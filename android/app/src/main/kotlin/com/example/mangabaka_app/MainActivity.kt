@@ -1,4 +1,4 @@
-package com.example.mangabaka_app
+package dev.oazzies.mangabaka_app
 
 import io.flutter.embedding.android.FlutterActivity
 
