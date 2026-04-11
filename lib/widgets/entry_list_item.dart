@@ -31,7 +31,7 @@ class EntryListItem extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Align(
-                  alignment: Alignment.topRight,
+                  alignment: Alignment.topLeft,
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium,

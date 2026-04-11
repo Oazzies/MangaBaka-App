@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/widgets/mb_search_bar.dart';
 import 'package:mangabaka_app/widgets/entry_list_item.dart';
-import 'package:mangabaka_app/services/series_service.dart';
+import 'package:mangabaka_app/services/series_search_service.dart';
 
-class BrowseScreen extends StatefulWidget{
+class BrowseScreen extends StatefulWidget {
   const BrowseScreen({Key? key}) : super(key: key);
 
   @override
@@ -11,34 +11,35 @@ class BrowseScreen extends StatefulWidget{
 }
 
 class _BrowseScreenState extends State<BrowseScreen> {
-  Map<String, dynamic>? series;
+  final SeriesSearchService _searchService = SeriesSearchService();
+  List<Map<String, dynamic>> searchResults = [];
   bool isLoading = false;
   String? error;
 
-  Future<void> fetchSeriesById(String text) async {
-    final id = int.tryParse(text);
-    if (id == null){
+  Future<void> searchSeries(String text) async {
+    if (text.trim().isEmpty) {
       setState(() {
-        error = "Please enter a valid number";
-        series = null;
+        searchResults = [];
+        error = null;
       });
       return;
     }
     setState(() {
       isLoading = true;
       error = null;
+      searchResults = [];
     });
     try {
-      final data = await SeriesService.fetchSeries(id);
+      final results = await _searchService.searchSeriesByName(text);
       setState(() {
-        series = data;
+        searchResults = results;
         isLoading = false;
       });
-    } catch (exception) {
+    } catch (e) {
       setState(() {
         error = "Not found or error";
         isLoading = false;
-        series = null;
+        searchResults = [];
       });
     }
   }
@@ -46,22 +47,30 @@ class _BrowseScreenState extends State<BrowseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Home')),
+      appBar: AppBar(title: Text('Browse')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             MBSearchBar(
-              onChanged: fetchSeriesById,
+              onChanged: searchSeries,
             ),
             if (isLoading)
               CircularProgressIndicator(),
             if (error != null)
               Text(error!, style: TextStyle(color: Colors.red)),
-            if (series != null)
-              EntryListItem(
-                coverUrl: series!['cover']['x150']['x1'],
-                title: series!['title'],
+            if (searchResults.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: searchResults.length,
+                  itemBuilder: (context, index) {
+                    final item = searchResults[index];
+                    return EntryListItem(
+                      coverUrl: item['cover']?['x150']?['x1'] ?? '',
+                      title: item['title'] ?? '',
+                    );
+                  },
+                ),
               ),
           ],
         ),
