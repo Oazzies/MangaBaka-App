@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/screens/browse_screen.dart';
-import 'package:mangabaka_app/screens/home_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:mangabaka_app/screens/main_screen.dart';
 
 void main() {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarContrastEnforced: false,
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
+
   runApp(const MyApp());
 }
 
@@ -14,9 +23,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MangaBaka',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF00301d)),
       ),
-      home: const HomeScreen(),
+      home: const MainScreen(),
     );
   }
 }
