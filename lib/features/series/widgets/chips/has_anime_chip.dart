@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chip.dart';
+import '../chip.dart';
 
 class HasAnimeChip extends StatelessWidget {
   const HasAnimeChip({super.key});

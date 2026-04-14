@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chip.dart';
+import '../chip.dart';
 
 class StatusChip extends StatelessWidget {
   final String status;

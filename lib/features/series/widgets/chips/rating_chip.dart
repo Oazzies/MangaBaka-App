@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chip.dart';
+import '../chip.dart';
 
 class RatingChip extends StatelessWidget {
   final List<dynamic> sources;

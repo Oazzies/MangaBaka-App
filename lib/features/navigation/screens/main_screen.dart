@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/screens/browse_screen.dart';
+import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);

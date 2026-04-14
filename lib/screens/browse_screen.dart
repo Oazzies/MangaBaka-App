@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:mangabaka_app/widgets/mb_search_bar.dart';
-import 'package:mangabaka_app/widgets/entry_list_item.dart';
-import 'package:mangabaka_app/widgets/shortcut_button.dart';
-import 'package:mangabaka_app/services/series_search_service.dart';
-import 'package:mangabaka_app/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/screens/browse_results_screen.dart';
+import 'package:mangabaka_app/features/browse/widgets/mb_search_bar.dart';
+import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
+import 'package:mangabaka_app/features/browse/widgets/filter_bottom_drawer.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/models/series.dart';
-import 'package:mangabaka_app/widgets/shortcut_section.dart';
+import 'package:mangabaka_app/features/browse/widgets/shortcut_section.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({Key? key}) : super(key: key);
@@ -18,25 +18,54 @@ class BrowseScreen extends StatefulWidget {
 
 class _BrowseScreenState extends State<BrowseScreen> {
   final SeriesSearchService _searchService = SeriesSearchService();
+  final TextEditingController _searchController = TextEditingController();
   List<Series> searchResults = [];
   bool isLoading = false;
   String? error;
+  Map<String, dynamic> _currentFilters = {};
 
-  Future<void> searchSeries(String text) async {
-    if (text.trim().isEmpty) {
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> searchSeries(
+    String text, {
+    Map<String, dynamic>? filters,
+  }) async {
+    final query = text.trim();
+    final appliedFilters = filters ?? _currentFilters;
+
+    if (query.isEmpty && appliedFilters.values.every((list) => list.isEmpty)) {
       setState(() {
         searchResults = [];
         error = null;
       });
       return;
     }
+
     setState(() {
       isLoading = true;
       error = null;
       searchResults = [];
     });
+
     try {
-      final results = await _searchService.searchSeriesByName(text);
+      // Convert filter map to extraParams for the service
+      Map<String, dynamic> extraParams = {};
+      appliedFilters.forEach((key, value) {
+        if (value is List && value.isNotEmpty) {
+          extraParams[key] = value.join(',');
+        } else if (value is String && value.isNotEmpty) {
+          extraParams[key] = value;
+        }
+      });
+
+      final results = await _searchService.searchSeriesByName(
+        query,
+        extraParams: extraParams,
+      );
       setState(() {
         searchResults = results;
         isLoading = false;
@@ -48,32 +77,6 @@ class _BrowseScreenState extends State<BrowseScreen> {
         searchResults = [];
       });
     }
-  }
-
-  void _openMostPopular() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BrowseResultsScreen(
-          sortType: 'Most Popular',
-          sortBy: 'popularity_asc',
-        ),
-      ),
-    );
-  }
-
-  void _openRandom() {
-    final randomSeed = Random().nextDouble() * 2 - 1; // between -1 and 1
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BrowseResultsScreen(
-          sortType: 'Random',
-          sortBy: 'random',
-          randomSeed: randomSeed,
-        ),
-      ),
-    );
   }
 
   void _openResults(String header, String sortBy, {String? type}) {
@@ -89,6 +92,24 @@ class _BrowseScreenState extends State<BrowseScreen> {
           sortBy: sortBy,
           type: type,
           randomSeed: randomSeed,
+        ),
+      ),
+    );
+  }
+
+  void _showFilterDrawer() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: 0.8,
+        child: FilterBottomDrawer(
+          onApply: (filters) {
+            setState(() {
+              _currentFilters = filters;
+            });
+            searchSeries(_searchController.text, filters: filters);
+          },
         ),
       ),
     );
@@ -111,6 +132,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
                 child: MBSearchBar(
+                  controller: _searchController,
                   onChanged: (text) {
                     if (text.isEmpty) {
                       setState(() {
@@ -120,6 +142,14 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     }
                   },
                   onSubmitted: searchSeries,
+                  onClear: () {
+                    _searchController.clear();
+                    setState(() {
+                      searchResults = [];
+                      error = null;
+                    });
+                  },
+                  onFilter: _showFilterDrawer,
                 ),
               ),
               if (searchResults.isEmpty && !isLoading && error == null)
@@ -161,7 +191,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     ),
                   ),
                 ),
-              if (isLoading) const CircularProgressIndicator(),
+              if (isLoading) const Center(child: CircularProgressIndicator()),
               if (error != null)
                 Text(error!, style: const TextStyle(color: Colors.red)),
               if (searchResults.isNotEmpty)

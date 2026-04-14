@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/models/series.dart';
-import 'package:mangabaka_app/widgets/chips/type_chip.dart';
-import 'package:mangabaka_app/widgets/chips/status_chip.dart';
-import 'package:mangabaka_app/widgets/chips/licensed_chip.dart';
-import 'package:mangabaka_app/widgets/chips/volume_chip.dart';
-import 'package:mangabaka_app/widgets/chips/chapters_chip.dart';
-import 'package:mangabaka_app/widgets/chips/date_range_chip.dart';
-import 'package:mangabaka_app/widgets/chips/has_anime_chip.dart';
-import 'package:mangabaka_app/widgets/chips/rating_chip.dart';
-import 'package:mangabaka_app/widgets/chips/content_rating_chip.dart';
-import 'package:mangabaka_app/widgets/chips/id_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/type_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/status_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/licensed_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/volume_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/chapters_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/date_range_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/has_anime_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/rating_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chips/content_rating_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/id_chip.dart';
 
 class SeriesDetailHeader extends StatelessWidget {
   final Series series;

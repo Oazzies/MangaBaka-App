@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/models/series.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
-import 'package:mangabaka_app/widgets/description_section.dart';
-import 'package:mangabaka_app/widgets/expandable_chip_wrap.dart';
-import 'package:mangabaka_app/widgets/series_detail_header.dart';
+import 'package:mangabaka_app/features/series/widgets/description_section.dart';
+import 'package:mangabaka_app/features/series/widgets/expandable_chip_wrap.dart';
+import 'package:mangabaka_app/features/series/widgets/series_detail_header.dart';
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;

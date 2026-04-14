@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'chip.dart';
+import '../chip.dart';
 
 class LicensedChip extends StatelessWidget {
   const LicensedChip({super.key});
