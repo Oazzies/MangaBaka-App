@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:bakahyou/features/series/models/series.dart';
 
 class EntryListItem extends StatelessWidget {
   final Series series;

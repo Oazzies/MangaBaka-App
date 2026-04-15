@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/news/models/news.dart';
-import 'package:mangabaka_app/features/news/services/news_service.dart';
-import 'package:mangabaka_app/features/news/widgets/news_list.item.dart';
+import 'package:bakahyou/features/news/models/news.dart';
+import 'package:bakahyou/features/news/services/news_service.dart';
+import 'package:bakahyou/features/news/widgets/news_list.item.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({Key? key}) : super(key: key);

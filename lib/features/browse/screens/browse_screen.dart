@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:mangabaka_app/features/browse/widgets/mb_search_bar.dart';
-import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
-import 'package:mangabaka_app/features/series/services/series_search_service.dart';
-import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
-import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/browse/widgets/shortcut_section.dart';
+import 'package:bakahyou/features/browse/widgets/mb_search_bar.dart';
+import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
+import 'package:bakahyou/features/series/services/series_search_service.dart';
+import 'package:bakahyou/features/series/screens/series_detail_screen.dart';
+import 'package:bakahyou/features/browse/screens/browse_results_screen.dart';
+import 'package:bakahyou/features/series/models/series.dart';
+import 'package:bakahyou/features/browse/widgets/shortcut_section.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({Key? key}) : super(key: key);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:bakahyou/features/series/models/series.dart';
+import 'package:bakahyou/features/series/screens/series_detail_screen.dart';
 
 class ReferencedListItem extends StatelessWidget {
   final Series series;

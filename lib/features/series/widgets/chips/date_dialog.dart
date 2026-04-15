@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/utils/date_utils.dart' as mb_date;
+import 'package:bakahyou/utils/date_utils.dart' as mb_date;
 
 class DateDialog extends StatelessWidget {
   final String start;

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.oazzies.mangabaka_app"
+    namespace = "dev.oazzies.bakahyou"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,11 +19,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "dev.oazzies.mangabaka_app"
+        applicationId = "dev.oazzies.bakahyou"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appAuthRedirectScheme"] = "dev.oazzies.bakahyou"
     }
 
     buildTypes {

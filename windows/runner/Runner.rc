@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "mangabaka_app" "\0"
+            VALUE "FileDescription", "bakahyou" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mangabaka_app" "\0"
+            VALUE "InternalName", "bakahyou" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mangabaka_app.exe" "\0"
-            VALUE "ProductName", "mangabaka_app" "\0"
+            VALUE "OriginalFilename", "bakahyou.exe" "\0"
+            VALUE "ProductName", "bakahyou" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mangabaka_app/features/news/models/news.dart';
-import 'package:mangabaka_app/features/news/widgets/referenced_list_item.dart';
+import 'package:bakahyou/features/news/models/news.dart';
+import 'package:bakahyou/features/news/widgets/referenced_list_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsListItem extends StatelessWidget {

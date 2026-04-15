@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
-import 'package:mangabaka_app/features/news/screens/news_screen.dart';
+import 'package:bakahyou/features/browse/screens/browse_screen.dart';
+import 'package:bakahyou/features/news/screens/news_screen.dart';
+import 'package:bakahyou/features/profile/screens/profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -17,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     Placeholder(),
     BrowseScreen(),
     NewsScreen(),
-    Placeholder(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

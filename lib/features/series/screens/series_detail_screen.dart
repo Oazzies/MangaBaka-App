@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/utils/widget_utils.dart';
-import 'package:mangabaka_app/features/series/widgets/description_section.dart';
-import 'package:mangabaka_app/features/series/widgets/series_detail_header.dart';
+import 'package:bakahyou/features/series/models/series.dart';
+import 'package:bakahyou/utils/widget_utils.dart';
+import 'package:bakahyou/features/series/widgets/description_section.dart';
+import 'package:bakahyou/features/series/widgets/series_detail_header.dart';
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
@@ -59,7 +59,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No mangabaka link available'),
+          content: Text('No MangaBaka link available'),
           duration: Duration(seconds: 2),
         ),
       );

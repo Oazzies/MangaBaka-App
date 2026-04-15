@@ -4,7 +4,7 @@ import 'dart:convert';
 class SeriesService {
   static Future<Map<String, dynamic>> fetchSeries(int id) async {
     final url = Uri.parse("https://api.mangabaka.dev/v1/series/$id");
-    final response = await http.get(url, headers: {'User-Agent': 'MangaBakaApp/0.0 (oazziesmail@gmail.com)'},);
+    final response = await http.get(url, headers: {'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)'},);
 
     if(response.statusCode == 200) {
       final data = jsonDecode(response.body);

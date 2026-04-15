@@ -1,4 +1,4 @@
-import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:bakahyou/features/series/models/series.dart';
 
 class News {
   final String id;

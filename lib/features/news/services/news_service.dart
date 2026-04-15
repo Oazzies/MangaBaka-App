@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:mangabaka_app/features/news/models/news.dart';
+import 'package:bakahyou/features/news/models/news.dart';
 
 class NewsService {
   static const String _baseUrl = 'https://api.mangabaka.dev/v1/news';
@@ -14,7 +14,7 @@ class NewsService {
       String url = '$_baseUrl?page=$page&limit=$limit';
       final response = await http.get(
         Uri.parse(url),
-        headers: {'User-Agent': 'MangaBakaApp/0.0 (oazziesmail@gmail.com)'},
+        headers: {'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)'},
       );
 
       print("!!! NEWS API CALL MADE!!!");

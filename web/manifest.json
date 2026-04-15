@@ -1,6 +1,6 @@
 {
-    "name": "mangabaka_app",
-    "short_name": "mangabaka_app",
+    "name": "bakahyou",
+    "short_name": "bakahyou",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

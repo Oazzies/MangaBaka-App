@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:bakahyou/features/series/models/series.dart';
 
 class SeriesSearchService {
   static const String _baseUrl = 'https://api.mangabaka.dev/v1/series/search';
@@ -26,7 +26,7 @@ class SeriesSearchService {
 
     final response = await http.get(
       Uri.parse(url),
-      headers: {'User-Agent': 'MangaBakaApp/0.0 (oazziesmail@gmail.com)'},
+      headers: {'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)'},
     );
 
     print("!!! API CALL MADE!!!");

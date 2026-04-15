@@ -1,4 +1,4 @@
-import 'package:mangabaka_app/utils/json_utils.dart';
+import 'package:bakahyou/utils/json_utils.dart';
 
 class Series {
   final String id;

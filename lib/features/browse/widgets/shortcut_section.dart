@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/browse/widgets/shortcut_button.dart';
+import 'package:bakahyou/features/browse/widgets/shortcut_button.dart';
 
 class ShortcutSection extends StatelessWidget {
   final String header;

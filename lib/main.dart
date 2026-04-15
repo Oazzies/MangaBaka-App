@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:bakahyou/features/navigation/screens/main_screen.dart';
 
-void main() {
-
+void main() async {
+  await dotenv.load();
   WidgetsFlutterBinding.ensureInitialized();
   
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MangaBaka',
+      title: 'BakaHyou',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF00301d)),
       ),
