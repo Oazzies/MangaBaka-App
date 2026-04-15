@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
+import 'package:mangabaka_app/features/news/screens/news_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class _MainScreenState extends State<MainScreen> {
     Placeholder(),
     Placeholder(),
     BrowseScreen(),
-    Placeholder(),
+    NewsScreen(),
     Placeholder(),
   ];
 
