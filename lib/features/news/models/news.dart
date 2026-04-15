@@ -26,12 +26,22 @@ class News {
             .toList() ??
         [];
 
+    String sourceName = json['source_name']?.toString() ?? '';
+
+    const sourceNameMap = {
+      'ann': 'Anime News Network',
+      'mal': 'MyAnimeList',
+      'anidb': 'AniDB',
+    };
+
+    sourceName = sourceNameMap[sourceName.toLowerCase()] ?? sourceName;
+
     return News(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       url: json['url']?.toString() ?? '',
       author: json['author']?.toString() ?? '',
-      source: json['source']?.toString() ?? '',
+      source: sourceName,
       publishedAt: json['published_at']?.toString() ?? '',
       series: seriesList,
     );

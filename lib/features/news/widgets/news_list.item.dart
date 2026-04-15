@@ -19,6 +19,14 @@ class NewsListItem extends StatelessWidget {
     }
   }
 
+  String _formatAuthorLine() {
+    final publishedDate = _formatDate(news.publishedAt);
+    if (news.author.isEmpty) {
+      return 'Published on $publishedDate - ${news.source}';
+    }
+    return 'By ${news.author} published on $publishedDate - ${news.source}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -47,7 +55,7 @@ class NewsListItem extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'By ${news.author} published on ${_formatDate(news.publishedAt)} - ${news.source}',
+                        _formatAuthorLine(),
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
