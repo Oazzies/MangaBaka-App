@@ -30,6 +30,7 @@ class NewsListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color(0xFF18181B),
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
