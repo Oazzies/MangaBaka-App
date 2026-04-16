@@ -29,7 +29,7 @@ class SeriesSearchService {
       headers: {'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)'},
     );
 
-    print("!!! API CALL MADE!!!");
+    print("!!! SEARCH API CALL MADE!!!");
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
