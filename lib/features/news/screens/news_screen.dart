@@ -67,26 +67,37 @@ class _NewsScreenState extends State<NewsScreen> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    setState(() {
+      _currentPage = 1;
+      _hasMore = true;
+    });
+    await _fetchNews(initial: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: _newsList.isEmpty && !_isLoading
             ? Center(child: Text(_error ?? 'No news found.'))
-            : ListView.builder(
-                controller: _scrollController,
-                itemCount: _newsList.length + (_isLoading ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _newsList.length) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-                  return NewsListItem(news: _newsList[index]);
-                },
+            : RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  itemCount: _newsList.length + (_isLoading ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == _newsList.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                    return NewsListItem(news: _newsList[index]);
+                  },
+                ),
               ),
       ),
     );
