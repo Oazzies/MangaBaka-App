@@ -33,7 +33,8 @@ class WidgetUtils {
               final domain = uri.host.replaceFirst('www.', '');
 
               var prettyName = domain.split('.').first;
-              prettyName = prettyName[0].toUpperCase() + prettyName.substring(1);
+              prettyName =
+                  prettyName[0].toUpperCase() + prettyName.substring(1);
 
               final langMatch = RegExp(r'\/([a-z]{2})\/').firstMatch(uri.path);
               if (langMatch != null) {
@@ -53,6 +54,7 @@ class WidgetUtils {
                   ),
                 ),
                 label: Text(prettyName),
+                tooltip: l,
                 onPressed: () => launchUrl(uri),
               );
             }

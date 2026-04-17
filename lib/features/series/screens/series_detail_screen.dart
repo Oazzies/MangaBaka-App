@@ -106,6 +106,9 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               const SizedBox(height: 8),
               if (widget.series.publishers.isNotEmpty)
                 WidgetUtils.chipWrap('Publishers', widget.series.publishers),
+              const SizedBox(height: 8),
+              if (widget.series.links.isNotEmpty)
+                WidgetUtils.linkList(widget.series.links),
             ],
           ),
         ),
