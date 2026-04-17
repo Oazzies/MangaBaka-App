@@ -1,3 +1,6 @@
+import 'package:bakahyou/database/database.dart';
+import 'package:bakahyou/features/profile/services/statistics_service.dart';
+import 'package:bakahyou/features/profile/widgets/statistic_card.dart';
 import 'package:flutter/material.dart';
 import '../models/mb_profile.dart';
 import '../services/profile_auth_service.dart';
@@ -11,14 +14,22 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileAuthService _auth = ProfileAuthService();
+  late final StatisticsService _statisticsService;
 
   bool _loading = true;
   String? _error;
   MbProfile? _profile;
 
+  int _totalSeries = 0;
+  int _chaptersRead = 0;
+  int _volumesRead = 0;
+  double _completionRate = 0.0;
+  int _totalRereads = 0;
+
   @override
   void initState() {
     super.initState();
+    _statisticsService = StatisticsService(AppDatabase());
     _bootstrap();
   }
 
@@ -39,8 +50,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       final profile = await _auth.fetchProfile();
+      final totalSeries = await _statisticsService.getTotalSeries();
+      final chaptersRead = await _statisticsService.getChaptersRead();
+      final volumesRead = await _statisticsService.getVolumesRead();
+      final completionRate = await _statisticsService.getCompletionRate();
+      final totalRereads = await _statisticsService.getTotalRereads();
+
       setState(() {
         _profile = profile;
+        _totalSeries = totalSeries;
+        _chaptersRead = chaptersRead;
+        _volumesRead = volumesRead;
+        _completionRate = completionRate;
+        _totalRereads = totalRereads;
         _loading = false;
       });
     } catch (e) {
@@ -59,11 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       await _auth.login();
-      final profile = await _auth.fetchProfile();
-      setState(() {
-        _profile = profile;
-        _loading = false;
-      });
+      await _bootstrap();
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -77,6 +95,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _profile = null;
       _error = null;
+      _totalSeries = 0;
+      _chaptersRead = 0;
+      _volumesRead = 0;
+      _completionRate = 0.0;
+      _totalRereads = 0;
     });
   }
 
@@ -102,47 +125,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Text(
                       'Profile',
                       style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
                         fontSize: 28,
-                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Log in with MangaBaka to view your profile and scopes.',
-                    ),
-                    const SizedBox(height: 20),
-                    FilledButton(
+                    const SizedBox(height: 24),
+                    ElevatedButton(
                       onPressed: _login,
-                      child: const Text('Login on MangaBaka'),
+                      child: const Text('Login'),
                     ),
                     if (_error != null) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Text(_error!, style: const TextStyle(color: Colors.red)),
                     ],
                   ],
                 )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      username != null ? "${username}'s Profile" : 'Profile',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${username ?? 'User'} Profile',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 28,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text('ID: ${_profile!.id}'),
-                    const SizedBox(height: 8),
-                    Text('Role: ${_profile!.role}'),
-                    const SizedBox(height: 8),
-                    Text('Scopes: ${_profile!.scopes.join(', ')}'),
-                    const SizedBox(height: 20),
-                    OutlinedButton(
-                      onPressed: _logout,
-                      child: const Text('Logout'),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      const Text(
+                        'At a Glance',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'A quick snapshot of ${username ?? 'your'} reading habits, ratings, and collection size.',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Row(
+                        children: [
+                          StatisticCard(
+                            icon: Icons.library_books,
+                            label: 'Total Series',
+                            value: _totalSeries.toString(),
+                          ),
+                          const SizedBox(width: 16),
+                          StatisticCard(
+                            icon: Icons.menu_book,
+                            label: 'Chapters Read',
+                            value: _chaptersRead.toString(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          StatisticCard(
+                            icon: Icons.book,
+                            label: 'Volumes Read',
+                            value: _volumesRead.toString(),
+                          ),
+                          const SizedBox(width: 16),
+                          StatisticCard(
+                            icon: Icons.percent,
+                            label: 'Completion Rate',
+                            value: '${_completionRate.toStringAsFixed(1)}%',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          StatisticCard(
+                            icon: Icons.repeat,
+                            label: 'Total Rereads',
+                            value: _totalRereads.toString(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton(
+                        onPressed: _logout,
+                        child: const Text('Logout'),
+                      ),
+                    ],
+                  ),
                 ),
         ),
       ),
