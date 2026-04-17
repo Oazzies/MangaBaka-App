@@ -7,6 +7,7 @@ import 'package:bakahyou/features/library/services/library_service.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/features/series/screens/series_detail_screen.dart';
 import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
+import 'package:bakahyou/features/series/models/series.dart' as api;
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({Key? key}) : super(key: key);
@@ -22,12 +23,9 @@ class _LibraryScreenState extends State<LibraryScreen>
   late TabController _tabController;
   late final Map<String, ScrollController> _scrollControllers;
 
-  // State variables
-  bool _loading = true;
   bool _loggedIn = false;
   String _query = '';
-  String? _error;
-  List<LibraryEntry> _allEntries = const [];
+  Stream<List<LibraryEntry>>? _entriesStream;
 
   @override
   void initState() {
@@ -56,76 +54,44 @@ class _LibraryScreenState extends State<LibraryScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    for (final controller in _scrollControllers.values) {
-      controller.dispose();
-    }
+    _scrollControllers.values.forEach((c) => c.dispose());
     super.dispose();
   }
 
   Future<void> _bootstrap() async {
-    _setLoading(true);
+    final hasSession = await _auth.hasSession();
+    if (!mounted) return;
 
-    try {
-      final hasSession = await _auth.hasSession();
-      if (!hasSession) {
-        _setLoggedIn(false);
-        return;
-      }
+    setState(() => _loggedIn = hasSession);
 
-      _setLoggedIn(true);
-      await _loadLibraryEntries();
-    } catch (e) {
-      _setError('Failed to initialize library: $e');
+    if (hasSession) {
+      _setupStreamAndSync();
     }
   }
 
-  Future<void> _loadLibraryEntries() async {
-    _setLoading(true);
-
-    try {
-      var entries = await _libraryService.getEntriesFromDb();
-
-      if (entries.isEmpty) {
-        entries = await _libraryService.fetchAllEntriesAndSave();
-      }
-
-      if (!mounted) return;
-      _setEntries(entries);
-    } catch (e) {
-      _setError('Failed to load library entries: $e');
-    }
-  }
+  void _setupStreamAndSync() {
+  setState(() {
+    _entriesStream = _libraryService.watchEntriesFromDb();
+  });
+  // Only sync if it's the first time; otherwise use cached data
+  _libraryService.performInitialSyncIfNeeded();
+}
 
   Future<void> _loginAndReload() async {
-    _setLoading(true);
-
     try {
       await _auth.login();
-      _setLoggedIn(true);
-      await _loadLibraryEntries();
+      if (!mounted) return;
+      setState(() => _loggedIn = true);
+      _setupStreamAndSync();
     } catch (e) {
-      _setError('Failed to login: $e');
+      // Handle login error
     }
   }
 
-  // State setters to reduce boilerplate
-  void _setLoading(bool value) => _updateState(() => _loading = value);
-  void _setLoggedIn(bool value) => _updateState(() => _loggedIn = value);
-  void _setError(String? value) => _updateState(() => _error = value);
-  void _setEntries(List<LibraryEntry> entries) {
-    _updateState(() {
-      _allEntries = entries;
-      _loading = false;
-      _error = null;
-    });
+  Future<void> _onRefresh() async {
+    await _libraryService.syncLibrary();
   }
 
-  void _updateState(VoidCallback callback) {
-    if (!mounted) return;
-    setState(callback);
-  }
-
-  // UI Building Methods
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,9 +104,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       backgroundColor: LibraryScreenConstants.backgroundColor,
-      title: MBSearchBar(
-        onChanged: (value) => _updateState(() => _query = value),
-      ),
+      title: MBSearchBar(onChanged: (value) => setState(() => _query = value)),
       bottom: _buildTabBar(),
     );
   }
@@ -158,9 +122,48 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   Widget _buildBody() {
     if (!_loggedIn) return _buildLoginPrompt();
-    if (_loading) return _buildLoadingIndicator();
-    if (_error != null) return _buildErrorWidget();
-    return _buildTabBarView();
+    if (_entriesStream == null)
+      return const Center(child: CircularProgressIndicator());
+
+    return StreamBuilder<List<LibraryEntry>>(
+      stream: _entriesStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(
+            child: Text('Your library is empty. Start by adding some series!'),
+          );
+        }
+
+        final allEntries = snapshot.data!;
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: LibraryScreenConstants.accentColor,
+          child: TabBarView(
+            controller: _tabController,
+            children: LibraryScreenConstants.tabs.map((tab) {
+              final filterHelper = LibraryFilterHelper(
+                allEntries: allEntries,
+                query: _query,
+              );
+              final items = filterHelper.getByTab(tab.key);
+              return _buildTabContent(items, tab.key);
+            }).toList(),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildLoginPrompt() {
@@ -185,46 +188,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  Widget _buildLoadingIndicator() {
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  Widget _buildErrorWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            _error!,
-            style: const TextStyle(color: Colors.red, fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _loadLibraryEntries,
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabBarView() {
-    return TabBarView(
-      controller: _tabController,
-      children: LibraryScreenConstants.tabs
-          .map((tab) => _buildTabContent(tab))
-          .toList(),
-    );
-  }
-
-  Widget _buildTabContent(LibraryTabDefinition tab) {
-    final filterHelper = LibraryFilterHelper(
-      allEntries: _allEntries,
-      query: _query,
-    );
-    final items = filterHelper.getByTab(tab.key);
-
+    Widget _buildTabContent(List<LibraryEntry> items, String tabKey) {
     if (items.isEmpty) {
       return Center(
         child: Text(
@@ -234,20 +198,27 @@ class _LibraryScreenState extends State<LibraryScreen>
       );
     }
 
-    return ListView.builder(
-      controller: _scrollControllers[tab.key],
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final entry = items[index];
-        return GestureDetector(
-          onTap: () => _navigateToSeriesDetail(entry.series),
-          child: EntryListItem(series: entry.series),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: LibraryScreenConstants.accentColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: ListView.builder(
+          controller: _scrollControllers[tabKey],
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final entry = items[index];
+            return GestureDetector(
+              onTap: () => _navigateToSeriesDetail(entry.series),
+              child: EntryListItem(series: entry.series),
+            );
+          },
+        ),
+      ),
     );
   }
 
-  void _navigateToSeriesDetail(dynamic series) {
+  void _navigateToSeriesDetail(api.Series series) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SeriesDetailScreen(series: series),

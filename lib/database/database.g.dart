@@ -191,6 +191,16 @@ class $SeriesTableTable extends SeriesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _genresMeta = const VerificationMeta('genres');
+  @override
+  late final GeneratedColumn<String> genres = GeneratedColumn<String>(
+    'genres',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -208,6 +218,7 @@ class $SeriesTableTable extends SeriesTable
     finalVolume,
     totalChapters,
     lastUpdated,
+    genres,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -337,6 +348,12 @@ class $SeriesTableTable extends SeriesTable
         ),
       );
     }
+    if (data.containsKey('genres')) {
+      context.handle(
+        _genresMeta,
+        genres.isAcceptableOrUnknown(data['genres']!, _genresMeta),
+      );
+    }
     return context;
   }
 
@@ -406,6 +423,10 @@ class $SeriesTableTable extends SeriesTable
         DriftSqlType.string,
         data['${effectivePrefix}last_updated'],
       ),
+      genres: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}genres'],
+      )!,
     );
   }
 
@@ -431,6 +452,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
   final String? finalVolume;
   final String? totalChapters;
   final String? lastUpdated;
+  final String genres;
   const SeriesTableData({
     required this.id,
     this.state,
@@ -447,6 +469,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
     this.finalVolume,
     this.totalChapters,
     this.lastUpdated,
+    required this.genres,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -488,6 +511,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
     if (!nullToAbsent || lastUpdated != null) {
       map['last_updated'] = Variable<String>(lastUpdated);
     }
+    map['genres'] = Variable<String>(genres);
     return map;
   }
 
@@ -526,6 +550,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
       lastUpdated: lastUpdated == null && nullToAbsent
           ? const Value.absent()
           : Value(lastUpdated),
+      genres: Value(genres),
     );
   }
 
@@ -550,6 +575,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
       finalVolume: serializer.fromJson<String?>(json['finalVolume']),
       totalChapters: serializer.fromJson<String?>(json['totalChapters']),
       lastUpdated: serializer.fromJson<String?>(json['lastUpdated']),
+      genres: serializer.fromJson<String>(json['genres']),
     );
   }
   @override
@@ -571,6 +597,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
       'finalVolume': serializer.toJson<String?>(finalVolume),
       'totalChapters': serializer.toJson<String?>(totalChapters),
       'lastUpdated': serializer.toJson<String?>(lastUpdated),
+      'genres': serializer.toJson<String>(genres),
     };
   }
 
@@ -590,6 +617,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
     Value<String?> finalVolume = const Value.absent(),
     Value<String?> totalChapters = const Value.absent(),
     Value<String?> lastUpdated = const Value.absent(),
+    String? genres,
   }) => SeriesTableData(
     id: id ?? this.id,
     state: state.present ? state.value : this.state,
@@ -612,6 +640,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
         ? totalChapters.value
         : this.totalChapters,
     lastUpdated: lastUpdated.present ? lastUpdated.value : this.lastUpdated,
+    genres: genres ?? this.genres,
   );
   SeriesTableData copyWithCompanion(SeriesTableCompanion data) {
     return SeriesTableData(
@@ -644,6 +673,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
       lastUpdated: data.lastUpdated.present
           ? data.lastUpdated.value
           : this.lastUpdated,
+      genres: data.genres.present ? data.genres.value : this.genres,
     );
   }
 
@@ -664,7 +694,8 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
           ..write('rating: $rating, ')
           ..write('finalVolume: $finalVolume, ')
           ..write('totalChapters: $totalChapters, ')
-          ..write('lastUpdated: $lastUpdated')
+          ..write('lastUpdated: $lastUpdated, ')
+          ..write('genres: $genres')
           ..write(')'))
         .toString();
   }
@@ -686,6 +717,7 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
     finalVolume,
     totalChapters,
     lastUpdated,
+    genres,
   );
   @override
   bool operator ==(Object other) =>
@@ -705,7 +737,8 @@ class SeriesTableData extends DataClass implements Insertable<SeriesTableData> {
           other.rating == this.rating &&
           other.finalVolume == this.finalVolume &&
           other.totalChapters == this.totalChapters &&
-          other.lastUpdated == this.lastUpdated);
+          other.lastUpdated == this.lastUpdated &&
+          other.genres == this.genres);
 }
 
 class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
@@ -724,6 +757,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
   final Value<String?> finalVolume;
   final Value<String?> totalChapters;
   final Value<String?> lastUpdated;
+  final Value<String> genres;
   final Value<int> rowid;
   const SeriesTableCompanion({
     this.id = const Value.absent(),
@@ -741,6 +775,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
     this.finalVolume = const Value.absent(),
     this.totalChapters = const Value.absent(),
     this.lastUpdated = const Value.absent(),
+    this.genres = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SeriesTableCompanion.insert({
@@ -759,6 +794,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
     this.finalVolume = const Value.absent(),
     this.totalChapters = const Value.absent(),
     this.lastUpdated = const Value.absent(),
+    this.genres = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -780,6 +816,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
     Expression<String>? finalVolume,
     Expression<String>? totalChapters,
     Expression<String>? lastUpdated,
+    Expression<String>? genres,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -798,6 +835,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
       if (finalVolume != null) 'final_volume': finalVolume,
       if (totalChapters != null) 'total_chapters': totalChapters,
       if (lastUpdated != null) 'last_updated': lastUpdated,
+      if (genres != null) 'genres': genres,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -818,6 +856,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
     Value<String?>? finalVolume,
     Value<String?>? totalChapters,
     Value<String?>? lastUpdated,
+    Value<String>? genres,
     Value<int>? rowid,
   }) {
     return SeriesTableCompanion(
@@ -836,6 +875,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
       finalVolume: finalVolume ?? this.finalVolume,
       totalChapters: totalChapters ?? this.totalChapters,
       lastUpdated: lastUpdated ?? this.lastUpdated,
+      genres: genres ?? this.genres,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -888,6 +928,9 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
     if (lastUpdated.present) {
       map['last_updated'] = Variable<String>(lastUpdated.value);
     }
+    if (genres.present) {
+      map['genres'] = Variable<String>(genres.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -912,6 +955,7 @@ class SeriesTableCompanion extends UpdateCompanion<SeriesTableData> {
           ..write('finalVolume: $finalVolume, ')
           ..write('totalChapters: $totalChapters, ')
           ..write('lastUpdated: $lastUpdated, ')
+          ..write('genres: $genres, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1446,6 +1490,7 @@ typedef $$SeriesTableTableCreateCompanionBuilder =
       Value<String?> finalVolume,
       Value<String?> totalChapters,
       Value<String?> lastUpdated,
+      Value<String> genres,
       Value<int> rowid,
     });
 typedef $$SeriesTableTableUpdateCompanionBuilder =
@@ -1465,6 +1510,7 @@ typedef $$SeriesTableTableUpdateCompanionBuilder =
       Value<String?> finalVolume,
       Value<String?> totalChapters,
       Value<String?> lastUpdated,
+      Value<String> genres,
       Value<int> rowid,
     });
 
@@ -1584,6 +1630,11 @@ class $$SeriesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get genres => $composableBuilder(
+    column: $table.genres,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> libraryEntriesTableRefs(
     Expression<bool> Function($$LibraryEntriesTableTableFilterComposer f) f,
   ) {
@@ -1693,6 +1744,11 @@ class $$SeriesTableTableOrderingComposer
     column: $table.lastUpdated,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get genres => $composableBuilder(
+    column: $table.genres,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SeriesTableTableAnnotationComposer
@@ -1762,6 +1818,9 @@ class $$SeriesTableTableAnnotationComposer
     column: $table.lastUpdated,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get genres =>
+      $composableBuilder(column: $table.genres, builder: (column) => column);
 
   Expression<T> libraryEntriesTableRefs<T extends Object>(
     Expression<T> Function($$LibraryEntriesTableTableAnnotationComposer a) f,
@@ -1833,6 +1892,7 @@ class $$SeriesTableTableTableManager
                 Value<String?> finalVolume = const Value.absent(),
                 Value<String?> totalChapters = const Value.absent(),
                 Value<String?> lastUpdated = const Value.absent(),
+                Value<String> genres = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SeriesTableCompanion(
                 id: id,
@@ -1850,6 +1910,7 @@ class $$SeriesTableTableTableManager
                 finalVolume: finalVolume,
                 totalChapters: totalChapters,
                 lastUpdated: lastUpdated,
+                genres: genres,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1869,6 +1930,7 @@ class $$SeriesTableTableTableManager
                 Value<String?> finalVolume = const Value.absent(),
                 Value<String?> totalChapters = const Value.absent(),
                 Value<String?> lastUpdated = const Value.absent(),
+                Value<String> genres = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SeriesTableCompanion.insert(
                 id: id,
@@ -1886,6 +1948,7 @@ class $$SeriesTableTableTableManager
                 finalVolume: finalVolume,
                 totalChapters: totalChapters,
                 lastUpdated: lastUpdated,
+                genres: genres,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

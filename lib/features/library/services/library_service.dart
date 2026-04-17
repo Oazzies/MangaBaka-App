@@ -9,47 +9,60 @@ import 'package:bakahyou/features/library/services/mappers/db_to_api_mapper.dart
 class LibraryService {
   final ProfileAuthService _auth;
   final db.AppDatabase _db;
+  bool _hasPerformedInitialSync = false;
 
-  LibraryService({ProfileAuthService? auth})
-      : _auth = auth ?? ProfileAuthService(),
-        _db = db.AppDatabase.instance;
+  LibraryService._({ProfileAuthService? auth})
+    : _auth = auth ?? ProfileAuthService(),
+      _db = db.AppDatabase();
 
-  // Load library entries from the local database
-  Future<List<api.LibraryEntry>> getEntriesFromDb() async {
-    final dbEntries = await _db.libraryEntriesDao.getAllEntriesWithSeries();
-    return dbEntries
-        .map(DbToApiMapper.libraryEntryFromDb)
-        .toList();
+  static final LibraryService _instance = LibraryService._();
+
+  factory LibraryService({ProfileAuthService? auth}) {
+    return _instance;
   }
 
-  // Fetch all library entries from the API and save them to the database
-  Future<List<api.LibraryEntry>> fetchAllEntriesAndSave() async {
-    final token = await _auth.getValidAccessToken();
-    final allEntries = <api.LibraryEntry>[];
-    var page = 1;
+  /// Watches for changes in the local database and provides a stream of entries.
+  Stream<List<api.LibraryEntry>> watchEntriesFromDb() {
+    return _db.libraryEntriesDao.watchAllEntriesWithSeries().map(
+      (dbEntries) => dbEntries.map(DbToApiMapper.libraryEntryFromDb).toList(),
+    );
+  }
 
+  /// Performs initial sync only once on first app load.
+  Future<void> performInitialSyncIfNeeded() async {
+    if (_hasPerformedInitialSync) return;
+    _hasPerformedInitialSync = true;
+    await syncLibrary();
+  }
+
+  /// Performs a full sync with the remote API.
+  Future<void> syncLibrary() async {
+    final token = await _auth.getValidAccessToken();
+
+    var page = 1;
     while (true) {
-      final entries = await _fetchPage(token, page);
-      
-      if (entries.isEmpty) {
+      final remoteEntries = await _fetchPage(token, page);
+      if (remoteEntries.isEmpty) {
+        break; // No more pages
+      }
+
+      await _saveEntries(remoteEntries);
+
+      // If a page has fewer items than the limit, it must be the last one.
+      if (remoteEntries.length < LibraryConstants.pageLimit) {
         break;
       }
 
-      allEntries.addAll(entries);
-      
-      // Save to database after each page
-      await _saveEntries(entries);
-      
       page++;
-    }
 
-    return allEntries;
+      // Add delay between requests to avoid rate limiting
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
   }
 
-  // Fetch a single page from the API
   Future<List<api.LibraryEntry>> _fetchPage(String token, int page) async {
     final uri = Uri.parse(
-      '${LibraryConstants.baseUrl}?page=$page&limit=${LibraryConstants.pageLimit}',
+      '${LibraryConstants.baseUrl}?page=$page&limit=${LibraryConstants.pageLimit}&sort_by=updated_at_desc',
     );
 
     final response = await http.get(
@@ -60,35 +73,28 @@ class LibraryService {
       },
     );
 
-    print("!!! LIBRARY API CALL MADE!!!");
+    print("!!! LIBRARY API CALL MADE (page $page)!!!");
 
+    if (response.statusCode == 429) {
+      throw Exception('Rate limited. Please try again later.');
+    }
     if (response.statusCode != 200) {
       throw Exception(
-        'Failed to fetch library page $page: ${response.statusCode} ${response.body}',
+        'Failed to fetch library page $page: ${response.statusCode}',
       );
     }
 
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
-    final data = (body['data'] as List<dynamic>? ?? const []);
-    final pagination = body['pagination'] as Map<String, dynamic>?;
-    final hasNext = pagination != null && pagination['next'] != null;
-
-    if (!hasNext) {
-      // Mark this as the last page by returning empty
-      return data
-          .map((item) => api.LibraryEntry.fromJson(item as Map<String, dynamic>))
-          .toList();
-    }
-
-    return data
+    final data =
+        (jsonDecode(response.body)['data'] as List<dynamic>? ?? const []);
+    final entries = data
         .map((item) => api.LibraryEntry.fromJson(item as Map<String, dynamic>))
         .toList();
+
+    return entries;
   }
 
-  // Save library entries to the database
   Future<void> _saveEntries(List<api.LibraryEntry> entries) async {
     if (entries.isEmpty) return;
-    
     await _db.seriesDao.upsertSeries(entries.map((e) => e.series).toList());
     await _db.libraryEntriesDao.upsertLibraryEntries(entries);
   }
