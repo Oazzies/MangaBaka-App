@@ -17,15 +17,46 @@ class BrowseScreen extends StatefulWidget {
 
 class _BrowseScreenState extends State<BrowseScreen> {
   final SeriesSearchService _searchService = SeriesSearchService();
+  final ScrollController _scrollController = ScrollController();
+
   List<Series> searchResults = [];
   bool isLoading = false;
+  bool _isLoadingMore = false;
   String? error;
+  String _currentSearchQuery = '';
+  int _currentPage = 1;
+  bool _hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 100) {
+      if (_hasMore && !_isLoadingMore && _currentSearchQuery.isNotEmpty) {
+        _loadMoreResults();
+      }
+    }
+  }
 
   Future<void> searchSeries(String text) async {
     if (text.trim().isEmpty) {
       setState(() {
         searchResults = [];
         error = null;
+        _currentSearchQuery = '';
+        _currentPage = 1;
+        _hasMore = true;
       });
       return;
     }
@@ -33,18 +64,49 @@ class _BrowseScreenState extends State<BrowseScreen> {
       isLoading = true;
       error = null;
       searchResults = [];
+      _currentSearchQuery = text;
+      _currentPage = 1;
+      _hasMore = true;
+      _isLoadingMore = false;
     });
+    await _fetchSearchResults();
+  }
+
+  Future<void> _loadMoreResults() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+    _currentPage++;
+    await _fetchSearchResults();
+  }
+
+  Future<void> _fetchSearchResults() async {
     try {
-      final results = await _searchService.searchSeriesByName(text);
+      final results = await _searchService.searchSeriesByName(
+        _currentSearchQuery,
+        extraParams: {'page': _currentPage, 'limit': 20},
+      );
+
       setState(() {
-        searchResults = results;
+        if (_currentPage == 1) {
+          searchResults = results;
+        } else {
+          searchResults.addAll(results);
+        }
         isLoading = false;
+        _isLoadingMore = false;
+        _hasMore = results.length == 20;
       });
     } catch (e) {
       setState(() {
         error = "Not found or error";
         isLoading = false;
-        searchResults = [];
+        _isLoadingMore = false;
+        if (_currentPage > 1) {
+          _currentPage--;
+        }
       });
     }
   }
@@ -115,6 +177,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
                       setState(() {
                         searchResults = [];
                         error = null;
+                        _currentSearchQuery = '';
+                        _currentPage = 1;
+                        _hasMore = true;
                       });
                     }
                   },
@@ -160,14 +225,33 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     ),
                   ),
                 ),
-              if (isLoading) const CircularProgressIndicator(),
-              if (error != null)
-                Text(error!, style: const TextStyle(color: Colors.red)),
+              if (isLoading && searchResults.isEmpty)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              if (error != null && searchResults.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      error!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ),
               if (searchResults.isNotEmpty)
                 Expanded(
                   child: ListView.builder(
-                    itemCount: searchResults.length,
+                    controller: _scrollController,
+                    itemCount: searchResults.length + (_isLoadingMore ? 1 : 0),
                     itemBuilder: (context, index) {
+                      // Show loading indicator at the bottom
+                      if (index == searchResults.length) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
                       final seriesObj = searchResults[index];
                       return InkWell(
                         onTap: () {
