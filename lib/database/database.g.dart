@@ -1028,6 +1028,15 @@ class $LibraryEntriesTableTable extends LibraryEntriesTable
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
+  @override
+  late final GeneratedColumn<int> rating = GeneratedColumn<int>(
+    'rating',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _seriesIdMeta = const VerificationMeta(
     'seriesId',
   );
@@ -1050,6 +1059,7 @@ class $LibraryEntriesTableTable extends LibraryEntriesTable
     progressChapter,
     progressVolume,
     numberOfRereads,
+    rating,
     seriesId,
   ];
   @override
@@ -1110,6 +1120,12 @@ class $LibraryEntriesTableTable extends LibraryEntriesTable
         ),
       );
     }
+    if (data.containsKey('rating')) {
+      context.handle(
+        _ratingMeta,
+        rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
+      );
+    }
     if (data.containsKey('series_id')) {
       context.handle(
         _seriesIdMeta,
@@ -1154,6 +1170,10 @@ class $LibraryEntriesTableTable extends LibraryEntriesTable
         DriftSqlType.int,
         data['${effectivePrefix}number_of_rereads'],
       ),
+      rating: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rating'],
+      ),
       seriesId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}series_id'],
@@ -1175,6 +1195,7 @@ class LibraryEntriesTableData extends DataClass
   final int? progressChapter;
   final int? progressVolume;
   final int? numberOfRereads;
+  final int? rating;
   final String seriesId;
   const LibraryEntriesTableData({
     required this.id,
@@ -1183,6 +1204,7 @@ class LibraryEntriesTableData extends DataClass
     this.progressChapter,
     this.progressVolume,
     this.numberOfRereads,
+    this.rating,
     required this.seriesId,
   });
   @override
@@ -1202,6 +1224,9 @@ class LibraryEntriesTableData extends DataClass
     if (!nullToAbsent || numberOfRereads != null) {
       map['number_of_rereads'] = Variable<int>(numberOfRereads);
     }
+    if (!nullToAbsent || rating != null) {
+      map['rating'] = Variable<int>(rating);
+    }
     map['series_id'] = Variable<String>(seriesId);
     return map;
   }
@@ -1220,6 +1245,9 @@ class LibraryEntriesTableData extends DataClass
       numberOfRereads: numberOfRereads == null && nullToAbsent
           ? const Value.absent()
           : Value(numberOfRereads),
+      rating: rating == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rating),
       seriesId: Value(seriesId),
     );
   }
@@ -1236,6 +1264,7 @@ class LibraryEntriesTableData extends DataClass
       progressChapter: serializer.fromJson<int?>(json['progressChapter']),
       progressVolume: serializer.fromJson<int?>(json['progressVolume']),
       numberOfRereads: serializer.fromJson<int?>(json['numberOfRereads']),
+      rating: serializer.fromJson<int?>(json['rating']),
       seriesId: serializer.fromJson<String>(json['seriesId']),
     );
   }
@@ -1249,6 +1278,7 @@ class LibraryEntriesTableData extends DataClass
       'progressChapter': serializer.toJson<int?>(progressChapter),
       'progressVolume': serializer.toJson<int?>(progressVolume),
       'numberOfRereads': serializer.toJson<int?>(numberOfRereads),
+      'rating': serializer.toJson<int?>(rating),
       'seriesId': serializer.toJson<String>(seriesId),
     };
   }
@@ -1260,6 +1290,7 @@ class LibraryEntriesTableData extends DataClass
     Value<int?> progressChapter = const Value.absent(),
     Value<int?> progressVolume = const Value.absent(),
     Value<int?> numberOfRereads = const Value.absent(),
+    Value<int?> rating = const Value.absent(),
     String? seriesId,
   }) => LibraryEntriesTableData(
     id: id ?? this.id,
@@ -1274,6 +1305,7 @@ class LibraryEntriesTableData extends DataClass
     numberOfRereads: numberOfRereads.present
         ? numberOfRereads.value
         : this.numberOfRereads,
+    rating: rating.present ? rating.value : this.rating,
     seriesId: seriesId ?? this.seriesId,
   );
   LibraryEntriesTableData copyWithCompanion(LibraryEntriesTableCompanion data) {
@@ -1290,6 +1322,7 @@ class LibraryEntriesTableData extends DataClass
       numberOfRereads: data.numberOfRereads.present
           ? data.numberOfRereads.value
           : this.numberOfRereads,
+      rating: data.rating.present ? data.rating.value : this.rating,
       seriesId: data.seriesId.present ? data.seriesId.value : this.seriesId,
     );
   }
@@ -1303,6 +1336,7 @@ class LibraryEntriesTableData extends DataClass
           ..write('progressChapter: $progressChapter, ')
           ..write('progressVolume: $progressVolume, ')
           ..write('numberOfRereads: $numberOfRereads, ')
+          ..write('rating: $rating, ')
           ..write('seriesId: $seriesId')
           ..write(')'))
         .toString();
@@ -1316,6 +1350,7 @@ class LibraryEntriesTableData extends DataClass
     progressChapter,
     progressVolume,
     numberOfRereads,
+    rating,
     seriesId,
   );
   @override
@@ -1328,6 +1363,7 @@ class LibraryEntriesTableData extends DataClass
           other.progressChapter == this.progressChapter &&
           other.progressVolume == this.progressVolume &&
           other.numberOfRereads == this.numberOfRereads &&
+          other.rating == this.rating &&
           other.seriesId == this.seriesId);
 }
 
@@ -1339,6 +1375,7 @@ class LibraryEntriesTableCompanion
   final Value<int?> progressChapter;
   final Value<int?> progressVolume;
   final Value<int?> numberOfRereads;
+  final Value<int?> rating;
   final Value<String> seriesId;
   final Value<int> rowid;
   const LibraryEntriesTableCompanion({
@@ -1348,6 +1385,7 @@ class LibraryEntriesTableCompanion
     this.progressChapter = const Value.absent(),
     this.progressVolume = const Value.absent(),
     this.numberOfRereads = const Value.absent(),
+    this.rating = const Value.absent(),
     this.seriesId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1358,6 +1396,7 @@ class LibraryEntriesTableCompanion
     this.progressChapter = const Value.absent(),
     this.progressVolume = const Value.absent(),
     this.numberOfRereads = const Value.absent(),
+    this.rating = const Value.absent(),
     required String seriesId,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1370,6 +1409,7 @@ class LibraryEntriesTableCompanion
     Expression<int>? progressChapter,
     Expression<int>? progressVolume,
     Expression<int>? numberOfRereads,
+    Expression<int>? rating,
     Expression<String>? seriesId,
     Expression<int>? rowid,
   }) {
@@ -1380,6 +1420,7 @@ class LibraryEntriesTableCompanion
       if (progressChapter != null) 'progress_chapter': progressChapter,
       if (progressVolume != null) 'progress_volume': progressVolume,
       if (numberOfRereads != null) 'number_of_rereads': numberOfRereads,
+      if (rating != null) 'rating': rating,
       if (seriesId != null) 'series_id': seriesId,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1392,6 +1433,7 @@ class LibraryEntriesTableCompanion
     Value<int?>? progressChapter,
     Value<int?>? progressVolume,
     Value<int?>? numberOfRereads,
+    Value<int?>? rating,
     Value<String>? seriesId,
     Value<int>? rowid,
   }) {
@@ -1402,6 +1444,7 @@ class LibraryEntriesTableCompanion
       progressChapter: progressChapter ?? this.progressChapter,
       progressVolume: progressVolume ?? this.progressVolume,
       numberOfRereads: numberOfRereads ?? this.numberOfRereads,
+      rating: rating ?? this.rating,
       seriesId: seriesId ?? this.seriesId,
       rowid: rowid ?? this.rowid,
     );
@@ -1428,6 +1471,9 @@ class LibraryEntriesTableCompanion
     if (numberOfRereads.present) {
       map['number_of_rereads'] = Variable<int>(numberOfRereads.value);
     }
+    if (rating.present) {
+      map['rating'] = Variable<int>(rating.value);
+    }
     if (seriesId.present) {
       map['series_id'] = Variable<String>(seriesId.value);
     }
@@ -1446,6 +1492,7 @@ class LibraryEntriesTableCompanion
           ..write('progressChapter: $progressChapter, ')
           ..write('progressVolume: $progressVolume, ')
           ..write('numberOfRereads: $numberOfRereads, ')
+          ..write('rating: $rating, ')
           ..write('seriesId: $seriesId, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -2017,6 +2064,7 @@ typedef $$LibraryEntriesTableTableCreateCompanionBuilder =
       Value<int?> progressChapter,
       Value<int?> progressVolume,
       Value<int?> numberOfRereads,
+      Value<int?> rating,
       required String seriesId,
       Value<int> rowid,
     });
@@ -2028,6 +2076,7 @@ typedef $$LibraryEntriesTableTableUpdateCompanionBuilder =
       Value<int?> progressChapter,
       Value<int?> progressVolume,
       Value<int?> numberOfRereads,
+      Value<int?> rating,
       Value<String> seriesId,
       Value<int> rowid,
     });
@@ -2107,6 +2156,11 @@ class $$LibraryEntriesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$SeriesTableTableFilterComposer get seriesId {
     final $$SeriesTableTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -2170,6 +2224,11 @@ class $$LibraryEntriesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SeriesTableTableOrderingComposer get seriesId {
     final $$SeriesTableTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2226,6 +2285,9 @@ class $$LibraryEntriesTableTableAnnotationComposer
     column: $table.numberOfRereads,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get rating =>
+      $composableBuilder(column: $table.rating, builder: (column) => column);
 
   $$SeriesTableTableAnnotationComposer get seriesId {
     final $$SeriesTableTableAnnotationComposer composer = $composerBuilder(
@@ -2293,6 +2355,7 @@ class $$LibraryEntriesTableTableTableManager
                 Value<int?> progressChapter = const Value.absent(),
                 Value<int?> progressVolume = const Value.absent(),
                 Value<int?> numberOfRereads = const Value.absent(),
+                Value<int?> rating = const Value.absent(),
                 Value<String> seriesId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LibraryEntriesTableCompanion(
@@ -2302,6 +2365,7 @@ class $$LibraryEntriesTableTableTableManager
                 progressChapter: progressChapter,
                 progressVolume: progressVolume,
                 numberOfRereads: numberOfRereads,
+                rating: rating,
                 seriesId: seriesId,
                 rowid: rowid,
               ),
@@ -2313,6 +2377,7 @@ class $$LibraryEntriesTableTableTableManager
                 Value<int?> progressChapter = const Value.absent(),
                 Value<int?> progressVolume = const Value.absent(),
                 Value<int?> numberOfRereads = const Value.absent(),
+                Value<int?> rating = const Value.absent(),
                 required String seriesId,
                 Value<int> rowid = const Value.absent(),
               }) => LibraryEntriesTableCompanion.insert(
@@ -2322,6 +2387,7 @@ class $$LibraryEntriesTableTableTableManager
                 progressChapter: progressChapter,
                 progressVolume: progressVolume,
                 numberOfRereads: numberOfRereads,
+                rating: rating,
                 seriesId: seriesId,
                 rowid: rowid,
               ),

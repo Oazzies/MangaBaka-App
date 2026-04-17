@@ -41,6 +41,7 @@ class LibraryEntriesTable extends Table {
   IntColumn get progressChapter => integer().nullable()();
   IntColumn get progressVolume => integer().nullable()();
   IntColumn get numberOfRereads => integer().nullable()();
+  IntColumn get rating => integer().nullable()();
   TextColumn get seriesId => text().references(SeriesTable, #id)();
 
   @override
@@ -194,6 +195,16 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
         mode: InsertMode.insertOrReplace,
       );
     });
+  }
+
+  Future<void> updateEntryState(String seriesId, String newState) {
+    return (update(libraryEntriesTable)..where((t) => t.seriesId.equals(seriesId)))
+        .write(LibraryEntriesTableCompanion(state: Value(newState)));
+  }
+
+    Future<void> updateEntryRating(String seriesId, int newRating) {
+    return (update(libraryEntriesTable)..where((t) => t.seriesId.equals(seriesId)))
+        .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
   }
 }
 

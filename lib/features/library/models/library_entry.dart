@@ -7,6 +7,7 @@ class LibraryEntry {
   final int? progressChapter;
   final int? progressVolume;
   final int? numberOfRereads;
+  final int? rating;
   final Series series;
 
   LibraryEntry({
@@ -16,6 +17,7 @@ class LibraryEntry {
     this.progressChapter,
     this.progressVolume,
     this.numberOfRereads,
+    this.rating,
     required this.series,
   });
 
@@ -32,6 +34,7 @@ class LibraryEntry {
       progressChapter: (json['progress_chapter'] as num?)?.toInt(),
       progressVolume: (json['progress_volume'] as num?)?.toInt(),
       numberOfRereads: (json['number_of_rereads'] as num?)?.toInt(),
+      rating: (json['rating'] as num?)?.toInt(),
       series: Series.fromJson(rawSeries),
     );
   }
