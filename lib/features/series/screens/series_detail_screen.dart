@@ -23,6 +23,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
   bool _showTitle = false;
   final LibraryService _libraryService = LibraryService();
   Stream<LibraryEntry?>? _entryStream;
+  bool _isAdding = false;
 
   @override
   void initState() {
@@ -103,21 +104,23 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
   }
 
   Future<void> _addSeriesToLibrary() async {
+    if (_isAdding) return;
+    setState(() => _isAdding = true);
+
     try {
       await _libraryService.createLibraryEntry(
         widget.series.id,
         'plan_to_read',
       );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Added to library')));
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Failed to add to library: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAdding = false);
       }
     }
   }
@@ -218,9 +221,15 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
           if (snapshot.connectionState == ConnectionState.active &&
               snapshot.data == null) {
             return FloatingActionButton.extended(
-              onPressed: _addSeriesToLibrary,
-              label: const Text('Add to Library'),
-              icon: const Icon(Icons.add),
+              onPressed: _isAdding ? null : _addSeriesToLibrary,
+              label: _isAdding
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Add to Library'),
+              icon: _isAdding ? null : const Icon(Icons.add),
             );
           }
           return const SizedBox.shrink();
