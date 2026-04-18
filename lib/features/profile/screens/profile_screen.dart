@@ -24,18 +24,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _error;
   MbProfile? _profile;
 
-  // Statistics
   int _totalSeries = 0;
   int _chaptersRead = 0;
   int _volumesRead = 0;
   double _completionRate = 0.0;
   int _totalRereads = 0;
 
-  // Snapshot lists
   final List<LibraryEntry> _recentlyChanged = [];
   final List<LibraryEntry> _recentlyAdded = [];
 
-  // Snapshot state
   bool _isLoadingChanged = false;
   bool _isLoadingAdded = false;
   bool _hasMoreChanged = true;

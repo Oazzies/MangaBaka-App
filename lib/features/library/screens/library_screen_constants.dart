@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
 class LibraryScreenConstants {
-  // Colors
   static const Color backgroundColor = Color(0xFF0a0a0a);
   static const Color accentColor = Color(0xFF1b9f70);
   static const Color errorColor = Colors.red;
 
-  // Tab definitions
   static const List<LibraryTabDefinition> tabs = [
     LibraryTabDefinition(key: 'reading', label: 'Reading'),
     LibraryTabDefinition(key: 'paused', label: 'Paused'),
