@@ -192,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Welcome, ${username ?? 'User'}!',
+                        '${username ?? 'User'} Profile',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

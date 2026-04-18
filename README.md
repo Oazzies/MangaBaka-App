@@ -19,7 +19,7 @@ An unofficial, free and open source app for MangaBaka
 
 ## Download
 
-Download Coming Soon!
+Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 
 *Requires Android 6.0 or higher.*
 
