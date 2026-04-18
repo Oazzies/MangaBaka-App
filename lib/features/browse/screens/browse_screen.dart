@@ -16,13 +16,22 @@ class BrowseScreen extends StatefulWidget {
 }
 
 class _BrowseScreenState extends State<BrowseScreen> {
-  final SeriesSearchService _searchService = SeriesSearchService();
-  final ScrollController _scrollController = ScrollController();
+  // Constants
+  static const int _pageLimit = 20;
+  static const double _scrollThreshold = 100;
+  static const Color _backgroundColor = Color(0xFF0a0a0a);
+  static const double _horizontalPadding = 16.0;
+  static const double _verticalPadding = 16.0;
 
-  List<Series> searchResults = [];
-  bool isLoading = false;
+  // Services & Controllers
+  late final SeriesSearchService _searchService;
+  late final ScrollController _scrollController;
+
+  // Search State
+  List<Series> _searchResults = [];
+  bool _isLoading = false;
   bool _isLoadingMore = false;
-  String? error;
+  String? _error;
   String _currentSearchQuery = '';
   int _currentPage = 1;
   bool _hasMore = true;
@@ -30,6 +39,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
   @override
   void initState() {
     super.initState();
+    _searchService = SeriesSearchService();
+    _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
   }
 
@@ -40,35 +51,42 @@ class _BrowseScreenState extends State<BrowseScreen> {
     super.dispose();
   }
 
+  void _resetSearchState() {
+    setState(() {
+      _searchResults = [];
+      _error = null;
+      _currentSearchQuery = '';
+      _currentPage = 1;
+      _hasMore = true;
+      _isLoadingMore = false;
+    });
+  }
+
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 100) {
-      if (_hasMore && !_isLoadingMore && _currentSearchQuery.isNotEmpty) {
-        _loadMoreResults();
-      }
+    final isNearEnd = _scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - _scrollThreshold;
+
+    if (isNearEnd && _hasMore && !_isLoadingMore && _currentSearchQuery.isNotEmpty) {
+      _loadMoreResults();
     }
   }
 
-  Future<void> searchSeries(String text) async {
+  Future<void> _searchSeries(String text) async {
     if (text.trim().isEmpty) {
-      setState(() {
-        searchResults = [];
-        error = null;
-        _currentSearchQuery = '';
-        _currentPage = 1;
-        _hasMore = true;
-      });
+      _resetSearchState();
       return;
     }
+
     setState(() {
-      isLoading = true;
-      error = null;
-      searchResults = [];
+      _isLoading = true;
+      _error = null;
+      _searchResults = [];
       _currentSearchQuery = text;
       _currentPage = 1;
       _hasMore = true;
       _isLoadingMore = false;
     });
+
     await _fetchSearchResults();
   }
 
@@ -86,23 +104,23 @@ class _BrowseScreenState extends State<BrowseScreen> {
     try {
       final results = await _searchService.searchSeriesByName(
         _currentSearchQuery,
-        extraParams: {'page': _currentPage, 'limit': 20},
+        extraParams: {'page': _currentPage, 'limit': _pageLimit},
       );
 
       setState(() {
         if (_currentPage == 1) {
-          searchResults = results;
+          _searchResults = results;
         } else {
-          searchResults.addAll(results);
+          _searchResults.addAll(results);
         }
-        isLoading = false;
+        _isLoading = false;
         _isLoadingMore = false;
-        _hasMore = results.length == 20;
+        _hasMore = results.length == _pageLimit;
       });
     } catch (e) {
       setState(() {
-        error = "Not found or error";
-        isLoading = false;
+        _error = "Not found or error";
+        _isLoading = false;
         _isLoadingMore = false;
         if (_currentPage > 1) {
           _currentPage--;
@@ -111,37 +129,16 @@ class _BrowseScreenState extends State<BrowseScreen> {
     }
   }
 
-  void _openMostPopular() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BrowseResultsScreen(
-          sortType: 'Most Popular',
-          sortBy: 'popularity_asc',
-        ),
-      ),
-    );
+  static num _generateRandomSeed() {
+    return Random().nextDouble() * 2 - 1;
   }
 
-  void _openRandom() {
-    final randomSeed = Random().nextDouble() * 2 - 1; // between -1 and 1
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BrowseResultsScreen(
-          sortType: 'Random',
-          sortBy: 'random',
-          randomSeed: randomSeed,
-        ),
-      ),
-    );
-  }
-
-  void _openResults(String header, String sortBy, {String? type}) {
+  void _navigateToBrowseResults(String header, String sortBy, {String? type}) {
     num? randomSeed;
     if (sortBy == 'random') {
-      randomSeed = Random().nextDouble() * 2 - 1;
+      randomSeed = _generateRandomSeed();
     }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -155,119 +152,166 @@ class _BrowseScreenState extends State<BrowseScreen> {
     );
   }
 
+  void _navigateToDetail(Series series) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SeriesDetailScreen(series: series),
+      ),
+    );
+  }
+
+  Widget _buildShortcutSections() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          ShortcutSection(
+            header: 'Manga / Manhwa / Manhua',
+            onMostPopular: () => _navigateToBrowseResults(
+              'Most Popular',
+              'popularity_asc',
+              type: 'manga',
+            ),
+            onRandom: () => _navigateToBrowseResults(
+              'Random',
+              'random',
+              type: 'manga',
+            ),
+          ),
+          ShortcutSection(
+            header: 'Novels',
+            onMostPopular: () => _navigateToBrowseResults(
+              'Most Popular',
+              'popularity_asc',
+              type: 'novel',
+            ),
+            onRandom: () => _navigateToBrowseResults(
+              'Random',
+              'random',
+              type: 'novel',
+            ),
+          ),
+          ShortcutSection(
+            header: 'OEL / Other',
+            onMostPopular: () => _navigateToBrowseResults(
+              'Most Popular',
+              'popularity_asc',
+              type: 'oel',
+            ),
+            onRandom: () => _navigateToBrowseResults(
+              'Random',
+              'random',
+              type: 'oel',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Expanded(
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _searchSeries(_currentSearchQuery),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultsList() {
+    return Expanded(
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount: _searchResults.length + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == _searchResults.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final series = _searchResults[index];
+          return InkWell(
+            onTap: () => _navigateToDetail(series),
+            child: EntryListItem(series: series),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    // Show shortcuts when no search
+    if (_searchResults.isEmpty && !_isLoading && _error == null) {
+      return Expanded(child: _buildShortcutSections());
+    }
+
+    // Show loading spinner
+    if (_isLoading && _searchResults.isEmpty) {
+      return _buildLoadingState();
+    }
+
+    // Show error
+    if (_error != null && _searchResults.isEmpty) {
+      return _buildErrorState();
+    }
+
+    // Show search results
+    if (_searchResults.isNotEmpty) {
+      return _buildResultsList();
+    }
+
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0a0a0a),
+      backgroundColor: _backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 16.0,
+            left: _horizontalPadding,
+            right: _horizontalPadding,
+            top: _verticalPadding,
             bottom: 8.0,
           ),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
+                padding: const EdgeInsets.only(bottom: 8.0),
                 child: MBSearchBar(
                   onChanged: (text) {
                     if (text.isEmpty) {
-                      setState(() {
-                        searchResults = [];
-                        error = null;
-                        _currentSearchQuery = '';
-                        _currentPage = 1;
-                        _hasMore = true;
-                      });
+                      _resetSearchState();
                     }
                   },
-                  onSubmitted: searchSeries,
+                  onSubmitted: _searchSeries,
                 ),
               ),
-              if (searchResults.isEmpty && !isLoading && error == null)
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ShortcutSection(
-                          header: 'Manga / Manhwa / Manhua',
-                          onMostPopular: () => _openResults(
-                            'Most Popular',
-                            'popularity_asc',
-                            type: 'manga',
-                          ),
-                          onRandom: () =>
-                              _openResults('Random', 'random', type: 'manga'),
-                        ),
-                        ShortcutSection(
-                          header: 'Novels',
-                          onMostPopular: () => _openResults(
-                            'Most Popular',
-                            'popularity_asc',
-                            type: 'novel',
-                          ),
-                          onRandom: () =>
-                              _openResults('Random', 'random', type: 'novel'),
-                        ),
-                        ShortcutSection(
-                          header: 'OEL / Other',
-                          onMostPopular: () => _openResults(
-                            'Most Popular',
-                            'popularity_asc',
-                            type: 'oel',
-                          ),
-                          onRandom: () =>
-                              _openResults('Random', 'random', type: 'oel'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (isLoading && searchResults.isEmpty)
-                const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              if (error != null && searchResults.isEmpty)
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      error!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ),
-              if (searchResults.isNotEmpty)
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: searchResults.length + (_isLoadingMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      // Show loading indicator at the bottom
-                      if (index == searchResults.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-
-                      final seriesObj = searchResults[index];
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  SeriesDetailScreen(series: seriesObj),
-                            ),
-                          );
-                        },
-                        child: EntryListItem(series: seriesObj),
-                      );
-                    },
-                  ),
-                ),
+              _buildContent(),
             ],
           ),
         ),
