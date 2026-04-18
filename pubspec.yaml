@@ -37,10 +37,11 @@ dev_dependencies:
   drift_dev: ^2.32.1
   build_runner: ^2.13.1
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/mangabaka512.png"
+  adaptive_icon_foreground: "assets/mangabaka512.png"
 
 flutter:
   assets:
