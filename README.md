@@ -23,11 +23,63 @@ Download Coming Soon!
 
 *Requires Android 6.0 or higher.*
 
+## Features
+
+<div align="left">
+
+<details open="">
+<summary><h3>Implemented</h3></summary>
+
+* Series with info
+* Library
+* Browsing
+* Seeing news
+* Basic Statistics
+
+</details>
+
+<details open="">
+    <summary><h3>Upcoming</h3></summary>
+
+* A LOT of UI/UX improvements
+* On Boarding
+* Home Page (Discover, Current, Activity)
+* Optional Notifications for various things
+* Customization (List styles, App styles, Preferences, etc)
+* Better responsiveness
+* Collections
+* Works
+* Multiple series covers
+* Recommendations
+* Better Tags Display
+* Language Support
+* Filtering
+* Content Rating Preferences
+* More Statistics
+* More browse shortcuts
+
+</details>
+
+<details>
+    <summary><h3>Not Planned</h3></summary>
+
+Its not a definite no, but its a list that is really really low priority, not fit for an app or not possible
+* Data Moderation, Submissions, etc in App
+* API/Any Documentation in App
+* Import/Export in App
+* Bookmarklet
+* Quick Nav
+* Seeing other profiles (No API for)
+
+</details>
+
+</div>
+
 ## Disclaimer
 
 Like MangaBaka the app is NOT a reading site - we do not link to or host any copyrighted reading content
 
-## License
+#### License
 
 <pre>
 Licensed under the Apache License, Version 2.0 (the "License");
