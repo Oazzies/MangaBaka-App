@@ -78,6 +78,7 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0a0a0a),
       body: SafeArea(
         child: _newsList.isEmpty && !_isLoading
             ? Center(child: Text(_error ?? 'No news found.'))

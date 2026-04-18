@@ -176,6 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : _profile?.preferredUsername;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0a0a0a),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -313,7 +314,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _login,
-            icon: const Icon(Icons.login),
             label: const Text('Login with MangaBaka'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,

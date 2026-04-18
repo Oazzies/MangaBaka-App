@@ -167,7 +167,7 @@ class _LibraryScreenState extends State<LibraryScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'You are not logged in.',
+            'Login with MangaBaka to see your Library',
             style: TextStyle(fontSize: 18, color: Colors.white),
           ),
           const SizedBox(height: 20),
