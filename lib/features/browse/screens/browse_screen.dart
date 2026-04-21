@@ -102,34 +102,27 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Future<void> _fetchSearchResults() async {
     try {
-      final results = await _searchService.searchSeriesByName(
+      final newResults = await _searchService.searchSeriesByName(
         _currentSearchQuery,
         extraParams: {'page': _currentPage, 'limit': _pageLimit},
       );
 
       setState(() {
-        if (_currentPage == 1) {
-          _searchResults = results;
-        } else {
-          _searchResults.addAll(results);
-        }
+        _hasMore = newResults.length == _pageLimit;
         _isLoading = false;
         _isLoadingMore = false;
-        _hasMore = results.length == _pageLimit;
+        _searchResults.addAll(newResults);
       });
     } catch (e) {
       setState(() {
-        _error = "Not found or error";
         _isLoading = false;
         _isLoadingMore = false;
-        if (_currentPage > 1) {
-          _currentPage--;
-        }
+        _error = e.toString();
       });
     }
   }
 
-  static num _generateRandomSeed() {
+  num _generateRandomSeed() {
     return Random().nextDouble() * 2 - 1;
   }
 

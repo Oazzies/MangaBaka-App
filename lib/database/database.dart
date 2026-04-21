@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:bakahyou/utils/services/logging_service.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
@@ -58,49 +58,85 @@ class LibraryEntryWithSeries {
 
 @DriftAccessor(tables: [SeriesTable])
 class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
+  final _logger = LoggingService.logger;
   SeriesDao(AppDatabase db) : super(db);
 
   // Gets the most recently updated series from the database.
-  Future<SeriesTableData?> getLatestUpdatedSeries() {
-    return (select(seriesTable)
-          ..orderBy([
-            (t) => OrderingTerm(
-              expression: t.lastUpdated,
-              mode: OrderingMode.desc,
-            ),
-          ])
-          ..limit(1))
-        .getSingleOrNull();
+  Future<SeriesTableData?> getLatestUpdatedSeries() async {
+    try {
+      return await (select(seriesTable)
+            ..orderBy([
+              (t) => OrderingTerm(
+                    expression: t.lastUpdated,
+                    mode: OrderingMode.desc,
+                  )
+            ])
+            ..limit(1))
+          .getSingleOrNull();
+    } catch (e) {
+      _logger.severe('Failed to get latest updated series: $e');
+      throw Exception('Failed to get latest updated series.');
+    }
   }
 
   Future<void> upsertSeries(List<api.Series> series) async {
     if (series.isEmpty) return;
-    await db.batch((batch) {
-      batch.insertAll(
-        db.seriesTable,
-        series.map(
-          (s) => SeriesTableCompanion.insert(
-            id: s.id,
-            state: Value(s.state),
-            title: s.title,
-            nativeTitle: Value(s.nativeTitle),
-            romanizedTitle: Value(s.romanizedTitle),
-            coverUrl: s.coverUrl,
-            description: s.description,
-            year: Value(s.year),
-            status: Value(s.status),
-            contentRating: Value(s.contentRating),
-            type: Value(s.type),
-            rating: Value(s.rating),
-            finalVolume: Value(s.finalVolume),
-            totalChapters: Value(s.totalChapters),
-            lastUpdated: Value(s.lastUpdated),
-            genres: Value(jsonEncode(s.genres)),
+    try {
+      await db.batch((batch) {
+        batch.insertAll(
+          db.seriesTable,
+          series.map(
+            (s) => SeriesTableCompanion.insert(
+              id: s.id,
+              state: Value(s.state),
+              title: s.title,
+              nativeTitle: Value(s.nativeTitle),
+              romanizedTitle: Value(s.romanizedTitle),
+              coverUrl: s.coverUrl,
+              description: s.description,
+              year: Value(s.year),
+              status: Value(s.status),
+              contentRating: Value(s.contentRating),
+              type: Value(s.type),
+              rating: Value(s.rating),
+              finalVolume: Value(s.finalVolume),
+              totalChapters: Value(s.totalChapters),
+              lastUpdated: Value(s.lastUpdated),
+              genres: Value(json.encode(s.genres)),
+            ),
           ),
-        ),
-        mode: InsertMode.insertOrReplace,
-      );
-    });
+          onConflict: DoUpdate(
+            (old) => SeriesTableCompanion.custom(
+              state: const CustomExpression<String>('excluded.state'),
+              title: const CustomExpression<String>('excluded.title'),
+              nativeTitle:
+                  const CustomExpression<String>('excluded.native_title'),
+              romanizedTitle:
+                  const CustomExpression<String>('excluded.romanized_title'),
+              coverUrl: const CustomExpression<String>('excluded.cover_url'),
+              description:
+                  const CustomExpression<String>('excluded.description'),
+              year: const CustomExpression<String>('excluded.year'),
+              status: const CustomExpression<String>('excluded.status'),
+              contentRating:
+                  const CustomExpression<String>('excluded.content_rating'),
+              type: const CustomExpression<String>('excluded.type'),
+              rating: const CustomExpression<String>('excluded.rating'),
+              finalVolume:
+                  const CustomExpression<String>('excluded.final_volume'),
+              totalChapters:
+                  const CustomExpression<String>('excluded.total_chapters'),
+              lastUpdated:
+                  const CustomExpression<String>('excluded.last_updated'),
+              genres: const CustomExpression<String>('excluded.genres'),
+            ),
+          ),
+        );
+      });
+    } catch (e) {
+      _logger.severe('Failed to upsert series: $e');
+      throw Exception('Failed to upsert series.');
+    }
   }
 
   Future<void> insertLibraryEntry(
@@ -108,107 +144,155 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     String state,
     String seriesId,
   ) async {
-    await into(db.libraryEntriesTable).insert(
-      LibraryEntriesTableCompanion.insert(
-        id: id,
-        state: state,
-        seriesId: seriesId,
-      ),
-    );
+    try {
+      await into(db.libraryEntriesTable).insert(
+        LibraryEntriesTableCompanion.insert(
+          id: id,
+          state: state,
+          seriesId: seriesId,
+        ),
+      );
+    } catch (e) {
+      _logger.severe('Failed to insert library entry: $e');
+      throw Exception('Failed to insert library entry.');
+    }
   }
 
-  Future<LibraryEntryWithSeries?> watchEntryWithSeries(String entryId) {
-    return (select(db.libraryEntriesTable).join([
-      innerJoin(
-        db.seriesTable,
-        db.seriesTable.id.equalsExp(db.libraryEntriesTable.seriesId),
-      ),
-    ])).getSingleOrNull().then(
-      (result) => result != null
-          ? LibraryEntryWithSeries(
-              libraryEntry: result.readTable(db.libraryEntriesTable),
-              series: result.readTable(db.seriesTable),
-            )
-          : null,
-    );
+  Future<LibraryEntryWithSeries?> watchEntryWithSeries(String entryId) async {
+    try {
+      return await (select(db.libraryEntriesTable).join([
+        innerJoin(
+          db.seriesTable,
+          db.seriesTable.id.equalsExp(db.libraryEntriesTable.seriesId),
+        ),
+      ]))
+          .getSingleOrNull()
+          .then(
+            (result) => result != null
+                ? LibraryEntryWithSeries(
+                    libraryEntry: result.readTable(db.libraryEntriesTable),
+                    series: result.readTable(db.seriesTable),
+                  )
+                : null,
+          );
+    } catch (e) {
+      _logger.severe('Failed to watch entry with series: $e');
+      throw Exception('Failed to watch entry with series.');
+    }
   }
 }
 
 @DriftAccessor(tables: [LibraryEntriesTable])
 class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     with _$LibraryEntriesDaoMixin {
+  final _logger = LoggingService.logger;
   LibraryEntriesDao(AppDatabase db) : super(db);
 
   Stream<LibraryEntryWithSeries?> watchEntryWithSeries(String seriesId) {
-    final query = select(libraryEntriesTable).join([
-      innerJoin(
-        seriesTable,
-        seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-      ),
-    ])..where(libraryEntriesTable.seriesId.equals(seriesId));
+    try {
+      final query = select(libraryEntriesTable).join([
+        innerJoin(
+          seriesTable,
+          seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+        ),
+      ])
+        ..where(libraryEntriesTable.seriesId.equals(seriesId));
 
-    return query.watchSingleOrNull().map((row) {
-      if (row == null) return null;
-      return LibraryEntryWithSeries(
-        libraryEntry: row.readTable(libraryEntriesTable),
-        series: row.readTable(seriesTable),
-      );
-    });
+      return query.watchSingleOrNull().map((row) {
+        if (row == null) return null;
+        return LibraryEntryWithSeries(
+          libraryEntry: row.readTable(libraryEntriesTable),
+          series: row.readTable(seriesTable),
+        );
+      });
+    } catch (e) {
+      _logger.severe('Failed to watch entry with series: $e');
+      throw Exception('Failed to watch entry with series.');
+    }
   }
 
   Stream<List<LibraryEntryWithSeries>> watchAllEntriesWithSeries() {
-    final query = select(libraryEntriesTable).join([
-      innerJoin(
-        seriesTable,
-        seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-      ),
-    ]);
+    try {
+      final query = select(libraryEntriesTable).join([
+        innerJoin(
+          seriesTable,
+          seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+        ),
+      ]);
 
-    return query.watch().map((rows) {
-      return rows
-          .map(
-            (row) => LibraryEntryWithSeries(
-              libraryEntry: row.readTable(libraryEntriesTable),
-              series: row.readTable(seriesTable),
-            ),
-          )
-          .toList();
-    });
+      return query.watch().map((rows) {
+        return rows
+            .map(
+              (row) => LibraryEntryWithSeries(
+                libraryEntry: row.readTable(libraryEntriesTable),
+                series: row.readTable(seriesTable),
+              ),
+            )
+            .toList();
+      });
+    } catch (e) {
+      _logger.severe('Failed to watch all entries with series: $e');
+      throw Exception('Failed to watch all entries with series.');
+    }
   }
 
   Future<void> upsertLibraryEntries(List<api.LibraryEntry> entries) async {
     if (entries.isEmpty) return;
-    await db.batch((batch) {
-      batch.insertAll(
-        db.libraryEntriesTable,
-        entries.map(
-          (e) => LibraryEntriesTableCompanion.insert(
-            id: e.id,
-            state: e.state,
-            note: Value(e.note),
-            progressChapter: Value(e.progressChapter),
-            progressVolume: Value(e.progressVolume),
-            numberOfRereads: Value(e.numberOfRereads),
-            seriesId: e.series.id,
+    try {
+      await db.batch((batch) {
+        batch.insertAll(
+          db.libraryEntriesTable,
+          entries.map(
+            (e) => LibraryEntriesTableCompanion.insert(
+              id: e.id,
+              state: e.state,
+              note: Value(e.note),
+              progressChapter: Value(e.progressChapter),
+              progressVolume: Value(e.progressVolume),
+              numberOfRereads: Value(e.numberOfRereads),
+              seriesId: e.series.id,
+            ),
           ),
-        ),
-        mode: InsertMode.insertOrReplace,
-      );
-    });
+          mode: InsertMode.insertOrReplace,
+        );
+      });
+    } catch (e) {
+      _logger.severe('Failed to upsert library entries: $e');
+      throw Exception('Failed to upsert library entries.');
+    }
   }
 
-  Future<void> updateEntryState(String seriesId, String newState) {
-    return (update(libraryEntriesTable)..where((t) => t.seriesId.equals(seriesId)))
-        .write(LibraryEntriesTableCompanion(state: Value(newState)));
+  Future<void> updateEntryState(String seriesId, String newState) async {
+    try {
+      await (update(libraryEntriesTable)
+            ..where((t) => t.seriesId.equals(seriesId)))
+          .write(LibraryEntriesTableCompanion(state: Value(newState)));
+    } catch (e) {
+      _logger.severe('Failed to update entry state: $e');
+      throw Exception('Failed to update entry state.');
+    }
   }
 
-    Future<void> updateEntryRating(String seriesId, int newRating) {
-    return (update(libraryEntriesTable)..where((t) => t.seriesId.equals(seriesId)))
-        .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
+  Future<void> updateEntryRating(String seriesId, int newRating) async {
+    try {
+      await (update(libraryEntriesTable)
+            ..where((t) => t.seriesId.equals(seriesId)))
+          .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
+    } catch (e) {
+      _logger.severe('Failed to update entry rating: $e');
+      throw Exception('Failed to update entry rating.');
+    }
   }
-  
-    Future<void> deleteEntry(String seriesId) {
-    return (delete(libraryEntriesTable)..where((tbl) => tbl.seriesId.equals(seriesId))).go();
+
+  Future<void> deleteEntry(String seriesId) async {
+    try {
+      await (delete(libraryEntriesTable)
+            ..where((tbl) => tbl.seriesId.equals(seriesId)))
+          .go();
+    } catch (e) {
+      _logger.severe('Failed to delete entry: $e');
+      throw Exception('Failed to delete entry.');
+    }
   }
 }
 
@@ -217,6 +301,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
   daos: [SeriesDao, LibraryEntriesDao],
 )
 class AppDatabase extends _$AppDatabase {
+  final _logger = LoggingService.logger;
   AppDatabase._() : super(_openConnection());
 
   @override
@@ -227,10 +312,16 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase() => _instance;
 
   static LazyDatabase _openConnection() {
+    final _logger = LoggingService.logger;
     return LazyDatabase(() async {
-      final dbFolder = await getApplicationDocumentsDirectory();
-      final file = File(p.join(dbFolder.path, 'manga_db.sqlite'));
-      return NativeDatabase(file);
+      try {
+        final dbFolder = await getApplicationDocumentsDirectory();
+        final file = File(p.join(dbFolder.path, 'manga_db.sqlite'));
+        return NativeDatabase(file);
+      } catch (e) {
+        _logger.severe('Failed to open database connection: $e');
+        throw Exception('Failed to open database connection.');
+      }
     });
   }
 }

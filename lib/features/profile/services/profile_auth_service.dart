@@ -3,10 +3,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:bakahyou/utils/services/logging_service.dart';
 
 import '../models/mb_profile.dart';
 
 class ProfileAuthService {
+  final _logger = LoggingService.logger;
   static const _authorizationEndpoint = 'https://mangabaka.org/auth/oauth2/authorize';
   static const _tokenEndpoint = 'https://mangabaka.org/auth/oauth2/token';
   static const _endSessionEndpoint = 'https://mangabaka.org/auth/oauth2/end-session';
@@ -32,134 +34,184 @@ class ProfileAuthService {
       );
 
   Future<bool> hasSession() async {
-    final token = await _storage.read(key: _kAccessToken);
-    return token != null && token.isNotEmpty;
+    try {
+      final token = await _storage.read(key: _kAccessToken);
+      return token != null && token.isNotEmpty;
+    } catch (e) {
+      _logger.severe('Failed to check session status: $e');
+      return false;
+    }
   }
 
   Future<void> login() async {
-    if (_clientId.isEmpty || _redirectUri.isEmpty) {
-      throw Exception('Missing BAKAHYOU_CLIENT_ID or BAKAHYOU_REDIRECT_URI in .env');
+    try {
+      if (_clientId.isEmpty || _redirectUri.isEmpty) {
+        throw Exception(
+            'Missing BAKAHYOU_CLIENT_ID or BAKAHYOU_REDIRECT_URI in .env');
+      }
+
+      final response = await _appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          _clientId,
+          _redirectUri,
+          serviceConfiguration: _serviceConfig,
+          scopes: const [
+            'openid',
+            'profile',
+            'library.read',
+            'library.write',
+            'offline_access',
+          ],
+          promptValues: const ['consent'],
+        ),
+      );
+
+      if (response == null || response.accessToken == null) {
+        throw Exception('OAuth login failed: no access token returned');
+      }
+
+      await _persistTokens(response);
+    } catch (e) {
+      _logger.severe('Login failed: $e');
+      throw Exception('Login failed.');
     }
-
-    final response = await _appAuth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(
-        _clientId,
-        _redirectUri,
-        serviceConfiguration: _serviceConfig,
-        scopes: const [
-          'openid',
-          'profile',
-          'library.read',
-          'library.write',
-          'offline_access',
-        ],
-        promptValues: const ['consent'],
-      ),
-    );
-
-    if (response == null || response.accessToken == null) {
-      throw Exception('OAuth login failed: no access token returned');
-    }
-
-    await _persistTokens(response);
   }
 
   Future<void> _persistTokens(TokenResponse response) async {
-    await _storage.write(key: _kAccessToken, value: response.accessToken);
-    await _storage.write(key: _kRefreshToken, value: response.refreshToken);
-    await _storage.write(key: _kIdToken, value: response.idToken);
-    final exp = response.accessTokenExpirationDateTime?.toUtc().toIso8601String();
-    if (exp != null) {
-      await _storage.write(key: _kAccessTokenExp, value: exp);
+    try {
+      await _storage.write(key: _kAccessToken, value: response.accessToken);
+      await _storage.write(key: _kRefreshToken, value: response.refreshToken);
+      await _storage.write(key: _kIdToken, value: response.idToken);
+      final exp =
+          response.accessTokenExpirationDateTime?.toUtc().toIso8601String();
+      if (exp != null) {
+        await _storage.write(key: _kAccessTokenExp, value: exp);
+      }
+    } catch (e) {
+      _logger.severe('Failed to persist tokens: $e');
+      throw Exception('Failed to persist tokens.');
     }
   }
 
   Future<void> _refreshIfNeeded() async {
-    final expRaw = await _storage.read(key: _kAccessTokenExp);
-    if (expRaw == null) return;
+    try {
+      final expRaw = await _storage.read(key: _kAccessTokenExp);
+      if (expRaw == null) return;
 
-    final exp = DateTime.tryParse(expRaw);
-    if (exp == null) return;
+      final exp = DateTime.tryParse(expRaw);
+      if (exp == null) return;
 
-    if (DateTime.now().toUtc().isBefore(exp.subtract(const Duration(minutes: 1)))) {
-      return;
-    }
+      if (DateTime.now()
+          .toUtc()
+          .isBefore(exp.subtract(const Duration(minutes: 1)))) {
+        return;
+      }
 
-    final refreshToken = await _storage.read(key: _kRefreshToken);
-    if (refreshToken == null || refreshToken.isEmpty) return;
+      final refreshToken = await _storage.read(key: _kRefreshToken);
+      if (refreshToken == null || refreshToken.isEmpty) return;
 
-    final response = await _appAuth.token(
-      TokenRequest(
-        _clientId,
-        _redirectUri,
-        serviceConfiguration: _serviceConfig,
-        refreshToken: refreshToken,
-        scopes: const ['openid', 'profile', 'library.read', 'library.write', 'offline_access'],
-      ),
-    );
+      final response = await _appAuth.token(
+        TokenRequest(
+          _clientId,
+          _redirectUri,
+          serviceConfiguration: _serviceConfig,
+          refreshToken: refreshToken,
+          scopes: const [
+            'openid',
+            'profile',
+            'library.read',
+            'library.write',
+            'offline_access'
+          ],
+        ),
+      );
 
-    if (response != null && response.accessToken != null) {
+      if (response == null) {
+        throw Exception('Token refresh failed: no response from server');
+      }
+
       await _persistTokens(response);
+    } catch (e) {
+      _logger.severe('Failed to refresh tokens: $e');
+      throw Exception('Failed to refresh tokens.');
     }
   }
 
   Future<MbProfile> fetchProfile() async {
-    await _refreshIfNeeded();
-    final accessToken = await _storage.read(key: _kAccessToken);
+    try {
+      await _refreshIfNeeded();
+      final accessToken = await _storage.read(key: _kAccessToken);
 
-    if (accessToken == null || accessToken.isEmpty) {
-      throw Exception('Not logged in');
-    }
+      if (accessToken == null || accessToken.isEmpty) {
+        throw Exception('Not logged in');
+      }
 
-    // Try /v1/me first
-    final res = await http.get(
-      Uri.parse(_meEndpoint),
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)',
-      },
-    );
-
-    print("!!! PROFILE API CALL MADE!!!");
-
-    if (res.statusCode == 200) {
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      return MbProfile.fromMeResponse(body);
-    } else if (res.statusCode == 404) {
-      // Fallback to OIDC userinfo endpoint
-      final userinfoRes = await http.get(
-        Uri.parse(_userInfoEndpoint),
+      // Try /v1/me first
+      final res = await http.get(
+        Uri.parse(_meEndpoint),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)',
         },
       );
-      if (userinfoRes.statusCode == 200) {
-        final body = jsonDecode(userinfoRes.body) as Map<String, dynamic>;
-        return MbProfile.fromUserInfo(body);
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        return MbProfile.fromMeResponse(body);
+      } else if (res.statusCode == 404) {
+        // Fallback to OIDC userinfo endpoint
+        final userinfoRes = await http.get(
+          Uri.parse(_userInfoEndpoint),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)',
+          },
+        );
+        if (userinfoRes.statusCode == 200) {
+          final body = jsonDecode(userinfoRes.body) as Map<String, dynamic>;
+          return MbProfile.fromUserInfo(body);
+        } else {
+          _logger.severe(
+              'Failed to fetch profile from userinfo endpoint: ${userinfoRes.statusCode} ${userinfoRes.body}');
+          throw Exception(
+              'Failed to fetch profile: ${userinfoRes.statusCode}');
+        }
       } else {
-        throw Exception('Failed to fetch profile: ${userinfoRes.statusCode} ${userinfoRes.body}');
+        _logger
+            .severe('Failed to fetch profile from me endpoint: ${res.statusCode} ${res.body}');
+        throw Exception('Failed to fetch profile: ${res.statusCode}');
       }
-    } else {
-      throw Exception('Failed to fetch profile: ${res.statusCode} ${res.body}');
+    } catch (e) {
+      _logger.severe('Failed to fetch profile: $e');
+      throw Exception('Failed to fetch profile.');
     }
   }
 
   Future<String> getValidAccessToken() async {
-    await _refreshIfNeeded();
+    try {
+      await _refreshIfNeeded();
 
-    final token = await _storage.read(key: _kAccessToken);
-    if (token == null || token.isEmpty) {
-      throw Exception('Not logged in');
+      final token = await _storage.read(key: _kAccessToken);
+      if (token == null || token.isEmpty) {
+        throw Exception('Not logged in');
+      }
+
+      return token;
+    } catch (e) {
+      _logger.severe('Failed to get valid access token: $e');
+      throw Exception('Failed to get valid access token.');
     }
-
-    return token;
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: _kAccessToken);
-    await _storage.delete(key: _kRefreshToken);
-    await _storage.delete(key: _kIdToken);
-    await _storage.delete(key: _kAccessTokenExp);
+    try {
+      await _storage.delete(key: _kAccessToken);
+      await _storage.delete(key: _kRefreshToken);
+      await _storage.delete(key: _kIdToken);
+      await _storage.delete(key: _kAccessTokenExp);
+    } catch (e) {
+      _logger.severe('Failed to logout: $e');
+      throw Exception('Failed to logout.');
+    }
   }
 }

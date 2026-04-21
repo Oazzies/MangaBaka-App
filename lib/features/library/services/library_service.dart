@@ -5,8 +5,10 @@ import 'package:bakahyou/features/library/models/library_entry.dart' as api;
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/features/library/services/library_constants.dart';
 import 'package:bakahyou/features/library/services/mappers/db_to_api_mapper.dart';
+import 'package:bakahyou/utils/services/logging_service.dart';
 
 class LibraryService {
+  final _logger = LoggingService.logger;
   final ProfileAuthService _auth;
   final db.AppDatabase _db;
   bool _hasPerformedInitialSync = false;
@@ -23,41 +25,61 @@ class LibraryService {
 
   /// Watches a single library entry by series ID.
   Stream<api.LibraryEntry?> watchEntryFromDb(String seriesId) {
-    return _db.libraryEntriesDao
-        .watchEntryWithSeries(seriesId)
-        .map(
-          (dbEntry) => dbEntry != null
-              ? DbToApiMapper.libraryEntryFromDb(dbEntry)
-              : null,
-        );
+    try {
+      return _db.libraryEntriesDao
+          .watchEntryWithSeries(seriesId)
+          .map(
+            (dbEntry) => dbEntry != null
+                ? DbToApiMapper.libraryEntryFromDb(dbEntry)
+                : null,
+          );
+    } catch (e) {
+      _logger.severe('Failed to watch entry from db: $e');
+      throw Exception('Failed to watch entry from db.');
+    }
   }
 
   Stream<List<api.LibraryEntry>> watchEntriesFromDb() {
-    return _db.libraryEntriesDao.watchAllEntriesWithSeries().map(
-      (dbEntries) => dbEntries.map(DbToApiMapper.libraryEntryFromDb).toList(),
-    );
+    try {
+      return _db.libraryEntriesDao.watchAllEntriesWithSeries().map(
+        (dbEntries) => dbEntries.map(DbToApiMapper.libraryEntryFromDb).toList(),
+      );
+    } catch (e) {
+      _logger.severe('Failed to watch entries from db: $e');
+      throw Exception('Failed to watch entries from db.');
+    }
   }
 
   /// Performs initial sync only once on first app load.
   Future<void> performInitialSyncIfNeeded() async {
     if (_hasPerformedInitialSync) return;
     _hasPerformedInitialSync = true;
-    await syncLibrary();
+    try {
+      await syncLibrary();
+    } catch (e) {
+      _logger.severe('Failed to perform initial sync: $e');
+      throw Exception('Failed to perform initial sync.');
+    }
   }
 
   /// Performs a full sync with the remote API.
   Future<void> syncLibrary() async {
-    final token = await _auth.getValidAccessToken();
-    if (token == null) return;
+    try {
+      final token = await _auth.getValidAccessToken();
+      if (token == null) return;
 
-    var page = 1;
-    while (true) {
-      final entries = await _fetchPage(token, page);
-      await _saveEntries(entries);
-      if (entries.length < LibraryConstants.pageLimit) {
-        break;
+      var page = 1;
+      while (true) {
+        final entries = await _fetchPage(token, page);
+        await _saveEntries(entries);
+        if (entries.length < LibraryConstants.pageLimit) {
+          break;
+        }
+        page++;
       }
-      page++;
+    } catch (e) {
+      _logger.severe('Failed to sync library: $e');
+      throw Exception('Failed to sync library.');
     }
   }
 
@@ -66,38 +88,50 @@ class LibraryService {
       '${LibraryConstants.baseUrl}?page=$page&limit=${LibraryConstants.pageLimit}',
     );
 
-    final response = await http.get(
-      uri,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'User-Agent': LibraryConstants.userAgent,
-      },
-    );
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'User-Agent': LibraryConstants.userAgent,
+        },
+      );
 
-    print("!!! LIBRARY API CALL MADE (page $page)!!!");
+      if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching library page. Retrying...');
+        await Future.delayed(const Duration(seconds: 2));
+        return _fetchPage(token, page);
+      }
+      if (response.statusCode != 200) {
+        _logger.severe(
+            'Library sync failed: ${response.statusCode} ${response.body}');
+        throw Exception(
+            'Failed to load library page: ${response.statusCode}');
+      }
 
-    if (response.statusCode == 429) {
-      await Future.delayed(const Duration(seconds: 2));
-      return _fetchPage(token, page);
+      final data =
+          (jsonDecode(response.body)['data'] as List<dynamic>? ?? const []);
+      final entries = data
+          .map((item) =>
+              api.LibraryEntry.fromJson(item as Map<String, dynamic>))
+          .toList();
+
+      return entries;
+    } catch (e) {
+      _logger.severe('Failed to fetch library page: $e');
+      throw Exception('Failed to fetch library page.');
     }
-    if (response.statusCode != 200) {
-      print('Library sync failed: ${response.statusCode} ${response.body}');
-      throw Exception('Failed to load library page');
-    }
-
-    final data =
-        (jsonDecode(response.body)['data'] as List<dynamic>? ?? const []);
-    final entries = data
-        .map((item) => api.LibraryEntry.fromJson(item as Map<String, dynamic>))
-        .toList();
-
-    return entries;
   }
 
   Future<void> _saveEntries(List<api.LibraryEntry> entries) async {
     if (entries.isEmpty) return;
-    await _db.seriesDao.upsertSeries(entries.map((e) => e.series).toList());
-    await _db.libraryEntriesDao.upsertLibraryEntries(entries);
+    try {
+      await _db.seriesDao.upsertSeries(entries.map((e) => e.series).toList());
+      await _db.libraryEntriesDao.upsertLibraryEntries(entries);
+    } catch (e) {
+      _logger.severe('Failed to save entries: $e');
+      throw Exception('Failed to save entries.');
+    }
   }
 
   Future<void> updateLibraryEntryState(String seriesId, String state) async {
