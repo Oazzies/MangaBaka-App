@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bakahyou/features/series/models/series.dart';
 import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
 import 'package:bakahyou/features/browse/widgets/browse_shortcuts.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class BrowseContent extends StatelessWidget {
   final List<Series> searchResults;
@@ -26,7 +27,7 @@ class BrowseContent extends StatelessWidget {
   });
 
   Widget _buildLoadingState() {
-    return const Expanded(child: Center(child: CircularProgressIndicator()));
+    return Expanded(child: Center(child: CircularProgressIndicator()));
   }
 
   Widget _buildErrorState() {
@@ -35,11 +36,11 @@ class BrowseContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
+            Icon(Icons.error_outline, color: AppConstants.errorColor, size: 48),
+            SizedBox(height: 16),
             Text(
               error!,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: AppConstants.errorColor),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),

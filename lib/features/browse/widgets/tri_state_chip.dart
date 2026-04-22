@@ -18,7 +18,7 @@ class TriStateChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color? backgroundColor;
-    Color textColor = Colors.white;
+    Color textColor = AppConstants.textColor;
     IconData? icon;
 
     switch (state) {
@@ -28,13 +28,13 @@ class TriStateChip extends StatelessWidget {
         icon = Icons.check;
         break;
       case TriState.exclude:
-        backgroundColor = Colors.red.withValues(alpha: 0.2);
-        textColor = Colors.red;
+        backgroundColor = AppConstants.errorColor.withValues(alpha: 0.2);
+        textColor = AppConstants.errorColor;
         icon = Icons.close;
         break;
       case TriState.off:
         backgroundColor = Colors.transparent;
-        textColor = Colors.white70;
+        textColor = AppConstants.textMutedColor;
         icon = null;
         break;
     }
@@ -43,7 +43,7 @@ class TriStateChip extends StatelessWidget {
       label: Text(label, style: TextStyle(color: textColor)),
       backgroundColor: backgroundColor,
       side: BorderSide(
-        color: state == TriState.off ? Colors.white24 : Colors.transparent,
+        color: state == TriState.off ? AppConstants.borderColor : Colors.transparent,
       ),
       avatar: icon != null ? Icon(icon, size: 16, color: textColor) : null,
       shape: RoundedRectangleBorder(

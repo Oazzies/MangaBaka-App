@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/browse/widgets/tri_state_chip.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class TriStateGroup extends StatelessWidget {
   final String title;
@@ -39,11 +40,11 @@ class TriStateGroup extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          padding: EdgeInsets.symmetric(vertical: 12.0),
           child: Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppConstants.textColor,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

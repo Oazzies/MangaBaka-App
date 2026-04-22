@@ -21,14 +21,14 @@ class StateSelectionSection extends StatelessWidget {
     final dropdownWidth = MediaQuery.of(context).size.width / 3;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Align(
         alignment: Alignment.centerLeft,
         child: SizedBox(
           width: dropdownWidth,
           child: Container(
             height: 38, // Slightly taller
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
             decoration: BoxDecoration(
               color: AppConstants.primaryBackground,
               borderRadius: BorderRadius.circular(8.0),
@@ -37,11 +37,11 @@ class StateSelectionSection extends StatelessWidget {
             child: DropdownButton<String>(
               value: currentState,
               isExpanded: true,
-              underline: const SizedBox.shrink(),
+              underline: SizedBox.shrink(),
               dropdownColor: AppConstants.primaryBackground,
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-              style: const TextStyle(
-                color: Colors.white,
+              icon: Icon(Icons.arrow_drop_down, color: AppConstants.textColor),
+              style: TextStyle(
+                color: AppConstants.textColor,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
@@ -61,7 +61,7 @@ class StateSelectionSection extends StatelessWidget {
                         _getIconForState(tab.key),
                         color: _getColorForState(tab.key),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Text(tab.label),
                     ],
                   ),
@@ -117,17 +117,17 @@ class StateSelectionSection extends StatelessWidget {
       case 'rereading':
         return AppConstants.successColor;
       case 'completed':
-        return Colors.white;
+        return AppConstants.textColor;
       case 'paused':
         return AppConstants.warningColor;
       case 'dropped':
-        return Colors.red;
+        return AppConstants.errorColor;
       case 'plan_to_read':
-        return Colors.blue;
+        return AppConstants.infoColor;
       case 'considering':
-        return Colors.purple;
+        return AppConstants.accentColor;
       default:
-        return Colors.grey;
+        return AppConstants.textMutedColor;
     }
   }
 }

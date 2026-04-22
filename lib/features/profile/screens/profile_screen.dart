@@ -211,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const SettingsScreen(),
+                                  builder: (context) => SettingsScreen(),
                                 ),
                               );
                             },
@@ -226,10 +226,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8),
+                      Text(
                         'A quick overview of your reading statistics.',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: AppConstants.textMutedColor),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -281,10 +281,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8),
+                      Text(
                         'Two quick ways to scan what has been added lately, what is rated highest, and what has seen recent reading progress.',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: AppConstants.textMutedColor),
                       ),
                       const SizedBox(height: 16),
                       SnapshotList(
@@ -300,16 +300,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         hasMore: _hasMoreAdded,
                         onFetchMore: _fetchRecentlyAdded,
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32),
                       if (_profile != null)
                         Center(
                           child: ElevatedButton.icon(
                             onPressed: _logout,
-                            icon: const Icon(Icons.logout),
-                            label: const Text('Logout'),
+                            icon: Icon(Icons.logout),
+                            label: Text('Logout'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppConstants.errorColor,
+                              foregroundColor: AppConstants.textColor,
                             ),
                           ),
                         ),
@@ -327,17 +327,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Login with MangaBaka to see your profile.',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: _login,
-            label: const Text('Login with MangaBaka'),
+            label: Text('Login with MangaBaka'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
+              backgroundColor: AppConstants.successColor,
+              foregroundColor: AppConstants.textColor,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               textStyle: const TextStyle(
                 fontSize: 16,

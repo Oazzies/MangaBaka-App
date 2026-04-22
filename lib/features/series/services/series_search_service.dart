@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:bakahyou/features/series/models/series.dart';
 
 class SeriesSearchService {
-  static const String _baseUrl = '${AppConstants.baseApiUrl}/series/search';
+  static String _baseUrl = '${AppConstants.baseApiUrl}/series/search';
   final _logger = LoggingService.logger;
 
   Future<List<Map<String, dynamic>>> getGenres() async {
@@ -18,7 +18,7 @@ class SeriesSearchService {
             Uri.parse('${AppConstants.baseApiUrl}/genres'),
             headers: {'User-Agent': AppConstants.userAgent},
           )
-          .timeout(const Duration(seconds: AppConstants.networkTimeoutSeconds));
+          .timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -38,7 +38,7 @@ class SeriesSearchService {
             Uri.parse('${AppConstants.baseApiUrl}/tags'),
             headers: {'User-Agent': AppConstants.userAgent},
           )
-          .timeout(const Duration(seconds: AppConstants.networkTimeoutSeconds));
+          .timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -80,7 +80,7 @@ class SeriesSearchService {
       final response = await http
           .get(Uri.parse(url), headers: {'User-Agent': AppConstants.userAgent})
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Series search request timed out'),
           );

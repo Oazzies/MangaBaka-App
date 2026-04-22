@@ -39,10 +39,10 @@ class _MainScreenState extends State<MainScreen> {
           data: NavigationBarThemeData(
             backgroundColor: AppConstants.secondaryBackground,
             labelTextStyle: WidgetStateProperty.all(
-              const TextStyle(color: Colors.white, fontSize: 12),
+              TextStyle(color: AppConstants.textColor, fontSize: 12),
             ),
             iconTheme: WidgetStateProperty.all(
-              const IconThemeData(color: Colors.white, size: 28),
+              IconThemeData(color: AppConstants.textColor, size: 28),
             ),
           ),
           child: NavigationBar(

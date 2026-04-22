@@ -84,11 +84,11 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: EdgeInsets.symmetric(vertical: 12.0),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: AppConstants.textColor,
           fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
@@ -138,9 +138,9 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppConstants.cardRadius),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.white24),
+          border: Border.all(color: AppConstants.borderColor),
           borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         ),
         child: Row(
@@ -150,11 +150,11 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
               includes.isEmpty && excludes.isEmpty
                   ? 'Select $title...'
                   : '${includes.length} Included, ${excludes.length} Excluded',
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(color: AppConstants.textMutedColor),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white54,
+              color: AppConstants.textMutedColor,
               size: 16,
             ),
           ],
@@ -169,31 +169,31 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Container(
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white30,
+              color: AppConstants.borderColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
                   onPressed: () => setState(() => _filters = SearchFilters()),
-                  child: const Text(
+                  child: Text(
                     'Reset',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppConstants.textMutedColor),
                   ),
                 ),
-                const Text(
+                Text(
                   "Filters",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textColor,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -214,20 +214,20 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
               ],
             ),
           ),
-          const Divider(color: Colors.white24, height: 1),
+          Divider(color: AppConstants.borderColor, height: 1),
           Expanded(
             child: _isLoadingMetadata
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : ListView(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(16.0),
                     children: [
                       _buildSectionTitle('Sort By'),
                       DropdownButtonFormField<String>(
                         initialValue: _filters.sortBy,
                         dropdownColor: AppConstants.tertiaryBackground,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: AppConstants.textColor),
                         decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
+                          contentPadding: EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 12,
                           ),
@@ -240,7 +240,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             borderRadius: BorderRadius.circular(
                               AppConstants.cardRadius,
                             ),
-                            borderSide: const BorderSide(color: Colors.white24),
+                            borderSide: BorderSide(color: AppConstants.borderColor),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
@@ -385,7 +385,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                         spacing: 8,
                         children: [
                           ChoiceChip(
-                            label: const Text('Any'),
+                            label: Text('Any'),
                             selected: _filters.isLicensed == null,
                             onSelected: (val) => setState(
                               () =>
@@ -397,7 +397,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             labelStyle: TextStyle(
                               color: _filters.isLicensed == null
                                   ? AppConstants.accentColor
-                                  : Colors.white,
+                                  : AppConstants.textColor,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
@@ -406,7 +406,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             ),
                           ),
                           ChoiceChip(
-                            label: const Text('Yes'),
+                            label: Text('Yes'),
                             selected: _filters.isLicensed == true,
                             onSelected: (val) => setState(
                               () =>
@@ -418,7 +418,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             labelStyle: TextStyle(
                               color: _filters.isLicensed == true
                                   ? AppConstants.accentColor
-                                  : Colors.white,
+                                  : AppConstants.textColor,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
@@ -427,7 +427,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             ),
                           ),
                           ChoiceChip(
-                            label: const Text('No'),
+                            label: Text('No'),
                             selected: _filters.isLicensed == false,
                             onSelected: (val) => setState(
                               () =>
@@ -439,7 +439,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             labelStyle: TextStyle(
                               color: _filters.isLicensed == false
                                   ? AppConstants.accentColor
-                                  : Colors.white,
+                                  : AppConstants.textColor,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
@@ -463,7 +463,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                         max: 100,
                         divisions: 100,
                         activeColor: AppConstants.accentColor,
-                        inactiveColor: Colors.white24,
+                        inactiveColor: AppConstants.borderColor,
                         labels: RangeLabels(
                           '${_filters.ratingLower.toInt()}',
                           '${_filters.ratingUpper.toInt()}',
@@ -489,7 +489,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                         max: _maxYear.toDouble(),
                         divisions: _maxYear - _minYear,
                         activeColor: AppConstants.accentColor,
-                        inactiveColor: Colors.white24,
+                        inactiveColor: AppConstants.borderColor,
                         labels: RangeLabels(
                           _filters.publishedYearLower == null
                               ? 'Any'

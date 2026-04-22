@@ -115,7 +115,7 @@ class LibraryService {
             },
           )
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () => throw TimeoutException('Library fetch timed out'),
           );
 
@@ -124,7 +124,7 @@ class LibraryService {
           'Rate limited fetching library page $page. Retrying after delay...',
         );
         await Future.delayed(
-          const Duration(seconds: AppConstants.rateLimitRetryDelaySeconds),
+          Duration(seconds: AppConstants.rateLimitRetryDelaySeconds),
         );
         return _fetchPage(token, page);
       }
@@ -230,7 +230,7 @@ class LibraryService {
             body: jsonEncode({'state': state}),
           )
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Update state request timed out'),
           );
@@ -304,7 +304,7 @@ class LibraryService {
             body: jsonEncode({'rating': rating}),
           )
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Update rating request timed out'),
           );
@@ -377,7 +377,7 @@ class LibraryService {
             body: jsonEncode({'state': state}),
           )
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Create entry request timed out'),
           );
@@ -448,7 +448,7 @@ class LibraryService {
             },
           )
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Delete entry request timed out'),
           );

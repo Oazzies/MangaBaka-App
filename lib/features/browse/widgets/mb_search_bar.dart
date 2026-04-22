@@ -60,28 +60,28 @@ class _MBSearchBarState extends State<MBSearchBar> {
       focusNode: _focusNode,
       decoration: InputDecoration(
         hintText: "Search for something",
-        hintStyle: const TextStyle(color: Colors.white),
-        prefixIcon: const Icon(Icons.search, color: Colors.white),
+        hintStyle: TextStyle(color: AppConstants.textColor),
+        prefixIcon: Icon(Icons.search, color: AppConstants.textColor),
         suffixIcon: Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+          padding: EdgeInsets.only(right: 8.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (_controller.text.isNotEmpty) ...[
                 IconButton(
-                  icon: const Icon(Icons.clear, color: Colors.white),
+                  icon: Icon(Icons.clear, color: AppConstants.textColor),
                   onPressed: _clear,
-                  constraints: const BoxConstraints(),
+                  constraints: BoxConstraints(),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
               ],
               IconButton(
                 icon: Icon(
                   Icons.filter_list,
                   color: _currentFilters.toMap().isNotEmpty
                       ? AppConstants.accentColor
-                      : Colors.white,
+                      : AppConstants.textColor,
                 ),
                 onPressed: () {
                   showModalBottomSheet(
@@ -109,7 +109,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
                     },
                   );
                 },
-                constraints: const BoxConstraints(),
+                constraints: BoxConstraints(),
               ),
             ],
           ),
@@ -128,12 +128,12 @@ class _MBSearchBarState extends State<MBSearchBar> {
           borderRadius: BorderRadius.circular(40),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 20,
         ),
       ),
-      style: const TextStyle(color: Colors.white),
+      style: TextStyle(color: AppConstants.textColor),
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       textInputAction: TextInputAction.search,

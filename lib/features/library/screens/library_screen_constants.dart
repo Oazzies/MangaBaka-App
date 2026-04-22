@@ -4,7 +4,7 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 class LibraryScreenConstants {
   static Color backgroundColor = AppConstants.primaryBackground;
   static Color accentColor = AppConstants.accentColor;
-  static const Color errorColor = Colors.red;
+  static Color errorColor = AppConstants.errorColor;
 
   static const List<LibraryTabDefinition> tabs = [
     LibraryTabDefinition(key: 'reading', label: 'Reading'),
@@ -16,7 +16,7 @@ class LibraryScreenConstants {
     LibraryTabDefinition(key: 'considering', label: 'Considering'),
   ];
 
-  static const Set<String> knownStates = AppConstants.libraryStates;
+  static Set<String> knownStates = AppConstants.libraryStates;
 }
 
 class LibraryTabDefinition {

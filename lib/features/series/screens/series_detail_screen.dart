@@ -84,26 +84,26 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: AppConstants.tertiaryBackground,
-          title: const Text(
+          title: Text(
             'Delete from Library',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppConstants.textColor, fontWeight: FontWeight.bold),
           ),
-          content: const Text(
+          content: Text(
             'Are you sure you want to delete this series from your library?',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: AppConstants.textMutedColor),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text(
+              child: Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: AppConstants.textColor),
               ),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
             ),
             TextButton(
-              child: Text('Confirm', style: TextStyle(color: Colors.red[400])),
+              child: Text('Confirm', style: TextStyle(color: AppConstants.errorColor)),
               onPressed: () async {
                 // First, pop the dialog.
                 Navigator.of(dialogContext).pop();
@@ -120,7 +120,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Error: ${e.toString()}'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: AppConstants.errorColor,
                       ),
                     );
                   }

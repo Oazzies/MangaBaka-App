@@ -166,7 +166,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       backgroundColor: AppConstants.primaryBackground,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             left: AppConstants.horizontalPadding,
             right: AppConstants.horizontalPadding,
             top: AppConstants.verticalPadding,

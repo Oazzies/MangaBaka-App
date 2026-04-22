@@ -3,14 +3,14 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.primaryBackground,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text('Settings'),
         backgroundColor: AppConstants.primaryBackground,
         elevation: 0,
       ),
@@ -18,7 +18,7 @@ class SettingsScreen extends StatelessWidget {
         listenable: ThemeManager(),
         builder: (context, _) {
           return ListView(
-            padding: const EdgeInsets.all(AppConstants.horizontalPadding),
+            padding: EdgeInsets.all(AppConstants.horizontalPadding),
             children: [
               _buildSectionHeader('Appearance'),
               _buildSettingItem(
@@ -45,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, top: 16.0),
+      padding: EdgeInsets.only(bottom: 8.0, top: 16.0),
       child: Text(
         title,
         style: TextStyle(
@@ -65,18 +65,18 @@ class SettingsScreen extends StatelessWidget {
   }) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Colors.white70),
+      leading: Icon(icon, color: AppConstants.textMutedColor),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: AppConstants.textColor),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: const TextStyle(color: Colors.white54),
+              style: TextStyle(color: AppConstants.textMutedColor),
             )
           : null,
-      trailing: const Icon(Icons.chevron_right, color: Colors.white54),
+      trailing: Icon(Icons.chevron_right, color: AppConstants.textMutedColor),
       onTap: onTap,
     );
   }
@@ -89,6 +89,8 @@ class SettingsScreen extends StatelessWidget {
         return 'Monochrome';
       case AppTheme.dark:
         return 'Dark Mode';
+      case AppTheme.system:
+        return 'System Default';
     }
   }
 
@@ -109,12 +111,12 @@ class SettingsScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   'Select Theme',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textColor,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -124,7 +126,7 @@ class SettingsScreen extends StatelessWidget {
                 return ListTile(
                   title: Text(
                     _getThemeName(theme),
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppConstants.textColor),
                   ),
                   trailing: theme == currentTheme
                       ? Icon(Icons.check, color: AppConstants.accentColor)

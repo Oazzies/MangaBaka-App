@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/date_utils.dart' as mb_date;
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class DateDialog extends StatelessWidget {
   final String start;
   final String end;
-  const DateDialog({required this.start, required this.end, super.key});
+  DateDialog({required this.start, required this.end, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +13,11 @@ class DateDialog extends StatelessWidget {
     final endFormatted = mb_date.DateUtils.formatFullDate(end);
 
     return AlertDialog(
-      backgroundColor: const Color(0xFF23232a),
-      title: const Text(
+      backgroundColor: AppConstants.tertiaryBackground,
+      title: Text(
         'Publication Dates',
         style: TextStyle(
-          color: Colors.white,
+          color: AppConstants.textColor,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -35,7 +36,7 @@ class DateDialog extends StatelessWidget {
                   child: Text(
                     'Start:',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: AppConstants.textMutedColor,
                       fontWeight: FontWeight.w500,
                       fontSize: 17,
                     ),
@@ -43,8 +44,8 @@ class DateDialog extends StatelessWidget {
                 ),
                 Text(
                   startFormatted,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppConstants.textColor,
                     fontWeight: FontWeight.w400,
                     fontSize: 17,
                   ),
@@ -53,7 +54,7 @@ class DateDialog extends StatelessWidget {
             ),
           if (endFormatted.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 12.0),
+              padding: EdgeInsets.only(top: 12.0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -62,7 +63,7 @@ class DateDialog extends StatelessWidget {
                     child: Text(
                       'End:',
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: AppConstants.textMutedColor,
                         fontWeight: FontWeight.w500,
                         fontSize: 17,
                       ),
@@ -70,8 +71,8 @@ class DateDialog extends StatelessWidget {
                   ),
                   Text(
                     endFormatted,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppConstants.textColor,
                       fontWeight: FontWeight.w400,
                       fontSize: 17,
                     ),

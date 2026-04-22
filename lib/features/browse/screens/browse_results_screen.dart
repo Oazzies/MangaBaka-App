@@ -133,12 +133,12 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(child: CircularProgressIndicator());
+    return Center(child: CircularProgressIndicator());
   }
 
   Widget _buildEmptyState() {
-    return const Center(
-      child: Text('No results found.', style: TextStyle(color: Colors.white)),
+    return Center(
+      child: Text('No results found.', style: TextStyle(color: AppConstants.textColor)),
     );
   }
 
@@ -147,11 +147,11 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 48),
-          const SizedBox(height: 16),
+          Icon(Icons.error_outline, color: AppConstants.errorColor, size: 48),
+          SizedBox(height: 16),
           Text(
             _error!,
-            style: const TextStyle(color: Colors.red),
+            style: TextStyle(color: AppConstants.errorColor),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -213,12 +213,12 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
         backgroundColor: AppConstants.primaryBackground,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           widget.sortType,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: AppConstants.textColor),
         ),
       ),
       body: SafeArea(

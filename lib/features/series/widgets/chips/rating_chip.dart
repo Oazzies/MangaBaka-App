@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class RatingChip extends StatelessWidget {
   final List<dynamic> sources;
@@ -22,17 +23,17 @@ class RatingChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avg = _calculateAverageRating();
-    if (avg == null) return const SizedBox.shrink();
+    if (avg == null) return SizedBox.shrink();
 
     return ChipBase(
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star, size: 18, color: Colors.white),
-          const SizedBox(width: 4),
+          Icon(Icons.star, size: 18, color: AppConstants.textColor),
+          SizedBox(width: 4),
           Text(
             '${avg.toStringAsFixed(1)} / 100',
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: AppConstants.textColor),
           ),
         ],
       ),

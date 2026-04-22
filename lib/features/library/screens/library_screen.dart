@@ -10,6 +10,7 @@ import 'package:bakahyou/features/series/screens/series_detail_screen.dart';
 import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
 import 'package:bakahyou/features/series/models/series.dart' as api;
 import 'package:bakahyou/utils/di/service_locator.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -134,13 +135,13 @@ class _LibraryScreenState extends State<LibraryScreen>
       stream: _entriesStream,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
           return Center(
             child: Text(
               'Error: ${snapshot.error}',
-              style: const TextStyle(color: LibraryScreenConstants.errorColor),
+              style: TextStyle(color: LibraryScreenConstants.errorColor),
             ),
           );
         }
@@ -169,20 +170,20 @@ class _LibraryScreenState extends State<LibraryScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
+          Text(
             'Login with MangaBaka to see your Library',
-            style: TextStyle(fontSize: 18, color: Colors.white),
+            style: TextStyle(fontSize: 18, color: AppConstants.textColor),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           ElevatedButton(
             onPressed: _loginAndReload,
             style: ElevatedButton.styleFrom(
               backgroundColor: LibraryScreenConstants.accentColor,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
             ),
-            child: const Text(
+            child: Text(
               'Login with MangaBaka',
-              style: TextStyle(fontSize: 16, color: Colors.white),
+              style: TextStyle(fontSize: 16, color: AppConstants.textColor),
             ),
           ),
         ],
@@ -195,7 +196,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       return Center(
         child: Text(
           'No entries in this category.',
-          style: TextStyle(color: Colors.grey[600]),
+          style: TextStyle(color: AppConstants.textMutedColor),
         ),
       );
     }
@@ -241,7 +242,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to load details: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppConstants.errorColor,
         ),
       );
     }

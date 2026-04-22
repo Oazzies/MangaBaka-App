@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AppTheme { dark, light, monochrome }
+enum AppTheme { dark, light, monochrome, system }
 
 /// App-wide constants for UI, API, and business logic
 class AppConstants {
@@ -26,9 +26,19 @@ class AppConstants {
   static Color borderColor = const Color(0xFF3f3f46);
   static Color successColor = const Color(0xFF81e6ca);
   static Color warningColor = const Color(0xFFffc83e);
+  static Color errorColor = const Color(0xFFef4444); 
+  static Color infoColor = const Color(0xFF3b82f6);
+  static Color textColor = const Color(0xFFFFFFFF);
+  static Color textMutedColor = const Color(0x8AFFFFFF);
 
   static void setAppTheme(AppTheme theme) {
-    switch (theme) {
+    AppTheme effectiveTheme = theme;
+    if (theme == AppTheme.system) {
+      final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      effectiveTheme = brightness == Brightness.dark ? AppTheme.dark : AppTheme.light;
+    }
+
+    switch (effectiveTheme) {
       case AppTheme.light:
         primaryBackground = const Color(0xFFF4F4F5);
         secondaryBackground = const Color(0xFFE4E4E7);
@@ -38,6 +48,10 @@ class AppConstants {
         borderColor = const Color(0xFFA1A1AA);
         successColor = const Color(0xFF34d399);
         warningColor = const Color(0xFFfbbf24);
+        errorColor = const Color(0xFFdc2626);
+        infoColor = const Color(0xFF2563eb);
+        textColor = const Color(0xFF000000);
+        textMutedColor = const Color(0x8A000000); 
         break;
       case AppTheme.monochrome:
         primaryBackground = const Color(0xFF000000);
@@ -48,6 +62,10 @@ class AppConstants {
         borderColor = const Color(0xFF333333);
         successColor = const Color(0xFFB3B3B3);
         warningColor = const Color(0xFF737373);
+        errorColor = const Color(0xFF9ca3af);
+        infoColor = const Color(0xFF6b7280);
+        textColor = const Color(0xFFFFFFFF);
+        textMutedColor = const Color(0x8AFFFFFF);
         break;
       case AppTheme.dark:
         primaryBackground = const Color(0xFF0a0a0a);
@@ -58,6 +76,12 @@ class AppConstants {
         borderColor = const Color(0xFF3f3f46);
         successColor = const Color(0xFF81e6ca);
         warningColor = const Color(0xFFffc83e);
+        errorColor = const Color(0xFFef4444);
+        infoColor = const Color(0xFF3b82f6);
+        textColor = const Color(0xFFFFFFFF);
+        textMutedColor = const Color(0x8AFFFFFF);
+        break;
+      default:
         break;
     }
   }

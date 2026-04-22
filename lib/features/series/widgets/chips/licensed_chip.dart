@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class LicensedChip extends StatelessWidget {
-  const LicensedChip({super.key});
+  LicensedChip({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +11,7 @@ class LicensedChip extends StatelessWidget {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.euro, size: 16, color: Colors.white),
+          Icon(Icons.euro, size: 16, color: AppConstants.textColor),
           const SizedBox(width: 4),
           Text('Licensed'),
         ],

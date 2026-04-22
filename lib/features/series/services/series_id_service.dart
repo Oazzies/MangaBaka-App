@@ -16,7 +16,7 @@ class SeriesService {
       final response = await http
           .get(url, headers: {'User-Agent': AppConstants.userAgent})
           .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Series fetch request timed out'),
           );

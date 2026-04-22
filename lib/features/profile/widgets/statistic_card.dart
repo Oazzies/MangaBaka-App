@@ -17,7 +17,7 @@ class StatisticCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppConstants.secondaryBackground,
           borderRadius: BorderRadius.circular(12),
@@ -25,17 +25,17 @@ class StatisticCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Colors.white, size: 22),
-            const SizedBox(height: 8),
+            Icon(icon, color: AppConstants.textColor, size: 22),
+            SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              style: TextStyle(color: AppConstants.textMutedColor, fontSize: 14),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppConstants.textColor,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),

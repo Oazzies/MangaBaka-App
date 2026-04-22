@@ -67,23 +67,23 @@ class _FilterListDialogState extends State<FilterListDialog> {
       height: MediaQuery.of(context).size.height * 0.8,
       child: Column(
         children: [
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Container(
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white30,
+              color: AppConstants.borderColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: TextField(
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: AppConstants.textColor),
               decoration: InputDecoration(
                 hintText: 'Search ${widget.title.toLowerCase()}...',
-                hintStyle: const TextStyle(color: Colors.white54),
-                prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                hintStyle: TextStyle(color: AppConstants.textMutedColor),
+                prefixIcon: Icon(Icons.search, color: AppConstants.textMutedColor),
                 filled: true,
                 fillColor: AppConstants.secondaryBackground,
                 border: OutlineInputBorder(
@@ -110,7 +110,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
                 return ListTile(
                   title: Text(
                     name,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppConstants.textColor),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
                           Icons.check_circle,
                           color: state == TriState.include
                               ? AppConstants.accentColor
-                              : Colors.white24,
+                              : AppConstants.borderColor,
                         ),
                         onPressed: () {
                           _updateTriState(
@@ -135,8 +135,8 @@ class _FilterListDialogState extends State<FilterListDialog> {
                         icon: Icon(
                           Icons.cancel,
                           color: state == TriState.exclude
-                              ? Colors.red
-                              : Colors.white24,
+                              ? AppConstants.errorColor
+                              : AppConstants.borderColor,
                         ),
                         onPressed: () {
                           _updateTriState(

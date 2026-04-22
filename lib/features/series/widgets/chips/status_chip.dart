@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class StatusChip extends StatelessWidget {
   final String status;
@@ -19,15 +20,15 @@ class StatusChip extends StatelessWidget {
     Color? iconColor;
 
     if (lower == 'releasing') {
-      bgColor = const Color(0xFF0d542b);
+      bgColor = Color(0xFF0d542b);
       icon = Icons.play_arrow_outlined;
-      textStyle = const TextStyle(color: Color(0xFF81e6ca));
-      iconColor = const Color(0xFF81e6ca);
+      textStyle = TextStyle(color: Color(0xFF81e6ca));
+      iconColor = Color(0xFF81e6ca);
     } else if (lower == 'completed') {
-      bgColor = const Color(0xFF314158);
+      bgColor = Color(0xFF314158);
       icon = Icons.check_circle_outline_outlined;
-      textStyle = const TextStyle(color: Colors.white);
-      iconColor = Colors.white;
+      textStyle = TextStyle(color: AppConstants.textColor);
+      iconColor = AppConstants.textColor;
     } else if (lower == 'hiatus') {
       bgColor = const Color(0xFF733e0a);
       icon = Icons.pause_circle_outline;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/browse/widgets/shortcut_button.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class ShortcutSection extends StatelessWidget {
   final String header;
@@ -16,14 +17,14 @@ class ShortcutSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14.0),
+      padding: EdgeInsets.symmetric(vertical: 14.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             header,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppConstants.textColor,
               fontWeight: FontWeight.w900,
               fontSize: 20,
               letterSpacing: 0.5,

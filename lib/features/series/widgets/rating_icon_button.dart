@@ -1,5 +1,6 @@
 import 'package:bakahyou/features/series/widgets/rating_selection_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class RatingIconButton extends StatelessWidget {
   final int? currentRating;
@@ -20,14 +21,14 @@ class RatingIconButton extends StatelessWidget {
       height: 38,
       width: 50,
       decoration: BoxDecoration(
-        color: const Color(0xFF0a0a0a),
+        color: AppConstants.primaryBackground,
         borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: const Color(0xFF3f3f46), width: 1.5),
+        border: Border.all(color: AppConstants.borderColor, width: 1.5),
       ),
       child: IconButton(
         icon: Icon(
           hasRating ? Icons.star : Icons.star_border,
-          color: hasRating ? Colors.amber : Colors.white,
+          color: hasRating ? AppConstants.warningColor : AppConstants.textColor,
         ),
         onPressed: () {
           showDialog(

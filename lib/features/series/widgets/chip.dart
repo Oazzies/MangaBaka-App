@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class ChipBase extends StatelessWidget {
   final Widget label;
@@ -20,14 +21,14 @@ class ChipBase extends StatelessWidget {
       label: DefaultTextStyle(
         style:
             labelStyle ??
-            const TextStyle(
+            TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: Colors.white,
+              color: AppConstants.textColor,
             ),
         child: label,
       ),
-      backgroundColor: backgroundColor ?? const Color(0xFF3f3f46),
+      backgroundColor: backgroundColor ?? AppConstants.borderColor,
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       visualDensity: VisualDensity.compact,

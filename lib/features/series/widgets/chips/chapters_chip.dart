@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class ChaptersChip extends StatelessWidget {
   final String chapters;
@@ -23,7 +24,7 @@ class ChaptersChip extends StatelessWidget {
         label: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.format_list_bulleted, size: 18, color: Colors.white),
+            Icon(Icons.format_list_bulleted, size: 18, color: AppConstants.textColor),
             const SizedBox(width: 4),
             Text.rich(
               TextSpan(
@@ -37,7 +38,7 @@ class ChaptersChip extends StatelessWidget {
                   ),
                   TextSpan(
                     text: ' of $chapters Ch.',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppConstants.textColor),
                   ),
                 ],
               ),
@@ -51,7 +52,7 @@ class ChaptersChip extends StatelessWidget {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.format_list_bulleted, size: 18, color: Colors.white),
+          Icon(Icons.format_list_bulleted, size: 18, color: AppConstants.textColor),
           const SizedBox(width: 4),
           Text('$chapters Ch.'),
         ],

@@ -28,9 +28,9 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: AppConstants.tertiaryBackground,
-      title: const Text(
+      title: Text(
         'Set Your Rating',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: TextStyle(color: AppConstants.textColor, fontWeight: FontWeight.bold),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -39,8 +39,8 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             _currentRating.toInt() == 0
                 ? 'Unrated'
                 : _currentRating.toInt().toString(),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppConstants.textColor,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
