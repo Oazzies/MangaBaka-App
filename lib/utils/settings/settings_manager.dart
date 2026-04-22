@@ -9,6 +9,8 @@ enum AppListStyle {
   grid,
 }
 
+const String _hideLibrarySeriesInBrowseKey = '${AppConstants.prefixStorageKey}hide_library_series';
+
 class SettingsManager extends ChangeNotifier {
   static final SettingsManager _instance = SettingsManager._internal();
   factory SettingsManager() => _instance;
@@ -19,6 +21,9 @@ class SettingsManager extends ChangeNotifier {
   AppListStyle _currentListStyle = AppListStyle.comfortable;
   AppListStyle get currentListStyle => _currentListStyle;
 
+  bool _hideLibrarySeriesInBrowse = false;
+  bool get hideLibrarySeriesInBrowse => _hideLibrarySeriesInBrowse;
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -27,6 +32,9 @@ class SettingsManager extends ChangeNotifier {
     if (listStyleIndex != null && listStyleIndex >= 0 && listStyleIndex < AppListStyle.values.length) {
       _currentListStyle = AppListStyle.values[listStyleIndex];
     }
+    
+    // Load Hide Library Series In Browse
+    _hideLibrarySeriesInBrowse = prefs.getBool(_hideLibrarySeriesInBrowseKey) ?? false;
     
     notifyListeners();
   }
@@ -38,6 +46,17 @@ class SettingsManager extends ChangeNotifier {
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_listStyleKey, style.index);
+    
+    notifyListeners();
+  }
+
+  Future<void> setHideLibrarySeriesInBrowse(bool value) async {
+    if (_hideLibrarySeriesInBrowse == value) return;
+    
+    _hideLibrarySeriesInBrowse = value;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hideLibrarySeriesInBrowseKey, value);
     
     notifyListeners();
   }

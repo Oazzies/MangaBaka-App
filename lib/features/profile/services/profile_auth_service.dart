@@ -25,6 +25,8 @@ class ProfileAuthService {
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  MbProfile? _cachedProfile;
+
   String get _clientId => dotenv.env['BAKAHYOU_CLIENT_ID'] ?? '';
   String get _redirectUri => dotenv.env['BAKAHYOU_REDIRECT_URI'] ?? '';
 
@@ -133,8 +135,12 @@ class ProfileAuthService {
     }
   }
 
-  Future<MbProfile> fetchProfile() async {
+  Future<MbProfile> fetchProfile({bool forceRefresh = false}) async {
     try {
+      if (!forceRefresh && _cachedProfile != null) {
+        return _cachedProfile!;
+      }
+
       await _refreshIfNeeded();
       final accessToken = await _storage.read(key: _kAccessToken);
 
@@ -153,7 +159,8 @@ class ProfileAuthService {
 
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body) as Map<String, dynamic>;
-        return MbProfile.fromMeResponse(body);
+        _cachedProfile = MbProfile.fromMeResponse(body);
+        return _cachedProfile!;
       } else if (res.statusCode == 404) {
         // Fallback to OIDC userinfo endpoint
         final userinfoRes = await http.get(
@@ -165,7 +172,8 @@ class ProfileAuthService {
         );
         if (userinfoRes.statusCode == 200) {
           final body = jsonDecode(userinfoRes.body) as Map<String, dynamic>;
-          return MbProfile.fromUserInfo(body);
+          _cachedProfile = MbProfile.fromUserInfo(body);
+          return _cachedProfile!;
         } else {
           _logger.severe(
             'Failed to fetch profile from userinfo endpoint: ${userinfoRes.statusCode} ${userinfoRes.body}',
@@ -206,6 +214,7 @@ class ProfileAuthService {
       await _storage.delete(key: _kRefreshToken);
       await _storage.delete(key: _kIdToken);
       await _storage.delete(key: _kAccessTokenExp);
+      _cachedProfile = null;
     } catch (e) {
       _logger.severe('Failed to logout: $e');
       throw Exception('Failed to logout.');

@@ -6,6 +6,8 @@ import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
 import 'package:bakahyou/features/series/services/series_search_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -78,7 +80,22 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     });
 
     try {
-      final params = _buildRequestParams(initial);
+      String? userId;
+      if (SettingsManager().hideLibrarySeriesInBrowse) {
+        final auth = ProfileAuthService();
+        if (await auth.hasSession()) {
+          try {
+            final profile = await auth.fetchProfile();
+            // exclude_user_library expects a 32-character alphanumeric string.
+            // UUIDs from the profile ID might contain hyphens, so we strip them.
+            userId = profile.id.replaceAll('-', '');
+          } catch (e) {
+            // Silently ignore auth errors for this specific feature
+          }
+        }
+      }
+
+      final params = _buildRequestParams(initial, userId);
       final newResults = await _searchService.searchSeriesByName(
         '',
         sortBy: widget.sortBy,
@@ -103,11 +120,15 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     }
   }
 
-  Map<String, dynamic> _buildRequestParams(bool initial) {
+  Map<String, dynamic> _buildRequestParams(bool initial, String? excludeUserId) {
     final params = <String, dynamic>{
       'limit': AppConstants.defaultPageLimit,
       'page': _currentPage,
     };
+
+    if (excludeUserId != null && excludeUserId.isNotEmpty) {
+      params['exclude_user_library'] = excludeUserId;
+    }
 
     if (widget.sortBy == 'random') {
       if (!initial) {

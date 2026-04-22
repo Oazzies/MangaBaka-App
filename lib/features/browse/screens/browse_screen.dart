@@ -9,6 +9,8 @@ import 'package:bakahyou/features/series/models/series.dart';
 import 'package:bakahyou/features/browse/models/search_filters.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -104,11 +106,30 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Future<void> _fetchSearchResults() async {
     try {
-      final extraParams = {
+      String? userId;
+      if (SettingsManager().hideLibrarySeriesInBrowse) {
+        final auth = ProfileAuthService();
+        if (await auth.hasSession()) {
+          try {
+            final profile = await auth.fetchProfile();
+            // exclude_user_library expects a 32-character alphanumeric string.
+            // UUIDs from the profile ID might contain hyphens, so we strip them.
+            userId = profile.id.replaceAll('-', '');
+          } catch (e) {
+            // Silently ignore auth errors for this specific feature
+          }
+        }
+      }
+
+      final extraParams = <String, dynamic>{
         'page': _currentPage,
         'limit': AppConstants.defaultPageLimit,
         ..._currentFilters.toMap(),
       };
+
+      if (userId != null && userId.isNotEmpty) {
+        extraParams['exclude_user_library'] = userId;
+      }
 
       final newResults = await _searchService.searchSeriesByName(
         _currentSearchQuery,
