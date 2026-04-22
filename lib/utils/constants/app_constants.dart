@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum AppTheme { dark, light, monochrome }
+
 /// App-wide constants for UI, API, and business logic
 class AppConstants {
   // ============ API & Network ============
@@ -15,15 +17,50 @@ class AppConstants {
   static const int libraryPageLimit = 50; // API max
   static const double scrollThresholdPx = 100;
 
-  // ============ UI Colors (Dark Theme) ============
-  static const Color primaryBackground = Color(0xFF0a0a0a);
-  static const Color secondaryBackground = Color(0xFF18181B);
-  static const Color tertiaryBackground = Color(0xFF23232a);
-  static const Color accentColor = Color(0xFF1b9f70);
-  static const Color primaryAccent = Color(0xFF00301d);
-  static const Color borderColor = Color(0xFF3f3f46);
-  static const Color successColor = Color(0xFF81e6ca);
-  static const Color warningColor = Color(0xFFffc83e);
+  // ============ UI Colors ============
+  static Color primaryBackground = const Color(0xFF0a0a0a);
+  static Color secondaryBackground = const Color(0xFF18181B);
+  static Color tertiaryBackground = const Color(0xFF23232a);
+  static Color accentColor = const Color(0xFF1b9f70);
+  static Color primaryAccent = const Color(0xFF00301d);
+  static Color borderColor = const Color(0xFF3f3f46);
+  static Color successColor = const Color(0xFF81e6ca);
+  static Color warningColor = const Color(0xFFffc83e);
+
+  static void setAppTheme(AppTheme theme) {
+    switch (theme) {
+      case AppTheme.light:
+        primaryBackground = const Color(0xFFF4F4F5);
+        secondaryBackground = const Color(0xFFE4E4E7);
+        tertiaryBackground = const Color(0xFFD4D4D8);
+        accentColor = const Color(0xFF10b981);
+        primaryAccent = const Color(0xFF047857);
+        borderColor = const Color(0xFFA1A1AA);
+        successColor = const Color(0xFF34d399);
+        warningColor = const Color(0xFFfbbf24);
+        break;
+      case AppTheme.monochrome:
+        primaryBackground = const Color(0xFF000000);
+        secondaryBackground = const Color(0xFF111111);
+        tertiaryBackground = const Color(0xFF222222);
+        accentColor = const Color(0xFFE5E5E5);
+        primaryAccent = const Color(0xFF404040);
+        borderColor = const Color(0xFF333333);
+        successColor = const Color(0xFFB3B3B3);
+        warningColor = const Color(0xFF737373);
+        break;
+      case AppTheme.dark:
+        primaryBackground = const Color(0xFF0a0a0a);
+        secondaryBackground = const Color(0xFF18181B);
+        tertiaryBackground = const Color(0xFF23232a);
+        accentColor = const Color(0xFF1b9f70);
+        primaryAccent = const Color(0xFF00301d);
+        borderColor = const Color(0xFF3f3f46);
+        successColor = const Color(0xFF81e6ca);
+        warningColor = const Color(0xFFffc83e);
+        break;
+    }
+  }
 
   // ============ UI Spacing ============
   static const double horizontalPadding = 16.0;

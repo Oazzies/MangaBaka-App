@@ -203,7 +203,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                     widget.onApply(_filters);
                     Navigator.pop(context);
                   },
-                  child: const Text(
+                  child: Text(
                     'Apply',
                     style: TextStyle(
                       color: AppConstants.accentColor,
@@ -246,7 +246,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             borderRadius: BorderRadius.circular(
                               AppConstants.cardRadius,
                             ),
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: AppConstants.accentColor,
                             ),
                           ),

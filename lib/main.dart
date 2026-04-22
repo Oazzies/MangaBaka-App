@@ -5,6 +5,7 @@ import 'package:bakahyou/features/navigation/screens/main_screen.dart';
 import 'package:bakahyou/utils/services/logging_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +13,8 @@ void main() async {
   LoggingService.setup();
   await dotenv.load();
   setupServiceLocator();
+  
+  await ThemeManager().init();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -29,21 +32,33 @@ class BakaHyouApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BakaHyou',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppConstants.primaryAccent,
-        ),
-      ),
-      darkTheme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppConstants.primaryAccent,
-          brightness: Brightness.dark,
-        ),
-      ),
-      themeMode: ThemeMode.dark,
-      home: const MainScreen(),
+    return ListenableBuilder(
+      listenable: ThemeManager(),
+      builder: (context, _) {
+        final theme = ThemeManager().currentTheme;
+        final isLight = theme == AppTheme.light;
+        
+        return MaterialApp(
+          key: ValueKey(theme),
+          title: 'BakaHyou',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppConstants.primaryAccent,
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: AppConstants.primaryBackground,
+          ),
+          darkTheme: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AppConstants.primaryAccent,
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: AppConstants.primaryBackground,
+          ),
+          themeMode: isLight ? ThemeMode.light : ThemeMode.dark,
+          home: const MainScreen(),
+        );
+      },
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:bakahyou/features/profile/widgets/statistic_card.dart';
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/profile/models/mb_profile.dart';
+import 'package:bakahyou/features/profile/screens/settings_screen.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -192,12 +193,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${username ?? 'User'} Profile',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${username ?? 'User'} Profile',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.settings),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SettingsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                       const Text(
