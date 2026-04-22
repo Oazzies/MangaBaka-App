@@ -45,6 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to scan barcodes for manga series.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 	<dict>

@@ -11,7 +11,8 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
-
+import 'package:bakahyou/features/browse/screens/barcode_scanner_screen.dart';
+import 'package:bakahyou/features/browse/services/book_lookup_service.dart';
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
 
@@ -23,6 +24,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
   // Services & Controllers
   late final SeriesSearchService _searchService;
   late final ScrollController _scrollController;
+  final TextEditingController _searchController = TextEditingController();
 
   // Search State
   List<Series> _searchResults = [];
@@ -44,6 +46,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -181,6 +184,85 @@ class _BrowseScreenState extends State<BrowseScreen> {
     );
   }
 
+  String _cleanTitle(String title) {
+    // Matches common suffixes like "Vol. 1", "Volume 2", "Part 3", "Deluxe Edition", "Omnibus"
+    final regex = RegExp(
+      r'(?:\s*[,-]?\s*(?:Vol\.|Volume|Part|Book)\s*\d+.*)|(?:\s*(?:Deluxe Edition|Omnibus|Box Set|Manga)\b.*)',
+      caseSensitive: false,
+    );
+    final cleaned = title.replaceAll(regex, '').trim();
+    // Remove trailing hyphens or colons
+    return cleaned.replaceAll(RegExp(r'[\-:]$'), '').trim();
+  }
+
+  Future<void> _handleBarcodeScan() async {
+    final isbn = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+
+    if (isbn != null && isbn.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      if (!mounted) return;
+
+      try {
+        final lookupService = BookLookupService();
+        final title = await lookupService.lookupTitleByIsbn(isbn);
+
+        if (title != null && title.isNotEmpty) {
+          _searchController.text = title;
+          _currentSearchQuery = title;
+          await _searchSeries();
+
+          if (!mounted) return;
+
+          if (_searchResults.isNotEmpty) {
+            _navigateToDetail(_searchResults.first);
+          } else {
+            // Fallback: Try stripping volume numbers and edition names
+            final cleanedTitle = _cleanTitle(title);
+            if (cleanedTitle != title && cleanedTitle.isNotEmpty) {
+              _searchController.text = cleanedTitle;
+              _currentSearchQuery = cleanedTitle;
+              await _searchSeries();
+
+              if (!mounted) return;
+
+              if (_searchResults.isNotEmpty) {
+                _navigateToDetail(_searchResults.first);
+                return;
+              }
+            }
+
+             ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('No series found for "$cleanedTitle" on MangaBaka.')),
+            );
+          }
+        } else {
+          if (!mounted) return;
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not find book title for this ISBN.')),
+          );
+        }
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error looking up book: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,7 +280,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: MBSearchBar(
+                  controller: _searchController,
                   initialFilters: _currentFilters,
+                  onScanTap: _handleBarcodeScan,
                   onChanged: (text) {
                     _currentSearchQuery = text;
                     if (text.isEmpty && _currentFilters.toMap().isEmpty) {

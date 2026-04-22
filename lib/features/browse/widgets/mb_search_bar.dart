@@ -8,6 +8,8 @@ class MBSearchBar extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final SearchFilters? initialFilters;
   final ValueChanged<SearchFilters>? onFilterApplied;
+  final TextEditingController? controller;
+  final VoidCallback? onScanTap;
 
   const MBSearchBar({
     super.key,
@@ -15,6 +17,8 @@ class MBSearchBar extends StatefulWidget {
     this.onSubmitted,
     this.initialFilters,
     this.onFilterApplied,
+    this.controller,
+    this.onScanTap,
   });
 
   @override
@@ -22,13 +26,14 @@ class MBSearchBar extends StatefulWidget {
 }
 
 class _MBSearchBarState extends State<MBSearchBar> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   late SearchFilters _currentFilters;
 
   @override
   void initState() {
     super.initState();
+    _controller = widget.controller ?? TextEditingController();
     _currentFilters = widget.initialFilters ?? SearchFilters();
     _controller.addListener(() => setState(() {}));
     _focusNode.addListener(_onFocusChange);
@@ -36,7 +41,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
     _focusNode.removeListener(_onFocusChange);
     _focusNode.dispose();
     super.dispose();
@@ -72,6 +79,14 @@ class _MBSearchBarState extends State<MBSearchBar> {
                 IconButton(
                   icon: Icon(Icons.clear, color: AppConstants.textColor),
                   onPressed: _clear,
+                  constraints: BoxConstraints(),
+                ),
+                SizedBox(width: 4),
+              ],
+              if (widget.onScanTap != null) ...[
+                IconButton(
+                  icon: Icon(Icons.qr_code_scanner, color: AppConstants.textColor),
+                  onPressed: widget.onScanTap,
                   constraints: BoxConstraints(),
                 ),
                 SizedBox(width: 4),
