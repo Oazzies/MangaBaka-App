@@ -44,7 +44,8 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 * Home Page (Discover, Current, Activity)
 
 * More browse shortcuts(Recommendations, etc)
-* Scan barcode to search
+* Browsing suggestions
+* Scan barcode to search (Improved once Works comes out)
 
 * Multiple series covers
 * Collections
