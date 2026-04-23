@@ -10,6 +10,7 @@ enum AppListStyle {
 }
 
 const String _hideLibrarySeriesInBrowseKey = '${AppConstants.prefixStorageKey}hide_library_series';
+const String _contentPreferencesKey = '${AppConstants.prefixStorageKey}content_prefs';
 
 class SettingsManager extends ChangeNotifier {
   static final SettingsManager _instance = SettingsManager._internal();
@@ -24,6 +25,9 @@ class SettingsManager extends ChangeNotifier {
   bool _hideLibrarySeriesInBrowse = false;
   bool get hideLibrarySeriesInBrowse => _hideLibrarySeriesInBrowse;
 
+  List<String> _contentPreferences = ['safe', 'suggestive'];
+  List<String> get contentPreferences => _contentPreferences;
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -35,6 +39,12 @@ class SettingsManager extends ChangeNotifier {
     
     // Load Hide Library Series In Browse
     _hideLibrarySeriesInBrowse = prefs.getBool(_hideLibrarySeriesInBrowseKey) ?? false;
+    
+    // Load Content Preferences
+    final savedContentPrefs = prefs.getStringList(_contentPreferencesKey);
+    if (savedContentPrefs != null && savedContentPrefs.isNotEmpty) {
+      _contentPreferences = savedContentPrefs;
+    }
     
     notifyListeners();
   }
@@ -57,6 +67,15 @@ class SettingsManager extends ChangeNotifier {
     
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_hideLibrarySeriesInBrowseKey, value);
+    
+    notifyListeners();
+  }
+
+  Future<void> setContentPreferences(List<String> prefsList) async {
+    _contentPreferences = prefsList;
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_contentPreferencesKey, prefsList);
     
     notifyListeners();
   }

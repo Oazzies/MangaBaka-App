@@ -6,6 +6,7 @@ import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:bakahyou/features/series/models/series.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
 
 class SeriesSearchService {
   static String _baseUrl = '${AppConstants.baseApiUrl}/series/search';
@@ -74,6 +75,11 @@ class SeriesSearchService {
           url += '&$key=${Uri.encodeComponent(value.toString())}';
         }
       });
+    }
+
+    final contentPrefs = SettingsManager().contentPreferences;
+    for (var rating in contentPrefs) {
+      url += '&content_rating=${Uri.encodeComponent(rating)}';
     }
 
     try {

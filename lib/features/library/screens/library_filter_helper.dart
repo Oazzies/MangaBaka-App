@@ -5,17 +5,21 @@ import 'package:bakahyou/features/library/services/state_normalizer.dart';
 class LibraryFilterHelper {
   final List<LibraryEntry> allEntries;
   final String query;
+  final List<String> contentPreferences;
 
-  LibraryFilterHelper({required this.allEntries, required this.query});
+  LibraryFilterHelper({required this.allEntries, required this.query, required this.contentPreferences});
 
   List<LibraryEntry> getFilteredByQuery() {
-    if (query.isEmpty) return allEntries;
+    if (query.isEmpty && contentPreferences.isEmpty) return allEntries;
 
     return allEntries
-        .where(
-          (entry) =>
-              entry.series.title.toLowerCase().contains(query.toLowerCase()),
-        )
+        .where((entry) {
+          final matchesQuery = query.isEmpty ||
+              entry.series.title.toLowerCase().contains(query.toLowerCase());
+          final matchesRating = contentPreferences.isEmpty ||
+              contentPreferences.contains(entry.series.contentRating.toLowerCase());
+          return matchesQuery && matchesRating;
+        })
         .toList();
   }
 

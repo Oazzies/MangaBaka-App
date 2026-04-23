@@ -42,6 +42,18 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ]),
               const SizedBox(height: 16),
+              _buildSectionHeader('Content'),
+              _buildSettingsGroup([
+                _buildSettingItem(
+                  icon: Icons.filter_alt_outlined,
+                  title: 'Content Preferences',
+                  subtitle: _getContentPreferencesText(SettingsManager().contentPreferences),
+                  onTap: () => _showContentPreferencesDialog(context),
+                  isFirst: true,
+                  isLast: true,
+                ),
+              ]),
+              const SizedBox(height: 16),
               _buildSectionHeader('Browse'),
               _buildSettingsGroup([
                 _buildSwitchItem(
@@ -327,6 +339,74 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 8),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  String _getContentPreferencesText(List<String> prefs) {
+    if (prefs.isEmpty) return 'None selected';
+    if (prefs.length == 4) return 'All ratings';
+    return prefs.map((s) => s[0].toUpperCase() + s.substring(1)).join(', ');
+  }
+
+  void _showContentPreferencesDialog(BuildContext context) {
+    final currentPrefs = List<String>.from(SettingsManager().contentPreferences);
+    final options = ['safe', 'suggestive', 'erotica', 'pornographic'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: AppConstants.secondaryBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+              ),
+              title: Text(
+                'Content Preferences',
+                style: TextStyle(color: AppConstants.textColor),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((option) {
+                  final isSelected = currentPrefs.contains(option);
+                  final label = option[0].toUpperCase() + option.substring(1);
+                  return CheckboxListTile(
+                    title: Text(label, style: TextStyle(color: AppConstants.textColor)),
+                    value: isSelected,
+                    activeColor: AppConstants.accentColor,
+                    checkColor: AppConstants.primaryBackground,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          currentPrefs.add(option);
+                        } else {
+                          currentPrefs.remove(option);
+                        }
+                      });
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text('Cancel', style: TextStyle(color: AppConstants.textMutedColor)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    SettingsManager().setContentPreferences(currentPrefs);
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Text('Save', style: TextStyle(color: AppConstants.accentColor)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
