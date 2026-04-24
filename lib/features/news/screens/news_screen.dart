@@ -17,14 +17,26 @@ class _NewsScreenState extends State<NewsScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _hasMore = true;
+  bool _isBackgroundRefresh = false;
   int _currentPage = 1;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _fetchNews(initial: true);
+    _loadCachedAndFetch();
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _loadCachedAndFetch() async {
+    final cachedNews = await _newsService.getCachedNews();
+    if (mounted && cachedNews.isNotEmpty) {
+      setState(() {
+        _newsList.addAll(cachedNews);
+        _currentPage = 2; // temporarily, in case user scrolls immediately
+      });
+    }
+    _fetchNews(initial: true, isBackground: cachedNews.isNotEmpty);
   }
 
   @override
@@ -42,31 +54,42 @@ class _NewsScreenState extends State<NewsScreen> {
     }
   }
 
-  Future<void> _fetchNews({bool initial = false}) async {
-    if (_isLoading) return;
+  Future<void> _fetchNews({bool initial = false, bool isBackground = false}) async {
+    if (_isLoading || _isBackgroundRefresh) return;
+    
     setState(() {
-      _isLoading = true;
+      if (isBackground) {
+        _isBackgroundRefresh = true;
+      } else {
+        _isLoading = true;
+      }
       _error = null;
     });
 
     try {
+      final pageToFetch = initial ? 1 : _currentPage;
       final newNews = await _newsService.fetchNews(
-        page: _currentPage,
+        page: pageToFetch,
         limit: 10,
       );
+      if (!mounted) return;
       setState(() {
         if (initial) {
           _newsList.clear();
+          _currentPage = 1;
         }
         _newsList.addAll(newNews);
         _isLoading = false;
+        _isBackgroundRefresh = false;
         _hasMore = newNews.length == 10;
         _currentPage++;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _error = 'Failed to load news';
+        _isBackgroundRefresh = false;
+        if (!isBackground) _error = 'Failed to load news';
       });
     }
   }
@@ -84,7 +107,7 @@ class _NewsScreenState extends State<NewsScreen> {
     return Scaffold(
       backgroundColor: AppConstants.primaryBackground,
       body: SafeArea(
-        child: _newsList.isEmpty && !_isLoading
+        child: _newsList.isEmpty && !_isLoading && !_isBackgroundRefresh
             ? Center(child: Text(_error ?? 'No news found.'))
             : RefreshIndicator(
                 onRefresh: _onRefresh,

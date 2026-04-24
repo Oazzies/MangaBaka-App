@@ -9,6 +9,7 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/profile/models/mb_profile.dart';
 import 'package:bakahyou/features/profile/screens/settings_screen.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
+import 'package:bakahyou/utils/di/service_locator.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +19,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final ProfileAuthService _auth = ProfileAuthService();
+  late final ProfileAuthService _auth;
   late final StatisticsService _statisticsService;
   late final SnapshotService _snapshotService;
 
@@ -45,9 +46,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _auth = getIt<ProfileAuthService>();
     _statisticsService = StatisticsService(AppDatabase());
     _snapshotService = SnapshotService();
-    _bootstrap();
+
+    // Instantly show cached profile — no loading spinner
+    _profile = _auth.cachedProfile;
+    if (_profile != null) {
+      _loading = false;
+      // Fire all data fetches in parallel
+      _fetchStatistics();
+      _fetchRecentlyChanged(initial: true);
+      _fetchRecentlyAdded(initial: true);
+      // Silently refresh profile in background
+      _auth.fetchProfile(forceRefresh: true).then((p) {
+        if (mounted) setState(() => _profile = p);
+      }).catchError((_) {});
+    } else if (_auth.isLoggedIn) {
+      // Logged in but no cached profile yet — full load
+      _bootstrap();
+    } else {
+      // Not logged in — show login prompt instantly
+      _loading = false;
+    }
   }
 
   Future<void> _bootstrap() async {
@@ -57,44 +78,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      final loggedIn = await _auth.hasSession();
-      if (!loggedIn) {
-        setState(() => _loading = false);
-        return;
-      }
+      final profile = await _auth.fetchProfile(forceRefresh: true);
+      if (!mounted) return;
+      setState(() => _profile = profile);
 
-      final profile = await _auth.fetchProfile();
-      setState(() {
-        _profile = profile;
-      });
-
-      await _fetchStatistics();
+      // Fetch all data in parallel
       await Future.wait([
+        _fetchStatistics(),
         _fetchRecentlyChanged(initial: true),
         _fetchRecentlyAdded(initial: true),
       ]);
 
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     } catch (e) {
-      setState(() {
-        _error = 'Failed to load profile: $e';
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load profile: $e';
+          _loading = false;
+        });
+      }
     }
   }
 
   Future<void> _fetchStatistics() async {
-    final totalSeries = await _statisticsService.getTotalSeries();
-    final chaptersRead = await _statisticsService.getChaptersRead();
-    final volumesRead = await _statisticsService.getVolumesRead();
-    final completionRate = await _statisticsService.getCompletionRate();
-    final totalRereads = await _statisticsService.getTotalRereads();
+    // Run all DB queries in parallel instead of sequentially
+    final results = await Future.wait([
+      _statisticsService.getTotalSeries(),
+      _statisticsService.getChaptersRead(),
+      _statisticsService.getVolumesRead(),
+      _statisticsService.getCompletionRate(),
+      _statisticsService.getTotalRereads(),
+    ]);
+    if (!mounted) return;
     setState(() {
-      _totalSeries = totalSeries;
-      _chaptersRead = chaptersRead;
-      _volumesRead = volumesRead;
-      _completionRate = completionRate;
-      _totalRereads = totalRereads;
+      _totalSeries = results[0] as int;
+      _chaptersRead = results[1] as int;
+      _volumesRead = results[2] as int;
+      _completionRate = results[3] as double;
+      _totalRereads = results[4] as int;
     });
   }
 

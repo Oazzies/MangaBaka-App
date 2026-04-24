@@ -17,15 +17,9 @@ class LibraryService {
   final db.AppDatabase _db;
   bool _hasPerformedInitialSync = false;
 
-  LibraryService._({ProfileAuthService? auth})
-    : _auth = auth ?? ProfileAuthService(),
+  LibraryService({required ProfileAuthService auth})
+    : _auth = auth,
       _db = db.AppDatabase();
-
-  static final LibraryService _instance = LibraryService._();
-
-  factory LibraryService({ProfileAuthService? auth}) {
-    return _instance;
-  }
 
   /// Watches a single library entry by series ID.
   Stream<api.LibraryEntry?> watchEntryFromDb(String seriesId) {
@@ -118,6 +112,8 @@ class LibraryService {
             Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () => throw TimeoutException('Library fetch timed out'),
           );
+
+      print("Library API");
 
       if (response.statusCode == 429) {
         _logger.warning(
@@ -235,6 +231,8 @@ class LibraryService {
                 throw TimeoutException('Update state request timed out'),
           );
 
+      print("Update Library API");
+
       if (response.statusCode == 401) {
         throw AuthException(
           message: 'Authentication failed. Please log in again.',
@@ -308,6 +306,8 @@ class LibraryService {
             onTimeout: () =>
                 throw TimeoutException('Update rating request timed out'),
           );
+      
+      print("Library Rating API");
 
       if (response.statusCode == 401) {
         throw AuthException(
@@ -381,6 +381,8 @@ class LibraryService {
             onTimeout: () =>
                 throw TimeoutException('Create entry request timed out'),
           );
+      
+      print("Create Library API");
 
       if (response.statusCode == 401) {
         throw AuthException(
@@ -452,6 +454,8 @@ class LibraryService {
             onTimeout: () =>
                 throw TimeoutException('Delete entry request timed out'),
           );
+
+      print("Delete Library API");
 
       if (response.statusCode == 401) {
         throw AuthException(

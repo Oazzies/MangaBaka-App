@@ -32,12 +32,6 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
     'hiatus',
     'cancelled',
   ];
-  final List<String> _contentRatings = [
-    'safe',
-    'suggestive',
-    'erotica',
-    'pornographic',
-  ];
 
   final Map<String, String> _sortOptions = {
     'name_asc': 'Title (A-Z)',
@@ -354,27 +348,6 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                           () => _filters = _filters.copyWith(
                             status: inc,
                             statusNot: exc,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      TriStateGroup(
-                        title: 'Content Rating',
-                        options: _contentRatings
-                            .map(
-                              (c) => {
-                                'value': c,
-                                'label': c[0].toUpperCase() + c.substring(1),
-                              },
-                            )
-                            .toList(),
-                        includes: _filters.contentRating,
-                        excludes: _filters.notContentRating,
-                        onUpdate: (inc, exc) => setState(
-                          () => _filters = _filters.copyWith(
-                            contentRating: inc,
-                            notContentRating: exc,
                           ),
                         ),
                       ),

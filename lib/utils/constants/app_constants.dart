@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-enum AppTheme { dark, light, monochrome, system }
+import 'package:bakahyou/utils/theme/app_theme_colors.dart';
+export 'package:bakahyou/utils/theme/app_theme_colors.dart' show AppTheme;
 
 /// App-wide constants for UI, API, and business logic
 class AppConstants {
@@ -31,59 +32,8 @@ class AppConstants {
   static Color textColor = const Color(0xFFFFFFFF);
   static Color textMutedColor = const Color(0x8AFFFFFF);
 
-  static void setAppTheme(AppTheme theme) {
-    AppTheme effectiveTheme = theme;
-    if (theme == AppTheme.system) {
-      final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
-      effectiveTheme = brightness == Brightness.dark ? AppTheme.dark : AppTheme.light;
-    }
-
-    switch (effectiveTheme) {
-      case AppTheme.light:
-        primaryBackground = const Color(0xFFF4F4F5);
-        secondaryBackground = const Color(0xFFE4E4E7);
-        tertiaryBackground = const Color(0xFFD4D4D8);
-        accentColor = const Color(0xFF10b981);
-        primaryAccent = const Color(0xFF047857);
-        borderColor = const Color(0xFFA1A1AA);
-        successColor = const Color(0xFF34d399);
-        warningColor = const Color(0xFFfbbf24);
-        errorColor = const Color(0xFFdc2626);
-        infoColor = const Color(0xFF2563eb);
-        textColor = const Color(0xFF000000);
-        textMutedColor = const Color(0x8A000000); 
-        break;
-      case AppTheme.monochrome:
-        primaryBackground = const Color(0xFF000000);
-        secondaryBackground = const Color(0xFF111111);
-        tertiaryBackground = const Color(0xFF222222);
-        accentColor = const Color(0xFFE5E5E5);
-        primaryAccent = const Color(0xFF404040);
-        borderColor = const Color(0xFF333333);
-        successColor = const Color(0xFFB3B3B3);
-        warningColor = const Color(0xFF737373);
-        errorColor = const Color(0xFF9ca3af);
-        infoColor = const Color(0xFF6b7280);
-        textColor = const Color(0xFFFFFFFF);
-        textMutedColor = const Color(0x8AFFFFFF);
-        break;
-      case AppTheme.dark:
-        primaryBackground = const Color(0xFF0a0a0a);
-        secondaryBackground = const Color(0xFF18181B);
-        tertiaryBackground = const Color(0xFF23232a);
-        accentColor = const Color(0xFF1b9f70);
-        primaryAccent = const Color(0xFF00301d);
-        borderColor = const Color(0xFF3f3f46);
-        successColor = const Color(0xFF81e6ca);
-        warningColor = const Color(0xFFffc83e);
-        errorColor = const Color(0xFFef4444);
-        infoColor = const Color(0xFF3b82f6);
-        textColor = const Color(0xFFFFFFFF);
-        textMutedColor = const Color(0x8AFFFFFF);
-        break;
-      default:
-        break;
-    }
+  static void setAppTheme(AppTheme theme, bool isDark) {
+    AppThemeColors.applyTheme(theme, isDark);
   }
 
   // ============ UI Spacing ============

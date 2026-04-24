@@ -27,7 +27,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   late TabController _tabController;
   late final Map<String, ScrollController> _scrollControllers;
 
-  bool _loggedIn = false;
+  late bool _loggedIn;
   String _query = '';
   Stream<List<LibraryEntry>>? _entriesStream;
 
@@ -64,13 +64,10 @@ class _LibraryScreenState extends State<LibraryScreen>
     super.dispose();
   }
 
-  Future<void> _bootstrap() async {
-    final hasSession = await _auth.hasSession();
-    if (!mounted) return;
+  void _bootstrap() {
+    _loggedIn = _auth.isLoggedIn;
 
-    setState(() => _loggedIn = hasSession);
-
-    if (hasSession) {
+    if (_loggedIn) {
       _setupStreamAndSync();
     }
   }
@@ -150,17 +147,23 @@ class _LibraryScreenState extends State<LibraryScreen>
           return const Center(child: Text('Your library is empty.'));
         }
 
-        final filterHelper = LibraryFilterHelper(
-          allEntries: snapshot.data!,
-          query: _query,
-        );
+        return ListenableBuilder(
+          listenable: SettingsManager(),
+          builder: (context, _) {
+            final filterHelper = LibraryFilterHelper(
+              allEntries: snapshot.data!,
+              query: _query,
+              contentPreferences: SettingsManager().contentPreferences,
+            );
 
-        return TabBarView(
-          controller: _tabController,
-          children: LibraryScreenConstants.tabs.map((tab) {
-            final items = filterHelper.getByTab(tab.key);
-            return _buildTabContent(items, tab.key);
-          }).toList(),
+            return TabBarView(
+              controller: _tabController,
+              children: LibraryScreenConstants.tabs.map((tab) {
+                final items = filterHelper.getByTab(tab.key);
+                return _buildTabContent(items, tab.key);
+              }).toList(),
+            );
+          },
         );
       },
     );
@@ -204,35 +207,19 @@ class _LibraryScreenState extends State<LibraryScreen>
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      child: ListenableBuilder(
-        listenable: SettingsManager(),
-        builder: (context, _) {
-          final isGrid = SettingsManager().currentListStyle == AppListStyle.grid;
+      child: () {
+        final isGrid = SettingsManager().currentListStyle == AppListStyle.grid;
 
-          if (isGrid) {
-            return GridView.builder(
-              controller: _scrollControllers[tabKey],
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 160,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final entry = items[index];
-                return GestureDetector(
-                  onTap: () => _navigateToSeriesDetail(entry.series),
-                  child: EntryListItem(series: entry.series),
-                );
-              },
-            );
-          }
-
-          return ListView.builder(
+        if (isGrid) {
+          return GridView.builder(
             controller: _scrollControllers[tabKey],
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 160,
+              childAspectRatio: 0.65,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final entry = items[index];
@@ -242,8 +229,21 @@ class _LibraryScreenState extends State<LibraryScreen>
               );
             },
           );
-        },
-      ),
+        }
+
+        return ListView.builder(
+          controller: _scrollControllers[tabKey],
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final entry = items[index];
+            return GestureDetector(
+              onTap: () => _navigateToSeriesDetail(entry.series),
+              child: EntryListItem(series: entry.series),
+            );
+          },
+        );
+      }(),
     );
   }
 

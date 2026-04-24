@@ -39,4 +39,24 @@ class MbProfile {
       preferredUsername: json['preferred_username']?.toString(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'role': role,
+      'scopes': scopes,
+      'nickname': nickname,
+      'preferred_username': preferredUsername,
+    };
+  }
+
+  factory MbProfile.fromJson(Map<String, dynamic> json) {
+    return MbProfile(
+      id: json['id']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
+      scopes: (json['scopes'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      nickname: json['nickname']?.toString(),
+      preferredUsername: json['preferred_username']?.toString(),
+    );
+  }
 }

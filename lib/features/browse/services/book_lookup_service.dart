@@ -25,7 +25,7 @@ class BookLookupService {
 
       // Fallback to OpenLibrary API if Google Books fails or returns no results
       final openLibResponse = await http.get(Uri.parse('https://openlibrary.org/search.json?isbn=$isbn'));
-      
+      print("Open Library API");
       if (openLibResponse.statusCode == 200) {
         final data = json.decode(openLibResponse.body);
         if (data['docs'] != null && (data['docs'] as List).isNotEmpty) {

@@ -82,15 +82,13 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     try {
       String? userId;
       if (SettingsManager().hideLibrarySeriesInBrowse) {
-        final auth = ProfileAuthService();
-        if (await auth.hasSession()) {
-          try {
-            final profile = await auth.fetchProfile();
+        final auth = getIt<ProfileAuthService>();
+        if (auth.isLoggedIn) {
+          final profile = auth.cachedProfile;
+          if (profile != null) {
             // exclude_user_library expects a 32-character alphanumeric string.
             // UUIDs from the profile ID might contain hyphens, so we strip them.
             userId = profile.id.replaceAll('-', '');
-          } catch (e) {
-            // Silently ignore auth errors for this specific feature
           }
         }
       }

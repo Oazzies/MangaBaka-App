@@ -3,8 +3,6 @@ class SearchFilters {
   final List<String> typeNot;
   final List<String> status;
   final List<String> statusNot;
-  final List<String> contentRating;
-  final List<String> notContentRating;
   final List<String> genre;
   final List<String> genreNot;
   final List<String> tag;
@@ -22,8 +20,6 @@ class SearchFilters {
     this.typeNot = const [],
     this.status = const [],
     this.statusNot = const [],
-    this.contentRating = const [],
-    this.notContentRating = const [],
     this.genre = const [],
     this.genreNot = const [],
     this.tag = const [],
@@ -42,8 +38,6 @@ class SearchFilters {
     List<String>? typeNot,
     List<String>? status,
     List<String>? statusNot,
-    List<String>? contentRating,
-    List<String>? notContentRating,
     List<String>? genre,
     List<String>? genreNot,
     List<String>? tag,
@@ -61,8 +55,6 @@ class SearchFilters {
       typeNot: typeNot ?? this.typeNot,
       status: status ?? this.status,
       statusNot: statusNot ?? this.statusNot,
-      contentRating: contentRating ?? this.contentRating,
-      notContentRating: notContentRating ?? this.notContentRating,
       genre: genre ?? this.genre,
       genreNot: genreNot ?? this.genreNot,
       tag: tag ?? this.tag,
@@ -85,8 +77,6 @@ class SearchFilters {
       typeNot: typeNot,
       status: status,
       statusNot: statusNot,
-      contentRating: contentRating,
-      notContentRating: notContentRating,
       genre: genre,
       genreNot: genreNot,
       tag: tag,
@@ -108,10 +98,6 @@ class SearchFilters {
     if (typeNot.isNotEmpty) map['type_not'] = typeNot;
     if (status.isNotEmpty) map['status'] = status;
     if (statusNot.isNotEmpty) map['status_not'] = statusNot;
-    if (contentRating.isNotEmpty) map['content_rating'] = contentRating;
-    if (notContentRating.isNotEmpty) {
-      map['not_content_rating'] = notContentRating;
-    }
     if (genre.isNotEmpty) map['genre'] = genre;
     if (genreNot.isNotEmpty) map['genre_not'] = genreNot;
     if (tag.isNotEmpty) map['tag'] = tag;

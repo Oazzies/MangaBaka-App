@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bakahyou/features/navigation/screens/main_screen.dart';
+import 'package:bakahyou/features/navigation/screens/onboarding_screen.dart';
 import 'package:bakahyou/utils/services/logging_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +16,7 @@ void main() async {
   LoggingService.setup();
   await dotenv.load();
   setupServiceLocator();
+  await getIt<ProfileAuthService>().init();
   
   await ThemeManager().init();
   await SettingsManager().init();
@@ -37,11 +40,9 @@ class BakaHyouApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: ThemeManager(),
       builder: (context, _) {
-        final theme = ThemeManager().currentTheme;
-        final isLight = theme == AppTheme.light;
+        final currentThemeMode = ThemeManager().currentThemeMode;
         
         return MaterialApp(
-          key: ValueKey(theme),
           title: 'BakaHyou',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
@@ -57,8 +58,10 @@ class BakaHyouApp extends StatelessWidget {
             ),
             scaffoldBackgroundColor: AppConstants.primaryBackground,
           ),
-          themeMode: isLight ? ThemeMode.light : ThemeMode.dark,
-          home: const MainScreen(),
+          themeMode: currentThemeMode,
+          home: SettingsManager().hasCompletedOnboarding 
+              ? const MainScreen() 
+              : const OnboardingScreen(),
         );
       },
     );

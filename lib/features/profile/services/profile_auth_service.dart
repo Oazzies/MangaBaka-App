@@ -21,11 +21,16 @@ class ProfileAuthService {
   static const _kRefreshToken = 'mb_refresh_token';
   static const _kIdToken = 'mb_id_token';
   static const _kAccessTokenExp = 'mb_access_token_exp';
+  static const _kProfileCache = 'mb_profile_cache';
 
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   MbProfile? _cachedProfile;
+  bool _hasSessionCache = false;
+
+  bool get isLoggedIn => _hasSessionCache;
+  MbProfile? get cachedProfile => _cachedProfile;
 
   String get _clientId => dotenv.env['BAKAHYOU_CLIENT_ID'] ?? '';
   String get _redirectUri => dotenv.env['BAKAHYOU_REDIRECT_URI'] ?? '';
@@ -36,6 +41,20 @@ class ProfileAuthService {
         tokenEndpoint: _tokenEndpoint,
         endSessionEndpoint: _endSessionEndpoint,
       );
+
+  Future<void> init() async {
+    _hasSessionCache = await hasSession();
+    if (_hasSessionCache) {
+      try {
+        final cachedString = await _storage.read(key: _kProfileCache);
+        if (cachedString != null) {
+          _cachedProfile = MbProfile.fromJson(jsonDecode(cachedString));
+        }
+      } catch (e) {
+        _logger.warning('Failed to load cached profile: $e');
+      }
+    }
+  }
 
   Future<bool> hasSession() async {
     try {
@@ -72,6 +91,7 @@ class ProfileAuthService {
       );
 
       await _persistTokens(response);
+      _hasSessionCache = true;
     } catch (e) {
       _logger.severe('Login failed: $e');
       throw Exception('Login failed.');
@@ -160,6 +180,7 @@ class ProfileAuthService {
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body) as Map<String, dynamic>;
         _cachedProfile = MbProfile.fromMeResponse(body);
+        await _storage.write(key: _kProfileCache, value: jsonEncode(_cachedProfile!.toJson()));
         return _cachedProfile!;
       } else if (res.statusCode == 404) {
         // Fallback to OIDC userinfo endpoint
@@ -173,6 +194,7 @@ class ProfileAuthService {
         if (userinfoRes.statusCode == 200) {
           final body = jsonDecode(userinfoRes.body) as Map<String, dynamic>;
           _cachedProfile = MbProfile.fromUserInfo(body);
+          await _storage.write(key: _kProfileCache, value: jsonEncode(_cachedProfile!.toJson()));
           return _cachedProfile!;
         } else {
           _logger.severe(
@@ -214,7 +236,9 @@ class ProfileAuthService {
       await _storage.delete(key: _kRefreshToken);
       await _storage.delete(key: _kIdToken);
       await _storage.delete(key: _kAccessTokenExp);
+      await _storage.delete(key: _kProfileCache);
       _cachedProfile = null;
+      _hasSessionCache = false;
     } catch (e) {
       _logger.severe('Failed to logout: $e');
       throw Exception('Failed to logout.');

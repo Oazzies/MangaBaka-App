@@ -6,6 +6,7 @@ import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:bakahyou/features/series/models/series.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
 
 class SeriesSearchService {
   static final String _baseUrl = '${AppConstants.baseApiUrl}/series/search';
@@ -19,7 +20,7 @@ class SeriesSearchService {
             headers: {'User-Agent': AppConstants.userAgent},
           )
           .timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
-
+      print("Genres API");
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         return List<Map<String, dynamic>>.from(json['data'] ?? []);
@@ -39,6 +40,8 @@ class SeriesSearchService {
             headers: {'User-Agent': AppConstants.userAgent},
           )
           .timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
+
+      print("Tags API");
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -76,6 +79,11 @@ class SeriesSearchService {
       });
     }
 
+    final contentPrefs = SettingsManager().contentPreferences;
+    for (var rating in contentPrefs) {
+      url += '&content_rating=${Uri.encodeComponent(rating)}';
+    }
+
     try {
       final response = await http
           .get(Uri.parse(url), headers: {'User-Agent': AppConstants.userAgent})
@@ -84,6 +92,8 @@ class SeriesSearchService {
             onTimeout: () =>
                 throw TimeoutException('Series search request timed out'),
           );
+
+      print("Search API");
 
       if (response.statusCode == 200) {
         try {

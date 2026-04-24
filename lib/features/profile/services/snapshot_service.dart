@@ -3,6 +3,7 @@ import 'package:bakahyou/features/library/models/library_entry.dart';
 import 'package:bakahyou/features/library/services/library_constants.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/utils/services/logging_service.dart';
+import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:http/http.dart' as http;
 
 class SnapshotService {
@@ -10,7 +11,7 @@ class SnapshotService {
   final ProfileAuthService _auth;
 
   SnapshotService({ProfileAuthService? auth})
-    : _auth = auth ?? ProfileAuthService();
+    : _auth = auth ?? getIt<ProfileAuthService>();
 
   Future<List<LibraryEntry>> fetchSnapshot({
     required String sortBy,
@@ -30,6 +31,8 @@ class SnapshotService {
           'User-Agent': LibraryConstants.userAgent,
         },
       );
+
+      print("Snapshot API");
 
       if (response.statusCode != 200) {
         _logger.severe(

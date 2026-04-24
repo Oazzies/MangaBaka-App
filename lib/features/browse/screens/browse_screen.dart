@@ -13,6 +13,9 @@ import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/features/browse/screens/barcode_scanner_screen.dart';
 import 'package:bakahyou/features/browse/services/book_lookup_service.dart';
+import 'package:bakahyou/features/series/models/autocomplete_series_result.dart';
+import 'package:bakahyou/features/series/services/series_id_service.dart';
+
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
 
@@ -111,15 +114,13 @@ class _BrowseScreenState extends State<BrowseScreen> {
     try {
       String? userId;
       if (SettingsManager().hideLibrarySeriesInBrowse) {
-        final auth = ProfileAuthService();
-        if (await auth.hasSession()) {
-          try {
-            final profile = await auth.fetchProfile();
+        final auth = getIt<ProfileAuthService>();
+        if (auth.isLoggedIn) {
+          final profile = auth.cachedProfile;
+          if (profile != null) {
             // exclude_user_library expects a 32-character alphanumeric string.
             // UUIDs from the profile ID might contain hyphens, so we strip them.
             userId = profile.id.replaceAll('-', '');
-          } catch (e) {
-            // Silently ignore auth errors for this specific feature
           }
         }
       }
@@ -263,6 +264,30 @@ class _BrowseScreenState extends State<BrowseScreen> {
     }
   }
 
+  Future<void> _handleResultSelected(AutocompleteSeriesResult result) async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final fullSeries = await SeriesService.fetchSeries(result.id.toString());
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _navigateToDetail(fullSeries);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _error = 'Failed to load series details: $e';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -275,41 +300,48 @@ class _BrowseScreenState extends State<BrowseScreen> {
             top: AppConstants.verticalPadding,
             bottom: 8.0,
           ),
-          child: Column(
+          child: Stack(
             children: [
+              // Main content sits below, with top padding for the search bar
               Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: MBSearchBar(
-                  controller: _searchController,
-                  initialFilters: _currentFilters,
-                  onScanTap: _handleBarcodeScan,
-                  onChanged: (text) {
-                    _currentSearchQuery = text;
-                    if (text.isEmpty && _currentFilters.toMap().isEmpty) {
-                      _resetSearchState();
-                    }
-                  },
-                  onSubmitted: (text) {
-                    _currentSearchQuery = text;
-                    _searchSeries();
-                  },
-                  onFilterApplied: (filters) {
-                    setState(() {
-                      _currentFilters = filters;
-                    });
-                    _searchSeries();
-                  },
+                padding: const EdgeInsets.only(top: 64),
+                child: Column(
+                  children: [
+                    BrowseContent(
+                      searchResults: _searchResults,
+                      isLoading: _isLoading,
+                      isLoadingMore: _isLoadingMore,
+                      error: _error,
+                      scrollController: _scrollController,
+                      onRetry: _searchSeries,
+                      onNavigateToDetail: _navigateToDetail,
+                      onNavigateToResults: _navigateToBrowseResults,
+                    ),
+                  ],
                 ),
               ),
-              BrowseContent(
-                searchResults: _searchResults,
-                isLoading: _isLoading,
-                isLoadingMore: _isLoadingMore,
-                error: _error,
-                scrollController: _scrollController,
-                onRetry: _searchSeries,
-                onNavigateToDetail: _navigateToDetail,
-                onNavigateToResults: _navigateToBrowseResults,
+              // Search bar + suggestions float on top
+              MBSearchBar(
+                controller: _searchController,
+                initialFilters: _currentFilters,
+                onScanTap: _handleBarcodeScan,
+                onResultSelected: _handleResultSelected,
+                onChanged: (text) {
+                  _currentSearchQuery = text;
+                  if (text.isEmpty && _currentFilters.toMap().isEmpty) {
+                    _resetSearchState();
+                  }
+                },
+                onSubmitted: (text) {
+                  _currentSearchQuery = text;
+                  _searchSeries();
+                },
+                onFilterApplied: (filters) {
+                  setState(() {
+                    _currentFilters = filters;
+                  });
+                  _searchSeries();
+                },
               ),
             ],
           ),

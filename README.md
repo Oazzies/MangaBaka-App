@@ -41,9 +41,11 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 <details open="">
     <summary><h3>Upcoming</h3></summary>
 
-* Home Page (Discover(Waiting on Discover API), Current, Activity)
+* Home Page (Discover, Current, Activity)
 
 * More browse shortcuts(Recommendations, etc)
+* Browsing suggestions
+* Scan barcode to search (Improved once Works comes out)
 
 * Multiple series covers
 * Collections
@@ -60,6 +62,11 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 * Optional Notifications for various things
 * A LOT of UI/UX improvements
 
+MB Api Needed:
+* Homepage Discover feed
+* More browse shortcuts, so recommendation feed
+* Seeing other profiles
+
 </details>
 
 <details>
@@ -71,7 +78,6 @@ Its not a definite no, but its a list that is really really low priority, not fi
 * Import/Export in App
 * Bookmarklet
 * Quick Nav
-* Seeing other profiles (No API for)
 
 </details>
 
