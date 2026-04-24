@@ -46,21 +46,62 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 <details open="">
     <summary><h3>Upcoming</h3></summary>
 
-* Home Page (Discover, Current, Activity)
+Home
+* Discover
+* Current
+* Activity)
 
+Browse
 * More browse shortcuts(Recommendations, etc)
 
+Series
 * Multiple series covers
 * Collections
 * Works
 * Better Tags Display
 
+Profile
 * More Statistics
 
-* Language Support
+Settings
+* Display
+  * Theme and Mode placement
+  * Language
+  * Default Title Language (Default, Native, Romanized)
+  * Default Start Page
+  * Rating slider step
+  * Add to Library default
 
+* List
+  * Seperate List styles (Browse, Library, etc)
+  * List style
+
+* Content
+  * Content Rating Preferences placement
+
+* Notifications
+  * Push Notifications
+
+* Account
+  * MangaBaka account settings (link)
+  * Logout Button placement
+
+* Push Notifications
+  * Push Notifications
+
+* Information
+  * MangaBaka Discord
+  * Project Github
+  * Translation Credits
+  * Open MangaBaka links in app/browser
+
+* Advanced Settings (new page)
+  * Redo Onboarding
+
+Extra
 * Optional Notifications for various things
 * A LOT of UI/UX improvements
+* Language Support
 
 MB Api Needed:
 * Homepage Discover feed
