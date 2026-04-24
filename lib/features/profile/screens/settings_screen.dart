@@ -194,22 +194,22 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              SettingsSectionHeader(title: l10n.translate('notifications')),
-              SettingsGroup(
-                children: [
-                  SettingsSwitchItem(
-                    icon: Icons.notifications_outlined,
-                    title: l10n.translate('push_notifications'),
-                    subtitle: l10n.translate('push_notifications_subtext'),
-                    value: SettingsManager().pushNotifications,
-                    onChanged: (value) =>
-                        SettingsManager().setPushNotifications(value),
-                    isFirst: true,
-                    isLast: true,
-                  ),
-                ],
-              ),
+              // const SizedBox(height: 16),
+              // SettingsSectionHeader(title: l10n.translate('notifications')),
+              // SettingsGroup(
+              //   children: [
+              //     SettingsSwitchItem(
+              //       icon: Icons.notifications_outlined,
+              //       title: l10n.translate('push_notifications'),
+              //       subtitle: l10n.translate('push_notifications_subtext'),
+              //       value: SettingsManager().pushNotifications,
+              //       onChanged: (value) =>
+              //           SettingsManager().setPushNotifications(value),
+              //       isFirst: true,
+              //       isLast: true,
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 16),
               SettingsSectionHeader(title: l10n.translate('account')),
               SettingsGroup(
