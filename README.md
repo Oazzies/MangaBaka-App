@@ -33,8 +33,13 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 * Series with info (Titles, Chips, Description, etc)
 * Library (Adding, Editing, Deleting)
 * Browsing
+* Browsing suggestions
+* Scan barcode to search (Improved once Works comes out)
 * Seeing news
 * Basic Statistics (At a Glance, Library Snapshot)
+* Customization (List styles, App styles, Preferences, etc)
+* Content Rating Preferences
+* On Boarding
 
 </details>
 
@@ -44,8 +49,6 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 * Home Page (Discover, Current, Activity)
 
 * More browse shortcuts(Recommendations, etc)
-* Browsing suggestions
-* Scan barcode to search (Improved once Works comes out)
 
 * Multiple series covers
 * Collections
@@ -54,11 +57,8 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 
 * More Statistics
 
-* Customization (List styles, App styles, Preferences, etc)
 * Language Support
-* Content Rating Preferences
 
-* On Boarding
 * Optional Notifications for various things
 * A LOT of UI/UX improvements
 
