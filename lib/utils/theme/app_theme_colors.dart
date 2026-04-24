@@ -3,7 +3,6 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 
 enum AppTheme {
   defaultTheme,
-  dynamic,
   catppuccin,
   greenApple,
   lavender,
@@ -36,7 +35,6 @@ class AppThemeColors {
 
     switch (theme) {
       case AppTheme.defaultTheme:
-      case AppTheme.dynamic:
         break;
       case AppTheme.monochrome:
         if (isDark) {

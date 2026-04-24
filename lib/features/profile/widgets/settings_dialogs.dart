@@ -21,7 +21,6 @@ class SettingsDialogs {
     final l10n = LocalizationService();
     switch (theme) {
       case AppTheme.defaultTheme: return l10n.translate('theme_default');
-      case AppTheme.dynamic: return l10n.translate('theme_dynamic');
       case AppTheme.catppuccin: return l10n.translate('theme_catppuccin');
       case AppTheme.greenApple: return l10n.translate('theme_green_apple');
       case AppTheme.lavender: return l10n.translate('theme_lavender');

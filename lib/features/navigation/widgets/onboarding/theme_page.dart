@@ -16,7 +16,6 @@ class ThemePage extends StatelessWidget {
   String _getThemeName(AppTheme theme) {
     switch (theme) {
       case AppTheme.defaultTheme: return 'Default';
-      case AppTheme.dynamic: return 'Dynamic';
       case AppTheme.catppuccin: return 'Catppuccin';
       case AppTheme.greenApple: return 'Green Apple';
       case AppTheme.lavender: return 'Lavender';
@@ -35,7 +34,6 @@ class ThemePage extends StatelessWidget {
   Color _getThemeAccentColor(AppTheme theme, bool isDark) {
     switch (theme) {
       case AppTheme.defaultTheme:
-      case AppTheme.dynamic:
         return isDark ? const Color(0xFF1b9f70) : const Color(0xFF10b981);
       case AppTheme.monochrome:
         return isDark ? const Color(0xFFE5E5E5) : const Color(0xFF171717);
