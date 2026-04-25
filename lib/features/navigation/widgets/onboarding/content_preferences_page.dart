@@ -14,7 +14,7 @@ class ContentPreferencesPage extends StatelessWidget {
       'safe': 'Safe Content',
       'suggestive': 'Suggestive',
       'erotica': 'Erotica',
-      'pornographic': 'Hentai',
+      'pornographic': 'Pornographic',
     };
 
     return SingleChildScrollView(

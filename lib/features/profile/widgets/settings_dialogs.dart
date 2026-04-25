@@ -251,12 +251,12 @@ class SettingsDialogs {
 
   static void showContentPreferencesDialog(BuildContext context) {
     final l10n = LocalizationService();
-    final options = ['safe', 'suggestive', 'erotica', 'hentai'];
+    final options = ['safe', 'suggestive', 'erotica', 'pornographic'];
     final labels = {
       'safe': l10n.translate('safe'),
       'suggestive': l10n.translate('suggestive'),
       'erotica': l10n.translate('erotica'),
-      'hentai': l10n.translate('hentai'),
+      'pornographic': l10n.translate('pornographic'),
     };
 
     showModalBottomSheet(
