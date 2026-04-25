@@ -62,8 +62,8 @@ class BakaHyouApp extends StatelessWidget {
           ),
           themeMode: currentThemeMode,
           home: SettingsManager().hasCompletedOnboarding 
-              ? const MainScreen() 
-              : const OnboardingScreen(),
+              ? MainScreen() 
+              : OnboardingScreen(),
         );
       },
     );

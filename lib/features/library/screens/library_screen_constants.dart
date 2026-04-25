@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class LibraryScreenConstants {
-  static Color backgroundColor = AppConstants.primaryBackground;
-  static Color accentColor = AppConstants.accentColor;
-  static Color errorColor = AppConstants.errorColor;
+  static Color get backgroundColor => AppConstants.primaryBackground;
+  static Color get accentColor => AppConstants.accentColor;
+  static Color get errorColor => AppConstants.errorColor;
 
   static const List<LibraryTabDefinition> tabs = [
     LibraryTabDefinition(key: 'reading', label: 'Reading'),

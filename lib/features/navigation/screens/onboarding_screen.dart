@@ -120,8 +120,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       });
                     },
                     children: [
-                      const WelcomePage(),
-                      const ThemePage(),
+                      WelcomePage(),
+                      ThemePage(),
                       CameraPermissionPage(
                         onRequestPermission: _requestCameraPermission,
                       ),
