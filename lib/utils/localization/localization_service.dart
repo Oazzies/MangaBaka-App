@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class LocalizationService extends ChangeNotifier {
   static final LocalizationService _instance = LocalizationService._internal();
   factory LocalizationService() => _instance;
   LocalizationService._internal();
+
+  static const String _languageKey = '${AppConstants.prefixStorageKey}language_pref';
 
   Map<String, dynamic> _languageData = {};
   String _currentLanguage = 'en';
@@ -14,18 +18,30 @@ class LocalizationService extends ChangeNotifier {
     try {
       final jsonString = await rootBundle.loadString('assets/lang/languages.json');
       _languageData = json.decode(jsonString);
-      // Set to English by default if not set
-      _currentLanguage = _languageData.containsKey('en') ? 'en' : _languageData.keys.first;
+      
+      final prefs = await SharedPreferences.getInstance();
+      final savedLang = prefs.getString(_languageKey);
+      
+      if (savedLang != null && _languageData.containsKey(savedLang)) {
+        _currentLanguage = savedLang;
+      } else {
+        // Set to English by default if not set
+        _currentLanguage = _languageData.containsKey('en') ? 'en' : _languageData.keys.first;
+      }
+      
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading localization data: $e');
     }
   }
 
-  void setLanguage(String langCode) {
+  Future<void> setLanguage(String langCode) async {
     if (_languageData.containsKey(langCode)) {
       _currentLanguage = langCode;
       notifyListeners();
+      
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_languageKey, langCode);
     }
   }
 
