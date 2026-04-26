@@ -5,6 +5,7 @@ import 'package:bakahyou/features/news/widgets/news_list.item.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
@@ -107,7 +108,7 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: LocalizationService(),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
         return Scaffold(

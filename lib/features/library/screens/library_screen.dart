@@ -13,6 +13,7 @@ import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/features/profile/widgets/mb_login_prompt.dart';
 
@@ -117,7 +118,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: LocalizationService(),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         return Scaffold(
           backgroundColor: LibraryScreenConstants.backgroundColor,

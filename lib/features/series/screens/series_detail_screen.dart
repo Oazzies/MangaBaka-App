@@ -15,6 +15,7 @@ import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/features/series/services/metadata_service.dart';
 
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
@@ -200,7 +201,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: LocalizationService(),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
         return Scaffold(

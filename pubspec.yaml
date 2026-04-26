@@ -1,7 +1,7 @@
 name: bakahyou
 description: "BakaHyou is an app for MangaBaka"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0-pre.3+3
 
 
 environment:
@@ -51,6 +51,7 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/mangabaka512.png"
+  adaptive_icon_background: "#0a0a0a"
   adaptive_icon_foreground: "assets/mangabaka512.png"
 
 flutter_native_splash:

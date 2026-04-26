@@ -27,18 +27,25 @@ void main() async {
   await SettingsManager().init();
   await LocalizationService().init();
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarContrastEnforced: false,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
-  );
+  // Set initial system UI style
+  _updateSystemUI(ThemeManager().isDarkMode);
 
   runApp(const BakaHyouApp());
   
   // Remove the splash screen after the app has started
   FlutterNativeSplash.remove();
+}
+
+void _updateSystemUI(bool isDarkMode) {
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarContrastEnforced: false,
+      systemNavigationBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDarkMode ? Brightness.light : Brightness.dark,
+    ),
+  );
 }
 
 class BakaHyouApp extends StatelessWidget {
@@ -50,9 +57,11 @@ class BakaHyouApp extends StatelessWidget {
       listenable: ThemeManager(),
       builder: (context, _) {
         final currentThemeMode = ThemeManager().currentThemeMode;
+        final isDark = ThemeManager().isDarkMode;
+        _updateSystemUI(isDark);
         
         return MaterialApp(
-          title: 'BakaHyou',
+          title: AppConstants.appName,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
               seedColor: AppConstants.primaryAccent,

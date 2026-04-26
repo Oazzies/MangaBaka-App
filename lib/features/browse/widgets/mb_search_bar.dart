@@ -6,6 +6,7 @@ import 'package:bakahyou/features/series/models/autocomplete_series_result.dart'
 import 'package:bakahyou/features/series/services/series_autocomplete_service.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 class MBSearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
@@ -126,7 +127,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([SettingsManager(), LocalizationService()]),
+      listenable: Listenable.merge([SettingsManager(), LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         final autoSuggest = SettingsManager().autoSuggestBrowse;
         final effectiveShowSuggestions = _showSuggestions && autoSuggest;

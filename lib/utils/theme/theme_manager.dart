@@ -20,6 +20,15 @@ class ThemeManager extends ChangeNotifier with WidgetsBindingObserver {
   AppTheme _currentTheme = AppTheme.defaultTheme;
   AppTheme get currentTheme => _currentTheme;
 
+  bool get isDarkMode {
+    if (_currentThemeMode == ThemeMode.system) {
+      final brightness =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      return brightness == Brightness.dark;
+    }
+    return _currentThemeMode == ThemeMode.dark;
+  }
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
 

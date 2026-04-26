@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 import 'package:bakahyou/features/home/widgets/activity_tab.dart';
 import 'package:bakahyou/features/home/widgets/current_tab.dart';
@@ -11,7 +12,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: LocalizationService(),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
         

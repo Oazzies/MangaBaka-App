@@ -10,6 +10,7 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 class ActivityTab extends StatefulWidget {
   const ActivityTab({super.key});
@@ -138,7 +139,7 @@ class _ActivityTabState extends State<ActivityTab> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([LocalizationService(), _authService]),
+      listenable: Listenable.merge([LocalizationService(), _authService, ThemeManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
 

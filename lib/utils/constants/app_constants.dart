@@ -6,9 +6,11 @@ export 'package:bakahyou/utils/theme/app_theme_colors.dart' show AppTheme;
 /// App-wide constants for UI, API, and business logic
 class AppConstants {
   // ============ API & Network ============
+  static const String appName = 'BakaHyou';
+  static const String appVersion = '1.0.0-pre.3';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
   static const String authBaseUrl = 'https://mangabaka.org/auth/oauth2';
-  static const String userAgent = 'BakaHyou/0.0 (oazziesmail@gmail.com)';
+  static const String userAgent = '$appName/$appVersion (oazziesmail@gmail.com)';
   static const int networkTimeoutSeconds = 30;
   static const int maxRetries = 3;
   static const int rateLimitRetryDelaySeconds = 2;

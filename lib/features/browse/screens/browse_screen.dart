@@ -15,6 +15,8 @@ import 'package:bakahyou/features/browse/screens/barcode_scanner_screen.dart';
 import 'package:bakahyou/features/browse/services/book_lookup_service.dart';
 import 'package:bakahyou/features/series/models/autocomplete_series_result.dart';
 import 'package:bakahyou/features/series/services/series_id_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -290,63 +292,68 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: AppConstants.horizontalPadding,
-            right: AppConstants.horizontalPadding,
-            top: AppConstants.verticalPadding,
-            bottom: 8.0,
-          ),
-          child: Stack(
-            children: [
-              // Main content sits below, with top padding for the search bar
-              Padding(
-                padding: const EdgeInsets.only(top: 64),
-                child: Column(
-                  children: [
-                    BrowseContent(
-                      searchResults: _searchResults,
-                      isLoading: _isLoading,
-                      isLoadingMore: _isLoadingMore,
-                      error: _error,
-                      scrollController: _scrollController,
-                      onRetry: _searchSeries,
-                      onNavigateToDetail: _navigateToDetail,
-                      onNavigateToResults: _navigateToBrowseResults,
+    return ListenableBuilder(
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: AppConstants.primaryBackground,
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: AppConstants.horizontalPadding,
+                right: AppConstants.horizontalPadding,
+                top: AppConstants.verticalPadding,
+                bottom: 8.0,
+              ),
+              child: Stack(
+                children: [
+                  // Main content sits below, with top padding for the search bar
+                  Padding(
+                    padding: const EdgeInsets.only(top: 64),
+                    child: Column(
+                      children: [
+                        BrowseContent(
+                          searchResults: _searchResults,
+                          isLoading: _isLoading,
+                          isLoadingMore: _isLoadingMore,
+                          error: _error,
+                          scrollController: _scrollController,
+                          onRetry: _searchSeries,
+                          onNavigateToDetail: _navigateToDetail,
+                          onNavigateToResults: _navigateToBrowseResults,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  // Search bar + suggestions float on top
+                  MBSearchBar(
+                    controller: _searchController,
+                    initialFilters: _currentFilters,
+                    onScanTap: _handleBarcodeScan,
+                    onResultSelected: _handleResultSelected,
+                    onChanged: (text) {
+                      _currentSearchQuery = text;
+                      if (text.isEmpty && _currentFilters.toMap().isEmpty) {
+                        _resetSearchState();
+                      }
+                    },
+                    onSubmitted: (text) {
+                      _currentSearchQuery = text;
+                      _searchSeries();
+                    },
+                    onFilterApplied: (filters) {
+                      setState(() {
+                        _currentFilters = filters;
+                      });
+                      _searchSeries();
+                    },
+                  ),
+                ],
               ),
-              // Search bar + suggestions float on top
-              MBSearchBar(
-                controller: _searchController,
-                initialFilters: _currentFilters,
-                onScanTap: _handleBarcodeScan,
-                onResultSelected: _handleResultSelected,
-                onChanged: (text) {
-                  _currentSearchQuery = text;
-                  if (text.isEmpty && _currentFilters.toMap().isEmpty) {
-                    _resetSearchState();
-                  }
-                },
-                onSubmitted: (text) {
-                  _currentSearchQuery = text;
-                  _searchSeries();
-                },
-                onFilterApplied: (filters) {
-                  setState(() {
-                    _currentFilters = filters;
-                  });
-                  _searchSeries();
-                },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

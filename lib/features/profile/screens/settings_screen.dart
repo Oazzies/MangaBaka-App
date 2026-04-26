@@ -277,7 +277,7 @@ class SettingsScreen extends StatelessWidget {
                   SettingsItem(
                     icon: Icons.info_outline,
                     title: l10n.translate('version'),
-                    subtitle: '1.0.0+1',
+                    subtitle: AppConstants.appVersion,
                     onTap: null,
                     trailing: const SizedBox.shrink(),
                   ),

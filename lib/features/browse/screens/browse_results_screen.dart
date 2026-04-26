@@ -7,6 +7,7 @@ import 'package:bakahyou/features/series/services/series_search_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
@@ -261,26 +262,31 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
-      appBar: AppBar(
-        backgroundColor: AppConstants.primaryBackground,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.sortType,
-          style: TextStyle(color: AppConstants.textColor),
-        ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
-          child: _buildBody(),
-        ),
-      ),
+    return ListenableBuilder(
+      listenable: ThemeManager(),
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: AppConstants.primaryBackground,
+          appBar: AppBar(
+            backgroundColor: AppConstants.primaryBackground,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              widget.sortType,
+              style: TextStyle(color: AppConstants.textColor),
+            ),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
+              child: _buildBody(),
+            ),
+          ),
+        );
+      },
     );
   }
 }

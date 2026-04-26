@@ -12,6 +12,7 @@ import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/features/library/services/library_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/features/profile/widgets/mb_login_prompt.dart';
 
@@ -231,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: LocalizationService(),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
         final username = _profile?.nickname?.isNotEmpty == true
