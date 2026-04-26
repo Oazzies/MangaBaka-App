@@ -35,33 +35,43 @@ class SeriesSearchService {
     String? type,
     Map<String, dynamic>? extraParams,
   }) async {
-    String url = '$_baseUrl?q=${Uri.encodeComponent(query)}';
-    if (sortBy != null) {
-      url += '&sort_by=$sortBy';
+    final queryParams = <String, String>{};
+    if (query.isNotEmpty) {
+      queryParams['q'] = query;
+    }
+    if (sortBy != null && sortBy.isNotEmpty) {
+      queryParams['sort_by'] = sortBy;
     }
     if (type != null && type.isNotEmpty) {
-      url += '&type=$type';
-    }
-    if (extraParams != null) {
-      extraParams.forEach((key, value) {
-        if (value is List) {
-          for (var item in value) {
-            url += '&$key=${Uri.encodeComponent(item.toString())}';
-          }
-        } else {
-          url += '&$key=${Uri.encodeComponent(value.toString())}';
-        }
-      });
+      queryParams['type'] = type;
     }
 
     final contentPrefs = SettingsManager().contentPreferences;
-    for (var rating in contentPrefs) {
-      url += '&content_rating=${Uri.encodeComponent(rating)}';
+    
+    // Build the final URI
+    final finalQueryParams = <String, dynamic>{
+      ...queryParams,
+      'content_rating': contentPrefs,
+    };
+
+    if (extraParams != null) {
+      finalQueryParams.addAll(extraParams);
     }
+
+    final uri = Uri.parse(_baseUrl).replace(
+      queryParameters: finalQueryParams.map((key, value) {
+        if (value is List) {
+          return MapEntry(key, value.map((e) => e.toString()).toList());
+        }
+        return MapEntry(key, value.toString());
+      }),
+    );
+
 
     try {
       final response = await http
-          .get(Uri.parse(url), headers: {'User-Agent': AppConstants.userAgent})
+          .get(uri, headers: {'User-Agent': AppConstants.userAgent})
+
           .timeout(
             Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>

@@ -157,12 +157,14 @@ class _BrowseScreenState extends State<BrowseScreen> {
     }
   }
 
-  num _generateRandomSeed() {
-    return Random().nextDouble() * 2 - 1;
+  int _generateRandomSeed() {
+    return Random().nextInt(1000000);
   }
 
+
   void _navigateToBrowseResults(String header, String sortBy, {String? type}) {
-    num? randomSeed;
+    int? randomSeed;
+
     if (sortBy == 'random') {
       randomSeed = _generateRandomSeed();
     }

@@ -14,7 +14,8 @@ class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
   final String sortBy;
   final String? type;
-  final num? randomSeed;
+  final int? randomSeed;
+
 
   const BrowseResultsScreen({
     required this.sortType,
@@ -38,7 +39,8 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   bool _isLoading = false;
   bool _hasMore = true;
   int _currentPage = 1;
-  late num _currentRandomSeed;
+  late int _currentRandomSeed;
+
   String? _error;
 
   @override
@@ -57,9 +59,10 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     super.dispose();
   }
 
-  static num _generateRandomSeed() {
-    return Random().nextDouble() * 2 - 1;
+  static int _generateRandomSeed() {
+    return Random().nextInt(1000000);
   }
+
 
   void _onScroll() {
     final isNearEnd =
@@ -140,10 +143,13 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   }
 
   void _incrementPageIfNeeded() {
-    if (widget.sortBy == 'popularity_asc') {
+    // We increment page for all sorts except random, 
+    // as random usually handles its own shuffling/seed logic
+    if (widget.sortBy != 'random') {
       _currentPage++;
     }
   }
+
 
   void _navigateToDetail(Series series) {
     Navigator.push(
