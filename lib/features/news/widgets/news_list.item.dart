@@ -5,6 +5,8 @@ import 'package:bakahyou/features/news/widgets/referenced_list_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
+
 
 class NewsListItem extends StatelessWidget {
   final News news;
@@ -53,7 +55,12 @@ class NewsListItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           InkWell(
-                            onTap: () => launchUrl(Uri.parse(news.url)),
+                            onTap: () => launchUrl(
+                              Uri.parse(news.url),
+                              mode: SettingsManager().openLinksInApp
+                                  ? LaunchMode.platformDefault
+                                  : LaunchMode.externalApplication,
+                            ),
                             child: Text(
                               news.title,
                               style: Theme.of(context).textTheme.titleMedium

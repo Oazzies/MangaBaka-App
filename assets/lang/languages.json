@@ -47,7 +47,10 @@
       "open_links": "Open MangaBaka links",
       "open_links_subtext": "Handle MangaBaka URLs directly in-app",
       "open_links_subtitle": "System default settings",
+      "open_links_in_app": "Open links in app",
+      "open_links_in_app_subtitle": "Open links within the application instead of a browser",
       "advanced_settings": "Advanced Settings",
+
       "advanced_settings_subtitle": "Onboarding, Auto-Suggest, etc.",
       "redo_onboarding": "Redo Onboarding",
       "redo_onboarding_subtitle": "Restart the initial setup flow",

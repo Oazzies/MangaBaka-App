@@ -306,6 +306,14 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                   const SettingsDivider(),
+                  SettingsSwitchItem(
+                    icon: Icons.open_in_new_outlined,
+                    title: l10n.translate('open_links_in_app'),
+                    subtitle: l10n.translate('open_links_in_app_subtitle'),
+                    value: SettingsManager().openLinksInApp,
+                    onChanged: (value) => SettingsManager().setOpenLinksInApp(value),
+                  ),
+                  const SettingsDivider(),
                   SettingsItem(
                     icon: Icons.open_in_browser_outlined,
                     title: l10n.translate('open_links'),
@@ -324,6 +332,7 @@ class SettingsScreen extends StatelessWidget {
                     trailing: Icon(Icons.open_in_new, color: AppConstants.textMutedColor, size: 20),
                     isLast: true,
                   ),
+
                 ],
               ),
               const SizedBox(height: 16),
