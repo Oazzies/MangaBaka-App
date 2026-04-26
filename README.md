@@ -27,68 +27,18 @@ Go to the [releases](https://github.com/Oazzies/BakaHyou/releases) page.
 
 <div align="left">
 
-<details open="">
-<summary><h3>Implemented</h3></summary>
-
-* Series with info (Titles, Chips, Description, etc)
-* Library (Adding, Editing, Deleting)
-* Browsing
-* Browsing suggestions
-* Scan barcode to search (Improved once Works comes out)
-* Seeing news
-* Basic Statistics (At a Glance, Library Snapshot)
-* Customization (List styles, App styles, Preferences, etc)
-* Content Rating Preferences
-* On Boarding
-* Current
-* Activity
-* Language Support
-Settings
-* Display
-  * Theme and Mode placement
-  * Language
-  * Default Title Language (Default, Native, Romanized)
-  * Default Start Page
-  * Rating slider step
-  * Add to Library default
-
-* List
-  * Seperate List styles (Browse, Library, etc)
-  * List style
-
-* Content
-  * Content Rating Preferences placement
-
-* Notifications
-  * Push Notifications
-
-* Account
-  * MangaBaka account settings (link)
-  * Logout Button placement
-
-* Push Notifications
-  * Push Notifications (News related to series in your Library)
-
-* Information
-  * MangaBaka Discord
-  * Project Github
-  * Translation Credits
-  * Open MangaBaka links in app/browser
-
-* Advanced Settings (new page)
-  * Redo Onboarding
-  * Browse-suggestions switch
-
 </details>
 
 <details open="">
     <summary><h3>Upcoming</h3></summary>
 
 Home
-* Discover
+* Discover (API needed)
 
 Browse
-* More browse shortcuts(Recommendations, etc)
+* More browse shortcuts(Recommendations, etc) (API needed)
+* Seeing other profiles (API needed)
+* Better Barcode Scanner
 
 Series
 * Multiple series covers
@@ -103,14 +53,9 @@ Extra
 * Optional Notifications for various things
 * A LOT of UI/UX improvements
 
-MB Api Needed:
-* Homepage Discover feed
-* More browse shortcuts, so recommendation feed
-* Seeing other profiles
-
 </details>
 
-<details>
+<details open="">
     <summary><h3>Not Planned</h3></summary>
 
 * Data Moderation, Submissions, etc in App
