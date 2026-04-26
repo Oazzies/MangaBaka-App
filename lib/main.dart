@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:bakahyou/features/navigation/screens/main_screen.dart';
 import 'package:bakahyou/features/navigation/screens/onboarding_screen.dart';
 import 'package:bakahyou/utils/services/logging_service.dart';
@@ -13,7 +14,8 @@ import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   LoggingService.setup();
   await dotenv.load();
@@ -34,6 +36,9 @@ void main() async {
   );
 
   runApp(const BakaHyouApp());
+  
+  // Remove the splash screen after the app has started
+  FlutterNativeSplash.remove();
 }
 
 class BakaHyouApp extends StatelessWidget {
