@@ -1,5 +1,6 @@
 import 'package:bakahyou/database/database.dart';
 import 'package:bakahyou/utils/services/logging_service.dart';
+import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:drift/drift.dart' as drift;
 
 class StatisticsService {
@@ -15,9 +16,9 @@ class StatisticsService {
         ..addColumns([count]);
       final result = await query.getSingle();
       return result.read(count) ?? 0;
-    } catch (e) {
-      _logger.severe('Failed to get total series: $e');
-      throw Exception('Failed to get total series.');
+    } catch (e, st) {
+      _logger.severe('Failed to get total series: $e\n$st');
+      throw DatabaseException(message: 'Failed to get total series', originalError: e, stackTrace: st);
     }
   }
 
@@ -27,9 +28,9 @@ class StatisticsService {
       final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
       final result = await query.getSingle();
       return result.read(sum) ?? 0;
-    } catch (e) {
-      _logger.severe('Failed to get chapters read: $e');
-      throw Exception('Failed to get chapters read.');
+    } catch (e, st) {
+      _logger.severe('Failed to get chapters read: $e\n$st');
+      throw DatabaseException(message: 'Failed to get chapters read', originalError: e, stackTrace: st);
     }
   }
 
@@ -39,9 +40,9 @@ class StatisticsService {
       final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
       final result = await query.getSingle();
       return result.read(sum) ?? 0;
-    } catch (e) {
-      _logger.severe('Failed to get volumes read: $e');
-      throw Exception('Failed to get volumes read.');
+    } catch (e, st) {
+      _logger.severe('Failed to get volumes read: $e\n$st');
+      throw DatabaseException(message: 'Failed to get volumes read', originalError: e, stackTrace: st);
     }
   }
 
@@ -66,9 +67,9 @@ class StatisticsService {
       final completed = completedResult.read(completedCount) ?? 0;
 
       return (completed / total) * 100;
-    } catch (e) {
-      _logger.severe('Failed to get completion rate: $e');
-      throw Exception('Failed to get completion rate.');
+    } catch (e, st) {
+      _logger.severe('Failed to get completion rate: $e\n$st');
+      throw DatabaseException(message: 'Failed to get completion rate', originalError: e, stackTrace: st);
     }
   }
 
@@ -78,9 +79,9 @@ class StatisticsService {
       final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
       final result = await query.getSingle();
       return result.read(sum) ?? 0;
-    } catch (e) {
-      _logger.severe('Failed to get total rereads: $e');
-      throw Exception('Failed to get total rereads.');
+    } catch (e, st) {
+      _logger.severe('Failed to get total rereads: $e\n$st');
+      throw DatabaseException(message: 'Failed to get total rereads', originalError: e, stackTrace: st);
     }
   }
 }

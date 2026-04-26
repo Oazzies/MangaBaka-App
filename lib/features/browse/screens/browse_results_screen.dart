@@ -277,7 +277,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
           child: _buildBody(),
         ),
       ),

@@ -4,19 +4,20 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:bakahyou/utils/services/logging_service.dart';
-
+import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/features/profile/models/mb_profile.dart';
 import 'package:flutter/foundation.dart';
 
 class ProfileAuthService extends ChangeNotifier {
   final _logger = LoggingService.logger;
   static const _authorizationEndpoint =
-      'https://mangabaka.org/auth/oauth2/authorize';
-  static const _tokenEndpoint = 'https://mangabaka.org/auth/oauth2/token';
+      '${AppConstants.authBaseUrl}/authorize';
+  static const _tokenEndpoint = '${AppConstants.authBaseUrl}/token';
   static const _endSessionEndpoint =
-      'https://mangabaka.org/auth/oauth2/end-session';
-  static const _meEndpoint = 'https://api.mangabaka.dev/v1/me';
-  static const _userInfoEndpoint = 'https://mangabaka.org/auth/oauth2/userinfo';
+      '${AppConstants.authBaseUrl}/end-session';
+  static const _meEndpoint = '${AppConstants.baseApiUrl}/me';
+  static const _userInfoEndpoint = '${AppConstants.authBaseUrl}/userinfo';
 
   static const _kAccessToken = 'mb_access_token';
   static const _kRefreshToken = 'mb_refresh_token';
@@ -70,8 +71,9 @@ class ProfileAuthService extends ChangeNotifier {
   Future<void> login() async {
     try {
       if (_clientId.isEmpty || _redirectUri.isEmpty) {
-        throw Exception(
-          'Missing BAKAHYOU_CLIENT_ID or BAKAHYOU_REDIRECT_URI in .env',
+        throw AuthException(
+          message: 'Missing BAKAHYOU_CLIENT_ID or BAKAHYOU_REDIRECT_URI in .env',
+          code: 'MISSING_CONFIG',
         );
       }
 
@@ -80,13 +82,7 @@ class ProfileAuthService extends ChangeNotifier {
           _clientId,
           _redirectUri,
           serviceConfiguration: _serviceConfig,
-          scopes: const [
-            'openid',
-            'profile',
-            'library.read',
-            'library.write',
-            'offline_access',
-          ],
+          scopes: AppConstants.oauthScopes,
           promptValues: const ['consent'],
         ),
       );
@@ -94,9 +90,10 @@ class ProfileAuthService extends ChangeNotifier {
       await _persistTokens(response);
       _hasSessionCache = true;
       notifyListeners();
-    } catch (e) {
-      _logger.severe('Login failed: $e');
-      throw Exception('Login failed.');
+    } catch (e, st) {
+      _logger.severe('Login failed: $e\n$st');
+      if (e is AppException) rethrow;
+      throw AuthException(message: 'Login failed', originalError: e, stackTrace: st);
     }
   }
 
@@ -111,9 +108,9 @@ class ProfileAuthService extends ChangeNotifier {
       if (exp != null) {
         await _storage.write(key: _kAccessTokenExp, value: exp);
       }
-    } catch (e) {
-      _logger.severe('Failed to persist tokens: $e');
-      throw Exception('Failed to persist tokens.');
+    } catch (e, st) {
+      _logger.severe('Failed to persist tokens: $e\n$st');
+      throw AuthException(message: 'Failed to persist tokens', originalError: e, stackTrace: st);
     }
   }
 
@@ -140,20 +137,15 @@ class ProfileAuthService extends ChangeNotifier {
           _redirectUri,
           serviceConfiguration: _serviceConfig,
           refreshToken: refreshToken,
-          scopes: const [
-            'openid',
-            'profile',
-            'library.read',
-            'library.write',
-            'offline_access',
-          ],
+          scopes: AppConstants.oauthScopes,
         ),
       );
 
       await _persistTokens(response);
-    } catch (e) {
-      _logger.severe('Failed to refresh tokens: $e');
-      throw Exception('Failed to refresh tokens.');
+    } catch (e, st) {
+      _logger.severe('Failed to refresh tokens: $e\n$st');
+      if (e is AppException) rethrow;
+      throw AuthException(message: 'Failed to refresh tokens', originalError: e, stackTrace: st);
     }
   }
 
@@ -167,7 +159,7 @@ class ProfileAuthService extends ChangeNotifier {
       final accessToken = await _storage.read(key: _kAccessToken);
 
       if (accessToken == null || accessToken.isEmpty) {
-        throw Exception('Not logged in');
+        throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
       }
 
       // Try /v1/me first
@@ -175,7 +167,7 @@ class ProfileAuthService extends ChangeNotifier {
         Uri.parse(_meEndpoint),
         headers: {
           'Authorization': 'Bearer $accessToken',
-          'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)',
+          'User-Agent': AppConstants.userAgent,
         },
       );
 
@@ -190,7 +182,7 @@ class ProfileAuthService extends ChangeNotifier {
           Uri.parse(_userInfoEndpoint),
           headers: {
             'Authorization': 'Bearer $accessToken',
-            'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)',
+            'User-Agent': AppConstants.userAgent,
           },
         );
         if (userinfoRes.statusCode == 200) {
@@ -202,17 +194,18 @@ class ProfileAuthService extends ChangeNotifier {
           _logger.severe(
             'Failed to fetch profile from userinfo endpoint: ${userinfoRes.statusCode} ${userinfoRes.body}',
           );
-          throw Exception('Failed to fetch profile: ${userinfoRes.statusCode}');
+          throw AuthException(message: 'Failed to fetch profile from userinfo endpoint', code: '${userinfoRes.statusCode}');
         }
       } else {
         _logger.severe(
           'Failed to fetch profile from me endpoint: ${res.statusCode} ${res.body}',
         );
-        throw Exception('Failed to fetch profile: ${res.statusCode}');
+        throw AuthException(message: 'Failed to fetch profile from me endpoint', code: '${res.statusCode}');
       }
-    } catch (e) {
-      _logger.severe('Failed to fetch profile: $e');
-      throw Exception('Failed to fetch profile.');
+    } catch (e, st) {
+      _logger.severe('Failed to fetch profile: $e\n$st');
+      if (e is AppException) rethrow;
+      throw AuthException(message: 'Failed to fetch profile', originalError: e, stackTrace: st);
     }
   }
 
@@ -222,13 +215,14 @@ class ProfileAuthService extends ChangeNotifier {
 
       final token = await _storage.read(key: _kAccessToken);
       if (token == null || token.isEmpty) {
-        throw Exception('Not logged in');
+        throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
       }
 
       return token;
-    } catch (e) {
-      _logger.severe('Failed to get valid access token: $e');
-      throw Exception('Failed to get valid access token.');
+    } catch (e, st) {
+      _logger.severe('Failed to get valid access token: $e\n$st');
+      if (e is AppException) rethrow;
+      throw AuthException(message: 'Failed to get valid access token', originalError: e, stackTrace: st);
     }
   }
 
@@ -242,9 +236,9 @@ class ProfileAuthService extends ChangeNotifier {
       _cachedProfile = null;
       _hasSessionCache = false;
       notifyListeners();
-    } catch (e) {
-      _logger.severe('Failed to logout: $e');
-      throw Exception('Failed to logout.');
+    } catch (e, st) {
+      _logger.severe('Failed to logout: $e\n$st');
+      throw AuthException(message: 'Failed to logout', originalError: e, stackTrace: st);
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:bakahyou/utils/services/logging_service.dart';
+import 'package:bakahyou/utils/exceptions/app_exceptions.dart' as exc;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
@@ -94,7 +95,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           .getSingleOrNull();
     } catch (e) {
       _logger.severe('Failed to get latest updated series: $e');
-      throw Exception('Failed to get latest updated series.');
+      throw exc.DatabaseException(message: 'Failed to get latest updated series', originalError: e);
     }
   }
 
@@ -199,7 +200,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       });
     } catch (e) {
       _logger.severe('Failed to upsert series: $e');
-      throw Exception('Failed to upsert series.');
+      throw exc.DatabaseException(message: 'Failed to upsert series', originalError: e);
     }
   }
 
@@ -218,7 +219,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
     } catch (e) {
       _logger.severe('Failed to insert library entry: $e');
-      throw Exception('Failed to insert library entry.');
+      throw exc.DatabaseException(message: 'Failed to insert library entry', originalError: e);
     }
   }
 
@@ -239,7 +240,7 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
     } catch (e) {
       _logger.severe('Failed to watch entry with series: $e');
-      throw Exception('Failed to watch entry with series.');
+      throw exc.DatabaseException(message: 'Failed to watch entry with series', originalError: e);
     }
   }
 }
@@ -268,7 +269,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       });
     } catch (e) {
       _logger.severe('Failed to watch entry with series: $e');
-      throw Exception('Failed to watch entry with series.');
+      throw exc.DatabaseException(message: 'Failed to watch entry with series', originalError: e);
     }
   }
 
@@ -293,7 +294,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       });
     } catch (e) {
       _logger.severe('Failed to watch all entries with series: $e');
-      throw Exception('Failed to watch all entries with series.');
+      throw exc.DatabaseException(message: 'Failed to watch all entries with series', originalError: e);
     }
   }
 
@@ -319,7 +320,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       });
     } catch (e) {
       _logger.severe('Failed to upsert library entries: $e');
-      throw Exception('Failed to upsert library entries.');
+      throw exc.DatabaseException(message: 'Failed to upsert library entries', originalError: e);
     }
   }
 
@@ -330,7 +331,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           .write(LibraryEntriesTableCompanion(state: Value(newState)));
     } catch (e) {
       _logger.severe('Failed to update entry state: $e');
-      throw Exception('Failed to update entry state.');
+      throw exc.DatabaseException(message: 'Failed to update entry state', originalError: e);
     }
   }
 
@@ -341,7 +342,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
     } catch (e) {
       _logger.severe('Failed to update entry rating: $e');
-      throw Exception('Failed to update entry rating.');
+      throw exc.DatabaseException(message: 'Failed to update entry rating', originalError: e);
     }
   }
 
@@ -352,7 +353,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       )..where((tbl) => tbl.seriesId.equals(seriesId))).go();
     } catch (e) {
       _logger.severe('Failed to delete entry: $e');
-      throw Exception('Failed to delete entry.');
+      throw exc.DatabaseException(message: 'Failed to delete entry', originalError: e);
     }
   }
 
@@ -361,7 +362,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       await delete(libraryEntriesTable).go();
     } catch (e) {
       _logger.severe('Failed to delete all entries: $e');
-      throw Exception('Failed to delete all entries.');
+      throw exc.DatabaseException(message: 'Failed to delete all entries', originalError: e);
     }
   }
 }
@@ -389,7 +390,7 @@ class AppDatabase extends _$AppDatabase {
         return NativeDatabase(file);
       } catch (e) {
         logger.severe('Failed to open database connection: $e');
-        throw Exception('Failed to open database connection.');
+        throw exc.DatabaseException(message: 'Failed to open database connection', originalError: e);
       }
     });
   }

@@ -17,8 +17,8 @@ class DateRangeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final startYear = mb_date.DateUtils.extractYear(start);
-    final endYear = mb_date.DateUtils.extractYear(end);
+    final startYear = mb_date.AppDateUtils.extractYear(start);
+    final endYear = mb_date.AppDateUtils.extractYear(end);
 
     if (startYear.isEmpty && endYear.isEmpty) return SizedBox.shrink();
 

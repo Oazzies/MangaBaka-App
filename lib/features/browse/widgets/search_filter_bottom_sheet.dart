@@ -3,8 +3,6 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/browse/models/search_filters.dart';
 import 'package:bakahyou/features/series/services/series_search_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
-import 'package:bakahyou/utils/settings/settings_manager.dart';
-import 'package:bakahyou/features/browse/widgets/tri_state_group.dart';
 import 'package:bakahyou/features/browse/widgets/filter_list_dialog.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/features/profile/widgets/settings_components.dart';
@@ -176,7 +174,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                   Navigator.pop(dialogContext);
                 },
                 behavior: HitTestBehavior.opaque,
-                child: Container(
+                child: SizedBox(
                   height: 56,
                   child: Row(
                     children: [
@@ -729,33 +727,6 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildChoiceChip(String label, bool selected, VoidCallback onSelected) {
-    return GestureDetector(
-      onTap: onSelected,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppConstants.accentColor.withValues(alpha: 0.15)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-          border: Border.all(
-            color: selected ? AppConstants.accentColor : AppConstants.borderColor,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? AppConstants.accentColor : AppConstants.textColor,
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ),
     );
   }
 }

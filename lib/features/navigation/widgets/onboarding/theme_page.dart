@@ -127,9 +127,13 @@ class ThemePage extends StatelessWidget {
                     children: ThemeMode.values.map((mode) {
                       final isSelected = mode == currentMode;
                       IconData modeIcon;
-                      if (mode == ThemeMode.light) modeIcon = Icons.wb_sunny_rounded;
-                      else if (mode == ThemeMode.dark) modeIcon = Icons.nightlight_round;
-                      else modeIcon = Icons.brightness_auto_rounded;
+                      if (mode == ThemeMode.light) {
+                        modeIcon = Icons.wb_sunny_rounded;
+                      } else if (mode == ThemeMode.dark) {
+                        modeIcon = Icons.nightlight_round;
+                      } else {
+                        modeIcon = Icons.brightness_auto_rounded;
+                      }
 
                       return Expanded(
                         child: Padding(

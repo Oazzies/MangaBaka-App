@@ -9,8 +9,8 @@ class DateDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final startFormatted = mb_date.DateUtils.formatFullDate(start);
-    final endFormatted = mb_date.DateUtils.formatFullDate(end);
+    final startFormatted = mb_date.AppDateUtils.formatFullDate(start);
+    final endFormatted = mb_date.AppDateUtils.formatFullDate(end);
 
     return AlertDialog(
       backgroundColor: AppConstants.tertiaryBackground,

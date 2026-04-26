@@ -29,6 +29,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _isLoggingIn = false;
   bool _isLoggedIn = false;
 
+  static const int _totalPages = 5;
+
   final List<String> _contentOptions = ['safe', 'suggestive', 'erotica', 'pornographic'];
 
   @override
@@ -45,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 4) {
+    if (_currentPage < _totalPages - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -154,7 +156,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Dot indicators
           Row(
             children: List.generate(
-              5,
+              _totalPages,
               (index) => Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 width: 8,
@@ -179,7 +181,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: Text(
-              _currentPage == 4 ? 'Finish' : 'Next',
+              _currentPage == _totalPages - 1 ? 'Finish' : 'Next',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),

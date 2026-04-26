@@ -131,7 +131,7 @@ class LibraryService {
             onTimeout: () => throw TimeoutException('Library fetch timed out'),
           );
 
-      print("Library API");
+      _logger.fine('Library fetch page $page completed');
 
       if (response.statusCode == 429) {
         _logger.warning(
@@ -257,7 +257,7 @@ class LibraryService {
                 throw TimeoutException('Update state request timed out'),
           );
 
-      print("Update Library API");
+      _logger.fine('Library entry state update completed');
 
       if (response.statusCode == 401) {
         throw AuthException(
@@ -341,7 +341,7 @@ class LibraryService {
                 throw TimeoutException('Update rating request timed out'),
           );
       
-      print("Library Rating API");
+      _logger.fine('Library entry rating update completed');
 
       if (response.statusCode == 401) {
         throw AuthException(
@@ -424,7 +424,7 @@ class LibraryService {
                 throw TimeoutException('Create entry request timed out'),
           );
       
-      print("Create Library API");
+      _logger.fine('Library entry creation completed');
 
       if (response.statusCode == 401) {
         throw AuthException(
@@ -505,7 +505,7 @@ class LibraryService {
                 throw TimeoutException('Delete entry request timed out'),
           );
 
-      print("Delete Library API");
+      _logger.fine('Library entry deletion completed');
 
       if (response.statusCode == 401) {
         throw AuthException(

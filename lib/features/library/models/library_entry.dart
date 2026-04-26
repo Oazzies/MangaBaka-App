@@ -28,7 +28,7 @@ class LibraryEntry {
   factory LibraryEntry.fromJson(Map<String, dynamic> json) {
     final rawSeries = json['Series'] ?? json['series'];
     if (rawSeries is! Map<String, dynamic>) {
-      throw Exception('Library entry missing Series payload');
+      throw FormatException('Library entry missing Series payload');
     }
 
     return LibraryEntry(

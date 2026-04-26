@@ -51,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _auth = getIt<ProfileAuthService>();
     _auth.addListener(_onAuthStateChanged);
-    _statisticsService = StatisticsService(AppDatabase());
+    _statisticsService = StatisticsService(getIt<AppDatabase>());
     _snapshotService = SnapshotService();
 
     // Instantly show cached profile — no loading spinner

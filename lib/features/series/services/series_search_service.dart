@@ -68,7 +68,7 @@ class SeriesSearchService {
                 throw TimeoutException('Series search request timed out'),
           );
 
-      print("Search API");
+      _logger.fine('Series search request completed');
 
       if (response.statusCode == 200) {
         try {

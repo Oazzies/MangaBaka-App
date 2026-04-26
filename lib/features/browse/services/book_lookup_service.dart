@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
+import 'package:bakahyou/utils/services/logging_service.dart';
 
 class BookLookupService {
+  static final _logger = LoggingService.logger;
   static const String _baseUrl = 'https://www.googleapis.com/books/v1/volumes';
 
   Future<String?> lookupTitleByIsbn(String isbn) async {
@@ -25,7 +27,7 @@ class BookLookupService {
 
       // Fallback to OpenLibrary API if Google Books fails or returns no results
       final openLibResponse = await http.get(Uri.parse('https://openlibrary.org/search.json?isbn=$isbn'));
-      print("Open Library API");
+      _logger.fine('OpenLibrary API lookup for ISBN: $isbn');
       if (openLibResponse.statusCode == 200) {
         final data = json.decode(openLibResponse.body);
         if (data['docs'] != null && (data['docs'] as List).isNotEmpty) {

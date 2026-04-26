@@ -128,7 +128,7 @@ class SeriesAutocompleteService {
           .get(Uri.parse(url), headers: {'User-Agent': AppConstants.userAgent})
           .timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
 
-      print("Autocomplete API");
+      _logger.fine('Autocomplete search request completed');
 
       // If this client was cancelled while waiting, bail out silently
       if (_activeClient != client) return;

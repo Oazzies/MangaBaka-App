@@ -1,6 +1,10 @@
 import 'package:intl/intl.dart';
 
-class DateUtils {
+/// App-specific date utilities.
+/// Named AppDateUtils to avoid conflict with Flutter's built-in DateUtils.
+class AppDateUtils {
+  AppDateUtils._(); // Prevent instantiation
+
   static String extractYear(String date) {
     if (date.isEmpty) return '';
     return date.length >= 4 ? date.substring(0, 4) : date;

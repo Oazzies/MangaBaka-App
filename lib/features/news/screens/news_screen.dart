@@ -49,7 +49,7 @@ class _NewsScreenState extends State<NewsScreen> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 100) {
+        _scrollController.position.maxScrollExtent - AppConstants.scrollThresholdPx) {
       if (_hasMore && !_isLoading) {
         _fetchNews(initial: false);
       }
@@ -72,7 +72,7 @@ class _NewsScreenState extends State<NewsScreen> {
       final pageToFetch = initial ? 1 : _currentPage;
       final newNews = await _newsService.fetchNews(
         page: pageToFetch,
-        limit: 10,
+        limit: AppConstants.defaultPageLimit,
       );
       if (!mounted) return;
       setState(() {
@@ -83,7 +83,7 @@ class _NewsScreenState extends State<NewsScreen> {
         _newsList.addAll(newNews);
         _isLoading = false;
         _isBackgroundRefresh = false;
-        _hasMore = newNews.length == 10;
+        _hasMore = newNews.length == AppConstants.defaultPageLimit;
         _currentPage++;
       });
     } catch (e) {

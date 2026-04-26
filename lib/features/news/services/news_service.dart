@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:bakahyou/utils/services/logging_service.dart';
+import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
+import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:bakahyou/features/news/models/news.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewsService {
   static final _logger = LoggingService.logger;
-  static const String _baseUrl = 'https://api.mangabaka.dev/v1/news';
-  static const String _cacheKey = 'mb_news_cache';
+  static final String _baseUrl = '${AppConstants.baseApiUrl}/news';
+  static const String _cacheKey = '${AppConstants.prefixStorageKey}news_cache';
   bool _isFetching = false;
 
   Future<List<News>> getCachedNews() async {
@@ -36,10 +38,10 @@ class NewsService {
       String url = '$_baseUrl?page=$page&limit=$limit';
       final response = await http.get(
         Uri.parse(url),
-        headers: {'User-Agent': 'BakaHyou/0.0 (oazziesmail@gmail.com)'},
+        headers: {'User-Agent': AppConstants.userAgent},
       );
 
-      print("News API");
+      _logger.fine('News fetch page $page completed');
 
       if (response.statusCode == 200) {
         if (page == 1) {
@@ -55,11 +57,12 @@ class NewsService {
         _logger.severe(
           'Failed to load news: ${response.statusCode} ${response.body}',
         );
-        throw Exception('Failed to load news: ${response.statusCode}');
+        throw ApiException(message: 'Failed to load news', statusCode: response.statusCode);
       }
-    } catch (e) {
-      _logger.severe('Failed to load news: $e');
-      throw Exception('Failed to load news.');
+    } catch (e, st) {
+      _logger.severe('Failed to load news: $e\n$st');
+      if (e is AppException) rethrow;
+      throw NetworkException(message: 'Failed to load news', originalError: e, stackTrace: st);
     } finally {
       _isFetching = false;
     }

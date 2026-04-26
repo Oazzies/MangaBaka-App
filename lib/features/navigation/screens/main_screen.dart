@@ -27,12 +27,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // Keep pages alive across tab switches with IndexedStack
-  List<Widget> get _pages => [
-    const HomeScreen(),
-    const LibraryScreen(),
-    const BrowseScreen(),
-    const NewsScreen(),
-    const ProfileScreen(),
+  static const List<Widget> _pages = [
+    HomeScreen(),
+    LibraryScreen(),
+    BrowseScreen(),
+    NewsScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

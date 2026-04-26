@@ -21,7 +21,7 @@ class SeriesService {
                 throw TimeoutException('Series fetch request timed out'),
           );
 
-      print("Seried ID API");
+      _logger.fine('Series ID fetch request completed');
 
       if (response.statusCode == 200) {
         try {
