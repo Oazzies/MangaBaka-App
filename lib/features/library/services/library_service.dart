@@ -66,7 +66,7 @@ class LibraryService {
   }
 
   /// Performs a full sync with the remote API.
-  Future<void> syncLibrary() async {
+  Future<void> syncLibrary({String? state}) async {
     const maxRetries = 3;
     var retryCount = 0;
 
@@ -76,7 +76,7 @@ class LibraryService {
 
         var page = 1;
         while (true) {
-          final entries = await _fetchPage(token, page);
+          final entries = await _fetchPage(token, page, state: state);
           await _saveEntries(entries);
           if (entries.length < LibraryConstants.pageLimit) {
             break;
@@ -110,10 +110,12 @@ class LibraryService {
     }
   }
 
-  Future<List<api.LibraryEntry>> _fetchPage(String token, int page) async {
-    final uri = Uri.parse(
-      '${LibraryConstants.baseUrl}?page=$page&limit=${LibraryConstants.pageLimit}',
-    );
+  Future<List<api.LibraryEntry>> _fetchPage(String token, int page, {String? state}) async {
+    var url = '${LibraryConstants.baseUrl}?page=$page&limit=${LibraryConstants.pageLimit}';
+    if (state != null) {
+      url += '&state=$state';
+    }
+    final uri = Uri.parse(url);
 
     try {
       final response = await http
@@ -138,7 +140,7 @@ class LibraryService {
         await Future.delayed(
           Duration(seconds: AppConstants.rateLimitRetryDelaySeconds),
         );
-        return _fetchPage(token, page);
+        return _fetchPage(token, page, state: state);
       }
 
       if (response.statusCode == 401) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bakahyou/features/home/screens/home_screen.dart';
 import 'package:bakahyou/features/browse/screens/browse_screen.dart';
 import 'package:bakahyou/features/library/screens/library_screen.dart';
 import 'package:bakahyou/features/news/screens/news_screen.dart';
@@ -27,11 +28,11 @@ class _MainScreenState extends State<MainScreen> {
 
   // Keep pages alive across tab switches with IndexedStack
   List<Widget> get _pages => [
-    const Placeholder(),
-    LibraryScreen(),
-    BrowseScreen(),
-    NewsScreen(),
-    ProfileScreen(),
+    const HomeScreen(),
+    const LibraryScreen(),
+    const BrowseScreen(),
+    const NewsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

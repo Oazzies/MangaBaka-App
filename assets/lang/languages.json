@@ -5,6 +5,9 @@
     "strings": {
       "app_name": "BakaHyou",
       "home": "Home",
+      "discover": "Discover",
+      "current": "Current",
+      "activity": "Activity",
       "library": "Library",
       "browse": "Browse",
       "news": "News",
@@ -192,6 +195,9 @@
     "strings": {
       "app_name": "BakaHyou",
       "home": "Start",
+      "discover": "Ontdekken",
+      "current": "Huidig",
+      "activity": "Activiteit",
       "library": "Bibliotheek",
       "browse": "Bladeren",
       "news": "Nieuws",
@@ -379,6 +385,9 @@
     "strings": {
       "app_name": "BakaHyou",
       "home": "Startseite",
+      "discover": "Entdecken",
+      "current": "Aktuell",
+      "activity": "Aktivität",
       "library": "Bibliothek",
       "browse": "Durchsuchen",
       "news": "Neuigkeiten",
@@ -566,6 +575,9 @@
     "strings": {
       "app_name": "BakaHyou",
       "home": "Inicio",
+      "discover": "Descubrir",
+      "current": "Actual",
+      "activity": "Actividad",
       "library": "Biblioteca",
       "browse": "Explorar",
       "news": "Noticias",
