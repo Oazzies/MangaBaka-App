@@ -33,19 +33,19 @@ class HomeScreen extends StatelessWidget {
               ),
               centerTitle: false,
               actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.notifications_outlined, 
-                      color: AppConstants.textColor,
-                      size: 28,
-                    ),
-                    onPressed: () {
-                      // Static notification button as requested
-                    },
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.only(right: 8.0),
+                //   child: IconButton(
+                //     icon: Icon(
+                //       Icons.notifications_outlined, 
+                //       color: AppConstants.textColor,
+                //       size: 28,
+                //     ),
+                //     onPressed: () {
+                //       // Static notification button as requested
+                //     },
+                //   ),
+                // ),
               ],
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(48),
