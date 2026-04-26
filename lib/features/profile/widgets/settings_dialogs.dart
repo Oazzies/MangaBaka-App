@@ -3,6 +3,8 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+
 
 class SettingsDialogs {
   static String getThemeModeName(ThemeMode mode) {

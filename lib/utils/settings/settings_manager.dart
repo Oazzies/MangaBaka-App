@@ -17,8 +17,6 @@ const String _libraryListStyleKey = '${AppConstants.prefixStorageKey}library_lis
 const String _browseListStyleKey = '${AppConstants.prefixStorageKey}browse_list_style';
 const String _pushNotificationsKey = '${AppConstants.prefixStorageKey}push_notifications';
 const String _autoSuggestBrowseKey = '${AppConstants.prefixStorageKey}auto_suggest_browse';
-const String _openLinksInAppKey = '${AppConstants.prefixStorageKey}open_links_in_app';
-
 
 class SettingsManager extends ChangeNotifier {
   static final SettingsManager _instance = SettingsManager._internal();
@@ -65,10 +63,6 @@ class SettingsManager extends ChangeNotifier {
 
   bool _autoSuggestBrowse = true;
   bool get autoSuggestBrowse => _autoSuggestBrowse;
-
-  bool _openLinksInApp = true;
-  bool get openLinksInApp => _openLinksInApp;
-
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -122,10 +116,8 @@ class SettingsManager extends ChangeNotifier {
 
     _pushNotifications = prefs.getBool(_pushNotificationsKey) ?? false;
     _autoSuggestBrowse = prefs.getBool(_autoSuggestBrowseKey) ?? true;
-    _openLinksInApp = prefs.getBool(_openLinksInAppKey) ?? true;
 
     notifyListeners();
-
   }
 
   Future<void> setListStyle(AppListStyle style) async {
@@ -241,13 +233,4 @@ class SettingsManager extends ChangeNotifier {
     await prefs.setBool(_autoSuggestBrowseKey, value);
     notifyListeners();
   }
-
-  Future<void> setOpenLinksInApp(bool value) async {
-    if (_openLinksInApp == value) return;
-    _openLinksInApp = value;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_openLinksInAppKey, value);
-    notifyListeners();
-  }
 }
-

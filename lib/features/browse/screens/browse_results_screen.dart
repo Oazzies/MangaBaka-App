@@ -7,6 +7,8 @@ import 'package:bakahyou/features/series/services/series_search_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 
@@ -14,7 +16,8 @@ class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
   final String sortBy;
   final String? type;
-  final int? randomSeed;
+  final double? randomSeed;
+
 
 
   const BrowseResultsScreen({
@@ -39,7 +42,8 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   bool _isLoading = false;
   bool _hasMore = true;
   int _currentPage = 1;
-  late int _currentRandomSeed;
+  late double _currentRandomSeed;
+
 
   String? _error;
 
@@ -59,9 +63,10 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     super.dispose();
   }
 
-  static int _generateRandomSeed() {
-    return Random().nextInt(1000000);
+  static double _generateRandomSeed() {
+    return Random().nextDouble();
   }
+
 
 
   void _onScroll() {

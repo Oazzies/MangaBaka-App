@@ -4,6 +4,8 @@ import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
 import 'package:bakahyou/features/browse/widgets/browse_shortcuts.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+
 
 import 'package:bakahyou/utils/localization/localization_service.dart';
 

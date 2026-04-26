@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+
 
 class RatingSelectionDialog extends StatefulWidget {
   final int initialRating;

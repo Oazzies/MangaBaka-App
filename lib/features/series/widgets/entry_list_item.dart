@@ -5,6 +5,8 @@ import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/features/series/services/metadata_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+
 
 class EntryListItem extends StatelessWidget {
   final Series series;
@@ -34,7 +36,8 @@ class EntryListItem extends StatelessWidget {
 
         return Stack(
           children: [
-            _buildContent(context, style, l10n),
+            _buildContent(context, style, l10n, displayTitle),
+
             if (ranking != null)
               Positioned(
                 top: 0,
@@ -64,19 +67,20 @@ class EntryListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, AppListStyle style, LocalizationService l10n) {
+  Widget _buildContent(BuildContext context, AppListStyle style, LocalizationService l10n, String displayTitle) {
     switch (style) {
       case AppListStyle.grid:
-        return _buildGridItem(context, l10n);
+        return _buildGridItem(context, l10n, displayTitle);
       case AppListStyle.minimalList:
-        return _buildMinimalListItem(context, l10n);
+        return _buildMinimalListItem(context, l10n, displayTitle);
       case AppListStyle.compact:
-        return _buildCompactListItem(context, l10n);
+        return _buildCompactListItem(context, l10n, displayTitle);
       case AppListStyle.comfortable:
       default:
-        return _buildComfortableListItem(context, l10n);
+        return _buildComfortableListItem(context, l10n, displayTitle);
     }
   }
+
 
   Widget _buildCoverImage({
     required double width,
@@ -112,7 +116,7 @@ class EntryListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildGridItem(BuildContext context, LocalizationService l10n) {
+  Widget _buildGridItem(BuildContext context, LocalizationService l10n, String displayTitle) {
     return Card(
       color: AppConstants.secondaryBackground,
       clipBehavior: Clip.antiAlias,
@@ -132,7 +136,7 @@ class EntryListItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _getDisplayTitle(),
+                  displayTitle,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppConstants.textColor,
@@ -158,7 +162,9 @@ class EntryListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildMinimalListItem(BuildContext context, LocalizationService l10n) {
+
+  Widget _buildMinimalListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
+
     return Card(
       color: AppConstants.secondaryBackground,
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -188,7 +194,8 @@ class EntryListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactListItem(BuildContext context, LocalizationService l10n) {
+  Widget _buildCompactListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
+
     return Card(
       color: AppConstants.secondaryBackground,
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -234,7 +241,8 @@ class EntryListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildComfortableListItem(BuildContext context, LocalizationService l10n) {
+  Widget _buildComfortableListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
+
     return Card(
       color: AppConstants.secondaryBackground,
       margin: const EdgeInsets.symmetric(vertical: 6),

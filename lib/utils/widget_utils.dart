@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:bakahyou/utils/settings/settings_manager.dart';
-
 
 class WidgetUtils {
   static Widget chipWrap(String label, List<String> items, {Color? color}) {
@@ -57,12 +55,7 @@ class WidgetUtils {
                 ),
                 label: Text(prettyName),
                 tooltip: l,
-                onPressed: () => launchUrl(
-                  uri,
-                  mode: SettingsManager().openLinksInApp
-                      ? LaunchMode.platformDefault
-                      : LaunchMode.externalApplication,
-                ),
+                onPressed: () => launchUrl(uri),
               );
             }
             return const SizedBox.shrink();
