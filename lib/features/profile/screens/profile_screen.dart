@@ -222,6 +222,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return Scaffold(
           backgroundColor: AppConstants.primaryBackground,
+          appBar: AppBar(
+            backgroundColor: AppConstants.primaryBackground,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
           body: _loading
               ? const Center(child: CircularProgressIndicator())
               : _error != null
@@ -230,10 +247,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ? _buildLoginPrompt()
               : RefreshIndicator(
                   onRefresh: _bootstrap,
-                  child: SafeArea(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
@@ -247,17 +263,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.settings),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const SettingsScreen(),
-                                    ),
-                                  );
-                                },
                               ),
                             ],
                           ),
@@ -357,8 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     ),
-                  ),
-                ),
+          ),
         );
       },
     );
