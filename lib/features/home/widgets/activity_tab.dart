@@ -20,7 +20,7 @@ class ActivityTab extends StatefulWidget {
 class _ActivityTabState extends State<ActivityTab> {
   final _snapshotService = SnapshotService();
   final _authService = getIt<ProfileAuthService>();
-  final List<Series> _activities = [];
+  final List<LibraryEntry> _activities = [];
   bool _isLoading = false;
   String? _error;
 
@@ -77,22 +77,25 @@ class _ActivityTabState extends State<ActivityTab> {
       final recentlyAdded = results[1];
 
       // Merge results and remove duplicates using a Map
-      final Map<String, Series> mergedMap = {};
+      final Map<String, LibraryEntry> mergedMap = {};
       
-      // We prioritize "Recently Updated" in the merge
       for (var entry in recentlyUpdated) {
-        mergedMap[entry.series.id] = entry.series;
+        mergedMap[entry.series.id] = entry;
       }
       for (var entry in recentlyAdded) {
         if (!mergedMap.containsKey(entry.series.id)) {
-          mergedMap[entry.series.id] = entry.series;
+          mergedMap[entry.series.id] = entry;
         }
       }
 
       final mergedList = mergedMap.values.toList();
       
-      // Sort by lastUpdated descending (most recent first)
-      mergedList.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
+      // Sort by interaction time (updatedAt or createdAt) descending
+      mergedList.sort((a, b) {
+        final dateA = a.updatedAt ?? a.createdAt ?? '';
+        final dateB = b.updatedAt ?? b.createdAt ?? '';
+        return dateB.compareTo(dateA);
+      });
 
       if (!mounted) return;
       setState(() {
@@ -205,13 +208,13 @@ class _ActivityTabState extends State<ActivityTab> {
             ),
             itemCount: _activities.length,
             itemBuilder: (context, index) {
-              final series = _activities[index];
+              final entry = _activities[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: InkWell(
-                  onTap: () => _navigateToDetail(series),
+                  onTap: () => _navigateToDetail(entry.series),
                   borderRadius: BorderRadius.circular(8),
-                  child: EntryListItem(series: series),
+                  child: EntryListItem(series: entry.series),
                 ),
               );
             },
