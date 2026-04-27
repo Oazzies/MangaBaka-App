@@ -52,6 +52,7 @@ Profile
 Extra
 * Optional Notifications for various things
 * A LOT of UI/UX improvements
+* Back to Top FAB button
 
 </details>
 
