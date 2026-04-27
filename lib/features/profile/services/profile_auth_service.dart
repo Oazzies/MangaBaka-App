@@ -27,7 +27,13 @@ class ProfileAuthService extends ChangeNotifier {
   static const _kProfileCache = 'mb_profile_cache';
 
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+      resetOnError: true,
+      sharedPreferencesName: 'bakahyou_secure_storage_v2',
+    ),
+  );
 
   MbProfile? _cachedProfile;
   bool _hasSessionCache = false;
@@ -63,6 +69,12 @@ class ProfileAuthService extends ChangeNotifier {
     try {
       final token = await _storage.read(key: _kAccessToken);
       return token != null && token.isNotEmpty;
+    } on PlatformException catch (e) {
+      _logger.severe('Secure storage error (likely decryption failure): $e');
+      // If we can't read the storage due to key issues, clear everything
+      // so the app can function again (user will need to log in).
+      await _storage.deleteAll();
+      return false;
     } catch (e) {
       _logger.severe('Failed to check session status: $e');
       return false;

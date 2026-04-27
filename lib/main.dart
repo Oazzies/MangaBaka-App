@@ -20,9 +20,9 @@ void main() async {
   LoggingService.setup();
   await dotenv.load();
   setupServiceLocator();
+  
   await getIt<ProfileAuthService>().init();
   await getIt<MetadataService>().init();
-  
   await ThemeManager().init();
   await SettingsManager().init();
   await LocalizationService().init();
