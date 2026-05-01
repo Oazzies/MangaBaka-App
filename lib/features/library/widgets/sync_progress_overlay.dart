@@ -4,6 +4,7 @@ import 'package:bakahyou/features/library/models/library_sync_status.dart';
 import 'package:bakahyou/features/library/services/library_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class SyncProgressOverlay extends StatelessWidget {
   const SyncProgressOverlay({super.key});
@@ -19,21 +20,16 @@ class SyncProgressOverlay extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return AnimatedSlide(
-          duration: AppConstants.shortAnimationDuration,
-          offset: status.isSyncing ? Offset.zero : const Offset(0, 1),
-          child: AnimatedOpacity(
-            duration: AppConstants.shortAnimationDuration,
-            opacity: status.isSyncing ? 1.0 : 0.0,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: _buildProgressBar(context, status),
-              ),
-            ),
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: _buildProgressBar(context, status),
           ),
-        );
+        )
+            .animate(target: status.isSyncing ? 1 : 0)
+            .slideY(begin: 1, end: 0, curve: Curves.easeOutBack, duration: 400.ms)
+            .fadeIn(duration: 400.ms);
       },
     );
   }
@@ -69,13 +65,14 @@ class SyncProgressOverlay extends StatelessWidget {
             child: SizedBox(
               width: 20,
               height: 20,
-              child: status.error != null
-                  ? Icon(Icons.warning_amber_rounded, color: AppConstants.errorColor, size: 20)
-                  : CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppConstants.accentColor),
-                    ),
-            ),
+            child: status.error != null
+                ? Icon(Icons.warning_amber_rounded, color: AppConstants.errorColor, size: 20)
+                : CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppConstants.accentColor),
+                  ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                   .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: 1.seconds, curve: Curves.easeInOut),
+          ),
           ),
           const SizedBox(width: 16),
           Expanded(

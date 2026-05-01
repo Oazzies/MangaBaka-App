@@ -11,6 +11,7 @@ import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ActivityTab extends StatefulWidget {
   const ActivityTab({super.key});
@@ -235,7 +236,10 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
                   borderRadius: BorderRadius.circular(8),
                   child: EntryListItem(series: entry.series),
                 ),
-              );
+              )
+                  .animate(delay: Duration(milliseconds: 50 * index))
+                  .fadeIn(duration: const Duration(milliseconds: 300))
+                  .slideX(begin: 0.1, end: 0, curve: Curves.easeOutCubic);
             },
           ),
         );

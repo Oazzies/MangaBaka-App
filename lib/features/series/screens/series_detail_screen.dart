@@ -18,6 +18,7 @@ import 'package:bakahyou/features/series/widgets/series_hero_cover.dart';
 
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
@@ -188,7 +189,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
               : Text(l10n.translate('add_to_library'), style: const TextStyle(fontWeight: FontWeight.bold)),
             icon: _isAdding ? null : const Icon(Icons.add),
-          );
+          ).animate().scale(duration: 200.ms, curve: Curves.easeOutBack);
         }
         return const SizedBox.shrink();
       },
@@ -199,21 +200,27 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SeriesMetadataChips(series: widget.series, entry: entry),
+        SeriesMetadataChips(series: widget.series, entry: entry)
+            .animate()
+            .fadeIn(duration: 400.ms)
+            .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
         const SizedBox(height: 16),
         SeriesActionBar(
           entry: entry, 
           l10n: l10n,
           onStateChanged: (s) => _libraryService.updateLibraryEntryState(widget.series.id, s),
           onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(widget.series.id, r),
-        ),
+        ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
         const SizedBox(height: 20),
         if (widget.series.description.isNotEmpty) ...[
-          _buildSectionHeader('Description'),
-          DescriptionSection(description: widget.series.description),
+          _buildSectionHeader('Description').animate().fadeIn(delay: 200.ms),
+          DescriptionSection(description: widget.series.description).animate().fadeIn(delay: 250.ms).slideY(begin: 0.1, end: 0),
           const SizedBox(height: 20),
         ],
-        SeriesDetailsGrid(series: widget.series, enrichedLinks: _enrichedLinks, l10n: l10n),
+        SeriesDetailsGrid(series: widget.series, enrichedLinks: _enrichedLinks, l10n: l10n)
+            .animate()
+            .fadeIn(delay: 300.ms)
+            .slideY(begin: 0.1, end: 0),
         const SizedBox(height: 100),
       ],
     );
@@ -228,9 +235,15 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SeriesHeroCover(series: widget.series, height: 420, width: 300),
+              SeriesHeroCover(series: widget.series, height: 420, width: 300)
+                  .animate()
+                  .fadeIn(duration: 500.ms)
+                  .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutBack),
               const SizedBox(height: 32),
-              SeriesMetadataChips(series: widget.series, entry: entry, isVertical: true),
+              SeriesMetadataChips(series: widget.series, entry: entry, isVertical: true)
+                  .animate()
+                  .fadeIn(delay: 200.ms)
+                  .slideX(begin: -0.1, end: 0),
             ],
           ),
         ),
@@ -244,14 +257,17 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                 l10n: l10n,
                 onStateChanged: (s) => _libraryService.updateLibraryEntryState(widget.series.id, s),
                 onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(widget.series.id, r),
-              ),
+              ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
               const SizedBox(height: 20),
               if (widget.series.description.isNotEmpty) ...[
-                _buildSectionHeader('Description'),
-                DescriptionSection(description: widget.series.description),
+                _buildSectionHeader('Description').animate().fadeIn(delay: 200.ms),
+                DescriptionSection(description: widget.series.description).animate().fadeIn(delay: 250.ms).slideY(begin: 0.05, end: 0),
                 const SizedBox(height: 24),
               ],
-              SeriesDetailsGrid(series: widget.series, enrichedLinks: _enrichedLinks, isWide: true, l10n: l10n),
+              SeriesDetailsGrid(series: widget.series, enrichedLinks: _enrichedLinks, isWide: true, l10n: l10n)
+                  .animate()
+                  .fadeIn(delay: 300.ms)
+                  .slideY(begin: 0.05, end: 0),
               const SizedBox(height: 100),
             ],
           ),

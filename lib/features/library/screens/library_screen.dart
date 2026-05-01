@@ -16,6 +16,7 @@ import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/utils/settings/settings_enums.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:bakahyou/features/profile/widgets/mb_login_prompt.dart';
 import 'package:bakahyou/features/browse/models/search_filters.dart';
@@ -246,7 +247,10 @@ class _LibraryScreenState extends State<LibraryScreen>
               return GestureDetector(
                 onTap: () => _navigateToSeriesDetail(entry.series),
                 child: EntryListItem(series: entry.series, isLibrary: true),
-              );
+              )
+                  .animate(delay: Duration(milliseconds: 50 * index))
+                  .fadeIn(duration: const Duration(milliseconds: 300))
+                  .scale(begin: const Offset(0.95, 0.95), end: const Offset(1, 1), curve: Curves.easeOutCubic);
             },
           );
         }
@@ -260,7 +264,10 @@ class _LibraryScreenState extends State<LibraryScreen>
             return GestureDetector(
               onTap: () => _navigateToSeriesDetail(entry.series),
               child: EntryListItem(series: entry.series, isLibrary: true),
-            );
+            )
+                .animate(delay: Duration(milliseconds: 50 * index))
+                .fadeIn(duration: const Duration(milliseconds: 300))
+                .slideX(begin: 0.05, end: 0, curve: Curves.easeOutCubic);
           },
         );
       }(),
