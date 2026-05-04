@@ -8,6 +8,8 @@ import 'package:bakahyou/utils/settings/settings_enums.dart';
 
 
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/features/browse/widgets/list_skeleton.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class BrowseContent extends StatelessWidget {
   final List<Series> searchResults;
@@ -32,7 +34,11 @@ class BrowseContent extends StatelessWidget {
   });
 
   Widget _buildLoadingState() {
-    return Expanded(child: Center(child: CircularProgressIndicator()));
+    final settings = SettingsManager();
+    final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
+    final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
+    
+    return Expanded(child: ListSkeleton(isGrid: isGrid));
   }
 
   Widget _buildErrorState(LocalizationService l10n) {
@@ -119,23 +125,38 @@ class BrowseContent extends StatelessWidget {
       listenable: LocalizationService(),
       builder: (context, _) {
         final l10n = LocalizationService();
+        
+        Widget content;
         if (searchResults.isEmpty && !isLoading && error == null) {
-          return Expanded(child: BrowseShortcuts(onNavigate: onNavigateToResults));
+          content = Expanded(child: BrowseShortcuts(onNavigate: onNavigateToResults));
+        } else if (isLoading && searchResults.isEmpty) {
+          content = _buildLoadingState();
+        } else if (error != null && searchResults.isEmpty) {
+          content = _buildErrorState(l10n);
+        } else if (searchResults.isNotEmpty) {
+          content = _buildResultsList(l10n);
+        } else {
+          content = const SizedBox.shrink();
         }
 
-        if (isLoading && searchResults.isEmpty) {
-          return _buildLoadingState();
-        }
-
-        if (error != null && searchResults.isEmpty) {
-          return _buildErrorState(l10n);
-        }
-
-        if (searchResults.isNotEmpty) {
-          return _buildResultsList(l10n);
-        }
-
-        return const SizedBox.shrink();
+        return AnimatedSwitcher(
+          duration: 600.ms,
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.01),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: content,
+        );
       },
     );
   }

@@ -11,6 +11,8 @@ import 'package:bakahyou/utils/settings/settings_enums.dart';
 
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
+import 'package:bakahyou/features/browse/widgets/list_skeleton.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -172,7 +174,11 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   }
 
   Widget _buildLoadingState() {
-    return Center(child: CircularProgressIndicator());
+    final settings = SettingsManager();
+    final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
+    final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
+    
+    return ListSkeleton(isGrid: isGrid);
   }
 
   Widget _buildEmptyState() {
@@ -268,15 +274,28 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       return _buildErrorState();
     }
 
-    if (_results.isEmpty && _isLoading) {
-      return _buildLoadingState();
-    }
-
-    if (_results.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _buildResultsList();
+    return AnimatedSwitcher(
+      duration: 600.ms,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.02),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: _results.isEmpty && _isLoading
+          ? _buildLoadingState()
+          : _results.isEmpty
+              ? _buildEmptyState()
+              : _buildResultsList(),
+    );
   }
 
   @override
