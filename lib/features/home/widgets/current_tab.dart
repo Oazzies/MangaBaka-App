@@ -11,6 +11,9 @@ import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+import 'package:bakahyou/features/series/widgets/series_list_skeleton.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class CurrentTab extends StatefulWidget {
@@ -80,58 +83,97 @@ class _CurrentTabState extends State<CurrentTab> with AutomaticKeepAliveClientMi
         return StreamBuilder<List<LibraryEntry>>(
           stream: _libraryService.watchEntriesFromDb(),
           builder: (context, snapshot) {
-            // Only show spinner if we have no data and are waiting
+            final settings = SettingsManager();
+            final isGrid = settings.currentListStyle == AppListStyle.grid || 
+                           settings.currentListStyle == AppListStyle.coverOnlyGrid;
+
+            Widget content;
+
+            // Only show skeleton if we have no data and are waiting
             if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              content = SeriesListSkeleton(isGrid: isGrid);
+            } else {
+              final entries = snapshot.data ?? [];
+              final currentlyReading = entries
+                  .where((e) => e.state.toLowerCase() == 'reading')
+                  .map((e) => e.series)
+                  .toList();
+
+              // Sort by most recently updated first
+              currentlyReading.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
+
+              if (currentlyReading.isEmpty) {
+                content = Center(
+                  key: const ValueKey('empty'),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.menu_book_outlined, color: AppConstants.textMutedColor, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.translate('no_entries_category'),
+                        style: TextStyle(color: AppConstants.textMutedColor),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                content = RefreshIndicator(
+                  key: const ValueKey('list'),
+                  onRefresh: () => _libraryService.syncLibrary(state: 'reading'),
+                  color: AppConstants.accentColor,
+                  backgroundColor: AppConstants.secondaryBackground,
+                  child: isGrid 
+                    ? GridView.builder(
+                        padding: const EdgeInsets.all(12),
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 160,
+                          childAspectRatio: 0.65,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: currentlyReading.length,
+                        itemBuilder: (context, index) {
+                          final series = currentlyReading[index];
+                          return InkWell(
+                            onTap: () => _navigateToDetail(series),
+                            child: EntryListItem(series: series),
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
+                        itemCount: currentlyReading.length,
+                        itemBuilder: (context, index) {
+                          final series = currentlyReading[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: InkWell(
+                              onTap: () => _navigateToDetail(series),
+                              borderRadius: BorderRadius.circular(8),
+                              child: EntryListItem(series: series),
+                            ),
+                          );
+                        },
+                      ),
+                );
+              }
             }
 
-            final entries = snapshot.data ?? [];
-            final currentlyReading = entries
-                .where((e) => e.state.toLowerCase() == 'reading')
-                .map((e) => e.series)
-                .toList();
-
-            // Sort by most recently updated first
-            currentlyReading.sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
-
-            if (currentlyReading.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.menu_book_outlined, color: AppConstants.textMutedColor, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.translate('no_entries_category'),
-                      style: TextStyle(color: AppConstants.textMutedColor),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return RefreshIndicator(
-              onRefresh: () => _libraryService.syncLibrary(state: 'reading'),
-              color: AppConstants.accentColor,
-              backgroundColor: AppConstants.secondaryBackground,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                itemCount: currentlyReading.length,
-                itemBuilder: (context, index) {
-                  final series = currentlyReading[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: InkWell(
-                      onTap: () => _navigateToDetail(series),
-                      borderRadius: BorderRadius.circular(8),
-                      child: EntryListItem(series: series),
-                    ),
-                  );
-                },
-              ),
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 600),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+              child: content,
             );
           },
         );

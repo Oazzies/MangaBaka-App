@@ -6,7 +6,7 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/settings/settings_enums.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
-import 'package:bakahyou/features/browse/widgets/list_skeleton.dart';
+import 'package:bakahyou/features/series/widgets/series_list_skeleton.dart';
 
 class BrowseContent extends StatelessWidget {
   final List<Series> searchResults;
@@ -35,7 +35,7 @@ class BrowseContent extends StatelessWidget {
     final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
     final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
     
-    return ListSkeleton(isGrid: isGrid);
+    return SeriesListSkeleton(isGrid: isGrid);
   }
 
   Widget _buildErrorState(LocalizationService l10n) {

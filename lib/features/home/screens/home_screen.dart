@@ -5,6 +5,7 @@ import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 import 'package:bakahyou/features/home/widgets/activity_tab.dart';
 import 'package:bakahyou/features/home/widgets/current_tab.dart';
+import 'package:bakahyou/features/home/widgets/discover_tab.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -75,11 +76,11 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            body: TabBarView(
+            body: const TabBarView(
               children: [
-                _buildPlaceholderContent(l10n.translate("discover")),
-                const CurrentTab(),
-                const ActivityTab(),
+                DiscoverTab(),
+                CurrentTab(),
+                ActivityTab(),
               ],
             ),
           ),
@@ -88,15 +89,5 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholderContent(String title) {
-    return Center(
-      child: Text(
-        title,
-        style: TextStyle(
-          color: AppConstants.textMutedColor,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
+
 }

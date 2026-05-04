@@ -186,7 +186,8 @@
       "language_subtitle": "Select your preferred app language",
       "all_ratings_hint": "All ratings",
       "login_prompt_library": "Login with MangaBaka to see your library",
-      "login_prompt_profile": "Login with MangaBaka to see your profile"
+      "login_prompt_profile": "Login with MangaBaka to see your profile",
+      "discover_coming_soon": "Discover feature coming soon!"
     }
   },
   "es": {
@@ -376,7 +377,8 @@
       "language_subtitle": "Idioma de la aplicación",
       "all_ratings_hint": "Todas las clasificaciones",
       "login_prompt_library": "Inicia sesión con MangaBaka para ver tu biblioteca",
-      "login_prompt_profile": "Inicia sesión con MangaBaka para ver tu perfil"
+      "login_prompt_profile": "Inicia sesión con MangaBaka para ver tu perfil",
+      "discover_coming_soon": "¡La función de descubrir estará disponible pronto!"
     }
   }
 }

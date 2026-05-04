@@ -11,6 +11,9 @@ import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
+import 'package:bakahyou/utils/settings/settings_enums.dart';
+import 'package:bakahyou/features/series/widgets/series_list_skeleton.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ActivityTab extends StatefulWidget {
@@ -159,25 +162,26 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
       builder: (context, _) {
         final l10n = LocalizationService();
 
+        final settings = SettingsManager();
+        final isGrid = settings.currentListStyle == AppListStyle.grid || 
+                       settings.currentListStyle == AppListStyle.coverOnlyGrid;
+
+        Widget content;
+
         if (!_authService.isLoggedIn) {
-          return Padding(
+          content = Padding(
+            key: const ValueKey('login'),
             padding: const EdgeInsets.all(24.0),
             child: MBLoginPrompt(
               onLogin: _handleLogin,
               message: l10n.translate('login_prompt_library'),
             ),
           );
-        }
-
-        // Show spinner only if loading and we have no data yet
-        if (_isLoading && _activities.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (_error != null && _activities.isEmpty) {
-          return Center(
+        } else if (_isLoading && _activities.isEmpty) {
+          content = SeriesListSkeleton(key: const ValueKey('skeleton'), isGrid: isGrid);
+        } else if (_error != null && _activities.isEmpty) {
+          content = Center(
+            key: const ValueKey('error'),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -199,10 +203,9 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
               ),
             ),
           );
-        }
-
-        if (_activities.isEmpty) {
-          return Center(
+        } else if (_activities.isEmpty) {
+          content = Center(
+            key: const ValueKey('empty'),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -215,30 +218,62 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
               ],
             ),
           );
+        } else {
+          content = RefreshIndicator(
+            key: const ValueKey('list'),
+            onRefresh: _fetchActivity,
+            color: AppConstants.accentColor,
+            backgroundColor: AppConstants.secondaryBackground,
+            child: isGrid 
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 160,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: _activities.length,
+                  itemBuilder: (context, index) {
+                    final entry = _activities[index];
+                    return InkWell(
+                      onTap: () => _navigateToDetail(entry.series),
+                      child: EntryListItem(series: entry.series),
+                    );
+                  },
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  itemCount: _activities.length,
+                  itemBuilder: (context, index) {
+                    final entry = _activities[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: InkWell(
+                        onTap: () => _navigateToDetail(entry.series),
+                        borderRadius: BorderRadius.circular(8),
+                        child: EntryListItem(series: entry.series),
+                      ),
+                    );
+                  },
+                ),
+          );
         }
 
-        return RefreshIndicator(
-          onRefresh: _fetchActivity,
-          color: AppConstants.accentColor,
-          backgroundColor: AppConstants.secondaryBackground,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            itemCount: _activities.length,
-            itemBuilder: (context, index) {
-              final entry = _activities[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: InkWell(
-                  onTap: () => _navigateToDetail(entry.series),
-                  borderRadius: BorderRadius.circular(8),
-                  child: EntryListItem(series: entry.series),
-                ),
-              );
-            },
-          ),
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 600),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: content,
         );
       },
     );

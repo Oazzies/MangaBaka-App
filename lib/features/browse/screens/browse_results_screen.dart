@@ -11,7 +11,7 @@ import 'package:bakahyou/utils/settings/settings_enums.dart';
 
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
-import 'package:bakahyou/features/browse/widgets/list_skeleton.dart';
+import 'package:bakahyou/features/series/widgets/series_list_skeleton.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
@@ -178,7 +178,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
     final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
     
-    return ListSkeleton(isGrid: isGrid);
+    return SeriesListSkeleton(isGrid: isGrid);
   }
 
   Widget _buildEmptyState() {
