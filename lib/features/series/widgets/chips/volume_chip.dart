@@ -21,7 +21,7 @@ class VolumeChip extends StatelessWidget {
     if (inLibrary) {
       final progressValue = progress ?? 0;
       return MiniBadge(
-        text: '$progressValue / $volume VOLS',
+        text: '$progressValue / $volume Vol.',
         icon: Icons.shelves,
         color: AppConstants.successColor,
         backgroundColor: AppConstants.successColor.withValues(alpha: 0.1),
@@ -29,7 +29,7 @@ class VolumeChip extends StatelessWidget {
     }
 
     return MiniBadge(
-      text: '$volume VOLS',
+      text: '$volume Vol.',
       icon: Icons.shelves,
     );
   }

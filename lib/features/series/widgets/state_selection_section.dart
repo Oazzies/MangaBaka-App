@@ -28,8 +28,7 @@ class StateSelectionSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           decoration: BoxDecoration(
             color: AppConstants.secondaryBackground,
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(color: AppConstants.borderColor, width: 1),
+            borderRadius: BorderRadius.circular(16.0),
           ),
           child: DropdownButton<String>(
             value: currentState,

@@ -22,8 +22,7 @@ class RatingIconButton extends StatelessWidget {
       width: 54,
       decoration: BoxDecoration(
         color: AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: AppConstants.borderColor, width: 1),
+        borderRadius: BorderRadius.circular(16.0),
       ),
       child: IconButton(
         icon: Icon(

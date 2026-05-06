@@ -4,6 +4,7 @@ import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/features/series/services/metadata_service.dart';
+import 'package:bakahyou/features/series/widgets/chip.dart';
 
 class SeriesGroupedTags extends StatefulWidget {
   final Series series;
@@ -113,19 +114,8 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                               runSpacing: 8,
                               children: tags.map((tag) {
                                 final tagParts = tag.split(' > ');
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: AppConstants.tertiaryBackground,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: AppConstants.borderColor
-                                          .withValues(alpha: 0.6),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Text.rich(
+                                return ChipBase(
+                                  label: Text.rich(
                                     TextSpan(
                                       children: [
                                         if (tagParts.length > 1) ...[
@@ -137,7 +127,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                                                 ' > ',
                                             style: TextStyle(
                                               color: AppConstants.textMutedColor,
-                                              fontSize: 11,
+                                              fontSize: 12,
                                               height: 1.2,
                                             ),
                                           ),
@@ -146,8 +136,8 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                                           text: tagParts.last,
                                           style: TextStyle(
                                             color: AppConstants.textColor,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
                                             height: 1.2,
                                           ),
                                         ),

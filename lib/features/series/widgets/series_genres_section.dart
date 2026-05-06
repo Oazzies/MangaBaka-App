@@ -4,6 +4,7 @@ import 'package:bakahyou/features/series/models/series.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/features/series/services/metadata_service.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/features/series/widgets/chip.dart';
 
 class SeriesGenresSection extends StatelessWidget {
   final Series series;
@@ -24,25 +25,8 @@ class SeriesGenresSection extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: series.genres
-              .map((g) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppConstants.tertiaryBackground,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppConstants.borderColor.withValues(alpha: 0.6),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      metadataService.getGenreLabel(g),
-                      style: TextStyle(
-                        color: AppConstants.textColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                    ),
+              .map((g) => ChipBase(
+                    label: Text(metadataService.getGenreLabel(g)),
                   ))
               .toList(),
         ),

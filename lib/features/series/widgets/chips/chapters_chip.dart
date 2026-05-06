@@ -21,7 +21,7 @@ class ChaptersChip extends StatelessWidget {
     if (inLibrary) {
       final progressValue = progress ?? 0;
       return MiniBadge(
-        text: '$progressValue / $chapters CHS',
+        text: '$progressValue / $chapters Ch.',
         icon: Icons.format_list_bulleted,
         color: AppConstants.successColor,
         backgroundColor: AppConstants.successColor.withValues(alpha: 0.1),
@@ -29,7 +29,7 @@ class ChaptersChip extends StatelessWidget {
     }
 
     return MiniBadge(
-      text: '$chapters CHS',
+      text: '$chapters Ch.',
       icon: Icons.format_list_bulleted,
     );
   }

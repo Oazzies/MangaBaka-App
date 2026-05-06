@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/features/series/widgets/chip.dart';
 
 class WidgetUtils {
   static Widget chipWrap(String label, List<String> items, {Color? color}) {
@@ -22,25 +23,9 @@ class WidgetUtils {
           spacing: 10,
           runSpacing: 10,
           children: items
-              .map((e) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: color ?? AppConstants.tertiaryBackground,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppConstants.borderColor.withValues(alpha: 0.6),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      e,
-                      style: TextStyle(
-                        color: AppConstants.textColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                    ),
+              .map((e) => ChipBase(
+                    backgroundColor: color,
+                    label: Text(e),
                   ))
               .toList(),
         ),
@@ -103,17 +88,10 @@ class WidgetUtils {
 
             return InkWell(
               onTap: () => launchUrl(uri),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
+              borderRadius: BorderRadius.circular(16),
+              child: ChipBase(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppConstants.secondaryBackground,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppConstants.borderColor.withValues(alpha: 0.5),
-                  ),
-                ),
-                child: Row(
+                label: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.network(
@@ -128,7 +106,7 @@ class WidgetUtils {
                       style: TextStyle(
                         color: AppConstants.textColor,
                         fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (language != null && language.isNotEmpty) ...[
