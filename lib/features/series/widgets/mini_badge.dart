@@ -18,9 +18,9 @@ class MiniBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppConstants.tertiaryBackground,
+        color: backgroundColor ?? AppConstants.secondaryBackground,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -29,18 +29,18 @@ class MiniBadge extends StatelessWidget {
           if (icon != null) ...[
             Icon(
               icon, 
-              size: 16, 
+              size: 18, 
               color: color ?? AppConstants.textMutedColor,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
           ],
           Text(
             text.toUpperCase(),
             style: TextStyle(
               color: color ?? AppConstants.textColor, 
-              fontSize: 11, 
-              fontWeight: FontWeight.bold, 
-              letterSpacing: 0.7,
+              fontSize: 12, 
+              fontWeight: FontWeight.w800, 
+              letterSpacing: 0.8,
               height: 1.2,
             ),
           ),
