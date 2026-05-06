@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/features/series/widgets/mini_badge.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class ContentRatingChip extends StatelessWidget {
@@ -8,44 +8,34 @@ class ContentRatingChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (rating.isEmpty) return SizedBox.shrink();
-
-    final formatted =
-        rating[0].toUpperCase() + rating.substring(1).toLowerCase();
+    if (rating.isEmpty) return const SizedBox.shrink();
 
     Color color;
     IconData icon;
     switch (rating.toLowerCase()) {
       case 'suggestive':
         color = AppConstants.warningColor;
-        icon = Icons.whatshot;
+        icon = Icons.whatshot_outlined;
         break;
       case 'erotica':
-        color = AppConstants.errorColor;
-        icon = Icons.whatshot;
-        break;
       case 'pornographic':
         color = AppConstants.errorColor;
-        icon = Icons.whatshot;
+        icon = Icons.whatshot_outlined;
         break;
       case 'safe':
         color = AppConstants.successColor;
-        icon = Icons.local_hospital;
+        icon = Icons.verified_outlined;
         break;
       default:
         color = AppConstants.textMutedColor;
-        icon = Icons.help_outline;
+        icon = Icons.info_outline;
     }
 
-    return ChipBase(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
-          Text(formatted, style: TextStyle(color: color)),
-        ],
-      ),
+    return MiniBadge(
+      text: rating,
+      icon: icon,
+      color: color,
+      backgroundColor: color.withValues(alpha: 0.1),
     );
   }
 }

@@ -7,87 +7,94 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 class SeriesCoversTab extends StatelessWidget {
   final List<SeriesCover>? covers;
+  final double horizontalPadding;
 
-  const SeriesCoversTab({super.key, this.covers});
+  const SeriesCoversTab({super.key, this.covers, this.horizontalPadding = 16.0});
 
   @override
   Widget build(BuildContext context) {
     if (covers == null) {
-      return _buildCoverSkeleton();
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: _buildCoverSkeleton(),
+      );
     }
     if (covers!.isEmpty) {
       return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Text('No covers available.')));
     }
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SeriesSectionHeader(title: 'Covers'),
-        GridView.builder(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 150,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.65,
-          ),
-          itemCount: covers!.length,
-          itemBuilder: (context, index) {
-            final cover = covers![index];
-            final url = cover.url ?? cover.urlX350 ?? cover.urlX250 ?? cover.urlX150;
-            final title = _formatCoverTitle(cover);
-            
-            return GestureDetector(
-              onTap: () {
-                if (url != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FullScreenImageScreen(
-                        imageUrl: url,
-                        heroTag: url,
-                        title: title,
-                        note: cover.note,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SeriesSectionHeader(title: 'Covers'),
+          GridView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 150,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.65,
+            ),
+            itemCount: covers!.length,
+            itemBuilder: (context, index) {
+              final cover = covers![index];
+              final url = cover.url ?? cover.urlX350 ?? cover.urlX250 ?? cover.urlX150;
+              final title = _formatCoverTitle(cover);
+              
+              return GestureDetector(
+                onTap: () {
+                  if (url != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FullScreenImageScreen(
+                          imageUrl: url,
+                          heroTag: url,
+                          title: title,
+                          note: cover.note,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: url != null
+                            ? Hero(
+                                tag: url,
+                                child: Image.network(
+                                  url,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(color: AppConstants.secondaryBackground, child: const Icon(Icons.broken_image)),
+                                ),
+                              )
+                            : Container(color: AppConstants.secondaryBackground, child: const Icon(Icons.broken_image)),
                       ),
                     ),
-                  );
-                }
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: url != null
-                          ? Hero(
-                              tag: url,
-                              child: Image.network(
-                                url,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(color: AppConstants.secondaryBackground, child: const Icon(Icons.broken_image)),
-                              ),
-                            )
-                          : Container(color: AppConstants.secondaryBackground, child: const Icon(Icons.broken_image)),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: AppConstants.textColor, fontSize: 12),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: AppConstants.textColor, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 

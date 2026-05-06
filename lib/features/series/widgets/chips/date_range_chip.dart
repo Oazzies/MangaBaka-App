@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/date_utils.dart' as mb_date;
-import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/features/series/widgets/mini_badge.dart';
 import 'date_dialog.dart';
 
 class DateRangeChip extends StatelessWidget {
@@ -20,7 +20,7 @@ class DateRangeChip extends StatelessWidget {
     final startYear = mb_date.AppDateUtils.extractYear(start);
     final endYear = mb_date.AppDateUtils.extractYear(end);
 
-    if (startYear.isEmpty && endYear.isEmpty) return SizedBox.shrink();
+    if (startYear.isEmpty && endYear.isEmpty) return const SizedBox.shrink();
 
     String text;
     if (startYear.isNotEmpty && endYear.isNotEmpty) {
@@ -32,7 +32,7 @@ class DateRangeChip extends StatelessWidget {
     }
     return GestureDetector(
       onTap: () => _showDateDialog(context),
-      child: ChipBase(label: Text(text)),
+      child: MiniBadge(text: text, icon: Icons.calendar_today_outlined),
     );
   }
 }

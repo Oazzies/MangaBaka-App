@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/features/series/widgets/mini_badge.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class RatingChip extends StatelessWidget {
@@ -23,20 +23,13 @@ class RatingChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avg = _calculateAverageRating();
-    if (avg == null) return SizedBox.shrink();
+    if (avg == null) return const SizedBox.shrink();
 
-    return ChipBase(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.star, size: 18, color: AppConstants.textColor),
-          SizedBox(width: 4),
-          Text(
-            '${avg.toStringAsFixed(1)} / 100',
-            style: TextStyle(color: AppConstants.textColor),
-          ),
-        ],
-      ),
+    return MiniBadge(
+      text: '${avg.toStringAsFixed(1)} / 100',
+      icon: Icons.star,
+      color: AppConstants.accentColor,
+      backgroundColor: AppConstants.accentColor.withValues(alpha: 0.1),
     );
   }
 }

@@ -3,8 +3,6 @@ import 'package:bakahyou/features/series/models/series.dart';
 import 'package:bakahyou/features/series/models/series_link.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
-import 'package:bakahyou/utils/di/service_locator.dart';
-import 'package:bakahyou/features/series/services/metadata_service.dart';
 import 'package:bakahyou/features/series/widgets/series_grouped_tags.dart';
 import 'package:bakahyou/utils/widget_utils.dart';
 
@@ -13,6 +11,7 @@ class SeriesDetailsGrid extends StatelessWidget {
   final List<SeriesLink>? enrichedLinks;
   final bool isWide;
   final LocalizationService l10n;
+  final double horizontalPadding;
 
   const SeriesDetailsGrid({
     super.key,
@@ -20,12 +19,11 @@ class SeriesDetailsGrid extends StatelessWidget {
     this.enrichedLinks,
     this.isWide = false,
     required this.l10n,
+    this.horizontalPadding = 16.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final metadataService = getIt<MetadataService>();
-
     final content = [
       // Genres moved to SeriesDetailScreen
       SeriesGroupedTags(series: series, l10n: l10n),
@@ -59,23 +57,11 @@ class SeriesDetailsGrid extends StatelessWidget {
       ],
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: content,
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: AppConstants.textColor,
-          letterSpacing: 0.5,
-        ),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: content,
       ),
     );
   }

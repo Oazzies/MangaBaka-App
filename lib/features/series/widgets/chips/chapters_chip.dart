@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bakahyou/features/series/widgets/chip.dart';
+import 'package:bakahyou/features/series/widgets/mini_badge.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 
 class ChaptersChip extends StatelessWidget {
@@ -16,47 +16,21 @@ class ChaptersChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (chapters.isEmpty || chapters == 'null') return SizedBox.shrink();
+    if (chapters.isEmpty || chapters == 'null') return const SizedBox.shrink();
 
     if (inLibrary) {
       final progressValue = progress ?? 0;
-      return ChipBase(
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.format_list_bulleted, size: 18, color: AppConstants.textColor),
-            const SizedBox(width: 4),
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: '$progressValue',
-                    style: TextStyle(
-                      color: AppConstants.successColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' of $chapters Ch.',
-                    style: TextStyle(color: AppConstants.textColor),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      return MiniBadge(
+        text: '$progressValue / $chapters CHS',
+        icon: Icons.format_list_bulleted,
+        color: AppConstants.successColor,
+        backgroundColor: AppConstants.successColor.withValues(alpha: 0.1),
       );
     }
 
-    return ChipBase(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.format_list_bulleted, size: 18, color: AppConstants.textColor),
-          const SizedBox(width: 4),
-          Text('$chapters Ch.'),
-        ],
-      ),
+    return MiniBadge(
+      text: '$chapters CHS',
+      icon: Icons.format_list_bulleted,
     );
   }
 }

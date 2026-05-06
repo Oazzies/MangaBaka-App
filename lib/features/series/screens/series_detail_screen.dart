@@ -197,12 +197,9 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                           if (_fetchError)
                             _buildErrorBanner(),
                           SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: isWide ? 40.0 : 16.0),
-                              child: isWide 
-                                ? _buildWideLayout(entry, l10n)
-                                : _buildMobileLayout(entry, l10n),
-                            ),
+                            child: isWide 
+                              ? _buildWideLayout(entry, l10n)
+                              : _buildMobileLayout(entry, l10n),
                           ),
                           const SliverToBoxAdapter(child: SizedBox(height: 80)),
                         ],
@@ -279,6 +276,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
 
   Widget _buildMobileLayout(LibraryEntry? entry, LocalizationService l10n) {
     final series = _fullSeries ?? widget.series;
+    const hPadding = 16.0;
     
     return AnimatedSwitcher(
       duration: 600.ms,
@@ -289,55 +287,70 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
             key: const ValueKey('full_layout'),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SeriesMetadataChips(series: series, entry: entry),
-              const SizedBox(height: 16),
-              SeriesActionBar(
-                entry: entry, 
-                l10n: l10n,
-                onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
-                onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: hPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SeriesMetadataChips(series: series, entry: entry),
+                    const SizedBox(height: 16),
+                    SeriesActionBar(
+                      entry: entry, 
+                      l10n: l10n,
+                      onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
+                      onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
+                    ),
+                    const SizedBox(height: 20),
+                    if (series.description.isNotEmpty) ...[
+                      const SeriesSectionHeader(title: 'Description'),
+                      DescriptionSection(description: series.description),
+                      const SizedBox(height: 20),
+                    ],
+                    SeriesGenresSection(series: series, l10n: l10n),
+                    SeriesSegmentedControl(
+                      selectedTab: _selectedTab,
+                      onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              if (series.description.isNotEmpty) ...[
-                const SeriesSectionHeader(title: 'Description'),
-                DescriptionSection(description: series.description),
-                const SizedBox(height: 20),
-              ],
-              SeriesGenresSection(series: series, l10n: l10n),
-              SeriesSegmentedControl(
-                selectedTab: _selectedTab,
-                onTabChanged: (tab) => setState(() => _selectedTab = tab),
-              ),
               const SizedBox(height: 16),
-              _buildTabContent(series, entry, l10n),
+              _buildTabContent(series, entry, l10n, hPadding: hPadding),
             ],
           ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-        : const Column(
-            key: ValueKey('skeleton_layout'),
-            children: [
-              SeriesDetailSkeleton(),
-              SizedBox(height: 400),
-            ],
+        : const Padding(
+            padding: EdgeInsets.symmetric(horizontal: hPadding),
+            child: Column(
+              key: ValueKey('skeleton_layout'),
+              children: [
+                SeriesDetailSkeleton(),
+                SizedBox(height: 400),
+              ],
+            ),
           ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOutCubic),
     );
   }
 
   Widget _buildWideLayout(LibraryEntry? entry, LocalizationService l10n) {
     final series = _fullSeries ?? widget.series;
+    const hPadding = 40.0;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 300,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SeriesHeroCover(series: series, height: 420, width: 300),
-              const SizedBox(height: 32),
-              if (_isDataLoaded)
-                SeriesMetadataChips(series: series, entry: entry, isVertical: true)
-                    .animate().fadeIn(duration: 400.ms).slideX(begin: -0.1, end: 0),
-            ],
+        Padding(
+          padding: const EdgeInsets.only(left: hPadding),
+          child: SizedBox(
+            width: 300,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SeriesHeroCover(series: series, height: 420, width: 300),
+                const SizedBox(height: 32),
+                if (_isDataLoaded)
+                  SeriesMetadataChips(series: series, entry: entry, isVertical: true)
+                      .animate().fadeIn(duration: 400.ms).slideX(begin: -0.1, end: 0),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 48),
@@ -349,49 +362,65 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                   key: const ValueKey('wide_full_layout'),
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SeriesActionBar(
-                      entry: entry, 
-                      l10n: l10n,
-                      onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
-                      onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
-                    ),
-                    const SizedBox(height: 20),
-                    if (series.description.isNotEmpty) ...[
-                      const SeriesSectionHeader(title: 'Description'),
-                      DescriptionSection(description: series.description),
-                      const SizedBox(height: 24),
-                    ],
-                    SeriesGenresSection(series: series, l10n: l10n),
-                    SeriesSegmentedControl(
-                      selectedTab: _selectedTab,
-                      onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                    Padding(
+                      padding: const EdgeInsets.only(right: hPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SeriesActionBar(
+                            entry: entry, 
+                            l10n: l10n,
+                            onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
+                            onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
+                          ),
+                          const SizedBox(height: 20),
+                          if (series.description.isNotEmpty) ...[
+                            const SeriesSectionHeader(title: 'Description'),
+                            DescriptionSection(description: series.description),
+                            const SizedBox(height: 24),
+                          ],
+                          SeriesGenresSection(series: series, l10n: l10n),
+                          SeriesSegmentedControl(
+                            selectedTab: _selectedTab,
+                            onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    _buildTabContent(series, entry, l10n, isWide: true),
+                    _buildTabContent(series, entry, l10n, isWide: true, hPadding: hPadding, wideRightPaddingOnly: true),
                   ],
                 ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-              : const SeriesDetailSkeleton(key: ValueKey('wide_skeleton'), isWide: true),
+              : Padding(
+                  padding: const EdgeInsets.only(right: hPadding),
+                  child: const SeriesDetailSkeleton(key: ValueKey('wide_skeleton'), isWide: true),
+                ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTabContent(Series series, LibraryEntry? entry, LocalizationService l10n, {bool isWide = false}) {
+  Widget _buildTabContent(Series series, LibraryEntry? entry, LocalizationService l10n, {bool isWide = false, double hPadding = 16.0, bool wideRightPaddingOnly = false}) {
+    // For News, we want 0 horizontal padding because NewsListItem already has horizontal margin.
+    // However, the header still needs padding.
+    final tabPadding = _selectedTab == 'News' ? 0.0 : hPadding;
+    // For wide layout, the padding is usually only on the right for the tab content in this column.
+    
     switch (_selectedTab) {
       case 'Covers':
-        return SeriesCoversTab(covers: _covers);
+        return SeriesCoversTab(covers: _covers, horizontalPadding: tabPadding);
       case 'Related':
-        return SeriesRelatedTab(related: _related, l10n: l10n);
+        return SeriesRelatedTab(related: _related, l10n: l10n, horizontalPadding: tabPadding);
       case 'News':
-        return SeriesNewsTab(news: _news);
+        return SeriesNewsTab(news: _news, horizontalPadding: hPadding); // Pass hPadding for the header, items handle themselves
       case 'Collections':
-        return SeriesCollectionsTab(collections: _collections);
+        return SeriesCollectionsTab(collections: _collections, horizontalPadding: tabPadding);
       case 'Works':
-        return SeriesWorksTab(works: _works);
+        return SeriesWorksTab(works: _works, horizontalPadding: tabPadding);
       case 'Information':
       default:
-        return SeriesDetailsGrid(series: series, enrichedLinks: _enrichedLinks, l10n: l10n, isWide: isWide);
+        return SeriesDetailsGrid(series: series, enrichedLinks: _enrichedLinks, l10n: l10n, isWide: isWide, horizontalPadding: tabPadding);
     }
   }
 

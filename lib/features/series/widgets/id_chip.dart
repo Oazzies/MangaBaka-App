@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/features/series/widgets/mini_badge.dart';
 
 class IdChip extends StatelessWidget {
   final String id;
@@ -24,22 +24,9 @@ class IdChip extends StatelessWidget {
             );
           }
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.5)),
-          ),
-          child: Text(
-            'ID: $id',
-            style: TextStyle(
-              fontSize: 11,
-              color: AppConstants.textMutedColor,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'monospace',
-            ),
-          ),
+        child: MiniBadge(
+          text: 'ID: $id',
+          icon: Icons.fingerprint_outlined,
         ),
       ),
     );
