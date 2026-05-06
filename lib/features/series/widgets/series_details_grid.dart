@@ -27,37 +27,7 @@ class SeriesDetailsGrid extends StatelessWidget {
     final metadataService = getIt<MetadataService>();
 
     final content = [
-      if (series.genres.isNotEmpty) ...[
-        _buildSectionHeader(l10n.translate('genres')),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: series.genres
-              .map((g) => Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: AppConstants.tertiaryBackground,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppConstants.borderColor.withValues(alpha: 0.6),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      metadataService.getGenreLabel(g),
-                      style: TextStyle(
-                        color: AppConstants.textColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        height: 1.2,
-                      ),
-                    ),
-                  ))
-              .toList(),
-        ),
-        const SizedBox(height: 32),
-      ],
+      // Genres moved to SeriesDetailScreen
       SeriesGroupedTags(series: series, l10n: l10n),
       if (series.authors.isNotEmpty) ...[
         WidgetUtils.chipWrap(

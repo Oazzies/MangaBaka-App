@@ -11,6 +11,7 @@ class Series {
   final String romanizedTitle;
   final List<String> secondaryTitles;
   final String coverUrl;
+  final String rawCoverUrl;
   final List<String> authors;
   final List<String> artists;
   final String description;
@@ -42,6 +43,7 @@ class Series {
     required this.romanizedTitle,
     required this.secondaryTitles,
     required this.coverUrl,
+    required this.rawCoverUrl,
     required this.authors,
     required this.artists,
     required this.description,
@@ -92,6 +94,7 @@ class Series {
               .toList() ??
           [],
       coverUrl: JsonUtils.getCover(json),
+      rawCoverUrl: JsonUtils.getRawCover(json),
       authors: (json['authors'] as List?)?.cast<String>() ?? [],
       artists: (json['artists'] as List?)?.cast<String>() ?? [],
       description: (json['description'] ?? '')

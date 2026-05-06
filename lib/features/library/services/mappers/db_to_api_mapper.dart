@@ -64,6 +64,7 @@ class DbToApiMapper {
       romanizedTitle: dbSeries.romanizedTitle ?? '',
       secondaryTitles: decodeStringArray(dbSeries.secondaryTitles),
       coverUrl: dbSeries.coverUrl,
+      rawCoverUrl: dbSeries.coverUrl,
       authors: decodeStringArray(dbSeries.authors),
       artists: decodeStringArray(dbSeries.artists),
       description: dbSeries.description,

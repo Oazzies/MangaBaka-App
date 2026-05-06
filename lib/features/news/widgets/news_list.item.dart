@@ -8,8 +8,9 @@ import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class NewsListItem extends StatelessWidget {
   final News news;
+  final bool showReferencedSeries;
 
-  const NewsListItem({super.key, required this.news});
+  const NewsListItem({super.key, required this.news, this.showReferencedSeries = true});
 
   String _formatDate(String date) {
     if (date.isEmpty) return '';
@@ -70,24 +71,26 @@ class NewsListItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(l10n.translate('series_referenced')),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 220,
-                  child: GridView.builder(
-                    scrollDirection: Axis.horizontal,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1,
-                      childAspectRatio: 1.5,
-                      mainAxisSpacing: 8,
+                if (showReferencedSeries && news.series.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(l10n.translate('series_referenced')),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 220,
+                    child: GridView.builder(
+                      scrollDirection: Axis.horizontal,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        childAspectRatio: 1.5,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: news.series.length,
+                      itemBuilder: (context, index) {
+                        return ReferencedListItem(series: news.series[index]);
+                      },
                     ),
-                    itemCount: news.series.length,
-                    itemBuilder: (context, index) {
-                      return ReferencedListItem(series: news.series[index]);
-                    },
                   ),
-                ),
+                ],
               ],
             ),
           ),

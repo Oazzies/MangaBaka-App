@@ -18,4 +18,12 @@ class JsonUtils {
     }
     return '';
   }
+
+  static String getRawCover(Map<String, dynamic> map) {
+    final cover = map['cover'];
+    if (cover is Map && cover['raw'] is Map && cover['raw']['url'] is String) {
+      return cover['raw']['url'];
+    }
+    return '';
+  }
 }

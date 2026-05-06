@@ -9,12 +9,24 @@ import 'package:bakahyou/features/series/widgets/description_section.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/features/series/models/series_link.dart';
+import 'package:bakahyou/features/series/models/series_cover.dart';
+import 'package:bakahyou/features/news/models/news.dart';
+import 'package:bakahyou/features/series/models/series_collection.dart';
+import 'package:bakahyou/features/series/models/series_work.dart';
 import 'package:bakahyou/features/series/services/series_id_service.dart';
 import 'package:bakahyou/features/series/widgets/series_detail_app_bar.dart';
 import 'package:bakahyou/features/series/widgets/series_action_bar.dart';
 import 'package:bakahyou/features/series/widgets/series_metadata_chips.dart';
 import 'package:bakahyou/features/series/widgets/series_details_grid.dart';
 import 'package:bakahyou/features/series/widgets/series_hero_cover.dart';
+import 'package:bakahyou/features/series/widgets/series_segmented_control.dart';
+import 'package:bakahyou/features/series/widgets/series_genres_section.dart';
+import 'package:bakahyou/features/series/widgets/series_section_header.dart';
+import 'package:bakahyou/features/series/widgets/tabs/series_covers_tab.dart';
+import 'package:bakahyou/features/series/widgets/tabs/series_related_tab.dart';
+import 'package:bakahyou/features/series/widgets/tabs/series_news_tab.dart';
+import 'package:bakahyou/features/series/widgets/tabs/series_collections_tab.dart';
+import 'package:bakahyou/features/series/widgets/tabs/series_works_tab.dart';
 
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/theme/theme_manager.dart';
@@ -39,18 +51,35 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
   bool _isDataLoaded = false;
   bool _fetchError = false;
 
+  String _selectedTab = 'Information';
+  List<SeriesCover>? _covers;
+  List<Series>? _related;
+  List<News>? _news;
+  List<SeriesCollection>? _collections;
+  List<SeriesWork>? _works;
+
   @override
   void initState() {
     super.initState();
     _libraryService = getIt<LibraryService>();
     _entryStream = _libraryService.watchEntryFromDb(widget.series.id);
-    _fullSeries = widget.series; // Start with partial data
+    _fullSeries = widget.series; 
     _fetchFullData();
+  }
+
+  Future<void> _fetchExtraData() async {
+    final id = widget.series.id;
+    SeriesService.fetchSeriesCovers(id).then((v) { if (mounted) setState(() => _covers = v); });
+    SeriesService.fetchSeriesRelated(id).then((v) { if (mounted) setState(() => _related = v); });
+    SeriesService.fetchSeriesNews(id).then((v) { if (mounted) setState(() => _news = v); });
+    SeriesService.fetchSeriesCollections(id).then((v) { if (mounted) setState(() => _collections = v); });
+    SeriesService.fetchSeriesWorks(id).then((v) { if (mounted) setState(() => _works = v); });
   }
 
   Future<void> _fetchFullData() async {
     try {
-      // Start fetching links and full series in parallel
+      _fetchExtraData(); 
+
       final results = await Future.wait([
         SeriesService.fetchSeriesLinks(widget.series.id),
         SeriesService.fetchSeries(widget.series.id),
@@ -68,17 +97,15 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
       SeriesService.logger.warning('Error fetching full data: $e');
       if (mounted) {
         setState(() {
-          _isDataLoaded = true; // Still show what we have
+          _isDataLoaded = true; 
           _fetchError = true;
         });
       }
     }
   }
 
-
   void _shareLink() {
     final l10n = LocalizationService();
-    // links is List<dynamic>; find first String containing 'mangabaka'
     final String? link = widget.series.links
         .whereType<String>()
         .where((l) => l.contains('mangabaka'))
@@ -131,7 +158,6 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = SettingsManager();
-    final preferredTitle = widget.series.getDisplayTitle(settings.defaultTitleLanguage);
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > 900;
     final isTablet = screenWidth > 600 && screenWidth <= 900;
@@ -169,41 +195,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                             onCopy: _copyToClipboard,
                           ),
                           if (_fetchError)
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: AppConstants.errorColor.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: AppConstants.errorColor.withValues(alpha: 0.4)),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.warning_amber_rounded, color: AppConstants.errorColor, size: 18),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          'Could not load full details. Showing partial data.',
-                                          style: TextStyle(color: AppConstants.errorColor, fontSize: 13),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _isDataLoaded = false;
-                                            _fetchError = false;
-                                          });
-                                          _fetchFullData();
-                                        },
-                                        child: Text('Retry', style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold, fontSize: 13)),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
+                            _buildErrorBanner(),
                           SliverToBoxAdapter(
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: isWide ? 40.0 : 16.0),
@@ -212,6 +204,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                                 : _buildMobileLayout(entry, l10n),
                             ),
                           ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 80)),
                         ],
                       ),
                     ),
@@ -223,6 +216,44 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildErrorBanner() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppConstants.errorColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppConstants.errorColor.withValues(alpha: 0.4)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppConstants.errorColor, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Could not load full details. Showing partial data.',
+                  style: TextStyle(color: AppConstants.errorColor, fontSize: 13),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isDataLoaded = false;
+                    _fetchError = false;
+                  });
+                  _fetchFullData();
+                },
+                child: Text('Retry', style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold, fontSize: 13)),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -268,24 +299,26 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               ),
               const SizedBox(height: 20),
               if (series.description.isNotEmpty) ...[
-                _buildSectionHeader('Description'),
+                const SeriesSectionHeader(title: 'Description'),
                 DescriptionSection(description: series.description),
                 const SizedBox(height: 20),
               ],
-              SeriesDetailsGrid(series: series, enrichedLinks: _enrichedLinks, l10n: l10n),
+              SeriesGenresSection(series: series, l10n: l10n),
+              SeriesSegmentedControl(
+                selectedTab: _selectedTab,
+                onTabChanged: (tab) => setState(() => _selectedTab = tab),
+              ),
+              const SizedBox(height: 16),
+              _buildTabContent(series, entry, l10n),
             ],
-          ).animate()
-           .fadeIn(duration: 600.ms)
-           .slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-        : Column(
-            key: const ValueKey('skeleton_layout'),
+          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
+        : const Column(
+            key: ValueKey('skeleton_layout'),
             children: [
-              const SeriesDetailSkeleton(),
-              const SizedBox(height: 400),
+              SeriesDetailSkeleton(),
+              SizedBox(height: 400),
             ],
-          ).animate()
-           .fadeIn(duration: 400.ms)
-           .slideY(begin: 0.05, end: 0, curve: Curves.easeOutCubic),
+          ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOutCubic),
     );
   }
 
@@ -303,9 +336,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               const SizedBox(height: 32),
               if (_isDataLoaded)
                 SeriesMetadataChips(series: series, entry: entry, isVertical: true)
-                    .animate()
-                    .fadeIn(duration: 400.ms)
-                    .slideX(begin: -0.1, end: 0),
+                    .animate().fadeIn(duration: 400.ms).slideX(begin: -0.1, end: 0),
             ],
           ),
         ),
@@ -326,15 +357,19 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                     ),
                     const SizedBox(height: 20),
                     if (series.description.isNotEmpty) ...[
-                      _buildSectionHeader('Description'),
+                      const SeriesSectionHeader(title: 'Description'),
                       DescriptionSection(description: series.description),
                       const SizedBox(height: 24),
                     ],
-                    SeriesDetailsGrid(series: series, enrichedLinks: _enrichedLinks, isWide: true, l10n: l10n),
-                  ].animate(interval: 50.ms)
-                   .fadeIn(duration: 500.ms)
-                   .slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic),
-                )
+                    SeriesGenresSection(series: series, l10n: l10n),
+                    SeriesSegmentedControl(
+                      selectedTab: _selectedTab,
+                      onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTabContent(series, entry, l10n, isWide: true),
+                  ],
+                ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
               : const SeriesDetailSkeleton(key: ValueKey('wide_skeleton'), isWide: true),
           ),
         ),
@@ -342,11 +377,22 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppConstants.textColor, letterSpacing: 0.5)),
-    );
+  Widget _buildTabContent(Series series, LibraryEntry? entry, LocalizationService l10n, {bool isWide = false}) {
+    switch (_selectedTab) {
+      case 'Covers':
+        return SeriesCoversTab(covers: _covers);
+      case 'Related':
+        return SeriesRelatedTab(related: _related, l10n: l10n);
+      case 'News':
+        return SeriesNewsTab(news: _news);
+      case 'Collections':
+        return SeriesCollectionsTab(collections: _collections);
+      case 'Works':
+        return SeriesWorksTab(works: _works);
+      case 'Information':
+      default:
+        return SeriesDetailsGrid(series: series, enrichedLinks: _enrichedLinks, l10n: l10n, isWide: isWide);
+    }
   }
 
   Future<void> _addSeriesToLibrary() async {
@@ -366,3 +412,4 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
     }
   }
 }
+

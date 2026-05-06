@@ -279,6 +279,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       romanizedTitle: '',
       secondaryTitles: [],
       coverUrl: result.thumbnailUrl,
+      rawCoverUrl: result.thumbnailUrl,
       authors: [],
       artists: [],
       description: '',
