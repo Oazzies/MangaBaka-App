@@ -39,6 +39,9 @@ class SeriesDetailAppBar extends StatelessWidget {
       backgroundColor: AppConstants.primaryBackground,
       elevation: 0,
       scrolledUnderElevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: onBack,

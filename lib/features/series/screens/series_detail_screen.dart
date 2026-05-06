@@ -283,48 +283,61 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
       child: _isDataLoaded 
-        ? Column(
-            key: const ValueKey('full_layout'),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: hPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SeriesMetadataChips(series: series, entry: entry),
-                    const SizedBox(height: 16),
-                    SeriesActionBar(
-                      entry: entry, 
-                      l10n: l10n,
-                      onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
-                      onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
-                    ),
-                    const SizedBox(height: 20),
-                    if (series.description.isNotEmpty) ...[
-                      const SeriesSectionHeader(title: 'Description'),
-                      DescriptionSection(description: series.description),
-                      const SizedBox(height: 20),
-                    ],
-                    SeriesGenresSection(series: series, l10n: l10n),
-                    SeriesSegmentedControl(
-                      selectedTab: _selectedTab,
-                      onTabChanged: (tab) => setState(() => _selectedTab = tab),
-                    ),
-                  ],
+        ? Transform.translate(
+            offset: const Offset(0, -16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppConstants.primaryBackground,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
                 ),
               ),
-              const SizedBox(height: 16),
-              _buildTabContent(series, entry, l10n, hPadding: hPadding),
-            ],
+              child: Column(
+                key: const ValueKey('full_layout'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: hPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SeriesMetadataChips(series: series, entry: entry),
+                        const SizedBox(height: 16),
+                        SeriesActionBar(
+                          entry: entry, 
+                          l10n: l10n,
+                          onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
+                          onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
+                        ),
+                        const SizedBox(height: 20),
+                        if (series.description.isNotEmpty) ...[
+                          const SeriesSectionHeader(title: 'Description'),
+                          DescriptionSection(description: series.description),
+                          const SizedBox(height: 20),
+                        ],
+                        SeriesGenresSection(series: series, l10n: l10n),
+                        SeriesSegmentedControl(
+                          selectedTab: _selectedTab,
+                          onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTabContent(series, entry, l10n, hPadding: hPadding),
+                ],
+              ),
+            ),
           ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-        : const Padding(
-            padding: EdgeInsets.symmetric(horizontal: hPadding),
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: hPadding),
             child: Column(
-              key: ValueKey('skeleton_layout'),
+              key: const ValueKey('skeleton_layout'),
               children: [
-                SeriesDetailSkeleton(),
-                SizedBox(height: 400),
+                const SeriesDetailSkeleton(),
+                const SizedBox(height: 400),
               ],
             ),
           ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOutCubic),
