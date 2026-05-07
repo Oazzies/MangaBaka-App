@@ -8,6 +8,9 @@ class TypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (type.isEmpty) return const SizedBox.shrink();
-    return MiniBadge(text: type);
+    return MiniBadge(
+      text: type,
+      icon: Icons.category_outlined,
+    );
   }
 }
