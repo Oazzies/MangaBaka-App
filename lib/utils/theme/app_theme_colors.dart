@@ -26,10 +26,10 @@ class AppThemeColors {
     Color baseBorder = const Color(0xFF3F3F46);
     Color baseAccent = const Color(0xFF10B981);
     Color basePrimaryAccent = const Color(0xFF047857);
-    Color baseSuccess = const Color(0xFF34D399);
-    Color baseWarning = const Color(0xFFFBBF24);
-    Color baseError = const Color(0xFFF87171);
-    Color baseInfo = const Color(0xFF60A5FA);
+    Color baseSuccess = isDark ? const Color(0xFF34D399) : const Color(0xFF059669); // Emerald 400 vs 600
+    Color baseWarning = isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706); // Amber 400 vs 600
+    Color baseError = isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626); // Red 400 vs 600
+    Color baseInfo = isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB); // Blue 400 vs 600
     Color baseText = const Color(0xFFFAFAFA);
     Color baseTextMuted = const Color(0xFFA1A1AA);
 
