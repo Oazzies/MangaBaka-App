@@ -163,6 +163,13 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
 
         final settings = SettingsManager();
         final isGrid = settings.currentListStyle.isGrid;
+        final contentPreferences = settings.contentPreferences;
+
+        // Filter activities based on content rating preferences
+        final filteredActivities = _activities.where((entry) {
+          return contentPreferences.isEmpty ||
+              contentPreferences.contains(entry.series.contentRating.toLowerCase());
+        }).toList();
 
         Widget content;
 
@@ -175,9 +182,9 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
               message: l10n.translate('login_prompt_library'),
             ),
           );
-        } else if (_isLoading && _activities.isEmpty) {
+        } else if (_isLoading && filteredActivities.isEmpty) {
           content = SeriesListSkeleton(key: const ValueKey('skeleton'), isGrid: isGrid);
-        } else if (_error != null && _activities.isEmpty) {
+        } else if (_error != null && filteredActivities.isEmpty) {
           content = Center(
             key: const ValueKey('error'),
             child: Padding(
@@ -201,7 +208,7 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
               ),
             ),
           );
-        } else if (_activities.isEmpty) {
+        } else if (filteredActivities.isEmpty) {
           content = Center(
             key: const ValueKey('empty'),
             child: Column(
@@ -231,9 +238,9 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
-                  itemCount: _activities.length,
+                  itemCount: filteredActivities.length,
                   itemBuilder: (context, index) {
-                    final entry = _activities[index];
+                    final entry = filteredActivities[index];
                     return InkWell(
                       onTap: () => _navigateToDetail(entry.series),
                       child: EntryListItem(series: entry.series),
@@ -245,9 +252,9 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  itemCount: _activities.length,
+                  itemCount: filteredActivities.length,
                   itemBuilder: (context, index) {
-                    final entry = _activities[index];
+                    final entry = filteredActivities[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: InkWell(

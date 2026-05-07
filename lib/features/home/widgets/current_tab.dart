@@ -134,8 +134,15 @@ class _CurrentTabContent extends StatelessWidget {
               );
             } else {
               final entries = snapshot.data ?? [];
+              final contentPreferences = settings.contentPreferences;
+              
               final currentlyReading = entries
-                  .where((e) => e.state.toLowerCase() == 'reading')
+                  .where((e) {
+                    final isReading = e.state.toLowerCase() == 'reading';
+                    final matchesRating = contentPreferences.isEmpty ||
+                        contentPreferences.contains(e.series.contentRating.toLowerCase());
+                    return isReading && matchesRating;
+                  })
                   .map((e) => e.series)
                   .toList()
                 ..sort((a, b) => b.lastUpdated.compareTo(a.lastUpdated));
