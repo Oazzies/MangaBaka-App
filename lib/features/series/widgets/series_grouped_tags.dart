@@ -242,7 +242,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
               ),
             ),
           ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
       ],
     );
   }

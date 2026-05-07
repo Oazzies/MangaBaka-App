@@ -27,32 +27,26 @@ class SeriesDetailsGrid extends StatelessWidget {
     final content = [
       // Genres moved to SeriesDetailScreen
       SeriesGroupedTags(series: series, l10n: l10n),
-      if (series.authors.isNotEmpty) ...[
+      if (series.authors.isNotEmpty)
         WidgetUtils.chipWrap(
           l10n.translate('authors'),
           series.authors,
           color: AppConstants.secondaryBackground,
         ),
-        const SizedBox(height: 12),
-      ],
-      if (series.artists.isNotEmpty) ...[
+      if (series.artists.isNotEmpty)
         WidgetUtils.chipWrap(
           l10n.translate('artists'),
           series.artists,
           color: AppConstants.secondaryBackground,
         ),
-        const SizedBox(height: 12),
-      ],
-      if (series.publishers.isNotEmpty) ...[
+      if (series.publishers.isNotEmpty)
         WidgetUtils.chipWrap(
           l10n.translate('publishers'),
           series.publishers,
           color: AppConstants.secondaryBackground,
         ),
-        const SizedBox(height: 12),
-      ],
       if (enrichedLinks != null || series.links.isNotEmpty) ...[
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
         WidgetUtils.linkList(enrichedLinks ?? series.links),
       ],
     ];

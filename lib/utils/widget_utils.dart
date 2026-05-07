@@ -29,7 +29,7 @@ class WidgetUtils {
                   ))
               .toList(),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -133,7 +133,7 @@ class WidgetUtils {
             );
           }).toList(),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
       ],
     );
   }
