@@ -5,6 +5,8 @@ import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:bakahyou/features/navigation/screens/main_screen.dart';
+
 class SyncProgressOverlay extends StatelessWidget {
   const SyncProgressOverlay({super.key});
 
@@ -36,79 +38,104 @@ class SyncProgressOverlay extends StatelessWidget {
   Widget _buildCard(BuildContext context, LibrarySyncStatus status) {
     final hasError = status.error != null;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppConstants.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: AppConstants.primaryBackground.withValues(alpha: 0.6),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Icon / spinner
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppConstants.tertiaryBackground,
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () => MainScreen.setTabIndex(1), // Library is index 1
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppConstants.secondaryBackground,
+          borderRadius: BorderRadius.circular(16),
+          // border: Border.all(color: AppConstants.borderColor), // Removed border
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: hasError
-                  ? Icon(Icons.warning_amber_rounded,
-                      color: AppConstants.errorColor, size: 20)
-                  : CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(AppConstants.accentColor),
-                    ),
-            ),
-          ),
-          const SizedBox(width: 14),
-
-          // Text
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Icon / spinner
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Text(
-                  hasError ? 'Sync Interrupted' : 'Syncing Library',
-                  style: TextStyle(
-                    color: hasError
-                        ? AppConstants.errorColor
-                        : AppConstants.textColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00301d), // Dark green
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      hasError ? Icons.warning_amber_rounded : Icons.sync,
+                      color: hasError
+                          ? AppConstants.errorColor
+                          : AppConstants.accentColor,
+                      size: 20,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  hasError
-                      ? (status.error ?? 'An error occurred.')
-                      : '${status.currentEntries} entries synced',
-                  style: TextStyle(
-                    color: hasError
-                        ? AppConstants.errorColor.withOpacity(0.85)
-                        : AppConstants.textMutedColor,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                if (!hasError && status.isSyncing)
+                  SizedBox(
+                    width: 42,
+                    height: 42,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          AppConstants.accentColor),
+                    ),
                   ),
-                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(width: 14),
+
+            // Text
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hasError
+                        ? 'Sync Interrupted'
+                        : '${status.currentEntries} entries synced',
+                    style: TextStyle(
+                      color: hasError
+                          ? AppConstants.errorColor
+                          : AppConstants.textColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hasError
+                        ? (status.error ?? 'An error occurred.')
+                        : 'Please keep the app open',
+                    style: TextStyle(
+                      color: hasError
+                          ? AppConstants.errorColor.withValues(alpha: 0.85)
+                          : AppConstants.textMutedColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right,
+              color: AppConstants.textMutedColor.withValues(alpha: 0.5),
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

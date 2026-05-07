@@ -2,6 +2,7 @@ import 'package:bakahyou/features/series/services/series_id_service.dart';
 import 'package:flutter/material.dart';
 import 'package:bakahyou/features/browse/widgets/mb_search_bar.dart';
 import 'package:bakahyou/features/library/models/library_entry.dart';
+import 'package:bakahyou/features/library/models/library_sync_status.dart';
 import 'package:bakahyou/features/library/screens/library_filter_helper.dart';
 import 'package:bakahyou/features/library/screens/library_screen_constants.dart';
 import 'package:bakahyou/features/library/services/library_service.dart';
@@ -137,11 +138,19 @@ class _LibraryScreenState extends State<LibraryScreen>
         return Scaffold(
           backgroundColor: LibraryScreenConstants.backgroundColor,
           appBar: _buildAppBar(),
-          body: Column(
-            children: [
-              if (_isLibraryIncomplete) _buildIncompleteWarning(),
-              Expanded(child: _buildBody()),
-            ],
+          body: ValueListenableBuilder<LibrarySyncStatus>(
+            valueListenable: _libraryService.syncStatus,
+            builder: (context, status, _) {
+              return Column(
+                children: [
+                  if (status.isServerDown) _buildServerDownWarning(),
+                  if (!status.isServerDown && status.error != null)
+                    _buildSyncErrorWarning(status.error!),
+                  if (_isLibraryIncomplete) _buildIncompleteWarning(),
+                  Expanded(child: _buildBody()),
+                ],
+              );
+            },
           ),
         );
       },
@@ -166,6 +175,55 @@ class _LibraryScreenState extends State<LibraryScreen>
           TextButton(
             onPressed: () => _libraryService.importFullLibrary(),
             child: Text('Re-import', style: TextStyle(color: AppConstants.warningColor, fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServerDownWarning() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: AppConstants.errorColor.withValues(alpha: 0.12),
+      child: Row(
+        children: [
+          Icon(Icons.cloud_off_rounded, color: AppConstants.errorColor, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'MangaBaka is currently unreachable. Using local library.',
+              style: TextStyle(color: AppConstants.errorColor, fontSize: 12),
+            ),
+          ),
+          TextButton(
+            onPressed: () => _onRefresh(),
+            child: Text('Retry', style: TextStyle(color: AppConstants.errorColor, fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSyncErrorWarning(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: AppConstants.errorColor.withValues(alpha: 0.12),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline_rounded, color: AppConstants.errorColor, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Sync failed: $message',
+              style: TextStyle(color: AppConstants.errorColor, fontSize: 12),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.close, color: AppConstants.errorColor, size: 16),
+            onPressed: () => _libraryService.syncStatus.value = 
+                _libraryService.syncStatus.value.copyWith(clearError: true),
           ),
         ],
       ),

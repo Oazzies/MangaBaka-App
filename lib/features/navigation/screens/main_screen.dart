@@ -12,7 +12,13 @@ import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  static final GlobalKey<_MainScreenState> mainScreenKey = GlobalKey<_MainScreenState>();
+  
+  MainScreen({Key? key}) : super(key: key ?? mainScreenKey);
+
+  static void setTabIndex(int index) {
+    mainScreenKey.currentState?._onItemTapped(index);
+  }
 
   @override
   State<MainScreen> createState() => _MainScreenState();

@@ -146,8 +146,20 @@ class LibraryService {
       rethrow;
     } on NetworkException catch (e) {
       syncStatus.value = syncStatus.value.copyWith(
-          isSyncing: false, error: 'Connection failed. Try again later.');
+        isSyncing: false,
+        error: e.message,
+        isServerDown: true,
+      );
       _logger.warning('Network error during import: $e');
+      rethrow;
+    } on ApiException catch (e) {
+      final isDown = e.statusCode >= 500;
+      syncStatus.value = syncStatus.value.copyWith(
+        isSyncing: false,
+        error: e.message,
+        isServerDown: isDown,
+      );
+      _logger.warning('API error during import: $e');
       rethrow;
     } catch (e, st) {
       _logger.severe('Failed to import library: $e\n$st');
@@ -173,7 +185,7 @@ class LibraryService {
     while (page <= apiPageCap) {
       if (_isSyncCancelled) return (hitCap: false);
 
-      final result = await _fetchPage(token, page, sortBy: 'id');
+      final result = await _fetchPage(token, page, sortBy: 'updated_at_desc');
       final entries = result.entries;
 
       if (result.isError) {
@@ -276,9 +288,21 @@ class LibraryService {
           syncStatus.value.copyWith(isSyncing: false, error: e.message);
       rethrow;
     } on NetworkException catch (e) {
-      syncStatus.value = syncStatus.value
-          .copyWith(isSyncing: false, error: 'Connection failed.');
+      syncStatus.value = syncStatus.value.copyWith(
+        isSyncing: false,
+        error: e.message,
+        isServerDown: true,
+      );
       _logger.warning('Network error during sync: $e');
+      rethrow;
+    } on ApiException catch (e) {
+      final isDown = e.statusCode >= 500;
+      syncStatus.value = syncStatus.value.copyWith(
+        isSyncing: false,
+        error: e.message,
+        isServerDown: isDown,
+      );
+      _logger.warning('API error during sync: $e');
       rethrow;
     } catch (e, st) {
       _logger.severe('Failed to sync library: $e\n$st');

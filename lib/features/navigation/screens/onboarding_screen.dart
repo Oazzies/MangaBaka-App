@@ -66,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       Navigator.of(context).pop();
     } else {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainScreen()),
+        MaterialPageRoute(builder: (_) => MainScreen()),
       );
     }
   }
