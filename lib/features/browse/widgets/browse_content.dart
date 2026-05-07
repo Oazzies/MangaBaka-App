@@ -33,7 +33,7 @@ class BrowseContent extends StatelessWidget {
   Widget _buildLoadingState() {
     final settings = SettingsManager();
     final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-    final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
+    final isGrid = activeStyle.isGrid;
     
     return SeriesListSkeleton(isGrid: isGrid);
   }
@@ -63,7 +63,7 @@ class BrowseContent extends StatelessWidget {
       builder: (context, _) {
         final settings = SettingsManager();
         final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-        final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
+        final isGrid = activeStyle.isGrid;
 
         if (isGrid) {
           return GridView.builder(

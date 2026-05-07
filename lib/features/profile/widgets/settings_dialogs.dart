@@ -94,28 +94,36 @@ class SettingsDialogs {
                 ),
               ),
               const SizedBox(height: 24),
-              if (isScrollable)
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (context, index) => _buildOptionRow(
-                      options[index],
-                      currentValue,
-                      getLabel,
-                      onSelected,
-                      dialogContext,
-                    ),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isScrollable)
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: options.length,
+                          itemBuilder: (context, index) => _buildOptionRow(
+                            options[index],
+                            currentValue,
+                            getLabel,
+                            onSelected,
+                            dialogContext,
+                          ),
+                        )
+                      else
+                        ...options.map((option) => _buildOptionRow(
+                              option,
+                              currentValue,
+                              getLabel,
+                              onSelected,
+                              dialogContext,
+                            )),
+                    ],
                   ),
-                )
-              else
-                ...options.map((option) => _buildOptionRow(
-                      option,
-                      currentValue,
-                      getLabel,
-                      onSelected,
-                      dialogContext,
-                    )),
+                ),
+              ),
             ],
           ),
         );
@@ -224,10 +232,10 @@ class SettingsDialogs {
         return l10n.translate('list_style_compact');
       case AppListStyle.minimalList:
         return l10n.translate('list_style_minimal_list');
-      case AppListStyle.grid:
-        return l10n.translate('list_style_grid');
       case AppListStyle.coverOnlyGrid:
         return l10n.translate('list_style_cover_only_grid');
+      case AppListStyle.compactGrid:
+        return l10n.translate('list_style_compact_grid');
     }
   }
 

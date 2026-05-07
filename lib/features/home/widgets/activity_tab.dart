@@ -161,8 +161,7 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
         final l10n = LocalizationService();
 
         final settings = SettingsManager();
-        final isGrid = settings.currentListStyle == AppListStyle.grid || 
-                       settings.currentListStyle == AppListStyle.coverOnlyGrid;
+        final isGrid = settings.currentListStyle.isGrid;
 
         Widget content;
 

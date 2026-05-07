@@ -209,8 +209,8 @@ class _LibraryScreenState extends State<LibraryScreen>
         if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           final settings = SettingsManager();
           final isGrid = settings.separateListStyles
-              ? settings.libraryListStyle == AppListStyle.grid
-              : settings.currentListStyle == AppListStyle.grid;
+              ? settings.libraryListStyle.isGrid
+              : settings.currentListStyle.isGrid;
           return SeriesListSkeleton(isGrid: isGrid);
         }
         if (snapshot.hasError) {
@@ -275,8 +275,8 @@ class _LibraryScreenState extends State<LibraryScreen>
         builder: (context, _) {
           final settings = SettingsManager();
           final isGrid = settings.separateListStyles
-              ? settings.libraryListStyle == AppListStyle.grid
-              : settings.currentListStyle == AppListStyle.grid;
+              ? settings.libraryListStyle.isGrid
+              : settings.currentListStyle.isGrid;
 
           if (isGrid) {
             return GridView.builder(

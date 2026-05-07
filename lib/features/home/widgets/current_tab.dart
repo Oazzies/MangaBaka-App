@@ -120,10 +120,8 @@ class _CurrentTabContent extends StatelessWidget {
           builder: (context, _) {
             final settings = SettingsManager();
             final isGrid = settings.separateListStyles
-                ? settings.libraryListStyle == AppListStyle.grid ||
-                    settings.libraryListStyle == AppListStyle.coverOnlyGrid
-                : settings.currentListStyle == AppListStyle.grid ||
-                    settings.currentListStyle == AppListStyle.coverOnlyGrid;
+                ? settings.libraryListStyle.isGrid
+                : settings.currentListStyle.isGrid;
 
             Widget content;
 

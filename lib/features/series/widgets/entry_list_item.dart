@@ -66,8 +66,10 @@ class EntryListItem extends StatelessWidget {
 
   Widget _buildContent(BuildContext context, AppListStyle style, LocalizationService l10n, String displayTitle) {
     switch (style) {
-      case AppListStyle.grid:
-        return _buildGridItem(context, l10n, displayTitle);
+      case AppListStyle.coverOnlyGrid:
+        return _buildCoverOnlyGridItem(context);
+      case AppListStyle.compactGrid:
+        return _buildCompactGridItem(context, displayTitle);
       case AppListStyle.minimalList:
         return _buildMinimalListItem(context, l10n, displayTitle);
       case AppListStyle.compact:
@@ -118,49 +120,54 @@ class EntryListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildGridItem(BuildContext context, LocalizationService l10n, String displayTitle) {
+
+
+  Widget _buildCoverOnlyGridItem(BuildContext context) {
     return Card(
       color: AppConstants.secondaryBackground,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
+      child: _buildCoverImage(
+        width: double.infinity,
+        borderRadius: BorderRadius.zero,
+      ),
+    );
+  }
+
+  Widget _buildCompactGridItem(BuildContext context, String displayTitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Card(
+            color: AppConstants.secondaryBackground,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            margin: EdgeInsets.zero,
             child: _buildCoverImage(
               width: double.infinity,
               borderRadius: BorderRadius.zero,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayTitle,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppConstants.textColor,
-                      ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 2),
-                Text(
-                  '${l10n.translate('type_${series.type.toLowerCase()}')} • ${l10n.translate('status_${series.status.toLowerCase()}')}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppConstants.textMutedColor,
-                        fontSize: 11,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
+          child: SizedBox(
+            height: 18, // Fixed height for title area
+            child: Text(
+              displayTitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppConstants.textColor,
+                    fontSize: 12,
+                  ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

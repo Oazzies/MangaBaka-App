@@ -176,7 +176,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   Widget _buildLoadingState() {
     final settings = SettingsManager();
     final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-    final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
+    final isGrid = activeStyle.isGrid;
     
     return SeriesListSkeleton(isGrid: isGrid);
   }
@@ -215,7 +215,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       builder: (context, _) {
         final settings = SettingsManager();
         final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-        final isGrid = activeStyle == AppListStyle.grid || activeStyle == AppListStyle.coverOnlyGrid;
+        final isGrid = activeStyle.isGrid;
         final shouldShowRanking = widget.sortBy == 'popularity_asc';
 
         if (isGrid) {

@@ -25,7 +25,7 @@ class SettingsManager extends ChangeNotifier {
 
   static const String _listStyleKey = '${AppConstants.prefixStorageKey}list_style_pref';
 
-  AppListStyle _currentListStyle = AppListStyle.comfortable;
+  AppListStyle _currentListStyle = AppListStyle.compactGrid;
   AppListStyle get currentListStyle => _currentListStyle;
 
   bool _hideLibrarySeriesInBrowse = false;
@@ -52,10 +52,10 @@ class SettingsManager extends ChangeNotifier {
   bool _separateListStyles = false;
   bool get separateListStyles => _separateListStyles;
 
-  AppListStyle _libraryListStyle = AppListStyle.comfortable;
+  AppListStyle _libraryListStyle = AppListStyle.compactGrid;
   AppListStyle get libraryListStyle => _libraryListStyle;
 
-  AppListStyle _browseListStyle = AppListStyle.comfortable;
+  AppListStyle _browseListStyle = AppListStyle.compactGrid;
   AppListStyle get browseListStyle => _browseListStyle;
 
   bool _pushNotifications = false;

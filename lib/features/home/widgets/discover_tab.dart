@@ -40,8 +40,7 @@ class _DiscoverTabState extends State<DiscoverTab> with AutomaticKeepAliveClient
       builder: (context, _) {
         final l10n = LocalizationService();
         final settings = SettingsManager();
-        final isGrid = settings.currentListStyle == AppListStyle.grid || 
-                       settings.currentListStyle == AppListStyle.coverOnlyGrid;
+        final isGrid = settings.currentListStyle.isGrid;
 
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 600),

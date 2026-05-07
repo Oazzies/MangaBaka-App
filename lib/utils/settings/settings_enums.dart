@@ -2,8 +2,13 @@ enum AppListStyle {
   comfortable,
   compact,
   minimalList,
-  grid,
   coverOnlyGrid,
+  compactGrid,
+}
+
+extension AppListStyleExtension on AppListStyle {
+  bool get isGrid => this == AppListStyle.coverOnlyGrid || 
+                     this == AppListStyle.compactGrid;
 }
 
 enum AppStartPage { home, library, browse, news, profile }
