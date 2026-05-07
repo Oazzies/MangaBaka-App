@@ -55,7 +55,7 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.transparent,
+                          AppConstants.primaryBackground.withValues(alpha: 0),
                           AppConstants.primaryBackground.withValues(alpha: 0.8),
                           AppConstants.primaryBackground,
                         ],

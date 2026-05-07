@@ -124,7 +124,7 @@ class SeriesDetailAppBar extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.transparent,
+                    AppConstants.primaryBackground.withValues(alpha: 0),
                     AppConstants.primaryBackground.withValues(alpha: 0.4),
                     AppConstants.primaryBackground.withValues(alpha: 0.9),
                     AppConstants.primaryBackground,
