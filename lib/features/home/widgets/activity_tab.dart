@@ -7,6 +7,7 @@ import 'package:bakahyou/features/series/widgets/entry_list_item.dart';
 import 'package:bakahyou/features/series/screens/series_detail_screen.dart';
 import 'package:bakahyou/features/profile/widgets/mb_login_prompt.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/exceptions/app_exceptions.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
@@ -147,7 +148,7 @@ class _ActivityTabState extends State<ActivityTab> with AutomaticKeepAliveClient
       if (e is AuthCancelledException) return;
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please try again.')),
+        SnackBar(content: Text(LocalizationService().translate('login_failed'))),
       );
     }
   }

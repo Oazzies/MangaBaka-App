@@ -3,6 +3,7 @@ import 'package:bakahyou/features/library/models/library_sync_status.dart';
 import 'package:bakahyou/features/library/services/library_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:bakahyou/features/navigation/screens/main_screen.dart';
@@ -37,6 +38,7 @@ class SyncProgressOverlay extends StatelessWidget {
 
   Widget _buildCard(BuildContext context, LibrarySyncStatus status) {
     final hasError = status.error != null;
+    final l10n = LocalizationService();
 
     return GestureDetector(
       onTap: () => MainScreen.setTabIndex(1), // Library is index 1
@@ -67,7 +69,7 @@ class SyncProgressOverlay extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF00301d), // Dark green
+                    color: AppConstants.accentColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -102,8 +104,8 @@ class SyncProgressOverlay extends StatelessWidget {
                 children: [
                   Text(
                     hasError
-                        ? 'Sync Interrupted'
-                        : '${status.currentEntries} entries synced',
+                        ? l10n.translate('sync_interrupted')
+                        : l10n.translate('entries_synced').replaceAll('{count}', status.currentEntries.toString()),
                     style: TextStyle(
                       color: hasError
                           ? AppConstants.errorColor
@@ -115,8 +117,8 @@ class SyncProgressOverlay extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     hasError
-                        ? (status.error ?? 'An error occurred.')
-                        : 'Please keep the app open',
+                        ? (status.error ?? l10n.translate('an_error_occurred'))
+                        : l10n.translate('keep_app_open'),
                     style: TextStyle(
                       color: hasError
                           ? AppConstants.errorColor.withValues(alpha: 0.85)

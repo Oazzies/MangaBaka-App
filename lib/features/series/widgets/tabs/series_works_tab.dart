@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/series/models/series_work.dart';
 import 'package:bakahyou/features/series/widgets/series_section_header.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class SeriesWorksTab extends StatelessWidget {
   final List<SeriesWork>? works;
@@ -15,15 +16,16 @@ class SeriesWorksTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LocalizationService();
     if (works == null) return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
-    if (works!.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Text('No works available.')));
+    if (works!.isEmpty) return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_works_available'))));
     
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SeriesSectionHeader(title: 'Works'),
+          SeriesSectionHeader(title: l10n.translate('tab_works')),
           ListView.separated(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
@@ -61,7 +63,7 @@ class SeriesWorksTab extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  w.subTitle.isNotEmpty ? w.subTitle : 'Volume ${w.sequenceString}',
+                                  w.subTitle.isNotEmpty ? w.subTitle : l10n.translate('volume_title').replaceAll('{index}', w.sequenceString),
                                   style: TextStyle(color: AppConstants.textColor, fontWeight: FontWeight.bold, fontSize: 15),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -79,7 +81,7 @@ class SeriesWorksTab extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Release: ${w.releaseDate}',
+                            l10n.translate('release_date').replaceAll('{date}', w.releaseDate),
                             style: TextStyle(color: AppConstants.textMutedColor, fontSize: 13),
                           ),
                           const SizedBox(height: 4),
@@ -87,7 +89,7 @@ class SeriesWorksTab extends StatelessWidget {
                             children: [
                               Icon(Icons.description_outlined, size: 14, color: AppConstants.textMutedColor),
                               const SizedBox(width: 4),
-                              Text('${w.pages} pages', style: TextStyle(color: AppConstants.textMutedColor, fontSize: 12)),
+                              Text(l10n.translate('pages_count').replaceAll('{count}', w.pages.toString()), style: TextStyle(color: AppConstants.textMutedColor, fontSize: 12)),
                               const SizedBox(width: 12),
                               Icon(Icons.label_outline, size: 14, color: AppConstants.textMutedColor),
                               const SizedBox(width: 4),

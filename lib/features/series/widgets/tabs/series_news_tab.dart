@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bakahyou/features/news/models/news.dart';
 import 'package:bakahyou/features/news/widgets/news_list.item.dart';
 import 'package:bakahyou/features/series/widgets/series_section_header.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class SeriesNewsTab extends StatelessWidget {
   final List<News>? news;
@@ -18,8 +19,9 @@ class SeriesNewsTab extends StatelessWidget {
     if (news == null) {
       return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
     }
+    final l10n = LocalizationService();
     if (news!.isEmpty) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Text('No news available.')));
+      return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_news_available'))));
     }
     
     return Column(
@@ -27,7 +29,7 @@ class SeriesNewsTab extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: const SeriesSectionHeader(title: 'Series News'),
+          child: SeriesSectionHeader(title: l10n.translate('tab_news')),
         ),
         ListView.builder(
           shrinkWrap: true,

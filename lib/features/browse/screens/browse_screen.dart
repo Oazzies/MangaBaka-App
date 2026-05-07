@@ -244,8 +244,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
               }
             }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('No series found for "$cleanedTitle".')),
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(LocalizationService().translate('no_series_found_for').replaceAll('{title}', cleanedTitle))),
             );
           }
         } else {
@@ -254,7 +254,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
             _isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not find a book title for this barcode.')),
+            SnackBar(content: Text(LocalizationService().translate('barcode_not_found'))),
           );
         }
       } catch (e) {
@@ -263,7 +263,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to look up the barcode. Please try again.')),
+          SnackBar(content: Text(LocalizationService().translate('barcode_lookup_failed'))),
         );
       }
     }

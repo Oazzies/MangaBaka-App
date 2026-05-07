@@ -23,7 +23,7 @@ class SeriesRelatedTab extends StatelessWidget {
       return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
     }
     if (related!.isEmpty) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Text('No related series.')));
+      return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_related_series'))));
     }
     
     return Padding(
@@ -31,7 +31,7 @@ class SeriesRelatedTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SeriesSectionHeader(title: 'Related Series'),
+          SeriesSectionHeader(title: l10n.translate('tab_related')),
           ListView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.zero,

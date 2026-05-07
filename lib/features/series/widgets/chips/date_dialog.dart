@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/date_utils.dart' as mb_date;
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class DateDialog extends StatelessWidget {
   final String start;
@@ -11,11 +12,12 @@ class DateDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final startFormatted = mb_date.AppDateUtils.formatFullDate(start);
     final endFormatted = mb_date.AppDateUtils.formatFullDate(end);
+    final l10n = LocalizationService();
 
     return AlertDialog(
       backgroundColor: AppConstants.tertiaryBackground,
       title: Text(
-        'Publication Dates',
+        l10n.translate('publication_dates'),
         style: TextStyle(
           color: AppConstants.textColor,
           fontSize: 20,
@@ -34,7 +36,7 @@ class DateDialog extends StatelessWidget {
                 SizedBox(
                   width: 60,
                   child: Text(
-                    'Start:',
+                    '${l10n.translate('start')}:',
                     style: TextStyle(
                       color: AppConstants.textMutedColor,
                       fontWeight: FontWeight.w500,
@@ -61,7 +63,7 @@ class DateDialog extends StatelessWidget {
                   SizedBox(
                     width: 60,
                     child: Text(
-                      'End:',
+                      '${l10n.translate('end')}:',
                       style: TextStyle(
                         color: AppConstants.textMutedColor,
                         fontWeight: FontWeight.w500,
@@ -85,7 +87,7 @@ class DateDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n.translate('close')),
         ),
       ],
     );

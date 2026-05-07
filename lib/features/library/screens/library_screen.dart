@@ -121,7 +121,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       if (e is AuthCancelledException) return;
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please try again.')),
+        SnackBar(content: Text(LocalizationService().translate('login_failed_retry'))),
       );
     }
   }
@@ -174,7 +174,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Your library exceeds 1,000,000 entries. Only the first 1,000,000 could be imported.',
+              LocalizationService().translate('library_limit_warning'),
               style: TextStyle(
                 color: AppConstants.warningColor, 
                 fontSize: 12,
@@ -184,7 +184,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           ),
           TextButton(
             onPressed: () => _libraryService.importFullLibrary(),
-            child: Text('Re-import', style: TextStyle(color: AppConstants.warningColor, fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text(LocalizationService().translate('re_import'), style: TextStyle(color: AppConstants.warningColor, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -208,7 +208,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'MangaBaka is currently unreachable. Using local library.',
+              LocalizationService().translate('server_unreachable_warning'),
               style: TextStyle(
                 color: AppConstants.errorColor, 
                 fontSize: 12,
@@ -218,7 +218,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           ),
           TextButton(
             onPressed: () => _onRefresh(),
-            child: Text('Retry', style: TextStyle(color: AppConstants.errorColor, fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text(LocalizationService().translate('retry'), style: TextStyle(color: AppConstants.errorColor, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -242,7 +242,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Sync failed: $message',
+              LocalizationService().translate('sync_failed').replaceAll('{message}', message),
               style: TextStyle(
                 color: AppConstants.errorColor, 
                 fontSize: 12,

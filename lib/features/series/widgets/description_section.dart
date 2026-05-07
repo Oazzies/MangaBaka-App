@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class DescriptionSection extends StatefulWidget {
   final String description;
@@ -82,7 +83,7 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                expanded ? 'Show less' : 'Show more',
+                                expanded ? LocalizationService().translate('show_less') : LocalizationService().translate('show_more'),
                                 style: TextStyle(
                                   color: AppConstants.accentColor,
                                   fontWeight: FontWeight.bold,
@@ -105,12 +106,12 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                 IconButton(
                   icon: const Icon(Icons.copy_all, size: 20),
                   padding: const EdgeInsets.all(8),
-                  tooltip: 'Copy description',
+                  tooltip: LocalizationService().translate('copy_description'),
                   color: AppConstants.textMutedColor,
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: widget.description));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Description copied to clipboard'), behavior: SnackBarBehavior.floating),
+                      SnackBar(content: Text(LocalizationService().translate('description_copied')), behavior: SnackBarBehavior.floating),
                     );
                   },
                 ),

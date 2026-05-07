@@ -149,7 +149,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Copied "$text" to clipboard'),
+      content: Text(LocalizationService().translate('copied_to_clipboard').replaceAll('{text}', text)),
       behavior: SnackBarBehavior.floating,
       duration: const Duration(seconds: 2),
     ));
@@ -233,7 +233,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Could not load full details. Showing partial data.',
+                  LocalizationService().translate('failed_to_load'),
                   style: TextStyle(color: AppConstants.errorColor, fontSize: 13),
                 ),
               ),
@@ -245,7 +245,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                   });
                   _fetchFullData();
                 },
-                child: Text('Retry', style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold, fontSize: 13)),
+                child: Text(LocalizationService().translate('retry'), style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold, fontSize: 13)),
               ),
             ],
           ),
@@ -313,7 +313,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                         ),
                         const SizedBox(height: 20),
                         if (series.description.isNotEmpty) ...[
-                          const SeriesSectionHeader(title: 'Description'),
+                          SeriesSectionHeader(title: l10n.translate('overview_desc')),
                           DescriptionSection(description: series.description),
                           const SizedBox(height: 20),
                         ],
@@ -388,7 +388,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                           ),
                           const SizedBox(height: 20),
                           if (series.description.isNotEmpty) ...[
-                            const SeriesSectionHeader(title: 'Description'),
+                            SeriesSectionHeader(title: l10n.translate('overview_desc')),
                             DescriptionSection(description: series.description),
                             const SizedBox(height: 24),
                           ],
@@ -446,7 +446,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
       SeriesService.logger.warning('Failed to add series to library: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to add to library. Please try again.')),
+          SnackBar(content: Text(LocalizationService().translate('failed_to_add'))),
         );
       }
     } finally {

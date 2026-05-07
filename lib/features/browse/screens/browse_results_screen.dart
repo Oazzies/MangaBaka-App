@@ -13,6 +13,7 @@ import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/features/series/widgets/series_list_skeleton.dart';
 import 'package:bakahyou/utils/transitions/app_transitions.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -132,7 +133,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _error = 'Failed to load results. Please try again.';
+        _error = LocalizationService().translate('failed_to_load');
       });
     }
   }
@@ -183,7 +184,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Text('No results found.', style: TextStyle(color: AppConstants.textColor)),
+      child: Text(LocalizationService().translate('no_results'), style: TextStyle(color: AppConstants.textColor)),
     );
   }
 
@@ -202,7 +203,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => _fetchResults(initial: true),
-            child: const Text('Retry'),
+            child: Text(LocalizationService().translate('retry')),
           ),
         ],
       ),

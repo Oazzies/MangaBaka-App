@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/series/models/series_collection.dart';
 import 'package:bakahyou/features/series/widgets/series_section_header.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class SeriesCollectionsTab extends StatelessWidget {
   final List<SeriesCollection>? collections;
@@ -16,14 +17,15 @@ class SeriesCollectionsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (collections == null) return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
-    if (collections!.isEmpty) return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Text('No collections available.')));
+    final l10n = LocalizationService();
+    if (collections!.isEmpty) return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_collections_available'))));
     
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SeriesSectionHeader(title: 'Collections'),
+          SeriesSectionHeader(title: l10n.translate('tab_collections')),
           ListView.separated(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
@@ -55,7 +57,7 @@ class SeriesCollectionsTab extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${col.publisherName} • ${col.editionName}',
+                                '${col.publisherName} | ${col.editionName}',
                                 style: TextStyle(color: AppConstants.textMutedColor, fontSize: 13),
                               ),
                             ],

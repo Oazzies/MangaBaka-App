@@ -3,6 +3,7 @@ import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/series/models/series_cover.dart';
 import 'package:bakahyou/features/series/screens/full_screen_image_screen.dart';
 import 'package:bakahyou/features/series/widgets/series_section_header.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class SeriesCoversTab extends StatelessWidget {
@@ -19,8 +20,9 @@ class SeriesCoversTab extends StatelessWidget {
         child: _buildCoverSkeleton(),
       );
     }
-    if (covers!.isEmpty) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: Text('No covers available.')));
+    final l10n = LocalizationService();
+    if (covers == null || covers!.isEmpty) {
+      return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_covers_available'))));
     }
     
     return Padding(
@@ -28,7 +30,7 @@ class SeriesCoversTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SeriesSectionHeader(title: 'Covers'),
+          SeriesSectionHeader(title: l10n.translate('tab_covers')),
           GridView.builder(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
@@ -128,20 +130,20 @@ class SeriesCoversTab extends StatelessWidget {
     );
   }
 
-  String _getFlagEmoji(String lang) {
+  String _getLanguageBadge(String lang) {
     switch (lang.toLowerCase()) {
-      case 'en': return '🇺🇸';
-      case 'ko': return '🇰🇷';
-      case 'pt-br': return '🇧🇷';
-      case 'es': return '🇪🇸';
-      case 'ja': return '🇯🇵';
-      case 'zh': return '🇨🇳';
-      case 'fr': return '🇫🇷';
-      case 'de': return '🇩🇪';
-      case 'it': return '🇮🇹';
-      case 'ru': return '🇷🇺';
-      case 'pt': return '🇵🇹';
-      default: return '🏳️';
+      case 'en': return 'EN';
+      case 'ko': return 'KO';
+      case 'pt-br': return 'BR';
+      case 'es': return 'ES';
+      case 'ja': return 'JA';
+      case 'zh': return 'ZH';
+      case 'fr': return 'FR';
+      case 'de': return 'DE';
+      case 'it': return 'IT';
+      case 'ru': return 'RU';
+      case 'pt': return 'PT';
+      default: return lang.toUpperCase();
     }
   }
 
@@ -162,8 +164,8 @@ class SeriesCoversTab extends StatelessWidget {
           : 'Cover';
     }
 
-    final flag = _getFlagEmoji(cover.language ?? '');
-    String title = '$flag $typeStr';
+    final langBadge = _getLanguageBadge(cover.language ?? '');
+    String title = langBadge.isNotEmpty ? '[$langBadge] $typeStr' : typeStr;
 
     if (type == 'volume' || type == 'volume_back') {
       title += ' (Volume)';

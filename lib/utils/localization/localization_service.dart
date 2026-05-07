@@ -54,6 +54,7 @@ class LocalizationService extends ChangeNotifier {
       return {
         'code': e.key,
         'name': e.value['name'] ?? e.key,
+        'native_name': e.value['native_name'] ?? e.value['name'] ?? e.key,
         'translators': List<String>.from(e.value['translators'] ?? []),
       };
     }).toList();

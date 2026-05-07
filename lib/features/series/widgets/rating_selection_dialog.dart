@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
-import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/settings/settings_enums.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/settings/settings_manager.dart';
 
 
 class RatingSelectionDialog extends StatefulWidget {
@@ -29,10 +30,11 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LocalizationService();
     return AlertDialog(
       backgroundColor: AppConstants.tertiaryBackground,
       title: Text(
-        'Set Your Rating',
+        l10n.translate('rating_dialog_title'),
         style: TextStyle(color: AppConstants.textColor, fontWeight: FontWeight.bold),
       ),
       content: Column(
@@ -40,7 +42,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
         children: [
           Text(
             _currentRating.toInt() == 0
-                ? 'Unrated'
+                ? l10n.translate('rating_unrated')
                 : _currentRating.toInt().toString(),
             style: TextStyle(
               color: AppConstants.textColor,
@@ -65,7 +67,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.translate('cancel')),
         ),
         TextButton(
           onPressed: () {
@@ -75,7 +77,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             }
             Navigator.of(context).pop();
           },
-          child: const Text('Update'),
+          child: Text(l10n.translate('update')),
         ),
       ],
     );
