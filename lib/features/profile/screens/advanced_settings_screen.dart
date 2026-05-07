@@ -4,6 +4,7 @@ import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/features/navigation/screens/onboarding_screen.dart';
 import 'package:bakahyou/features/profile/widgets/settings_components.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/utils/theme/theme_manager.dart';
 
 class AdvancedSettingsScreen extends StatelessWidget {
   const AdvancedSettingsScreen({super.key});
@@ -11,7 +12,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: LocalizationService(),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
         return Scaffold(

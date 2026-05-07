@@ -61,7 +61,7 @@ class SettingsManager extends ChangeNotifier {
   bool _pushNotifications = false;
   bool get pushNotifications => _pushNotifications;
 
-  bool _autoSuggestBrowse = true;
+  bool _autoSuggestBrowse = false;
   bool get autoSuggestBrowse => _autoSuggestBrowse;
 
   Future<void> init() async {
@@ -115,7 +115,7 @@ class SettingsManager extends ChangeNotifier {
     }
 
     _pushNotifications = prefs.getBool(_pushNotificationsKey) ?? false;
-    _autoSuggestBrowse = prefs.getBool(_autoSuggestBrowseKey) ?? true;
+    _autoSuggestBrowse = prefs.getBool(_autoSuggestBrowseKey) ?? false;
 
     notifyListeners();
   }

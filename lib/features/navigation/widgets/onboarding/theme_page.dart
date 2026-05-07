@@ -32,6 +32,24 @@ class ThemePage extends StatelessWidget {
     }
   }
 
+  String _getThemeName(AppTheme theme, LocalizationService localization) {
+    switch (theme) {
+      case AppTheme.defaultTheme: return localization.translate('theme_default');
+      case AppTheme.catppuccin: return localization.translate('theme_catppuccin');
+      case AppTheme.greenApple: return localization.translate('theme_green_apple');
+      case AppTheme.lavender: return localization.translate('theme_lavender');
+      case AppTheme.midnightDusk: return localization.translate('theme_midnight_dusk');
+      case AppTheme.nord: return localization.translate('theme_nord');
+      case AppTheme.strawberryDaiquiri: return localization.translate('theme_strawberry_daiquiri');
+      case AppTheme.tako: return localization.translate('theme_tako');
+      case AppTheme.tealTurquoise: return localization.translate('theme_teal_turquoise');
+      case AppTheme.tidalWave: return localization.translate('theme_tidal_wave');
+      case AppTheme.yinYang: return localization.translate('theme_yin_yang');
+      case AppTheme.yotsuba: return localization.translate('theme_yotsuba');
+      case AppTheme.monochrome: return localization.translate('theme_monochrome');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -111,38 +129,66 @@ class ThemePage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      Wrap(
-                        spacing: 16,
-                        runSpacing: 16,
+                      Column(
                         children: AppTheme.values.map((theme) {
                           final isSelected = theme == currentTheme;
                           final accent = _getThemeAccentColor(theme, isActuallyDark);
-
-                          return InkWell(
-                            onTap: () => ThemeManager().setTheme(theme),
-                            borderRadius: BorderRadius.circular(24),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 54,
-                              height: 54,
-                              decoration: BoxDecoration(
-                                color: accent,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected ? AppConstants.textColor : Colors.transparent,
-                                  width: 3,
+                          final themeName = _getThemeName(theme, localization);
+                      
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: InkWell(
+                              onTap: () => ThemeManager().setTheme(theme),
+                              borderRadius: BorderRadius.circular(16),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isSelected 
+                                      ? AppConstants.accentColor.withValues(alpha: 0.15) 
+                                      : AppConstants.secondaryBackground,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isSelected 
+                                        ? AppConstants.accentColor 
+                                        : AppConstants.borderColor.withValues(alpha: 0.5),
+                                    width: 1.5,
+                                  ),
                                 ),
-                                boxShadow: isSelected ? [
-                                  BoxShadow(
-                                    color: accent.withValues(alpha: 0.4),
-                                    blurRadius: 12,
-                                    spreadRadius: 2,
-                                  )
-                                ] : [],
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: accent,
+                                        shape: BoxShape.circle,
+                                        border: isSelected 
+                                            ? Border.all(color: AppConstants.textColor.withValues(alpha: 0.5), width: 2)
+                                            : null,
+                                      ),
+                                      child: isSelected 
+                                          ? Icon(Icons.check, color: AppConstants.primaryBackground, size: 20)
+                                          : null,
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Text(
+                                        themeName,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          color: isSelected ? AppConstants.textColor : AppConstants.textColor.withValues(alpha: 0.8),
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(Icons.radio_button_checked, color: AppConstants.accentColor, size: 20)
+                                    else
+                                      Icon(Icons.radio_button_off, color: AppConstants.textMutedColor, size: 20),
+                                  ],
+                                ),
                               ),
-                              child: isSelected 
-                                ? Icon(Icons.check, color: AppConstants.primaryBackground, size: 24)
-                                : null,
                             ),
                           );
                         }).toList(),
