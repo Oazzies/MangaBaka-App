@@ -30,7 +30,7 @@ class SeriesGenresSection extends StatelessWidget {
                   ))
               .toList(),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
       ],
     );
   }

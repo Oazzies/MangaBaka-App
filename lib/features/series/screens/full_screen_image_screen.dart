@@ -19,14 +19,19 @@ class FullScreenImageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstants.primaryBackground,
       appBar: AppBar(
-        backgroundColor: Colors.black.withValues(alpha: 0.5),
+        backgroundColor: AppConstants.primaryBackground.withValues(alpha: 0.8),
         elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: title != null 
-            ? Text(title!, style: const TextStyle(color: Colors.white, fontSize: 16)) 
+            ? Text(title!, style: TextStyle(color: AppConstants.textColor, fontSize: 16, fontWeight: FontWeight.bold)) 
             : null,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: AppConstants.textColor),
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -44,7 +49,7 @@ class FullScreenImageScreen extends StatelessWidget {
                     if (loadingProgress == null) return child;
                     return const Center(child: CircularProgressIndicator());
                   },
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, color: Colors.white),
+                  errorBuilder: (context, error, stackTrace) => Icon(Icons.error, color: AppConstants.textColor),
                 ),
               ),
             ),
@@ -61,16 +66,15 @@ class FullScreenImageScreen extends StatelessWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.8),
-                      Colors.transparent,
+                      AppConstants.primaryBackground.withValues(alpha: 0.9),
+                      AppConstants.primaryBackground.withValues(alpha: 0),
                     ],
                   ),
                 ),
                 child: SafeArea(
-                  top: false,
                   child: Text(
                     note!,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: TextStyle(color: AppConstants.textColor, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
                 ),
