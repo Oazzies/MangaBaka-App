@@ -19,13 +19,13 @@ enum AppTheme {
 
 class AppThemeColors {
   static void applyTheme(AppTheme theme, bool isDark) {
-    // Defaults to help avoid uninitialized colors
-    Color basePrimary = isDark ? const Color(0xFF0a0a0a) : const Color(0xFFFAFAFA);
-    Color baseSecondary = isDark ? const Color(0xFF18181B) : const Color(0xFFFFFFFF);
-    Color baseTertiary = isDark ? const Color(0xFF23232a) : const Color(0xFFF4F4F5);
+    // Default fallback values
+    Color basePrimary = isDark ? const Color(0xFF050505) : const Color(0xFFF2F2F5);
+    Color baseSecondary = isDark ? const Color(0xFF161618) : const Color(0xFFFFFFFF);
+    Color baseTertiary = isDark ? const Color(0xFF28282C) : const Color(0xFFE2E2E8);
     Color baseAccent = isDark ? const Color(0xFF1b9f70) : const Color(0xFF10b981);
     Color basePrimaryAccent = isDark ? const Color(0xFF00301d) : const Color(0xFF047857);
-    Color baseBorder = isDark ? const Color(0xFF3f3f46) : const Color(0xFFE4E4E7);
+    Color baseBorder = isDark ? const Color(0xFF404045) : const Color(0xFFC8C8D0);
     Color baseSuccess = isDark ? const Color(0xFF81e6ca) : const Color(0xFF34d399);
     Color baseWarning = isDark ? const Color(0xFFffc83e) : const Color(0xFFfbbf24);
     Color baseError = isDark ? const Color(0xFFef4444) : const Color(0xFFdc2626);
@@ -35,221 +35,232 @@ class AppThemeColors {
 
     switch (theme) {
       case AppTheme.defaultTheme:
+        if (isDark) {
+          basePrimary = const Color(0xFF050505);
+          baseSecondary = const Color(0xFF161618);
+          baseTertiary = const Color(0xFF28282C);
+          baseBorder = const Color(0xFF404045);
+        } else {
+          basePrimary = const Color(0xFFF2F2F5);
+          baseSecondary = const Color(0xFFFFFFFF);
+          baseTertiary = const Color(0xFFE2E2E8);
+          baseBorder = const Color(0xFFC8C8D0);
+        }
         break;
       case AppTheme.monochrome:
         if (isDark) {
           basePrimary = const Color(0xFF000000);
-          baseSecondary = const Color(0xFF111111);
-          baseTertiary = const Color(0xFF222222);
+          baseSecondary = const Color(0xFF141414);
+          baseTertiary = const Color(0xFF282828);
+          baseBorder = const Color(0xFF444444);
           baseAccent = const Color(0xFFE5E5E5);
-          basePrimaryAccent = const Color(0xFF404040);
-          baseBorder = const Color(0xFF333333);
+          basePrimaryAccent = const Color(0xFF737373);
         } else {
-          basePrimary = const Color(0xFFFFFFFF);
-          baseSecondary = const Color(0xFFF5F5F5);
-          baseTertiary = const Color(0xFFE5E5E5);
+          basePrimary = const Color(0xFFF0F0F0);
+          baseSecondary = const Color(0xFFFFFFFF);
+          baseTertiary = const Color(0xFFE0E0E0);
+          baseBorder = const Color(0xFFBDBDBD);
           baseAccent = const Color(0xFF171717);
-          basePrimaryAccent = const Color(0xFFD4D4D4);
-          baseBorder = const Color(0xFFE5E5E5);
+          basePrimaryAccent = const Color(0xFF737373);
           baseText = const Color(0xFF000000);
           baseTextMuted = const Color(0x8A000000);
         }
         break;
       case AppTheme.catppuccin:
         if (isDark) {
-          basePrimary = const Color(0xFF1e1e2e);
-          baseSecondary = const Color(0xFF181825);
-          baseTertiary = const Color(0xFF11111b);
-          baseAccent = const Color(0xFFcba6f7);
-          basePrimaryAccent = const Color(0xFFb4befe);
-          baseBorder = const Color(0xFF313244);
-          baseText = const Color(0xFFcdd6f4);
-          baseTextMuted = const Color(0xFFbac2de);
+          basePrimary = const Color(0xFF11111B); // Crust
+          baseSecondary = const Color(0xFF1E1E2E); // Base
+          baseTertiary = const Color(0xFF313244); // Surface0
+          baseBorder = const Color(0xFF45475A); // Surface1
+          baseAccent = const Color(0xFFCBA6F7);
+          basePrimaryAccent = const Color(0xFFB4BEFE);
+          baseText = const Color(0xFFCDD6F4);
+          baseTextMuted = const Color(0xFFBAC2DE);
         } else {
-          basePrimary = const Color(0xFFeff1f5);
-          baseSecondary = const Color(0xFFe6e9ef);
-          baseTertiary = const Color(0xFFdce0e8);
-          baseAccent = const Color(0xFF8839ef);
-          basePrimaryAccent = const Color(0xFF7287fd);
-          baseBorder = const Color(0xFFbcc0cc);
-          baseText = const Color(0xFF4c4f69);
-          baseTextMuted = const Color(0xFF6c6f85);
+          basePrimary = const Color(0xFFE6E9EF); // Mantle
+          baseSecondary = const Color(0xFFEFF1F5); // Base (lightest)
+          baseTertiary = const Color(0xFFCCD0DA); // Surface0
+          baseBorder = const Color(0xFFBCC0CC); // Surface1
+          baseAccent = const Color(0xFF8839EF);
+          basePrimaryAccent = const Color(0xFF7287FD);
+          baseText = const Color(0xFF4C4F69);
+          baseTextMuted = const Color(0xFF6C6F85);
         }
         break;
       case AppTheme.greenApple:
         if (isDark) {
-          basePrimary = const Color(0xFF0F172A);
-          baseSecondary = const Color(0xFF1E293B);
-          baseTertiary = const Color(0xFF334155);
+          basePrimary = const Color(0xFF070B14);
+          baseSecondary = const Color(0xFF121B2B);
+          baseTertiary = const Color(0xFF22324A);
+          baseBorder = const Color(0xFF3B4E6B);
           baseAccent = const Color(0xFF84CC16);
           basePrimaryAccent = const Color(0xFF65A30D);
-          baseBorder = const Color(0xFF475569);
         } else {
-          basePrimary = const Color(0xFFF8FAFC);
+          basePrimary = const Color(0xFFEEF2F6);
           baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFF1F5F9);
+          baseTertiary = const Color(0xFFDFE6F0);
+          baseBorder = const Color(0xFFC0CDDF);
           baseAccent = const Color(0xFF65A30D);
           basePrimaryAccent = const Color(0xFF4D7C0F);
-          baseBorder = const Color(0xFFE2E8F0);
         }
         break;
       case AppTheme.lavender:
         if (isDark) {
-          basePrimary = const Color(0xFF171520);
-          baseSecondary = const Color(0xFF1F1D2B);
-          baseTertiary = const Color(0xFF2A273A);
+          basePrimary = const Color(0xFF0E0D14);
+          baseSecondary = const Color(0xFF1A1724);
+          baseTertiary = const Color(0xFF2A2538);
+          baseBorder = const Color(0xFF423A54);
           baseAccent = const Color(0xFFB4A1E5);
           basePrimaryAccent = const Color(0xFF9074D6);
-          baseBorder = const Color(0xFF3B3754);
         } else {
-          basePrimary = const Color(0xFFF8F7FA);
+          basePrimary = const Color(0xFFEBE7F2);
           baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFF0EDF6);
+          baseTertiary = const Color(0xFFDBD4E8);
+          baseBorder = const Color(0xFFBDB2D4);
           baseAccent = const Color(0xFF8E75D3);
           basePrimaryAccent = const Color(0xFF6E51B8);
-          baseBorder = const Color(0xFFE5DFEF);
         }
         break;
       case AppTheme.midnightDusk:
         if (isDark) {
-          basePrimary = const Color(0xFF121217);
-          baseSecondary = const Color(0xFF1A1A24);
-          baseTertiary = const Color(0xFF252533);
+          basePrimary = const Color(0xFF0A0A0C);
+          baseSecondary = const Color(0xFF14141B);
+          baseTertiary = const Color(0xFF242430);
+          baseBorder = const Color(0xFF383848);
           baseAccent = const Color(0xFFF03A47);
           basePrimaryAccent = const Color(0xFFC02C36);
-          baseBorder = const Color(0xFF343447);
         } else {
-          basePrimary = const Color(0xFFF5F5F7);
+          basePrimary = const Color(0xFFEBEBEF);
           baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFEAEAF0);
+          baseTertiary = const Color(0xFFDADAE0);
+          baseBorder = const Color(0xFFBEBECA);
           baseAccent = const Color(0xFFD81E2B);
           basePrimaryAccent = const Color(0xFFA51420);
-          baseBorder = const Color(0xFFDADBDF);
         }
         break;
       case AppTheme.nord:
         if (isDark) {
-          basePrimary = const Color(0xFF2E3440);
-          baseSecondary = const Color(0xFF3B4252);
-          baseTertiary = const Color(0xFF434C5E);
+          basePrimary = const Color(0xFF242933);
+          baseSecondary = const Color(0xFF2E3440);
+          baseTertiary = const Color(0xFF3B4252);
+          baseBorder = const Color(0xFF4C566A);
           baseAccent = const Color(0xFF88C0D0);
           basePrimaryAccent = const Color(0xFF5E81AC);
-          baseBorder = const Color(0xFF4C566A);
           baseText = const Color(0xFFECEFF4);
           baseTextMuted = const Color(0xFFD8DEE9);
         } else {
-          basePrimary = const Color(0xFFECEFF4);
-          baseSecondary = const Color(0xFFE5E9F0);
+          basePrimary = const Color(0xFFE5E9F0);
+          baseSecondary = const Color(0xFFECEFF4);
           baseTertiary = const Color(0xFFD8DEE9);
+          baseBorder = const Color(0xFFBCC6D6);
           baseAccent = const Color(0xFF5E81AC);
           basePrimaryAccent = const Color(0xFF81A1C1);
-          baseBorder = const Color(0xFFD8DEE9);
           baseText = const Color(0xFF2E3440);
           baseTextMuted = const Color(0xFF4C566A);
         }
         break;
       case AppTheme.strawberryDaiquiri:
         if (isDark) {
-          basePrimary = const Color(0xFF1A0B10);
-          baseSecondary = const Color(0xFF241017);
-          baseTertiary = const Color(0xFF331621);
+          basePrimary = const Color(0xFF100709);
+          baseSecondary = const Color(0xFF1C0D13);
+          baseTertiary = const Color(0xFF301620);
+          baseBorder = const Color(0xFF4D2434);
           baseAccent = const Color(0xFFE0315B);
           basePrimaryAccent = const Color(0xFFB82548);
-          baseBorder = const Color(0xFF4A2030);
         } else {
-          basePrimary = const Color(0xFFFFF1F4);
-          baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFFFE3E8);
+          basePrimary = const Color(0xFFFFDFE6);
+          baseSecondary = const Color(0xFFFFF0F3);
+          baseTertiary = const Color(0xFFFFC7D2);
+          baseBorder = const Color(0xFFFFA3B4);
           baseAccent = const Color(0xFFC92A52);
           basePrimaryAccent = const Color(0xFFA12040);
-          baseBorder = const Color(0xFFFFCCD5);
         }
         break;
       case AppTheme.tako:
         if (isDark) {
-          basePrimary = const Color(0xFF201A23);
-          baseSecondary = const Color(0xFF2B222F);
-          baseTertiary = const Color(0xFF392C3E);
+          basePrimary = const Color(0xFF141016);
+          baseSecondary = const Color(0xFF221A26);
+          baseTertiary = const Color(0xFF35293A);
+          baseBorder = const Color(0xFF4D3B54);
           baseAccent = const Color(0xFFF3B61F);
           basePrimaryAccent = const Color(0xFFC59215);
-          baseBorder = const Color(0xFF4D3B54);
         } else {
-          basePrimary = const Color(0xFFF4EDF6);
-          baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFEADDF0);
+          basePrimary = const Color(0xFFE5D5ED);
+          baseSecondary = const Color(0xFFF6F0F8);
+          baseTertiary = const Color(0xFFD6C0E1);
+          baseBorder = const Color(0xFFBBA0CA);
           baseAccent = const Color(0xFFD49A00);
           basePrimaryAccent = const Color(0xFFA37700);
-          baseBorder = const Color(0xFFDFCCEA);
         }
         break;
       case AppTheme.tealTurquoise:
         if (isDark) {
-          basePrimary = const Color(0xFF0E1719);
-          baseSecondary = const Color(0xFF142225);
-          baseTertiary = const Color(0xFF1B2E32);
+          basePrimary = const Color(0xFF070B0C);
+          baseSecondary = const Color(0xFF10191B);
+          baseTertiary = const Color(0xFF1B2C30);
+          baseBorder = const Color(0xFF2A4449);
           baseAccent = const Color(0xFF20C997);
           basePrimaryAccent = const Color(0xFF12B886);
-          baseBorder = const Color(0xFF254045);
         } else {
-          basePrimary = const Color(0xFFE6F3F5);
-          baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFD6EBEF);
+          basePrimary = const Color(0xFFD6EBEF);
+          baseSecondary = const Color(0xFFECF6F8);
+          baseTertiary = const Color(0xFFC0DEE4);
+          baseBorder = const Color(0xFFA2CCD5);
           baseAccent = const Color(0xFF0CA678);
           basePrimaryAccent = const Color(0xFF099268);
-          baseBorder = const Color(0xFFBCE0E6);
         }
         break;
       case AppTheme.tidalWave:
         if (isDark) {
-          basePrimary = const Color(0xFF0B131E);
-          baseSecondary = const Color(0xFF111D2D);
-          baseTertiary = const Color(0xFF19293E);
+          basePrimary = const Color(0xFF050A10);
+          baseSecondary = const Color(0xFF0D1724);
+          baseTertiary = const Color(0xFF18293F);
+          baseBorder = const Color(0xFF264060);
           baseAccent = const Color(0xFF0EA5E9);
           basePrimaryAccent = const Color(0xFF0284C7);
-          baseBorder = const Color(0xFF233956);
         } else {
-          basePrimary = const Color(0xFFF0F6FA);
-          baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFE0EEF6);
+          basePrimary = const Color(0xFFDBEAF3);
+          baseSecondary = const Color(0xFFF0F6FA);
+          baseTertiary = const Color(0xFFC8DFEE);
+          baseBorder = const Color(0xFFA5CBE2);
           baseAccent = const Color(0xFF0284C7);
           basePrimaryAccent = const Color(0xFF0369A1);
-          baseBorder = const Color(0xFFCDE3F0);
         }
         break;
       case AppTheme.yinYang:
         if (isDark) {
-          basePrimary = const Color(0xFF121212);
-          baseSecondary = const Color(0xFF1E1E1E);
-          baseTertiary = const Color(0xFF2C2C2C);
+          basePrimary = const Color(0xFF000000);
+          baseSecondary = const Color(0xFF141414);
+          baseTertiary = const Color(0xFF282828);
+          baseBorder = const Color(0xFF444444);
           baseAccent = const Color(0xFFFFFFFF);
           basePrimaryAccent = const Color(0xFFE0E0E0);
-          baseBorder = const Color(0xFF3D3D3D);
           baseText = const Color(0xFFFFFFFF);
         } else {
-          basePrimary = const Color(0xFFFFFFFF);
-          baseSecondary = const Color(0xFFF5F5F5);
-          baseTertiary = const Color(0xFFEBEBEB);
+          basePrimary = const Color(0xFFF0F0F0);
+          baseSecondary = const Color(0xFFFFFFFF);
+          baseTertiary = const Color(0xFFE0E0E0);
+          baseBorder = const Color(0xFFBDBDBD);
           baseAccent = const Color(0xFF000000);
           basePrimaryAccent = const Color(0xFF222222);
-          baseBorder = const Color(0xFFE0E0E0);
           baseText = const Color(0xFF000000);
         }
         break;
       case AppTheme.yotsuba:
         if (isDark) {
-          basePrimary = const Color(0xFF1E1B1A);
-          baseSecondary = const Color(0xFF2B2523);
-          baseTertiary = const Color(0xFF38302D);
+          basePrimary = const Color(0xFF120E0D);
+          baseSecondary = const Color(0xFF201918);
+          baseTertiary = const Color(0xFF332725);
+          baseBorder = const Color(0xFF4D3B38);
           baseAccent = const Color(0xFFF97316);
           basePrimaryAccent = const Color(0xFFEA580C);
-          baseBorder = const Color(0xFF4C413D);
         } else {
-          basePrimary = const Color(0xFFFEF9F6);
-          baseSecondary = const Color(0xFFFFFFFF);
-          baseTertiary = const Color(0xFFFBECE4);
+          basePrimary = const Color(0xFFF8E3D8);
+          baseSecondary = const Color(0xFFFEF9F6);
+          baseTertiary = const Color(0xFFF2D1BF);
+          baseBorder = const Color(0xFFE6B49D);
           baseAccent = const Color(0xFFEA580C);
           basePrimaryAccent = const Color(0xFFC2410C);
-          baseBorder = const Color(0xFFF5D6C6);
         }
         break;
     }

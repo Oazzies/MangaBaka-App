@@ -69,18 +69,48 @@ class BakaHyouApp extends StatelessWidget {
         return MaterialApp(
           title: AppConstants.appName,
           theme: ThemeData(
+            useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: AppConstants.primaryAccent,
               brightness: Brightness.light,
+              surface: AppConstants.primaryBackground,
+              primary: AppConstants.accentColor,
+              error: AppConstants.errorColor,
             ),
             scaffoldBackgroundColor: AppConstants.primaryBackground,
+            cardColor: AppConstants.secondaryBackground,
+            dialogBackgroundColor: AppConstants.secondaryBackground,
+            dividerColor: AppConstants.borderColor,
+            bottomSheetTheme: BottomSheetThemeData(
+              backgroundColor: AppConstants.secondaryBackground,
+              modalBackgroundColor: AppConstants.secondaryBackground,
+            ),
+            appBarTheme: AppBarTheme(
+              backgroundColor: AppConstants.primaryBackground,
+              surfaceTintColor: Colors.transparent,
+            ),
           ),
           darkTheme: ThemeData.dark().copyWith(
+            useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: AppConstants.primaryAccent,
               brightness: Brightness.dark,
+              surface: AppConstants.primaryBackground,
+              primary: AppConstants.accentColor,
+              error: AppConstants.errorColor,
             ),
             scaffoldBackgroundColor: AppConstants.primaryBackground,
+            cardColor: AppConstants.secondaryBackground,
+            dialogBackgroundColor: AppConstants.secondaryBackground,
+            dividerColor: AppConstants.borderColor,
+            bottomSheetTheme: BottomSheetThemeData(
+              backgroundColor: AppConstants.secondaryBackground,
+              modalBackgroundColor: AppConstants.secondaryBackground,
+            ),
+            appBarTheme: AppBarTheme(
+              backgroundColor: AppConstants.primaryBackground,
+              surfaceTintColor: Colors.transparent,
+            ),
           ),
           themeMode: currentThemeMode,
           home: SettingsManager().hasCompletedOnboarding 
