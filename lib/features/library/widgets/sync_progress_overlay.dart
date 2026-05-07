@@ -47,7 +47,7 @@ class SyncProgressOverlay extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppConstants.secondaryBackground,
           borderRadius: BorderRadius.circular(16),
-          // border: Border.all(color: AppConstants.borderColor), // Removed border
+          border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.5)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.25),

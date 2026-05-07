@@ -158,10 +158,16 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   Widget _buildIncompleteWarning() {
+    final isDark = ThemeManager().isDarkMode;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppConstants.warningColor.withValues(alpha: 0.12),
+      decoration: BoxDecoration(
+        color: AppConstants.warningColor.withValues(alpha: isDark ? 0.12 : 0.18),
+        border: Border(
+          bottom: BorderSide(color: AppConstants.warningColor.withValues(alpha: 0.25)),
+        ),
+      ),
       child: Row(
         children: [
           Icon(Icons.warning_amber_rounded, color: AppConstants.warningColor, size: 18),
@@ -169,7 +175,11 @@ class _LibraryScreenState extends State<LibraryScreen>
           Expanded(
             child: Text(
               'Your library exceeds 1,000,000 entries. Only the first 1,000,000 could be imported.',
-              style: TextStyle(color: AppConstants.warningColor, fontSize: 12),
+              style: TextStyle(
+                color: AppConstants.warningColor, 
+                fontSize: 12,
+                fontWeight: isDark ? FontWeight.normal : FontWeight.w600,
+              ),
             ),
           ),
           TextButton(
@@ -182,10 +192,16 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   Widget _buildServerDownWarning() {
+    final isDark = ThemeManager().isDarkMode;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppConstants.errorColor.withValues(alpha: 0.12),
+      decoration: BoxDecoration(
+        color: AppConstants.errorColor.withValues(alpha: isDark ? 0.12 : 0.18),
+        border: Border(
+          bottom: BorderSide(color: AppConstants.errorColor.withValues(alpha: 0.25)),
+        ),
+      ),
       child: Row(
         children: [
           Icon(Icons.cloud_off_rounded, color: AppConstants.errorColor, size: 18),
@@ -193,7 +209,11 @@ class _LibraryScreenState extends State<LibraryScreen>
           Expanded(
             child: Text(
               'MangaBaka is currently unreachable. Using local library.',
-              style: TextStyle(color: AppConstants.errorColor, fontSize: 12),
+              style: TextStyle(
+                color: AppConstants.errorColor, 
+                fontSize: 12,
+                fontWeight: isDark ? FontWeight.normal : FontWeight.w600,
+              ),
             ),
           ),
           TextButton(
@@ -206,10 +226,16 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   Widget _buildSyncErrorWarning(String message) {
+    final isDark = ThemeManager().isDarkMode;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppConstants.errorColor.withValues(alpha: 0.12),
+      decoration: BoxDecoration(
+        color: AppConstants.errorColor.withValues(alpha: isDark ? 0.12 : 0.18),
+        border: Border(
+          bottom: BorderSide(color: AppConstants.errorColor.withValues(alpha: 0.25)),
+        ),
+      ),
       child: Row(
         children: [
           Icon(Icons.error_outline_rounded, color: AppConstants.errorColor, size: 18),
@@ -217,7 +243,11 @@ class _LibraryScreenState extends State<LibraryScreen>
           Expanded(
             child: Text(
               'Sync failed: $message',
-              style: TextStyle(color: AppConstants.errorColor, fontSize: 12),
+              style: TextStyle(
+                color: AppConstants.errorColor, 
+                fontSize: 12,
+                fontWeight: isDark ? FontWeight.normal : FontWeight.w600,
+              ),
             ),
           ),
           IconButton(
