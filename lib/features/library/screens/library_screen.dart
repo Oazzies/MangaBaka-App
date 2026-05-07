@@ -159,7 +159,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Your library exceeds 10,000 entries. Only the first 10,000 could be imported.',
+              'Your library exceeds 1,000,000 entries. Only the first 1,000,000 could be imported.',
               style: TextStyle(color: AppConstants.warningColor, fontSize: 12),
             ),
           ),

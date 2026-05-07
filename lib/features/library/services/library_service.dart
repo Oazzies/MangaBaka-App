@@ -111,19 +111,7 @@ class LibraryService {
 
   // ─── Full library import ───────────────────────────────────────────────────
 
-  // Library states and media types used to slice large libraries.
-  static const _importStates = [
-    'reading', 'completed', 'plan_to_read', 'paused',
-    'dropped', 'rereading', 'considering',
-  ];
-  static const _mediaTypes = [
-    'manga', 'manhwa', 'manhua', 'novel', 'oel',
-  ];
-  static const _apiPageCap = 100; // Hard per-query page limit
-
-  /// Fetches the entire library by iterating over each state to avoid the
-  /// 100-page per-query API cap. For states that still exceed 100 pages,
-  /// further slices by media type.
+  /// Fetches the entire library, paginating up to the API limit.
   Future<void> importFullLibrary() async {
     if (syncStatus.value.isSyncing) return;
 
@@ -133,52 +121,25 @@ class LibraryService {
     try {
       final token = await _auth.getValidAccessToken();
       var totalFetched = 0;
-      var anyStateIncomplete = false;
 
-      for (final state in _importStates) {
-        if (_isSyncCancelled) break;
-
-        _logger.info('Importing state: $state');
-        final result = await _importSlice(
-          token, state: state,
-          onProgress: (n) {
-            totalFetched += n;
-            syncStatus.value = syncStatus.value.copyWith(
-              currentEntries: totalFetched, error: null);
-          },
-        );
-
-        if (result.hitCap) {
-          // State exceeded 100 pages — slice by type to get the rest.
-          _logger.warning(
-              'State "$state" hit the page cap. Slicing by type...');
-          for (final type in _mediaTypes) {
-            if (_isSyncCancelled) break;
-            final typeResult = await _importSlice(
-              token, state: state, type: type,
-              onProgress: (n) {
-                totalFetched += n;
-                syncStatus.value = syncStatus.value.copyWith(
-                  currentEntries: totalFetched, error: null);
-              },
-            );
-            if (typeResult.hitCap) {
-              _logger.warning(
-                  'State "$state" type "$type" still hit the cap. Some entries may be missing.');
-              anyStateIncomplete = true;
-            }
-          }
-        }
-      }
+      _logger.info('Importing full library...');
+      final result = await _importSlice(
+        token,
+        onProgress: (n) {
+          totalFetched += n;
+          syncStatus.value = syncStatus.value.copyWith(
+            currentEntries: totalFetched, error: null);
+        },
+      );
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_isIncompleteKey, anyStateIncomplete);
+      await prefs.setBool(_isIncompleteKey, result.hitCap);
       await prefs.setString(
           _lastSyncKey, DateTime.now().toUtc().toIso8601String());
 
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
       _logger.info(
-          'Full library import completed. Total: $totalFetched. Incomplete: $anyStateIncomplete');
+          'Full library import completed. Total: $totalFetched. Incomplete: ${result.hitCap}');
     } on AuthException catch (e) {
       syncStatus.value =
           syncStatus.value.copyWith(isSyncing: false, error: e.message);
@@ -200,25 +161,27 @@ class LibraryService {
     }
   }
 
-  /// Paginates a single (state, type?) slice up to [_apiPageCap] pages.
+  /// Paginates up to [AppConstants.libraryMaxPages] pages.
   /// Returns whether the cap was hit (meaning there may be more entries).
   Future<({bool hitCap})> _importSlice(
     String token, {
-    required String state,
-    String? type,
     required void Function(int fetched) onProgress,
   }) async {
     var page = 1;
+    final int apiPageCap = AppConstants.libraryMaxPages;
 
-    while (page <= _apiPageCap) {
+    while (page <= apiPageCap) {
       if (_isSyncCancelled) return (hitCap: false);
 
-      final result = await _fetchPage(token, page, state: state, type: type);
+      final result = await _fetchPage(token, page, sortBy: 'id');
       final entries = result.entries;
 
-      _logger.info(
-          'Import [$state${type != null ? '/$type' : ''}] page $page: '
-          '${entries.length} entries');
+      if (result.isError) {
+        _logger.warning('Stopped import at page $page due to API error/limit.');
+        return (hitCap: true);
+      }
+
+      _logger.info('Import page $page: ${entries.length} entries');
 
       await _saveEntries(entries);
       onProgress(entries.length);
@@ -227,8 +190,8 @@ class LibraryService {
         return (hitCap: false); // Natural end of data
       }
 
-      if (page == _apiPageCap) {
-        return (hitCap: true); // Hit the wall
+      if (page == apiPageCap) {
+        return (hitCap: true); // Hit our own app cap
       }
 
       page++;
@@ -377,10 +340,10 @@ class LibraryService {
         );
       }
 
-      // 400 = page out of range (no more data). Return empty to stop the loop.
+      // 400 usually means "Bad Request" - often "Page out of range" or hitting a deep pagination limit.
       if (response.statusCode == 400) {
-        _logger.info('Page $page returned 400 — no more data.');
-        return _FetchPageResult(entries: [], totalEntries: 0);
+        _logger.warning('Page $page returned 400. Body: ${response.body}');
+        return _FetchPageResult(entries: [], totalEntries: 0, isError: true);
       }
 
       if (response.statusCode != 200) {
@@ -698,8 +661,13 @@ class LibraryService {
 class _FetchPageResult {
   final List<api.LibraryEntry> entries;
   final int totalEntries;
+  final bool isError;
 
-  _FetchPageResult({required this.entries, required this.totalEntries});
+  _FetchPageResult({
+    required this.entries,
+    required this.totalEntries,
+    this.isError = false,
+  });
 }
 
 _FetchPageResult _parseLibraryPage(String responseBody) {
