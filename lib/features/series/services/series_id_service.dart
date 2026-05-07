@@ -33,8 +33,13 @@ class SeriesService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List linksJson = data['data'] ?? [];
-        return linksJson.map((l) => SeriesLink.fromJson(l)).toList();
+        final rawData = data['data'];
+        if (rawData is List) {
+          return rawData.map((l) => SeriesLink.fromJson(l)).toList();
+        }
+        _logger.warning('Expected list for series links, got ${rawData.runtimeType}');
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching links for $id');
       }
       return [];
     } on SocketException catch (e) {
@@ -94,6 +99,14 @@ class SeriesService {
           statusCode: response.statusCode,
           responseBody: response.body,
           code: 'NOT_FOUND',
+        );
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching series: $id');
+        throw ApiException(
+          message: 'Too many requests. Please slow down.',
+          statusCode: response.statusCode,
+          responseBody: response.body,
+          code: 'RATE_LIMITED',
         );
       } else {
         _logger.severe(
@@ -157,8 +170,13 @@ class SeriesService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List coversJson = data['data'] ?? [];
-        return coversJson.map((l) => SeriesCover.fromJson(l)).toList();
+        final rawData = data['data'];
+        if (rawData is List) {
+          return rawData.map((l) => SeriesCover.fromJson(l)).toList();
+        }
+        _logger.warning('Expected list for series covers, got ${rawData.runtimeType}');
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching covers for $id');
       }
       return [];
     } catch (e) {
@@ -179,8 +197,13 @@ class SeriesService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List relatedJson = data['data'] ?? [];
-        return relatedJson.map((l) => Series.fromJson(l)).toList();
+        final rawData = data['data'];
+        if (rawData is List) {
+          return rawData.map((l) => Series.fromJson(l)).toList();
+        }
+        _logger.warning('Expected list for related series, got ${rawData.runtimeType}');
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching related series for $id');
       }
       return [];
     } catch (e) {
@@ -201,8 +224,13 @@ class SeriesService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List newsJson = data['data'] ?? [];
-        return newsJson.map((l) => News.fromJson(l)).toList();
+        final rawData = data['data'];
+        if (rawData is List) {
+          return rawData.map((l) => News.fromJson(l)).toList();
+        }
+        _logger.warning('Expected list for series news, got ${rawData.runtimeType}');
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching news for $id');
       }
       return [];
     } catch (e) {
@@ -223,8 +251,13 @@ class SeriesService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List jsonList = data['data'] ?? [];
-        return jsonList.map((l) => SeriesCollection.fromJson(l)).toList();
+        final rawData = data['data'];
+        if (rawData is List) {
+          return rawData.map((l) => SeriesCollection.fromJson(l)).toList();
+        }
+        _logger.warning('Expected list for series collections, got ${rawData.runtimeType}');
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching collections for $id');
       }
       return [];
     } catch (e) {
@@ -245,8 +278,13 @@ class SeriesService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final List jsonList = data['data'] ?? [];
-        return jsonList.map((l) => SeriesWork.fromJson(l)).toList();
+        final rawData = data['data'];
+        if (rawData is List) {
+          return rawData.map((l) => SeriesWork.fromJson(l)).toList();
+        }
+        _logger.warning('Expected list for series works, got ${rawData.runtimeType}');
+      } else if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching works for $id');
       }
       return [];
     } catch (e) {

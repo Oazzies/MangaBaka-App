@@ -67,23 +67,57 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
     _fetchFullData();
   }
 
-  Future<void> _fetchExtraData() async {
+  Future<void> _fetchTabData(String tab) async {
+    if (!mounted) return;
     final id = widget.series.id;
-    SeriesService.fetchSeriesCovers(id).then((v) { if (mounted) setState(() => _covers = v); });
-    SeriesService.fetchSeriesRelated(id).then((v) { if (mounted) setState(() => _related = v); });
-    SeriesService.fetchSeriesNews(id).then((v) { if (mounted) setState(() => _news = v); });
-    SeriesService.fetchSeriesCollections(id).then((v) { if (mounted) setState(() => _collections = v); });
-    SeriesService.fetchSeriesWorks(id).then((v) { if (mounted) setState(() => _works = v); });
+    
+    switch (tab) {
+      case 'Covers':
+        if (_covers == null) {
+          final data = await SeriesService.fetchSeriesCovers(id);
+          if (mounted) setState(() => _covers = data);
+        }
+        break;
+      case 'Related':
+        if (_related == null) {
+          final data = await SeriesService.fetchSeriesRelated(id);
+          if (mounted) setState(() => _related = data);
+        }
+        break;
+      case 'News':
+        if (_news == null) {
+          final data = await SeriesService.fetchSeriesNews(id);
+          if (mounted) setState(() => _news = data);
+        }
+        break;
+      case 'Collections':
+        if (_collections == null) {
+          final data = await SeriesService.fetchSeriesCollections(id);
+          if (mounted) setState(() => _collections = data);
+        }
+        break;
+      case 'Works':
+        if (_works == null) {
+          final data = await SeriesService.fetchSeriesWorks(id);
+          if (mounted) setState(() => _works = data);
+        }
+        break;
+    }
   }
 
   Future<void> _fetchFullData() async {
     try {
-      _fetchExtraData(); 
-
+      // Core data fetch
       final results = await Future.wait([
         SeriesService.fetchSeriesLinks(widget.series.id),
+        // Stagger the second core request slightly if needed, but 2 is usually fine
         SeriesService.fetchSeries(widget.series.id),
       ]);
+      
+      // If we are on a tab that needs data, fetch it now
+      if (_selectedTab != 'Information') {
+        _fetchTabData(_selectedTab);
+      }
       
       if (mounted) {
         setState(() {
@@ -320,7 +354,10 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                         SeriesGenresSection(series: series, l10n: l10n),
                         SeriesSegmentedControl(
                           selectedTab: _selectedTab,
-                          onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                          onTabChanged: (tab) {
+                            setState(() => _selectedTab = tab);
+                            _fetchTabData(tab);
+                          },
                         ),
                       ],
                     ),
@@ -395,7 +432,10 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                           SeriesGenresSection(series: series, l10n: l10n),
                           SeriesSegmentedControl(
                             selectedTab: _selectedTab,
-                            onTabChanged: (tab) => setState(() => _selectedTab = tab),
+                            onTabChanged: (tab) {
+                              setState(() => _selectedTab = tab);
+                              _fetchTabData(tab);
+                            },
                           ),
                         ],
                       ),
