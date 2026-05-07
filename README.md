@@ -40,18 +40,12 @@ Browse
 * Seeing other profiles (API needed)
 * Better Barcode Scanner
 
-Series
-* Multiple series covers
-* Collections
-* Works
-
 Profile
 * More Statistics
 
 Extra
 * Optional Notifications for various things
 * A LOT of UI/UX improvements (Animations, Shortcuts, etc)
-* Back to Top FAB button
 
 </details>
 
