@@ -46,7 +46,7 @@ class SeriesDetailAppBar extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: onBack,
         style: IconButton.styleFrom(
-          foregroundColor: Colors.white,
+          foregroundColor: AppConstants.textColor,
         ),
       ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
       actions: [
@@ -54,7 +54,7 @@ class SeriesDetailAppBar extends StatelessWidget {
           icon: const Icon(Icons.share),
           onPressed: onShare,
           style: IconButton.styleFrom(
-            foregroundColor: Colors.white,
+            foregroundColor: AppConstants.textColor,
           ),
         ).animate().fadeIn(delay: 100.ms, duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
         if (entry != null)
@@ -62,7 +62,7 @@ class SeriesDetailAppBar extends StatelessWidget {
             icon: const Icon(Icons.delete_outline),
             onPressed: onDelete,
             style: IconButton.styleFrom(
-              foregroundColor: Colors.white,
+              foregroundColor: AppConstants.textColor,
             ),
           ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
         const SizedBox(width: 8),
@@ -81,8 +81,8 @@ class SeriesDetailAppBar extends StatelessWidget {
                 constraints: BoxConstraints(maxWidth: isWide ? 600 : 200),
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppConstants.textColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
@@ -189,11 +189,11 @@ class SeriesDetailAppBar extends StatelessWidget {
             style: TextStyle(
               fontSize: isWide ? 32 : 22,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppConstants.textColor,
               height: 1.1,
               shadows: [
                 Shadow(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: AppConstants.primaryBackground.withValues(alpha: 0.5),
                   offset: const Offset(0, 2),
                   blurRadius: 4,
                 ),
@@ -214,7 +214,7 @@ class SeriesDetailAppBar extends StatelessWidget {
                 t,
                 style: TextStyle(
                   fontSize: isWide ? 15 : 13,
-                  color: Colors.white70,
+                  color: AppConstants.textMutedColor,
                   fontStyle: FontStyle.italic,
                 ),
                 maxLines: 1,

@@ -221,7 +221,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _tagsExpanded ? 'Show less' : 'Show all tags',
+                      _tagsExpanded ? widget.l10n.translate('show_less') : widget.l10n.translate('show_all_tags'),
                       style: TextStyle(
                         color: AppConstants.accentColor,
                         fontWeight: FontWeight.bold,

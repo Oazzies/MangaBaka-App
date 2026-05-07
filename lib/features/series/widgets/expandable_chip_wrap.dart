@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
+import 'package:bakahyou/utils/localization/localization_service.dart';
 
 class ExpandableChipWrap extends StatefulWidget {
   final String label;
@@ -183,7 +184,7 @@ class _ExpandableChipWrapState extends State<ExpandableChipWrap> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _expanded ? 'Show less' : 'Show all',
+                            _expanded ? LocalizationService().translate('show_less') : LocalizationService().translate('show_all'),
                             style: TextStyle(
                               color: AppConstants.accentColor,
                               fontWeight: FontWeight.bold,
