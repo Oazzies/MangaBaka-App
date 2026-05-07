@@ -464,7 +464,13 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
       case 'Covers':
         return SeriesCoversTab(covers: _covers, horizontalPadding: tabPadding);
       case 'Related':
-        return SeriesRelatedTab(related: _related, l10n: l10n, horizontalPadding: tabPadding);
+        return SeriesRelatedTab(
+          related: _related, 
+          l10n: l10n, 
+          horizontalPadding: tabPadding,
+          currentSeriesId: series.id,
+          heroTagPrefix: 'related',
+        );
       case 'News':
         return SeriesNewsTab(news: _news, horizontalPadding: hPadding); // Pass hPadding for the header, items handle themselves
       case 'Collections':

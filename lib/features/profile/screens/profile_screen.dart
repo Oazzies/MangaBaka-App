@@ -26,8 +26,11 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late final ProfileAuthService _auth;
+  late final LibraryService _libraryService;
   late final StatisticsService _statisticsService;
   late final SnapshotService _snapshotService;
+
+  bool _wasSyncing = false;
 
   bool _loading = true;
   String? _error;
@@ -54,6 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _auth = getIt<ProfileAuthService>();
     _auth.addListener(_onAuthStateChanged);
+    _libraryService = getIt<LibraryService>();
+    _libraryService.syncStatus.addListener(_onSyncStatusChanged);
     _statisticsService = StatisticsService(getIt<AppDatabase>());
     _snapshotService = SnapshotService();
 
@@ -81,7 +86,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _auth.removeListener(_onAuthStateChanged);
+    _libraryService.syncStatus.removeListener(_onSyncStatusChanged);
     super.dispose();
+  }
+
+  void _onSyncStatusChanged() {
+    if (!mounted) return;
+    final isSyncing = _libraryService.syncStatus.value.isSyncing;
+    
+    // Only trigger refresh when sync transitions from true -> false
+    if (_wasSyncing && !isSyncing && _auth.isLoggedIn) {
+      _fetchStatistics();
+      _fetchRecentlyChanged(initial: true);
+      _fetchRecentlyAdded(initial: true);
+    }
+    
+    _wasSyncing = isSyncing;
   }
 
   void _onAuthStateChanged() {

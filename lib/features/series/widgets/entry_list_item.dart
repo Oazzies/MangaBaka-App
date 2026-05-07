@@ -12,8 +12,15 @@ class EntryListItem extends StatelessWidget {
   final Series series;
   final int? ranking;
   final bool isLibrary;
+  final String? heroTagPrefix;
 
-  const EntryListItem({super.key, required this.series, this.ranking, this.isLibrary = false});
+  const EntryListItem({
+    super.key, 
+    required this.series, 
+    this.ranking, 
+    this.isLibrary = false,
+    this.heroTagPrefix,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,8 +93,12 @@ class EntryListItem extends StatelessWidget {
     double? height,
     BorderRadiusGeometry borderRadius = const BorderRadius.horizontal(left: Radius.circular(8)),
   }) {
+    final heroTag = heroTagPrefix != null 
+        ? '${heroTagPrefix}_${series.id}' 
+        : 'series_cover_${series.id}';
+
     return Hero(
-      tag: 'series_cover_${series.id}',
+      tag: heroTag,
       child: ClipRRect(
         borderRadius: borderRadius,
         child: series.coverUrl.isNotEmpty
