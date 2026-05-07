@@ -44,14 +44,18 @@ class SeriesWorksTab extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 60,
-                        height: 90,
-                        child: w.imageUrl != null
-                          ? Image.network(w.imageUrl!, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(color: AppConstants.tertiaryBackground))
-                          : Container(color: AppConstants.tertiaryBackground),
+                    SizedBox(
+                      width: 60,
+                      height: 90,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: w.imageUrl != null && w.imageUrl!.isNotEmpty
+                            ? Image.network(
+                                w.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (c, e, s) => _buildPlaceholder(),
+                              )
+                            : _buildPlaceholder(),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -105,6 +109,19 @@ class SeriesWorksTab extends StatelessWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 60,
+      height: 90,
+      color: AppConstants.tertiaryBackground,
+      child: Icon(
+        Icons.broken_image,
+        color: AppConstants.textMutedColor,
+        size: 24,
       ),
     );
   }

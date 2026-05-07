@@ -47,16 +47,32 @@ class SeriesHeroCover extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.network(
-              series.coverUrl,
-              height: height,
-              width: width,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
-              cacheWidth: 400,
-            ),
+            child: series.coverUrl.isNotEmpty 
+              ? Image.network(
+                  series.coverUrl,
+                  height: height,
+                  width: width,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+                  cacheWidth: 400,
+                  errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+                )
+              : _buildPlaceholder(),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: width,
+      height: height,
+      color: AppConstants.secondaryBackground,
+      child: Icon(
+        Icons.broken_image,
+        color: AppConstants.textMutedColor,
+        size: width > 50 ? 40 : 24,
       ),
     );
   }
