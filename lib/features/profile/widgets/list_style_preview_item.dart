@@ -48,7 +48,7 @@ class ListStylePreviewItem extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(isSelected ? 13 : 15),
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(isSelected ? 6 : 8),
                   child: _buildPreviewContent(),
                 ),
               ),
@@ -74,53 +74,70 @@ class ListStylePreviewItem extends StatelessWidget {
   Widget _buildPreviewContent() {
     switch (style) {
       case AppListStyle.comfortable:
-        return Column(
-          children: List.generate(2, (index) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            height: 48,
+        return ListView(
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          children: List.generate(5, (index) => Container(
+            margin: const EdgeInsets.only(bottom: 5),
+            height: 25,
             decoration: BoxDecoration(
               color: AppConstants.secondaryBackground,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.1), width: 0.5),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 30,
+                  width: 18,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: AppConstants.tertiaryBackground,
-                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
+                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(width: 32, height: 4, color: AppConstants.textMutedColor.withValues(alpha: 0.3)),
-                        const SizedBox(height: 4),
-                        Container(width: 28, height: 3, color: AppConstants.accentColor.withValues(alpha: 0.2)),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              width: 5,
-                              height: 5,
-                              decoration: BoxDecoration(
-                                color: AppConstants.textMutedColor.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 3),
-                            Container(width: 10, height: 3, color: AppConstants.textMutedColor.withValues(alpha: 0.1)),
-                          ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 30,
+                        height: 3,
+                        decoration: BoxDecoration(
+                          color: AppConstants.textMutedColor.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(1.5),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 3),
+                      Container(
+                        width: 22,
+                        height: 2,
+                        decoration: BoxDecoration(
+                          color: AppConstants.accentColor.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            size: 6,
+                            color: AppConstants.textMutedColor.withValues(alpha: 0.2),
+                          ),
+                          const SizedBox(width: 2),
+                          Container(
+                            width: 8,
+                            height: 2,
+                            decoration: BoxDecoration(
+                              color: AppConstants.textMutedColor.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -128,34 +145,36 @@ class ListStylePreviewItem extends StatelessWidget {
           )),
         );
       case AppListStyle.compact:
-        return Column(
-          children: List.generate(3, (index) => Container(
-            margin: const EdgeInsets.only(bottom: 6),
-            height: 36,
+        return ListView(
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          children: List.generate(6, (index) => Container(
+            margin: const EdgeInsets.only(bottom: 4),
+            height: 20,
             decoration: BoxDecoration(
               color: AppConstants.secondaryBackground,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.1), width: 0.5),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 26,
+                  width: 15,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: AppConstants.tertiaryBackground,
-                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
+                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(width: 32, height: 4, color: AppConstants.textMutedColor.withValues(alpha: 0.3)),
+                      Container(width: 28, height: 3, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(1.5))),
                       const SizedBox(height: 3),
-                      Container(width: 28, height: 3, color: AppConstants.textMutedColor.withValues(alpha: 0.1)),
+                      Container(width: 32, height: 2, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(1))),
                     ],
                   ),
                 ),
@@ -164,75 +183,79 @@ class ListStylePreviewItem extends StatelessWidget {
           )),
         );
       case AppListStyle.minimalList:
-        return Column(
-          children: List.generate(4, (index) => Container(
-            margin: const EdgeInsets.only(bottom: 6),
-            height: 28,
+        return ListView(
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          children: List.generate(8, (index) => Container(
+            margin: const EdgeInsets.only(bottom: 3),
+            height: 16,
             decoration: BoxDecoration(
               color: AppConstants.secondaryBackground,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(2),
               border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.1), width: 0.5),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 20,
+                  width: 12,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: AppConstants.tertiaryBackground,
-                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
+                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(2)),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(width: 32, height: 4, color: AppConstants.textMutedColor.withValues(alpha: 0.3)),
+                const SizedBox(width: 6),
+                Container(width: 34, height: 3, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(1.5))),
               ],
             ),
           )),
         );
       case AppListStyle.coverOnlyGrid:
         return GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
+          crossAxisCount: 3,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
           childAspectRatio: 0.7,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
-          children: List.generate(4, (index) => Container(
+          children: List.generate(12, (index) => Container(
             decoration: BoxDecoration(
               color: AppConstants.secondaryBackground,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.1), width: 0.5),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               child: Container(color: AppConstants.tertiaryBackground),
             ),
           )),
         );
       case AppListStyle.compactGrid:
         return GridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
+          crossAxisCount: 3,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
           childAspectRatio: 0.62,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
-          children: List.generate(4, (index) => Column(
+          children: List.generate(12, (index) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppConstants.secondaryBackground,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(3),
                     border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.1), width: 0.5),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(3),
                     child: Container(color: AppConstants.tertiaryBackground),
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Center(child: Container(width: 30, height: 3, color: AppConstants.textMutedColor.withValues(alpha: 0.2))),
+              const SizedBox(height: 3),
+              Center(child: Container(width: 16, height: 2, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(1)))),
             ],
           )),
         );
