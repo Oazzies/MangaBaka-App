@@ -5,6 +5,7 @@ import 'package:bakahyou/utils/settings/settings_manager.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
 import 'package:bakahyou/utils/settings/settings_enums.dart';
 import 'package:bakahyou/features/profile/widgets/theme_preview_item.dart';
+import 'package:bakahyou/features/profile/widgets/list_style_preview_item.dart';
 
 
 class SettingsDialogs {
@@ -315,14 +316,107 @@ class SettingsDialogs {
 
   static void showListStyleSelectionDialog(BuildContext context) {
     final l10n = LocalizationService();
-    _showSelectionBottomSheet<AppListStyle>(
+    _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('list_style'),
       subtitle: l10n.translate('list_style_subtitle'),
-      options: AppListStyle.values,
-      currentValue: SettingsManager().currentListStyle,
-      getLabel: getListStyleName,
+      currentValueGetter: () => SettingsManager().currentListStyle,
       onSelected: (style) => SettingsManager().setListStyle(style),
+    );
+  }
+
+  static void _showListStyleSelectionBottomSheet({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required AppListStyle Function() currentValueGetter,
+    required void Function(AppListStyle) onSelected,
+  }) {
+    final l10n = LocalizationService();
+    final settingsManager = SettingsManager();
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext dialogContext) {
+        return ListenableBuilder(
+          listenable: settingsManager,
+          builder: (context, _) {
+            final currentValue = currentValueGetter();
+
+            return Container(
+              decoration: BoxDecoration(
+                color: AppConstants.secondaryBackground,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(0, 12, 0, 40),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 32,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppConstants.borderColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: AppConstants.textColor,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: AppConstants.textMutedColor,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    height: 200,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: AppListStyle.values.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final style = AppListStyle.values[index];
+                        final isSelected = currentValue == style;
+
+                        return ListStylePreviewItem(
+                          style: style,
+                          isSelected: isSelected,
+                          label: getListStyleName(style),
+                          onTap: () {
+                            onSelected(style);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -549,13 +643,11 @@ class SettingsDialogs {
 
   static void showLibraryListStyleSelectionDialog(BuildContext context) {
     final l10n = LocalizationService();
-    _showSelectionBottomSheet<AppListStyle>(
+    _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('library_list_style'),
       subtitle: l10n.translate('library_list_style_subtitle'),
-      options: AppListStyle.values,
-      currentValue: SettingsManager().libraryListStyle,
-      getLabel: getListStyleName,
+      currentValueGetter: () => SettingsManager().libraryListStyle,
       onSelected: (style) => SettingsManager().setLibraryListStyle(style),
     );
   }
@@ -584,13 +676,11 @@ class SettingsDialogs {
 
   static void showBrowseListStyleSelectionDialog(BuildContext context) {
     final l10n = LocalizationService();
-    _showSelectionBottomSheet<AppListStyle>(
+    _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('browse_list_style'),
       subtitle: l10n.translate('browse_list_style_subtitle'),
-      options: AppListStyle.values,
-      currentValue: SettingsManager().browseListStyle,
-      getLabel: getListStyleName,
+      currentValueGetter: () => SettingsManager().browseListStyle,
       onSelected: (style) => SettingsManager().setBrowseListStyle(style),
     );
   }
