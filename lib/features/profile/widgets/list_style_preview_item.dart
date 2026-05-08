@@ -77,7 +77,7 @@ class ListStylePreviewItem extends StatelessWidget {
         return Column(
           children: List.generate(2, (index) => Container(
             margin: const EdgeInsets.only(bottom: 8),
-            height: 52,
+            height: 48,
             decoration: BoxDecoration(
               color: AppConstants.secondaryBackground,
               borderRadius: BorderRadius.circular(4),
@@ -86,7 +86,7 @@ class ListStylePreviewItem extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 34,
+                  width: 30,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     color: AppConstants.tertiaryBackground,
@@ -96,21 +96,27 @@ class ListStylePreviewItem extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(width: 32, height: 4, color: AppConstants.textMutedColor.withValues(alpha: 0.3)),
-                        const SizedBox(height: 3),
-                        Container(width: 24, height: 3, color: AppConstants.textMutedColor.withValues(alpha: 0.1)),
-                        const Spacer(),
+                        const SizedBox(height: 4),
+                        Container(width: 28, height: 3, color: AppConstants.accentColor.withValues(alpha: 0.2)),
+                        const SizedBox(height: 4),
                         Row(
                           children: [
-                            Container(width: 9, height: 6, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(1), border: Border.all(color: AppConstants.textMutedColor.withValues(alpha: 0.1), width: 0.5))),
-                            const SizedBox(width: 2),
-                            Container(width: 9, height: 6, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(1), border: Border.all(color: AppConstants.textMutedColor.withValues(alpha: 0.1), width: 0.5))),
-                            const SizedBox(width: 2),
-                            Container(width: 9, height: 6, decoration: BoxDecoration(color: AppConstants.textMutedColor.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(1), border: Border.all(color: AppConstants.textMutedColor.withValues(alpha: 0.1), width: 0.5))),
+                            Container(
+                              width: 5,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: AppConstants.textMutedColor.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Container(width: 10, height: 3, color: AppConstants.textMutedColor.withValues(alpha: 0.1)),
                           ],
                         ),
                       ],

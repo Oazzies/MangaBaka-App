@@ -262,20 +262,23 @@ class EntryListItem extends StatelessWidget {
   }
 
   Widget _buildComfortableListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
+    final ratingValue = double.tryParse(series.rating) ?? 0.0;
 
     return Card(
       color: AppConstants.secondaryBackground,
       margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: SizedBox(
-        height: 120,
+        height: 100,
         child: Row(
           children: [
-            _buildCoverImage(width: 80),
+            _buildCoverImage(width: 72),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       displayTitle,
@@ -287,48 +290,37 @@ class EntryListItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      '${l10n.translate('type_${series.type.toLowerCase()}')} - ${l10n.translate('status_${series.status.toLowerCase()}')} - ${series.year}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppConstants.textMutedColor,
-                            fontSize: 14,
+                      '${l10n.translate('type_${series.type.toLowerCase()}')} • ${l10n.translate('status_${series.status.toLowerCase()}')} • ${series.year}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppConstants.accentColor.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w500,
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Spacer(),
-                    SizedBox(
-                      height: 32,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: series.genres.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (context, index) {
-                          final genre = series.genres[index];
-                          final genreLabel = getIt<MetadataService>().getGenreLabel(genre);
-                          return Chip(
-                            label: Text(
-                              genreLabel,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppConstants.textColor,
-                              ),
+                    if (ratingValue > 0) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            size: 14,
+                            color: AppConstants.textMutedColor.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            ratingValue.toStringAsFixed(1),
+                            style: TextStyle(
+                              color: AppConstants.textMutedColor.withValues(alpha: 0.7),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
-                            backgroundColor: Colors.transparent,
-                            side: BorderSide(
-                              color: AppConstants.textMutedColor,
-                              width: 0.8,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 2,
-                            ),
-                            visualDensity: VisualDensity.compact,
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
