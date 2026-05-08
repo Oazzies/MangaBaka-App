@@ -60,11 +60,18 @@ class BakaHyouApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: ThemeManager(),
+      listenable: Listenable.merge([
+        ThemeManager(),
+        SettingsManager(),
+        getIt<ProfileAuthService>(),
+      ]),
       builder: (context, _) {
         final currentThemeMode = ThemeManager().currentThemeMode;
         final isDark = ThemeManager().isDarkMode;
         _updateSystemUI(isDark);
+
+        final hasCompletedOnboarding = SettingsManager().hasCompletedOnboarding;
+        final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
         
         return MaterialApp(
           title: AppConstants.appName,
@@ -113,7 +120,7 @@ class BakaHyouApp extends StatelessWidget {
             ),
           ),
           themeMode: currentThemeMode,
-          home: SettingsManager().hasCompletedOnboarding 
+          home: (hasCompletedOnboarding || isLoggedIn)
               ? MainScreen() 
               : const OnboardingScreen(),
         );
