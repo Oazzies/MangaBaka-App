@@ -95,6 +95,18 @@ class LibraryService {
 
   Future<void> _doInitialSync() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastSync = prefs.getString(_lastSyncKey);
+
+      if (lastSync != null) {
+        _logger.info('Library already imported. Performing incremental catch-up.');
+        _hasPerformedInitialSync = true;
+        // Background sync to catch up on any changes while app was closed
+        unawaited(syncLibrary());
+        return;
+      }
+
+      _logger.info('No previous sync found. Performing full initial import...');
       await importFullLibrary();
       _hasPerformedInitialSync = true;
     } on NetworkException catch (e) {
@@ -123,17 +135,30 @@ class LibraryService {
       var totalFetched = 0;
 
       _logger.info('Importing full library...');
+      final fetchedIds = <String>[];
       final result = await _importSlice(
         token,
-        onProgress: (n) {
+        onProgress: (n, ids) {
           totalFetched += n;
+          fetchedIds.addAll(ids);
           syncStatus.value = syncStatus.value.copyWith(
             currentEntries: totalFetched, error: null);
         },
       );
 
+      if (!result.hitCap && !_isSyncCancelled && fetchedIds.isNotEmpty) {
+        await _db.libraryEntriesDao.deleteEntriesNotIn(fetchedIds);
+      }
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_isIncompleteKey, result.hitCap);
+      
+      // Update last sync time using the newest entry's timestamp if available,
+      // otherwise fallback to current time.
+      // Update last sync time using the newest entry's timestamp if available,
+      // otherwise fallback to current time.
+      // Actually, it's easier to just use the current time here as a baseline,
+      // but syncLibrary will refine it.
       await prefs.setString(
           _lastSyncKey, DateTime.now().toUtc().toIso8601String());
 
@@ -175,41 +200,44 @@ class LibraryService {
 
   /// Paginates up to [AppConstants.libraryMaxPages] pages.
   /// Returns whether the cap was hit (meaning there may be more entries).
-  Future<({bool hitCap})> _importSlice(
+  Future<({bool hitCap, List<String> fetchedIds})> _importSlice(
     String token, {
-    required void Function(int fetched) onProgress,
+    required void Function(int fetched, List<String> fetchedIds) onProgress,
   }) async {
     var page = 1;
     final int apiPageCap = AppConstants.libraryMaxPages;
+    final allFetchedIds = <String>[];
 
     while (page <= apiPageCap) {
-      if (_isSyncCancelled) return (hitCap: false);
+      if (_isSyncCancelled) return (hitCap: false, fetchedIds: allFetchedIds);
 
       final result = await _fetchPage(token, page, sortBy: 'updated_at_desc');
       final entries = result.entries;
 
       if (result.isError) {
         _logger.warning('Stopped import at page $page due to API error/limit.');
-        return (hitCap: true);
+        return (hitCap: true, fetchedIds: allFetchedIds);
       }
 
       _logger.info('Import page $page: ${entries.length} entries');
 
       await _saveEntries(entries);
-      onProgress(entries.length);
+      final ids = entries.map((e) => e.id).toList();
+      allFetchedIds.addAll(ids);
+      onProgress(entries.length, ids);
 
       if (entries.isEmpty || entries.length < LibraryConstants.pageLimit) {
-        return (hitCap: false); // Natural end of data
+        return (hitCap: false, fetchedIds: allFetchedIds); // Natural end of data
       }
 
       if (page == apiPageCap) {
-        return (hitCap: true); // Hit our own app cap
+        return (hitCap: true, fetchedIds: allFetchedIds); // Hit our own app cap
       }
 
       page++;
     }
 
-    return (hitCap: false);
+    return (hitCap: false, fetchedIds: allFetchedIds);
   }
 
   // ─── Recents sync ─────────────────────────────────────────────────────────
@@ -227,7 +255,8 @@ class LibraryService {
       final token = await _auth.getValidAccessToken();
       final prefs = await SharedPreferences.getInstance();
       final lastSyncStr = prefs.getString(_lastSyncKey);
-      final lastSync = lastSyncStr != null ? DateTime.tryParse(lastSyncStr) : null;
+      final lastSync = lastSyncStr != null ? _parseAsUtc(lastSyncStr) : null;
+      String? newestEntryTimestamp;
 
       var page = 1;
       var totalFetched = 0;
@@ -255,9 +284,15 @@ class LibraryService {
           for (final e in entries) {
             final dateStr = e.updatedAt ?? e.createdAt;
             if (dateStr != null) {
-              final entryDate = DateTime.tryParse(dateStr);
-              if (entryDate != null &&
-                  !entryDate.isAfter(lastSync)) {
+              final entryDate = _parseAsUtc(dateStr);
+              
+              // Keep track of the absolute newest entry we've seen to update the watermark
+              final newestDate = newestEntryTimestamp != null ? _parseAsUtc(newestEntryTimestamp!) : null;
+              if (newestDate == null || (entryDate != null && entryDate.isAfter(newestDate))) {
+                newestEntryTimestamp = dateStr;
+              }
+
+              if (entryDate != null && !entryDate.isAfter(lastSync)) {
                 reachedKnown = true;
                 break;
               }
@@ -267,6 +302,9 @@ class LibraryService {
           await _saveEntries(newEntries);
           totalFetched += newEntries.length;
         } else {
+          if (entries.isNotEmpty) {
+            newestEntryTimestamp = entries.first.updatedAt ?? entries.first.createdAt;
+          }
           await _saveEntries(entries);
           totalFetched += entries.length;
         }
@@ -279,8 +317,13 @@ class LibraryService {
         page++;
       }
 
-      await prefs.setString(
-          _lastSyncKey, DateTime.now().toUtc().toIso8601String());
+      if (newestEntryTimestamp != null) {
+        await prefs.setString(_lastSyncKey, newestEntryTimestamp!);
+      } else {
+        await prefs.setString(
+            _lastSyncKey, DateTime.now().toUtc().toIso8601String());
+      }
+      
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
       _logger.info('Recents sync completed. Fetched $totalFetched entries.');
     } on AuthException catch (e) {
@@ -711,4 +754,20 @@ _FetchPageResult _parseLibraryPage(String responseBody) {
       .toList();
 
   return _FetchPageResult(entries: entries, totalEntries: total);
+}
+
+DateTime? _parseAsUtc(String dateStr) {
+  if (dateStr.isEmpty) return null;
+  // If the string doesn't have a timezone indicator, assume UTC
+  String normalized = dateStr;
+  if (!normalized.contains('Z') && !normalized.contains('+')) {
+    // Check if it looks like a date first
+    if (normalized.contains('-')) {
+      normalized = normalized.contains(' ') 
+          ? normalized.replaceFirst(' ', 'T') 
+          : normalized;
+      normalized = '${normalized}Z';
+    }
+  }
+  return DateTime.tryParse(normalized);
 }

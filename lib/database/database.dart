@@ -301,23 +301,33 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
   Future<void> upsertLibraryEntries(List<api.LibraryEntry> entries) async {
     if (entries.isEmpty) return;
     try {
-      await db.batch((batch) {
-        batch.insertAll(
-          db.libraryEntriesTable,
-          entries.map(
-            (e) => LibraryEntriesTableCompanion.insert(
-              id: e.id,
-              state: e.state,
-              note: Value(e.note),
-              progressChapter: Value(e.progressChapter),
-              progressVolume: Value(e.progressVolume),
-              numberOfRereads: Value(e.numberOfRereads),
-              rating: Value(e.rating),
-              seriesId: e.series.id,
+      await db.transaction(() async {
+        final uniqueSeriesIds =
+            entries.map((e) => e.series.id).toSet().toList();
+
+        // Delete any existing entries for these series to prevent duplicates
+        await (delete(db.libraryEntriesTable)
+              ..where((t) => t.seriesId.isIn(uniqueSeriesIds)))
+            .go();
+
+        await db.batch((batch) {
+          batch.insertAll(
+            db.libraryEntriesTable,
+            entries.map(
+              (e) => LibraryEntriesTableCompanion.insert(
+                id: e.id,
+                state: e.state,
+                note: Value(e.note),
+                progressChapter: Value(e.progressChapter),
+                progressVolume: Value(e.progressVolume),
+                numberOfRereads: Value(e.numberOfRereads),
+                rating: Value(e.rating),
+                seriesId: e.series.id,
+              ),
             ),
-          ),
-          mode: InsertMode.insertOrReplace,
-        );
+            mode: InsertMode.insertOrReplace,
+          );
+        });
       });
     } catch (e) {
       _logger.severe('Failed to upsert library entries: $e');
@@ -355,6 +365,32 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     } catch (e) {
       _logger.severe('Failed to delete entry: $e');
       throw exc.DatabaseException(message: 'Failed to delete entry', originalError: e);
+    }
+  }
+
+  Future<void> deleteEntriesNotIn(List<String> validIds) async {
+    try {
+      final validSet = validIds.toSet();
+      final allEntries = await select(libraryEntriesTable).get();
+      final toDelete = allEntries
+          .where((e) => !validSet.contains(e.id))
+          .map((e) => e.id)
+          .toList();
+
+      if (toDelete.isEmpty) return;
+
+      await db.transaction(() async {
+        for (var i = 0; i < toDelete.length; i += 500) {
+          final end = (i + 500 > toDelete.length) ? toDelete.length : i + 500;
+          final chunk = toDelete.sublist(i, end);
+          await (delete(libraryEntriesTable)..where((t) => t.id.isIn(chunk)))
+              .go();
+        }
+      });
+    } catch (e) {
+      _logger.severe('Failed to delete stale entries: $e');
+      throw exc.DatabaseException(
+          message: 'Failed to delete stale entries', originalError: e);
     }
   }
 
