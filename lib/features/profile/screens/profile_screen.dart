@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/features/profile/models/mb_profile.dart';
 import 'package:bakahyou/features/profile/screens/settings_screen.dart';
+import 'package:bakahyou/features/profile/screens/statistics_screen.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
 import 'package:bakahyou/features/library/services/library_service.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
@@ -41,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _volumesRead = 0;
   double _completionRate = 0.0;
   int _totalRereads = 0;
+  double _meanScore = 0.0;
 
   final List<LibraryEntry> _recentlyChanged = [];
   final List<LibraryEntry> _recentlyAdded = [];
@@ -115,6 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _volumesRead = 0;
         _completionRate = 0.0;
         _totalRereads = 0;
+        _meanScore = 0.0;
         _recentlyChanged.clear();
         _recentlyAdded.clear();
         _error = null;
@@ -167,6 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _statisticsService.getVolumesRead(),
       _statisticsService.getCompletionRate(),
       _statisticsService.getTotalRereads(),
+      _statisticsService.getMeanScore(),
     ]);
     if (!mounted) return;
     setState(() {
@@ -175,6 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _volumesRead = results[2] as int;
       _completionRate = results[3] as double;
       _totalRereads = results[4] as int;
+      _meanScore = results[5] as double;
     });
   }
 
@@ -303,13 +308,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 16),
-                          Text(
-                            l10n.translate('at_a_glance'),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                             children: [
+                               Text(
+                                 l10n.translate('at_a_glance'),
+                                 style: const TextStyle(
+                                   fontSize: 20,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                               TextButton(
+                                 onPressed: () {
+                                   Navigator.push(
+                                     context,
+                                     MaterialPageRoute(
+                                       builder: (context) => const StatisticsScreen(),
+                                     ),
+                                   );
+                                 },
+                                 child: Text(
+                                   l10n.translate('see_more_stats'),
+                                   style: TextStyle(
+                                     color: AppConstants.accentColor,
+                                     fontWeight: FontWeight.w600,
+                                   ),
+                                 ),
+                               ),
+                             ],
+                           ),
                           const SizedBox(height: 8),
                           Text(
                             l10n.translate('overview_desc'),
@@ -336,39 +363,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: StatisticCard(
-                                  icon: Icons.library_books,
-                                  label: l10n.translate('volumes_read'),
-                                  value: '$_volumesRead',
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: StatisticCard(
-                                  icon: Icons.check_circle,
-                                  label: l10n.translate('completion'),
-                                  value: '${_completionRate.toStringAsFixed(1)}%',
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: StatisticCard(
-                                  icon: Icons.replay,
-                                  label: l10n.translate('total_rereads'),
-                                  value: '$_totalRereads',
-                                ),
-                              ),
-                              const Spacer(),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
+                           Row(
+                             children: [
+                               Expanded(
+                                 child: StatisticCard(
+                                   icon: Icons.library_books,
+                                   label: l10n.translate('volumes_read'),
+                                   value: '$_volumesRead',
+                                 ),
+                               ),
+                               const SizedBox(width: 16),
+                               Expanded(
+                                 child: StatisticCard(
+                                   icon: Icons.star,
+                                   label: l10n.translate('mean_score'),
+                                   value: _meanScore.toStringAsFixed(1),
+                                 ),
+                               ),
+                             ],
+                           ),
+                           const SizedBox(height: 24),
                           Text(
                             l10n.translate('library_snapshot'),
                             style: const TextStyle(

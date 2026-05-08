@@ -14,11 +14,11 @@ class DbToApiMapper {
       progressChapter: dbEntry.libraryEntry.progressChapter,
       progressVolume: dbEntry.libraryEntry.progressVolume,
       numberOfRereads: dbEntry.libraryEntry.numberOfRereads,
-      series: _seriesFromDb(dbEntry.series),
+      series: seriesFromDb(dbEntry.series),
     );
   }
 
-  static api.Series _seriesFromDb(db.SeriesTableData dbSeries) {
+  static api.Series seriesFromDb(db.SeriesTableData dbSeries) {
     // Helper function to safely decode JSON arrays
     List<String> decodeStringArray(String? jsonStr) {
       if (jsonStr == null || jsonStr.isEmpty) return [];
