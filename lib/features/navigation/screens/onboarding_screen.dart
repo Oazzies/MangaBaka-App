@@ -75,15 +75,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     if (widget.isRedoing) {
       Navigator.of(context).pop();
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => MainScreen()),
-      );
     }
+    // Note: For initial onboarding, we don't call pushReplacement(MainScreen) 
+    // because main.dart is already listening to SettingsManager and will 
+    // rebuild the MaterialApp with MainScreen as the home widget. 
+    // Doing both was causing a race condition leading to a black screen.
   }
 
   Future<void> _requestCameraPermission() async {
     await Permission.camera.request();
+    if (!mounted) return;
     _nextPage();
   }
 
@@ -91,6 +92,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() => _isLoggingIn = true);
     try {
       await _authService.login();
+      if (!mounted) return;
       setState(() => _isLoggedIn = true);
       _nextPage();
     } catch (e) {
