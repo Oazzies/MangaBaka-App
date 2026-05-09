@@ -79,6 +79,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           appBar: AppBar(
             backgroundColor: AppConstants.primaryBackground,
             elevation: 0,
+            centerTitle: true,
             title: Text(
               l10n.translate('statistics'),
               style: const TextStyle(

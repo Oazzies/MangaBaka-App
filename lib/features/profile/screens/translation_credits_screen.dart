@@ -19,6 +19,7 @@ class TranslationCreditsScreen extends StatelessWidget {
         ),
         backgroundColor: AppConstants.primaryBackground,
         iconTheme: IconThemeData(color: AppConstants.textColor),
+        centerTitle: true,
         elevation: 0,
       ),
       body: ListView.builder(

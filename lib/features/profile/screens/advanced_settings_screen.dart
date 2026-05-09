@@ -20,6 +20,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: AppConstants.primaryBackground,
             elevation: 0,
+            centerTitle: true,
             title: Text(
               l10n.translate('advanced_settings'),
               style: TextStyle(

@@ -312,6 +312,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           appBar: AppBar(
             backgroundColor: AppConstants.primaryBackground,
             elevation: 0,
+            centerTitle: true,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
               onPressed: () => Navigator.pop(context),

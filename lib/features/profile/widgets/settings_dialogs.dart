@@ -654,22 +654,22 @@ class SettingsDialogs {
 
   static String getLanguageName(String code) {
     final languages = LocalizationService().getLanguages();
-    final lang = languages.firstWhere((l) => l['code'] == code, orElse: () => {'name': code});
-    return lang['name'] as String;
+    final lang = languages.firstWhere((l) => l['code'] == code, orElse: () => {'native_name': code});
+    return lang['native_name'] as String;
   }
 
   static void showLanguageSelectionDialog(BuildContext context) {
     final l10n = LocalizationService();
-    final languages = LocalizationService().getLanguages();
+    final languages = l10n.getLanguages();
     _showSelectionBottomSheet<String>(
       context: context,
       title: l10n.translate('language'),
-      subtitle: l10n.translate('language_subtitle'), // I should add this key
+      subtitle: l10n.translate('language_subtitle'),
       options: languages.map((l) => l['code'] as String).toList(),
-      currentValue: LocalizationService().currentLanguage,
-      getLabel: (code) => languages.firstWhere((l) => l['code'] == code)['name'] as String,
+      currentValue: l10n.currentLanguage,
+      getLabel: (code) => languages.firstWhere((l) => l['code'] == code)['native_name'] as String,
       onSelected: (code) {
-        LocalizationService().setLanguage(code);
+        l10n.setLanguage(code);
       },
     );
   }

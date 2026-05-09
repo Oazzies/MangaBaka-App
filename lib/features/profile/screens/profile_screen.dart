@@ -269,6 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             backgroundColor: AppConstants.primaryBackground,
             elevation: 0,
+            centerTitle: true,
             title: Text(
               _profile == null
                   ? l10n.translate('profile')
