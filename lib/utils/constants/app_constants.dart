@@ -7,7 +7,7 @@ export 'package:bakahyou/utils/theme/app_theme_colors.dart' show AppTheme;
 class AppConstants {
   // ============ API & Network ============
   static const String appName = 'BakaHyou';
-  static const String appVersion = '0.1.0-pre-release-3';
+  static const String appVersion = '0.1.0-pre-release-5';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
   static const String authBaseUrl = 'https://mangabaka.org/auth/oauth2';
   static const String userAgent = '$appName/$appVersion (oazziesmail@gmail.com)';
