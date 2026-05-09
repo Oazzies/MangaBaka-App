@@ -38,14 +38,10 @@ Home
 Browse
 * More browse shortcuts(Recommendations, etc) (API needed)
 * Seeing other profiles (API needed)
-* Better Barcode Scanner
-
-Profile
-* More Statistics
+* Better Barcode Scanner (API needed)
 
 Extra
-* Optional Notifications for various things
-* A LOT of UI/UX improvements (Animations, Shortcuts, etc)
+* Optional Notifications for various things (API needed)
 
 </details>
 
