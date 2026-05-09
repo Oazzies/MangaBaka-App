@@ -11,9 +11,11 @@ import 'package:bakahyou/utils/settings/settings_enums.dart';
 
 import 'package:bakahyou/utils/theme/theme_manager.dart';
 import 'package:bakahyou/features/profile/services/profile_auth_service.dart';
-import 'package:bakahyou/features/series/widgets/series_list_skeleton.dart';
 import 'package:bakahyou/utils/transitions/app_transitions.dart';
 import 'package:bakahyou/utils/localization/localization_service.dart';
+import 'package:bakahyou/features/browse/widgets/browse_results_body.dart';
+import 'package:bakahyou/features/browse/widgets/browse_results_list.dart';
+import 'package:bakahyou/features/browse/widgets/browse_results_status_widgets.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -174,134 +176,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     );
   }
 
-  Widget _buildLoadingState() {
-    final settings = SettingsManager();
-    final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-    final isGrid = activeStyle.isGrid;
-    
-    return SeriesListSkeleton(isGrid: isGrid);
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Text(LocalizationService().translate('no_results'), style: TextStyle(color: AppConstants.textColor)),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: AppConstants.errorColor, size: 48),
-          SizedBox(height: 16),
-          Text(
-            _error!,
-            style: TextStyle(color: AppConstants.errorColor),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => _fetchResults(initial: true),
-            child: Text(LocalizationService().translate('retry')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultsList() {
-    return ListenableBuilder(
-      listenable: SettingsManager(),
-      builder: (context, _) {
-        final settings = SettingsManager();
-        final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-        final isGrid = activeStyle.isGrid;
-        final shouldShowRanking = widget.sortBy == 'popularity_asc';
-
-        if (isGrid) {
-          return GridView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: _results.length + (_isLoading && _results.isNotEmpty ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index >= _results.length) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              final series = _results[index];
-              return InkWell(
-                onTap: () => _navigateToDetail(series),
-                child: shouldShowRanking
-                    ? EntryListItem(series: series, ranking: index + 1)
-                    : EntryListItem(series: series),
-              );
-            },
-          );
-        }
-
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: _results.length + (_isLoading && _results.isNotEmpty ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index >= _results.length) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.0),
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            final series = _results[index];
-            return InkWell(
-              onTap: () => _navigateToDetail(series),
-              child: shouldShowRanking
-                  ? EntryListItem(series: series, ranking: index + 1)
-                  : EntryListItem(series: series),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildBody() {
-    if (_error != null) {
-      return _buildErrorState();
-    }
-
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      layoutBuilder: (currentChild, previousChildren) {
-        return Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
-        );
-      },
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
-      },
-      child: _results.isEmpty && _isLoading
-          ? _buildLoadingState()
-          : _results.isEmpty
-              ? _buildEmptyState()
-              : _buildResultsList(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -325,7 +199,15 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           body: SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
-              child: _buildBody(),
+              child: BrowseResultsBody(
+                error: _error,
+                isLoading: _isLoading,
+                results: _results,
+                sortBy: widget.sortBy,
+                scrollController: _scrollController,
+                onRetry: () => _fetchResults(initial: true),
+                onSeriesTap: _navigateToDetail,
+              ),
             ),
           ),
           floatingActionButton: _showBackToTop
