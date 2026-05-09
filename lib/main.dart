@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:bakahyou/features/navigation/screens/main_screen.dart';
 import 'package:bakahyou/features/navigation/screens/onboarding_screen.dart';
+import 'package:bakahyou/features/navigation/screens/animated_splash_screen.dart';
 import 'package:bakahyou/utils/services/logging_service.dart';
 import 'package:bakahyou/utils/constants/app_constants.dart';
 import 'package:bakahyou/utils/di/service_locator.dart';
@@ -37,9 +38,6 @@ void main() async {
   _updateSystemUI(ThemeManager().isDarkMode);
 
   runApp(const BakaHyouApp());
-  
-  // Remove the splash screen after the app has started
-  FlutterNativeSplash.remove();
 }
 
 void _updateSystemUI(bool isDarkMode) {
@@ -54,8 +52,15 @@ void _updateSystemUI(bool isDarkMode) {
   );
 }
 
-class BakaHyouApp extends StatelessWidget {
+class BakaHyouApp extends StatefulWidget {
   const BakaHyouApp({super.key});
+
+  @override
+  State<BakaHyouApp> createState() => _BakaHyouAppState();
+}
+
+class _BakaHyouAppState extends State<BakaHyouApp> {
+  bool _showSplash = true;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +77,11 @@ class BakaHyouApp extends StatelessWidget {
 
         final hasCompletedOnboarding = SettingsManager().hasCompletedOnboarding;
         final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
-        
+
+        final Widget content = (hasCompletedOnboarding || isLoggedIn)
+            ? MainScreen()
+            : const OnboardingScreen();
+
         return MaterialApp(
           title: AppConstants.appName,
           theme: ThemeData(
@@ -120,9 +129,19 @@ class BakaHyouApp extends StatelessWidget {
             ),
           ),
           themeMode: currentThemeMode,
-          home: (hasCompletedOnboarding || isLoggedIn)
-              ? MainScreen() 
-              : const OnboardingScreen(),
+          home: Stack(
+            children: [
+              content,
+              if (_showSplash)
+                AnimatedSplashOverlay(
+                  onComplete: () {
+                    setState(() {
+                      _showSplash = false;
+                    });
+                  },
+                ),
+            ],
+          ),
         );
       },
     );
