@@ -104,7 +104,7 @@ class SeriesCoversTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SeriesSectionHeader(title: 'Covers'),
+        SeriesSectionHeader(title: LocalizationService().translate('tab_covers')),
         GridView.builder(
           shrinkWrap: true,
           padding: EdgeInsets.zero,

@@ -347,7 +347,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                         ),
                         const SizedBox(height: 20),
                         if (series.description.isNotEmpty) ...[
-                          SeriesSectionHeader(title: l10n.translate('overview_desc')),
+                          SeriesSectionHeader(title: l10n.translate('description')),
                           DescriptionSection(description: series.description),
                           const SizedBox(height: 20),
                         ],
@@ -425,7 +425,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                           ),
                           const SizedBox(height: 20),
                           if (series.description.isNotEmpty) ...[
-                            SeriesSectionHeader(title: l10n.translate('overview_desc')),
+                            SeriesSectionHeader(title: l10n.translate('description')),
                             DescriptionSection(description: series.description),
                             const SizedBox(height: 24),
                           ],
