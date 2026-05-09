@@ -5,6 +5,6 @@ flutter_launcher_icons:
   image_path: "assets/mangabaka512.png"
   adaptive_icon_background: "#0a0a0a"
   adaptive_icon_foreground: "assets/mangabaka512.png"
-  adaptive_icon_foreground_inset: 16
+  adaptive_icon_foreground_inset: 30
   min_sdk_android: 21
   remove_alpha_ios: true
