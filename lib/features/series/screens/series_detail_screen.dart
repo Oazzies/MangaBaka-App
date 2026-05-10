@@ -3,36 +3,22 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:flutter/services.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/series/widgets/description_section.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
-import 'package:mangabaka_app/features/series/models/series_link.dart';
-import 'package:mangabaka_app/features/series/models/series_cover.dart';
-import 'package:mangabaka_app/features/news/models/news.dart';
-import 'package:mangabaka_app/features/series/models/series_collection.dart';
-import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/series/services/series_id_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_app_bar.dart';
-import 'package:mangabaka_app/features/series/widgets/series_action_bar.dart';
-import 'package:mangabaka_app/features/series/widgets/series_metadata_chips.dart';
-import 'package:mangabaka_app/features/series/widgets/series_details_grid.dart';
-import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
-import 'package:mangabaka_app/features/series/widgets/series_segmented_control.dart';
-import 'package:mangabaka_app/features/series/widgets/series_genres_section.dart';
-import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
-import 'package:mangabaka_app/features/series/widgets/tabs/series_covers_tab.dart';
-import 'package:mangabaka_app/features/series/widgets/tabs/series_related_tab.dart';
-import 'package:mangabaka_app/features/series/widgets/tabs/series_news_tab.dart';
-import 'package:mangabaka_app/features/series/widgets/tabs/series_collections_tab.dart';
-import 'package:mangabaka_app/features/series/widgets/tabs/series_works_tab.dart';
 
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:mangabaka_app/features/series/widgets/series_detail_skeleton.dart';
+import 'package:mangabaka_app/features/series/widgets/layouts/series_detail_mobile_layout.dart';
+import 'package:mangabaka_app/features/series/widgets/layouts/series_detail_wide_layout.dart';
+import 'package:mangabaka_app/features/series/widgets/series_detail_error_banner.dart';
+import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
+import 'package:mangabaka_app/features/series/widgets/series_detail_tab_content.dart';
+import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin.dart';
+import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.dart';
+
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
@@ -43,22 +29,30 @@ class SeriesDetailScreen extends StatefulWidget {
   State<SeriesDetailScreen> createState() => _SeriesDetailScreenState();
 }
 
-class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
+class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDetailActionsMixin, SeriesDetailDataMixin {
   late final LibraryService _libraryService;
   late final SeriesService _seriesService;
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
-  List<SeriesLink>? _enrichedLinks;
-  Series? _fullSeries;
-  bool _isDataLoaded = false;
-  bool _fetchError = false;
+  @override
+  LibraryService get libraryService => _libraryService;
+
+  @override
+  Series get series => widget.series;
+
+  @override
+  bool get isAdding => _isAdding;
+
+  @override
+  set isAdding(bool value) => _isAdding = value;
 
   String _selectedTab = 'Information';
-  List<SeriesCover>? _covers;
-  List<Series>? _related;
-  List<News>? _news;
-  List<SeriesCollection>? _collections;
-  List<SeriesWork>? _works;
+
+  @override
+  SeriesService get seriesService => _seriesService;
+
+  @override
+  String get selectedTab => _selectedTab;
 
   @override
   void initState() {
@@ -66,130 +60,8 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
     _libraryService = getIt<LibraryService>();
     _seriesService = getIt<SeriesService>();
     _entryStream = _libraryService.watchEntryFromDb(widget.series.id);
-    _fullSeries = widget.series; 
-    _fetchFullData();
-  }
-
-  Future<void> _fetchTabData(String tab) async {
-    if (!mounted) return;
-    final id = widget.series.id;
-    
-    switch (tab) {
-      case 'Covers':
-        if (_covers == null) {
-          final data = await _seriesService.fetchSeriesCovers(id);
-          if (mounted) setState(() => _covers = data);
-        }
-        break;
-      case 'Related':
-        if (_related == null) {
-          final data = await _seriesService.fetchSeriesRelated(id);
-          if (mounted) setState(() => _related = data);
-        }
-        break;
-      case 'News':
-        if (_news == null) {
-          final data = await _seriesService.fetchSeriesNews(id);
-          if (mounted) setState(() => _news = data);
-        }
-        break;
-      case 'Collections':
-        if (_collections == null) {
-          final data = await _seriesService.fetchSeriesCollections(id);
-          if (mounted) setState(() => _collections = data);
-        }
-        break;
-      case 'Works':
-        if (_works == null) {
-          final data = await _seriesService.fetchSeriesWorks(id);
-          if (mounted) setState(() => _works = data);
-        }
-        break;
-    }
-  }
-
-  Future<void> _fetchFullData() async {
-    try {
-      // Core data fetch
-      final results = await Future.wait([
-        _seriesService.fetchSeriesLinks(widget.series.id),
-        // Stagger the second core request slightly if needed, but 2 is usually fine
-        _seriesService.fetchSeries(widget.series.id),
-      ]);
-      
-      // If we are on a tab that needs data, fetch it now
-      if (_selectedTab != 'Information') {
-        _fetchTabData(_selectedTab);
-      }
-      
-      if (mounted) {
-        setState(() {
-          _enrichedLinks = results[0] as List<SeriesLink>?;
-          _fullSeries = results[1] as Series?;
-          _isDataLoaded = true;
-          _fetchError = false;
-        });
-      }
-    } catch (e) {
-      _seriesService.logger.warning('Error fetching full data: $e');
-      if (mounted) {
-        setState(() {
-          _isDataLoaded = true; 
-          _fetchError = true;
-        });
-      }
-    }
-  }
-
-  void _shareLink() {
-    final l10n = LocalizationService();
-    final String? link = widget.series.links
-        .whereType<String>()
-        .where((l) => l.contains('mangabaka'))
-        .firstOrNull;
-
-    if (link != null) {
-      final box = context.findRenderObject() as RenderBox?;
-      SharePlus.instance.share(ShareParams(
-        text: link,
-        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
-      ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.translate('no_sharing_link'))));
-    }
-  }
-
-  void _showDeleteConfirmationDialog() {
-    final l10n = LocalizationService();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppConstants.tertiaryBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(l10n.translate('delete_from_library'), style: TextStyle(color: AppConstants.textColor, fontWeight: FontWeight.bold)),
-        content: Text(l10n.translate('delete_confirmation'), style: TextStyle(color: AppConstants.textMutedColor)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.translate('cancel'), style: TextStyle(color: AppConstants.textColor))),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _libraryService.deleteEntry(widget.series.id);
-              if (mounted) Navigator.pop(this.context);
-            },
-            child: Text(l10n.translate('confirm'), style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _copyToClipboard(String text) {
-    Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(LocalizationService().translate('copied_to_clipboard').replaceAll('{text}', text)),
-      behavior: SnackBarBehavior.floating,
-      duration: const Duration(seconds: 2),
-    ));
+    fullSeries = widget.series; 
+    fetchFullData();
   }
 
   @override
@@ -221,22 +93,80 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
                         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
                           SeriesDetailAppBar(
-                            series: _fullSeries ?? widget.series,
-                            title: (_fullSeries ?? widget.series).getDisplayTitle(settings.defaultTitleLanguage),
+                            series: fullSeries ?? widget.series,
+                            title: (fullSeries ?? widget.series).getDisplayTitle(settings.defaultTitleLanguage),
                             entry: entry,
                             isWide: isWide || isTablet,
-                            isLoaded: _isDataLoaded,
+                            isLoaded: isDataLoaded,
                             onBack: () => Navigator.pop(context),
-                            onShare: _shareLink,
-                            onDelete: _showDeleteConfirmationDialog,
-                            onCopy: _copyToClipboard,
+                            onShare: shareLink,
+                            onDelete: showDeleteConfirmationDialog,
+                            onCopy: copyToClipboard,
                           ),
-                          if (_fetchError)
-                            _buildErrorBanner(),
+                          if (fetchError)
+                            SeriesDetailErrorBanner(onRetry: () {
+                              setState(() {
+                                isDataLoaded = false;
+                                fetchError = false;
+                              });
+                              fetchFullData();
+                            }),
                           SliverToBoxAdapter(
                             child: isWide 
-                              ? _buildWideLayout(entry, l10n)
-                              : _buildMobileLayout(entry, l10n),
+                              ? SeriesDetailWideLayout(
+                                series: fullSeries ?? widget.series,
+                                entry: entry,
+                                l10n: l10n,
+                                isDataLoaded: isDataLoaded,
+                                selectedTab: _selectedTab,
+                                onTabChanged: (tab) {
+                                  setState(() => _selectedTab = tab);
+                                  fetchTabData(tab);
+                                },
+                                onStateChanged: (s) => _libraryService.updateLibraryEntryState((fullSeries ?? widget.series).id, s),
+                                onRatingChanged: (r) => _libraryService.updateLibraryEntryRating((fullSeries ?? widget.series).id, r),
+                                buildTabContent: (hPadding, {isWide = false, wideRightPaddingOnly = false}) => SeriesDetailTabContent(
+                                  series: fullSeries ?? widget.series,
+                                  entry: entry,
+                                  l10n: l10n,
+                                  selectedTab: _selectedTab,
+                                  covers: covers,
+                                  related: related,
+                                  news: news,
+                                  collections: collections,
+                                  works: works,
+                                  enrichedLinks: enrichedLinks,
+                                  isWide: isWide,
+                                  hPadding: hPadding,
+                                  wideRightPaddingOnly: wideRightPaddingOnly,
+                                ),
+                              )
+                              : SeriesDetailMobileLayout(
+                                series: fullSeries ?? widget.series,
+                                entry: entry,
+                                l10n: l10n,
+                                isDataLoaded: isDataLoaded,
+                                selectedTab: _selectedTab,
+                                onTabChanged: (tab) {
+                                  setState(() => _selectedTab = tab);
+                                  fetchTabData(tab);
+                                },
+                                onStateChanged: (s) => _libraryService.updateLibraryEntryState((fullSeries ?? widget.series).id, s),
+                                onRatingChanged: (r) => _libraryService.updateLibraryEntryRating((fullSeries ?? widget.series).id, r),
+                                buildTabContent: (hPadding) => SeriesDetailTabContent(
+                                  series: fullSeries ?? widget.series,
+                                  entry: entry,
+                                  l10n: l10n,
+                                  selectedTab: _selectedTab,
+                                  covers: covers,
+                                  related: related,
+                                  news: news,
+                                  collections: collections,
+                                  works: works,
+                                  enrichedLinks: enrichedLinks,
+                                  hPadding: hPadding,
+                                ),
+                              ),
                           ),
                           const SliverToBoxAdapter(child: SizedBox(height: 80)),
                         ],
@@ -247,265 +177,11 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> {
               },
             ),
           ),
-          floatingActionButton: _buildFAB(l10n),
+          floatingActionButton: SeriesDetailFAB(entryStream: _entryStream, isAdding: _isAdding, onAdd: addSeriesToLibrary),
         );
       },
     );
   }
 
-  Widget _buildErrorBanner() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppConstants.errorColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppConstants.errorColor.withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.warning_amber_rounded, color: AppConstants.errorColor, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  LocalizationService().translate('failed_to_load'),
-                  style: TextStyle(color: AppConstants.errorColor, fontSize: 13),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isDataLoaded = false;
-                    _fetchError = false;
-                  });
-                  _fetchFullData();
-                },
-                child: Text(LocalizationService().translate('retry'), style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold, fontSize: 13)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFAB(LocalizationService l10n) {
-    final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
-    if (!isLoggedIn) return const SizedBox.shrink();
-    return StreamBuilder<LibraryEntry?>(
-      stream: _entryStream,
-      builder: (context, snapshot) {
-        if (snapshot.data == null) {
-          return FloatingActionButton.extended(
-            key: const Key('add_to_library_fab'),
-            onPressed: _isAdding ? null : () {
-              _addSeriesToLibrary();
-            },
-            backgroundColor: AppConstants.accentColor,
-            foregroundColor: AppConstants.primaryBackground,
-            label: _isAdding 
-              ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppConstants.primaryBackground))
-              : Text(l10n.translate('add_to_library'), style: const TextStyle(fontWeight: FontWeight.bold)),
-            icon: _isAdding ? null : const Icon(Icons.add),
-          );
-        }
-        return const SizedBox.shrink();
-      },
-    );
-  }
-
-  Widget _buildMobileLayout(LibraryEntry? entry, LocalizationService l10n) {
-    final series = _fullSeries ?? widget.series;
-    const hPadding = 16.0;
-    
-    return AnimatedSwitcher(
-      duration: 600.ms,
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
-      child: _isDataLoaded 
-        ? Transform.translate(
-            offset: const Offset(0, -16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppConstants.primaryBackground,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(32),
-                ),
-              ),
-              child: Column(
-                key: const ValueKey('full_layout'),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: hPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SeriesMetadataChips(series: series, entry: entry),
-                        const SizedBox(height: 16),
-                        SeriesActionBar(
-                          entry: entry, 
-                          l10n: l10n,
-                          onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
-                          onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
-                        ),
-                        const SizedBox(height: 20),
-                        if (series.description.isNotEmpty) ...[
-                          SeriesSectionHeader(title: l10n.translate('description')),
-                          DescriptionSection(description: series.description),
-                          const SizedBox(height: 20),
-                        ],
-                        SeriesGenresSection(series: series, l10n: l10n),
-                        SeriesSegmentedControl(
-                          selectedTab: _selectedTab,
-                          onTabChanged: (tab) {
-                            setState(() => _selectedTab = tab);
-                            _fetchTabData(tab);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildTabContent(series, entry, l10n, hPadding: hPadding),
-                ],
-              ),
-            ),
-          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: hPadding),
-            child: Column(
-              key: const ValueKey('skeleton_layout'),
-              children: [
-                const SeriesDetailSkeleton(),
-                const SizedBox(height: 400),
-              ],
-            ),
-          ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOutCubic),
-    );
-  }
-
-  Widget _buildWideLayout(LibraryEntry? entry, LocalizationService l10n) {
-    final series = _fullSeries ?? widget.series;
-    const hPadding = 40.0;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: hPadding),
-          child: SizedBox(
-            width: 300,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SeriesHeroCover(series: series, height: 420, width: 300),
-                const SizedBox(height: 32),
-                if (_isDataLoaded)
-                  SeriesMetadataChips(series: series, entry: entry, isVertical: true)
-                      .animate().fadeIn(duration: 400.ms).slideX(begin: -0.1, end: 0),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 48),
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: 600.ms,
-            child: _isDataLoaded 
-              ? Column(
-                  key: const ValueKey('wide_full_layout'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: hPadding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SeriesActionBar(
-                            entry: entry, 
-                            l10n: l10n,
-                            onStateChanged: (s) => _libraryService.updateLibraryEntryState(series.id, s),
-                            onRatingChanged: (r) => _libraryService.updateLibraryEntryRating(series.id, r),
-                          ),
-                          const SizedBox(height: 20),
-                          if (series.description.isNotEmpty) ...[
-                            SeriesSectionHeader(title: l10n.translate('description')),
-                            DescriptionSection(description: series.description),
-                            const SizedBox(height: 24),
-                          ],
-                          SeriesGenresSection(series: series, l10n: l10n),
-                          SeriesSegmentedControl(
-                            selectedTab: _selectedTab,
-                            onTabChanged: (tab) {
-                              setState(() => _selectedTab = tab);
-                              _fetchTabData(tab);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTabContent(series, entry, l10n, isWide: true, hPadding: hPadding, wideRightPaddingOnly: true),
-                  ],
-                ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-              : Padding(
-                  padding: const EdgeInsets.only(right: hPadding),
-                  child: const SeriesDetailSkeleton(key: ValueKey('wide_skeleton'), isWide: true),
-                ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabContent(Series series, LibraryEntry? entry, LocalizationService l10n, {bool isWide = false, double hPadding = 16.0, bool wideRightPaddingOnly = false}) {
-    // For News, we want 0 horizontal padding because NewsListItem already has horizontal margin.
-    // However, the header still needs padding.
-    final tabPadding = _selectedTab == 'News' ? 0.0 : hPadding;
-    // For wide layout, the padding is usually only on the right for the tab content in this column.
-    
-    switch (_selectedTab) {
-      case 'Covers':
-        return SeriesCoversTab(covers: _covers, horizontalPadding: tabPadding);
-      case 'Related':
-        return SeriesRelatedTab(
-          related: _related, 
-          l10n: l10n, 
-          horizontalPadding: tabPadding,
-          currentSeriesId: series.id,
-          heroTagPrefix: 'related',
-        );
-      case 'News':
-        return SeriesNewsTab(news: _news, horizontalPadding: hPadding); // Pass hPadding for the header, items handle themselves
-      case 'Collections':
-        return SeriesCollectionsTab(collections: _collections, horizontalPadding: tabPadding);
-      case 'Works':
-        return SeriesWorksTab(works: _works, horizontalPadding: tabPadding);
-      case 'Information':
-      default:
-        return SeriesDetailsGrid(series: series, enrichedLinks: _enrichedLinks, l10n: l10n, isWide: isWide, horizontalPadding: tabPadding);
-    }
-  }
-
-  Future<void> _addSeriesToLibrary() async {
-    if (_isAdding) return;
-    setState(() => _isAdding = true);
-    try {
-      await _libraryService.createLibraryEntry(widget.series.id, SettingsManager().addLibraryDefaultTab);
-    } catch (e) {
-      _seriesService.logger.warning('Failed to add series to library: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(LocalizationService().translate('failed_to_add'))),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isAdding = false);
-    }
-  }
 }
 

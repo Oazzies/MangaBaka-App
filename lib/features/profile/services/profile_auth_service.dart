@@ -1,44 +1,25 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:mangabaka_app/features/profile/services/auth/auth_storage.dart';
+import 'package:mangabaka_app/features/profile/services/auth/auth_network_client.dart';
 
 class ProfileAuthService extends ChangeNotifier {
   final _logger = LoggingService.logger;
-  static const _authorizationEndpoint =
-      '${AppConstants.authBaseUrl}/authorize';
+  static const _authorizationEndpoint = '${AppConstants.authBaseUrl}/authorize';
   static const _tokenEndpoint = '${AppConstants.authBaseUrl}/token';
-  static const _endSessionEndpoint =
-      '${AppConstants.authBaseUrl}/end-session';
-  static const _meEndpoint = '${AppConstants.baseApiUrl}/me';
-  static const _userInfoEndpoint = '${AppConstants.authBaseUrl}/userinfo';
-
-  static const _kAccessToken = 'mb_access_token';
-  static const _kRefreshToken = 'mb_refresh_token';
-  static const _kIdToken = 'mb_id_token';
-  static const _kAccessTokenExp = 'mb_access_token_exp';
-  static const _kProfileCache = 'mb_profile_cache';
+  static const _endSessionEndpoint = '${AppConstants.authBaseUrl}/end-session';
 
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      // encryptedSharedPreferences: true is known to cause "unwrap key failed" 
-      // errors on various Android devices after OS updates or re-installs.
-      // Setting it to false uses a more stable (but still encrypted) implementation.
-      encryptedSharedPreferences: false,
-      resetOnError: true,
-      sharedPreferencesName: 'mangabaka_app_secure_storage_v3', // Changed name to ensure a clean start
-    ),
-  );
+  final AuthStorage _storage = AuthStorage();
+  final AuthNetworkClient _network = AuthNetworkClient();
 
   MbProfile? _cachedProfile;
   bool _hasSessionCache = false;
@@ -60,40 +41,16 @@ class ProfileAuthService extends ChangeNotifier {
     try {
       _hasSessionCache = await hasSession();
       if (_hasSessionCache) {
-        final cachedString = await _storage.read(key: _kProfileCache);
-        if (cachedString != null) {
-          _cachedProfile = MbProfile.fromJson(jsonDecode(cachedString));
-        }
+        _cachedProfile = await _storage.getCachedProfile();
       }
-    } on PlatformException catch (e) {
-      _logger.severe('Secure storage error during initialization: $e');
-      // If initialization fails due to keystore issues, we must clear it
-      try {
-        await _storage.deleteAll();
-      } catch (e2) {
-        _logger.severe('Failed to clear secure storage after error: $e2');
-      }
-      _hasSessionCache = false;
-      _cachedProfile = null;
     } catch (e) {
       _logger.warning('Failed to load cached profile: $e');
     }
   }
 
   Future<bool> hasSession() async {
-    try {
-      final token = await _storage.read(key: _kAccessToken);
-      return token != null && token.isNotEmpty;
-    } on PlatformException catch (e) {
-      _logger.severe('Secure storage error (likely decryption failure): $e');
-      // If we can't read the storage due to key issues, clear everything
-      // so the app can function again (user will need to log in).
-      await _storage.deleteAll();
-      return false;
-    } catch (e) {
-      _logger.severe('Failed to check session status: $e');
-      return false;
-    }
+    final token = await _storage.read(AuthStorage.kAccessToken);
+    return token != null && token.isNotEmpty;
   }
 
   Future<void> login() async {
@@ -117,10 +74,7 @@ class ProfileAuthService extends ChangeNotifier {
 
       await _persistTokens(response);
       _hasSessionCache = true;
-      
-      // Fetch profile before notifying listeners so UI reflects fully logged-in state
       await fetchProfile(forceRefresh: true);
-      
       notifyListeners();
     } catch (e, st) {
       if (e is PlatformException &&
@@ -132,24 +86,20 @@ class ProfileAuthService extends ChangeNotifier {
           throw AuthCancelledException();
         }
       }
-
       _logger.severe('Login failed: $e\n$st');
       if (e is AppException) rethrow;
-      throw AuthException(
-          message: 'Login failed', originalError: e, stackTrace: st);
+      throw AuthException(message: 'Login failed', originalError: e, stackTrace: st);
     }
   }
 
   Future<void> _persistTokens(TokenResponse response) async {
     try {
-      await _storage.write(key: _kAccessToken, value: response.accessToken);
-      await _storage.write(key: _kRefreshToken, value: response.refreshToken);
-      await _storage.write(key: _kIdToken, value: response.idToken);
-      final exp = response.accessTokenExpirationDateTime
-          ?.toUtc()
-          .toIso8601String();
+      await _storage.write(AuthStorage.kAccessToken, response.accessToken);
+      await _storage.write(AuthStorage.kRefreshToken, response.refreshToken);
+      await _storage.write(AuthStorage.kIdToken, response.idToken);
+      final exp = response.accessTokenExpirationDateTime?.toUtc().toIso8601String();
       if (exp != null) {
-        await _storage.write(key: _kAccessTokenExp, value: exp);
+        await _storage.write(AuthStorage.kAccessTokenExp, exp);
       }
     } catch (e, st) {
       _logger.severe('Failed to persist tokens: $e\n$st');
@@ -159,19 +109,17 @@ class ProfileAuthService extends ChangeNotifier {
 
   Future<void> _refreshIfNeeded() async {
     try {
-      final expRaw = await _storage.read(key: _kAccessTokenExp);
+      final expRaw = await _storage.read(AuthStorage.kAccessTokenExp);
       if (expRaw == null) return;
 
       final exp = DateTime.tryParse(expRaw);
       if (exp == null) return;
 
-      if (DateTime.now().toUtc().isBefore(
-        exp.subtract(const Duration(minutes: 1)),
-      )) {
+      if (DateTime.now().toUtc().isBefore(exp.subtract(const Duration(minutes: 1)))) {
         return;
       }
 
-      final refreshToken = await _storage.read(key: _kRefreshToken);
+      final refreshToken = await _storage.read(AuthStorage.kRefreshToken);
       if (refreshToken == null || refreshToken.isEmpty) return;
 
       final response = await _appAuth.token(
@@ -199,52 +147,15 @@ class ProfileAuthService extends ChangeNotifier {
       }
 
       await _refreshIfNeeded();
-      final accessToken = await _storage.read(key: _kAccessToken);
+      final accessToken = await _storage.read(AuthStorage.kAccessToken);
 
       if (accessToken == null || accessToken.isEmpty) {
         throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
       }
 
-      // Try /v1/me first
-      final res = await http.get(
-        Uri.parse(_meEndpoint),
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          'User-Agent': AppConstants.userAgent,
-        },
-      );
-
-      if (res.statusCode == 200) {
-        final body = jsonDecode(res.body) as Map<String, dynamic>;
-        _cachedProfile = MbProfile.fromMeResponse(body);
-        await _storage.write(key: _kProfileCache, value: jsonEncode(_cachedProfile!.toJson()));
-        return _cachedProfile!;
-      } else if (res.statusCode == 404) {
-        // Fallback to OIDC userinfo endpoint
-        final userinfoRes = await http.get(
-          Uri.parse(_userInfoEndpoint),
-          headers: {
-            'Authorization': 'Bearer $accessToken',
-            'User-Agent': AppConstants.userAgent,
-          },
-        );
-        if (userinfoRes.statusCode == 200) {
-          final body = jsonDecode(userinfoRes.body) as Map<String, dynamic>;
-          _cachedProfile = MbProfile.fromUserInfo(body);
-          await _storage.write(key: _kProfileCache, value: jsonEncode(_cachedProfile!.toJson()));
-          return _cachedProfile!;
-        } else {
-          _logger.severe(
-            'Failed to fetch profile from userinfo endpoint: ${userinfoRes.statusCode} ${userinfoRes.body}',
-          );
-          throw AuthException(message: 'Failed to fetch profile from userinfo endpoint', code: '${userinfoRes.statusCode}');
-        }
-      } else {
-        _logger.severe(
-          'Failed to fetch profile from me endpoint: ${res.statusCode} ${res.body}',
-        );
-        throw AuthException(message: 'Failed to fetch profile from me endpoint', code: '${res.statusCode}');
-      }
+      _cachedProfile = await _network.fetchProfile(accessToken);
+      await _storage.cacheProfile(_cachedProfile!);
+      return _cachedProfile!;
     } catch (e, st) {
       _logger.severe('Failed to fetch profile: $e\n$st');
       if (e is AppException) rethrow;
@@ -255,12 +166,10 @@ class ProfileAuthService extends ChangeNotifier {
   Future<String> getValidAccessToken() async {
     try {
       await _refreshIfNeeded();
-
-      final token = await _storage.read(key: _kAccessToken);
+      final token = await _storage.read(AuthStorage.kAccessToken);
       if (token == null || token.isEmpty) {
         throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
       }
-
       return token;
     } catch (e, st) {
       _logger.severe('Failed to get valid access token: $e\n$st');
@@ -271,15 +180,10 @@ class ProfileAuthService extends ChangeNotifier {
 
   Future<void> logout() async {
     try {
-      await _storage.delete(key: _kAccessToken);
-      await _storage.delete(key: _kRefreshToken);
-      await _storage.delete(key: _kIdToken);
-      await _storage.delete(key: _kAccessTokenExp);
-      await _storage.delete(key: _kProfileCache);
+      await _storage.deleteAll();
       _cachedProfile = null;
       _hasSessionCache = false;
 
-      // Clear library and cancel any ongoing syncs on logout
       try {
         await getIt<LibraryService>().clearLibrary();
       } catch (e) {

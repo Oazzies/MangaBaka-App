@@ -45,7 +45,7 @@ class MockSeriesService extends Fake implements SeriesService {
   }
   
   @override
-  dynamic get logger => LoggingService.logger;
+  get logger => LoggingService.logger;
 
   @override
   Future<List<SeriesCover>> fetchSeriesCovers(String id) async {

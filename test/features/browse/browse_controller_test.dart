@@ -5,6 +5,7 @@ import 'package:mangabaka_app/features/series/services/series_search_service.dar
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/browse/utils/browse_helpers.dart';
 
 class MockSeriesSearchService extends Fake implements SeriesSearchService {
   List<Series> mockResults = [];
@@ -100,11 +101,11 @@ void main() {
     });
 
     test('cleanTitle removes volume and edition noise', () {
-      expect(controller.cleanTitle('One Piece Vol. 100'), 'One Piece');
-      expect(controller.cleanTitle('Naruto Volume 1'), 'Naruto');
-      expect(controller.cleanTitle('Bleach (Manga)'), 'Bleach');
-      expect(controller.cleanTitle('Attack on Titan Deluxe Edition'), 'Attack on Titan');
-      expect(controller.cleanTitle('Spy x Family - Part 1'), 'Spy x Family');
+      expect(BrowseHelpers.cleanTitle('One Piece Vol. 100'), 'One Piece');
+      expect(BrowseHelpers.cleanTitle('Naruto Volume 1'), 'Naruto');
+      expect(BrowseHelpers.cleanTitle('Bleach (Manga)'), 'Bleach');
+      expect(BrowseHelpers.cleanTitle('Attack on Titan Deluxe Edition'), 'Attack on Titan');
+      expect(BrowseHelpers.cleanTitle('Spy x Family - Part 1'), 'Spy x Family');
     });
 
     test('resetSearchState clears everything', () {

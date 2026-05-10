@@ -1,9 +1,8 @@
-import 'package:mangabaka_app/database/database.dart';
-import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
+import 'package:mangabaka_app/features/profile/widgets/statistics/statistics_data_mixin.dart';
+import 'package:mangabaka_app/features/profile/widgets/statistics/standout_pick_card.dart';
 import 'package:mangabaka_app/features/profile/widgets/statistic_card.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
-import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -16,54 +15,11 @@ class StatisticsScreen extends StatefulWidget {
   State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
-  late final StatisticsService _statisticsService;
-  bool _loading = true;
-
-  int _totalSeries = 0;
-  int _chaptersRead = 0;
-  int _volumesRead = 0;
-  double _completionRate = 0.0;
-  int _totalRereads = 0;
-  double _meanScore = 0.0;
-  double _finishRate = 0.0;
-  LibraryEntryWithSeries? _highestRated;
-  LibraryEntryWithSeries? _mostReread;
-
+class _StatisticsScreenState extends State<StatisticsScreen> with StatisticsDataMixin {
   @override
   void initState() {
     super.initState();
-    _statisticsService = StatisticsService(getIt<AppDatabase>());
-    _fetchStatistics();
-  }
-
-  Future<void> _fetchStatistics() async {
-    final results = await Future.wait([
-      _statisticsService.getTotalSeries(),
-      _statisticsService.getChaptersRead(),
-      _statisticsService.getVolumesRead(),
-      _statisticsService.getCompletionRate(),
-      _statisticsService.getTotalRereads(),
-      _statisticsService.getMeanScore(),
-      _statisticsService.getFinishRate(),
-      _statisticsService.getHighestRatedSeries(),
-      _statisticsService.getMostRereadSeries(),
-    ]);
-
-    if (!mounted) return;
-
-    setState(() {
-      _totalSeries = results[0] as int;
-      _chaptersRead = results[1] as int;
-      _volumesRead = results[2] as int;
-      _completionRate = results[3] as double;
-      _totalRereads = results[4] as int;
-      _meanScore = results[5] as double;
-      _finishRate = results[6] as double;
-      _highestRated = results[7] as LibraryEntryWithSeries?;
-      _mostReread = results[8] as LibraryEntryWithSeries?;
-      _loading = false;
-    });
+    initStatistics();
   }
 
   @override
@@ -87,7 +43,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
             ),
           ),
-          body: _loading
+          body: loading
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
@@ -108,12 +64,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           _StatData(
                             icon: Icons.book,
                             label: l10n.translate('total_series'),
-                            value: '$_totalSeries',
+                            value: '$totalSeries',
                           ),
                           _StatData(
                             icon: Icons.article,
                             label: l10n.translate('chapters_read'),
-                            value: '$_chaptersRead',
+                            value: '$chaptersRead',
                           ),
                         ],
                       ),
@@ -124,12 +80,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           _StatData(
                             icon: Icons.library_books,
                             label: l10n.translate('volumes_read'),
-                            value: '$_volumesRead',
+                            value: '$volumesRead',
                           ),
                           _StatData(
                             icon: Icons.check_circle,
                             label: l10n.translate('completion'),
-                            value: '${_completionRate.toStringAsFixed(1)}%',
+                            value: '${completionRate.toStringAsFixed(1)}%',
                           ),
                         ],
                       ),
@@ -140,12 +96,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           _StatData(
                             icon: Icons.replay,
                             label: l10n.translate('total_rereads'),
-                            value: '$_totalRereads',
+                            value: '$totalRereads',
                           ),
                           _StatData(
                             icon: Icons.star,
                             label: l10n.translate('mean_score'),
-                            value: _meanScore.toStringAsFixed(1),
+                            value: meanScore.toStringAsFixed(1),
                           ),
                         ],
                       ),
@@ -156,7 +112,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           _StatData(
                             icon: Icons.flag,
                             label: l10n.translate('finish_rate'),
-                            value: '${_finishRate.toStringAsFixed(1)}%',
+                            value: '${finishRate.toStringAsFixed(1)}%',
                           ),
                         ],
                       ),
@@ -169,38 +125,36 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      if (_highestRated != null)
-                        _buildStandoutItem(
-                          context,
+                      if (highestRated != null)
+                        StandoutPickCard(
                           icon: Icons.star_rounded,
                           label: l10n.translate('highest_rated'),
-                          title: _highestRated!.series.title,
-                          value: '${l10n.translate('score')}: ${_highestRated!.libraryEntry.rating ?? 0}',
+                          title: highestRated!.series.title,
+                          value: '${l10n.translate('score')}: ${highestRated!.libraryEntry.rating ?? 0}',
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => SeriesDetailScreen(
-                                  series: DbToApiMapper.seriesFromDb(_highestRated!.series),
+                                  series: DbToApiMapper.seriesFromDb(highestRated!.series),
                                 ),
                               ),
                             );
                           },
                         ),
-                      if (_mostReread != null) ...[
+                      if (mostReread != null) ...[
                         const SizedBox(height: 16),
-                        _buildStandoutItem(
-                          context,
+                        StandoutPickCard(
                           icon: Icons.replay_rounded,
                           label: l10n.translate('most_reread'),
-                          title: _mostReread!.series.title,
-                          value: '${_mostReread!.libraryEntry.numberOfRereads} ${l10n.translate('rereads')}',
+                          title: mostReread!.series.title,
+                          value: '${mostReread!.libraryEntry.numberOfRereads} ${l10n.translate('rereads')}',
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => SeriesDetailScreen(
-                                  series: DbToApiMapper.seriesFromDb(_mostReread!.series),
+                                  series: DbToApiMapper.seriesFromDb(mostReread!.series),
                                 ),
                               ),
                             );
@@ -213,59 +167,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ),
         );
       },
-    );
-  }
-
-  Widget _buildStandoutItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String title,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppConstants.textColor, size: 22),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              color: AppConstants.textMutedColor,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: onTap,
-            child: Text(
-              title,
-              style: TextStyle(
-                color: AppConstants.accentColor,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              color: AppConstants.textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

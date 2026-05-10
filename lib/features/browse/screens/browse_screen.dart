@@ -10,6 +10,7 @@ import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
+import 'package:mangabaka_app/features/browse/utils/browse_helpers.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -81,6 +82,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       return;
     }
 
+    if (!mounted) return;
     final isbn = await Navigator.push<String>(
       context,
       MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
@@ -105,7 +107,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
   }
 
   void _handleResultSelected(AutocompleteSeriesResult result) {
-    final series = _controller.convertAutocompleteToSeries(result);
+    final series = BrowseHelpers.convertAutocompleteToSeries(result);
     _navigateToDetail(series);
   }
 

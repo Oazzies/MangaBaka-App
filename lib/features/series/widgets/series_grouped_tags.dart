@@ -4,7 +4,7 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
-import 'package:mangabaka_app/features/series/widgets/chip.dart';
+import 'package:mangabaka_app/features/series/widgets/series_tag_group.dart';
 
 class SeriesGroupedTags extends StatefulWidget {
   final Series series;
@@ -61,99 +61,9 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
 
     for (var header in sortedHeaders) {
       contentWidgets.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  width: 3,
-                  decoration: BoxDecoration(
-                    color: AppConstants.accentColor.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        header.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
-                          color: AppConstants.textMutedColor,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...grouped[header]!.entries.map((subEntry) {
-                        final subheader = subEntry.key;
-                        final tags = subEntry.value;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (subheader.isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Text(
-                                  subheader,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppConstants.textMutedColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: tags.map((tag) {
-                                final tagParts = tag.split(' > ');
-                                return ChipBase(
-                                  label: Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        if (tagParts.length > 1) ...[
-                                          TextSpan(
-                                            text: '${tagParts.sublist(0, tagParts.length - 1).join(' > ')} > ',
-                                            style: TextStyle(
-                                              color: AppConstants.textMutedColor,
-                                              fontSize: 12,
-                                              height: 1.2,
-                                            ),
-                                          ),
-                                        ],
-                                        TextSpan(
-                                          text: tagParts.last,
-                                          style: TextStyle(
-                                            color: AppConstants.textColor,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            height: 1.2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                            if (subEntry.key != grouped[header]!.keys.last)
-                              const SizedBox(height: 16),
-                          ],
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+        SeriesTagGroup(
+          header: header,
+          subGroups: grouped[header]!,
         ),
       );
     }
@@ -211,8 +121,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
               onTap: () => setState(() => _tagsExpanded = !_tagsExpanded),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -227,9 +136,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                     ),
                     const SizedBox(width: 4),
                     Icon(
-                      _tagsExpanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
+                      _tagsExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                       color: AppConstants.accentColor,
                       size: 20,
                     ),

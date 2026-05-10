@@ -8,14 +8,13 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/browse/services/book_lookup_service.dart';
-import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/features/browse/utils/browse_helpers.dart';
 
 class BrowseController extends ChangeNotifier {
   final SeriesSearchService _searchService = getIt<SeriesSearchService>();
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
-  // Search State
   List<Series> _searchResults = [];
   List<Series> get searchResults => _searchResults;
 
@@ -59,8 +58,7 @@ class BrowseController extends ChangeNotifier {
     if (isNearEnd &&
         _hasMore &&
         !_isLoadingMore &&
-        (_currentSearchQuery.isNotEmpty ||
-            _currentFilters.toMap().isNotEmpty)) {
+        (_currentSearchQuery.isNotEmpty || _currentFilters.toMap().isNotEmpty)) {
       loadMoreResults();
     }
 
@@ -165,15 +163,6 @@ class BrowseController extends ChangeNotifier {
     return Random().nextDouble();
   }
 
-  String cleanTitle(String title) {
-    final regex = RegExp(
-      r'(?:\s*[,-]?\s*(?:Vol\.|Volume|Part|Book)\s*\d+.*)|(?:\s*\(?(?:Deluxe Edition|Omnibus|Box Set|Manga)\b.*)',
-      caseSensitive: false,
-    );
-    final cleaned = title.replaceAll(regex, '').trim();
-    return cleaned.replaceAll(RegExp(r'[\-:]$'), '').trim();
-  }
-
   Future<String?> handleBarcodeScan(String isbn) async {
     if (isbn.isEmpty) return null;
 
@@ -191,16 +180,16 @@ class BrowseController extends ChangeNotifier {
         await searchSeries();
 
         if (_searchResults.isNotEmpty) {
-          return null; // Successfully found and searched
+          return null;
         } else {
-          final cleanedTitle = cleanTitle(title);
+          final cleanedTitle = BrowseHelpers.cleanTitle(title);
           if (cleanedTitle != title && cleanedTitle.isNotEmpty) {
             searchController.text = cleanedTitle;
             _currentSearchQuery = cleanedTitle;
             await searchSeries();
             return null;
           }
-          return 'no_series_found_for'; // Key for localization
+          return 'no_series_found_for';
         }
       } else {
         _isLoading = false;
@@ -212,36 +201,6 @@ class BrowseController extends ChangeNotifier {
       notifyListeners();
       return 'barcode_lookup_failed';
     }
-  }
-
-  Series convertAutocompleteToSeries(AutocompleteSeriesResult result) {
-    return Series(
-      id: result.id.toString(),
-      state: '',
-      title: result.title,
-      nativeTitle: '',
-      romanizedTitle: '',
-      secondaryTitles: [],
-      coverUrl: result.thumbnailUrl,
-      rawCoverUrl: result.thumbnailUrl,
-      authors: [],
-      artists: [],
-      description: '',
-      year: '',
-      status: '',
-      isLicensed: '',
-      hasAnime: '',
-      contentRating: '',
-      type: '',
-      rating: '',
-      finalVolume: '',
-      totalChapters: '',
-      links: [],
-      publishers: [],
-      genres: [],
-      tags: [],
-      lastUpdated: DateTime.now().toIso8601String(),
-    );
   }
 
   void scrollToTop() {

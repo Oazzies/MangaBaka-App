@@ -1,10 +1,11 @@
+import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
+import 'package:mangabaka_app/features/series/widgets/entry_list_item_list_layouts.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
-
 
 class EntryListItem extends StatelessWidget {
   final Series series;
@@ -34,7 +35,6 @@ class EntryListItem extends StatelessWidget {
         final style = settings.separateListStyles 
             ? (isLibrary ? settings.libraryListStyle : settings.browseListStyle)
             : settings.currentListStyle;
-
 
         return Stack(
           children: [
@@ -72,259 +72,15 @@ class EntryListItem extends StatelessWidget {
   Widget _buildContent(BuildContext context, AppListStyle style, LocalizationService l10n, String displayTitle) {
     switch (style) {
       case AppListStyle.coverOnlyGrid:
-        return _buildCoverOnlyGridItem(context);
+        return CoverOnlyGridItem(series: series, heroTagPrefix: heroTagPrefix);
       case AppListStyle.compactGrid:
-        return _buildCompactGridItem(context, displayTitle);
+        return CompactGridItem(series: series, heroTagPrefix: heroTagPrefix, displayTitle: displayTitle);
       case AppListStyle.minimalList:
-        return _buildMinimalListItem(context, l10n, displayTitle);
+        return MinimalListItem(series: series, heroTagPrefix: heroTagPrefix, displayTitle: displayTitle);
       case AppListStyle.compact:
-        return _buildCompactListItem(context, l10n, displayTitle);
+        return CompactListItem(series: series, heroTagPrefix: heroTagPrefix, displayTitle: displayTitle, l10n: l10n);
       case AppListStyle.comfortable:
-        return _buildComfortableListItem(context, l10n, displayTitle);
+        return ComfortableListItem(series: series, heroTagPrefix: heroTagPrefix, displayTitle: displayTitle, l10n: l10n);
     }
-  }
-
-
-  Widget _buildCoverImage({
-    required double width,
-    double? height,
-    BorderRadiusGeometry borderRadius = const BorderRadius.horizontal(left: Radius.circular(8)),
-  }) {
-    final heroTag = heroTagPrefix != null 
-        ? '${heroTagPrefix}_${series.id}' 
-        : 'series_cover_${series.id}';
-
-    return Hero(
-      tag: heroTag,
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: series.coverUrl.isNotEmpty
-            ? Image.network(
-                series.coverUrl,
-                width: width,
-                height: height ?? double.infinity,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                cacheWidth: 300,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildPlaceholder(width, height);
-                },
-              )
-            : _buildPlaceholder(width, height),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder(double width, double? height) {
-    return Container(
-      width: width,
-      height: height ?? double.infinity,
-      color: AppConstants.secondaryBackground,
-      child: Icon(
-        Icons.broken_image,
-        color: AppConstants.textMutedColor,
-        size: width > 50 ? 40 : 24,
-      ),
-    );
-  }
-
-
-
-  Widget _buildCoverOnlyGridItem(BuildContext context) {
-    return Card(
-      color: AppConstants.secondaryBackground,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: _buildCoverImage(
-        width: double.infinity,
-        borderRadius: BorderRadius.zero,
-      ),
-    );
-  }
-
-  Widget _buildCompactGridItem(BuildContext context, String displayTitle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: Card(
-            color: AppConstants.secondaryBackground,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            margin: EdgeInsets.zero,
-            child: _buildCoverImage(
-              width: double.infinity,
-              borderRadius: BorderRadius.zero,
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-          child: SizedBox(
-            height: 18, // Fixed height for title area
-            child: Text(
-              displayTitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppConstants.textColor,
-                    fontSize: 12,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildMinimalListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
-
-    return Card(
-      color: AppConstants.secondaryBackground,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: SizedBox(
-        height: 64,
-        child: Row(
-          children: [
-            _buildCoverImage(width: 48),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  displayTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppConstants.textColor,
-                        fontSize: 16,
-                      ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
-
-    return Card(
-      color: AppConstants.secondaryBackground,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: SizedBox(
-        height: 84,
-        child: Row(
-          children: [
-            _buildCoverImage(width: 60),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      displayTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppConstants.textColor,
-                            fontSize: 16,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '${l10n.translate('type_${series.type.toLowerCase()}')} - ${l10n.translate('status_${series.status.toLowerCase()}')} - ${series.year}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppConstants.textMutedColor,
-                            fontSize: 14,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildComfortableListItem(BuildContext context, LocalizationService l10n, String displayTitle) {
-    final ratingValue = double.tryParse(series.rating) ?? 0.0;
-
-    return Card(
-      color: AppConstants.secondaryBackground,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: SizedBox(
-        height: 100,
-        child: Row(
-          children: [
-            _buildCoverImage(width: 72),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      displayTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppConstants.textColor,
-                            fontSize: 16,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${l10n.translate('type_${series.type.toLowerCase()}')} • ${l10n.translate('status_${series.status.toLowerCase()}')} • ${series.year}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppConstants.accentColor.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w500,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (ratingValue > 0) ...[
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.star_rounded,
-                            size: 14,
-                            color: AppConstants.textMutedColor.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            ratingValue.toStringAsFixed(1),
-                            style: TextStyle(
-                              color: AppConstants.textMutedColor.withValues(alpha: 0.7),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

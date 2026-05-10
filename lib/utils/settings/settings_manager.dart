@@ -2,30 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:mangabaka_app/utils/constants/app_constants.dart';
-
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
-
-
-const String _hideLibrarySeriesInBrowseKey = '${AppConstants.prefixStorageKey}hide_library_series';
-const String _contentPreferencesKey = '${AppConstants.prefixStorageKey}content_prefs';
-const String _onboardingCompletedKey = '${AppConstants.prefixStorageKey}onboarding_completed';
-const String _defaultStartPageKey = '${AppConstants.prefixStorageKey}default_start_page';
-const String _ratingSliderStepKey = '${AppConstants.prefixStorageKey}rating_slider_step';
-const String _addLibraryDefaultTabKey = '${AppConstants.prefixStorageKey}add_library_default_tab';
-const String _defaultTitleLanguageKey = '${AppConstants.prefixStorageKey}default_title_language';
-const String _separateListStylesKey = '${AppConstants.prefixStorageKey}separate_list_styles';
-const String _libraryListStyleKey = '${AppConstants.prefixStorageKey}library_list_style';
-const String _browseListStyleKey = '${AppConstants.prefixStorageKey}browse_list_style';
-const String _pushNotificationsKey = '${AppConstants.prefixStorageKey}push_notifications';
-const String _autoSuggestBrowseKey = '${AppConstants.prefixStorageKey}auto_suggest_browse';
+import 'package:mangabaka_app/utils/settings/settings_keys.dart';
 
 class SettingsManager extends ChangeNotifier {
   static final SettingsManager _instance = SettingsManager._internal();
   factory SettingsManager() => _instance;
   SettingsManager._internal();
-
-  static const String _listStyleKey = '${AppConstants.prefixStorageKey}list_style_pref';
 
   AppListStyle _currentListStyle = AppListStyle.compactGrid;
   AppListStyle get currentListStyle => _currentListStyle;
@@ -69,116 +52,94 @@ class SettingsManager extends ChangeNotifier {
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Detect fresh install by checking a marker in the temporary directory.
-    // The temporary directory (Library/Caches on iOS) is NOT backed up by the OS,
-    // so if the app is deleted and reinstalled, this directory will be empty.
     try {
       final tempDir = await getTemporaryDirectory();
       final markerFile = File('${tempDir.path}/.install_marker');
       if (!await markerFile.exists()) {
-        // This is a fresh install or the cache was wiped. 
-        // We force onboarding even if SharedPreferences were restored from a backup.
-        await prefs.setBool(_onboardingCompletedKey, false);
-        // Create the marker so we don't reset again until the next reinstall
+        await prefs.setBool(SettingsKeys.onboardingCompleted, false);
         await markerFile.writeAsString(DateTime.now().toIso8601String());
       }
     } catch (e) {
-      // If we can't check the marker (e.g. path_provider error), 
-      // fall back to default behavior.
+      debugPrint('Error setting install marker: $e');
     }
 
-    // Load List Style
-    final listStyleIndex = prefs.getInt(_listStyleKey);
+    final listStyleIndex = prefs.getInt(SettingsKeys.listStylePref);
     if (listStyleIndex != null && listStyleIndex >= 0 && listStyleIndex < AppListStyle.values.length) {
       _currentListStyle = AppListStyle.values[listStyleIndex];
     }
     
-    // Load Hide Library Series In Browse
-    _hideLibrarySeriesInBrowse = prefs.getBool(_hideLibrarySeriesInBrowseKey) ?? false;
+    _hideLibrarySeriesInBrowse = prefs.getBool(SettingsKeys.hideLibrarySeriesInBrowse) ?? false;
     
-    // Load Content Preferences
-    final savedContentPrefs = prefs.getStringList(_contentPreferencesKey);
+    final savedContentPrefs = prefs.getStringList(SettingsKeys.contentPreferences);
     if (savedContentPrefs != null && savedContentPrefs.isNotEmpty) {
       _contentPreferences = savedContentPrefs;
     }
 
-    // Load Onboarding Completed
-    _hasCompletedOnboarding = prefs.getBool(_onboardingCompletedKey) ?? false;
+    _hasCompletedOnboarding = prefs.getBool(SettingsKeys.onboardingCompleted) ?? false;
     
-    final startPageIndex = prefs.getInt(_defaultStartPageKey);
+    final startPageIndex = prefs.getInt(SettingsKeys.defaultStartPage);
     if (startPageIndex != null && startPageIndex >= 0 && startPageIndex < AppStartPage.values.length) {
       _defaultStartPage = AppStartPage.values[startPageIndex];
     }
 
-    final ratingStepIndex = prefs.getInt(_ratingSliderStepKey);
+    final ratingStepIndex = prefs.getInt(SettingsKeys.ratingSliderStep);
     if (ratingStepIndex != null && ratingStepIndex >= 0 && ratingStepIndex < RatingSliderStep.values.length) {
       _ratingSliderStep = RatingSliderStep.values[ratingStepIndex];
     }
 
-    _addLibraryDefaultTab = prefs.getString(_addLibraryDefaultTabKey) ?? 'plan_to_read';
+    _addLibraryDefaultTab = prefs.getString(SettingsKeys.addLibraryDefaultTab) ?? 'plan_to_read';
 
-    final titleLangIndex = prefs.getInt(_defaultTitleLanguageKey);
+    final titleLangIndex = prefs.getInt(SettingsKeys.defaultTitleLanguage);
     if (titleLangIndex != null && titleLangIndex >= 0 && titleLangIndex < TitleLanguage.values.length) {
       _defaultTitleLanguage = TitleLanguage.values[titleLangIndex];
     }
 
-    _separateListStyles = prefs.getBool(_separateListStylesKey) ?? false;
+    _separateListStyles = prefs.getBool(SettingsKeys.separateListStyles) ?? false;
 
-    final libStyleIndex = prefs.getInt(_libraryListStyleKey);
+    final libStyleIndex = prefs.getInt(SettingsKeys.libraryListStyle);
     if (libStyleIndex != null && libStyleIndex >= 0 && libStyleIndex < AppListStyle.values.length) {
       _libraryListStyle = AppListStyle.values[libStyleIndex];
     }
 
-    final browseStyleIndex = prefs.getInt(_browseListStyleKey);
+    final browseStyleIndex = prefs.getInt(SettingsKeys.browseListStyle);
     if (browseStyleIndex != null && browseStyleIndex >= 0 && browseStyleIndex < AppListStyle.values.length) {
       _browseListStyle = AppListStyle.values[browseStyleIndex];
     }
 
-    _pushNotifications = prefs.getBool(_pushNotificationsKey) ?? false;
-    _autoSuggestBrowse = prefs.getBool(_autoSuggestBrowseKey) ?? false;
+    _pushNotifications = prefs.getBool(SettingsKeys.pushNotifications) ?? false;
+    _autoSuggestBrowse = prefs.getBool(SettingsKeys.autoSuggestBrowse) ?? false;
 
     notifyListeners();
   }
 
   Future<void> setListStyle(AppListStyle style) async {
     if (_currentListStyle == style) return;
-    
     _currentListStyle = style;
-    
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_listStyleKey, style.index);
-    
+    await prefs.setInt(SettingsKeys.listStylePref, style.index);
     notifyListeners();
   }
 
   Future<void> setHideLibrarySeriesInBrowse(bool value) async {
     if (_hideLibrarySeriesInBrowse == value) return;
-    
     _hideLibrarySeriesInBrowse = value;
-    
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_hideLibrarySeriesInBrowseKey, value);
-    
+    await prefs.setBool(SettingsKeys.hideLibrarySeriesInBrowse, value);
     notifyListeners();
   }
 
   Future<void> setContentPreferences(List<String> prefsList) async {
     _contentPreferences = prefsList;
-    
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_contentPreferencesKey, prefsList);
-    
+    await prefs.setStringList(SettingsKeys.contentPreferences, prefsList);
     notifyListeners();
   }
 
   Future<void> setHasCompletedOnboarding(bool value) async {
     if (_hasCompletedOnboarding == value) return;
-
     _hasCompletedOnboarding = value;
-
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_onboardingCompletedKey, value);
-
+    await prefs.setBool(SettingsKeys.onboardingCompleted, value);
     notifyListeners();
   }
 
@@ -186,7 +147,7 @@ class SettingsManager extends ChangeNotifier {
     if (_defaultStartPage == page) return;
     _defaultStartPage = page;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_defaultStartPageKey, page.index);
+    await prefs.setInt(SettingsKeys.defaultStartPage, page.index);
     notifyListeners();
   }
 
@@ -194,7 +155,7 @@ class SettingsManager extends ChangeNotifier {
     if (_ratingSliderStep == step) return;
     _ratingSliderStep = step;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_ratingSliderStepKey, step.index);
+    await prefs.setInt(SettingsKeys.ratingSliderStep, step.index);
     notifyListeners();
   }
 
@@ -202,7 +163,7 @@ class SettingsManager extends ChangeNotifier {
     if (_addLibraryDefaultTab == tabKey) return;
     _addLibraryDefaultTab = tabKey;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_addLibraryDefaultTabKey, tabKey);
+    await prefs.setString(SettingsKeys.addLibraryDefaultTab, tabKey);
     notifyListeners();
   }
 
@@ -210,7 +171,7 @@ class SettingsManager extends ChangeNotifier {
     if (_defaultTitleLanguage == lang) return;
     _defaultTitleLanguage = lang;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_defaultTitleLanguageKey, lang.index);
+    await prefs.setInt(SettingsKeys.defaultTitleLanguage, lang.index);
     notifyListeners();
   }
 
@@ -218,7 +179,7 @@ class SettingsManager extends ChangeNotifier {
     if (_separateListStyles == value) return;
     _separateListStyles = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_separateListStylesKey, value);
+    await prefs.setBool(SettingsKeys.separateListStyles, value);
     notifyListeners();
   }
 
@@ -226,7 +187,7 @@ class SettingsManager extends ChangeNotifier {
     if (_libraryListStyle == style) return;
     _libraryListStyle = style;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_libraryListStyleKey, style.index);
+    await prefs.setInt(SettingsKeys.libraryListStyle, style.index);
     notifyListeners();
   }
 
@@ -234,7 +195,7 @@ class SettingsManager extends ChangeNotifier {
     if (_browseListStyle == style) return;
     _browseListStyle = style;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_browseListStyleKey, style.index);
+    await prefs.setInt(SettingsKeys.browseListStyle, style.index);
     notifyListeners();
   }
 
@@ -242,7 +203,7 @@ class SettingsManager extends ChangeNotifier {
     if (_pushNotifications == value) return;
     _pushNotifications = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_pushNotificationsKey, value);
+    await prefs.setBool(SettingsKeys.pushNotifications, value);
     notifyListeners();
   }
 
@@ -250,7 +211,7 @@ class SettingsManager extends ChangeNotifier {
     if (_autoSuggestBrowse == value) return;
     _autoSuggestBrowse = value;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_autoSuggestBrowseKey, value);
+    await prefs.setBool(SettingsKeys.autoSuggestBrowse, value);
     notifyListeners();
   }
 }
