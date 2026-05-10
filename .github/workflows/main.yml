@@ -1,0 +1,121 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger only when you push a tag (e.g., v1.0.1)
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+
+jobs:
+  # JOB 1: Quality Check (Analysis and Testing)
+  quality_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Pub Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install & Analyze
+        run: |
+          flutter pub get
+          flutter analyze
+          
+      - name: Run Tests
+        run: flutter test
+
+  # JOB 2: Android Build (Runs on Linux - Cheap & Fast)
+  build_android:
+    needs: quality_check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Build Preparation
+        run: |
+          flutter clean
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build APK
+        # Point 3: Using github.run_number for automated versioning
+        run: flutter build apk --release --build-number=${{ github.run_number }}
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  # JOB 3: iOS Build (Runs on macOS - Required for IPA)
+  build_ios:
+    needs: quality_check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v3
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+
+      - name: Build Preparation
+        run: |
+          flutter clean
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build IPA
+        run: flutter build ipa --no-codesign --build-number=${{ github.run_number }}
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ipa
+          path: build/ios/archive/Runner.xcarchive
+
+  # JOB 4: Create GitHub Draft Release
+  create_release:
+    needs: [build_android, build_ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apk
+
+      - name: Download IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: release-ipa
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # This creates a draft so you can manually add descriptions
+          draft: true 
+          files: |
+            app-release.apk
+            Runner.xcarchive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
