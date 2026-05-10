@@ -5,6 +5,7 @@ import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart
 import 'package:mangabaka_app/features/profile/widgets/settings_components.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
+import 'package:mangabaka_app/features/profile/screens/logs_screen.dart';
 
 class AdvancedSettingsScreen extends StatelessWidget {
   const AdvancedSettingsScreen({super.key});
@@ -62,6 +63,21 @@ class AdvancedSettingsScreen extends StatelessWidget {
                         subtitle: l10n.translate('auto_suggest_browse_subtitle'),
                         value: SettingsManager().autoSuggestBrowse,
                         onChanged: (val) => SettingsManager().setAutoSuggestBrowse(val),
+                      ),
+                      const SettingsDivider(),
+                      SettingsItem(
+                        icon: Icons.assignment_outlined,
+                        title: l10n.translate('view_logs'),
+                        subtitle: l10n.translate('view_logs_subtitle'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LogsScreen(),
+                              fullscreenDialog: true,
+                            ),
+                          );
+                        },
                         isLast: true,
                       ),
                     ],

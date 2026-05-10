@@ -261,6 +261,14 @@
     "show_less": "Voir moins",
     "show_all": "Tout afficher",
     "show_all_tags": "Tous les tags",
-    "camera_permission_denied": "L'autorisation de la caméra est requise pour scanner les codes-barres."
+    "camera_permission_denied": ""camera_permission_denied": "L'autorisation de la caméra est requise pour scanner les codes-barres."",
+    "logs": "Logs",
+    "view_logs": "View Logs",
+    "view_logs_subtitle": "See the application's event logs",
+    "copy_logs": "Copy Logs",
+    "save_logs": "Save Logs",
+    "clear_logs": "Clear Logs",
+    "logs_cleared": "Logs cleared",
+    "logs_copied": "Logs copied to clipboard"
   }
 }

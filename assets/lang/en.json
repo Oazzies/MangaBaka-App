@@ -263,6 +263,14 @@
     "show_less": "Show Less",
     "show_all": "Show All",
     "show_all_tags": "Show All Tags",
-    "camera_permission_denied": "Camera permission is required to scan barcodes."
+    "camera_permission_denied": "Camera permission is required to scan barcodes.",
+    "logs": "Logs",
+    "view_logs": "View Logs",
+    "view_logs_subtitle": "See the application's event logs",
+    "copy_logs": "Copy Logs",
+    "save_logs": "Save Logs",
+    "clear_logs": "Clear Logs",
+    "logs_cleared": "Logs cleared",
+    "logs_copied": "Logs copied to clipboard"
   }
 }
