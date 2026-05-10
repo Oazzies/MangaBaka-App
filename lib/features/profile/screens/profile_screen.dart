@@ -55,7 +55,6 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     _statisticsService = StatisticsService(getIt<AppDatabase>());
     _snapshotService = SnapshotService();
 
-    // Instantly show cached profile — no loading spinner
     profile = _auth.cachedProfile;
     if (profile != null) {
       _logger.info('Using cached profile for username: ${profile!.preferredUsername ?? profile!.id}');
@@ -64,7 +63,6 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
       fetchStatistics();
       fetchRecentlyChanged(initial: true);
       fetchRecentlyAdded(initial: true);
-      // Silently refresh profile in background
       _logger.fine('Silently refreshing profile data in background');
       _auth.fetchProfile(forceRefresh: true).then((p) {
         if (mounted) {
@@ -76,11 +74,9 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
       });
     } else if (_auth.isLoggedIn) {
       _logger.info('User logged in but no cached profile found. Triggering full bootstrap.');
-      // Logged in but no cached profile yet — full load
       bootstrap();
     } else {
       _logger.info('User not logged in. Displaying login prompt.');
-      // Not logged in — show login prompt instantly
       loading = false;
     }
   }

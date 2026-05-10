@@ -35,11 +35,9 @@ class BrowseResultsScreen extends StatefulWidget {
 
 class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   static final _logger = LoggingService.logger;
-  // Services & Controllers
   late final SeriesSearchService _searchService;
   late final ScrollController _scrollController;
 
-  // State
   final List<Series> _results = [];
   bool _isLoading = false;
   bool _hasMore = true;
@@ -107,8 +105,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
         if (auth.isLoggedIn) {
           final profile = auth.cachedProfile;
           if (profile != null) {
-            // exclude_user_library expects a 32-character alphanumeric string.
-            // UUIDs from the profile ID might contain hyphens, so we strip them.
             userId = profile.id.replaceAll('-', '');
             _logger.fine('Hiding library series for user: $userId');
           }

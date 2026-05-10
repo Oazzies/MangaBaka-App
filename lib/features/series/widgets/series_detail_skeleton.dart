@@ -13,7 +13,7 @@ class SeriesDetailSkeleton extends StatelessWidget {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(width: 300), // Space for cover
+          const SizedBox(width: 300),
           const SizedBox(width: 48),
           Expanded(child: _buildBody()),
         ],

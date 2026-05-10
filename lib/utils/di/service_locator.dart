@@ -12,39 +12,29 @@ import 'package:mangabaka_app/features/news/services/news_service.dart';
 
 final getIt = GetIt.instance;
 
-/// Configures all service dependencies using GetIt
 void setupServiceLocator() {
-  // Logging Service (singleton)
   getIt.registerSingleton<LoggingService>(LoggingService());
 
-  // Database (singleton)
   getIt.registerSingleton<AppDatabase>(AppDatabase());
 
-  // Authentication Service (singleton)
   getIt.registerSingleton<ProfileAuthService>(ProfileAuthService());
 
-  // Metadata Service (singleton)
   getIt.registerSingleton<MetadataService>(MetadataService());
 
-  // Snapshot Service (singleton for activity caching)
   getIt.registerSingleton<SnapshotService>(
     SnapshotService(auth: getIt<ProfileAuthService>()),
   );
 
-  // Series Services (lazy singletons - created on first use)
   getIt.registerLazySingleton<SeriesService>(() => SeriesService());
   getIt.registerLazySingleton<SeriesSearchService>(() => SeriesSearchService());
 
-  // Library Service (singleton to maintain state)
   getIt.registerSingleton<LibraryService>(
     LibraryService(auth: getIt<ProfileAuthService>()),
   );
 
-  // News Service (singleton)
   getIt.registerLazySingleton<NewsService>(() => NewsService());
 }
 
-/// Resets all service instances (useful for testing)
 Future<void> resetServiceLocator() async {
   await getIt.reset();
 }

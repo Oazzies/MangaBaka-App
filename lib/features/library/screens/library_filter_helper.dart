@@ -76,8 +76,6 @@ class LibraryFilterHelper {
             if (f.publishedYearLower != null && seriesYear < f.publishedYearLower!) return false;
             if (f.publishedYearUpper != null && seriesYear > f.publishedYearUpper!) return false;
           } else if (f.publishedYearLower != null || f.publishedYearUpper != null) {
-            // If we filter by year but series has no year, should we hide it? 
-            // API usually hides it, so let's hide it.
             return false;
           }
         }

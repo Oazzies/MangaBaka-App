@@ -24,7 +24,7 @@ class StateSelectionSection extends StatelessWidget {
       builder: (context, _) {
         final l10n = LocalizationService();
         return Container(
-          height: 44, // Slightly taller for better touch target
+          height: 44, 
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           decoration: BoxDecoration(
             color: AppConstants.secondaryBackground,

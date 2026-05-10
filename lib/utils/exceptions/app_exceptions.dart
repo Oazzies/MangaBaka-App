@@ -1,4 +1,3 @@
-/// Base exception class for all app exceptions
 abstract class AppException implements Exception {
   final String message;
   final String? code;
@@ -22,7 +21,6 @@ abstract class AppException implements Exception {
   }
 }
 
-/// Network-related exceptions
 class NetworkException extends AppException {
   NetworkException({
     required super.message,
@@ -32,7 +30,6 @@ class NetworkException extends AppException {
   });
 }
 
-/// API response exceptions (4xx, 5xx)
 class ApiException extends AppException {
   final int statusCode;
   final String? responseBody;
@@ -47,7 +44,6 @@ class ApiException extends AppException {
   });
 }
 
-/// JSON parsing exceptions
 class ParseException extends AppException {
   ParseException({
     required super.message,
@@ -57,7 +53,6 @@ class ParseException extends AppException {
   });
 }
 
-/// Database exceptions
 class DatabaseException extends AppException {
   DatabaseException({
     required super.message,
@@ -67,7 +62,6 @@ class DatabaseException extends AppException {
   });
 }
 
-/// Authentication exceptions
 class AuthException extends AppException {
   AuthException({
     required super.message,
@@ -77,7 +71,6 @@ class AuthException extends AppException {
   });
 }
 
-/// Authentication cancelled by user
 class AuthCancelledException extends AppException {
   AuthCancelledException({
     super.message = 'Login cancelled',
@@ -85,7 +78,6 @@ class AuthCancelledException extends AppException {
   });
 }
 
-/// Generic application exception
 class AppError extends AppException {
   AppError({
     required super.message,

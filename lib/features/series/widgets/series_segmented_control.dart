@@ -35,7 +35,7 @@ class SeriesSegmentedControl extends StatelessWidget {
           final tabWidth = constraints.maxWidth / tabs.length;
           return Stack(
             children: [
-              // Sliding background pill (Flat M3 style)
+              // Sliding background pill
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOutExpo,

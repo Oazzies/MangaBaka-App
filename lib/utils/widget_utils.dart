@@ -71,7 +71,6 @@ class WidgetUtils {
                 }
               }
             } else if (l.runtimeType.toString() == 'SeriesLink') {
-              // Using dynamic check because we might not have the import here if used elsewhere
               try {
                 url = l.url;
                 displayName = l.nameDisplay;

@@ -60,10 +60,8 @@ void main() {
     expect(skipButton, findsOneWidget);
 
     // Tapping skip should call _finishOnboarding
-    // In a real app this would set a setting and navigate.
     await tester.tap(skipButton);
     await tester.pump();
     
-    // Check if it interacted with SettingsManager if we had a mock for it
   });
 }

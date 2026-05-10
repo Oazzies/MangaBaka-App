@@ -42,8 +42,6 @@ class _ExpandableChipWrapState extends State<ExpandableChipWrap> {
       final double singleHeight = singleBox.size.height;
       final double fullHeight = fullBox.size.height;
       
-      // We want to show at most 5 rows.
-      // Run spacing is 8.
       const double runSpacing = 8.0;
       final double fiveRowsHeight = (singleHeight * 5) + (runSpacing * 4) + 4; // +4 for a small buffer
       
@@ -90,7 +88,7 @@ class _ExpandableChipWrapState extends State<ExpandableChipWrap> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Trigger re-calculation whenever layout changes (e.g. orientation)
+        // Trigger re-calculation whenever layout changes
         WidgetsBinding.instance.addPostFrameCallback((_) => _calculateMetrics());
 
         return Column(

@@ -4,8 +4,6 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 
-/// A minimalistic splash overlay that handles the transition from native splash to Flutter.
-/// Should be used inside a Stack on top of the main content.
 class AnimatedSplashOverlay extends StatefulWidget {
   final VoidCallback onComplete;
 

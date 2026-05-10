@@ -19,7 +19,6 @@ class DbToApiMapper {
   }
 
   static api.Series seriesFromDb(db.SeriesTableData dbSeries) {
-    // Helper function to safely decode JSON arrays
     List<String> decodeStringArray(String? jsonStr) {
       if (jsonStr == null || jsonStr.isEmpty) return [];
       try {
@@ -31,7 +30,6 @@ class DbToApiMapper {
       return [];
     }
 
-    // Helper function to safely decode JSON objects
     Map<String, dynamic>? decodeJsonObject(String? jsonStr) {
       if (jsonStr == null || jsonStr.isEmpty) return null;
       try {
@@ -43,7 +41,6 @@ class DbToApiMapper {
       return null;
     }
 
-    // Helper function to safely decode generic lists
     List<dynamic> decodeList(String? jsonStr) {
       if (jsonStr == null || jsonStr.isEmpty) return [];
       try {

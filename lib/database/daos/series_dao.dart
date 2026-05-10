@@ -5,7 +5,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
   final _logger = LoggingService.logger;
   SeriesDao(super.db);
 
-  // Gets the most recently updated series from the database.
   Future<SeriesTableData?> getLatestUpdatedSeries() async {
     try {
       return await (select(seriesTable)

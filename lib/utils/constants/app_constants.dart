@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/theme/app_theme_colors.dart';
 export 'package:mangabaka_app/utils/theme/app_theme_colors.dart' show AppTheme;
 
-/// App-wide constants for UI, API, and business logic
 class AppConstants {
-  // ============ API & Network ============
   static const String appName = 'MangaBaka';
   static const String appVersion = '0.1.0-pre-release-5';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
@@ -15,13 +13,11 @@ class AppConstants {
   static const int maxRetries = 3;
   static const int rateLimitRetryDelaySeconds = 5;
 
-  // ============ Pagination ============
   static const int defaultPageLimit = 20;
   static const int libraryPageLimit = 100; // entries per page (API max)
   static const int libraryMaxPages = 10000; // API max pages
   static const double scrollThresholdPx = 100;
 
-  // ============ UI Colors ============
   static Color primaryBackground = const Color(0xFF0a0a0a);
   static Color secondaryBackground = const Color(0xFF18181B);
   static Color tertiaryBackground = const Color(0xFF23232a);
@@ -39,16 +35,13 @@ class AppConstants {
     AppThemeColors.applyTheme(theme, isDark);
   }
 
-  // ============ UI Spacing ============
   static const double horizontalPadding = 16.0;
   static const double verticalPadding = 16.0;
   static const double cardRadius = 12.0;
 
-  // ============ Animation ============
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);
   static const Duration mediumAnimationDuration = Duration(milliseconds: 500);
 
-  // ============ Library States ============
   static const Set<String> libraryStates = {
     'reading',
     'paused',
@@ -59,7 +52,6 @@ class AppConstants {
     'considering',
   };
 
-  // ============ OAuth Scopes ============
   static const List<String> oauthScopes = [
     'openid',
     'profile',
@@ -68,11 +60,9 @@ class AppConstants {
     'offline_access',
   ];
 
-  // ============ Storage Keys ============
   static const String prefixStorageKey = 'mangabaka_app_';
   static const String lastSyncKey = '${prefixStorageKey}last_sync';
   static const String userPreferencesKey = '${prefixStorageKey}preferences';
 
-  // ============ Delays ============
   static const Duration debounceDelay = Duration(milliseconds: 500);
 }

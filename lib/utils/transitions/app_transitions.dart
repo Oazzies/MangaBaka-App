@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// App-wide named page route transitions for consistent navigation feel.
 abstract final class AppTransitions {
-  /// Standard fade-through transition used for most page navigations.
   static Route<T> fade<T>(Widget page) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -20,7 +18,6 @@ abstract final class AppTransitions {
     );
   }
 
-  /// Slide-up-and-fade transition — good for modals and detail screens.
   static Route<T> slideUp<T>(Widget page) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -46,7 +43,6 @@ abstract final class AppTransitions {
     );
   }
 
-  /// Slide-from-right transition — matches the Material default for drill-down navigation.
   static Route<T> slideRight<T>(Widget page) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,

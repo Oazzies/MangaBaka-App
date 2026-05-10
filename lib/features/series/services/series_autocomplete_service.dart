@@ -7,45 +7,21 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
-/// Service that handles autocomplete search against the MangaBaka API.
-///
-/// Features:
-/// - **Debouncing**: 300ms delay before firing a request.
-/// - **Min length gate**: Queries shorter than 3 characters are rejected.
-/// - **Request cancellation**: In-flight HTTP requests are cancelled when a
-///   newer query arrives (via [http.Client.close]).
-/// - **Smart caching**: Exact match first, then prefix match from longer
-///   cached queries to provide instant suggestions while typing.
-/// - **Content preferences**: Automatically applies the user's content
-///   rating preferences to narrow results.
-/// - **Rate-limit awareness**: HTTP 429 responses are caught gracefully.
 class SeriesAutocompleteService {
   static final _logger = LoggingService.logger;
 
-  /// In-memory cache: query string → parsed results.
   final Map<String, List<AutocompleteSeriesResult>> _cache = {};
 
-  /// Currently active debounce timer.
   Timer? _debounceTimer;
 
-  /// The HTTP client for the current in-flight request.
-  /// Closing it cancels the pending request.
   http.Client? _activeClient;
 
-  /// Minimum query length before we hit the network.
   static const int minQueryLength = 3;
 
-  /// Number of results to request from the API.
   static const int autocompleteLimit = 5;
 
-  /// Debounce duration — 300ms for a snappy feel.
   static const Duration _debounceDuration = Duration(milliseconds: 300);
 
-  /// Search with debouncing and cancellation.
-  ///
-  /// [query] is the raw user input.
-  /// [onResults] is called with the list of results (may be empty).
-  /// [onError] is called with a user-friendly error message (optional).
   void search(
     String query, {
     required void Function(List<AutocompleteSeriesResult> results) onResults,
@@ -69,14 +45,9 @@ class SeriesAutocompleteService {
       return;
     }
 
-    // Check for a prefix match — if we already fetched "naruto" and the
-    // user now types "naru", filter from the longer cached result set.
-    // This gives instant intermediate results while the real query debounces.
     final prefixResults = _findPrefixMatch(trimmed);
     if (prefixResults != null) {
       onResults(prefixResults);
-      // Still debounce the real request for the shorter query in case
-      // the API returns different/better results
     }
 
     // Debounce the actual network call
@@ -85,8 +56,6 @@ class SeriesAutocompleteService {
     });
   }
 
-  /// Try to find cached results from a longer query that starts with [query].
-  /// Returns filtered results or null if no match.
   List<AutocompleteSeriesResult>? _findPrefixMatch(String query) {
     for (final entry in _cache.entries) {
       if (entry.key.startsWith(query) && entry.value.isNotEmpty) {
@@ -130,7 +99,6 @@ class SeriesAutocompleteService {
 
       _logger.fine('Autocomplete search request completed');
 
-      // If this client was cancelled while waiting, bail out silently
       if (_activeClient != client) return;
 
       if (response.statusCode == 200) {
@@ -155,7 +123,7 @@ class SeriesAutocompleteService {
         onResults([]);
       }
     } on http.ClientException {
-      // Request was cancelled — this is expected, do nothing
+      // Request was cancelled
       if (_activeClient != client) return;
     } on SocketException {
       if (_activeClient != client) return;
@@ -173,18 +141,15 @@ class SeriesAutocompleteService {
     }
   }
 
-  /// Cancel the in-flight HTTP request by closing its client.
   void _cancelActiveRequest() {
     _activeClient?.close();
     _activeClient = null;
   }
 
-  /// Clear the in-memory cache (e.g. when the user navigates away).
   void clearCache() {
     _cache.clear();
   }
 
-  /// Clean up resources. Call this from the widget's [dispose].
   void dispose() {
     _debounceTimer?.cancel();
     _cancelActiveRequest();

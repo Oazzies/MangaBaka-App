@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 
-/// Base chip widget used across the app for genres, tags, etc.
-/// Styled to match the action bar: rounded-rect with secondary background.
 class ChipBase extends StatelessWidget {
   final Widget label;
   final Color? backgroundColor;

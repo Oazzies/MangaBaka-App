@@ -45,7 +45,7 @@ class _NewsScreenState extends State<NewsScreen> {
       _logger.info('Loaded ${cachedNews.length} news items from cache');
       setState(() {
         _newsList.addAll(cachedNews);
-        _currentPage = 2; // temporarily, in case user scrolls immediately
+        _currentPage = 2; //in case user scrolls immediately
       });
     }
     _fetchNews(initial: true, isBackground: cachedNews.isNotEmpty);

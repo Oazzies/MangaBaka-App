@@ -143,8 +143,6 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   Future<void> _onRefresh() async {
     _logger.info('User triggered manual library refresh from screen');
-    // We don't await here so the RefreshIndicator spinner disappears immediately.
-    // The global SyncProgressOverlay handles the visual progress.
     _libraryService.syncLibrary().catchError((e) {
       _logger.severe('Manual refresh failed: $e');
     });

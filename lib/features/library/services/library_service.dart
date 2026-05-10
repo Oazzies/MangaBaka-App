@@ -17,12 +17,6 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 
-// ─── Prefs keys ───────────────────────────────────────────────────────────
-
-
-
-
-
 abstract class LibraryServiceBase {
   db.AppDatabase get database;
   ProfileAuthService get auth;
@@ -72,12 +66,6 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
   @override
   DateTime? parseAsUtc(String dateStr) => _parseAsUtc(dateStr);
 
-  @override
-  void resetInitialSyncTask() {
-    // Handled by mixin
-  }
-
-  // ─── Sync state notifier ──────────────────────────────────────────────────
   final ValueNotifier<LibrarySyncStatus> _syncStatus =
       ValueNotifier(LibrarySyncStatus());
 
@@ -94,9 +82,7 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
       : _auth = auth,
         _db = database ?? getIt<db.AppDatabase>();
 
-  // ─── DB streams ───────────────────────────────────────────────────────────
 
-  /// Watches a single library entry by series ID.
   Stream<api.LibraryEntry?> watchEntryFromDb(String seriesId) {
     return _db.libraryEntriesDao
         .watchEntryWithSeries(seriesId)
@@ -124,7 +110,6 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
         }, test: (error) => true);
   }
 
-  // ─── HTTP helpers ─────────────────────────────────────────────────────────
 
   Future<FetchPageResult> _fetchPage(
     String token,

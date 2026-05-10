@@ -1,9 +1,7 @@
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 
-/// Library-specific constants derived from AppConstants.
-/// Uses `final` for computed values from string interpolation.
 class LibraryConstants {
-  LibraryConstants._(); // Prevent instantiation
+  LibraryConstants._(); 
 
   static final String baseUrl = '${AppConstants.baseApiUrl}/my/library';
   static const int pageLimit = AppConstants.libraryPageLimit;

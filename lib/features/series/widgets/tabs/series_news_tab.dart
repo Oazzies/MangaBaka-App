@@ -37,7 +37,6 @@ class SeriesNewsTab extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: news!.length,
           itemBuilder: (context, index) {
-            // NewsListItem already has a horizontal margin of 16.0
             return NewsListItem(news: news![index], showReferencedSeries: false);
           },
         ),
