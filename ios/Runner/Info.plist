@@ -33,7 +33,14 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+		<string>mailto</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
+
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires camera access to scan barcodes for manga series.</string>
