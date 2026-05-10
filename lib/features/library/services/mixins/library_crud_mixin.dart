@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 mixin LibraryCrudMixin on LibraryServiceBase {
   
   Future<void> updateLibraryEntryState(String seriesId, String state) async {
+    logger.info('Updating library entry state for $seriesId to: $state');
     final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
@@ -30,9 +31,11 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           );
 
       if (response.statusCode == 401) {
+        logger.severe('Unauthorized update state request for $seriesId');
         throw AuthException(message: 'Authentication failed.', code: 'AUTH_FAILED');
       }
       if (response.statusCode != 200) {
+        logger.severe('Failed to update entry state for $seriesId. Status: ${response.statusCode}, Body: ${response.body}');
         throw ApiException(
           message: 'Failed to update entry state',
           statusCode: response.statusCode,
@@ -42,25 +45,25 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       }
 
       await database.libraryEntriesDao.updateEntryState(seriesId, state);
+      logger.info('Successfully updated state for $seriesId to $state in DB');
     } on http.ClientException catch (e, st) {
+      logger.severe('ClientException updating entry state for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
+      logger.severe('SocketException updating entry state for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
+      logger.severe('TimeoutException updating entry state for $seriesId');
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
-    } on AuthException {
-      rethrow;
-    } on ApiException {
-      rethrow;
-    } on NetworkException {
-      rethrow;
     } catch (e, st) {
-      logger.severe('Unexpected error updating entry state: $e\n$st');
+      logger.severe('Unexpected error updating entry state for $seriesId: $e\n$st');
+      if (e is AppException) rethrow;
       throw AppError(message: 'Failed to update entry state', originalError: e, stackTrace: st);
     }
   }
 
   Future<void> updateLibraryEntryRating(String seriesId, int rating) async {
+    logger.info('Updating library entry rating for $seriesId to: $rating');
     final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
@@ -80,9 +83,11 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           );
 
       if (response.statusCode == 401) {
+        logger.severe('Unauthorized update rating request for $seriesId');
         throw AuthException(message: 'Authentication failed.', code: 'AUTH_FAILED');
       }
       if (response.statusCode != 200) {
+        logger.severe('Failed to update entry rating for $seriesId. Status: ${response.statusCode}, Body: ${response.body}');
         throw ApiException(
           message: 'Failed to update entry rating',
           statusCode: response.statusCode,
@@ -92,25 +97,25 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       }
 
       await database.libraryEntriesDao.updateEntryRating(seriesId, rating);
+      logger.info('Successfully updated rating for $seriesId to $rating in DB');
     } on http.ClientException catch (e, st) {
+      logger.severe('ClientException updating entry rating for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
+      logger.severe('SocketException updating entry rating for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
+      logger.severe('TimeoutException updating entry rating for $seriesId');
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
-    } on AuthException {
-      rethrow;
-    } on ApiException {
-      rethrow;
-    } on NetworkException {
-      rethrow;
     } catch (e, st) {
-      logger.severe('Unexpected error updating entry rating: $e\n$st');
+      logger.severe('Unexpected error updating entry rating for $seriesId: $e\n$st');
+      if (e is AppException) rethrow;
       throw AppError(message: 'Failed to update entry rating', originalError: e, stackTrace: st);
     }
   }
 
   Future<void> createLibraryEntry(String seriesId, String state) async {
+    logger.info('Creating library entry for $seriesId with state: $state');
     final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
@@ -130,12 +135,14 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           );
 
       if (response.statusCode == 401) {
+        logger.severe('Unauthorized create entry request for $seriesId');
         throw AuthException(message: 'Authentication failed.', code: 'AUTH_FAILED');
       }
       if (response.statusCode == 201) {
+        logger.info('Successfully created library entry for $seriesId on server. Syncing local DB...');
         await syncLibrary();
       } else {
-        logger.severe('Failed to create library entry. Status: ${response.statusCode}');
+        logger.severe('Failed to create library entry for $seriesId. Status: ${response.statusCode}, Body: ${response.body}');
         throw ApiException(
           message: 'Failed to create library entry',
           statusCode: response.statusCode,
@@ -144,24 +151,23 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         );
       }
     } on http.ClientException catch (e, st) {
+      logger.severe('ClientException creating library entry for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
+      logger.severe('SocketException creating library entry for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
+      logger.severe('TimeoutException creating library entry for $seriesId');
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
-    } on AuthException {
-      rethrow;
-    } on ApiException {
-      rethrow;
-    } on NetworkException {
-      rethrow;
     } catch (e, st) {
-      logger.severe('Unexpected error creating entry: $e\n$st');
+      logger.severe('Unexpected error creating entry for $seriesId: $e\n$st');
+      if (e is AppException) rethrow;
       throw AppError(message: 'Failed to create library entry', originalError: e, stackTrace: st);
     }
   }
 
   Future<void> deleteEntry(String seriesId) async {
+    logger.info('Deleting library entry for $seriesId');
     final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
@@ -176,12 +182,14 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           );
 
       if (response.statusCode == 401) {
+        logger.severe('Unauthorized delete request for $seriesId');
         throw AuthException(message: 'Authentication failed.', code: 'AUTH_FAILED');
       }
       if (response.statusCode == 200 || response.statusCode == 404) {
+        logger.info('Successfully deleted entry $seriesId from server (or already gone). Updating DB...');
         await database.libraryEntriesDao.deleteEntry(seriesId);
       } else {
-        logger.severe('Failed to delete entry. Status: ${response.statusCode}');
+        logger.severe('Failed to delete entry for $seriesId. Status: ${response.statusCode}, Body: ${response.body}');
         throw ApiException(
           message: 'Failed to delete library entry',
           statusCode: response.statusCode,
@@ -190,32 +198,33 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         );
       }
     } on http.ClientException catch (e, st) {
+      logger.severe('ClientException deleting entry for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
+      logger.severe('SocketException deleting entry for $seriesId: $e');
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
+      logger.severe('TimeoutException deleting entry for $seriesId');
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
-    } on AuthException {
-      rethrow;
-    } on ApiException {
-      rethrow;
-    } on NetworkException {
-      rethrow;
     } catch (e, st) {
-      logger.severe('Unexpected error deleting entry: $e\n$st');
+      logger.severe('Unexpected error deleting entry for $seriesId: $e\n$st');
+      if (e is AppException) rethrow;
       throw AppError(message: 'Failed to delete library entry', originalError: e, stackTrace: st);
     }
   }
 
   Future<void> clearLibrary() async {
+    logger.info('User requested full library clear');
     try {
       setIsSyncCancelled(true);
       resetInitialSyncTask();
       await database.libraryEntriesDao.deleteAllEntries();
+      logger.info('Local library database cleared');
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(AppConstants.lastSyncKey);
       await prefs.remove('${AppConstants.prefixStorageKey}library_is_incomplete');
+      logger.info('Library sync preferences reset');
     } catch (e, st) {
       logger.severe('Failed to clear library: $e\n$st');
     }

@@ -130,8 +130,12 @@ mixin LibrarySyncMixin on LibraryServiceBase {
 
   @override
   Future<void> syncLibrary({String? state}) async {
-    if (syncStatus.value.isSyncing) return;
+    if (syncStatus.value.isSyncing) {
+      logger.info('Sync already in progress, skipping incremental sync request.');
+      return;
+    }
 
+    logger.info('Starting incremental library sync${state != null ? ' for state $state' : ''}');
     setIsSyncCancelled(false);
     syncStatus.value = LibrarySyncStatus(isSyncing: true);
 
@@ -140,6 +144,8 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       final prefs = await SharedPreferences.getInstance();
       final lastSyncStr = prefs.getString(_lastSyncKey);
       final lastSync = lastSyncStr != null ? parseAsUtc(lastSyncStr) : null;
+      
+      logger.fine('Last sync watermark: $lastSyncStr');
       String? newestEntryTimestamp;
 
       var page = 1;
@@ -147,12 +153,18 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       const maxSyncPages = 10;
 
       while (page <= maxSyncPages) {
-        if (isSyncCancelled) break;
+        if (isSyncCancelled) {
+          logger.info('Incremental sync cancelled at page $page');
+          break;
+        }
 
         final result = await fetchPage(token, page, sortBy: 'updated_at_desc', state: state);
         final entries = result.entries;
 
-        if (entries.isEmpty) break;
+        if (entries.isEmpty) {
+          logger.fine('No entries returned for page $page, stopping sync');
+          break;
+        }
 
         bool reachedKnown = false;
         final newEntries = <api.LibraryEntry>[];
@@ -176,19 +188,33 @@ mixin LibrarySyncMixin on LibraryServiceBase {
           newEntries.add(e);
         }
 
-        await saveEntries(newEntries);
-        totalFetched += newEntries.length;
-        syncStatus.value = syncStatus.value.copyWith(currentEntries: totalFetched, error: null);
+        if (newEntries.isNotEmpty) {
+          logger.info('Saving ${newEntries.length} new/updated entries from page $page');
+          await saveEntries(newEntries);
+          totalFetched += newEntries.length;
+          syncStatus.value = syncStatus.value.copyWith(currentEntries: totalFetched, error: null);
+        }
 
-        if (reachedKnown || entries.length < LibraryConstants.pageLimit) break;
+        if (reachedKnown) {
+          logger.info('Reached known entries at page $page. Sync catch-up complete.');
+          break;
+        }
+        
+        if (entries.length < LibraryConstants.pageLimit) {
+          logger.fine('Page $page was the last page of results');
+          break;
+        }
         page++;
       }
 
       if (!isSyncCancelled) {
-        await prefs.setString(_lastSyncKey, newestEntryTimestamp ?? DateTime.now().toUtc().toIso8601String());
+        final newWatermark = newestEntryTimestamp ?? DateTime.now().toUtc().toIso8601String();
+        logger.info('Incremental sync completed. Total fetched: $totalFetched. New watermark: $newWatermark');
+        await prefs.setString(_lastSyncKey, newWatermark);
       }
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
-    } catch (e) {
+    } catch (e, st) {
+      logger.severe('Incremental sync failed: $e\n$st');
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false, error: e.toString());
       rethrow;
     }

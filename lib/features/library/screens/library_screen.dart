@@ -16,7 +16,7 @@ import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/utils/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/library/widgets/library_status_banner.dart';
 import 'package:mangabaka_app/features/library/widgets/library_body.dart';
-
+import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -27,6 +27,7 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
+  static final _logger = LoggingService.logger;
   late final ProfileAuthService _auth;
   late final LibraryService _libraryService;
   late TabController _tabController;
@@ -41,6 +42,7 @@ class _LibraryScreenState extends State<LibraryScreen>
   @override
   void initState() {
     super.initState();
+    _logger.info('Library screen initialized');
     _initializeServices();
     _auth.addListener(_onAuthStateChanged);
     _initializeControllers();
@@ -57,15 +59,23 @@ class _LibraryScreenState extends State<LibraryScreen>
       length: LibraryScreenConstants.tabs.length,
       vsync: this,
     );
+    _tabController.addListener(_handleTabSelection);
     _scrollControllers = {
       for (final tab in LibraryScreenConstants.tabs)
         tab.key: ScrollController(),
     };
   }
 
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+      _logger.info('Library tab switched to: ${_tabController.index}');
+    }
+  }
+
   @override
   void dispose() {
     _auth.removeListener(_onAuthStateChanged);
+    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     for (var c in _scrollControllers.values) {
       c.dispose();
@@ -75,6 +85,7 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   void _bootstrap() {
     _loggedIn = _auth.isLoggedIn;
+    _logger.fine('Library bootstrap: loggedIn=$_loggedIn');
 
     if (_loggedIn) {
       _setupStreamAndSync();
@@ -83,6 +94,7 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   void _onAuthStateChanged() {
     if (!mounted) return;
+    _logger.info('Auth state changed in LibraryScreen. LoggedIn: ${_auth.isLoggedIn}');
     setState(() {
       _loggedIn = _auth.isLoggedIn;
       if (!_loggedIn) {
@@ -94,24 +106,34 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   void _setupStreamAndSync() {
+    _logger.info('Setting up library entries stream and sync tasks');
     setState(() {
       _entriesStream = _libraryService.watchEntriesFromDb();
     });
     // Full import only on first load; recents sync on subsequent ones.
     _libraryService.performInitialSyncIfNeeded().then((_) async {
+      _logger.info('Initial sync task completed');
       final incomplete = await _libraryService.isLibraryIncomplete();
       if (mounted) setState(() => _isLibraryIncomplete = incomplete);
-    }).catchError((_) {});
+    }).catchError((e) {
+      _logger.severe('Initial sync task failed: $e');
+    });
   }
 
   Future<void> _loginAndReload() async {
+    _logger.info('User attempting login from library screen');
     try {
       await _auth.login();
       if (!mounted) return;
+      _logger.info('Login successful in library screen');
       setState(() => _loggedIn = true);
       _setupStreamAndSync();
     } catch (e) {
-      if (e is AuthCancelledException) return;
+      if (e is AuthCancelledException) {
+        _logger.info('Login cancelled by user in library screen');
+        return;
+      }
+      _logger.severe('Login failed in library screen: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(LocalizationService().translate('login_failed_retry'))),
@@ -120,9 +142,12 @@ class _LibraryScreenState extends State<LibraryScreen>
   }
 
   Future<void> _onRefresh() async {
+    _logger.info('User triggered manual library refresh from screen');
     // We don't await here so the RefreshIndicator spinner disappears immediately.
     // The global SyncProgressOverlay handles the visual progress.
-    _libraryService.syncLibrary().catchError((_) {});
+    _libraryService.syncLibrary().catchError((e) {
+      _logger.severe('Manual refresh failed: $e');
+    });
   }
 
   @override

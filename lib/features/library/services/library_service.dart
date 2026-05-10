@@ -142,6 +142,7 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
     if (sortBy != null) queryParams['sort_by'] = sortBy;
 
     final uri = Uri.parse(LibraryConstants.baseUrl).replace(queryParameters: queryParams);
+    _logger.info('Fetching library page $page. URL: $uri');
 
     try {
       final response = await http.get(uri, headers: {
@@ -149,18 +150,32 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
         'User-Agent': LibraryConstants.userAgent,
       }).timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
 
+      _logger.fine('Library page $page fetch completed with status ${response.statusCode}');
+
       if (response.statusCode == 429) {
+        _logger.warning('Rate limited while fetching library page $page. Retrying in ${AppConstants.rateLimitRetryDelaySeconds}s...');
         await Future.delayed(Duration(seconds: AppConstants.rateLimitRetryDelaySeconds));
         return _fetchPage(token, page, state: state, sortBy: sortBy);
       }
 
-      if (response.statusCode == 401) throw AuthException(message: 'Auth failed', code: 'AUTH_FAILED');
-      if (response.statusCode == 400) return FetchPageResult(entries: [], totalEntries: 0, isError: true);
-      if (response.statusCode != 200) throw ApiException(message: 'Fetch failed', statusCode: response.statusCode);
+      if (response.statusCode == 401) {
+        _logger.severe('Unauthorized fetch request for library page $page');
+        throw AuthException(message: 'Auth failed', code: 'AUTH_FAILED');
+      }
+      if (response.statusCode == 400) {
+        _logger.warning('Bad request for library page $page: ${response.body}');
+        return FetchPageResult(entries: [], totalEntries: 0, isError: true);
+      }
+      if (response.statusCode != 200) {
+        _logger.severe('Failed to fetch library page $page. Status: ${response.statusCode}, Body: ${response.body}');
+        throw ApiException(message: 'Fetch failed', statusCode: response.statusCode);
+      }
 
       final result = await compute(_parseLibraryPage, response.body);
+      _logger.info('Successfully parsed ${result.entries.length} entries for library page $page');
       return result;
-    } catch (e) {
+    } catch (e, st) {
+      _logger.severe('Exception occurred while fetching library page $page: $e\n$st');
       rethrow;
     }
   }
