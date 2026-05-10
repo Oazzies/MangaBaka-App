@@ -8,6 +8,7 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 
 import 'package:mangabaka_app/utils/di/service_locator.dart';
+import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
@@ -17,6 +18,7 @@ class NewsScreen extends StatefulWidget {
 }
 
 class _NewsScreenState extends State<NewsScreen> {
+  static final _logger = LoggingService.logger;
   late final NewsService _newsService;
   final List<News> _newsList = [];
   final ScrollController _scrollController = ScrollController();
@@ -30,14 +32,17 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   void initState() {
     super.initState();
+    _logger.info('News screen initialized');
     _newsService = getIt<NewsService>();
     _loadCachedAndFetch();
     _scrollController.addListener(_onScroll);
   }
 
   Future<void> _loadCachedAndFetch() async {
+    _logger.fine('Loading cached news...');
     final cachedNews = await _newsService.getCachedNews();
     if (mounted && cachedNews.isNotEmpty) {
+      _logger.info('Loaded ${cachedNews.length} news items from cache');
       setState(() {
         _newsList.addAll(cachedNews);
         _currentPage = 2; // temporarily, in case user scrolls immediately
@@ -56,6 +61,7 @@ class _NewsScreenState extends State<NewsScreen> {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - AppConstants.scrollThresholdPx) {
       if (_hasMore && !_isLoading) {
+        _logger.fine('Scroll reached bottom, fetching more news (page $_currentPage)');
         _fetchNews(initial: false);
       }
     }
@@ -71,6 +77,7 @@ class _NewsScreenState extends State<NewsScreen> {
   Future<void> _fetchNews({bool initial = false, bool isBackground = false}) async {
     if (_isLoading || _isBackgroundRefresh) return;
     
+    _logger.info('Fetching news: initial=$initial, isBackground=$isBackground, page=$_currentPage');
     setState(() {
       if (isBackground) {
         _isBackgroundRefresh = true;
@@ -87,6 +94,9 @@ class _NewsScreenState extends State<NewsScreen> {
         limit: AppConstants.defaultPageLimit,
       );
       if (!mounted) return;
+
+      _logger.info('Received ${newNews.length} news items for page $pageToFetch');
+
       setState(() {
         if (initial) {
           _newsList.clear();
@@ -99,6 +109,7 @@ class _NewsScreenState extends State<NewsScreen> {
         _currentPage++;
       });
     } catch (e) {
+      _logger.severe('Error in NewsScreen while fetching news: $e');
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -109,6 +120,7 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Future<void> _onRefresh() async {
+    _logger.info('User triggered pull-to-refresh for news');
     setState(() {
       _currentPage = 1;
       _hasMore = true;

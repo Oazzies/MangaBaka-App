@@ -8,6 +8,7 @@ import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
+import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/welcome_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/language_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/theme_page.dart';
@@ -25,6 +26,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
+  static final _logger = LoggingService.logger;
   final PageController _pageController = PageController();
   late final ProfileAuthService _authService;
   int _currentPage = 0;
@@ -38,6 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    _logger.info('Onboarding started (isRedoing: ${widget.isRedoing})');
     _authService = getIt<ProfileAuthService>();
     _isLoggedIn = _authService.isLoggedIn;
   }
@@ -50,6 +53,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
+      _logger.fine('Moving to onboarding page ${_currentPage + 2}');
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
@@ -61,6 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _previousPage() {
     if (_currentPage > 0) {
+      _logger.fine('Moving back to onboarding page $_currentPage');
       _pageController.previousPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
@@ -69,33 +74,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _finishOnboarding() async {
+    _logger.info('Finishing onboarding');
     await SettingsManager().setHasCompletedOnboarding(true);
     if (!mounted) return;
 
     if (widget.isRedoing) {
       Navigator.of(context).pop();
     }
-    // Note: For initial onboarding, we don't call pushReplacement(MainScreen) 
-    // because main.dart is already listening to SettingsManager and will 
-    // rebuild the MaterialApp with MainScreen as the home widget. 
-    // Doing both was causing a race condition leading to a black screen.
   }
 
   Future<void> _requestCameraPermission() async {
-    await Permission.camera.request();
+    _logger.info('Requesting camera permission during onboarding');
+    final status = await Permission.camera.request();
+    _logger.info('Camera permission status: $status');
     if (!mounted) return;
     _nextPage();
   }
 
   Future<void> _login() async {
+    _logger.info('Starting login attempt during onboarding');
     setState(() => _isLoggingIn = true);
     try {
       await _authService.login();
       if (!mounted) return;
+      _logger.info('Login successful during onboarding');
       setState(() => _isLoggedIn = true);
       _nextPage();
     } catch (e) {
-      if (e is AuthCancelledException) return;
+      if (e is AuthCancelledException) {
+        _logger.info('Login cancelled by user');
+        return;
+      }
+      _logger.severe('Login failed during onboarding: $e');
       if (mounted) {
         final localization = LocalizationService();
         ScaffoldMessenger.of(context).showSnackBar(

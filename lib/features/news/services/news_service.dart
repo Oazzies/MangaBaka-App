@@ -36,31 +36,32 @@ class NewsService {
 
     try {
       String url = '$_baseUrl?page=$page&limit=$limit';
+      _logger.info('Fetching news from: $url');
       final response = await http.get(
         Uri.parse(url),
         headers: {'User-Agent': AppConstants.userAgent},
       );
 
-      _logger.fine('News fetch page $page completed');
-
       if (response.statusCode == 200) {
         if (page == 1) {
+          _logger.fine('Caching first page of news');
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString(_cacheKey, response.body);
         }
         final json = jsonDecode(response.body);
         final List data = json['data'] ?? [];
+        _logger.info('News fetch page $page completed with ${data.length} items');
         return data
             .map((item) => News.fromJson(item as Map<String, dynamic>))
             .toList();
       } else {
         _logger.severe(
-          'Failed to load news: ${response.statusCode} ${response.body}',
+          'Failed to load news (HTTP ${response.statusCode}) for URL: $url. Body: ${response.body}',
         );
         throw ApiException(message: 'Failed to load news', statusCode: response.statusCode);
       }
     } catch (e, st) {
-      _logger.severe('Failed to load news: $e\n$st');
+      _logger.severe('Exception occurred while fetching news at page $page: $e\n$st');
       if (e is AppException) rethrow;
       throw NetworkException(message: 'Failed to load news', originalError: e, stackTrace: st);
     } finally {

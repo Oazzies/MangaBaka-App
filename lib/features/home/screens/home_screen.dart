@@ -3,11 +3,16 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 
+import 'package:mangabaka_app/utils/services/logging_service.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  static final _logger = LoggingService.logger;
+
   @override
   Widget build(BuildContext context) {
+    _logger.info('HomeScreen built');
     return ListenableBuilder(
       listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {

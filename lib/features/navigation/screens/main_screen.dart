@@ -8,6 +8,7 @@ import 'package:mangabaka_app/features/library/widgets/sync_progress_overlay.dar
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
+import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 
@@ -25,12 +26,14 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
+  static final _logger = LoggingService.logger;
   late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = SettingsManager().defaultStartPage.index;
+    _logger.info('MainScreen initialized with tab index: $_selectedIndex');
   }
 
   // Keep pages alive across tab switches with IndexedStack
@@ -43,9 +46,12 @@ class MainScreenState extends State<MainScreen> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (_selectedIndex != index) {
+      _logger.info('Tab switched to: $index');
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   @override
