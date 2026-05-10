@@ -7,6 +7,8 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 
+import 'package:mangabaka_app/features/news/services/news_service.dart';
+
 final getIt = GetIt.instance;
 
 /// Configures all service dependencies using GetIt
@@ -35,6 +37,9 @@ void setupServiceLocator() {
   getIt.registerSingleton<LibraryService>(
     LibraryService(auth: getIt<ProfileAuthService>()),
   );
+
+  // News Service (singleton)
+  getIt.registerLazySingleton<NewsService>(() => NewsService());
 }
 
 /// Resets all service instances (useful for testing)

@@ -7,6 +7,8 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 
+import 'package:mangabaka_app/utils/di/service_locator.dart';
+
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
 
@@ -15,7 +17,7 @@ class NewsScreen extends StatefulWidget {
 }
 
 class _NewsScreenState extends State<NewsScreen> {
-  final NewsService _newsService = NewsService();
+  late final NewsService _newsService;
   final List<News> _newsList = [];
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
@@ -28,6 +30,7 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   void initState() {
     super.initState();
+    _newsService = getIt<NewsService>();
     _loadCachedAndFetch();
     _scrollController.addListener(_onScroll);
   }
