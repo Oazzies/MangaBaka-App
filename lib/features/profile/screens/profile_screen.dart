@@ -160,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
             title: Text(
               () {
                 if (profile == null) return l10n.translate('profile');
-                if (username == null) return l10n.translate('yourprofile');
+                if (username == null) return l10n.translate('your_profile');
                 
                 final suffix = l10n.translate('profile_title_suffix');
                 switch (l10n.currentLanguage) {
