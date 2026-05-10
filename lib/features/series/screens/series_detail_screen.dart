@@ -20,6 +20,8 @@ import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin
 import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.dart';
 
 
+import 'package:mangabaka_app/utils/services/logging_service.dart';
+
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
 
@@ -30,10 +32,12 @@ class SeriesDetailScreen extends StatefulWidget {
 }
 
 class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDetailActionsMixin, SeriesDetailDataMixin {
+  static final _logger = LoggingService.logger;
   late final LibraryService _libraryService;
   late final SeriesService _seriesService;
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
+
   @override
   LibraryService get libraryService => _libraryService;
 
@@ -57,11 +61,18 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
   @override
   void initState() {
     super.initState();
+    _logger.info('Series detail screen initialized for series: ${widget.series.title} (${widget.series.id})');
     _libraryService = getIt<LibraryService>();
     _seriesService = getIt<SeriesService>();
     _entryStream = _libraryService.watchEntryFromDb(widget.series.id);
     fullSeries = widget.series; 
-    fetchFullData();
+    
+    _logger.fine('Starting full data fetch for series: ${widget.series.id}');
+    fetchFullData().then((_) {
+      _logger.info('Full data fetch complete for series: ${widget.series.id}');
+    }).catchError((e) {
+      _logger.severe('Full data fetch failed for series: ${widget.series.id}. Error: $e');
+    });
   }
 
   @override
@@ -120,6 +131,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                                 isDataLoaded: isDataLoaded,
                                 selectedTab: _selectedTab,
                                 onTabChanged: (tab) {
+                                  _logger.info('Series detail tab switched to: $tab');
                                   setState(() => _selectedTab = tab);
                                   fetchTabData(tab);
                                 },
@@ -148,6 +160,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                                 isDataLoaded: isDataLoaded,
                                 selectedTab: _selectedTab,
                                 onTabChanged: (tab) {
+                                  _logger.info('Series detail tab switched to: $tab');
                                   setState(() => _selectedTab = tab);
                                   fetchTabData(tab);
                                 },

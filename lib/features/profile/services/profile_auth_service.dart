@@ -38,13 +38,20 @@ class ProfileAuthService extends ChangeNotifier {
       );
 
   Future<void> init() async {
+    _logger.info('Initializing ProfileAuthService...');
     try {
       _hasSessionCache = await hasSession();
       if (_hasSessionCache) {
+        _logger.info('Found active session in storage');
         _cachedProfile = await _storage.getCachedProfile();
+        if (_cachedProfile != null) {
+          _logger.fine('Loaded cached profile for: ${_cachedProfile!.preferredUsername ?? _cachedProfile!.id}');
+        }
+      } else {
+        _logger.fine('No active session found');
       }
     } catch (e) {
-      _logger.warning('Failed to load cached profile: $e');
+      _logger.warning('Failed to load cached profile during init: $e');
     }
   }
 
@@ -54,8 +61,10 @@ class ProfileAuthService extends ChangeNotifier {
   }
 
   Future<void> login() async {
+    _logger.info('Starting OAuth2 login flow...');
     try {
       if (_clientId.isEmpty || _redirectUri.isEmpty) {
+        _logger.severe('OAuth configuration missing from .env');
         throw AuthException(
           message: 'Missing MANGABAKA_APP_CLIENT_ID or MANGABAKA_APP_REDIRECT_URI in .env',
           code: 'MISSING_CONFIG',
@@ -72,9 +81,11 @@ class ProfileAuthService extends ChangeNotifier {
         ),
       );
 
+      _logger.info('OAuth2 authorization successful. Persisting tokens...');
       await _persistTokens(response);
       _hasSessionCache = true;
       await fetchProfile(forceRefresh: true);
+      _logger.info('Login complete for: ${_cachedProfile?.preferredUsername ?? _cachedProfile?.id}');
       notifyListeners();
     } catch (e, st) {
       if (e is PlatformException &&
@@ -86,7 +97,7 @@ class ProfileAuthService extends ChangeNotifier {
           throw AuthCancelledException();
         }
       }
-      _logger.severe('Login failed: $e\n$st');
+      _logger.severe('Login flow failed: $e\n$st');
       if (e is AppException) rethrow;
       throw AuthException(message: 'Login failed', originalError: e, stackTrace: st);
     }
@@ -99,6 +110,7 @@ class ProfileAuthService extends ChangeNotifier {
       await _storage.write(AuthStorage.kIdToken, response.idToken);
       final exp = response.accessTokenExpirationDateTime?.toUtc().toIso8601String();
       if (exp != null) {
+        _logger.fine('Token expiration set to: $exp');
         await _storage.write(AuthStorage.kAccessTokenExp, exp);
       }
     } catch (e, st) {
@@ -110,17 +122,28 @@ class ProfileAuthService extends ChangeNotifier {
   Future<void> _refreshIfNeeded() async {
     try {
       final expRaw = await _storage.read(AuthStorage.kAccessTokenExp);
-      if (expRaw == null) return;
+      if (expRaw == null) {
+        _logger.fine('No token expiration found, assuming refresh not needed');
+        return;
+      }
 
       final exp = DateTime.tryParse(expRaw);
       if (exp == null) return;
 
-      if (DateTime.now().toUtc().isBefore(exp.subtract(const Duration(minutes: 1)))) {
+      final now = DateTime.now().toUtc();
+      final threshold = exp.subtract(const Duration(minutes: 5));
+      
+      if (now.isBefore(threshold)) {
+        _logger.fine('Access token still valid. Expires at: $exp');
         return;
       }
 
+      _logger.info('Access token expiring soon or already expired. Attempting refresh...');
       final refreshToken = await _storage.read(AuthStorage.kRefreshToken);
-      if (refreshToken == null || refreshToken.isEmpty) return;
+      if (refreshToken == null || refreshToken.isEmpty) {
+        _logger.warning('No refresh token available to perform refresh');
+        return;
+      }
 
       final response = await _appAuth.token(
         TokenRequest(
@@ -132,9 +155,10 @@ class ProfileAuthService extends ChangeNotifier {
         ),
       );
 
+      _logger.info('Token refresh successful');
       await _persistTokens(response);
     } catch (e, st) {
-      _logger.severe('Failed to refresh tokens: $e\n$st');
+      _logger.severe('Token refresh failed: $e\n$st');
       if (e is AppException) rethrow;
       throw AuthException(message: 'Failed to refresh tokens', originalError: e, stackTrace: st);
     }

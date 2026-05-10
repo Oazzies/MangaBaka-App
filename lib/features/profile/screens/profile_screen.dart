@@ -14,6 +14,8 @@ import 'package:mangabaka_app/features/profile/widgets/profile_statistics_sectio
 import 'package:mangabaka_app/features/profile/widgets/profile_snapshot_section.dart';
 import 'package:mangabaka_app/features/profile/mixins/profile_data_mixin.dart';
 
+import 'package:mangabaka_app/utils/services/logging_service.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -22,6 +24,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
+  static final _logger = LoggingService.logger;
   late final ProfileAuthService _auth;
   late final LibraryService _libraryService;
   late final StatisticsService _statisticsService;
@@ -41,11 +44,10 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
   @override
   SnapshotService get snapshotService => _snapshotService;
 
-
-
   @override
   void initState() {
     super.initState();
+    _logger.info('Profile screen initialized');
     _auth = getIt<ProfileAuthService>();
     _auth.addListener(_onAuthStateChanged);
     _libraryService = getIt<LibraryService>();
@@ -56,19 +58,28 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     // Instantly show cached profile — no loading spinner
     profile = _auth.cachedProfile;
     if (profile != null) {
+      _logger.info('Using cached profile for username: ${profile!.preferredUsername ?? profile!.id}');
       loading = false;
       // Fire all data fetches in parallel
       fetchStatistics();
       fetchRecentlyChanged(initial: true);
       fetchRecentlyAdded(initial: true);
       // Silently refresh profile in background
+      _logger.fine('Silently refreshing profile data in background');
       _auth.fetchProfile(forceRefresh: true).then((p) {
-        if (mounted) setState(() => profile = p);
-      }).catchError((_) {});
+        if (mounted) {
+          _logger.fine('Background profile refresh complete');
+          setState(() => profile = p);
+        }
+      }).catchError((e) {
+        _logger.warning('Silently refreshing profile data failed: $e');
+      });
     } else if (_auth.isLoggedIn) {
+      _logger.info('User logged in but no cached profile found. Triggering full bootstrap.');
       // Logged in but no cached profile yet — full load
       bootstrap();
     } else {
+      _logger.info('User not logged in. Displaying login prompt.');
       // Not logged in — show login prompt instantly
       loading = false;
     }
@@ -76,6 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
 
   @override
   void dispose() {
+    _logger.info('Disposing profile screen');
     _auth.removeListener(_onAuthStateChanged);
     _libraryService.syncStatus.removeListener(_onSyncStatusChanged);
     super.dispose();
@@ -87,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     
     // Only trigger refresh when sync transitions from true -> false
     if (_wasSyncing && !isSyncing && _auth.isLoggedIn) {
+      _logger.info('Library sync completed. Refreshing profile statistics.');
       fetchStatistics();
       fetchRecentlyChanged(initial: true);
       fetchRecentlyAdded(initial: true);
@@ -97,9 +110,11 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
 
   void _onAuthStateChanged() {
     if (!mounted) return;
+    _logger.info('Auth state changed in ProfileScreen. LoggedIn: ${_auth.isLoggedIn}');
     setState(() {
       profile = _auth.cachedProfile;
       if (!_auth.isLoggedIn) {
+        _logger.fine('User logged out. Clearing profile UI state.');
         // Clear all state on logout
         totalSeries = 0;
         chaptersRead = 0;
@@ -111,6 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
         loading = false;
         profile = null;
       } else if (profile == null && _auth.isLoggedIn) {
+        _logger.info('User logged in. Triggering bootstrap for profile data.');
         // Logged in but profile not fetched yet — full load
         bootstrap();
       }

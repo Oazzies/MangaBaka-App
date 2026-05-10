@@ -23,6 +23,8 @@ mixin SeriesFetchMixin {
 
     try {
       final url = Uri.parse("${AppConstants.baseApiUrl}/series/$id");
+      logger.info('Fetching series details for ID: $id. URL: $url');
+      
       final response = await http
           .get(url, headers: {'User-Agent': AppConstants.userAgent})
           .timeout(
@@ -31,14 +33,17 @@ mixin SeriesFetchMixin {
                 throw TimeoutException('Series fetch request timed out'),
           );
 
+      logger.fine('Series fetch status for $id: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         try {
           final data = jsonDecode(response.body);
           final series = Series.fromJson(data['data']);
+          logger.info('Successfully fetched series: ${series.title} ($id)');
           _cache[id] = series;
           return series;
         } catch (e, st) {
-          logger.severe('Failed to parse series data: $e\n$st');
+          logger.severe('Failed to parse series data for $id: $e\n$st');
           throw ParseException(
             message: 'Failed to parse series data',
             originalError: e,
@@ -46,6 +51,7 @@ mixin SeriesFetchMixin {
           );
         }
       } else if (response.statusCode == 404) {
+        logger.warning('Series not found: $id');
         throw ApiException(
           message: 'Series not found',
           statusCode: response.statusCode,
@@ -53,6 +59,7 @@ mixin SeriesFetchMixin {
           code: 'NOT_FOUND',
         );
       } else if (response.statusCode == 429) {
+        logger.warning('Rate limited while fetching series $id');
         throw ApiException(
           message: 'Too many requests. Please slow down.',
           statusCode: response.statusCode,
@@ -60,6 +67,7 @@ mixin SeriesFetchMixin {
           code: 'RATE_LIMITED',
         );
       } else {
+        logger.severe('Failed to fetch series $id. Status: ${response.statusCode}, Body: ${response.body}');
         throw ApiException(
           message: 'Failed to fetch series',
           statusCode: response.statusCode,

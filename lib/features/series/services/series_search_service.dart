@@ -69,18 +69,18 @@ class SeriesSearchService {
       }),
     );
 
+    _logger.info('Performing series search. URI: $uri');
 
     try {
       final response = await http
           .get(uri, headers: {'User-Agent': AppConstants.userAgent})
-
           .timeout(
             Duration(seconds: AppConstants.networkTimeoutSeconds),
             onTimeout: () =>
                 throw TimeoutException('Series search request timed out'),
           );
 
-      _logger.fine('Series search request completed');
+      _logger.fine('Series search response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         try {
@@ -89,6 +89,8 @@ class SeriesSearchService {
           final results = data
               .map((item) => Series.fromJson(item as Map<String, dynamic>))
               .toList();
+          
+          _logger.info('Search successful. Found ${results.length} results');
           
           for (var series in results) {
             _seriesService.precacheSeries(series);

@@ -15,9 +15,11 @@ class StatisticsService {
       final query = _db.selectOnly(_db.libraryEntriesTable)
         ..addColumns([count]);
       final result = await query.getSingle();
-      return result.read(count) ?? 0;
+      final val = result.read(count) ?? 0;
+      _logger.fine('Total series count: $val');
+      return val;
     } catch (e, st) {
-      _logger.severe('Failed to get total series: $e\n$st');
+      _logger.severe('Failed to get total series from DB: $e\n$st');
       throw DatabaseException(message: 'Failed to get total series', originalError: e, stackTrace: st);
     }
   }
@@ -27,9 +29,11 @@ class StatisticsService {
       final sum = _db.libraryEntriesTable.progressChapter.sum();
       final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
       final result = await query.getSingle();
-      return result.read(sum) ?? 0;
+      final val = result.read(sum) ?? 0;
+      _logger.fine('Total chapters read: $val');
+      return val;
     } catch (e, st) {
-      _logger.severe('Failed to get chapters read: $e\n$st');
+      _logger.severe('Failed to get chapters read from DB: $e\n$st');
       throw DatabaseException(message: 'Failed to get chapters read', originalError: e, stackTrace: st);
     }
   }
@@ -39,9 +43,11 @@ class StatisticsService {
       final sum = _db.libraryEntriesTable.progressVolume.sum();
       final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
       final result = await query.getSingle();
-      return result.read(sum) ?? 0;
+      final val = result.read(sum) ?? 0;
+      _logger.fine('Total volumes read: $val');
+      return val;
     } catch (e, st) {
-      _logger.severe('Failed to get volumes read: $e\n$st');
+      _logger.severe('Failed to get volumes read from DB: $e\n$st');
       throw DatabaseException(message: 'Failed to get volumes read', originalError: e, stackTrace: st);
     }
   }
@@ -66,9 +72,11 @@ class StatisticsService {
       final completedResult = await queryCompleted.getSingle();
       final completed = completedResult.read(completedCount) ?? 0;
 
-      return (completed / total) * 100;
+      final rate = (completed / total) * 100;
+      _logger.fine('Completion rate: $rate% ($completed/$total)');
+      return rate;
     } catch (e, st) {
-      _logger.severe('Failed to get completion rate: $e\n$st');
+      _logger.severe('Failed to calculate completion rate: $e\n$st');
       throw DatabaseException(message: 'Failed to get completion rate', originalError: e, stackTrace: st);
     }
   }
@@ -78,9 +86,11 @@ class StatisticsService {
       final sum = _db.libraryEntriesTable.numberOfRereads.sum();
       final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
       final result = await query.getSingle();
-      return result.read(sum) ?? 0;
+      final val = result.read(sum) ?? 0;
+      _logger.fine('Total rereads: $val');
+      return val;
     } catch (e, st) {
-      _logger.severe('Failed to get total rereads: $e\n$st');
+      _logger.severe('Failed to get total rereads from DB: $e\n$st');
       throw DatabaseException(message: 'Failed to get total rereads', originalError: e, stackTrace: st);
     }
   }
@@ -92,9 +102,11 @@ class StatisticsService {
         ..addColumns([avg])
         ..where(_db.libraryEntriesTable.rating.isNotNull());
       final result = await query.getSingle();
-      return result.read(avg) ?? 0.0;
+      final val = result.read(avg) ?? 0.0;
+      _logger.fine('Mean score: $val');
+      return val;
     } catch (e, st) {
-      _logger.severe('Failed to get mean score: $e\n$st');
+      _logger.severe('Failed to calculate mean score: $e\n$st');
       throw DatabaseException(message: 'Failed to get mean score', originalError: e, stackTrace: st);
     }
   }
@@ -117,9 +129,11 @@ class StatisticsService {
       final total = completed + dropped;
       if (total == 0) return 0.0;
 
-      return (completed / total) * 100;
+      final rate = (completed / total) * 100;
+      _logger.fine('Finish rate: $rate% ($completed completed, $dropped dropped)');
+      return rate;
     } catch (e, st) {
-      _logger.severe('Failed to get finish rate: $e\n$st');
+      _logger.severe('Failed to calculate finish rate: $e\n$st');
       throw DatabaseException(message: 'Failed to get finish rate', originalError: e, stackTrace: st);
     }
   }
@@ -146,14 +160,19 @@ class StatisticsService {
         ..limit(1);
 
       final row = await query.getSingleOrNull();
-      if (row == null) return null;
+      if (row == null) {
+        _logger.fine('No rated series found for highest rated check');
+        return null;
+      }
 
-      return LibraryEntryWithSeries(
+      final entry = LibraryEntryWithSeries(
         libraryEntry: row.readTable(_db.libraryEntriesTable),
         series: row.readTable(_db.seriesTable),
       );
+      _logger.fine('Highest rated series found: ${entry.series.title}');
+      return entry;
     } catch (e, st) {
-      _logger.severe('Failed to get highest rated series: $e\n$st');
+      _logger.severe('Failed to get highest rated series from DB: $e\n$st');
       throw DatabaseException(message: 'Failed to get highest rated series', originalError: e, stackTrace: st);
     }
   }
@@ -181,14 +200,19 @@ class StatisticsService {
         ..limit(1);
 
       final row = await query.getSingleOrNull();
-      if (row == null) return null;
+      if (row == null) {
+        _logger.fine('No reread series found for most reread check');
+        return null;
+      }
 
-      return LibraryEntryWithSeries(
+      final entry = LibraryEntryWithSeries(
         libraryEntry: row.readTable(_db.libraryEntriesTable),
         series: row.readTable(_db.seriesTable),
       );
+      _logger.fine('Most reread series found: ${entry.series.title}');
+      return entry;
     } catch (e, st) {
-      _logger.severe('Failed to get most reread series: $e\n$st');
+      _logger.severe('Failed to get most reread series from DB: $e\n$st');
       throw DatabaseException(message: 'Failed to get most reread series', originalError: e, stackTrace: st);
     }
   }

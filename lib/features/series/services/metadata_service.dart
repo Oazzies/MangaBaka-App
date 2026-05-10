@@ -15,23 +15,29 @@ class MetadataService {
 
   Future<void> init() async {
     if (_isInitialized) return;
+    _logger.info('Initializing MetadataService...');
     try {
       await Future.wait([
         fetchGenres(),
         fetchTags(),
       ]);
       _isInitialized = true;
-    } catch (e) {
-      _logger.severe('Failed to initialize MetadataService: $e');
+      _logger.info('MetadataService initialized successfully');
+    } catch (e, st) {
+      _logger.severe('Failed to initialize MetadataService: $e\n$st');
     }
   }
 
   Future<void> fetchGenres() async {
+    final url = Uri.parse('${AppConstants.baseApiUrl}/genres');
+    _logger.info('Fetching genres from: $url');
     try {
       final response = await http.get(
-        Uri.parse('${AppConstants.baseApiUrl}/genres'),
+        url,
         headers: {'User-Agent': AppConstants.userAgent},
       ).timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
+
+      _logger.fine('Genres fetch status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -40,19 +46,25 @@ class MetadataService {
           for (var item in _genresList)
             item['value'].toString(): item['label'].toString()
         };
-        _logger.info('Fetched ${_genresList.length} genres');
+        _logger.info('Successfully fetched ${_genresList.length} genres');
+      } else {
+        _logger.warning('Failed to fetch genres. Status: ${response.statusCode}, Body: ${response.body}');
       }
-    } catch (e) {
-      _logger.warning('Failed to fetch genres: $e');
+    } catch (e, st) {
+      _logger.warning('Exception occurred while fetching genres: $e\n$st');
     }
   }
 
   Future<void> fetchTags() async {
+    final url = Uri.parse('${AppConstants.baseApiUrl}/tags');
+    _logger.info('Fetching tags from: $url');
     try {
       final response = await http.get(
-        Uri.parse('${AppConstants.baseApiUrl}/tags'),
+        url,
         headers: {'User-Agent': AppConstants.userAgent},
       ).timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
+
+      _logger.fine('Tags fetch status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -61,10 +73,12 @@ class MetadataService {
           for (var item in _tagsList)
             item['name'].toString(): item
         };
-        _logger.info('Fetched ${_tagsList.length} tags');
+        _logger.info('Successfully fetched ${_tagsList.length} tags');
+      } else {
+        _logger.warning('Failed to fetch tags. Status: ${response.statusCode}, Body: ${response.body}');
       }
-    } catch (e) {
-      _logger.warning('Failed to fetch tags: $e');
+    } catch (e, st) {
+      _logger.warning('Exception occurred while fetching tags: $e\n$st');
     }
   }
 

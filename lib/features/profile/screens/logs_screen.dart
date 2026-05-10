@@ -56,7 +56,7 @@ class _LogsScreenState extends State<LogsScreen> {
       final file = File('${directory.path}/mangabaka_logs.txt');
       await file.writeAsString(text);
       
-      await Share.shareXFiles([XFile(file.path)], text: 'MangaBaka Logs');
+      await Share.shareXFiles([XFile(file.path)], subject: 'MangaBaka Logs');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
