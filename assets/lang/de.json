@@ -262,7 +262,7 @@
     "show_less": "Weniger anzeigen",
     "show_all": "Alle anzeigen",
     "show_all_tags": "Alle Tags anzeigen",
-    "camera_permission_denied": ""camera_permission_denied": "Die Kameraberechtigung ist erforderlich, um Barcodes zu scannen."",
+    "camera_permission_denied": "Die Kameraberechtigung ist erforderlich, um Barcodes zu scannen.",
     "logs": "Logs",
     "view_logs": "View Logs",
     "view_logs_subtitle": "See the application's event logs",

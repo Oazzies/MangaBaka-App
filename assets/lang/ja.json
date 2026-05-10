@@ -262,7 +262,7 @@
     "show_less": "隠す",
     "show_all": "すべて表示",
     "show_all_tags": "すべてのタグを表示",
-    "camera_permission_denied": ""camera_permission_denied": "バーコードをスキャンするにはカメラの許可が必要です。"",
+    "camera_permission_denied": "バーコードをスキャンするにはカメラの許可が必要です。",
     "logs": "Logs",
     "view_logs": "View Logs",
     "view_logs_subtitle": "See the application's event logs",

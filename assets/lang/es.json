@@ -264,7 +264,7 @@
     "show_less": "Mostrar menos",
     "show_all": "Mostrar todo",
     "show_all_tags": "Mostrar todas las etiquetas",
-    "camera_permission_denied": ""camera_permission_denied": "Se requiere permiso de cámara para escanear códigos de barras."",
+    "camera_permission_denied": "Se requiere permiso de cámara para escanear códigos de barras.",
     "logs": "Logs",
     "view_logs": "View Logs",
     "view_logs_subtitle": "See the application's event logs",
