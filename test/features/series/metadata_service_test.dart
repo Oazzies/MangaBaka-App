@@ -4,8 +4,8 @@ import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     getIt.registerSingleton<LoggingService>(LoggingService());
   });
 

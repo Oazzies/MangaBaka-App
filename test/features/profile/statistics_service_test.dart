@@ -3,15 +3,17 @@ import 'package:mangabaka_app/features/profile/services/statistics_service.dart'
 import 'package:mangabaka_app/database/database.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
+import 'package:drift/native.dart';
 
 void main() {
   late AppDatabase db;
   late StatisticsService service;
 
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await resetServiceLocator();
     getIt.registerSingleton<LoggingService>(LoggingService());
-    db = AppDatabase();
+    db = AppDatabase.forTesting(NativeDatabase.memory());
     service = StatisticsService(db);
   });
 

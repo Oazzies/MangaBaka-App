@@ -29,8 +29,8 @@ class MockNewsService extends Fake implements NewsService {
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     SharedPreferences.setMockInitialValues({});
     getIt.registerSingleton<LoggingService>(LoggingService());
     getIt.registerSingleton<NewsService>(MockNewsService());

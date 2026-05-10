@@ -4,6 +4,7 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/database/database.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
+import 'package:drift/native.dart';
 
 class MockProfileAuthService extends Fake implements ProfileAuthService {
   @override
@@ -14,10 +15,10 @@ void main() {
   late LibraryService service;
   late MockProfileAuthService mockAuth;
 
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     getIt.registerSingleton<LoggingService>(LoggingService());
-    getIt.registerSingleton<AppDatabase>(AppDatabase()); // This will use the real one but it's okay for smoke tests if we don't hit disk too much
+    getIt.registerSingleton<AppDatabase>(AppDatabase.forTesting(NativeDatabase.memory()));
     
     mockAuth = MockProfileAuthService();
     service = LibraryService(auth: mockAuth);

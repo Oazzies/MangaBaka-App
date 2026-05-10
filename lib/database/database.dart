@@ -29,7 +29,9 @@ class LibraryEntryWithSeries {
   daos: [SeriesDao, LibraryEntriesDao],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase._() : super(_openConnection());
+  AppDatabase._(QueryExecutor executor) : super(executor);
+
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
 
   @override
   int get schemaVersion => 2;
@@ -73,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  static final AppDatabase _instance = AppDatabase._();
+  static final AppDatabase _instance = AppDatabase._(_openConnection());
 
   factory AppDatabase() => _instance;
 

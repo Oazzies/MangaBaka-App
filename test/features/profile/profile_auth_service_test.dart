@@ -20,8 +20,8 @@ class MockProfileAuthService extends ProfileAuthService {
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     getIt.registerSingleton<LoggingService>(LoggingService());
   });
 

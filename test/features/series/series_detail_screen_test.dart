@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/database/database.dart';
+import 'package:drift/native.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
@@ -49,10 +50,11 @@ void main() {
     'description': 'Description',
   });
 
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     SharedPreferences.setMockInitialValues({});
     getIt.registerSingleton<LoggingService>(LoggingService());
+    getIt.registerSingleton<AppDatabase>(AppDatabase.forTesting(NativeDatabase.memory()));
     getIt.registerSingleton<SeriesService>(MockSeriesService());
     getIt.registerSingleton<LibraryService>(MockLibraryService());
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());

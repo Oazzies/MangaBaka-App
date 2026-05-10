@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart';
 import 'package:mangabaka_app/database/database.dart';
@@ -15,26 +17,28 @@ class MockProfileAuthService extends Fake implements ProfileAuthService {
   @override
   bool get isLoggedIn => false;
   @override
+  MbProfile? get cachedProfile => null;
+  @override
   Future<void> init() async {}
   @override
-  void addListener(dynamic listener) {}
+  void addListener(VoidCallback listener) {}
   @override
-  void removeListener(dynamic listener) {}
+  void removeListener(VoidCallback listener) {}
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     setupServiceLocator();
-    // Override with mocks if necessary, but for smoke test real services (except network) are fine
+    // Override with mocks if necessary
+    getIt.unregister<ProfileAuthService>();
+    getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
   });
 
   testWidgets('App smoke test - shows onboarding initially', (WidgetTester tester) async {
-    // Note: Full app initialization in tests is tricky due to async dependencies.
-    // For a smoke test, we'll test the core MangaBakaApp widget with mocked services.
-    
     await tester.pumpWidget(const MangaBakaApp());
-    await tester.pump();
+    // Wait for the splash screen animation to finish
+    await tester.pumpAndSettle();
 
     // Since onboarding is shown when not logged in and not completed onboarding
     expect(find.byType(OnboardingScreen), findsOneWidget);

@@ -8,6 +8,7 @@ import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/database/database.dart';
+import 'package:drift/native.dart';
 
 class MockProfileAuthService extends Fake implements ProfileAuthService {
   @override
@@ -19,10 +20,10 @@ class MockProfileAuthService extends Fake implements ProfileAuthService {
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     getIt.registerSingleton<LoggingService>(LoggingService());
-    getIt.registerSingleton<AppDatabase>(AppDatabase());
+    getIt.registerSingleton<AppDatabase>(AppDatabase.forTesting(NativeDatabase.memory()));
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
     getIt.registerSingleton<MetadataService>(MetadataService());
     getIt.registerLazySingleton<SeriesSearchService>(() => SeriesSearchService());

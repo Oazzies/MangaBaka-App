@@ -33,7 +33,7 @@ void main() {
   late MockSeriesSearchService mockSearchService;
 
   setUp(() async {
-    resetServiceLocator();
+    await resetServiceLocator();
     mockSearchService = MockSeriesSearchService();
     getIt.registerSingleton<SeriesSearchService>(mockSearchService);
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());

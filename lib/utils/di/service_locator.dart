@@ -45,6 +45,6 @@ void setupServiceLocator() {
 }
 
 /// Resets all service instances (useful for testing)
-void resetServiceLocator() {
-  getIt.reset();
+Future<void> resetServiceLocator() async {
+  await getIt.reset();
 }

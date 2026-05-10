@@ -53,8 +53,8 @@ class MockProfileAuthService extends Fake implements ProfileAuthService {
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     getIt.registerSingleton<SeriesSearchService>(MockSeriesSearchService());
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
   });
@@ -70,7 +70,7 @@ void main() {
 
   testWidgets('BrowseResultsScreen renders title and results', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
-    await tester.pump(); // Handle initial fetch
+    await tester.pumpAndSettle();
 
     expect(find.text('Most Popular'), findsOneWidget);
     expect(find.byType(BrowseResultsBody), findsOneWidget);

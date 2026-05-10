@@ -10,9 +10,13 @@ import 'package:mangabaka_app/database/database.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
+
 class MockProfileAuthService extends Fake implements ProfileAuthService {
   @override
   bool get isLoggedIn => false;
+  @override
+  MbProfile? get cachedProfile => null;
   @override
   String? get username => null;
   @override
@@ -29,8 +33,8 @@ class MockSnapshotService extends Fake implements SnapshotService {
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     SharedPreferences.setMockInitialValues({});
     getIt.registerSingleton<LoggingService>(LoggingService());
     getIt.registerSingleton<AppDatabase>(AppDatabase());

@@ -25,8 +25,8 @@ class MockProfileAuthService extends Fake implements ProfileAuthService {
 }
 
 void main() {
-  setUp(() {
-    resetServiceLocator();
+  setUp(() async {
+    await resetServiceLocator();
     getIt.registerSingleton<SeriesSearchService>(MockSeriesSearchService());
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
   });
