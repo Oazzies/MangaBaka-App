@@ -262,6 +262,7 @@
     "show_more": "Show More",
     "show_less": "Show Less",
     "show_all": "Show All",
-    "show_all_tags": "Show All Tags"
+    "show_all_tags": "Show All Tags",
+    "camera_permission_denied": "Camera permission is required to scan barcodes."
   }
 }

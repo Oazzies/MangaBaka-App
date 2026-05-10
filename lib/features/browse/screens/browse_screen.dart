@@ -11,6 +11,7 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -56,6 +57,30 @@ class _BrowseScreenState extends State<BrowseScreen> {
   }
 
   Future<void> _handleBarcodeScan() async {
+    final status = await Permission.camera.request();
+    
+    if (status.isPermanentlyDenied) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(LocalizationService().translate('camera_permission_denied')),
+          action: SnackBarAction(
+            label: LocalizationService().translate('settings'),
+            onPressed: () => openAppSettings(),
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!status.isGranted) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(LocalizationService().translate('camera_permission_denied'))),
+      );
+      return;
+    }
+
     final isbn = await Navigator.push<String>(
       context,
       MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),

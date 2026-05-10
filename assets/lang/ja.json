@@ -260,6 +260,7 @@
     "show_more": "もっと見る",
     "show_less": "隠す",
     "show_all": "すべて表示",
-    "show_all_tags": "すべてのタグを表示"
+    "show_all_tags": "すべてのタグを表示",
+    "camera_permission_denied": "バーコードをスキャンするにはカメラの許可が必要です。"
   }
 }

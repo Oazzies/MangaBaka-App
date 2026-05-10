@@ -260,6 +260,7 @@
     "show_more": "Voir plus",
     "show_less": "Voir moins",
     "show_all": "Tout afficher",
-    "show_all_tags": "Tous les tags"
+    "show_all_tags": "Tous les tags",
+    "camera_permission_denied": "L'autorisation de la caméra est requise pour scanner les codes-barres."
   }
 }

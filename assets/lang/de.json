@@ -260,6 +260,7 @@
     "show_more": "Mehr anzeigen",
     "show_less": "Weniger anzeigen",
     "show_all": "Alle anzeigen",
-    "show_all_tags": "Alle Tags anzeigen"
+    "show_all_tags": "Alle Tags anzeigen",
+    "camera_permission_denied": "Die Kameraberechtigung ist erforderlich, um Barcodes zu scannen."
   }
 }
