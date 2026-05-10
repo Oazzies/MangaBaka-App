@@ -160,7 +160,7 @@ class SyncProgressOverlay extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        l10n.translate('cancel'),
+                        l10n.translate('stop'),
                         style: TextStyle(
                           color: AppConstants.errorColor,
                           fontSize: 12,

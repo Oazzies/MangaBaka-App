@@ -145,6 +145,7 @@
     "no_entries_category": "No entries in this category.",
     "add_to_library": "Add to Library",
     "cancel": "Cancel",
+    "stop": "Stop",
     "confirm": "Confirm",
     "delete_from_library": "Delete from Library",
     "delete_confirmation": "Are you sure you want to delete this series from your library?",
