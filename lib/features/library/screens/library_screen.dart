@@ -21,6 +21,7 @@ import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
+import 'package:mangabaka_app/utils/number_utils.dart';
 
 
 class LibraryScreen extends StatefulWidget {
@@ -324,7 +325,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        count.toString(),
+                        NumberUtils.formatCount(count),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
