@@ -79,60 +79,100 @@ class MainScreenState extends State<MainScreen> {
             backgroundColor: AppConstants.secondaryBackground,
             body: Row(
               children: [
-                SafeArea(
-                  right: false,
-                  child: NavigationRail(
-                    backgroundColor: AppConstants.secondaryBackground,
-                    indicatorColor: AppConstants.accentColor,
-                    selectedIndex: _selectedIndex,
-                    onDestinationSelected: _onItemTapped,
-                    labelType: NavigationRailLabelType.all,
-                    unselectedLabelTextStyle: TextStyle(color: AppConstants.textColor, fontSize: 12),
-                    selectedLabelTextStyle: TextStyle(color: AppConstants.textColor, fontSize: 12),
-                    unselectedIconTheme: IconThemeData(color: AppConstants.textColor, size: 28),
-                    selectedIconTheme: IconThemeData(color: AppConstants.textColor, size: 28),
-                    destinations: [
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.home_outlined),
-                        selectedIcon: const Icon(Icons.home),
-                        label: Text(l10n.translate("home")),
+                Container(
+                  width: 96,
+                  color: AppConstants.secondaryBackground,
+                  child: SafeArea(
+                    right: false,
+                    child: NavigationRail(
+                      backgroundColor: AppConstants.secondaryBackground,
+                      indicatorColor: AppConstants.accentColor.withOpacity(0.15),
+                      indicatorShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.library_books_outlined),
-                        selectedIcon: const Icon(Icons.library_books),
-                        label: Text(l10n.translate("library")),
+                      selectedIndex: _selectedIndex,
+                      onDestinationSelected: _onItemTapped,
+                      labelType: NavigationRailLabelType.all,
+                      unselectedLabelTextStyle: TextStyle(
+                        color: AppConstants.textColor.withOpacity(0.5),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
                       ),
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.explore_outlined),
-                        selectedIcon: const Icon(Icons.explore),
-                        label: Text(l10n.translate("browse")),
+                      selectedLabelTextStyle: TextStyle(
+                        color: AppConstants.accentColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.article_outlined),
-                        selectedIcon: const Icon(Icons.article),
-                        label: Text(l10n.translate("news")),
+                      unselectedIconTheme: IconThemeData(
+                        color: AppConstants.textColor.withOpacity(0.5),
+                        size: 26,
                       ),
-                      NavigationRailDestination(
-                        icon: const Icon(Icons.person_outline),
-                        selectedIcon: const Icon(Icons.person),
-                        label: Text(l10n.translate("profile")),
+                      selectedIconTheme: IconThemeData(
+                        color: AppConstants.accentColor,
+                        size: 26,
                       ),
-                    ],
-                    trailing: Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: IconButton(
-                            icon: const Icon(Icons.settings_outlined),
-                            selectedIcon: const Icon(Icons.settings),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                              );
-                            },
-                            tooltip: l10n.translate("settings"),
+                      leading: Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppConstants.accentColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Image.asset(
+                              'assets/mangabaka512.png',
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                      destinations: [
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.home_outlined),
+                          selectedIcon: const Icon(Icons.home),
+                          label: Text(l10n.translate("home")),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.library_books_outlined),
+                          selectedIcon: const Icon(Icons.library_books),
+                          label: Text(l10n.translate("library")),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.explore_outlined),
+                          selectedIcon: const Icon(Icons.explore),
+                          label: Text(l10n.translate("browse")),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.article_outlined),
+                          selectedIcon: const Icon(Icons.article),
+                          label: Text(l10n.translate("news")),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(Icons.person_outline),
+                          selectedIcon: const Icon(Icons.person),
+                          label: Text(l10n.translate("profile")),
+                        ),
+                      ],
+                      trailing: Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: IconButton(
+                              icon: const Icon(Icons.settings_outlined),
+                              selectedIcon: const Icon(Icons.settings),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                                );
+                              },
+                              tooltip: l10n.translate("settings"),
+                              color: AppConstants.textColor.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
