@@ -69,8 +69,6 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
       builder: (context, _) {
         final currentThemeMode = ThemeManager().currentThemeMode;
         final isDark = ThemeManager().isDarkMode;
-        _updateSystemUI(isDark);
-
         final hasCompletedOnboarding = SettingsManager().hasCompletedOnboarding;
         final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
 
@@ -127,18 +125,27 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
             ),
           ),
           themeMode: currentThemeMode,
-          home: Stack(
-            children: [
-              content,
-              if (_showSplash)
-                AnimatedSplashOverlay(
-                  onComplete: () {
-                    setState(() {
-                      _showSplash = false;
-                    });
-                  },
-                ),
-            ],
+          home: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              systemNavigationBarColor: Colors.transparent,
+              systemNavigationBarContrastEnforced: false,
+              systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+            ),
+            child: Stack(
+              children: [
+                content,
+                if (_showSplash)
+                  AnimatedSplashOverlay(
+                    onComplete: () {
+                      setState(() {
+                        _showSplash = false;
+                      });
+                    },
+                  ),
+              ],
+            ),
           ),
         );
       },
