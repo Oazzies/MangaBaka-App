@@ -250,13 +250,53 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   PreferredSizeWidget _buildTabBar() {
     final l10n = LocalizationService();
-    return TabBar(
-      controller: _tabController,
-      isScrollable: true,
-      tabAlignment: TabAlignment.start,
-      tabs: LibraryScreenConstants.tabs
-          .map((tab) => Tab(text: l10n.translate(tab.key)))
-          .toList(),
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(48),
+      child: StreamBuilder<List<LibraryEntry>>(
+        stream: _entriesStream,
+        builder: (context, snapshot) {
+          final entries = snapshot.data ?? [];
+          final counts = <String, int>{};
+          for (final entry in entries) {
+            counts[entry.state] = (counts[entry.state] ?? 0) + 1;
+          }
+
+          return TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            tabs: LibraryScreenConstants.tabs.map((tab) {
+              final count = counts[tab.key] ?? 0;
+              final label = l10n.translate(tab.key);
+              
+              return Tab(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(label),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          );
+        },
+      ),
     );
   }
 
