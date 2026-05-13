@@ -31,39 +31,63 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onUpgrade: (m, from, to) async {
-        if (from < 2) {
-          final seriesColumns = await customSelect('PRAGMA table_info("series_table")').get();
-          final seriesColumnNames = seriesColumns.map((row) => row.data['name'] as String).toSet();
+        final seriesColumns = await customSelect('PRAGMA table_info("series_table")').get();
+        final seriesColumnNames = seriesColumns.map((row) => row.data['name'] as String).toSet();
 
-          final libraryColumns = await customSelect('PRAGMA table_info("library_entries_table")').get();
-          final libraryColumnNames = libraryColumns.map((row) => row.data['name'] as String).toSet();
+        final libraryColumns = await customSelect('PRAGMA table_info("library_entries_table")').get();
+        final libraryColumnNames = libraryColumns.map((row) => row.data['name'] as String).toSet();
 
-          Future<void> addIfMissing(GeneratedColumn col, TableInfo table, Set<String> existing) async {
-            if (!existing.contains(col.name)) {
-              await m.addColumn(table, col);
-            } else {
-              LoggingService.logger.info('Migration: Column ${col.name} already exists in ${table.actualTableName}, skipping.');
-            }
+        Future<void> addIfMissing(GeneratedColumn col, TableInfo table, Set<String> existing) async {
+          if (!existing.contains(col.name)) {
+            await m.addColumn(table, col);
+            LoggingService.logger.info('Migration: Added column ${col.name} to ${table.actualTableName}.');
           }
-
-          await addIfMissing(seriesTable.mergedWith, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.contentRating, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.type, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.rating, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.finalVolume, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.totalChapters, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.lastUpdated, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.relationships, seriesTable, seriesColumnNames);
-          await addIfMissing(seriesTable.source, seriesTable, seriesColumnNames);
-          
-          await addIfMissing(libraryEntriesTable.rating, libraryEntriesTable, libraryColumnNames);
         }
+
+        // Ensure all SeriesTable columns exist (except primary key 'id')
+        await addIfMissing(seriesTable.state, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.mergedWith, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.title, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.nativeTitle, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.romanizedTitle, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.secondaryTitles, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.coverUrl, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.authors, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.artists, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.description, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.year, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.published, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.status, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.isLicensed, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.hasAnime, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.anime, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.contentRating, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.type, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.rating, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.finalVolume, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.totalChapters, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.links, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.publishers, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.genres, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.tags, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.lastUpdated, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.relationships, seriesTable, seriesColumnNames);
+        await addIfMissing(seriesTable.source, seriesTable, seriesColumnNames);
+
+        // Ensure all LibraryEntriesTable columns exist (except primary key 'id')
+        await addIfMissing(libraryEntriesTable.state, libraryEntriesTable, libraryColumnNames);
+        await addIfMissing(libraryEntriesTable.note, libraryEntriesTable, libraryColumnNames);
+        await addIfMissing(libraryEntriesTable.progressChapter, libraryEntriesTable, libraryColumnNames);
+        await addIfMissing(libraryEntriesTable.progressVolume, libraryEntriesTable, libraryColumnNames);
+        await addIfMissing(libraryEntriesTable.numberOfRereads, libraryEntriesTable, libraryColumnNames);
+        await addIfMissing(libraryEntriesTable.rating, libraryEntriesTable, libraryColumnNames);
+        await addIfMissing(libraryEntriesTable.seriesId, libraryEntriesTable, libraryColumnNames);
       },
     );
   }
