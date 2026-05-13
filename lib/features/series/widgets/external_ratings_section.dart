@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ExternalRatingsSection extends StatelessWidget {
   final Series series;
@@ -58,35 +59,84 @@ class ExternalRatingsSection extends StatelessWidget {
 
   Widget _buildRatingItem(String key, dynamic data) {
     final rating = data['rating_normalized'];
+    final url = _getUrl(key, data);
     
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _getFavicon(key),
-        const SizedBox(width: 8),
-        Text(
-          rating.toString(),
-          style: TextStyle(
-            color: AppConstants.textColor,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
+    return InkWell(
+      onTap: url != null && url.isNotEmpty 
+          ? () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)
+          : null,
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _getFavicon(key),
+            const SizedBox(width: 8),
+            Text(
+              rating.toString(),
+              style: TextStyle(
+                color: AppConstants.textColor,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  Widget _getFavicon(String key) {
-    String domain = '';
-    switch (key) {
-      case 'anilist': domain = 'anilist.co'; break;
-      case 'my_anime_list': domain = 'myanimelist.net'; break;
-      case 'kitsu': domain = 'kitsu.io'; break;
-      case 'anime_planet': domain = 'anime-planet.com'; break;
-      case 'shikimori': domain = 'shikimori.one'; break;
-      case 'manga_updates': domain = 'mangaupdates.com'; break;
-      case 'anime_news_network': domain = 'animenewsnetwork.com'; break;
+  String? _getUrl(String key, dynamic data) {
+    if (data['url'] != null) return data['url'].toString();
+    
+    final id = data['id']?.toString();
+    if (id != null && id.isNotEmpty) {
+      switch (key) {
+        case 'anilist': return 'https://anilist.co/manga/$id';
+        case 'my_anime_list': return 'https://myanimelist.net/manga/$id';
+        case 'kitsu': return 'https://kitsu.io/manga/$id';
+        case 'anime_planet': return 'https://www.anime-planet.com/manga/$id';
+        case 'shikimori': return 'https://shikimori.one/mangas/$id';
+        case 'manga_updates': return 'https://www.mangaupdates.com/series.html?id=$id';
+      }
     }
+
+    // Fallback to series links
+    final domain = _getDomain(key);
+    if (domain.isNotEmpty) {
+      for (var link in series.links) {
+        String linkUrl = '';
+        if (link is String) {
+          linkUrl = link;
+        } else if (link is Map && link['url'] != null) {
+          linkUrl = link['url'].toString();
+        }
+        
+        if (linkUrl.contains(domain)) {
+          return linkUrl;
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  String _getDomain(String key) {
+    switch (key) {
+      case 'anilist': return 'anilist.co';
+      case 'my_anime_list': return 'myanimelist.net';
+      case 'kitsu': return 'kitsu.io';
+      case 'anime_planet': return 'anime-planet.com';
+      case 'shikimori': return 'shikimori.one';
+      case 'manga_updates': return 'mangaupdates.com';
+      case 'anime_news_network': return 'animenewsnetwork.com';
+      default: return '';
+    }
+  }
+
+  Widget _getFavicon(String key) {
+    final domain = _getDomain(key);
 
     if (domain.isEmpty) return Icon(Icons.star_rounded, size: 16, color: AppConstants.accentColor);
 
