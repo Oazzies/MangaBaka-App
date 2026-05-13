@@ -91,13 +91,13 @@ class SeriesDetailWideLayout extends StatelessWidget {
                             onRatingChanged: onRatingChanged,
                           ),
                           const SizedBox(height: 20),
+                          ExternalRatingsSection(series: series),
                           if (series.description.isNotEmpty) ...[
                             SeriesSectionHeader(title: l10n.translate('description')),
                             DescriptionSection(description: series.description),
                             const SizedBox(height: 24),
                           ],
                           SeriesGenresSection(series: series, l10n: l10n),
-                          ExternalRatingsSection(series: series),
                           SeriesSegmentedControl(
                             selectedTab: selectedTab,
                             onTabChanged: onTabChanged,
