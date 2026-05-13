@@ -17,4 +17,5 @@ class SettingsKeys {
   static const String newsListColumns = '${AppConstants.prefixStorageKey}news_list_columns';
   static const String tapToUpdateProgressInChips = '${AppConstants.prefixStorageKey}tap_progress_chips';
   static const String tapToUpdateRatingInChips = '${AppConstants.prefixStorageKey}tap_rating_chips';
+  static const String showTooltips = '${AppConstants.prefixStorageKey}show_tooltips';
 }

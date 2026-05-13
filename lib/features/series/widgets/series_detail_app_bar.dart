@@ -6,6 +6,7 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
+import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class SeriesDetailAppBar extends StatelessWidget {
@@ -80,7 +81,7 @@ class SeriesDetailAppBar extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Center(
-              child: Tooltip(
+              child: WidgetUtils.tooltip(
                 message: LocalizationService().translate('go_back'),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back),
@@ -91,7 +92,7 @@ class SeriesDetailAppBar extends StatelessWidget {
             ),
           ),
           actions: [
-            Tooltip(
+            WidgetUtils.tooltip(
               message: LocalizationService().translate('share_series'),
               child: IconButton(
                 icon: const Icon(Icons.share),
@@ -100,7 +101,7 @@ class SeriesDetailAppBar extends StatelessWidget {
               ),
             ).animate().fadeIn(delay: 100.ms, duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
             if (entry != null)
-              Tooltip(
+              WidgetUtils.tooltip(
                 message: LocalizationService().translate('delete_from_library'),
                 child: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -293,7 +294,7 @@ class _HoverableTitleState extends State<_HoverableTitle> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: Tooltip(
+      child: WidgetUtils.tooltip(
         message: LocalizationService().translate('copy_title'),
         child: GestureDetector(
           onTap: widget.onTap,

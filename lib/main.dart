@@ -86,6 +86,14 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
           },
           theme: ThemeData(
             useMaterial3: true,
+            tooltipTheme: TooltipThemeData(
+              triggerMode: SettingsManager().showTooltips 
+                  ? null 
+                  : TooltipTriggerMode.manual,
+              waitDuration: SettingsManager().showTooltips 
+                  ? null 
+                  : const Duration(days: 365),
+            ),
             colorScheme: ColorScheme.fromSeed(
               seedColor: AppConstants.primaryAccent,
               brightness: Brightness.light,
@@ -114,6 +122,14 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
               surface: AppConstants.primaryBackground,
               primary: AppConstants.accentColor,
               error: AppConstants.errorColor,
+            ),
+            tooltipTheme: TooltipThemeData(
+              triggerMode: SettingsManager().showTooltips 
+                  ? null 
+                  : TooltipTriggerMode.manual,
+              waitDuration: SettingsManager().showTooltips 
+                  ? null 
+                  : const Duration(days: 365),
             ),
             scaffoldBackgroundColor: AppConstants.primaryBackground,
             cardColor: AppConstants.secondaryBackground,

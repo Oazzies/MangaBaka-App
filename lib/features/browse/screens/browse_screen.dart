@@ -206,11 +206,13 @@ class _BrowseScreenState extends State<BrowseScreen> {
             ),
           ),
           floatingActionButton: _controller.showBackToTop
-              ? FloatingActionButton(
-                  onPressed: _controller.scrollToTop,
-                  backgroundColor: AppConstants.accentColor,
-                  tooltip: LocalizationService().translate('back_to_top'),
-                  child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
+              ? WidgetUtils.tooltip(
+                  message: LocalizationService().translate('back_to_top'),
+                  child: FloatingActionButton(
+                    onPressed: _controller.scrollToTop,
+                    backgroundColor: AppConstants.accentColor,
+                    child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
+                  ),
                 )
               : null,
         ),

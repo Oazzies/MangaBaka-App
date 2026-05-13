@@ -234,15 +234,17 @@ class _NewsScreenState extends State<NewsScreen> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: Icon(
-                  settings.newsListColumns == 2 ? Icons.view_agenda_outlined : Icons.grid_view_rounded,
-                  color: AppConstants.textColor,
+              WidgetUtils.tooltip(
+                message: l10n.translate('toggle_layout'),
+                child: IconButton(
+                  icon: Icon(
+                    settings.newsListColumns == 2 ? Icons.view_agenda_outlined : Icons.grid_view_rounded,
+                    color: AppConstants.textColor,
+                  ),
+                  onPressed: () {
+                    settings.setNewsListColumns(settings.newsListColumns == 1 ? 2 : 1);
+                  },
                 ),
-                tooltip: l10n.translate('toggle_layout'),
-                onPressed: () {
-                  settings.setNewsListColumns(settings.newsListColumns == 1 ? 2 : 1);
-                },
               ),
               if (screenWidth < 600)
                 IconButton(
@@ -273,17 +275,19 @@ class _NewsScreenState extends State<NewsScreen> {
             ),
           ),
           floatingActionButton: _showBackToTop
-              ? FloatingActionButton(
-                  onPressed: () {
-                    _scrollController.animateTo(
-                      0,
-                      duration: AppConstants.mediumAnimationDuration,
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  backgroundColor: AppConstants.accentColor,
-                  tooltip: LocalizationService().translate('back_to_top'),
-                  child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
+              ? WidgetUtils.tooltip(
+                  message: LocalizationService().translate('back_to_top'),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      _scrollController.animateTo(
+                        0,
+                        duration: AppConstants.mediumAnimationDuration,
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    backgroundColor: AppConstants.accentColor,
+                    child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
+                  ),
                 )
               : null,
         );

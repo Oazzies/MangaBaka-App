@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:mangabaka_app/utils/widget_utils.dart';
 
 class DescriptionSection extends StatefulWidget {
   final String description;
@@ -103,17 +104,19 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                       ),
                     ),
                   ),
-                IconButton(
-                  icon: const Icon(Icons.copy_all, size: 20),
-                  padding: const EdgeInsets.all(8),
-                  tooltip: LocalizationService().translate('copy_description'),
-                  color: AppConstants.textMutedColor,
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: widget.description));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(LocalizationService().translate('description_copied')), behavior: SnackBarBehavior.floating),
-                    );
-                  },
+                WidgetUtils.tooltip(
+                  message: LocalizationService().translate('copy_description'),
+                  child: IconButton(
+                    icon: const Icon(Icons.copy_all, size: 20),
+                    padding: const EdgeInsets.all(8),
+                    color: AppConstants.textMutedColor,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: widget.description));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(LocalizationService().translate('description_copied')), behavior: SnackBarBehavior.floating),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),

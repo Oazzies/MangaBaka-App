@@ -352,17 +352,19 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
       actions: isLandscape
           ? [
-              IconButton(
-                icon: Icon(currentStyle.icon, color: AppConstants.textColor),
-                tooltip: l10n.translate('toggle_layout'),
-                onPressed: () {
-                  final nextStyle = currentStyle.next;
-                  if (settings.separateListStyles) {
-                    settings.setLibraryListStyle(nextStyle);
-                  } else {
-                    settings.setListStyle(nextStyle);
-                  }
-                },
+              WidgetUtils.tooltip(
+                message: l10n.translate('toggle_layout'),
+                child: IconButton(
+                  icon: Icon(currentStyle.icon, color: AppConstants.textColor),
+                  onPressed: () {
+                    final nextStyle = currentStyle.next;
+                    if (settings.separateListStyles) {
+                      settings.setLibraryListStyle(nextStyle);
+                    } else {
+                      settings.setListStyle(nextStyle);
+                    }
+                  },
+                ),
               ),
               const SizedBox(width: 8),
             ]

@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
 class WidgetUtils {
   static Widget responsiveConstraint(Widget child, {double maxWidth = 800}) {
@@ -13,6 +14,10 @@ class WidgetUtils {
         child: child,
       ),
     );
+  }
+
+  static Widget tooltip({required String message, required Widget child}) {
+    return AppTooltip(message: message, child: child);
   }
 
   static Widget chipWrap(String label, List<String> items, {Color? color}) {
@@ -110,6 +115,32 @@ class WidgetUtils {
   }
 }
 
+/// A reactive tooltip that listens to [SettingsManager] to show or hide itself.
+class AppTooltip extends StatelessWidget {
+  final String message;
+  final Widget child;
+
+  const AppTooltip({
+    super.key,
+    required this.message,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: SettingsManager(),
+      builder: (context, _) {
+        if (!SettingsManager().showTooltips) return child;
+        return Tooltip(
+          message: message,
+          child: child,
+        );
+      },
+    );
+  }
+}
+
 /// A link chip that shows a subtle highlight on hover.
 class _HoverableLinkChip extends StatelessWidget {
   final Uri uri;
@@ -126,7 +157,7 @@ class _HoverableLinkChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return WidgetUtils.tooltip(
       message: LocalizationService()
           .translate('open_link')
           .replaceAll('{name}', displayName),

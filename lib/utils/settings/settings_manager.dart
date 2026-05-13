@@ -58,6 +58,9 @@ class SettingsManager extends ChangeNotifier {
   bool _tapToUpdateRatingInChips = true;
   bool get tapToUpdateRatingInChips => _tapToUpdateRatingInChips;
 
+  bool _showTooltips = true;
+  bool get showTooltips => _showTooltips;
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -120,6 +123,7 @@ class SettingsManager extends ChangeNotifier {
     _newsListColumns = prefs.getInt(SettingsKeys.newsListColumns) ?? 1;
     _tapToUpdateProgressInChips = prefs.getBool(SettingsKeys.tapToUpdateProgressInChips) ?? true;
     _tapToUpdateRatingInChips = prefs.getBool(SettingsKeys.tapToUpdateRatingInChips) ?? true;
+    _showTooltips = prefs.getBool(SettingsKeys.showTooltips) ?? true;
 
     notifyListeners();
   }
@@ -248,6 +252,14 @@ class SettingsManager extends ChangeNotifier {
     _tapToUpdateRatingInChips = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(SettingsKeys.tapToUpdateRatingInChips, value);
+    notifyListeners();
+  }
+
+  Future<void> setShowTooltips(bool value) async {
+    if (_showTooltips == value) return;
+    _showTooltips = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(SettingsKeys.showTooltips, value);
     notifyListeners();
   }
 }

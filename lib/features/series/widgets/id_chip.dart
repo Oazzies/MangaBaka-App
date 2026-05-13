@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:mangabaka_app/utils/widget_utils.dart';
 
 class IdChip extends StatelessWidget {
   final String id;
@@ -9,7 +10,7 @@ class IdChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return WidgetUtils.tooltip(
       message: LocalizationService().translate('copy_id'),
       child: MiniBadge(
         text: 'ID: $id',

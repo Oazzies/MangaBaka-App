@@ -20,6 +20,8 @@
         "start_page": "Standard-Startseite",
         "rating_step": "Bewertungs-Schrittweite",
         "library_default": "Standardmäßig zur Bibliothek hinzufügen",
+        "show_tooltips": "Tooltips anzeigen",
+        "show_tooltips_subtext": "Hilfreiche Informationen beim Hovern über Elemente anzeigen",
         "list": "Liste",
         "title_language": "Standard-Titelsprache",
         "separate_list": "Getrennte Listenstile",

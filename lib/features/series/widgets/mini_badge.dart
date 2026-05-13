@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/utils/widget_utils.dart';
 
 class MiniBadge extends StatelessWidget {
   final String text;
@@ -81,7 +82,7 @@ class MiniBadge extends StatelessWidget {
           );
 
     if (tooltip != null) {
-      return Tooltip(
+      return WidgetUtils.tooltip(
         message: tooltip!,
         child: badge,
       );

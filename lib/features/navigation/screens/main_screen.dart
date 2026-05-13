@@ -12,6 +12,7 @@ import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
+import 'package:mangabaka_app/utils/widget_utils.dart';
 
 class MainScreen extends StatefulWidget {
   static final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
@@ -161,17 +162,19 @@ class MainScreenState extends State<MainScreen> {
                           alignment: Alignment.bottomCenter,
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 24.0),
-                            child: IconButton(
-                              icon: const Icon(Icons.settings_outlined),
-                              selectedIcon: const Icon(Icons.settings),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                                );
-                              },
-                              tooltip: l10n.translate("settings"),
-                              color: AppConstants.textColor.withOpacity(0.5),
+                            child: WidgetUtils.tooltip(
+                              message: l10n.translate("settings"),
+                              child: IconButton(
+                                icon: const Icon(Icons.settings_outlined),
+                                selectedIcon: const Icon(Icons.settings),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                                  );
+                                },
+                                color: AppConstants.textColor.withOpacity(0.5),
+                              ),
                             ),
                           ),
                         ),

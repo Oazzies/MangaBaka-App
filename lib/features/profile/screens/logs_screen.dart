@@ -93,10 +93,12 @@ class _LogsScreenState extends State<LogsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: AppConstants.textColor),
-            onPressed: _clearLogs,
-            tooltip: l10n.translate('clear_logs'),
+          WidgetUtils.tooltip(
+            message: l10n.translate('clear_logs'),
+            child: IconButton(
+              icon: Icon(Icons.delete_outline, color: AppConstants.textColor),
+              onPressed: _clearLogs,
+            ),
           ),
         ],
       ),

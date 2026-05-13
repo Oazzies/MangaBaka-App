@@ -22,6 +22,8 @@
         "start_page": "Default Start Page",
         "rating_step": "Rating Slider Step",
         "library_default": "Add to Library Default",
+        "show_tooltips": "Show Tooltips",
+        "show_tooltips_subtext": "Display helpful information when hovering over items",
         "list": "List",
         "title_language": "Default Title Language",
         "separate_list": "Separate List Styles",

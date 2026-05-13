@@ -20,6 +20,8 @@
         "start_page": "起動時のページ",
         "rating_step": "評価のスライダー刻み",
         "library_default": "ライブラリ追加時のデフォルト",
+        "show_tooltips": "ツールチップを表示",
+        "show_tooltips_subtext": "アイテムにホバーしたときに役立つ情報を表示します",
         "list": "リスト",
         "title_language": "デフォルトのタイトル言語",
         "separate_list": "リストスタイルを分ける",

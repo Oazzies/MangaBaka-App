@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ExternalRatingsSection extends StatelessWidget {
@@ -62,7 +63,7 @@ class ExternalRatingsSection extends StatelessWidget {
     final url = _getUrl(key, data);
     final String displayName = _getDisplayName(key);
     
-    return Tooltip(
+    return WidgetUtils.tooltip(
       message: LocalizationService()
           .translate('open_link')
           .replaceAll('{name}', displayName),
