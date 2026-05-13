@@ -37,6 +37,10 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration {
     return MigrationStrategy(
       onUpgrade: (m, from, to) async {
+        // First, ensure tables exist (robust for skip-upgrades)
+        await m.createTable(seriesTable);
+        await m.createTable(libraryEntriesTable);
+
         final seriesColumns = await customSelect('PRAGMA table_info("series_table")').get();
         final seriesColumnNames = seriesColumns.map((row) => row.data['name'] as String).toSet();
 
@@ -88,6 +92,9 @@ class AppDatabase extends _$AppDatabase {
         await addIfMissing(libraryEntriesTable.numberOfRereads, libraryEntriesTable, libraryColumnNames);
         await addIfMissing(libraryEntriesTable.rating, libraryEntriesTable, libraryColumnNames);
         await addIfMissing(libraryEntriesTable.seriesId, libraryEntriesTable, libraryColumnNames);
+      },
+      beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON');
       },
     );
   }

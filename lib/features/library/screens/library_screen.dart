@@ -22,7 +22,6 @@ import 'package:mangabaka_app/features/library/widgets/library_body.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
-import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/utils/number_utils.dart';
 import 'package:mangabaka_app/features/browse/widgets/filter_chips_row.dart';
 import 'package:mangabaka_app/features/library/screens/library_filter_helper.dart';
@@ -413,7 +412,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -421,7 +420,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ),

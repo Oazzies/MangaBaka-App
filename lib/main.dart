@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,7 +20,24 @@ void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  LoggingService.setup();
+  await LoggingService.setup();
+
+  // Handle Flutter framework errors
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    LoggingService.logger.severe(
+      'Flutter Error: ${details.exceptionAsString()}',
+      details.exception,
+      details.stack,
+    );
+  };
+
+  // Handle platform/async errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    LoggingService.logger.severe('Unhandled Platform Error', error, stack);
+    return true; // Error has been handled
+  };
+
   await dotenv.load();
   setupServiceLocator();
   
