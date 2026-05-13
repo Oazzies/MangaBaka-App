@@ -87,7 +87,7 @@ class MainScreenState extends State<MainScreen> {
                     right: false,
                     child: NavigationRail(
                       backgroundColor: AppConstants.secondaryBackground,
-                      indicatorColor: AppConstants.accentColor.withOpacity(0.15),
+                      indicatorColor: AppConstants.accentColor.withValues(alpha: 0.15),
                       indicatorShape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -95,7 +95,7 @@ class MainScreenState extends State<MainScreen> {
                       onDestinationSelected: _onItemTapped,
                       labelType: NavigationRailLabelType.all,
                       unselectedLabelTextStyle: TextStyle(
-                        color: AppConstants.textColor.withOpacity(0.5),
+                        color: AppConstants.textColor.withValues(alpha: 0.5),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -105,7 +105,7 @@ class MainScreenState extends State<MainScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                       unselectedIconTheme: IconThemeData(
-                        color: AppConstants.textColor.withOpacity(0.5),
+                        color: AppConstants.textColor.withValues(alpha: 0.5),
                         size: 26,
                       ),
                       selectedIconTheme: IconThemeData(
@@ -118,7 +118,7 @@ class MainScreenState extends State<MainScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppConstants.accentColor.withOpacity(0.1),
+                              color: AppConstants.accentColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Image.asset(
@@ -173,7 +173,7 @@ class MainScreenState extends State<MainScreen> {
                                     MaterialPageRoute(builder: (context) => const SettingsScreen()),
                                   );
                                 },
-                                color: AppConstants.textColor.withOpacity(0.5),
+                                color: AppConstants.textColor.withValues(alpha: 0.5),
                               ),
                             ),
                           ),

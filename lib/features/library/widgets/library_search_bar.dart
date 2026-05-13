@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
@@ -10,7 +9,6 @@ import 'package:mangabaka_app/features/browse/widgets/search_suggestions_panel.d
 import 'package:mangabaka_app/features/browse/widgets/mb_search_bar_suffix.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
-import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 
 class LibrarySearchBar extends StatefulWidget {

@@ -34,7 +34,7 @@ class NewsListItem extends StatelessWidget {
     return Card(
       color: AppConstants.secondaryBackground,
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.all(8.0),
       child: InkWell(
@@ -51,7 +51,7 @@ class NewsListItem extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppConstants.accentColor.withOpacity(0.15),
+                      color: AppConstants.accentColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -102,7 +102,7 @@ class NewsListItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: AppConstants.textColor.withOpacity(0.8),
+                    color: AppConstants.textColor.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 12),

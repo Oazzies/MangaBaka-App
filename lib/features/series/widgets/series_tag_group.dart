@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
-import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 
 class SeriesTagGroup extends StatelessWidget {

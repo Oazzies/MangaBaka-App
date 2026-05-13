@@ -10,7 +10,6 @@ import 'package:mangabaka_app/features/series/widgets/description_section.dart';
 import 'package:mangabaka_app/features/series/widgets/series_genres_section.dart';
 import 'package:mangabaka_app/features/series/widgets/series_segmented_control.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_skeleton.dart';
-import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
 
 import 'package:mangabaka_app/features/series/widgets/external_ratings_section.dart';
 

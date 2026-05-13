@@ -37,8 +37,6 @@ class SeriesMetadataChips extends StatelessWidget {
     return ListenableBuilder(
       listenable: SettingsManager(),
       builder: (context, _) {
-        final settings = SettingsManager();
-        
         final List<Widget> children = [
           TypeChip(type: series.type),
           StatusChip(status: series.status),
