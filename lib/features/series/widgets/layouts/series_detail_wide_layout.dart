@@ -85,10 +85,13 @@ class SeriesDetailWideLayout extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SeriesActionBar(
+                            series: series,
                             entry: entry, 
                             l10n: l10n,
                             onStateChanged: onStateChanged,
                             onRatingChanged: onRatingChanged,
+                            onUpdateChapter: onUpdateChapter,
+                            onUpdateVolume: onUpdateVolume,
                           ),
                           const SizedBox(height: 20),
                           ExternalRatingsSection(series: series),

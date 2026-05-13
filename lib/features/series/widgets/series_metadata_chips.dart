@@ -12,6 +12,8 @@ import 'package:mangabaka_app/features/series/widgets/chips/rating_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/chips/content_rating_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/id_chip.dart';
 
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
+
 class SeriesMetadataChips extends StatelessWidget {
   final Series series;
   final LibraryEntry? entry;
@@ -32,55 +34,63 @@ class SeriesMetadataChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = [
-      TypeChip(type: series.type),
-      StatusChip(status: series.status),
-      if (series.isLicensed == 'true') const LicensedChip(),
-      if (series.finalVolume.isNotEmpty && series.finalVolume != 'null')
-        VolumeChip(
-          volume: series.finalVolume,
-          progress: entry?.progressVolume,
-          inLibrary: entry != null,
-          onTap: onUpdateVolume,
-        ),
-      if (series.totalChapters.isNotEmpty && series.totalChapters != 'null')
-        ChaptersChip(
-          chapters: series.totalChapters,
-          progress: entry?.progressChapter,
-          inLibrary: entry != null,
-          onTap: onUpdateChapter,
-        ),
-      if ((series.published?['start_date']?.toString().isNotEmpty ?? false) ||
-          (series.published?['end_date']?.toString().isNotEmpty ?? false))
-        DateRangeChip(
-          start: series.published?['start_date']?.toString() ?? '',
-          end: series.published?['end_date']?.toString() ?? '',
-        ),
-      if (series.hasAnime == 'true') const HasAnimeChip(),
-      RatingChip(
-        sources: (series.source?.values.toList() ?? []),
-        entry: entry,
-        onTap: onUpdateRating,
-      ),
-      if (['suggestive', 'erotica', 'pornographic'].contains(series.contentRating.toLowerCase()))
-        ContentRatingChip(rating: series.contentRating),
-      IdChip(id: series.id),
-    ];
+    return ListenableBuilder(
+      listenable: SettingsManager(),
+      builder: (context, _) {
+        final settings = SettingsManager();
+        
+        final List<Widget> children = [
+          TypeChip(type: series.type),
+          StatusChip(status: series.status),
+          if (series.isLicensed == 'true') const LicensedChip(),
+          if (series.finalVolume.isNotEmpty && series.finalVolume != 'null')
+            VolumeChip(
+              volume: series.finalVolume,
+              progress: entry?.progressVolume,
+              inLibrary: entry != null,
+              onTap: settings.tapToUpdateProgressInChips ? onUpdateVolume : null,
+            ),
+          if (series.totalChapters.isNotEmpty && series.totalChapters != 'null')
+            ChaptersChip(
+              chapters: series.totalChapters,
+              progress: entry?.progressChapter,
+              inLibrary: entry != null,
+              onTap: settings.tapToUpdateProgressInChips ? onUpdateChapter : null,
+            ),
+          if ((series.published?['start_date']?.toString().isNotEmpty ?? false) ||
+              (series.published?['end_date']?.toString().isNotEmpty ?? false))
+            DateRangeChip(
+              start: series.published?['start_date']?.toString() ?? '',
+              end: series.published?['end_date']?.toString() ?? '',
+            ),
+          if (series.hasAnime == 'true') const HasAnimeChip(),
+          RatingChip(
+            sources: (series.source?.values.toList() ?? []),
+            entry: entry,
+            onTap: settings.tapToUpdateRatingInChips ? onUpdateRating : null,
+          ),
+          if (['suggestive', 'erotica', 'pornographic'].contains(series.contentRating.toLowerCase()))
+            ContentRatingChip(rating: series.contentRating),
+          IdChip(id: series.id),
+        ];
 
-    if (isVertical) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children.map((c) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: c,
-        )).toList(),
-      );
-    }
+        if (isVertical) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children.map((c) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: c,
+            )).toList(),
+          );
+        }
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: children,
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: children,
+        );
+      },
     );
   }
 }
+

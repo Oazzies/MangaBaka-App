@@ -82,10 +82,13 @@ class SeriesDetailMobileLayout extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         SeriesActionBar(
+                          series: series,
                           entry: entry, 
                           l10n: l10n,
                           onStateChanged: onStateChanged,
                           onRatingChanged: onRatingChanged,
+                          onUpdateChapter: onUpdateChapter,
+                          onUpdateVolume: onUpdateVolume,
                         ),
                         const SizedBox(height: 20),
                         ExternalRatingsSection(series: series),

@@ -67,6 +67,22 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           onChanged: (val) => SettingsManager().setAutoSuggestBrowse(val),
                         ),
                         const SettingsDivider(),
+                        SettingsSwitchItem(
+                          icon: Icons.touch_app_outlined,
+                          title: l10n.translate('tap_to_update_progress'),
+                          subtitle: l10n.translate('tap_to_update_progress_subtitle'),
+                          value: SettingsManager().tapToUpdateProgressInChips,
+                          onChanged: (val) => SettingsManager().setTapToUpdateProgressInChips(val),
+                        ),
+                        const SettingsDivider(),
+                        SettingsSwitchItem(
+                          icon: Icons.star_outline,
+                          title: l10n.translate('tap_to_update_rating'),
+                          subtitle: l10n.translate('tap_to_update_rating_subtitle'),
+                          value: SettingsManager().tapToUpdateRatingInChips,
+                          onChanged: (val) => SettingsManager().setTapToUpdateRatingInChips(val),
+                        ),
+                        const SettingsDivider(),
                         SettingsItem(
                           icon: Icons.assignment_outlined,
                           title: l10n.translate('view_logs'),

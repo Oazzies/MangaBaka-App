@@ -15,4 +15,6 @@ class SettingsKeys {
   static const String autoSuggestBrowse = '${AppConstants.prefixStorageKey}auto_suggest_browse';
   static const String listStylePref = '${AppConstants.prefixStorageKey}list_style_pref';
   static const String newsListColumns = '${AppConstants.prefixStorageKey}news_list_columns';
+  static const String tapToUpdateProgressInChips = '${AppConstants.prefixStorageKey}tap_progress_chips';
+  static const String tapToUpdateRatingInChips = '${AppConstants.prefixStorageKey}tap_rating_chips';
 }

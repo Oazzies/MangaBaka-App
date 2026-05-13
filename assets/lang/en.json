@@ -281,6 +281,10 @@
         "logs_copied": "Logs copied to clipboard",
         "update_chapters": "Update Chapters",
         "update_volumes": "Update Volumes",
-        "save": "Save"
+        "save": "Save",
+        "tap_to_update_progress": "Tap Chips to Update Progress",
+        "tap_to_update_progress_subtitle": "Enable updating chapter and volume progress by tapping on metadata chips",
+        "tap_to_update_rating": "Tap Chips to Update Rating",
+        "tap_to_update_rating_subtitle": "Enable updating your personal rating by tapping on the rating chip"
     }
 }
