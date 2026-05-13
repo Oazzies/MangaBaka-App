@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/widgets/mb_search_bar.dart';
 import 'package:mangabaka_app/utils/app_shortcuts.dart';
@@ -23,6 +24,8 @@ import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/utils/number_utils.dart';
+import 'package:mangabaka_app/features/browse/widgets/filter_chips_row.dart';
+import 'package:mangabaka_app/features/library/screens/library_filter_helper.dart';
 
 
 class LibraryScreen extends StatefulWidget {
@@ -45,6 +48,8 @@ class _LibraryScreenState extends State<LibraryScreen>
   String _query = '';
   SearchFilters _filters = SearchFilters();
   Stream<List<LibraryEntry>>? _entriesStream;
+  StreamSubscription<List<LibraryEntry>>? _entriesSubscription;
+  List<LibraryEntry> _lastEntries = [];
   bool _isLibraryIncomplete = false;
 
   @override
@@ -89,6 +94,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       c.dispose();
     }
     _searchFocusNode.dispose();
+    _entriesSubscription?.cancel();
     super.dispose();
   }
 
@@ -108,16 +114,54 @@ class _LibraryScreenState extends State<LibraryScreen>
       _loggedIn = _auth.isLoggedIn;
       if (!_loggedIn) {
         _entriesStream = null;
+        _entriesSubscription?.cancel();
+        _entriesSubscription = null;
       } else {
         _setupStreamAndSync();
       }
     });
   }
 
+  void _onEntriesUpdate(List<LibraryEntry> entries) {
+    if (!mounted) return;
+    _lastEntries = entries;
+    _performAutoTabSwitching();
+  }
+
+  void _performAutoTabSwitching() {
+    if (!mounted || (_query.isEmpty && _filters.isEmpty) || _tabController.indexIsChanging) return;
+
+    final currentTabKey = LibraryScreenConstants.tabs[_tabController.index].key;
+    
+    final filterHelper = LibraryFilterHelper(
+      allEntries: _lastEntries,
+      query: _query,
+      contentPreferences: SettingsManager().contentPreferences,
+      filters: _filters,
+    );
+    
+    final resultsInCurrentTab = filterHelper.getByTab(currentTabKey);
+    
+    if (resultsInCurrentTab.isEmpty) {
+      _logger.info('Current tab ($currentTabKey) is empty while searching. Looking for other tabs...');
+      // Try to find first tab with results
+      for (int i = 0; i < LibraryScreenConstants.tabs.length; i++) {
+        final tabKey = LibraryScreenConstants.tabs[i].key;
+        if (filterHelper.getByTab(tabKey).isNotEmpty) {
+          _logger.info('Auto-switching to tab: $tabKey (index $i)');
+          _tabController.animateTo(i);
+          break;
+        }
+      }
+    }
+  }
+
   void _setupStreamAndSync() {
     _logger.info('Setting up library entries stream and sync tasks');
     setState(() {
       _entriesStream = _libraryService.watchEntriesFromDb();
+      _entriesSubscription?.cancel();
+      _entriesSubscription = _entriesStream?.listen(_onEntriesUpdate);
     });
     // Full import only on first load; recents sync on subsequent ones.
     _libraryService.performInitialSyncIfNeeded().then((_) async {
@@ -213,6 +257,16 @@ class _LibraryScreenState extends State<LibraryScreen>
                         ),
                       ),
                     ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: FilterChipsRow(
+                      filters: _filters,
+                      onFiltersChanged: (filters) {
+                        setState(() => _filters = filters);
+                        _performAutoTabSwitching();
+                      },
+                    ),
+                  ),
                   Expanded(
                     child: LibraryBody(
                       loggedIn: _loggedIn,
@@ -275,9 +329,15 @@ class _LibraryScreenState extends State<LibraryScreen>
         constraints: const BoxConstraints(maxWidth: 800),
         child: MBSearchBar(
           focusNode: _searchFocusNode,
-          onChanged: (value) => setState(() => _query = value),
+          onChanged: (value) {
+            setState(() => _query = value);
+            _performAutoTabSwitching();
+          },
           initialFilters: _filters,
-          onFilterApplied: (filters) => setState(() => _filters = filters),
+          onFilterApplied: (filters) {
+            setState(() => _filters = filters);
+            _performAutoTabSwitching();
+          },
         ),
       ),
       actions: isLandscape
@@ -309,8 +369,18 @@ class _LibraryScreenState extends State<LibraryScreen>
         stream: _entriesStream,
         builder: (context, snapshot) {
           final entries = snapshot.data ?? [];
+          
+          final settings = SettingsManager();
+          final filterHelper = LibraryFilterHelper(
+            allEntries: entries,
+            query: _query,
+            contentPreferences: settings.contentPreferences,
+            filters: _filters,
+          );
+          final filteredEntries = filterHelper.getFilteredAndSorted();
+
           final counts = <String, int>{};
-          for (final entry in entries) {
+          for (final entry in filteredEntries) {
             counts[entry.state] = (counts[entry.state] ?? 0) + 1;
           }
 

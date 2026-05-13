@@ -15,6 +15,23 @@ class SearchFilters {
   final bool? isLicensed;
   final String tagMode;
 
+  bool get isEmpty =>
+      type.isEmpty &&
+      typeNot.isEmpty &&
+      status.isEmpty &&
+      statusNot.isEmpty &&
+      genre.isEmpty &&
+      genreNot.isEmpty &&
+      tag.isEmpty &&
+      tagNot.isEmpty &&
+      sortBy == null &&
+      ratingLower == 0 &&
+      ratingUpper == 100 &&
+      publishedYearLower == null &&
+      publishedYearUpper == null &&
+      isLicensed == null &&
+      tagMode == 'and';
+
   SearchFilters({
     this.type = const [],
     this.typeNot = const [],
@@ -68,6 +85,46 @@ class SearchFilters {
           ? (isLicensed ? true : (this.isLicensed == false ? false : null))
           : this.isLicensed,
       tagMode: tagMode ?? this.tagMode,
+    );
+  }
+
+  SearchFilters copyWithSortBy(String? sortBy) {
+    return SearchFilters(
+      type: type,
+      typeNot: typeNot,
+      status: status,
+      statusNot: statusNot,
+      genre: genre,
+      genreNot: genreNot,
+      tag: tag,
+      tagNot: tagNot,
+      sortBy: sortBy,
+      ratingLower: ratingLower,
+      ratingUpper: ratingUpper,
+      publishedYearLower: publishedYearLower,
+      publishedYearUpper: publishedYearUpper,
+      isLicensed: isLicensed,
+      tagMode: tagMode,
+    );
+  }
+
+  SearchFilters copyWithYear({int? publishedYearLower, int? publishedYearUpper}) {
+    return SearchFilters(
+      type: type,
+      typeNot: typeNot,
+      status: status,
+      statusNot: statusNot,
+      genre: genre,
+      genreNot: genreNot,
+      tag: tag,
+      tagNot: tagNot,
+      sortBy: sortBy,
+      ratingLower: ratingLower,
+      ratingUpper: ratingUpper,
+      publishedYearLower: publishedYearLower,
+      publishedYearUpper: publishedYearUpper,
+      isLicensed: isLicensed,
+      tagMode: tagMode,
     );
   }
 

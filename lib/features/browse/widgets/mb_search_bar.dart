@@ -57,6 +57,16 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   @override
+  void didUpdateWidget(MBSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialFilters != oldWidget.initialFilters && widget.initialFilters != null) {
+      setState(() {
+        _currentFilters = widget.initialFilters!;
+      });
+    }
+  }
+
+  @override
   void dispose() {
     if (widget.controller == null) {
       _controller.dispose();
@@ -201,6 +211,30 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   void _openFilterSheet() {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (isLandscape) {
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: SearchFilterBottomSheet(
+              isDialog: true,
+              initialFilters: _currentFilters,
+              onApply: (filters) {
+                setState(() => _currentFilters = filters);
+                widget.onFilterApplied?.call(filters);
+              },
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

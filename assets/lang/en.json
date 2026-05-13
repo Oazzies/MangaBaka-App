@@ -60,6 +60,7 @@
         "by_author": "By",
         "reset": "Reset",
         "apply": "Apply",
+        "default": "Default",
         "sort_by": "Sort By",
         "title_asc": "Title (A-Z)",
         "title_desc": "Title (Z-A)",

@@ -17,6 +17,7 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 import 'package:permission_handler/permission_handler.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
+import 'package:mangabaka_app/features/browse/widgets/filter_chips_row.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -172,6 +173,10 @@ class _BrowseScreenState extends State<BrowseScreen> {
                       padding: const EdgeInsets.only(top: 64),
                       child: Column(
                         children: [
+                          FilterChipsRow(
+                            filters: _controller.currentFilters,
+                            onFiltersChanged: _controller.updateFilters,
+                          ),
                           BrowseContent(
                             searchResults: _controller.searchResults,
                             isLoading: _controller.isLoading,
