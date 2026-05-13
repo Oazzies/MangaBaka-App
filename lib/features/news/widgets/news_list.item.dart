@@ -98,7 +98,7 @@ class NewsListItem extends StatelessWidget {
               if (showReferencedSeries && news.series.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(
-                  l10n.translate('series_referenced'),
+                  '${l10n.translate('series_referenced')} (${news.series.length})',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -106,16 +106,22 @@ class NewsListItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Wrap(
-                  spacing: 12.0,
-                  runSpacing: 12.0,
-                  children: news.series.map((s) {
-                    return ReferencedListItem(
-                      key: ValueKey('ref_${news.id}_${s.id}'),
-                      series: s,
-                      compact: true,
-                    );
-                  }).toList(),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: news.series.map((s) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: ReferencedListItem(
+                          key: ValueKey('ref_${news.id}_${s.id}'),
+                          series: s,
+                          compact: true,
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ],
@@ -124,5 +130,6 @@ class NewsListItem extends StatelessWidget {
       ),
     );
   }
-
 }
+
+
