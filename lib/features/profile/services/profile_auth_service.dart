@@ -115,7 +115,7 @@ class ProfileAuthService extends ChangeNotifier {
           throw AuthCancelledException();
         }
       }
-      _logger.severe('Login flow failed: $e\n$st');
+      _logger.severe('Login flow failed', e, st);
       if (e is AppException) rethrow;
       throw AuthException(message: 'Login failed', originalError: e, stackTrace: st);
     }
@@ -132,7 +132,7 @@ class ProfileAuthService extends ChangeNotifier {
         await _storage.write(AuthStorage.kAccessTokenExp, exp);
       }
     } catch (e, st) {
-      _logger.severe('Failed to persist tokens: $e\n$st');
+      _logger.severe('Failed to persist tokens', e, st);
       throw AuthException(message: 'Failed to persist tokens', originalError: e, stackTrace: st);
     }
   }
@@ -192,7 +192,7 @@ class ProfileAuthService extends ChangeNotifier {
       _logger.info('Token refresh successful');
       await _persistTokens(response);
     } catch (e, st) {
-      _logger.severe('Token refresh failed: $e\n$st');
+      _logger.severe('Token refresh failed', e, st);
       if (e is AppException) rethrow;
       throw AuthException(message: 'Failed to refresh tokens', originalError: e, stackTrace: st);
     }
@@ -215,7 +215,7 @@ class ProfileAuthService extends ChangeNotifier {
       await _storage.cacheProfile(_cachedProfile!);
       return _cachedProfile!;
     } catch (e, st) {
-      _logger.severe('Failed to fetch profile: $e\n$st');
+      _logger.severe('Failed to fetch profile', e, st);
       if (e is AppException) rethrow;
       throw AuthException(message: 'Failed to fetch profile', originalError: e, stackTrace: st);
     }
@@ -230,7 +230,7 @@ class ProfileAuthService extends ChangeNotifier {
       }
       return token;
     } catch (e, st) {
-      _logger.severe('Failed to get valid access token: $e\n$st');
+      _logger.severe('Failed to get valid access token', e, st);
       if (e is AppException) rethrow;
       throw AuthException(message: 'Failed to get valid access token', originalError: e, stackTrace: st);
     }
@@ -250,7 +250,7 @@ class ProfileAuthService extends ChangeNotifier {
 
       notifyListeners();
     } catch (e, st) {
-      _logger.severe('Failed to logout: $e\n$st');
+      _logger.severe('Failed to logout', e, st);
       throw AuthException(message: 'Failed to logout', originalError: e, stackTrace: st);
     }
   }

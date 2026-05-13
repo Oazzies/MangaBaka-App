@@ -98,7 +98,7 @@ class SeriesSearchService {
           
           return results;
         } catch (e, st) {
-          _logger.severe('Failed to parse series search response: $e\n$st');
+          _logger.severe('Failed to parse series search response', e, st);
           throw ParseException(
             message: 'Failed to parse series search response',
             originalError: e,
@@ -117,7 +117,7 @@ class SeriesSearchService {
         );
       }
     } on http.ClientException catch (e, st) {
-      _logger.severe('HTTP client error during series search: $e\n$st');
+      _logger.severe('HTTP client error during series search', e, st);
       throw NetworkException(
         message: 'Network error. Please check your connection.',
         code: 'NETWORK_ERROR',
@@ -125,7 +125,7 @@ class SeriesSearchService {
         stackTrace: st,
       );
     } on SocketException catch (e, st) {
-      _logger.severe('Network error during series search: $e\n$st');
+      _logger.severe('Network error during series search', e, st);
       throw NetworkException(
         message: 'Network error. Please check your connection.',
         code: 'NETWORK_ERROR',
@@ -133,7 +133,7 @@ class SeriesSearchService {
         stackTrace: st,
       );
     } on TimeoutException catch (e, st) {
-      _logger.severe('Request timeout during series search: $e\n$st');
+      _logger.severe('Request timeout during series search', e, st);
       throw NetworkException(
         message: 'Request timed out. Please try again.',
         code: 'TIMEOUT',
@@ -147,7 +147,7 @@ class SeriesSearchService {
     } on NetworkException {
       rethrow;
     } catch (e, st) {
-      _logger.severe('Unexpected error during series search: $e\n$st');
+      _logger.severe('Unexpected error during series search', e, st);
       throw AppError(
         message: 'An unexpected error occurred while searching for series',
         originalError: e,

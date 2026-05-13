@@ -47,16 +47,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       await database.libraryEntriesDao.updateEntryState(seriesId, state);
       logger.info('Successfully updated state for $seriesId to $state in DB');
     } on http.ClientException catch (e, st) {
-      logger.severe('ClientException updating entry state for $seriesId: $e');
+      logger.severe('ClientException updating entry state for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
-      logger.severe('SocketException updating entry state for $seriesId: $e');
+      logger.severe('SocketException updating entry state for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
-      logger.severe('TimeoutException updating entry state for $seriesId');
+      logger.severe('TimeoutException updating entry state for $seriesId', e, st);
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
     } catch (e, st) {
-      logger.severe('Unexpected error updating entry state for $seriesId: $e\n$st');
+      logger.severe('Unexpected error updating entry state for $seriesId', e, st);
       if (e is AppException) rethrow;
       throw AppError(message: 'Failed to update entry state', originalError: e, stackTrace: st);
     }
@@ -99,16 +99,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       await database.libraryEntriesDao.updateEntryRating(seriesId, rating);
       logger.info('Successfully updated rating for $seriesId to $rating in DB');
     } on http.ClientException catch (e, st) {
-      logger.severe('ClientException updating entry rating for $seriesId: $e');
+      logger.severe('ClientException updating entry rating for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
-      logger.severe('SocketException updating entry rating for $seriesId: $e');
+      logger.severe('SocketException updating entry rating for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
-      logger.severe('TimeoutException updating entry rating for $seriesId');
+      logger.severe('TimeoutException updating entry rating for $seriesId', e, st);
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
     } catch (e, st) {
-      logger.severe('Unexpected error updating entry rating for $seriesId: $e\n$st');
+      logger.severe('Unexpected error updating entry rating for $seriesId', e, st);
       if (e is AppException) rethrow;
       throw AppError(message: 'Failed to update entry rating', originalError: e, stackTrace: st);
     }
@@ -156,16 +156,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       await database.libraryEntriesDao.updateEntryProgress(seriesId, progressChapter: progressChapter, progressVolume: progressVolume);
       logger.info('Successfully updated progress for $seriesId in DB');
     } on http.ClientException catch (e, st) {
-      logger.severe('ClientException updating entry progress for $seriesId: $e');
+      logger.severe('ClientException updating entry progress for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
-      logger.severe('SocketException updating entry progress for $seriesId: $e');
+      logger.severe('SocketException updating entry progress for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
-      logger.severe('TimeoutException updating entry progress for $seriesId');
+      logger.severe('TimeoutException updating entry progress for $seriesId', e, st);
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
     } catch (e, st) {
-      logger.severe('Unexpected error updating entry progress for $seriesId: $e\n$st');
+      logger.severe('Unexpected error updating entry progress for $seriesId', e, st);
       if (e is AppException) rethrow;
       throw AppError(message: 'Failed to update entry progress', originalError: e, stackTrace: st);
     }
@@ -208,16 +208,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         );
       }
     } on http.ClientException catch (e, st) {
-      logger.severe('ClientException creating library entry for $seriesId: $e');
+      logger.severe('ClientException creating library entry for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
-      logger.severe('SocketException creating library entry for $seriesId: $e');
+      logger.severe('SocketException creating library entry for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
-      logger.severe('TimeoutException creating library entry for $seriesId');
+      logger.severe('TimeoutException creating library entry for $seriesId', e, st);
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
     } catch (e, st) {
-      logger.severe('Unexpected error creating entry for $seriesId: $e\n$st');
+      logger.severe('Unexpected error creating entry for $seriesId', e, st);
       if (e is AppException) rethrow;
       throw AppError(message: 'Failed to create library entry', originalError: e, stackTrace: st);
     }
@@ -255,16 +255,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         );
       }
     } on http.ClientException catch (e, st) {
-      logger.severe('ClientException deleting entry for $seriesId: $e');
+      logger.severe('ClientException deleting entry for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on SocketException catch (e, st) {
-      logger.severe('SocketException deleting entry for $seriesId: $e');
+      logger.severe('SocketException deleting entry for $seriesId', e, st);
       throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } on TimeoutException catch (e, st) {
-      logger.severe('TimeoutException deleting entry for $seriesId');
+      logger.severe('TimeoutException deleting entry for $seriesId', e, st);
       throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
     } catch (e, st) {
-      logger.severe('Unexpected error deleting entry for $seriesId: $e\n$st');
+      logger.severe('Unexpected error deleting entry for $seriesId', e, st);
       if (e is AppException) rethrow;
       throw AppError(message: 'Failed to delete library entry', originalError: e, stackTrace: st);
     }
@@ -283,7 +283,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       await prefs.remove('${AppConstants.prefixStorageKey}library_is_incomplete');
       logger.info('Library sync preferences reset');
     } catch (e, st) {
-      logger.severe('Failed to clear library: $e\n$st');
+      logger.severe('Failed to clear library', e, st);
     }
   }
 }
