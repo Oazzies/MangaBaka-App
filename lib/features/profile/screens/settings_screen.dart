@@ -36,7 +36,10 @@ class SettingsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppConstants.primaryBackground,
           appBar: AppBar(
-// ... (omitted lines for brevity, but I will include them in the final replacement)
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
             title: Text(
               l10n.translate('settings'),
               style: TextStyle(color: AppConstants.textColor),

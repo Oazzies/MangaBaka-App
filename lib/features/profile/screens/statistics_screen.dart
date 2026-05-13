@@ -33,6 +33,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> with StatisticsData
         return Scaffold(
           backgroundColor: AppConstants.primaryBackground,
           appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
             backgroundColor: AppConstants.primaryBackground,
             elevation: 0,
             centerTitle: true,

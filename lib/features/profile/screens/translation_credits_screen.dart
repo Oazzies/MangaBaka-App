@@ -14,6 +14,10 @@ class TranslationCreditsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppConstants.primaryBackground,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           l10n.translate('translation_credits'),
           style: TextStyle(color: AppConstants.textColor),
