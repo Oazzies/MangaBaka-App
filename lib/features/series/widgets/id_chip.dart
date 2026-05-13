@@ -10,8 +10,10 @@ class IdChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: LocalizationService().translate('click_to_copy_id'),
-      child: GestureDetector(
+      message: LocalizationService().translate('copy_id'),
+      child: MiniBadge(
+        text: 'ID: $id',
+        icon: Icons.fingerprint_outlined,
         onTap: () async {
           await Clipboard.setData(ClipboardData(text: id));
           if (context.mounted) {
@@ -25,10 +27,6 @@ class IdChip extends StatelessWidget {
             );
           }
         },
-        child: MiniBadge(
-          text: 'ID: $id',
-          icon: Icons.fingerprint_outlined,
-        ),
       ),
     );
   }

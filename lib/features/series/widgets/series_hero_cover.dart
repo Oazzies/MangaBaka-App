@@ -3,7 +3,7 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/screens/full_screen_image_screen.dart';
 
-class SeriesHeroCover extends StatelessWidget {
+class SeriesHeroCover extends StatefulWidget {
   final Series series;
   final double height;
   final double width;
@@ -16,48 +16,71 @@ class SeriesHeroCover extends StatelessWidget {
   });
 
   @override
+  State<SeriesHeroCover> createState() => _SeriesHeroCoverState();
+}
+
+class _SeriesHeroCoverState extends State<SeriesHeroCover> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: 'series_cover_${series.id}',
-      child: GestureDetector(
-        onTap: () {
-          final imageUrl = series.rawCoverUrl.isNotEmpty ? series.rawCoverUrl : series.coverUrl;
-          if (imageUrl.isNotEmpty) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FullScreenImageScreen(
-                  imageUrl: imageUrl,
-                  heroTag: 'series_cover_${series.id}',
+      tag: 'series_cover_${widget.series.id}',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: () {
+            final imageUrl = widget.series.rawCoverUrl.isNotEmpty
+                ? widget.series.rawCoverUrl
+                : widget.series.coverUrl;
+            if (imageUrl.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FullScreenImageScreen(
+                    imageUrl: imageUrl,
+                    heroTag: 'series_cover_${widget.series.id}',
+                  ),
                 ),
-              ),
-            );
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppConstants.primaryBackground.withValues(alpha: 0.6),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: series.coverUrl.isNotEmpty 
-              ? Image.network(
-                  series.coverUrl,
-                  height: height,
-                  width: width,
-                  fit: BoxFit.cover,
-                  gaplessPlayback: true,
-                  cacheWidth: 400,
-                  errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-                )
-              : _buildPlaceholder(),
+              );
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 50),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: _hovered
+                  ? Border.all(
+                      color: AppConstants.accentColor.withValues(alpha: 0.6),
+                      width: 2,
+                    )
+                  : Border.all(color: Colors.transparent, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: AppConstants.primaryBackground.withValues(
+                      alpha: _hovered ? 0.4 : 0.6),
+                  blurRadius: _hovered ? 28 : 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: widget.series.coverUrl.isNotEmpty
+                  ? Image.network(
+                      widget.series.coverUrl,
+                      height: widget.height,
+                      width: widget.width,
+                      fit: BoxFit.cover,
+                      gaplessPlayback: true,
+                      cacheWidth: 400,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildPlaceholder(),
+                    )
+                  : _buildPlaceholder(),
+            ),
           ),
         ),
       ),
@@ -66,13 +89,13 @@ class SeriesHeroCover extends StatelessWidget {
 
   Widget _buildPlaceholder() {
     return Container(
-      width: width,
-      height: height,
+      width: widget.width,
+      height: widget.height,
       color: AppConstants.secondaryBackground,
       child: Icon(
         Icons.broken_image,
         color: AppConstants.textMutedColor,
-        size: width > 50 ? 40 : 24,
+        size: widget.width > 50 ? 40 : 24,
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 
 class RatingChip extends StatelessWidget {
@@ -29,7 +30,9 @@ class RatingChip extends StatelessWidget {
       icon: Icons.star,
       color: AppConstants.warningColor,
       backgroundColor: AppConstants.warningColor.withValues(alpha: 0.1),
+      hoverColor: AppConstants.warningColor.withValues(alpha: 0.15),
       onTap: onTap,
+      tooltip: onTap != null ? LocalizationService().translate('update_rating') : null,
     );
   }
 }

@@ -30,9 +30,10 @@ class DateRangeChip extends StatelessWidget {
     } else {
       text = endYear;
     }
-    return GestureDetector(
+    return MiniBadge(
+      text: text,
+      icon: Icons.calendar_today_outlined,
       onTap: () => _showDateDialog(context),
-      child: MiniBadge(text: text, icon: Icons.calendar_today_outlined),
     );
   }
 }

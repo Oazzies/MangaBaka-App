@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -99,19 +100,22 @@ class SeriesDetailAppBar extends StatelessWidget {
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: const EdgeInsetsDirectional.only(start: 56, bottom: 16),
             centerTitle: false,
-            title: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
-              opacity: isCollapsed ? 1.0 : 0.0,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: isWide ? 600 : 200),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: AppConstants.textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+            title: IgnorePointer(
+              ignoring: !isCollapsed,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isCollapsed ? 1.0 : 0.0,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isWide ? 600 : 200),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: AppConstants.textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -192,13 +196,13 @@ class SeriesDetailAppBar extends StatelessWidget {
     if (series.title.isNotEmpty && series.title != title) {
       otherTitles.add(series.title);
     }
-    if (series.nativeTitle.isNotEmpty && 
-        series.nativeTitle != title && 
+    if (series.nativeTitle.isNotEmpty &&
+        series.nativeTitle != title &&
         !otherTitles.contains(series.nativeTitle)) {
       otherTitles.add(series.nativeTitle);
     }
-    if (series.romanizedTitle.isNotEmpty && 
-        series.romanizedTitle != title && 
+    if (series.romanizedTitle.isNotEmpty &&
+        series.romanizedTitle != title &&
         !otherTitles.contains(series.romanizedTitle)) {
       otherTitles.add(series.romanizedTitle);
     }
@@ -207,49 +211,103 @@ class SeriesDetailAppBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        InkWell(
-          onTap: () => onCopy(title),
-          borderRadius: BorderRadius.circular(4),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: isWide ? 32 : 22,
-              fontWeight: FontWeight.bold,
-              color: AppConstants.textColor,
-              height: 1.1,
-              shadows: [
-                Shadow(
-                  color: AppConstants.primaryBackground.withValues(alpha: 0.5),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
+        _HoverableTitle(
+          text: title,
+          fontSize: isWide ? 32 : 22,
+          fontWeight: FontWeight.bold,
+          color: AppConstants.textColor,
+          maxLines: 3,
+          shadows: [
+            Shadow(
+              color: AppConstants.primaryBackground.withValues(alpha: 0.5),
+              offset: const Offset(0, 2),
+              blurRadius: 4,
             ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
+          ],
+          onTap: () => onCopy(title),
         ),
         if (otherTitles.isNotEmpty) ...[
           const SizedBox(height: 8),
           ...otherTitles.map((t) => Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: InkWell(
-              onTap: () => onCopy(t),
-              borderRadius: BorderRadius.circular(4),
-              child: Text(
-                t,
-                style: TextStyle(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: _HoverableTitle(
+                  text: t,
                   fontSize: isWide ? 15 : 13,
                   color: AppConstants.textMutedColor,
                   fontStyle: FontStyle.italic,
+                  maxLines: 1,
+                  onTap: () => onCopy(t),
                 ),
-                maxLines: 1,
+              )),
+        ],
+      ],
+    );
+  }
+}
+
+/// A title widget that underlines on hover to indicate it is clickable.
+class _HoverableTitle extends StatefulWidget {
+  final String text;
+  final double fontSize;
+  final FontWeight fontWeight;
+  final Color color;
+  final FontStyle? fontStyle;
+  final int maxLines;
+  final List<Shadow>? shadows;
+  final VoidCallback onTap;
+
+  const _HoverableTitle({
+    required this.text,
+    required this.fontSize,
+    this.fontWeight = FontWeight.normal,
+    required this.color,
+    this.fontStyle,
+    this.maxLines = 1,
+    this.shadows,
+    required this.onTap,
+  });
+
+  @override
+  State<_HoverableTitle> createState() => _HoverableTitleState();
+}
+
+class _HoverableTitleState extends State<_HoverableTitle> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Tooltip(
+        message: LocalizationService().translate('copy_title'),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Text(
+                widget.text,
+                style: TextStyle(
+                  fontSize: widget.fontSize,
+                  fontWeight: widget.fontWeight,
+                  color: widget.color,
+                  fontStyle: widget.fontStyle,
+                  height: 1.1,
+                  shadows: widget.shadows,
+                  decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
+                  decorationColor: widget.color.withValues(alpha: 0.6),
+                ),
+                maxLines: widget.maxLines,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-          )),
-        ],
-      ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -47,51 +47,10 @@ class SeriesCoversTab extends StatelessWidget {
               final url = cover.url ?? cover.urlX350 ?? cover.urlX250 ?? cover.urlX150;
               final title = _formatCoverTitle(cover);
               
-              return GestureDetector(
-                onTap: () {
-                  if (url != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FullScreenImageScreen(
-                          imageUrl: url,
-                          heroTag: url,
-                          title: title,
-                          note: cover.note,
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: url != null
-                            ? Hero(
-                                tag: url,
-                                child: Image.network(
-                                  url,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(color: AppConstants.secondaryBackground, child: const Icon(Icons.broken_image)),
-                                ),
-                              )
-                            : Container(color: AppConstants.secondaryBackground, child: const Icon(Icons.broken_image)),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: AppConstants.textColor, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
+              return _HoverableCoverItem(
+                cover: cover,
+                url: url,
+                title: title,
               );
             },
           ),
@@ -177,5 +136,104 @@ class SeriesCoversTab extends StatelessWidget {
     }
 
     return title;
+  }
+}
+
+/// A cover grid item that shows an accent border on hover.
+class _HoverableCoverItem extends StatefulWidget {
+  final SeriesCover cover;
+  final String? url;
+  final String title;
+
+  const _HoverableCoverItem({
+    required this.cover,
+    required this.url,
+    required this.title,
+  });
+
+  @override
+  State<_HoverableCoverItem> createState() => _HoverableCoverItemState();
+}
+
+class _HoverableCoverItemState extends State<_HoverableCoverItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: widget.url != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: () {
+          if (widget.url != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => FullScreenImageScreen(
+                  imageUrl: widget.url!,
+                  heroTag: widget.url!,
+                  title: widget.title,
+                  note: widget.cover.note,
+                ),
+              ),
+            );
+          }
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: _hovered && widget.url != null
+                      ? Border.all(
+                          color: AppConstants.accentColor.withValues(alpha: 0.6),
+                          width: 2,
+                        )
+                      : Border.all(color: Colors.transparent, width: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: widget.url != null
+                      ? Hero(
+                          tag: widget.url!,
+                          child: Image.network(
+                            widget.url!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                              color: AppConstants.secondaryBackground,
+                              child: const Icon(Icons.broken_image),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          color: AppConstants.secondaryBackground,
+                          child: const Icon(Icons.broken_image),
+                        ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                widget.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: AppConstants.textColor,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

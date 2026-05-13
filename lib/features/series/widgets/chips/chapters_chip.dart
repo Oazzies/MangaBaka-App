@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 
 class ChaptersChip extends StatelessWidget {
@@ -28,6 +29,7 @@ class ChaptersChip extends StatelessWidget {
         color: AppConstants.successColor,
         backgroundColor: AppConstants.successColor.withValues(alpha: 0.1),
         onTap: onTap,
+        tooltip: onTap != null ? LocalizationService().translate('update_progress') : null,
       );
     }
 

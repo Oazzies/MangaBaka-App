@@ -11,7 +11,7 @@ import 'package:mangabaka_app/features/series/widgets/chips/has_anime_chip.dart'
 import 'package:mangabaka_app/features/series/widgets/chips/rating_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/chips/content_rating_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/id_chip.dart';
-
+import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
 class SeriesDetailHeader extends StatelessWidget {
@@ -71,14 +71,11 @@ class SeriesDetailHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () =>
-                          Clipboard.setData(ClipboardData(text: preferredTitle)),
-                      child: Text(
-                        preferredTitle,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    child: _HoverableTitleText(
+                      text: preferredTitle,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      overflow: TextOverflow.ellipsis,
+                      onTap: () => Clipboard.setData(ClipboardData(text: preferredTitle)),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -87,14 +84,12 @@ class SeriesDetailHeader extends StatelessWidget {
               ),
               ...otherTitles.map((t) => Padding(
                 padding: const EdgeInsets.only(top: 4.0),
-                child: GestureDetector(
+                child: _HoverableTitleText(
+                  text: t,
+                  style: t == otherTitles.first 
+                    ? Theme.of(context).textTheme.bodyMedium
+                    : Theme.of(context).textTheme.bodySmall,
                   onTap: () => Clipboard.setData(ClipboardData(text: t)),
-                  child: Text(
-                    t,
-                    style: t == otherTitles.first 
-                      ? Theme.of(context).textTheme.bodyMedium
-                      : Theme.of(context).textTheme.bodySmall,
-                  ),
                 ),
               )),
 
@@ -142,6 +137,53 @@ class SeriesDetailHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A text widget that underlines on hover to indicate it is clickable/copyable.
+class _HoverableTitleText extends StatefulWidget {
+  final String text;
+  final TextStyle? style;
+  final TextOverflow? overflow;
+  final VoidCallback onTap;
+
+  const _HoverableTitleText({
+    required this.text,
+    this.style,
+    this.overflow,
+    required this.onTap,
+  });
+
+  @override
+  State<_HoverableTitleText> createState() => _HoverableTitleTextState();
+}
+
+class _HoverableTitleTextState extends State<_HoverableTitleText> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final baseStyle = widget.style ?? const TextStyle();
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          child: Text(
+            widget.text,
+            style: baseStyle.copyWith(
+              decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
+              decorationColor: (baseStyle.color ?? AppConstants.textColor).withValues(alpha: 0.6),
+            ),
+            overflow: widget.overflow,
+          ),
+        ),
+      ),
     );
   }
 }

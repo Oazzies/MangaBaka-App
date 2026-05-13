@@ -31,6 +31,7 @@ class SeriesDetailFAB extends StatelessWidget {
             onPressed: isAdding ? null : onAdd,
             backgroundColor: AppConstants.accentColor,
             foregroundColor: AppConstants.primaryBackground,
+            tooltip: LocalizationService().translate('add_to_library'),
             label: isAdding 
               ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppConstants.primaryBackground))
               : Text(LocalizationService().translate('add_to_library'), style: const TextStyle(fontWeight: FontWeight.bold)),

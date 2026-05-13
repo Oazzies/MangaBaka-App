@@ -38,7 +38,6 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
   late final SeriesService _seriesService;
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
-  bool _isPopping = false;
 
   @override
   LibraryService get libraryService => _libraryService;
@@ -103,16 +102,6 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                 },
               ),
             },
-            child: GestureDetector(
-            onHorizontalDragUpdate: (details) {
-              if (!_isPopping && details.delta.dx > 15) {
-                final navigator = Navigator.of(context);
-                if (navigator.canPop()) {
-                  _isPopping = true;
-                  navigator.pop();
-                }
-              }
-            },
             child: StreamBuilder<LibraryEntry?>(
               stream: _entryStream,
               builder: (context, snapshot) {
@@ -121,6 +110,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1400),
                     child: RepaintBoundary(
+                    child: SelectionArea(
                       child: CustomScrollView(
                         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         slivers: [
@@ -213,11 +203,11 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                         ],
                       ),
                     ),
+                    ),
                   ),
                 );
               },
             ),
-          ),
           ),
           floatingActionButton: SeriesDetailFAB(entryStream: _entryStream, isAdding: _isAdding, onAdd: addSeriesToLibrary),
         );
