@@ -84,7 +84,7 @@ class BrowseContent extends StatelessWidget {
               final series = searchResults[index];
               return InkWell(
                 onTap: () => onNavigateToDetail(series),
-                child: EntryListItem(series: series),
+                child: EntryListItem(key: ValueKey('grid_${series.id}'), series: series),
               );
             },
           );
@@ -104,7 +104,7 @@ class BrowseContent extends StatelessWidget {
             final series = searchResults[index];
             return InkWell(
               onTap: () => onNavigateToDetail(series),
-              child: EntryListItem(series: series),
+              child: EntryListItem(key: ValueKey('list_${series.id}'), series: series),
             );
           },
         );
@@ -121,15 +121,15 @@ class BrowseContent extends StatelessWidget {
         
         Widget content;
         if (searchResults.isEmpty && !isLoading && error == null) {
-          content = BrowseShortcuts(onNavigate: onNavigateToResults);
+          content = BrowseShortcuts(key: const ValueKey('shortcuts'), onNavigate: onNavigateToResults);
         } else if (isLoading && searchResults.isEmpty) {
-          content = _buildLoadingState();
+          content = _buildLoadingState(); // SeriesListSkeleton already has internal keys often
         } else if (error != null && searchResults.isEmpty) {
           content = _buildErrorState(l10n);
         } else if (searchResults.isNotEmpty) {
           content = _buildResultsList(l10n);
         } else {
-          content = const SizedBox.shrink();
+          content = const SizedBox.shrink(key: ValueKey('empty'));
         }
 
         return Expanded(

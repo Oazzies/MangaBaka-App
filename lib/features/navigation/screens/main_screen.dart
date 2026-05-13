@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/home/screens/home_screen.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
@@ -39,12 +40,14 @@ class MainScreenState extends State<MainScreen> {
   }
 
   // Keep pages alive across tab switches with IndexedStack
-  final List<Widget> _pages = const [
-    HomeScreen(),
-    LibraryScreen(),
-    BrowseScreen(),
-    NewsScreen(),
-    ProfileScreen(),
+  List<Widget> get _pages => [
+    const HomeScreen(),
+    const LibraryScreen(),
+    Platform.isWindows 
+        ? const ExcludeSemantics(child: BrowseScreen()) 
+        : const BrowseScreen(),
+    const NewsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

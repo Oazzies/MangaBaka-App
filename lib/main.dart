@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -95,95 +96,98 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
             ? MainScreen()
             : const OnboardingScreen();
 
-        return MaterialApp(
-          navigatorKey: AppConstants.navigatorKey,
-          title: AppConstants.appName,
-          debugShowCheckedModeBanner: false,
-          builder: (context, child) {
-            return AppShortcuts(child: child!);
-          },
-          theme: ThemeData(
-            useMaterial3: true,
-            tooltipTheme: TooltipThemeData(
-              triggerMode: SettingsManager().showTooltips 
-                  ? null 
-                  : TooltipTriggerMode.manual,
-              waitDuration: SettingsManager().showTooltips 
-                  ? null 
-                  : const Duration(days: 365),
+        return ExcludeSemantics(
+          excluding: Platform.isWindows,
+          child: MaterialApp(
+            navigatorKey: AppConstants.navigatorKey,
+            title: AppConstants.appName,
+            debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              return AppShortcuts(child: child!);
+            },
+            theme: ThemeData(
+              useMaterial3: true,
+              tooltipTheme: TooltipThemeData(
+                triggerMode: SettingsManager().showTooltips 
+                    ? null 
+                    : TooltipTriggerMode.manual,
+                waitDuration: SettingsManager().showTooltips 
+                    ? null 
+                    : const Duration(days: 365),
+              ),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: AppConstants.primaryAccent,
+                brightness: Brightness.light,
+                surface: AppConstants.primaryBackground,
+                primary: AppConstants.accentColor,
+                error: AppConstants.errorColor,
+              ),
+              scaffoldBackgroundColor: AppConstants.primaryBackground,
+              cardColor: AppConstants.secondaryBackground,
+              dialogTheme: DialogThemeData(
+                backgroundColor: AppConstants.secondaryBackground,
+              ),
+              dividerColor: AppConstants.borderColor,
+              bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: AppConstants.secondaryBackground,
+              ),
+              appBarTheme: AppBarTheme(
+                backgroundColor: AppConstants.primaryBackground,
+                surfaceTintColor: Colors.transparent,
+              ),
             ),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AppConstants.primaryAccent,
-              brightness: Brightness.light,
-              surface: AppConstants.primaryBackground,
-              primary: AppConstants.accentColor,
-              error: AppConstants.errorColor,
+            darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: AppConstants.primaryAccent,
+                brightness: Brightness.dark,
+                surface: AppConstants.primaryBackground,
+                primary: AppConstants.accentColor,
+                error: AppConstants.errorColor,
+              ),
+              tooltipTheme: TooltipThemeData(
+                triggerMode: SettingsManager().showTooltips 
+                    ? null 
+                    : TooltipTriggerMode.manual,
+                waitDuration: SettingsManager().showTooltips 
+                    ? null 
+                    : const Duration(days: 365),
+              ),
+              scaffoldBackgroundColor: AppConstants.primaryBackground,
+              cardColor: AppConstants.secondaryBackground,
+              dialogTheme: DialogThemeData(
+                backgroundColor: AppConstants.secondaryBackground,
+              ),
+              dividerColor: AppConstants.borderColor,
+              bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: AppConstants.secondaryBackground,
+              ),
+              appBarTheme: AppBarTheme(
+                backgroundColor: AppConstants.primaryBackground,
+                surfaceTintColor: Colors.transparent,
+              ),
             ),
-            scaffoldBackgroundColor: AppConstants.primaryBackground,
-            cardColor: AppConstants.secondaryBackground,
-            dialogTheme: DialogThemeData(
-              backgroundColor: AppConstants.secondaryBackground,
-            ),
-            dividerColor: AppConstants.borderColor,
-            bottomSheetTheme: BottomSheetThemeData(
-              backgroundColor: AppConstants.secondaryBackground,
-            ),
-            appBarTheme: AppBarTheme(
-              backgroundColor: AppConstants.primaryBackground,
-              surfaceTintColor: Colors.transparent,
-            ),
-          ),
-          darkTheme: ThemeData.dark(useMaterial3: true).copyWith(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AppConstants.primaryAccent,
-              brightness: Brightness.dark,
-              surface: AppConstants.primaryBackground,
-              primary: AppConstants.accentColor,
-              error: AppConstants.errorColor,
-            ),
-            tooltipTheme: TooltipThemeData(
-              triggerMode: SettingsManager().showTooltips 
-                  ? null 
-                  : TooltipTriggerMode.manual,
-              waitDuration: SettingsManager().showTooltips 
-                  ? null 
-                  : const Duration(days: 365),
-            ),
-            scaffoldBackgroundColor: AppConstants.primaryBackground,
-            cardColor: AppConstants.secondaryBackground,
-            dialogTheme: DialogThemeData(
-              backgroundColor: AppConstants.secondaryBackground,
-            ),
-            dividerColor: AppConstants.borderColor,
-            bottomSheetTheme: BottomSheetThemeData(
-              backgroundColor: AppConstants.secondaryBackground,
-            ),
-            appBarTheme: AppBarTheme(
-              backgroundColor: AppConstants.primaryBackground,
-              surfaceTintColor: Colors.transparent,
-            ),
-          ),
-          themeMode: currentThemeMode,
-          home: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle(
-              systemNavigationBarColor: Colors.transparent,
-              systemNavigationBarContrastEnforced: false,
-              systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-              statusBarColor: Colors.transparent,
-              statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-            ),
-            child: Stack(
-              children: [
-                content,
-                if (_showSplash)
-                  AnimatedSplashOverlay(
-                    onComplete: () {
-                      setState(() {
-                        _showSplash = false;
-                      });
-                    },
-                  ),
-              ],
+            themeMode: currentThemeMode,
+            home: AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                systemNavigationBarColor: Colors.transparent,
+                systemNavigationBarContrastEnforced: false,
+                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+              ),
+              child: Stack(
+                children: [
+                  content,
+                  if (_showSplash)
+                    AnimatedSplashOverlay(
+                      onComplete: () {
+                        setState(() {
+                          _showSplash = false;
+                        });
+                      },
+                    ),
+                ],
+              ),
             ),
           ),
         );
