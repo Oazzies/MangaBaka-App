@@ -37,6 +37,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
   late final SeriesService _seriesService;
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
+  bool _isPopping = false;
 
   @override
   LibraryService get libraryService => _libraryService;
@@ -90,7 +91,13 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
           backgroundColor: AppConstants.primaryBackground,
           body: GestureDetector(
             onHorizontalDragUpdate: (details) {
-              if (details.delta.dx > 15) Navigator.of(context).pop();
+              if (!_isPopping && details.delta.dx > 15) {
+                final navigator = Navigator.of(context);
+                if (navigator.canPop()) {
+                  _isPopping = true;
+                  navigator.pop();
+                }
+              }
             },
             child: StreamBuilder<LibraryEntry?>(
               stream: _entryStream,
