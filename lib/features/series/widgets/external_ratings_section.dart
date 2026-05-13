@@ -60,31 +60,58 @@ class ExternalRatingsSection extends StatelessWidget {
   Widget _buildRatingItem(String key, dynamic data) {
     final rating = data['rating_normalized'];
     final url = _getUrl(key, data);
+    final String displayName = _getDisplayName(key);
     
-    return InkWell(
-      onTap: url != null && url.isNotEmpty 
-          ? () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)
-          : null,
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _getFavicon(key),
-            const SizedBox(width: 8),
-            Text(
-              rating.toString(),
-              style: TextStyle(
-                color: AppConstants.textColor,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+    return Tooltip(
+      message: LocalizationService()
+          .translate('open_link')
+          .replaceAll('{name}', displayName),
+      child: InkWell(
+        onTap: url != null && url.isNotEmpty 
+            ? () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)
+            : null,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _getFavicon(key),
+              const SizedBox(width: 8),
+              Text(
+                rating.toString(),
+                style: TextStyle(
+                  color: AppConstants.textColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _getDisplayName(String key) {
+    switch (key) {
+      case 'anilist':
+        return 'AniList';
+      case 'my_anime_list':
+        return 'MyAnimeList';
+      case 'kitsu':
+        return 'Kitsu';
+      case 'anime_planet':
+        return 'Anime-Planet';
+      case 'shikimori':
+        return 'Shikimori';
+      case 'manga_updates':
+        return 'MangaUpdates';
+      case 'anime_news_network':
+        return 'Anime News Network';
+      default:
+        return key[0].toUpperCase() + key.substring(1).replaceAll('_', ' ');
+    }
   }
 
   String? _getUrl(String key, dynamic data) {

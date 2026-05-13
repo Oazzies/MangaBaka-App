@@ -32,7 +32,7 @@ class RatingChip extends StatelessWidget {
       backgroundColor: AppConstants.warningColor.withValues(alpha: 0.1),
       hoverColor: AppConstants.warningColor.withValues(alpha: 0.15),
       onTap: onTap,
-      tooltip: onTap != null ? LocalizationService().translate('update_rating') : null,
+      tooltip: onTap != null ? LocalizationService().translate('show_rating') : null,
     );
   }
 }

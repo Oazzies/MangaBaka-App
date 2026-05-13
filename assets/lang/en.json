@@ -238,6 +238,7 @@
         "copy_title": "Copy Title",
         "update_progress": "Update Progress",
         "update_rating": "Update Rating",
+        "show_rating": "Show Rating",
         "browse_genre": "Browse Genre: {genre}",
         "browse_tag": "Browse Tag: {tag}",
         "browse_author": "Browse Author: {author}",
@@ -300,6 +301,7 @@
         "tap_to_update_progress_subtitle": "Enable updating chapter and volume progress by tapping on metadata chips",
         "tap_to_update_rating": "Tap Chips to Update Rating",
         "tap_to_update_rating_subtitle": "Enable updating your personal rating by tapping on the rating chip",
-        "back_to_top": "Back to top"
+        "back_to_top": "Back to top",
+        "anime_adaptation": "Anime Adaptation"
     }
 }

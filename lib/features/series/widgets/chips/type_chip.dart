@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
 
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
+
 class TypeChip extends StatelessWidget {
   final String type;
   const TypeChip({required this.type, super.key});
@@ -11,6 +13,7 @@ class TypeChip extends StatelessWidget {
     return MiniBadge(
       text: type,
       icon: Icons.category_outlined,
+      tooltip: LocalizationService().translate('type'),
     );
   }
 }

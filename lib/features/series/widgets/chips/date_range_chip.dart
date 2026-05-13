@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/date_utils.dart' as mb_date;
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'date_dialog.dart';
 
 class DateRangeChip extends StatelessWidget {
@@ -34,6 +35,7 @@ class DateRangeChip extends StatelessWidget {
       text: text,
       icon: Icons.calendar_today_outlined,
       onTap: () => _showDateDialog(context),
+      tooltip: LocalizationService().translate('publication_dates'),
     );
   }
 }

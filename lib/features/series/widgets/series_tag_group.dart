@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 
 class SeriesTagGroup extends StatelessWidget {
@@ -82,30 +83,35 @@ class SeriesTagGroup extends StatelessWidget {
 
   Widget _buildTagChip(String tag) {
     final tagParts = tag.split(' > ');
-    return ChipBase(
-      label: Text.rich(
-        TextSpan(
-          children: [
-            if (tagParts.length > 1) ...[
+    return Tooltip(
+      message: LocalizationService()
+          .translate(header.toLowerCase() == 'genres' ? 'browse_genre' : 'browse_tag')
+          .replaceAll(header.toLowerCase() == 'genres' ? '{genre}' : '{tag}', tagParts.last),
+      child: ChipBase(
+        label: Text.rich(
+          TextSpan(
+            children: [
+              if (tagParts.length > 1) ...[
+                TextSpan(
+                  text: '${tagParts.sublist(0, tagParts.length - 1).join(' > ')} > ',
+                  style: TextStyle(
+                    color: AppConstants.textMutedColor,
+                    fontSize: 12,
+                    height: 1.2,
+                  ),
+                ),
+              ],
               TextSpan(
-                text: '${tagParts.sublist(0, tagParts.length - 1).join(' > ')} > ',
+                text: tagParts.last,
                 style: TextStyle(
-                  color: AppConstants.textMutedColor,
-                  fontSize: 12,
+                  color: AppConstants.textColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   height: 1.2,
                 ),
               ),
             ],
-            TextSpan(
-              text: tagParts.last,
-              style: TextStyle(
-                color: AppConstants.textColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                height: 1.2,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

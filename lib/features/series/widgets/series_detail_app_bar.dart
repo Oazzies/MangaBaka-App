@@ -285,25 +285,22 @@ class _HoverableTitleState extends State<_HoverableTitle> {
         child: GestureDetector(
           onTap: widget.onTap,
           behavior: HitTestBehavior.opaque,
-          child: SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Text(
-                widget.text,
-                style: TextStyle(
-                  fontSize: widget.fontSize,
-                  fontWeight: widget.fontWeight,
-                  color: widget.color,
-                  fontStyle: widget.fontStyle,
-                  height: 1.1,
-                  shadows: widget.shadows,
-                  decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
-                  decorationColor: widget.color.withValues(alpha: 0.6),
-                ),
-                maxLines: widget.maxLines,
-                overflow: TextOverflow.ellipsis,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: Text(
+              widget.text,
+              style: TextStyle(
+                fontSize: widget.fontSize,
+                fontWeight: widget.fontWeight,
+                color: widget.color,
+                fontStyle: widget.fontStyle,
+                height: 1.1,
+                shadows: widget.shadows,
+                decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
+                decorationColor: widget.color.withValues(alpha: 0.6),
               ),
+              maxLines: widget.maxLines,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

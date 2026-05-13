@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
 
 class StatusChip extends StatelessWidget {
   final String status;
@@ -35,6 +36,7 @@ class StatusChip extends StatelessWidget {
       icon: icon,
       color: color,
       backgroundColor: bgColor,
+      tooltip: LocalizationService().translate('status'),
     );
   }
 }
