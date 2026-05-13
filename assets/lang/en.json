@@ -259,6 +259,8 @@
         "publication_dates": "Publication Dates",
         "start": "Start",
         "end": "End",
+        "anime_start": "Anime Start",
+        "anime_stop": "Anime Stop",
         "sync_interrupted": "Sync Interrupted",
         "entries_synced": "{count} entries synced",
         "keep_app_open": "Please keep the app open",

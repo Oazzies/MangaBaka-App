@@ -266,6 +266,8 @@
         "rating_dialog_title": "Set Your Rating",
         "rating_unrated": "Sin calificar",
         "external_ratings": "Calificaciones externas",
+        "anime_start": "Inicio del anime",
+        "anime_stop": "Fin del anime",
         "show_more": "Mostrar m\u00e1s",
         "show_less": "Mostrar menos",
         "show_all": "Mostrar todo",
@@ -281,6 +283,10 @@
         "logs_copied": "Logs copied to clipboard",
         "update_chapters": "Actualizar capítulos",
         "update_volumes": "Actualizar tomos",
-        "save": "Guardar"
+        "save": "Guardar",
+        "tap_to_update_progress": "Tocar chips para actualizar progreso",
+        "tap_to_update_progress_subtitle": "Permite actualizar el progreso de capítulos y tomos tocando los chips de metadatos",
+        "tap_to_update_rating": "Tocar chips para actualizar calificación",
+        "tap_to_update_rating_subtitle": "Permite actualizar tu calificación personal tocando el chip de calificación"
     }
 }

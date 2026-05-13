@@ -264,6 +264,8 @@
         "rating_dialog_title": "\u8a55\u4fa1\u3092\u8a2d\u5b9a",
         "rating_unrated": "\u672a\u8a55\u4fa1",
         "external_ratings": "\u5916\u90e8\u8a55\u4fa1",
+        "anime_start": "\u30a2\u30cb\u30e1\u958b\u59cb",
+        "anime_stop": "\u30a2\u30cb\u30e1\u7d42\u4e86",
         "show_more": "\u3082\u3063\u3068\u898b\u308b",
         "show_less": "\u96a0\u3059",
         "show_all": "\u3059\u3079\u3066\u8868\u793a",
@@ -279,6 +281,10 @@
         "logs_copied": "Logs copied to clipboard",
         "update_chapters": "\u30c1\u30e3\u30d7\u30bf\u30fc\u3092\u66f4\u65b0",
         "update_volumes": "\u5dfb\u6570\u3092\u66f4\u65b0",
-        "save": "\u4fdd\u5b58"
+        "save": "\u4fdd\u5b58",
+        "tap_to_update_progress": "チップをタップして進捗を更新",
+        "tap_to_update_progress_subtitle": "メタデータチップをタップして、チャプターと巻の進捗を更新できるようにします",
+        "tap_to_update_rating": "チップをタップして評価を更新",
+        "tap_to_update_rating_subtitle": "評価チップをタップして、個人の評価を更新できるようにします"
     }
 }

@@ -263,6 +263,9 @@
         "an_error_occurred": "Ein Fehler ist aufgetreten.",
         "rating_dialog_title": "Legen Sie Ihre Bewertung fest",
         "rating_unrated": "Ohne Bewertung",
+        "external_ratings": "Externe Bewertungen",
+        "anime_start": "Anime-Start",
+        "anime_stop": "Anime-Stopp",
         "show_more": "Mehr anzeigen",
         "show_less": "Weniger anzeigen",
         "show_all": "Alle anzeigen",
@@ -278,6 +281,10 @@
         "logs_copied": "Logs copied to clipboard",
         "update_chapters": "Kapitel aktualisieren",
         "update_volumes": "B\u00e4nde aktualisieren",
-        "save": "Speichern"
+        "save": "Speichern",
+        "tap_to_update_progress": "Chips zum Aktualisieren des Fortschritts tippen",
+        "tap_to_update_progress_subtitle": "Ermöglicht das Aktualisieren des Kapitel- und Bandfortschritts durch Tippen auf Metadaten-Chips",
+        "tap_to_update_rating": "Chips zum Aktualisieren der Bewertung tippen",
+        "tap_to_update_rating_subtitle": "Ermöglicht das Aktualisieren Ihrer persönlichen Bewertung durch Tippen auf den Bewertungs-Chip"
     }
 }

@@ -24,7 +24,22 @@ class SeriesDetailsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final animeStart = series.anime?['start']?.toString();
+    final animeStop = series.anime?['end']?.toString();
+
     final content = [
+      if (animeStart != null && animeStart.trim().isNotEmpty)
+        WidgetUtils.chipWrap(
+          l10n.translate('anime_start'),
+          animeStart.split('/').map((e) => e.trim()).toList(),
+          color: AppConstants.secondaryBackground,
+        ),
+      if (animeStop != null && animeStop.trim().isNotEmpty)
+        WidgetUtils.chipWrap(
+          l10n.translate('anime_stop'),
+          animeStop.split('/').map((e) => e.trim()).toList(),
+          color: AppConstants.secondaryBackground,
+        ),
       // Genres moved to SeriesDetailScreen
       SeriesGroupedTags(series: series, l10n: l10n),
       if (series.authors.isNotEmpty)

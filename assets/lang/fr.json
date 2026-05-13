@@ -264,6 +264,8 @@
         "rating_dialog_title": "D\u00e9finissez votre note",
         "rating_unrated": "Non noté",
         "external_ratings": "Notes externes",
+        "anime_start": "D\u00e9but de l'anime",
+        "anime_stop": "Fin de l'anime",
         "show_more": "Voir plus",
         "show_less": "Voir moins",
         "show_all": "Tout afficher",
@@ -279,6 +281,10 @@
         "logs_copied": "Logs copied to clipboard",
         "update_chapters": "Mettre à jour les chapitres",
         "update_volumes": "Mettre à jour les tomes",
-        "save": "Enregistrer"
+        "save": "Enregistrer",
+        "tap_to_update_progress": "Appuyez sur les badges pour mettre à jour la progression",
+        "tap_to_update_progress_subtitle": "Permet de mettre à jour la progression des chapitres et des volumes en appuyant sur les badges de métadonnées",
+        "tap_to_update_rating": "Appuyez sur les badges pour mettre à jour la note",
+        "tap_to_update_rating_subtitle": "Permet de mettre à jour votre note personnelle en appuyant sur le badge de notation"
     }
 }
