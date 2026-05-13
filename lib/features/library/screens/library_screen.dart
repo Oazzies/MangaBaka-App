@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/browse/widgets/mb_search_bar.dart';
+import 'package:mangabaka_app/features/library/widgets/library_search_bar.dart';
 import 'package:mangabaka_app/utils/app_shortcuts.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/models/library_sync_status.dart';
@@ -26,6 +26,8 @@ import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/utils/number_utils.dart';
 import 'package:mangabaka_app/features/browse/widgets/filter_chips_row.dart';
 import 'package:mangabaka_app/features/library/screens/library_filter_helper.dart';
+import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/features/browse/utils/browse_helpers.dart';
 
 
 class LibraryScreen extends StatefulWidget {
@@ -120,6 +122,12 @@ class _LibraryScreenState extends State<LibraryScreen>
         _setupStreamAndSync();
       }
     });
+  }
+
+  void _handleResultSelected(AutocompleteSeriesResult result) {
+    _logger.info('Library autocomplete result selected: ${result.title}');
+    final series = BrowseHelpers.convertAutocompleteToSeries(result);
+    _navigateToSeriesDetail(series);
   }
 
   void _onEntriesUpdate(List<LibraryEntry> entries) {
@@ -327,8 +335,10 @@ class _LibraryScreenState extends State<LibraryScreen>
       centerTitle: isLandscape,
       title: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 800),
-        child: MBSearchBar(
+        child: LibrarySearchBar(
           focusNode: _searchFocusNode,
+          entriesStream: _entriesStream,
+          onResultSelected: _handleResultSelected,
           onChanged: (value) {
             setState(() => _query = value);
             _performAutoTabSwitching();

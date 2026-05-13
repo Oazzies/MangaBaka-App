@@ -6,18 +6,20 @@ class SearchSuggestionsPanel extends StatelessWidget {
   final List<AutocompleteSeriesResult> results;
   final ValueChanged<AutocompleteSeriesResult> onResultTapped;
   final bool showSuggestions;
+  final int selectedIndex;
 
   const SearchSuggestionsPanel({
     super.key,
     required this.results,
     required this.onResultTapped,
     required this.showSuggestions,
+    this.selectedIndex = -1,
   });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
       alignment: Alignment.topCenter,
       child: showSuggestions ? _buildSuggestionsList() : const SizedBox.shrink(),
@@ -28,91 +30,159 @@ class SearchSuggestionsPanel extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppConstants.secondaryBackground,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          Divider(
-            height: 1,
-            thickness: 0.5,
-            color: AppConstants.borderColor.withValues(alpha: 0.4),
-            indent: 16,
-            endIndent: 16,
-          ),
-          ...List.generate(results.length, (index) {
-            final result = results[index];
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildResultTile(result),
-                if (index < results.length - 1)
-                  Divider(
-                    height: 1,
-                    thickness: 0.5,
-                    color: AppConstants.borderColor.withValues(alpha: 0.2),
-                    indent: 68,
-                    endIndent: 16,
-                  ),
-              ],
-            );
-          }),
-          const SizedBox(height: 8),
-        ],
+        children: List.generate(results.length, (index) {
+          final result = results[index];
+          return _buildResultTile(
+            result,
+            index == selectedIndex,
+            isFirst: index == 0,
+            isLast: index == results.length - 1,
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildResultTile(AutocompleteSeriesResult result) {
+  Widget _buildResultTile(
+    AutocompleteSeriesResult result,
+    bool isSelected, {
+    bool isFirst = false,
+    bool isLast = false,
+  }) {
+    final borderRadius = BorderRadius.vertical(
+      top: isFirst ? const Radius.circular(24) : Radius.zero,
+      bottom: isLast ? const Radius.circular(24) : Radius.zero,
+    );
+
     return Material(
-      color: Colors.transparent,
+      color: isSelected ? AppConstants.accentColor.withValues(alpha: 0.12) : Colors.transparent,
+      borderRadius: borderRadius,
       child: InkWell(
         onTap: () => onResultTapped(result),
         splashColor: AppConstants.accentColor.withValues(alpha: 0.08),
         highlightColor: AppConstants.accentColor.withValues(alpha: 0.04),
+        borderRadius: borderRadius,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: EdgeInsets.only(
+            left: 14,
+            right: 14,
+            top: isFirst ? 14 : 9,
+            bottom: isLast ? 14 : 9,
+          ),
           child: Row(
             children: [
+              // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: SizedBox(
                   width: 36,
-                  height: 50,
+                  height: 52,
                   child: result.thumbnailUrl.isNotEmpty
                       ? Image.network(
                           result.thumbnailUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _buildThumbnailPlaceholder(),
+                          errorBuilder: (_, __, ___) => _buildThumbnailPlaceholder(),
                         )
                       : _buildThumbnailPlaceholder(),
                 ),
               ),
               const SizedBox(width: 12),
+              // Title + metadata
               Expanded(
-                child: Text(
-                  result.title,
-                  style: TextStyle(
-                    color: AppConstants.textColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      result.title,
+                      style: TextStyle(
+                        color: AppConstants.textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (result.type.isNotEmpty) ...[
+                          _buildTypeBadge(result.type),
+                          const SizedBox(width: 6),
+                        ],
+                        if (result.year != null)
+                          Text(
+                            '${result.year}',
+                            style: TextStyle(
+                              color: AppConstants.textMutedColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        if (result.genres.isNotEmpty && (result.type.isNotEmpty || result.year != null))
+                          Text(
+                            '  ·  ${result.genres.take(2).map((g) => g.isNotEmpty ? g[0].toUpperCase() + g.substring(1) : g).join(', ')}',
+                            style: TextStyle(
+                              color: AppConstants.textMutedColor.withValues(alpha: 0.7),
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: 8),
               Icon(
                 Icons.north_west_rounded,
-                size: 16,
-                color: AppConstants.textMutedColor.withValues(alpha: 0.4),
+                size: 15,
+                color: AppConstants.textMutedColor.withValues(alpha: 0.35),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeBadge(String type) {
+    final colors = {
+      'manga': const Color(0xFF4A90D9),
+      'manhwa': const Color(0xFF7B68EE),
+      'manhua': const Color(0xFFE8A838),
+      'novel': const Color(0xFF50C878),
+      'oel': const Color(0xFFFF6B6B),
+    };
+    final color = colors[type.toLowerCase()] ?? AppConstants.textMutedColor;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        type.toUpperCase(),
+        style: TextStyle(
+          color: color,
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -123,8 +193,8 @@ class SearchSuggestionsPanel extends StatelessWidget {
       color: AppConstants.tertiaryBackground,
       child: Icon(
         Icons.menu_book_rounded,
-        color: AppConstants.textMutedColor,
-        size: 18,
+        color: AppConstants.textMutedColor.withValues(alpha: 0.5),
+        size: 16,
       ),
     );
   }

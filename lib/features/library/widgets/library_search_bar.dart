@@ -1,58 +1,56 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/library/services/library_autocomplete_service.dart';
+import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/widgets/search_filter_bottom_sheet.dart';
-import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
-import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
-import 'package:mangabaka_app/utils/settings/settings_manager.dart';
-import 'package:mangabaka_app/utils/localization/localization_service.dart';
-import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/browse/widgets/search_suggestions_panel.dart';
 import 'package:mangabaka_app/features/browse/widgets/mb_search_bar_suffix.dart';
+import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
+import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 
-class MBSearchBar extends StatefulWidget {
+class LibrarySearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
-  final ValueChanged<String>? onSubmitted;
   final SearchFilters? initialFilters;
   final ValueChanged<SearchFilters>? onFilterApplied;
-  final TextEditingController? controller;
   final FocusNode? focusNode;
-  final VoidCallback? onScanTap;
+  final Stream<List<LibraryEntry>>? entriesStream;
   final ValueChanged<AutocompleteSeriesResult>? onResultSelected;
 
-  const MBSearchBar({
+  const LibrarySearchBar({
     super.key,
     required this.onChanged,
-    this.onSubmitted,
     this.initialFilters,
     this.onFilterApplied,
-    this.controller,
     this.focusNode,
-    this.onScanTap,
+    this.entriesStream,
     this.onResultSelected,
   });
 
   @override
-  State<MBSearchBar> createState() => _MBSearchBarState();
+  State<LibrarySearchBar> createState() => _LibrarySearchBarState();
 }
 
-class _MBSearchBarState extends State<MBSearchBar> {
-  late final GhostTextEditingController _controller;
+class _LibrarySearchBarState extends State<LibrarySearchBar> {
+  final GhostTextEditingController _controller = GhostTextEditingController();
   late final FocusNode _focusNode;
-  final SeriesAutocompleteService _service = SeriesAutocompleteService();
+  final LibraryAutocompleteService _autocomplete = LibraryAutocompleteService();
   late SearchFilters _currentFilters;
 
-  List<AutocompleteSeriesResult> _results = [];
+  List<LibraryEntry> _allEntries = [];
+  List<AutocompleteSeriesResult> _suggestions = [];
   bool _showSuggestions = false;
   String _ghostSuffix = '';
   int _selectedIndex = -1;
   String _originalQuery = '';
   bool _isNavigatingWithArrows = false;
   
-  bool _isAutocompleteSuppressed = false;
   String _suppressedQuery = '';
+  bool _isAutocompleteSuppressed = false;
   
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
@@ -60,29 +58,30 @@ class _MBSearchBarState extends State<MBSearchBar> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller is GhostTextEditingController 
-        ? widget.controller as GhostTextEditingController 
-        : GhostTextEditingController();
     _focusNode = widget.focusNode ?? FocusNode();
     _currentFilters = widget.initialFilters ?? SearchFilters();
     _controller.addListener(_onControllerChanged);
     _focusNode.addListener(_onFocusChange);
     _focusNode.onKeyEvent = _handleKeyEvent;
+
+    widget.entriesStream?.listen((entries) {
+      if (mounted) _allEntries = entries;
+    });
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
 
     final query = _controller.text;
-    final hasSuggestions = _results.isNotEmpty && _showSuggestions;
+    final hasSuggestions = _suggestions.isNotEmpty && _showSuggestions;
 
-    // 1. Navigation (Up/Down) - now fills the search bar
+    // 1. Navigation
     if (hasSuggestions) {
       if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
         _isNavigatingWithArrows = true;
         setState(() {
-          _selectedIndex = (_selectedIndex + 1) % _results.length;
-          _controller.text = _results[_selectedIndex].title;
+          _selectedIndex = (_selectedIndex + 1) % _suggestions.length;
+          _controller.text = _suggestions[_selectedIndex].title;
           _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
           _ghostSuffix = '';
           _controller.ghostSuffix = '';
@@ -99,7 +98,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
             _controller.text = _originalQuery;
           } else {
             _selectedIndex--;
-            _controller.text = _results[_selectedIndex].title;
+            _controller.text = _suggestions[_selectedIndex].title;
           }
           _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
           _ghostSuffix = '';
@@ -125,10 +124,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
       }
     }
 
-    // 2. Selection (Enter) - handled by onSubmitted
+    // 2. Selection handled by onSubmitted
     if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter) {
-      // If we have a selection, we'll let onSubmitted handle it using the current text
-      return KeyEventResult.ignored; 
+      return KeyEventResult.ignored;
     }
 
     // 3. Rejection (Backspace)
@@ -149,7 +147,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
       return KeyEventResult.handled;
     }
 
-    // 4. Ghost text acceptance (Tab/ArrowRight)
+    // 4. Ghost text
     if (_ghostSuffix.isNotEmpty && _selectedIndex == -1) {
       if (event.logicalKey == LogicalKeyboardKey.tab ||
           (event.logicalKey == LogicalKeyboardKey.arrowRight &&
@@ -163,7 +161,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   @override
-  void didUpdateWidget(MBSearchBar oldWidget) {
+  void didUpdateWidget(LibrarySearchBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialFilters != oldWidget.initialFilters && widget.initialFilters != null) {
       setState(() => _currentFilters = widget.initialFilters!);
@@ -174,10 +172,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
   void dispose() {
     _hideOverlay();
     _controller.removeListener(_onControllerChanged);
-    if (widget.controller == null) _controller.dispose();
+    _controller.dispose();
     _focusNode.removeListener(_onFocusChange);
     if (widget.focusNode == null) _focusNode.dispose();
-    _service.dispose();
     super.dispose();
   }
 
@@ -185,38 +182,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
     setState(() {});
   }
 
-  void _updateGhostText(List<AutocompleteSeriesResult> results) {
-    if (_isAutocompleteSuppressed || _selectedIndex != -1) {
-      _ghostSuffix = '';
-      _controller.ghostSuffix = '';
-      return;
-    }
-    final query = _controller.text;
-    if (results.isEmpty || query.isEmpty || query == _suppressedQuery) {
-      _ghostSuffix = '';
-      _controller.ghostSuffix = '';
-      return;
-    }
-    
-    String? bestGhost;
-    for (var result in results) {
-      for (var t in result.allTitles) {
-        final tLower = t.toLowerCase();
-        final qLower = query.toLowerCase();
-        if (tLower.startsWith(qLower) && t.length > query.length) {
-          bestGhost = t.substring(query.length);
-          break;
-        }
-      }
-      if (bestGhost != null) break;
-    }
-
-    _ghostSuffix = bestGhost ?? '';
-    _controller.ghostSuffix = bestGhost ?? '';
-    _controller.ghostColor = AppConstants.textMutedColor.withValues(alpha: 0.5);
-  }
-
-  void _onSearchChanged(String query) {
+  void _onTextChanged(String query) {
     if (_isNavigatingWithArrows) return;
 
     _originalQuery = query;
@@ -227,54 +193,62 @@ class _MBSearchBarState extends State<MBSearchBar> {
       _suppressedQuery = '';
       _selectedIndex = -1;
     }
-    
     if (!_suppressedQuery.startsWith(query)) {
       _suppressedQuery = '';
     }
-
-    if (!SettingsManager().autoSuggestBrowse) {
-      _setSuggestions([]);
-      return;
-    }
-    if (query.trim().length < SeriesAutocompleteService.minQueryLength) {
-      _setSuggestions([]);
-      return;
-    }
-    _service.search(
-      query,
-      onResults: (results) {
-        if (!mounted) return;
-        
-        final queryLower = query.toLowerCase();
-        results.sort((a, b) {
-          final aLower = a.title.toLowerCase();
-          final bLower = b.title.toLowerCase();
-          
-          bool aExact = aLower == queryLower;
-          bool bExact = bLower == queryLower;
-          if (aExact && !bExact) return -1;
-          if (!aExact && bExact) return 1;
-          
-          bool aStarts = aLower.startsWith(queryLower);
-          bool bStarts = bLower.startsWith(queryLower);
-          if (aStarts && !bStarts) return -1;
-          if (!aStarts && bStarts) return 1;
-          
-          return a.title.length.compareTo(b.title.length);
-        });
-
-        _setSuggestions(results);
-      },
-      onError: (_) {},
-    );
+    _updateSuggestions(query);
   }
 
-  void _setSuggestions(List<AutocompleteSeriesResult> results) {
+  void _updateSuggestions(String query) {
+    if (query.trim().isEmpty || query == _suppressedQuery) {
+      setState(() {
+        _suggestions = [];
+        _showSuggestions = false;
+        _ghostSuffix = '';
+        _controller.ghostSuffix = '';
+        _selectedIndex = -1;
+      });
+      _updateOverlay();
+      return;
+    }
+
+    final results = _autocomplete.search(query, _allEntries);
+    
+    final queryLower = query.toLowerCase();
+    results.sort((a, b) {
+      final aLower = a.title.toLowerCase();
+      final bLower = b.title.toLowerCase();
+      
+      bool aExact = aLower == queryLower;
+      bool bExact = bLower == queryLower;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+      
+      return a.title.length.compareTo(b.title.length);
+    });
+
+    String? ghost;
+    if (results.isNotEmpty && !_isAutocompleteSuppressed) {
+      for (var result in results) {
+        for (var t in result.allTitles) {
+          final tLower = t.toLowerCase();
+          final qLower = query.toLowerCase();
+          if (tLower.startsWith(qLower) && t.length > query.length) {
+            ghost = t.substring(query.length);
+            break;
+          }
+        }
+        if (ghost != null) break;
+      }
+    }
+
     setState(() {
-      _results = results;
+      _suggestions = results;
       _showSuggestions = results.isNotEmpty && _focusNode.hasFocus;
+      _ghostSuffix = ghost ?? '';
+      _controller.ghostSuffix = ghost ?? '';
+      _controller.ghostColor = AppConstants.textMutedColor.withValues(alpha: 0.5);
       _selectedIndex = -1;
-      _updateGhostText(results);
     });
     _updateOverlay();
   }
@@ -312,8 +286,8 @@ class _MBSearchBarState extends State<MBSearchBar> {
             elevation: 8,
             color: Colors.transparent,
             child: SearchSuggestionsPanel(
-              results: _results,
-              onResultTapped: _onResultTapped,
+              results: _suggestions,
+              onResultTapped: _onSuggestionTapped,
               showSuggestions: true,
               selectedIndex: _selectedIndex,
             ),
@@ -323,26 +297,32 @@ class _MBSearchBarState extends State<MBSearchBar> {
     );
   }
 
-  void _onResultTapped(AutocompleteSeriesResult result) {
+  void _onSuggestionTapped(AutocompleteSeriesResult result) {
     _isNavigatingWithArrows = true;
     _controller.text = result.title;
     _originalQuery = result.title;
     _ghostSuffix = '';
     _controller.ghostSuffix = '';
-    _setSuggestions([]);
-    _focusNode.unfocus();
+    widget.onChanged(result.title);
     _isNavigatingWithArrows = false;
+    setState(() {
+      _suggestions = [];
+      _showSuggestions = false;
+      _selectedIndex = -1;
+    });
+    _updateOverlay();
+    _focusNode.unfocus();
     widget.onResultSelected?.call(result);
   }
 
   void _acceptGhostText() {
-    if (_ghostSuffix.isEmpty || _results.isEmpty) return;
+    if (_ghostSuffix.isEmpty || _suggestions.isEmpty) return;
     
     AutocompleteSeriesResult? matchedResult;
     String? matchedTitle;
     
     final query = _controller.text;
-    for (var result in _results) {
+    for (var result in _suggestions) {
       for (var t in result.allTitles) {
         if (t.toLowerCase().startsWith(query.toLowerCase()) && t.substring(query.length) == _ghostSuffix) {
           matchedResult = result;
@@ -362,8 +342,13 @@ class _MBSearchBarState extends State<MBSearchBar> {
       _originalQuery = matchedTitle;
       _ghostSuffix = '';
       _controller.ghostSuffix = '';
-      _setSuggestions([]);
       _isNavigatingWithArrows = false;
+      setState(() {
+        _suggestions = [];
+        _showSuggestions = false;
+        _selectedIndex = -1;
+      });
+      _updateOverlay();
     }
   }
 
@@ -371,12 +356,18 @@ class _MBSearchBarState extends State<MBSearchBar> {
     _isNavigatingWithArrows = true;
     _controller.clear();
     _originalQuery = '';
-    _setSuggestions([]);
     _suppressedQuery = '';
     _isAutocompleteSuppressed = false;
     _selectedIndex = -1;
     _isNavigatingWithArrows = false;
     widget.onChanged('');
+    setState(() {
+      _suggestions = [];
+      _showSuggestions = false;
+      _ghostSuffix = '';
+      _controller.ghostSuffix = '';
+    });
+    _updateOverlay();
   }
 
   void _onFocusChange() {
@@ -392,7 +383,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
           _updateOverlay();
         }
       });
-    } else if (_results.isNotEmpty && SettingsManager().autoSuggestBrowse) {
+    } else if (_suggestions.isNotEmpty) {
       setState(() {
         _isAutocompleteSuppressed = false;
         _showSuggestions = true;
@@ -406,20 +397,17 @@ class _MBSearchBarState extends State<MBSearchBar> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([SettingsManager(), LocalizationService(), ThemeManager()]),
+      listenable: Listenable.merge([LocalizationService(), ThemeManager()]),
       builder: (context, _) {
-        final autoSuggest = SettingsManager().autoSuggestBrowse;
-        final effectiveShowSuggestions = _showSuggestions && autoSuggest;
-
         return CompositedTransformTarget(
           link: _layerLink,
-          child: _buildTextField(effectiveShowSuggestions, autoSuggest),
+          child: _buildTextField(),
         );
       },
     );
   }
 
-  Widget _buildTextField(bool showSuggestions, bool autoSuggest) {
+  Widget _buildTextField() {
     final l10n = LocalizationService();
 
     final baseStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -445,7 +433,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
         suffixIcon: MBSearchBarSuffix(
           controllerText: _controller.text,
           onClear: _clear,
-          onScanTap: widget.onScanTap,
+          onScanTap: null,
           onFilterTap: _openFilterSheet,
           currentFilters: _currentFilters,
         ),
@@ -466,21 +454,22 @@ class _MBSearchBarState extends State<MBSearchBar> {
         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
       style: baseStyle,
-      onChanged: _onSearchChanged,
+      onChanged: _onTextChanged,
       onSubmitted: (text) {
         final ghostResult = _getMatchedResultForGhost();
         if (ghostResult != null) {
-          _onResultTapped(ghostResult);
+          _onSuggestionTapped(ghostResult);
           return;
         }
 
-        if (_selectedIndex != -1 && _results.isNotEmpty) {
-          _onResultTapped(_results[_selectedIndex]);
+        if (_selectedIndex != -1 && _suggestions.isNotEmpty) {
+          _onSuggestionTapped(_suggestions[_selectedIndex]);
           return;
         }
 
-        _setSuggestions([]);
-        widget.onSubmitted?.call(text);
+        setState(() => _showSuggestions = false);
+        _updateOverlay();
+        widget.onChanged(text);
       },
       textInputAction: TextInputAction.search,
     );
@@ -532,9 +521,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   AutocompleteSeriesResult? _getMatchedResultForGhost() {
-    if (_ghostSuffix.isEmpty || _results.isEmpty) return null;
+    if (_ghostSuffix.isEmpty || _suggestions.isEmpty) return null;
     final query = _controller.text;
-    for (var result in _results) {
+    for (var result in _suggestions) {
       for (var t in result.allTitles) {
         if (t.toLowerCase().startsWith(query.toLowerCase()) &&
             t.substring(query.length) == _ghostSuffix) {
