@@ -132,11 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
   }
 
   String _getPossessiveName(String name) {
-    final lang = LocalizationService().currentLanguage;
-    if (lang == 'es') {
-      return name;
-    }
-    return "$name's";
+    return LocalizationService().formatPossessive(name);
   }
 
   @override

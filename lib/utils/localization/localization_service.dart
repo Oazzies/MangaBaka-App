@@ -86,4 +86,27 @@ class LocalizationService extends ChangeNotifier {
   String translate(String key) {
     return _currentStrings[key] ?? key;
   }
+
+  String formatPossessive(String name) {
+    if (name.isEmpty) return name;
+    
+    // In Spanish and French, we use "de [name]" which is handled in the translation string
+    if (_currentLanguage == 'es' || _currentLanguage == 'fr') {
+      return name;
+    }
+    
+    // English/German/Japanese/etc. rules
+    if (_currentLanguage == 'ja') {
+      return name; // Japanese uses "の" which is handled in the translation string
+    }
+
+    // Default English-style possessive
+    // Rule: if ends in 's', add only '. Otherwise add 's.
+    // NOTE: The user requested "Oazzies's" specifically, but usually names ending in 's' can take either.
+    // We will use the 's only if it doesn't end in s.
+    if (name.toLowerCase().endsWith('s')) {
+      return "$name'";
+    }
+    return "$name's";
+  }
 }

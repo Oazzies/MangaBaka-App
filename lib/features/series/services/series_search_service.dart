@@ -158,4 +158,87 @@ class SeriesSearchService {
       );
     }
   }
+
+  Future<SeriesSearchResult> searchSeries(
+    String query, {
+    String? sortBy,
+    String? type,
+    Map<String, dynamic>? extraParams,
+  }) async {
+    final queryParams = <String, String>{};
+    if (query.isNotEmpty) {
+      queryParams['q'] = query;
+    }
+    if (sortBy != null && sortBy.isNotEmpty) {
+      queryParams['sort_by'] = sortBy;
+    }
+    if (type != null && type.isNotEmpty) {
+      queryParams['type'] = type;
+    }
+
+    final contentPrefs = SettingsManager().contentPreferences;
+    
+    // Build the final URI
+    final finalQueryParams = <String, dynamic>{
+      ...queryParams,
+      'content_rating': contentPrefs,
+    };
+
+    if (extraParams != null) {
+      finalQueryParams.addAll(extraParams);
+    }
+
+    final uri = Uri.parse(_baseUrl).replace(
+      queryParameters: finalQueryParams.map((key, value) {
+        if (value is List) {
+          return MapEntry(key, value.map((e) => e.toString()).toList());
+        }
+        return MapEntry(key, value.toString());
+      }),
+    );
+
+    _logger.info('Performing series search. URI: $uri');
+
+    try {
+      final response = await _client
+          .get(uri, headers: {'User-Agent': AppConstants.userAgent})
+          .timeout(
+            Duration(seconds: AppConstants.networkTimeoutSeconds),
+            onTimeout: () =>
+                throw TimeoutException('Series search request timed out'),
+          );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final List data = json['data'] ?? [];
+        final total = json['total'] as int? ?? 0;
+        
+        final results = data
+            .map((item) => Series.fromJson(item as Map<String, dynamic>))
+            .toList();
+        
+        for (var series in results) {
+          _seriesService.precacheSeries(series);
+        }
+        
+        return SeriesSearchResult(series: results, total: total);
+      } else {
+        throw ApiException(
+          message: 'Failed to search series',
+          statusCode: response.statusCode,
+          responseBody: response.body,
+        );
+      }
+    } catch (e) {
+      _logger.severe('Error during series search: $e');
+      rethrow;
+    }
+  }
+}
+
+class SeriesSearchResult {
+  final List<Series> series;
+  final int total;
+
+  SeriesSearchResult({required this.series, required this.total});
 }

@@ -10,19 +10,27 @@ import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart'
 import 'package:mangabaka_app/features/series/services/series_id_service.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 
+import 'package:mangabaka_app/features/browse/models/browse_type.dart';
+import 'package:mangabaka_app/features/publisher/models/publisher.dart';
+import 'package:mangabaka_app/features/publisher/widgets/publisher_list_item.dart';
+import 'package:mangabaka_app/features/staff/models/staff.dart';
+import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
+
 class BrowseContent extends StatelessWidget {
-  final List<Series> searchResults;
+  final List<dynamic> searchResults;
+  final BrowseType browseType;
   final bool isLoading;
   final bool isLoadingMore;
   final String? error;
   final ScrollController scrollController;
   final VoidCallback onRetry;
   final Function(Series) onNavigateToDetail;
-  final Function(String, String, {String? type}) onNavigateToResults;
+  final Function(String, String, {String? type, String? staff, String? publisher}) onNavigateToResults;
 
   const BrowseContent({
     super.key,
     required this.searchResults,
+    required this.browseType,
     required this.isLoading,
     required this.isLoadingMore,
     required this.error,
@@ -33,11 +41,15 @@ class BrowseContent extends StatelessWidget {
   });
 
   Widget _buildLoadingState() {
-    final settings = SettingsManager();
-    final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
-    final isGrid = activeStyle.isGrid;
+    if (browseType == BrowseType.series) {
+      final settings = SettingsManager();
+      final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
+      final isGrid = activeStyle.isGrid;
+      
+      return SeriesListSkeleton(isGrid: isGrid);
+    }
     
-    return SeriesListSkeleton(isGrid: isGrid);
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _buildErrorState(LocalizationService l10n) {
@@ -60,6 +72,18 @@ class BrowseContent extends StatelessWidget {
   }
 
   Widget _buildResultsList(LocalizationService l10n) {
+    if (browseType == BrowseType.series) {
+      return _buildSeriesResults(l10n);
+    } else if (browseType == BrowseType.publishers) {
+      return _buildPublisherResults(l10n);
+    } else if (browseType == BrowseType.staff) {
+      return _buildStaffResults(l10n);
+    } else {
+      return Center(child: Text(l10n.translate('no_results')));
+    }
+  }
+
+  Widget _buildSeriesResults(LocalizationService l10n) {
     return ListenableBuilder(
       listenable: Listenable.merge([SettingsManager(), l10n]),
       builder: (context, _) {
@@ -84,7 +108,7 @@ class BrowseContent extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final series = searchResults[index];
+              final series = searchResults[index] as Series;
               return MouseRegion(
                 onEnter: (_) => seriesService.fetchSeries(series.id),
                 child: InkWell(
@@ -107,7 +131,7 @@ class BrowseContent extends StatelessWidget {
               );
             }
 
-            final series = searchResults[index];
+            final series = searchResults[index] as Series;
             return MouseRegion(
               onEnter: (_) => seriesService.fetchSeries(series.id),
               child: InkWell(
@@ -116,6 +140,50 @@ class BrowseContent extends StatelessWidget {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  Widget _buildPublisherResults(LocalizationService l10n) {
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      itemCount: searchResults.length + (isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == searchResults.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final publisher = searchResults[index] as Publisher;
+        return PublisherListItem(
+          publisher: publisher,
+          onTap: () => onNavigateToResults(publisher.name, 'name_asc', publisher: publisher.name),
+        );
+      },
+    );
+  }
+
+  Widget _buildStaffResults(LocalizationService l10n) {
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      itemCount: searchResults.length + (isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == searchResults.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final staff = searchResults[index] as Staff;
+        return StaffListItem(
+          staff: staff,
+          onTap: () => onNavigateToResults(staff.name, 'popularity_desc', staff: staff.name),
         );
       },
     );
@@ -130,9 +198,35 @@ class BrowseContent extends StatelessWidget {
         
         Widget content;
         if (searchResults.isEmpty && !isLoading && error == null) {
-          content = BrowseShortcuts(key: const ValueKey('shortcuts'), onNavigate: onNavigateToResults);
+          if (browseType == BrowseType.series) {
+            content = BrowseShortcuts(key: const ValueKey('shortcuts'), onNavigate: onNavigateToResults);
+          } else {
+            content = Center(
+              key: const ValueKey('search_prompt'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    browseType == BrowseType.publishers 
+                      ? Icons.business 
+                      : (browseType == BrowseType.staff ? Icons.people : Icons.search),
+                    size: 64,
+                    color: AppConstants.textMutedColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.translate('no_results'),
+                    style: TextStyle(
+                      color: AppConstants.textMutedColor,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
         } else if (isLoading && searchResults.isEmpty) {
-          content = _buildLoadingState(); // SeriesListSkeleton already has internal keys often
+          content = _buildLoadingState();
         } else if (error != null && searchResults.isEmpty) {
           content = _buildErrorState(l10n);
         } else if (searchResults.isNotEmpty) {

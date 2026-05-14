@@ -9,7 +9,7 @@ import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 import 'package:mangabaka_app/features/news/services/news_service.dart';
-
+import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 final getIt = GetIt.instance;
 
 void setupServiceLocator() {
@@ -33,6 +33,7 @@ void setupServiceLocator() {
   );
 
   getIt.registerLazySingleton<NewsService>(() => NewsService());
+  getIt.registerLazySingleton<PublisherSearchService>(() => PublisherSearchService());
 }
 
 Future<void> resetServiceLocator() async {

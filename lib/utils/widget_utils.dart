@@ -53,7 +53,7 @@ class WidgetUtils {
     );
   }
 
-  static Widget chipWrap(String label, List<String> items, {Color? color}) {
+  static Widget chipWrap(String label, List<String> items, {Color? color, Function(String)? onChipTap}) {
     if (items.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,6 +75,7 @@ class WidgetUtils {
               .map((e) => ChipBase(
                     backgroundColor: color,
                     label: SelectableText(e),
+                    onTap: onChipTap != null ? () => onChipTap(e) : null,
                   ))
               .toList(),
         ),

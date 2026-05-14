@@ -12,6 +12,8 @@ class SeriesDetailsGrid extends StatelessWidget {
   final bool isWide;
   final LocalizationService l10n;
   final double horizontalPadding;
+  final Function(String)? onAuthorTap;
+  final Function(String)? onPublisherTap;
 
   const SeriesDetailsGrid({
     super.key,
@@ -20,6 +22,8 @@ class SeriesDetailsGrid extends StatelessWidget {
     this.isWide = false,
     required this.l10n,
     this.horizontalPadding = 16.0,
+    this.onAuthorTap,
+    this.onPublisherTap,
   });
 
   @override
@@ -47,18 +51,21 @@ class SeriesDetailsGrid extends StatelessWidget {
           l10n.translate('authors'),
           series.authors,
           color: AppConstants.secondaryBackground,
+          onChipTap: onAuthorTap,
         ),
       if (series.artists.isNotEmpty)
         WidgetUtils.chipWrap(
           l10n.translate('artists'),
           series.artists,
           color: AppConstants.secondaryBackground,
+          onChipTap: onAuthorTap,
         ),
       if (series.publishers.isNotEmpty)
         WidgetUtils.chipWrap(
           l10n.translate('publishers'),
           series.publishers,
           color: AppConstants.secondaryBackground,
+          onChipTap: onPublisherTap,
         ),
       if (enrichedLinks != null || series.links.isNotEmpty) ...[
         const SizedBox(height: 8),

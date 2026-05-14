@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/app_shortcuts.dart';
 import 'package:mangabaka_app/features/browse/widgets/mb_search_bar.dart';
 import 'package:mangabaka_app/features/browse/widgets/browse_content.dart';
@@ -16,8 +17,9 @@ import 'package:mangabaka_app/features/browse/utils/browse_helpers.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
-import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/features/browse/widgets/filter_chips_row.dart';
+import 'package:mangabaka_app/features/browse/widgets/browse_type_tabs.dart';
+import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -44,23 +46,39 @@ class _BrowseScreenState extends State<BrowseScreen> {
     super.dispose();
   }
 
-  void _navigateToBrowseResults(String header, String sortBy, {String? type}) {
-    _logger.info('Navigating to BrowseResults: header=$header, sortBy=$sortBy, type=$type');
-    final double? randomSeed = sortBy == 'random' ? BrowseController.generateRandomSeed() : null;
+  void _navigateToBrowseResults(
+    String header,
+    String sortBy, {
+    String? type,
+    String? staff,
+    String? publisher,
+  }) {
+    _logger.info(
+      'Navigating to BrowseResults: header=$header, sortBy=$sortBy, type=$type, staff=$staff, publisher=$publisher',
+    );
+    final double? randomSeed = sortBy == 'random'
+        ? BrowseController.generateRandomSeed()
+        : null;
 
     Navigator.push(
       context,
-      AppTransitions.slideRight(BrowseResultsScreen(
-        sortType: header,
-        sortBy: sortBy,
-        type: type,
-        randomSeed: randomSeed,
-      )),
+      AppTransitions.slideRight(
+        BrowseResultsScreen(
+          sortType: header,
+          sortBy: sortBy,
+          type: type,
+          staff: staff,
+          publisher: publisher,
+          randomSeed: randomSeed,
+        ),
+      ),
     );
   }
 
   void _navigateToDetail(Series series) {
-    _logger.info('Navigating to SeriesDetail: ${series.title} (ID: ${series.id})');
+    _logger.info(
+      'Navigating to SeriesDetail: ${series.title} (ID: ${series.id})',
+    );
     Navigator.push(
       context,
       AppTransitions.slideUp(SeriesDetailScreen(series: series)),
@@ -80,7 +98,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(LocalizationService().translate('camera_permission_denied')),
+            content: Text(
+              LocalizationService().translate('camera_permission_denied'),
+            ),
             action: SnackBarAction(
               label: LocalizationService().translate('settings'),
               onPressed: () => openAppSettings(),
@@ -94,7 +114,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
         _logger.warning('Camera permission denied (status: $status)');
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(LocalizationService().translate('camera_permission_denied'))),
+          SnackBar(
+            content: Text(
+              LocalizationService().translate('camera_permission_denied'),
+            ),
+          ),
         );
         return;
       }
@@ -114,15 +138,21 @@ class _BrowseScreenState extends State<BrowseScreen> {
       if (!mounted) return;
 
       if (errorKey != null) {
-        _logger.warning('Barcode scan handling failed with error key: $errorKey');
+        _logger.warning(
+          'Barcode scan handling failed with error key: $errorKey',
+        );
         String message = LocalizationService().translate(errorKey);
         if (errorKey == 'no_series_found_for') {
           final title = _controller.searchController.text;
           message = message.replaceAll('{title}', title);
         }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       } else if (_controller.searchResults.isNotEmpty) {
-        _logger.info('Successfully handled barcode scan, navigating to first result');
+        _logger.info(
+          'Successfully handled barcode scan, navigating to first result',
+        );
         _navigateToDetail(_controller.searchResults.first);
       }
     } else {
@@ -139,7 +169,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([LocalizationService(), ThemeManager(), _controller]),
+      listenable: Listenable.merge([
+        LocalizationService(),
+        ThemeManager(),
+        _controller,
+      ]),
       builder: (context, _) {
         return Actions(
           actions: <Type, Action<Intent>>{
@@ -159,59 +193,91 @@ class _BrowseScreenState extends State<BrowseScreen> {
           child: Scaffold(
             backgroundColor: AppConstants.primaryBackground,
             body: WidgetUtils.responsiveConstraint(
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: AppConstants.horizontalPadding,
-                  right: AppConstants.horizontalPadding,
-                  top: AppConstants.verticalPadding,
-                  bottom: 8.0,
-                ),
-                child: Column(
-                  children: [
-                    MBSearchBar(
-                      focusNode: _searchFocusNode,
-                      controller: _controller.searchController,
-                      initialFilters: _controller.currentFilters,
-                      onScanTap: _handleBarcodeScan,
-                      onResultSelected: _handleResultSelected,
-                      onChanged: _controller.updateSearchQuery,
-                      onSubmitted: (_) => _controller.searchSeries(),
-                      onFilterApplied: _controller.updateFilters,
-                    ),
-                    const SizedBox(height: 12),
-                    FilterChipsRow(
-                      filters: _controller.currentFilters,
-                      onFiltersChanged: _controller.updateFilters,
-                    ),
-                    BrowseContent(
-                      searchResults: _controller.searchResults,
-                      isLoading: _controller.isLoading,
-                      isLoadingMore: _controller.isLoadingMore,
-                      error: _controller.error,
-                      scrollController: _controller.scrollController,
-                      onRetry: _controller.searchSeries,
-                      onNavigateToDetail: _navigateToDetail,
-                      onNavigateToResults: _navigateToBrowseResults,
-                    ),
-                  ],
+              SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: AppConstants.horizontalPadding,
+                    right: AppConstants.horizontalPadding,
+                    top: AppConstants.verticalPadding,
+                    bottom: 8.0,
+                  ),
+                  child: Column(
+                    children: [
+                      MBSearchBar(
+                        focusNode: _searchFocusNode,
+                        controller: _controller.searchController,
+                        initialFilters: _controller.currentFilters,
+                        onScanTap: _handleBarcodeScan,
+                        onResultSelected: _handleResultSelected,
+                        onChanged: _controller.updateSearchQuery,
+                        onSubmitted: (_) => _controller.searchSeries(),
+                        onFilterApplied: _controller.updateFilters,
+                      ),
+                      if (_controller.isSearchMode)
+                        BrowseTypeTabs(
+                          selectedType: _controller.currentType,
+                          onTypeChanged: _controller.setType,
+                        ),
+                      if (_controller.currentType == BrowseType.series)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: FilterChipsRow(
+                            filters: _controller.currentFilters,
+                            onFiltersChanged: _controller.updateFilters,
+                          ),
+                        ),
+                      if (_controller.isSearchMode &&
+                          _controller.totalResults > 0)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 4.0,
+                            horizontal: 12.0,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                '${_controller.totalResults} ${LocalizationService().translate('series')}',
+                                style: TextStyle(
+                                  color: AppConstants.textMutedColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      BrowseContent(
+                        searchResults: _controller.searchResults,
+                        browseType: _controller.currentType,
+                        isLoading: _controller.isLoading,
+                        isLoadingMore: _controller.isLoadingMore,
+                        error: _controller.error,
+                        scrollController: _controller.scrollController,
+                        onRetry: _controller.searchSeries,
+                        onNavigateToDetail: _navigateToDetail,
+                        onNavigateToResults: _navigateToBrowseResults,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+            floatingActionButton: _controller.showBackToTop
+                ? WidgetUtils.tooltip(
+                    message: LocalizationService().translate('back_to_top'),
+                    child: FloatingActionButton(
+                      onPressed: _controller.scrollToTop,
+                      backgroundColor: AppConstants.accentColor,
+                      child: Icon(
+                        Icons.arrow_upward,
+                        color: AppConstants.primaryBackground,
+                      ),
+                    ),
+                  )
+                : null,
           ),
-          floatingActionButton: _controller.showBackToTop
-              ? WidgetUtils.tooltip(
-                  message: LocalizationService().translate('back_to_top'),
-                  child: FloatingActionButton(
-                    onPressed: _controller.scrollToTop,
-                    backgroundColor: AppConstants.accentColor,
-                    child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
-                  ),
-                )
-              : null,
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 }

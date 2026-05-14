@@ -29,6 +29,9 @@ class SeriesDetailTabContent extends StatelessWidget {
   final double hPadding;
   final bool wideRightPaddingOnly;
 
+  final Function(String)? onAuthorTap;
+  final Function(String)? onPublisherTap;
+
   const SeriesDetailTabContent({
     super.key,
     required this.series,
@@ -44,6 +47,8 @@ class SeriesDetailTabContent extends StatelessWidget {
     this.isWide = false,
     this.hPadding = 16.0,
     this.wideRightPaddingOnly = false,
+    this.onAuthorTap,
+    this.onPublisherTap,
   });
 
   @override
@@ -69,7 +74,15 @@ class SeriesDetailTabContent extends StatelessWidget {
         return SeriesWorksTab(works: works, horizontalPadding: tabPadding);
       case 'Information':
       default:
-        return SeriesDetailsGrid(series: series, enrichedLinks: enrichedLinks, l10n: l10n, isWide: isWide, horizontalPadding: tabPadding);
+        return SeriesDetailsGrid(
+          series: series, 
+          enrichedLinks: enrichedLinks, 
+          l10n: l10n, 
+          isWide: isWide, 
+          horizontalPadding: tabPadding,
+          onAuthorTap: onAuthorTap,
+          onPublisherTap: onPublisherTap,
+        );
     }
   }
 }

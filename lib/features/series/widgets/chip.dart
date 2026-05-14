@@ -7,17 +7,20 @@ class ChipBase extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final TextStyle? labelStyle;
 
+  final VoidCallback? onTap;
+
   const ChipBase({
     required this.label,
     this.backgroundColor,
     this.padding,
     this.labelStyle,
+    this.onTap,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final chip = Container(
       padding: padding ??
           const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
@@ -35,5 +38,18 @@ class ChipBase extends StatelessWidget {
         child: label,
       ),
     );
+
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: chip,
+        ),
+      );
+    }
+
+    return chip;
   }
 }

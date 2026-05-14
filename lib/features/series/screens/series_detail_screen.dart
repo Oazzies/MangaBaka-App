@@ -22,6 +22,9 @@ import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.da
 
 
 import 'package:mangabaka_app/utils/services/logging_service.dart';
+import 'package:mangabaka_app/utils/transitions/app_transitions.dart';
+import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
+import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
@@ -74,6 +77,30 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
     }).catchError((e) {
       _logger.severe('Full data fetch failed for series: ${widget.series.id}. Error: $e');
     });
+  }
+
+  void _navigateToAuthorSeries(String authorName) {
+    _logger.info('Navigating to series by author: $authorName');
+    Navigator.push(
+      context,
+      AppTransitions.slideRight(BrowseResultsScreen(
+        sortType: authorName,
+        sortBy: 'popularity_desc',
+        staff: authorName,
+      )),
+    );
+  }
+
+  void _navigateToPublisherSeries(String publisherName) {
+    _logger.info('Navigating to series by publisher: $publisherName');
+    Navigator.push(
+      context,
+      AppTransitions.slideRight(BrowseResultsScreen(
+        sortType: publisherName,
+        sortBy: 'popularity_desc',
+        publisher: publisherName,
+      )),
+    );
   }
 
   @override
@@ -166,6 +193,8 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                                   isWide: isWide,
                                   hPadding: hPadding,
                                   wideRightPaddingOnly: wideRightPaddingOnly,
+                                  onAuthorTap: _navigateToAuthorSeries,
+                                  onPublisherTap: _navigateToPublisherSeries,
                                 ),
                               )
                               : SeriesDetailMobileLayout(
@@ -196,6 +225,8 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                                   works: works,
                                   enrichedLinks: enrichedLinks,
                                   hPadding: hPadding,
+                                  onAuthorTap: _navigateToAuthorSeries,
+                                  onPublisherTap: _navigateToPublisherSeries,
                                 ),
                               ),
                           ),

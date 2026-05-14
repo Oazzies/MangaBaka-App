@@ -18,14 +18,16 @@ class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
   final String sortBy;
   final String? type;
+  final String? staff;
+  final String? publisher;
   final double? randomSeed;
-
-
 
   const BrowseResultsScreen({
     required this.sortType,
     required this.sortBy,
     this.type,
+    this.staff,
+    this.publisher,
     this.randomSeed,
     super.key,
   });
@@ -46,6 +48,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   late double _currentRandomSeed;
 
 
+  int? _totalResults;
   String? _error;
   bool _showBackToTop = false;
 
@@ -113,20 +116,24 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       }
 
       final params = _buildRequestParams(initial, userId);
-      final newResults = await _searchService.searchSeriesByName(
+      final result = await _searchService.searchSeries(
         '',
         sortBy: widget.sortBy,
         type: widget.type,
         extraParams: params,
       );
 
-      _logger.info('Fetched ${newResults.length} results for page $_currentPage');
+      final newResults = result.series;
+      final total = result.total;
+
+      _logger.info('Fetched ${newResults.length} results for page $_currentPage (Total: $total)');
 
       if (!mounted) return;
 
       setState(() {
         if (initial) {
           _results.clear();
+          _totalResults = total;
         }
         _results.addAll(newResults);
         _hasMore = newResults.length == AppConstants.defaultPageLimit;
@@ -142,12 +149,18 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       });
     }
   }
-
   Map<String, dynamic> _buildRequestParams(bool initial, String? excludeUserId) {
     final params = <String, dynamic>{
       'limit': AppConstants.defaultPageLimit,
       'page': _currentPage,
     };
+
+    if (widget.staff != null) {
+      params['staff'] = widget.staff;
+    }
+    if (widget.publisher != null) {
+      params['publisher'] = widget.publisher;
+    }
 
     if (excludeUserId != null && excludeUserId.isNotEmpty) {
       params['exclude_user_library'] = excludeUserId;
@@ -194,9 +207,34 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
               icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(
-              widget.sortType,
-              style: TextStyle(color: AppConstants.textColor),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  () {
+                    final l10n = LocalizationService();
+                    if (widget.staff != null) {
+                      return l10n.translate('staff_works_title')
+                          .replaceAll('{name}', l10n.formatPossessive(widget.staff!));
+                    }
+                    if (widget.publisher != null) {
+                      return l10n.translate('staff_works_title')
+                          .replaceAll('{name}', l10n.formatPossessive(widget.publisher!));
+                    }
+                    return widget.sortType;
+                  }(),
+                  style: TextStyle(color: AppConstants.textColor, fontSize: 16),
+                ),
+                if (_totalResults != null)
+                  Text(
+                    '$_totalResults ${LocalizationService().translate('series')}',
+                    style: TextStyle(
+                      color: AppConstants.textMutedColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+              ],
             ),
           ),
           body: WidgetUtils.responsiveConstraint(
