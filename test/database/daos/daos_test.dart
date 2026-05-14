@@ -1,5 +1,4 @@
 import 'package:drift/native.dart';
-import 'package:drift/drift.dart' hide isNull;
 import 'package:flutter_test/flutter_test.dart' as ft;
 import 'package:mangabaka_app/database/database.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';

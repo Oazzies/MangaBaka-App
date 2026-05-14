@@ -111,17 +111,4 @@ class SeriesWorksTab extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildPlaceholder() {
-    return Container(
-      width: 60,
-      height: 90,
-      color: AppConstants.tertiaryBackground,
-      child: Icon(
-        Icons.broken_image,
-        color: AppConstants.textMutedColor,
-        size: 24,
-      ),
-    );
-  }
 }

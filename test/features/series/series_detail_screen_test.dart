@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
@@ -136,8 +138,14 @@ void main() {
   });
 
   setUp(() async {
-    await resetServiceLocator();
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
     SharedPreferences.setMockInitialValues({});
+    await resetServiceLocator();
+    await SettingsManager().init();
+    
     mockSeriesService = MockSeriesService();
     mockLibraryService = MockLibraryService();
     mockAuthService = MockProfileAuthService();

@@ -190,15 +190,4 @@ class SearchSuggestionsPanel extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildThumbnailPlaceholder() {
-    return Container(
-      color: AppConstants.tertiaryBackground,
-      child: Icon(
-        Icons.menu_book_rounded,
-        color: AppConstants.textMutedColor.withValues(alpha: 0.5),
-        size: 16,
-      ),
-    );
-  }
 }

@@ -14,6 +14,5 @@ class LibraryEntriesTable extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  @override
   List<Index> get indexes => [Index('library_series_idx', 'CREATE INDEX IF NOT EXISTS library_series_idx ON library_entries_table (series_id)'), Index('library_state_idx', 'CREATE INDEX IF NOT EXISTS library_state_idx ON library_entries_table (state)')];
 }

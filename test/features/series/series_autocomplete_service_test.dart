@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
@@ -10,6 +11,10 @@ void main() {
   late SeriesAutocompleteService service;
 
   setUp(() async {
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
     SharedPreferences.setMockInitialValues({});
     await SettingsManager().init();
     service = SeriesAutocompleteService();

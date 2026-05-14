@@ -1,5 +1,6 @@
-import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
@@ -51,6 +52,10 @@ void main() {
     fakeSeriesService = FakeSeriesService();
     getIt.registerSingleton<SeriesService>(fakeSeriesService);
     
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
     SharedPreferences.setMockInitialValues({});
     await SettingsManager().init();
     

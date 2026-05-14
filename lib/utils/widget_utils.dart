@@ -32,7 +32,8 @@ class WidgetUtils {
     int? memCacheHeight,
   }) {
     if (url.isEmpty) {
-      return errorWidget ?? Icon(Icons.broken_image, size: width ?? 24, color: AppConstants.textMutedColor);
+      final iconSize = (width != null && width.isFinite) ? width : 24.0;
+      return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
     }
     
     return CachedNetworkImage(
@@ -43,7 +44,10 @@ class WidgetUtils {
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
       placeholder: (context, url) => placeholder ?? Container(color: AppConstants.secondaryBackground),
-      errorWidget: (context, url, error) => errorWidget ?? Icon(Icons.broken_image, size: width ?? 24, color: AppConstants.textMutedColor),
+      errorWidget: (context, url, error) {
+        final iconSize = (width != null && width.isFinite) ? width : 24.0;
+        return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
+      },
       fadeOutDuration: const Duration(milliseconds: 300),
       fadeInDuration: const Duration(milliseconds: 300),
     );

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
 import 'package:mangabaka_app/features/browse/widgets/mb_search_bar.dart';
 import 'package:mangabaka_app/features/browse/widgets/browse_shortcuts.dart';
@@ -34,7 +37,14 @@ class MockMetadataService extends Fake implements MetadataService {
 
 void main() {
   setUp(() async {
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
+    SharedPreferences.setMockInitialValues({});
     await resetServiceLocator();
+    await SettingsManager().init();
+    
     getIt.registerSingleton<LoggingService>(LoggingService());
     getIt.registerSingleton<SeriesSearchService>(MockSeriesSearchService());
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());

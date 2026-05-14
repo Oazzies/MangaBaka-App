@@ -82,17 +82,4 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
       ),
     );
   }
-
-  Widget _buildPlaceholder() {
-    return Container(
-      width: widget.width,
-      height: widget.height,
-      color: AppConstants.secondaryBackground,
-      child: Icon(
-        Icons.broken_image,
-        color: AppConstants.textMutedColor,
-        size: widget.width > 50 ? 40 : 24,
-      ),
-    );
-  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings_section_header.dart';
@@ -27,6 +28,10 @@ void main() {
     getIt.registerSingleton<LoggingService>(LoggingService());
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
     
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
     SharedPreferences.setMockInitialValues({});
     await SettingsManager().init();
   });

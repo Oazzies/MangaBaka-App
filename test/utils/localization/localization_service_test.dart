@@ -7,9 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const MethodChannel channel = MethodChannel('plugins.flutter.io/path_provider');
-  const MethodChannel channelAssets = MethodChannel('flutter/assets');
-
   setUp(() async {
     LocalizationService.resetForTesting();
     SharedPreferences.setMockInitialValues({});

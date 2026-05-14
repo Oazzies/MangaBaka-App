@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
@@ -8,6 +9,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
     SharedPreferences.setMockInitialValues({});
     SettingsManager.resetForTesting();
     await SettingsManager().init();
@@ -27,8 +32,7 @@ void main() {
         ),
       );
 
-      final container = tester.widget<Container>(find.byType(Container));
-      // The container itself doesn't have a width, but its parent ConstrainedBox does.
+      // Check constraints on the parent ConstrainedBox
       final constrainedBox = tester.widget<ConstrainedBox>(
         find.ancestor(of: find.byType(Container), matching: find.byType(ConstrainedBox)).first
       );

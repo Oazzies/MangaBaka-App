@@ -6,7 +6,9 @@ import 'package:mangabaka_app/features/browse/widgets/browse_results_status_widg
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/series/services/series_id_service.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
+import 'package:flutter/services.dart';
 
 class MockSeriesSearchService extends Fake implements SeriesSearchService {
   List<Series> response = [];
@@ -26,15 +28,26 @@ class MockProfileAuthService extends Fake implements ProfileAuthService {
   bool get isLoggedIn => false;
 }
 
+class MockSeriesService extends Fake implements SeriesService {
+  @override
+  Future<Series> fetchSeries(String id) async => Series.fromJson({'id': id, 'title': 'Mock'});
+}
+
 void main() {
   late MockSeriesSearchService mockSearchService;
 
   setUp(() async {
-    await resetServiceLocator();
+    const MethodChannel('plugins.flutter.io/path_provider')
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      return '.';
+    });
     SharedPreferences.setMockInitialValues({});
+    await resetServiceLocator();
+    
     mockSearchService = MockSeriesSearchService();
     getIt.registerSingleton<SeriesSearchService>(mockSearchService);
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
+    getIt.registerSingleton<SeriesService>(MockSeriesService());
   });
 
   Widget createWidgetUnderTest() {
@@ -105,7 +118,9 @@ void main() {
     mockSearchService.wasCalled = false;
     
     final scrollableFinder = find.byType(Scrollable);
-    await tester.fling(scrollableFinder, const Offset(0, -1000), 1000);
+    await tester.runAsync(() async {
+      await tester.fling(scrollableFinder, const Offset(0, -1000), 1000);
+    });
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
@@ -129,14 +144,18 @@ void main() {
     expect(find.byIcon(Icons.arrow_upward), findsNothing);
 
     final scrollableFinder = find.byType(Scrollable);
-    await tester.fling(scrollableFinder, const Offset(0, -1000), 1000);
+    await tester.runAsync(() async {
+      await tester.fling(scrollableFinder, const Offset(0, -1000), 1000);
+    });
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.arrow_upward), findsOneWidget);
     
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.runAsync(() async {
+      await tester.tap(find.byType(FloatingActionButton));
+    });
     await tester.pumpAndSettle();
     
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
