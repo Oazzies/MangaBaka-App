@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
 import 'package:mangabaka_app/utils/settings/settings_keys.dart';
 
@@ -79,16 +77,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
-    try {
-      final supportDir = await getApplicationSupportDirectory();
-      final markerFile = File('${supportDir.path}/.install_marker');
-      if (!await markerFile.exists()) {
-        await prefs.setBool(SettingsKeys.onboardingCompleted, false);
-        await markerFile.writeAsString(DateTime.now().toIso8601String());
-      }
-    } catch (e) {
-      debugPrint('Error setting install marker: $e');
-    }
+    // Load preferences
 
     final listStyleIndex = prefs.getInt(SettingsKeys.listStylePref);
     if (listStyleIndex != null && listStyleIndex >= 0 && listStyleIndex < AppListStyle.values.length) {
