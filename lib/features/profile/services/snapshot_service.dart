@@ -7,6 +7,7 @@ import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:http/http.dart' as http;
 
 class SnapshotService {
@@ -49,9 +50,12 @@ class SnapshotService {
 
     try {
       final token = await _auth.getValidAccessToken();
-      final uri = Uri.parse(
-        '${LibraryConstants.baseUrl}?page=$page&limit=$limit&sort_by=$sortBy',
-      );
+      final contentPrefs = SettingsManager().contentPreferences;
+      var urlStr = '${LibraryConstants.baseUrl}?page=$page&limit=$limit&sort_by=$sortBy';
+      for (final pref in contentPrefs) {
+        urlStr += '&content_rating=$pref';
+      }
+      final uri = Uri.parse(urlStr);
 
       final response = await http.get(
         uri,
@@ -77,7 +81,12 @@ class SnapshotService {
       }
 
       final data = (jsonDecode(response.body)['data'] as List<dynamic>? ?? []);
-      return data.map((item) => LibraryEntry.fromJson(item)).toList();
+      final results = data.map((item) => LibraryEntry.fromJson(item)).toList();
+      
+      if (contentPrefs.isNotEmpty) {
+        return results.where((e) => contentPrefs.contains(e.series.contentRating.toLowerCase())).toList();
+      }
+      return results;
     } on AppException {
       rethrow;
     } catch (e, st) {

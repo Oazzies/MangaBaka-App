@@ -6,6 +6,7 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
 
 mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
@@ -34,13 +35,14 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
   int pageAdded = 1;
 
   Future<void> fetchStatistics() async {
+    final contentPrefs = SettingsManager().contentPreferences;
     final results = await Future.wait([
-      statisticsService.getTotalSeries(),
-      statisticsService.getChaptersRead(),
-      statisticsService.getVolumesRead(),
-      statisticsService.getCompletionRate(),
-      statisticsService.getTotalRereads(),
-      statisticsService.getMeanScore(),
+      statisticsService.getTotalSeries(contentPreferences: contentPrefs),
+      statisticsService.getChaptersRead(contentPreferences: contentPrefs),
+      statisticsService.getVolumesRead(contentPreferences: contentPrefs),
+      statisticsService.getCompletionRate(contentPreferences: contentPrefs),
+      statisticsService.getTotalRereads(contentPreferences: contentPrefs),
+      statisticsService.getMeanScore(contentPreferences: contentPrefs),
     ]);
     if (!mounted) return;
     setState(() {

@@ -6,6 +6,7 @@ import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
 class PublisherSearchService {
   static final String _baseUrl = '${AppConstants.baseApiUrl}/publishers/search';
@@ -33,8 +34,21 @@ class PublisherSearchService {
     if (page != null) queryParams['page'] = page.toString();
     if (limit != null) queryParams['limit'] = limit.toString();
     if (sortBy != null && sortBy.isNotEmpty) queryParams['sort_by'] = sortBy;
-
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: queryParams);
+    
+    final contentPrefs = SettingsManager().contentPreferences;
+    final finalQueryParams = <String, dynamic>{
+      ...queryParams,
+      'content_rating': contentPrefs,
+    };
+    
+    final uri = Uri.parse(_baseUrl).replace(
+      queryParameters: finalQueryParams.map((key, value) {
+        if (value is List) {
+          return MapEntry(key, value.map((e) => e.toString()).toList());
+        }
+        return MapEntry(key, value.toString());
+      }),
+    );
     
     _logger.info('Performing publisher search. URI: $uri');
 
@@ -138,8 +152,18 @@ class PublisherSearchService {
   }
 
   Future<PublisherSearchResult> search(Map<String, dynamic> params) async {
+    final finalParams = <String, dynamic>{...params};
+    if (!finalParams.containsKey('content_rating')) {
+      finalParams['content_rating'] = SettingsManager().contentPreferences;
+    }
+
     final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: params.map((key, value) => MapEntry(key, value.toString())),
+      queryParameters: finalParams.map((key, value) {
+        if (value is List) {
+          return MapEntry(key, value.map((e) => e.toString()).toList());
+        }
+        return MapEntry(key, value.toString());
+      }),
     );
 
     _logger.info('Performing publisher search. URI: $uri');

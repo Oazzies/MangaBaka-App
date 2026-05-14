@@ -9,11 +9,20 @@ class StatisticsService {
 
   StatisticsService(this._db);
 
-  Future<int> getTotalSeries() async {
+  Future<int> getTotalSeries({List<String>? contentPreferences}) async {
     try {
       final count = drift.countAll();
-      final query = _db.selectOnly(_db.libraryEntriesTable)
-        ..addColumns([count]);
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([count]);
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final result = await query.getSingle();
       final val = result.read(count) ?? 0;
       _logger.fine('Total series count: $val');
@@ -24,10 +33,20 @@ class StatisticsService {
     }
   }
 
-  Future<int> getChaptersRead() async {
+  Future<int> getChaptersRead({List<String>? contentPreferences}) async {
     try {
       final sum = _db.libraryEntriesTable.progressChapter.sum();
-      final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([sum]);
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final result = await query.getSingle();
       final val = result.read(sum) ?? 0;
       _logger.fine('Total chapters read: $val');
@@ -38,10 +57,20 @@ class StatisticsService {
     }
   }
 
-  Future<int> getVolumesRead() async {
+  Future<int> getVolumesRead({List<String>? contentPreferences}) async {
     try {
       final sum = _db.libraryEntriesTable.progressVolume.sum();
-      final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([sum]);
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final result = await query.getSingle();
       final val = result.read(sum) ?? 0;
       _logger.fine('Total volumes read: $val');
@@ -52,23 +81,42 @@ class StatisticsService {
     }
   }
 
-  Future<double> getCompletionRate() async {
+  Future<double> getCompletionRate({List<String>? contentPreferences}) async {
     try {
       final totalCount = drift.countAll();
       final completedCount = drift.countAll(
         filter: _db.libraryEntriesTable.state.equals('completed'),
       );
 
-      final queryTotal = _db.selectOnly(_db.libraryEntriesTable)
-        ..addColumns([totalCount]);
+      final queryTotal = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([totalCount]);
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        queryTotal.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final totalResult = await queryTotal.getSingle();
       final total = totalResult.read(totalCount) ?? 0;
 
       if (total == 0) return 0.0;
 
-      final queryCompleted = _db.selectOnly(_db.libraryEntriesTable)
+      final queryCompleted = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])
         ..addColumns([completedCount])
         ..where(_db.libraryEntriesTable.state.equals('completed'));
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        queryCompleted.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final completedResult = await queryCompleted.getSingle();
       final completed = completedResult.read(completedCount) ?? 0;
 
@@ -81,10 +129,20 @@ class StatisticsService {
     }
   }
 
-  Future<int> getTotalRereads() async {
+  Future<int> getTotalRereads({List<String>? contentPreferences}) async {
     try {
       final sum = _db.libraryEntriesTable.numberOfRereads.sum();
-      final query = _db.selectOnly(_db.libraryEntriesTable)..addColumns([sum]);
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([sum]);
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final result = await query.getSingle();
       final val = result.read(sum) ?? 0;
       _logger.fine('Total rereads: $val');
@@ -95,12 +153,22 @@ class StatisticsService {
     }
   }
 
-  Future<double> getMeanScore() async {
+  Future<double> getMeanScore({List<String>? contentPreferences}) async {
     try {
       final avg = _db.libraryEntriesTable.rating.avg();
-      final query = _db.selectOnly(_db.libraryEntriesTable)
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])
         ..addColumns([avg])
         ..where(_db.libraryEntriesTable.rating.isNotNull());
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final result = await query.getSingle();
       final val = result.read(avg) ?? 0.0;
       _logger.fine('Mean score: $val');
@@ -111,7 +179,7 @@ class StatisticsService {
     }
   }
 
-  Future<double> getFinishRate() async {
+  Future<double> getFinishRate({List<String>? contentPreferences}) async {
     try {
       final completedExpr = _db.libraryEntriesTable.state.equals('completed');
       final droppedExpr = _db.libraryEntriesTable.state.equals('dropped');
@@ -119,9 +187,17 @@ class StatisticsService {
       final completedCount = drift.countAll(filter: completedExpr);
       final droppedCount = drift.countAll(filter: droppedExpr);
 
-      final query = _db.selectOnly(_db.libraryEntriesTable)
-        ..addColumns([completedCount, droppedCount]);
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([completedCount, droppedCount]);
       
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
       final result = await query.getSingle();
       final completed = result.read(completedCount) ?? 0;
       final dropped = result.read(droppedCount) ?? 0;
@@ -138,7 +214,7 @@ class StatisticsService {
     }
   }
 
-  Future<LibraryEntryWithSeries?> getHighestRatedSeries() async {
+  Future<LibraryEntryWithSeries?> getHighestRatedSeries({List<String>? contentPreferences}) async {
     try {
       final query = _db.select(_db.libraryEntriesTable).join([
         drift.innerJoin(
@@ -146,7 +222,13 @@ class StatisticsService {
           _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
         ),
       ])
-        ..where(_db.libraryEntriesTable.rating.isNotNull())
+        ..where(_db.libraryEntriesTable.rating.isNotNull());
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
+      query
         ..orderBy([
           drift.OrderingTerm(
             expression: _db.libraryEntriesTable.rating,
@@ -177,7 +259,7 @@ class StatisticsService {
     }
   }
 
-  Future<LibraryEntryWithSeries?> getMostRereadSeries() async {
+  Future<LibraryEntryWithSeries?> getMostRereadSeries({List<String>? contentPreferences}) async {
     try {
       final query = _db.select(_db.libraryEntriesTable).join([
         drift.innerJoin(
@@ -186,7 +268,13 @@ class StatisticsService {
         ),
       ])
         ..where(_db.libraryEntriesTable.numberOfRereads.isNotNull())
-        ..where(_db.libraryEntriesTable.numberOfRereads.isBiggerThan(const drift.Constant(0)))
+        ..where(_db.libraryEntriesTable.numberOfRereads.isBiggerThan(const drift.Constant(0)));
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+      }
+
+      query
         ..orderBy([
           drift.OrderingTerm(
             expression: _db.libraryEntriesTable.numberOfRereads,

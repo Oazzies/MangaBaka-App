@@ -91,6 +91,7 @@ class SeriesSearchService {
           final List data = json['data'] ?? [];
           final results = data
               .map((item) => Series.fromJson(item as Map<String, dynamic>))
+              .where((s) => contentPrefs.isEmpty || contentPrefs.contains(s.contentRating.toLowerCase()))
               .toList();
           
           _logger.info('Search successful. Found ${results.length} results');
@@ -215,6 +216,7 @@ class SeriesSearchService {
         
         final results = data
             .map((item) => Series.fromJson(item as Map<String, dynamic>))
+            .where((s) => contentPrefs.isEmpty || contentPrefs.contains(s.contentRating.toLowerCase()))
             .toList();
         
         for (var series in results) {

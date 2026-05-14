@@ -3,6 +3,7 @@ import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
@@ -17,8 +18,19 @@ mixin SeriesFetchMixin {
 
   Future<Series> fetchSeries(String id) async {
     if (_cache.containsKey(id)) {
+      final cached = _cache[id]!;
+      final contentPrefs = SettingsManager().contentPreferences;
+      if (contentPrefs.isNotEmpty && !contentPrefs.contains(cached.contentRating.toLowerCase())) {
+        logger.warning('Cached series ${cached.title} ($id) no longer matches content preferences. Blocking.');
+        _cache.remove(id);
+        throw ApiException(
+          message: 'This content is filtered by your content rating settings.',
+          statusCode: 403,
+          code: 'CONTENT_FILTERED',
+        );
+      }
       logger.fine('Returning cached series data for ID: $id');
-      return _cache[id]!;
+      return cached;
     }
 
     try {
@@ -39,6 +51,18 @@ mixin SeriesFetchMixin {
         try {
           final data = jsonDecode(response.body);
           final series = Series.fromJson(data['data']);
+          
+          // Enforce content rating filtering
+          final contentPrefs = SettingsManager().contentPreferences;
+          if (contentPrefs.isNotEmpty && !contentPrefs.contains(series.contentRating.toLowerCase())) {
+            logger.warning('Series ${series.title} (${series.id}) blocked due to content rating: ${series.contentRating}');
+            throw ApiException(
+              message: 'This content is filtered by your content rating settings.',
+              statusCode: 403,
+              code: 'CONTENT_FILTERED',
+            );
+          }
+
           logger.info('Successfully fetched series: ${series.title} ($id)');
           _cache[id] = series;
           return series;

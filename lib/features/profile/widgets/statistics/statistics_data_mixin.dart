@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/database/database.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
 mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
   late final StatisticsService statisticsService;
@@ -23,16 +24,17 @@ mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> fetchStatistics() async {
+    final contentPrefs = SettingsManager().contentPreferences;
     final results = await Future.wait([
-      statisticsService.getTotalSeries(),
-      statisticsService.getChaptersRead(),
-      statisticsService.getVolumesRead(),
-      statisticsService.getCompletionRate(),
-      statisticsService.getTotalRereads(),
-      statisticsService.getMeanScore(),
-      statisticsService.getFinishRate(),
-      statisticsService.getHighestRatedSeries(),
-      statisticsService.getMostRereadSeries(),
+      statisticsService.getTotalSeries(contentPreferences: contentPrefs),
+      statisticsService.getChaptersRead(contentPreferences: contentPrefs),
+      statisticsService.getVolumesRead(contentPreferences: contentPrefs),
+      statisticsService.getCompletionRate(contentPreferences: contentPrefs),
+      statisticsService.getTotalRereads(contentPreferences: contentPrefs),
+      statisticsService.getMeanScore(contentPreferences: contentPrefs),
+      statisticsService.getFinishRate(contentPreferences: contentPrefs),
+      statisticsService.getHighestRatedSeries(contentPreferences: contentPrefs),
+      statisticsService.getMostRereadSeries(contentPreferences: contentPrefs),
     ]);
 
     if (!mounted) return;

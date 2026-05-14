@@ -27,7 +27,7 @@ void main() {
         status: '',
         isLicensed: '',
         hasAnime: '',
-        contentRating: '',
+        contentRating: 'safe',
         type: '',
         rating: '',
         finalVolume: '',
