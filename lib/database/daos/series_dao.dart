@@ -170,14 +170,13 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
 
   Future<void> deleteStaleSeries() async {
     try {
-      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
       
       // Select series that are NOT in the library and were last updated > 7 days ago
+      final librarySeriesIds = selectOnly(db.libraryEntriesTable)..addColumns([db.libraryEntriesTable.seriesId]);
+      
       final query = delete(seriesTable)..where((t) {
-        final isInLibrary = exists(
-          select(db.libraryEntriesTable)..where((l) => l.seriesId.equalsExp(t.id)),
-        );
-        return isInLibrary.not() & t.lastUpdated.isSmallerThanValue(sevenDaysAgo);
+        return t.id.isInQuery(librarySeriesIds).not() & t.lastUpdated.isSmallerThanValue(sevenDaysAgo);
       });
 
       final deletedCount = await query.go();
