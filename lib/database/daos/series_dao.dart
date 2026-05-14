@@ -146,24 +146,44 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     }
   }
 
-  Future<LibraryEntryWithSeries?> watchEntryWithSeries(String entryId) async {
+  Future<LibraryEntryWithSeries?> getEntryWithSeries(String entryId) async {
     try {
-      return await (select(db.libraryEntriesTable).join([
+      final query = select(db.libraryEntriesTable).join([
         innerJoin(
           db.seriesTable,
           db.seriesTable.id.equalsExp(db.libraryEntriesTable.seriesId),
         ),
-      ])).getSingleOrNull().then(
-        (result) => result != null
-            ? LibraryEntryWithSeries(
-                libraryEntry: result.readTable(db.libraryEntriesTable),
-                series: result.readTable(db.seriesTable),
-              )
-            : null,
+      ])..where(db.libraryEntriesTable.id.equals(entryId));
+
+      final result = await query.getSingleOrNull();
+      if (result == null) return null;
+
+      return LibraryEntryWithSeries(
+        libraryEntry: result.readTable(db.libraryEntriesTable),
+        series: result.readTable(db.seriesTable),
       );
     } catch (e) {
-      _logger.severe('Failed to watch entry with series: $e');
-      throw exc.DatabaseException(message: 'Failed to watch entry with series', originalError: e);
+      _logger.severe('Failed to get entry with series: $e');
+      throw exc.DatabaseException(message: 'Failed to get entry with series', originalError: e);
+    }
+  }
+
+  Future<void> deleteStaleSeries() async {
+    try {
+      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
+      
+      // Select series that are NOT in the library and were last updated > 7 days ago
+      final query = delete(seriesTable)..where((t) {
+        final isInLibrary = exists(
+          select(db.libraryEntriesTable)..where((l) => l.seriesId.equalsExp(t.id)),
+        );
+        return isInLibrary.not() & t.lastUpdated.isSmallerThanValue(sevenDaysAgo);
+      });
+
+      final deletedCount = await query.go();
+      _logger.info('Database Maintenance: Cleaned up $deletedCount stale series entries.');
+    } catch (e) {
+      _logger.warning('Failed to clean up stale series: $e');
     }
   }
 }

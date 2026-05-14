@@ -117,7 +117,11 @@ class AppDatabase extends _$AppDatabase {
         }
       },
       beforeOpen: (details) async {
+        // WAL mode is enabled in NativeDatabase.createInBackground by default usually, 
+        // but we ensure PRAGMAs are set correctly here.
         await customStatement('PRAGMA foreign_keys = ON');
+        await customStatement('PRAGMA journal_mode = WAL');
+        await customStatement('PRAGMA synchronous = NORMAL');
       },
     );
   }

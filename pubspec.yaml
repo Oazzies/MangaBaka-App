@@ -35,6 +35,8 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_native_splash: ^2.4.7
   cached_network_image: ^3.4.1
+  window_manager: ^0.4.3
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
