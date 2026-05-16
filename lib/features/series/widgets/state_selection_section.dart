@@ -23,69 +23,75 @@ class StateSelectionSection extends StatelessWidget {
       listenable: LocalizationService(),
       builder: (context, _) {
         final l10n = LocalizationService();
-        return Container(
-          height: 44, 
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: DropdownButton<String>(
-            value: currentState,
-            isExpanded: true,
-            underline: const SizedBox.shrink(),
-            dropdownColor: AppConstants.secondaryBackground,
-            icon: Icon(Icons.arrow_drop_down, color: AppConstants.textColor),
-            style: TextStyle(
-              color: AppConstants.textColor,
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-            itemHeight: 48,
-            menuMaxHeight: MediaQuery.of(context).size.height * 0.7,
-            onChanged: (value) {
-              if (value != null && value != currentState) {
-                onStateChanged(value);
-              }
-            },
-            items: LibraryScreenConstants.tabs.map((tab) {
-              return DropdownMenuItem(
-                value: tab.key,
-                child: Row(
-                  children: [
-                    Icon(
-                      _getIconForState(tab.key),
-                      color: _getColorForState(tab.key),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(l10n.translate(tab.key)),
-                  ],
-                ),
-              );
-            }).toList(),
-            selectedItemBuilder: (BuildContext context) {
-              return LibraryScreenConstants.tabs.map<Widget>((tab) {
-                return Row(
-                  children: [
-                    Icon(
-                      _getIconForState(tab.key),
-                      color: _getColorForState(tab.key),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        l10n.translate(tab.key),
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return DropdownMenu<String>(
+              width: constraints.maxWidth,
+              initialSelection: currentState,
+              requestFocusOnTap: false,
+              enableSearch: false,
+              enableFilter: false,
+              onSelected: (value) {
+                if (value != null && value != currentState) {
+                  onStateChanged(value);
+                }
+              },
+              dropdownMenuEntries: LibraryScreenConstants.tabs.map((tab) {
+                final isSelected = currentState == tab.key;
+                return DropdownMenuEntry<String>(
+                  value: tab.key,
+                  label: l10n.translate(tab.key),
+                  leadingIcon: Icon(
+                    _getIconForState(tab.key),
+                    color: _getColorForState(tab.key),
+                    size: 20,
+                  ),
+                  trailingIcon: isSelected 
+                      ? Icon(Icons.check, color: AppConstants.accentColor, size: 18)
+                      : null,
+                  style: MenuItemButton.styleFrom(
+                    foregroundColor: AppConstants.textColor,
+                    backgroundColor: isSelected ? AppConstants.accentColor.withOpacity(0.1) : null,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
                 );
-              }).toList();
-            },
-          ),
+              }).toList(),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: AppConstants.secondaryBackground,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              trailingIcon: Icon(Icons.keyboard_arrow_down_rounded, color: AppConstants.textColor, size: 24),
+              selectedTrailingIcon: Icon(Icons.keyboard_arrow_up_rounded, color: AppConstants.textColor, size: 24),
+              textStyle: TextStyle(
+                color: AppConstants.textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              menuStyle: MenuStyle(
+                backgroundColor: WidgetStateProperty.all(AppConstants.secondaryBackground),
+                surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+                shape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                padding: WidgetStateProperty.all(EdgeInsets.zero), // Removes the top/bottom gap!
+              ),
+            );
+          },
         );
       },
     );
