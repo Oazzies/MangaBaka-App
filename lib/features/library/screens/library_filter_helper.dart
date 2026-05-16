@@ -124,6 +124,22 @@ class LibraryFilterHelper {
               return (b.createdAt ?? '').compareTo(a.createdAt ?? '');
             case 'updated_at':
               return (b.updatedAt ?? '').compareTo(a.updatedAt ?? '');
+            case 'chapters_desc':
+              final ca = int.tryParse(a.series.totalChapters) ?? 0;
+              final cb = int.tryParse(b.series.totalChapters) ?? 0;
+              return cb.compareTo(ca);
+            case 'chapters_asc':
+              final ca = int.tryParse(a.series.totalChapters) ?? 0;
+              final cb = int.tryParse(b.series.totalChapters) ?? 0;
+              return ca.compareTo(cb);
+            case 'unread_desc':
+              final ua = (int.tryParse(a.series.totalChapters) ?? 0) - (a.progressChapter ?? 0);
+              final ub = (int.tryParse(b.series.totalChapters) ?? 0) - (b.progressChapter ?? 0);
+              return ub.compareTo(ua);
+            case 'unread_asc':
+              final ua = (int.tryParse(a.series.totalChapters) ?? 0) - (a.progressChapter ?? 0);
+              final ub = (int.tryParse(b.series.totalChapters) ?? 0) - (b.progressChapter ?? 0);
+              return ua.compareTo(ub);
             default:
               return 0;
           }

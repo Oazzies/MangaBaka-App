@@ -280,6 +280,10 @@ class BrowseController extends ChangeNotifier {
             return 0; 
           } else if (sortBy.startsWith('name_')) {
             return sortBy == 'name_desc' ? b.title.compareTo(a.title) : a.title.compareTo(b.title);
+          } else if (sortBy.startsWith('chapters_')) {
+            final cA = int.tryParse(a.totalChapters) ?? 0;
+            final cB = int.tryParse(b.totalChapters) ?? 0;
+            return sortBy == 'chapters_desc' ? cB.compareTo(cA) : cA.compareTo(cB);
           }
           return 0;
         });

@@ -186,6 +186,14 @@ class FilterChipsRow extends StatelessWidget {
         return l10n.translate('rating_desc');
       case 'score_asc':
         return l10n.translate('rating_asc');
+      case 'chapters_desc':
+        return l10n.translate('chapters_desc');
+      case 'chapters_asc':
+        return l10n.translate('chapters_asc');
+      case 'unread_desc':
+        return l10n.translate('unread_desc');
+      case 'unread_asc':
+        return l10n.translate('unread_asc');
       case 'random': return l10n.translate('random_sort');
       default: return sortBy;
     }

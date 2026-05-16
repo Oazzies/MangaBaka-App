@@ -14,12 +14,14 @@ class SearchFilterBottomSheet extends StatefulWidget {
   final SearchFilters initialFilters;
   final ValueChanged<SearchFilters> onApply;
   final bool isDialog;
- 
+  final bool showLibrarySorts;
+
   const SearchFilterBottomSheet({
     super.key,
     required this.initialFilters,
     required this.onApply,
     this.isDialog = false,
+    this.showLibrarySorts = false,
   });
  
   @override
@@ -41,15 +43,25 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
   ];
  
   Map<String, String> _getSortOptions(LocalizationService l10n) {
-    return {
+    final options = {
       'name_asc': l10n.translate('title_asc'),
       'name_desc': l10n.translate('title_desc'),
       'popularity_asc': l10n.translate('popularity_asc'),
       'popularity_desc': l10n.translate('popularity_desc'),
       'score_desc': l10n.translate('rating_desc'),
       'score_asc': l10n.translate('rating_asc'),
-      'random': l10n.translate('random_sort'),
+      'chapters_desc': l10n.translate('chapters_desc'),
+      'chapters_asc': l10n.translate('chapters_asc'),
     };
+
+    if (widget.showLibrarySorts) {
+      options['unread_desc'] = l10n.translate('unread_desc');
+      options['unread_asc'] = l10n.translate('unread_asc');
+    }
+
+    options['random'] = l10n.translate('random_sort');
+
+    return options;
   }
  
   List<Map<String, dynamic>> _genres = [];

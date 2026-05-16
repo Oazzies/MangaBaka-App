@@ -486,6 +486,7 @@ class _LibrarySearchBarState extends State<LibrarySearchBar> {
             constraints: const BoxConstraints(maxWidth: 600),
             child: SearchFilterBottomSheet(
               isDialog: true,
+              showLibrarySorts: true,
               initialFilters: _currentFilters,
               onApply: (filters) {
                 setState(() => _currentFilters = filters);
@@ -509,6 +510,7 @@ class _LibrarySearchBarState extends State<LibrarySearchBar> {
       builder: (context) {
         return SearchFilterBottomSheet(
           initialFilters: _currentFilters,
+          showLibrarySorts: true,
           onApply: (filters) {
             setState(() => _currentFilters = filters);
             widget.onFilterApplied?.call(filters);
