@@ -57,7 +57,11 @@ class SeriesDetailTabContent extends StatelessWidget {
     
     switch (selectedTab) {
       case 'Covers':
-        return SeriesCoversTab(covers: covers, horizontalPadding: tabPadding);
+        return SeriesCoversTab(
+          covers: covers,
+          horizontalPadding: tabPadding,
+          contentRating: series.contentRating,
+        );
       case 'Related':
         return SeriesRelatedTab(
           related: related, 

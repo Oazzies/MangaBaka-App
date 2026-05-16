@@ -16,4 +16,5 @@ class SettingsKeys {
   static const String listStylePref = '${AppConstants.prefixStorageKey}list_style_pref';
   static const String newsListColumns = '${AppConstants.prefixStorageKey}news_list_columns';
   static const String showTooltips = '${AppConstants.prefixStorageKey}show_tooltips';
+  static const String blurredContentRatings = '${AppConstants.prefixStorageKey}blurred_content_ratings';
 }

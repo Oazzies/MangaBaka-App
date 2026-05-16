@@ -4,14 +4,21 @@ import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/series/screens/full_screen_image_screen.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class SeriesCoversTab extends StatelessWidget {
   final List<SeriesCover>? covers;
   final double horizontalPadding;
+  final String? contentRating;
 
-  const SeriesCoversTab({super.key, this.covers, this.horizontalPadding = 16.0});
+  const SeriesCoversTab({
+    super.key,
+    this.covers,
+    this.horizontalPadding = 16.0,
+    this.contentRating,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +59,7 @@ class SeriesCoversTab extends StatelessWidget {
                 cover: cover,
                 url: url,
                 title: title,
+                contentRating: contentRating,
               );
             },
           ),
@@ -145,11 +153,13 @@ class _HoverableCoverItem extends StatefulWidget {
   final SeriesCover cover;
   final String? url;
   final String title;
+  final String? contentRating;
 
   const _HoverableCoverItem({
     required this.cover,
     required this.url,
     required this.title,
+    this.contentRating,
   });
 
   @override
@@ -203,10 +213,18 @@ class _HoverableCoverItemState extends State<_HoverableCoverItem> {
                   child: widget.url != null
                       ? Hero(
                           tag: widget.url!,
-                          child: WidgetUtils.networkImage(
-                            url: widget.url!,
-                            fit: BoxFit.cover,
-                            memCacheWidth: 300,
+                          child: ListenableBuilder(
+                            listenable: SettingsManager(),
+                            builder: (context, _) {
+                              final isBlurred = widget.contentRating != null &&
+                                  SettingsManager().blurredContentRatings.contains(widget.contentRating!.toLowerCase());
+                              return WidgetUtils.networkImage(
+                                url: widget.url!,
+                                fit: BoxFit.cover,
+                                memCacheWidth: 300,
+                                blurred: isBlurred,
+                              );
+                            },
                           ),
                         )
                       : Container(

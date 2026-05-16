@@ -5,6 +5,7 @@ import 'package:mangabaka_app/features/series/widgets/chip.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:ui';
 
 class WidgetUtils {
   static Widget responsiveConstraint(Widget child, {double maxWidth = 800}) {
@@ -30,6 +31,7 @@ class WidgetUtils {
     Widget? errorWidget,
     int? memCacheWidth,
     int? memCacheHeight,
+    bool blurred = false,
   }) {
     if (url.isEmpty) {
       final iconSize = (width != null && width.isFinite) ? width : 24.0;
@@ -50,6 +52,17 @@ class WidgetUtils {
       },
       fadeOutDuration: const Duration(milliseconds: 300),
       fadeInDuration: const Duration(milliseconds: 300),
+      imageBuilder: blurred ? (context, imageProvider) => ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: imageProvider,
+              fit: fit,
+            ),
+          ),
+        ),
+      ) : null,
     );
   }
 

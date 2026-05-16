@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
+import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 
 
@@ -18,15 +19,22 @@ class EntryListLayoutHelper {
 
     return Hero(
       tag: heroTag,
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: WidgetUtils.networkImage(
-        url: series.coverUrl,
-        width: width,
-        height: height ?? double.infinity,
-        fit: BoxFit.cover,
-        memCacheWidth: 300,
-      ),
+      child: ListenableBuilder(
+        listenable: SettingsManager(),
+        builder: (context, _) {
+          final isBlurred = SettingsManager().blurredContentRatings.contains(series.contentRating.toLowerCase());
+          return ClipRRect(
+            borderRadius: borderRadius,
+            child: WidgetUtils.networkImage(
+              url: series.coverUrl,
+              width: width,
+              height: height ?? double.infinity,
+              fit: BoxFit.cover,
+              memCacheWidth: 300,
+              blurred: isBlurred,
+            ),
+          );
+        },
       ),
     );
   }

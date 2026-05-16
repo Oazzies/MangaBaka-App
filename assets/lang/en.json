@@ -223,6 +223,7 @@
         "toggle_layout": "Toggle Layout",
         "content_preferences_subtitle": "Filter library and search results by rating",
         "language_subtitle": "Select your preferred app language",
+        "blur_covers": "Blur Covers",
         "all_ratings_hint": "All ratings",
         "login_prompt_library": "Login with MangaBaka to see your library",
         "login_prompt_profile": "Login with MangaBaka to see your profile",

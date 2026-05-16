@@ -25,6 +25,7 @@ class SettingsManager extends ChangeNotifier {
     _instance._autoSuggestBrowse = false;
     _instance._newsListColumns = 1;
     _instance._showTooltips = true;
+    _instance._blurredContentRatings = [];
   }
 
   AppListStyle _currentListStyle = AppListStyle.compactGrid;
@@ -73,6 +74,9 @@ class SettingsManager extends ChangeNotifier {
 
   bool _showTooltips = true;
   bool get showTooltips => _showTooltips;
+
+  List<String> _blurredContentRatings = [];
+  List<String> get blurredContentRatings => _blurredContentRatings;
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -127,6 +131,7 @@ class SettingsManager extends ChangeNotifier {
     _newsListColumns = prefs.getInt(SettingsKeys.newsListColumns) ?? 1;
 
     _showTooltips = prefs.getBool(SettingsKeys.showTooltips) ?? true;
+    _blurredContentRatings = prefs.getStringList(SettingsKeys.blurredContentRatings) ?? [];
 
     notifyListeners();
   }
@@ -249,6 +254,13 @@ class SettingsManager extends ChangeNotifier {
     _showTooltips = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(SettingsKeys.showTooltips, value);
+    notifyListeners();
+  }
+
+  Future<void> setBlurredContentRatings(List<String> ratings) async {
+    _blurredContentRatings = ratings;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(SettingsKeys.blurredContentRatings, ratings);
     notifyListeners();
   }
 }
