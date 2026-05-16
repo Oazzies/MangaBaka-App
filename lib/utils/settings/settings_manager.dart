@@ -30,6 +30,7 @@ class SettingsManager extends ChangeNotifier {
     _instance._gridColumnCount = 0;
     _instance._libraryGridColumnCount = 0;
     _instance._browseGridColumnCount = 0;
+    _instance._collectionsListColumns = 0;
   }
 
   AppListStyle _currentListStyle = AppListStyle.compactGrid;
@@ -94,6 +95,9 @@ class SettingsManager extends ChangeNotifier {
   int _browseGridColumnCount = 0;
   int get browseGridColumnCount => _browseGridColumnCount;
 
+  int _collectionsListColumns = 0; // 0 means default/automatic
+  int get collectionsListColumns => _collectionsListColumns;
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -153,6 +157,7 @@ class SettingsManager extends ChangeNotifier {
     _gridColumnCount = prefs.getInt(SettingsKeys.gridColumnCount) ?? 0;
     _libraryGridColumnCount = prefs.getInt(SettingsKeys.libraryGridColumnCount) ?? 0;
     _browseGridColumnCount = prefs.getInt(SettingsKeys.browseGridColumnCount) ?? 0;
+    _collectionsListColumns = prefs.getInt(SettingsKeys.collectionsGridColumns) ?? 0;
 
     notifyListeners();
   }
@@ -314,6 +319,14 @@ class SettingsManager extends ChangeNotifier {
     _browseGridColumnCount = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(SettingsKeys.browseGridColumnCount, value);
+    notifyListeners();
+  }
+
+  Future<void> setCollectionsListColumns(int value) async {
+    if (_collectionsListColumns == value) return;
+    _collectionsListColumns = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.collectionsGridColumns, value);
     notifyListeners();
   }
 }

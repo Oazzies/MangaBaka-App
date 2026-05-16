@@ -21,4 +21,5 @@ class SettingsKeys {
   static const String gridColumnCount = '${AppConstants.prefixStorageKey}grid_column_count';
   static const String libraryGridColumnCount = '${AppConstants.prefixStorageKey}library_grid_column_count';
   static const String browseGridColumnCount = '${AppConstants.prefixStorageKey}browse_grid_column_count';
+  static const String collectionsGridColumns = '${AppConstants.prefixStorageKey}collections_grid_columns';
 }
