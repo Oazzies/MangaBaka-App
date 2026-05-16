@@ -266,7 +266,7 @@ class _NewsScreenState extends State<NewsScreen> {
             },
             child: WidgetUtils.responsiveConstraint(
               SafeArea(child: content),
-              maxWidth: isGrid ? 1200 : 800,
+              maxWidth: isGrid ? double.infinity : 800,
             ),
           ),
           floatingActionButton: _showBackToTop

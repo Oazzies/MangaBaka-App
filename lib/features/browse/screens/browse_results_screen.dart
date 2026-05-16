@@ -13,6 +13,7 @@ import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/browse/widgets/browse_results_body.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
+import 'package:mangabaka_app/utils/settings/settings_enums.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -228,21 +229,33 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
               ],
             ),
           ),
-          body: WidgetUtils.responsiveConstraint(
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
-                child: BrowseResultsBody(
-                  error: _error,
-                  isLoading: _isLoading,
-                  results: _results,
-                  sortBy: widget.sortBy,
-                  scrollController: _scrollController,
-                  onRetry: () => _fetchResults(initial: true),
-                  onSeriesTap: _navigateToDetail,
+          body: ListenableBuilder(
+            listenable: SettingsManager(),
+            builder: (context, _) {
+              final settings = SettingsManager();
+              final activeStyle = settings.separateListStyles
+                  ? settings.browseListStyle
+                  : settings.currentListStyle;
+              final isGrid = activeStyle.isGrid;
+
+              return WidgetUtils.responsiveConstraint(
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
+                    child: BrowseResultsBody(
+                      error: _error,
+                      isLoading: _isLoading,
+                      results: _results,
+                      sortBy: widget.sortBy,
+                      scrollController: _scrollController,
+                      onRetry: () => _fetchResults(initial: true),
+                      onSeriesTap: _navigateToDetail,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+                maxWidth: isGrid ? double.infinity : 800,
+              );
+            },
           ),
           floatingActionButton: _showBackToTop
               ? FloatingActionButton(

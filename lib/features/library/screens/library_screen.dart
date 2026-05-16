@@ -307,7 +307,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                 },
                 child: WidgetUtils.responsiveConstraint(
                   content,
-                  maxWidth: isGrid ? 1200 : 800,
+                  maxWidth: isGrid ? double.infinity : 800,
                 ),
               );
             },
