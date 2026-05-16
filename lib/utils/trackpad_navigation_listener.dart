@@ -18,7 +18,7 @@ class TrackpadNavigationListener extends StatefulWidget {
 
 class _TrackpadNavigationListenerState extends State<TrackpadNavigationListener> {
   double _cumulativeDelta = 0;
-  static const double _threshold = 100.0;
+  static const double _threshold = 250.0;
   DateTime? _lastNavigationTime;
   static const Duration _cooldown = Duration(milliseconds: 500);
 
