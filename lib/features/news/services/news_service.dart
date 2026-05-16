@@ -39,9 +39,6 @@ class NewsService {
     try {
       final contentPrefs = SettingsManager().contentPreferences;
       String url = '$_baseUrl?page=$page&limit=$limit';
-      for (var pref in contentPrefs) {
-        url += '&content_rating=$pref';
-      }
       
       _logger.info('Fetching news from: $url');
       final response = await http.get(

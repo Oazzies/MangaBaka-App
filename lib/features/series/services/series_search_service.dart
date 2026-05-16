@@ -61,6 +61,9 @@ class SeriesSearchService {
 
     if (extraParams != null) {
       finalQueryParams.addAll(extraParams);
+      if (query.isNotEmpty) {
+        finalQueryParams.remove('sort_by');
+      }
     }
 
     final uri = Uri.parse(_baseUrl).replace(
@@ -89,6 +92,11 @@ class SeriesSearchService {
         try {
           final json = jsonDecode(response.body);
           final List data = json['data'] ?? [];
+          if (data.isNotEmpty) {
+            _logger.fine('Search result sample item keys: ${data.first.keys.toList()}');
+            _logger.fine('Search result sample item rating: ${data.first['rating']}');
+            _logger.fine('Search result sample item popularity: ${data.first['popularity']}');
+          }
           final results = data
               .map((item) => Series.fromJson(item as Map<String, dynamic>))
               .where((s) {
@@ -103,6 +111,10 @@ class SeriesSearchService {
                   final rating = double.tryParse(s.rating) ?? 0;
                   if (ratingLower != null && rating < ratingLower) return false;
                   if (ratingUpper != null && rating > ratingUpper) return false;
+                } else if (sortBy != null && sortBy.startsWith('score_')) {
+                  // Explicitly exclude unrated series when sorting by community rating
+                  final rating = double.tryParse(s.rating) ?? 0;
+                  if (rating == 0) return false;
                 }
                 
                 return true;
@@ -185,7 +197,7 @@ class SeriesSearchService {
     if (query.isNotEmpty) {
       queryParams['q'] = query;
     }
-    if (sortBy != null && sortBy.isNotEmpty) {
+    if (sortBy != null && sortBy.isNotEmpty && query.isEmpty) {
       queryParams['sort_by'] = sortBy;
     }
     if (type != null && type.isNotEmpty) {
@@ -202,6 +214,11 @@ class SeriesSearchService {
 
     if (extraParams != null) {
       finalQueryParams.addAll(extraParams);
+      // Backend ignores 'q' if 'sort_by' is present, so we remove it here 
+      // if we have a search query.
+      if (query.isNotEmpty) {
+        finalQueryParams.remove('sort_by');
+      }
     }
 
     final uri = Uri.parse(_baseUrl).replace(
@@ -214,7 +231,6 @@ class SeriesSearchService {
     );
 
     _logger.info('Performing series search. URI: $uri');
-
     try {
       final response = await _client
           .get(uri, headers: {'User-Agent': AppConstants.userAgent})
@@ -226,8 +242,9 @@ class SeriesSearchService {
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
-        final List data = json['data'] ?? [];
         final total = json['total'] as int? ?? 0;
+        _logger.info('Series search returned total: $total');
+        final List data = json['data'] ?? [];
         
         final results = data
             .map((item) => Series.fromJson(item as Map<String, dynamic>))
@@ -243,6 +260,10 @@ class SeriesSearchService {
                 final rating = double.tryParse(s.rating) ?? 0;
                 if (ratingLower != null && rating < ratingLower) return false;
                 if (ratingUpper != null && rating > ratingUpper) return false;
+              } else if (sortBy != null && sortBy.startsWith('score_')) {
+                // Explicitly exclude unrated series when sorting by community rating
+                final rating = double.tryParse(s.rating) ?? 0;
+                if (rating == 0) return false;
               }
               
               return true;
@@ -255,6 +276,9 @@ class SeriesSearchService {
         
         return SeriesSearchResult(series: results, total: total);
       } else {
+        _logger.severe(
+          'Series search failed. Status: ${response.statusCode}, Body: ${response.body}',
+        );
         throw ApiException(
           message: 'Failed to search series',
           statusCode: response.statusCode,

@@ -160,7 +160,13 @@ class SearchFilters {
     if (tag.isNotEmpty) map['tag'] = tag;
     if (tagNot.isNotEmpty) map['tag_not'] = tagNot;
 
-    if (sortBy != null && sortBy!.isNotEmpty) map['sort_by'] = sortBy;
+    if (sortBy != null && sortBy!.isNotEmpty) {
+      map['sort_by'] = sortBy;
+      // Automatically exclude unrated series when sorting by community rating
+      if (sortBy!.startsWith('score_') && ratingLower == 0) {
+        map['rating_lower'] = 1;
+      }
+    }
     if (ratingLower > 0) map['rating_lower'] = ratingLower.toInt();
     if (ratingUpper < 100) map['rating_upper'] = ratingUpper.toInt();
 

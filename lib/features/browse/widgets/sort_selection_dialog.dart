@@ -14,48 +14,66 @@ class SortSelectionDialog {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (BuildContext dialogContext) {
         return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(dialogContext).size.height * 0.7,
+          ),
           decoration: BoxDecoration(
             color: AppConstants.secondaryBackground,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 60),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 12),
               _buildHeader(),
               const SizedBox(height: 24),
-              Text(
-                l10n.translate('sort_by'),
-                style: TextStyle(
-                  color: AppConstants.textColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  l10n.translate('sort_by'),
+                  style: TextStyle(
+                    color: AppConstants.textColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              const SizedBox(height: 24),
-              ...sortOptions.entries.map((e) {
-                final isSelected = currentFilters.sortBy == e.key;
-                return _SelectionTile(
-                  label: e.value,
-                  isSelected: isSelected,
-                  onTap: () {
-                    onSortSelected(e.key);
-                    Navigator.pop(dialogContext);
-                  },
-                );
-              }),
-              _SelectionTile(
-                label: l10n.translate('default'),
-                isSelected: currentFilters.sortBy == null,
-                onTap: () {
-                  onSortSelected(null);
-                  Navigator.pop(dialogContext);
-                },
-                isLast: true,
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...sortOptions.entries.map((e) {
+                        final isSelected = currentFilters.sortBy == e.key;
+                        return _SelectionTile(
+                          label: e.value,
+                          isSelected: isSelected,
+                          onTap: () {
+                            onSortSelected(e.key);
+                            Navigator.pop(dialogContext);
+                          },
+                        );
+                      }),
+                      _SelectionTile(
+                        label: l10n.translate('default'),
+                        isSelected: currentFilters.sortBy == null,
+                        onTap: () {
+                          onSortSelected(null);
+                          Navigator.pop(dialogContext);
+                        },
+                        isLast: true,
+                      ),
+                    ],
+                  ),
+                ),
               ),
+              const SafeArea(child: SizedBox(height: 24)),
             ],
           ),
         );

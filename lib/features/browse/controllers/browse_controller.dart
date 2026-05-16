@@ -254,11 +254,36 @@ class BrowseController extends ChangeNotifier {
       );
 
       final newResults = result.series;
-      _totalResults = result.total;
+      
+      // Handle the total results (API sometimes returns 0 even with data)
+      _totalResults = result.total > 0 ? result.total : (newResults.length < AppConstants.defaultPageLimit ? _seriesResults.length + newResults.length : 1000);
 
       _logger.info(
         'Fetched ${newResults.length} series results for page $_currentPage (Total: $_totalResults)',
       );
+
+      // HYBRID SORT: If searching and a custom sort is active, the API might ignore the query.
+      // We perform a local sort on the fetched results to ensure the most relevant ones appear at the top
+      // according to the user's chosen sort order.
+      if (_currentSearchQuery.isNotEmpty && _currentFilters.sortBy != null) {
+        final sortBy = _currentFilters.sortBy!;
+        _logger.fine('Applying local sort for query "$_currentSearchQuery": $sortBy');
+        
+        newResults.sort((a, b) {
+          if (sortBy.startsWith('score_')) {
+            final rA = double.tryParse(a.rating) ?? 0.0;
+            final rB = double.tryParse(b.rating) ?? 0.0;
+            return sortBy == 'score_desc' ? rB.compareTo(rA) : rA.compareTo(rB);
+          } else if (sortBy.startsWith('popularity_')) {
+            // Since we don't have the raw popularity rank easily accessible as a number in the model
+            // we'll stick to relevance if we can't sort accurately, but for score it's perfect.
+            return 0; 
+          } else if (sortBy.startsWith('name_')) {
+            return sortBy == 'name_desc' ? b.title.compareTo(a.title) : a.title.compareTo(b.title);
+          }
+          return 0;
+        });
+      }
 
       _hasMore = newResults.length == AppConstants.defaultPageLimit;
       _isLoading = false;

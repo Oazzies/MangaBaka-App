@@ -61,5 +61,21 @@ void main() {
       expect(map.containsKey('rating_lower'), isFalse); // Default is 0
       expect(map.containsKey('rating_upper'), isFalse); // Default is 100
     });
+
+    test('toMap adds rating_lower=1 when sorting by community rating if not set', () {
+      final filters = SearchFilters(sortBy: 'score_desc');
+      final map = filters.toMap();
+
+      expect(map['sort_by'], 'score_desc');
+      expect(map['rating_lower'], 1);
+    });
+
+    test('toMap respects explicit rating_lower when sorting by community rating', () {
+      final filters = SearchFilters(sortBy: 'score_desc', ratingLower: 50);
+      final map = filters.toMap();
+
+      expect(map['sort_by'], 'score_desc');
+      expect(map['rating_lower'], 50);
+    });
   });
 }

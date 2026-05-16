@@ -7,11 +7,13 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 class ShortcutSection extends StatelessWidget {
   final String header;
   final VoidCallback onMostPopular;
+  final VoidCallback? onTopRated;
   final VoidCallback onRandom;
 
   const ShortcutSection({
     required this.header,
     required this.onMostPopular,
+    this.onTopRated,
     required this.onRandom,
     super.key,
   });
@@ -43,12 +45,23 @@ class ShortcutSection extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(right: 3.0),
                       child: ShortcutButton(
-                        icon: Icons.star_outline,
+                        icon: Icons.trending_up_rounded,
                         label: l10n.translate('most_popular'),
                         onPressed: onMostPopular,
                       ),
                     ),
                   ),
+                  if (onTopRated != null)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                        child: ShortcutButton(
+                          icon: Icons.star_outline,
+                          label: l10n.translate('top_rated'),
+                          onPressed: onTopRated!,
+                        ),
+                      ),
+                    ),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(left: 3.0),

@@ -46,6 +46,8 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
       'name_desc': l10n.translate('title_desc'),
       'popularity_asc': l10n.translate('popularity_asc'),
       'popularity_desc': l10n.translate('popularity_desc'),
+      'score_desc': l10n.translate('rating_desc'),
+      'score_asc': l10n.translate('rating_asc'),
       'random': l10n.translate('random_sort'),
     };
   }
