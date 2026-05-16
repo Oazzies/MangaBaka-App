@@ -26,6 +26,13 @@ class SettingsManager extends ChangeNotifier {
     _instance._newsListColumns = 1;
     _instance._showTooltips = true;
     _instance._blurredContentRatings = [];
+    _instance._separateGridColumnCounts = false;
+    _instance._gridColumnCountPortrait = 0;
+    _instance._gridColumnCountLandscape = 0;
+    _instance._libraryGridColumnCountPortrait = 0;
+    _instance._libraryGridColumnCountLandscape = 0;
+    _instance._browseGridColumnCountPortrait = 0;
+    _instance._browseGridColumnCountLandscape = 0;
   }
 
   AppListStyle _currentListStyle = AppListStyle.compactGrid;
@@ -77,6 +84,27 @@ class SettingsManager extends ChangeNotifier {
 
   List<String> _blurredContentRatings = [];
   List<String> get blurredContentRatings => _blurredContentRatings;
+
+  bool _separateGridColumnCounts = false;
+  bool get separateGridColumnCounts => _separateGridColumnCounts;
+
+  int _gridColumnCountPortrait = 0;
+  int get gridColumnCountPortrait => _gridColumnCountPortrait;
+
+  int _gridColumnCountLandscape = 0;
+  int get gridColumnCountLandscape => _gridColumnCountLandscape;
+
+  int _libraryGridColumnCountPortrait = 0;
+  int get libraryGridColumnCountPortrait => _libraryGridColumnCountPortrait;
+
+  int _libraryGridColumnCountLandscape = 0;
+  int get libraryGridColumnCountLandscape => _libraryGridColumnCountLandscape;
+
+  int _browseGridColumnCountPortrait = 0;
+  int get browseGridColumnCountPortrait => _browseGridColumnCountPortrait;
+
+  int _browseGridColumnCountLandscape = 0;
+  int get browseGridColumnCountLandscape => _browseGridColumnCountLandscape;
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -132,6 +160,14 @@ class SettingsManager extends ChangeNotifier {
 
     _showTooltips = prefs.getBool(SettingsKeys.showTooltips) ?? true;
     _blurredContentRatings = prefs.getStringList(SettingsKeys.blurredContentRatings) ?? [];
+
+    _separateGridColumnCounts = prefs.getBool(SettingsKeys.separateGridColumnCounts) ?? false;
+    _gridColumnCountPortrait = prefs.getInt(SettingsKeys.gridColumnCountPortrait) ?? 0;
+    _gridColumnCountLandscape = prefs.getInt(SettingsKeys.gridColumnCountLandscape) ?? 0;
+    _libraryGridColumnCountPortrait = prefs.getInt(SettingsKeys.libraryGridColumnCountPortrait) ?? 0;
+    _libraryGridColumnCountLandscape = prefs.getInt(SettingsKeys.libraryGridColumnCountLandscape) ?? 0;
+    _browseGridColumnCountPortrait = prefs.getInt(SettingsKeys.browseGridColumnCountPortrait) ?? 0;
+    _browseGridColumnCountLandscape = prefs.getInt(SettingsKeys.browseGridColumnCountLandscape) ?? 0;
 
     notifyListeners();
   }
@@ -261,6 +297,62 @@ class SettingsManager extends ChangeNotifier {
     _blurredContentRatings = ratings;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(SettingsKeys.blurredContentRatings, ratings);
+    notifyListeners();
+  }
+
+  Future<void> setSeparateGridColumnCounts(bool value) async {
+    if (_separateGridColumnCounts == value) return;
+    _separateGridColumnCounts = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(SettingsKeys.separateGridColumnCounts, value);
+    notifyListeners();
+  }
+
+  Future<void> setGridColumnCountPortrait(int value) async {
+    if (_gridColumnCountPortrait == value) return;
+    _gridColumnCountPortrait = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.gridColumnCountPortrait, value);
+    notifyListeners();
+  }
+
+  Future<void> setGridColumnCountLandscape(int value) async {
+    if (_gridColumnCountLandscape == value) return;
+    _gridColumnCountLandscape = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.gridColumnCountLandscape, value);
+    notifyListeners();
+  }
+
+  Future<void> setLibraryGridColumnCountPortrait(int value) async {
+    if (_libraryGridColumnCountPortrait == value) return;
+    _libraryGridColumnCountPortrait = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.libraryGridColumnCountPortrait, value);
+    notifyListeners();
+  }
+
+  Future<void> setLibraryGridColumnCountLandscape(int value) async {
+    if (_libraryGridColumnCountLandscape == value) return;
+    _libraryGridColumnCountLandscape = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.libraryGridColumnCountLandscape, value);
+    notifyListeners();
+  }
+
+  Future<void> setBrowseGridColumnCountPortrait(int value) async {
+    if (_browseGridColumnCountPortrait == value) return;
+    _browseGridColumnCountPortrait = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.browseGridColumnCountPortrait, value);
+    notifyListeners();
+  }
+
+  Future<void> setBrowseGridColumnCountLandscape(int value) async {
+    if (_browseGridColumnCountLandscape == value) return;
+    _browseGridColumnCountLandscape = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.browseGridColumnCountLandscape, value);
     notifyListeners();
   }
 }

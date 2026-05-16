@@ -32,15 +32,27 @@ class BrowseResultsList extends StatelessWidget {
         final isGrid = activeStyle.isGrid;
 
         if (isGrid) {
+          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+          final columns = settings.separateGridColumnCounts
+              ? (isLandscape ? settings.browseGridColumnCountLandscape : settings.browseGridColumnCountPortrait)
+              : (isLandscape ? settings.gridColumnCountLandscape : settings.gridColumnCountPortrait);
+
           return GridView.builder(
             controller: scrollController,
             padding: const EdgeInsets.symmetric(vertical: 12),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
+            gridDelegate: columns > 0
+                ? SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  )
+                : const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 160,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
             itemCount: results.length + (isLoading && results.isNotEmpty ? 1 : 0),
             itemBuilder: (context, index) {
               if (index >= results.length) {

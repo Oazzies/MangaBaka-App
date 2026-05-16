@@ -51,50 +51,67 @@ class LibraryGridList extends StatelessWidget {
   }
 
   Widget _buildList(BuildContext context) {
-    final settings = SettingsManager();
-    final seriesService = getIt<SeriesService>();
-    final isGrid = settings.separateListStyles
-        ? settings.libraryListStyle.isGrid
-        : settings.currentListStyle.isGrid;
+    return ListenableBuilder(
+      listenable: SettingsManager(),
+      builder: (context, _) {
+        final settings = SettingsManager();
+        final seriesService = getIt<SeriesService>();
+        final isGrid = settings.separateListStyles
+            ? settings.libraryListStyle.isGrid
+            : settings.currentListStyle.isGrid;
 
-    if (isGrid) {
-      return GridView.builder(
-        controller: scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 160,
-          childAspectRatio: 0.65,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-        ),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final entry = items[index];
-          return MouseRegion(
-            onEnter: (_) => seriesService.fetchSeries(entry.series.id),
-            child: GestureDetector(
-              onTap: () => onItemTap(entry.series),
-              child: EntryListItem(series: entry.series, isLibrary: true),
-            ),
+        if (isGrid) {
+          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+          final columns = settings.separateGridColumnCounts
+              ? (isLandscape ? settings.libraryGridColumnCountLandscape : settings.libraryGridColumnCountPortrait)
+              : (isLandscape ? settings.gridColumnCountLandscape : settings.gridColumnCountPortrait);
+
+          return GridView.builder(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(12),
+            gridDelegate: columns > 0
+                ? SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  )
+                : const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 160,
+                    childAspectRatio: 0.65,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final entry = items[index];
+              return MouseRegion(
+                onEnter: (_) => seriesService.fetchSeries(entry.series.id),
+                child: GestureDetector(
+                  onTap: () => onItemTap(entry.series),
+                  child: EntryListItem(series: entry.series, isLibrary: true),
+                ),
+              );
+            },
           );
-        },
-      );
-    }
+        }
 
-    return ListView.builder(
-      controller: scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final entry = items[index];
-        return MouseRegion(
-          onEnter: (_) => seriesService.fetchSeries(entry.series.id),
-          child: GestureDetector(
-            onTap: () => onItemTap(entry.series),
-            child: EntryListItem(series: entry.series, isLibrary: true),
-          ),
+        return ListView.builder(
+          controller: scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final entry = items[index];
+            return MouseRegion(
+              onEnter: (_) => seriesService.fetchSeries(entry.series.id),
+              child: GestureDetector(
+                onTap: () => onItemTap(entry.series),
+                child: EntryListItem(series: entry.series, isLibrary: true),
+              ),
+            );
+          },
         );
       },
     );

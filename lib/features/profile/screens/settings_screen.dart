@@ -17,6 +17,7 @@ import 'package:mangabaka_app/features/profile/widgets/dialogs/content_preferenc
 import 'package:mangabaka_app/features/profile/screens/logs_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/translation_credits_screen.dart';
 import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart';
+import 'package:mangabaka_app/features/profile/widgets/dialogs/grid_column_dialogs.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -294,6 +295,7 @@ class SettingsScreen extends StatelessWidget {
                     onChanged: (val) => SettingsManager().setSeparateListStyles(val),
                     isLast: !SettingsManager().separateListStyles,
                   ),
+
                   if (SettingsManager().separateListStyles) ...[
                     const SettingsDivider(),
                     SettingsItem(
@@ -308,6 +310,59 @@ class SettingsScreen extends StatelessWidget {
                       title: l10n.translate('browse_list_style'),
                       subtitle: ListStyleDialogs.getListStyleName(SettingsManager().browseListStyle),
                       onTap: () => ListStyleDialogs.showBrowseListStyleSelectionDialog(context),
+                    ),
+                  ],
+                  const SettingsDivider(),
+                  SettingsItem(
+                    icon: Icons.view_column_outlined,
+                    title: l10n.translate('grid_columns_portrait'),
+                    subtitle: GridColumnDialogs.getGridColumnLabel(SettingsManager().gridColumnCountPortrait),
+                    onTap: () => GridColumnDialogs.showGridColumnCountPortraitDialog(context),
+                  ),
+                  const SettingsDivider(),
+                  SettingsItem(
+                    icon: Icons.view_column_outlined,
+                    title: l10n.translate('grid_columns_landscape'),
+                    subtitle: GridColumnDialogs.getGridColumnLabel(SettingsManager().gridColumnCountLandscape),
+                    onTap: () => GridColumnDialogs.showGridColumnCountLandscapeDialog(context),
+                  ),
+                  const SettingsDivider(),
+                  SettingsSwitchItem(
+                    icon: Icons.grid_on_outlined,
+                    title: l10n.translate('separate_grid_columns'),
+                    subtitle: l10n.translate('separate_grid_columns_subtitle'),
+                    value: SettingsManager().separateGridColumnCounts,
+                    onChanged: (val) => SettingsManager().setSeparateGridColumnCounts(val),
+                    isLast: !SettingsManager().separateGridColumnCounts,
+                  ),
+                  if (SettingsManager().separateGridColumnCounts) ...[
+                    const SettingsDivider(),
+                    SettingsItem(
+                      icon: Icons.library_books_outlined,
+                      title: l10n.translate('library_grid_columns_portrait'),
+                      subtitle: GridColumnDialogs.getGridColumnLabel(SettingsManager().libraryGridColumnCountPortrait),
+                      onTap: () => GridColumnDialogs.showLibraryGridColumnCountPortraitDialog(context),
+                    ),
+                    const SettingsDivider(),
+                    SettingsItem(
+                      icon: Icons.library_books_outlined,
+                      title: l10n.translate('library_grid_columns_landscape'),
+                      subtitle: GridColumnDialogs.getGridColumnLabel(SettingsManager().libraryGridColumnCountLandscape),
+                      onTap: () => GridColumnDialogs.showLibraryGridColumnCountLandscapeDialog(context),
+                    ),
+                    const SettingsDivider(),
+                    SettingsItem(
+                      icon: Icons.explore_outlined,
+                      title: l10n.translate('browse_grid_columns_portrait'),
+                      subtitle: GridColumnDialogs.getGridColumnLabel(SettingsManager().browseGridColumnCountPortrait),
+                      onTap: () => GridColumnDialogs.showBrowseGridColumnCountPortraitDialog(context),
+                    ),
+                    const SettingsDivider(),
+                    SettingsItem(
+                      icon: Icons.explore_outlined,
+                      title: l10n.translate('browse_grid_columns_landscape'),
+                      subtitle: GridColumnDialogs.getGridColumnLabel(SettingsManager().browseGridColumnCountLandscape),
+                      onTap: () => GridColumnDialogs.showBrowseGridColumnCountLandscapeDialog(context),
                       isLast: true,
                     ),
                   ],
