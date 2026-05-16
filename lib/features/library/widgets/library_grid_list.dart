@@ -61,12 +61,11 @@ class LibraryGridList extends StatelessWidget {
             : settings.currentListStyle.isGrid;
 
         if (isGrid) {
-          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
           final columns = settings.separateGridColumnCounts
-              ? (isLandscape ? settings.libraryGridColumnCountLandscape : settings.libraryGridColumnCountPortrait)
-              : (isLandscape ? settings.gridColumnCountLandscape : settings.gridColumnCountPortrait);
+              ? settings.libraryGridColumnCount
+              : settings.gridColumnCount;
 
-          return GridView.builder(
+          Widget grid = GridView.builder(
             controller: scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(12),
@@ -95,6 +94,19 @@ class LibraryGridList extends StatelessWidget {
               );
             },
           );
+
+          if (columns > 0) {
+            final expectedWidth = columns * 160.0 + (columns - 1) * 10.0 + 24.0;
+            return Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: expectedWidth),
+                child: grid,
+              ),
+            );
+          }
+
+          return grid;
         }
 
         return ListView.builder(

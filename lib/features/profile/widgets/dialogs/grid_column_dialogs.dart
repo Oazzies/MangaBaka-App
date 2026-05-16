@@ -9,87 +9,45 @@ class GridColumnDialogs {
     return val == 0 ? l10n.translate('grid_columns_auto') : val.toString();
   }
 
-  static void showGridColumnCountPortraitDialog(BuildContext context) {
+  static void showGridColumnCountDialog(BuildContext context) {
     final l10n = LocalizationService();
     final settings = SettingsManager();
     SelectionBottomSheet.showSelectionBottomSheet<int>(
       context: context,
-      title: l10n.translate('grid_columns_portrait'),
-      subtitle: l10n.translate('grid_columns_subtitle'),
-      options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      currentValue: settings.gridColumnCountPortrait,
-      getLabel: getGridColumnLabel,
-      onSelected: (val) => settings.setGridColumnCountPortrait(val),
-    );
-  }
-
-  static void showGridColumnCountLandscapeDialog(BuildContext context) {
-    final l10n = LocalizationService();
-    final settings = SettingsManager();
-    SelectionBottomSheet.showSelectionBottomSheet<int>(
-      context: context,
-      title: l10n.translate('grid_columns_landscape'),
+      title: l10n.translate('grid_columns'),
       subtitle: l10n.translate('grid_columns_subtitle'),
       options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      currentValue: settings.gridColumnCountLandscape,
+      currentValue: settings.gridColumnCount,
       getLabel: getGridColumnLabel,
-      onSelected: (val) => settings.setGridColumnCountLandscape(val),
+      onSelected: (val) => settings.setGridColumnCount(val),
     );
   }
 
-  static void showLibraryGridColumnCountPortraitDialog(BuildContext context) {
+  static void showLibraryGridColumnCountDialog(BuildContext context) {
     final l10n = LocalizationService();
     final settings = SettingsManager();
     SelectionBottomSheet.showSelectionBottomSheet<int>(
       context: context,
-      title: l10n.translate('library_grid_columns_portrait'),
-      subtitle: l10n.translate('grid_columns_subtitle'),
-      options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      currentValue: settings.libraryGridColumnCountPortrait,
-      getLabel: getGridColumnLabel,
-      onSelected: (val) => settings.setLibraryGridColumnCountPortrait(val),
-    );
-  }
-
-  static void showLibraryGridColumnCountLandscapeDialog(BuildContext context) {
-    final l10n = LocalizationService();
-    final settings = SettingsManager();
-    SelectionBottomSheet.showSelectionBottomSheet<int>(
-      context: context,
-      title: l10n.translate('library_grid_columns_landscape'),
+      title: l10n.translate('library_grid_columns'),
       subtitle: l10n.translate('grid_columns_subtitle'),
       options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      currentValue: settings.libraryGridColumnCountLandscape,
+      currentValue: settings.libraryGridColumnCount,
       getLabel: getGridColumnLabel,
-      onSelected: (val) => settings.setLibraryGridColumnCountLandscape(val),
+      onSelected: (val) => settings.setLibraryGridColumnCount(val),
     );
   }
 
-  static void showBrowseGridColumnCountPortraitDialog(BuildContext context) {
+  static void showBrowseGridColumnCountDialog(BuildContext context) {
     final l10n = LocalizationService();
     final settings = SettingsManager();
     SelectionBottomSheet.showSelectionBottomSheet<int>(
       context: context,
-      title: l10n.translate('browse_grid_columns_portrait'),
-      subtitle: l10n.translate('grid_columns_subtitle'),
-      options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      currentValue: settings.browseGridColumnCountPortrait,
-      getLabel: getGridColumnLabel,
-      onSelected: (val) => settings.setBrowseGridColumnCountPortrait(val),
-    );
-  }
-
-  static void showBrowseGridColumnCountLandscapeDialog(BuildContext context) {
-    final l10n = LocalizationService();
-    final settings = SettingsManager();
-    SelectionBottomSheet.showSelectionBottomSheet<int>(
-      context: context,
-      title: l10n.translate('browse_grid_columns_landscape'),
+      title: l10n.translate('browse_grid_columns'),
       subtitle: l10n.translate('grid_columns_subtitle'),
       options: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      currentValue: settings.browseGridColumnCountLandscape,
+      currentValue: settings.browseGridColumnCount,
       getLabel: getGridColumnLabel,
-      onSelected: (val) => settings.setBrowseGridColumnCountLandscape(val),
+      onSelected: (val) => settings.setBrowseGridColumnCount(val),
     );
   }
 }

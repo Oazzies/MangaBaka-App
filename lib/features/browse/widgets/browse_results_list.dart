@@ -32,12 +32,11 @@ class BrowseResultsList extends StatelessWidget {
         final isGrid = activeStyle.isGrid;
 
         if (isGrid) {
-          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
           final columns = settings.separateGridColumnCounts
-              ? (isLandscape ? settings.browseGridColumnCountLandscape : settings.browseGridColumnCountPortrait)
-              : (isLandscape ? settings.gridColumnCountLandscape : settings.gridColumnCountPortrait);
+              ? settings.browseGridColumnCount
+              : settings.gridColumnCount;
 
-          return GridView.builder(
+          Widget grid = GridView.builder(
             controller: scrollController,
             padding: const EdgeInsets.symmetric(vertical: 12),
             gridDelegate: columns > 0
@@ -68,6 +67,19 @@ class BrowseResultsList extends StatelessWidget {
               );
             },
           );
+
+          if (columns > 0) {
+            final expectedWidth = columns * 160.0 + (columns - 1) * 10.0;
+            return Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: expectedWidth),
+                child: grid,
+              ),
+            );
+          }
+
+          return grid;
         }
 
         return ListView.builder(

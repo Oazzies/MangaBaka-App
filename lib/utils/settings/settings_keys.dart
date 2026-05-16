@@ -18,10 +18,7 @@ class SettingsKeys {
   static const String showTooltips = '${AppConstants.prefixStorageKey}show_tooltips';
   static const String blurredContentRatings = '${AppConstants.prefixStorageKey}blurred_content_ratings';
   static const String separateGridColumnCounts = '${AppConstants.prefixStorageKey}separate_grid_column_counts';
-  static const String gridColumnCountPortrait = '${AppConstants.prefixStorageKey}grid_column_count_portrait';
-  static const String gridColumnCountLandscape = '${AppConstants.prefixStorageKey}grid_column_count_landscape';
-  static const String libraryGridColumnCountPortrait = '${AppConstants.prefixStorageKey}library_grid_column_count_portrait';
-  static const String libraryGridColumnCountLandscape = '${AppConstants.prefixStorageKey}library_grid_column_count_landscape';
-  static const String browseGridColumnCountPortrait = '${AppConstants.prefixStorageKey}browse_grid_column_count_portrait';
-  static const String browseGridColumnCountLandscape = '${AppConstants.prefixStorageKey}browse_grid_column_count_landscape';
+  static const String gridColumnCount = '${AppConstants.prefixStorageKey}grid_column_count';
+  static const String libraryGridColumnCount = '${AppConstants.prefixStorageKey}library_grid_column_count';
+  static const String browseGridColumnCount = '${AppConstants.prefixStorageKey}browse_grid_column_count';
 }
