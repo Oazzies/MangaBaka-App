@@ -160,6 +160,7 @@ class FilterChipsRow extends StatelessWidget {
       onDeleted: onDeleted,
       deleteIcon: Icon(Icons.close_rounded, size: 14, color: color),
       backgroundColor: bgColor,
+      side: BorderSide.none,
       labelStyle: TextStyle(
         color: color,
         fontSize: 12,
@@ -169,7 +170,6 @@ class FilterChipsRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide.none,
       ),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       visualDensity: VisualDensity.compact,
