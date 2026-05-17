@@ -50,6 +50,7 @@ dev_dependencies:
   build_runner: ^2.13.1
   flutter_launcher_icons: ^0.14.4
   msix: ^3.16.9
+  sqlite3: ^3.3.1
 
 
 

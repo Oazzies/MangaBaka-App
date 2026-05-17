@@ -96,7 +96,6 @@ void main() {
       final indices = indexNames
           .map((row) => row.read<String>('name'))
           .toList();
-      print('Existing indices: $indices');
       expect(indices, contains('series_title_idx'));
       expect(indices, contains('library_series_idx'));
       expect(indices, contains('library_state_idx'));
