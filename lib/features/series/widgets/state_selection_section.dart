@@ -51,7 +51,7 @@ class StateSelectionSection extends StatelessWidget {
                       : null,
                   style: MenuItemButton.styleFrom(
                     foregroundColor: AppConstants.textColor,
-                    backgroundColor: isSelected ? AppConstants.accentColor.withOpacity(0.1) : null,
+                    backgroundColor: isSelected ? AppConstants.accentColor.withValues(alpha: 0.1) : null,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                 );

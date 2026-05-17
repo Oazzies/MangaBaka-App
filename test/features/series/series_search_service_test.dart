@@ -52,10 +52,13 @@ void main() {
     fakeSeriesService = FakeSeriesService();
     getIt.registerSingleton<SeriesService>(fakeSeriesService);
     
-    const MethodChannel('plugins.flutter.io/path_provider')
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      return '.';
-    });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        return '.';
+      },
+    );
     SharedPreferences.setMockInitialValues({});
     await SettingsManager().init();
     

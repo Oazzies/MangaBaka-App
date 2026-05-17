@@ -49,7 +49,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   late double _currentRandomSeed;
 
 
-  int? _totalResults;
   String? _error;
   bool _showBackToTop = false;
 
@@ -136,7 +135,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       setState(() {
         if (initial) {
           _results.clear();
-          _totalResults = total;
         }
         _results.addAll(newResults);
         _hasMore = newResults.length == AppConstants.defaultPageLimit;

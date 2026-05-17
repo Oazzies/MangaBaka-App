@@ -62,7 +62,7 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _handlePress(context, widget.entry!),
+              onTap: () => _handlePress(widget.entry!),
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 height: 38,
@@ -90,7 +90,7 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
     );
   }
 
-  Future<void> _handlePress(BuildContext context, LibraryEntry entry) async {
+  Future<void> _handlePress(LibraryEntry entry) async {
     final libraryService = getIt<LibraryService>();
 
     final currentProgress = _optimisticProgress ?? entry.progressChapter ?? 0;

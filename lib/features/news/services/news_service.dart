@@ -5,7 +5,6 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:flutter/foundation.dart';
 
 class NewsService {
@@ -37,7 +36,6 @@ class NewsService {
     _isFetching = true;
 
     try {
-      final contentPrefs = SettingsManager().contentPreferences;
       String url = '$_baseUrl?page=$page&limit=$limit';
       
       _logger.info('Fetching news from: $url');

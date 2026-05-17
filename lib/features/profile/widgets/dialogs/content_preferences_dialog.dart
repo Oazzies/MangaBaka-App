@@ -165,7 +165,7 @@ class ContentPreferencesDialogs {
                                         }
                                         SettingsManager().setBlurredContentRatings(newBlurred);
                                       },
-                                      activeColor: AppConstants.accentColor,
+                                      activeThumbColor: AppConstants.accentColor,
                                       activeTrackColor: AppConstants.accentColor.withValues(alpha: 0.3),
                                     ),
                                   ),

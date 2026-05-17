@@ -357,8 +357,9 @@ class BrowseController extends ChangeNotifier {
 
     for (var series in newSeriesResults) {
       for (var author in series.authors) {
-        if (queryLower.isNotEmpty && !author.toLowerCase().contains(queryLower))
+        if (queryLower.isNotEmpty && !author.toLowerCase().contains(queryLower)) {
           continue;
+        }
 
         if (!staffMap.containsKey(author)) {
           staffMap[author] = Staff(
@@ -378,8 +379,9 @@ class BrowseController extends ChangeNotifier {
         }
       }
       for (var artist in series.artists) {
-        if (queryLower.isNotEmpty && !artist.toLowerCase().contains(queryLower))
+        if (queryLower.isNotEmpty && !artist.toLowerCase().contains(queryLower)) {
           continue;
+        }
 
         if (!staffMap.containsKey(artist)) {
           staffMap[artist] = Staff(

@@ -48,10 +48,13 @@ class MockSeriesService extends Fake implements SeriesService {}
 
 void main() {
   setUp(() async {
-    const MethodChannel('plugins.flutter.io/path_provider')
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      return '.';
-    });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (MethodCall methodCall) async {
+        return '.';
+      },
+    );
     SharedPreferences.setMockInitialValues({});
     await resetServiceLocator();
     await SettingsManager().init();

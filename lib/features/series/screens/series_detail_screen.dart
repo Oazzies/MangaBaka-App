@@ -24,7 +24,6 @@ import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.da
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
-import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
