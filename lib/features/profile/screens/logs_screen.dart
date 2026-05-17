@@ -168,7 +168,7 @@ class _LogsScreenState extends State<LogsScreen> {
                       label: Text(l10n.translate('save_logs')),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppConstants.accentColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(

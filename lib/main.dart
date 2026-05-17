@@ -88,6 +88,8 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
   ThemeData? _cachedLightTheme;
   ThemeData? _cachedDarkTheme;
   bool? _lastShowTooltips;
+  AppTheme? _lastTheme;
+  bool? _lastIsDarkMode;
   bool _showSplash = true;
 
   @override
@@ -101,12 +103,22 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
       builder: (context, _) {
         final currentThemeMode = ThemeManager().currentThemeMode;
         final isDark = ThemeManager().isDarkMode;
+        final currentTheme = ThemeManager().currentTheme;
         final hasCompletedOnboarding = SettingsManager().hasCompletedOnboarding;
         final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
         final showTooltips = SettingsManager().showTooltips;
 
-        if (_cachedLightTheme == null || _cachedDarkTheme == null || _lastShowTooltips != showTooltips) {
+        if (_cachedLightTheme == null || 
+            _cachedDarkTheme == null || 
+            _lastShowTooltips != showTooltips ||
+            _lastTheme != currentTheme ||
+            _lastIsDarkMode != isDark) {
           _lastShowTooltips = showTooltips;
+          _lastTheme = currentTheme;
+          _lastIsDarkMode = isDark;
+
+          // Re-apply the current theme palette values to AppConstants before rebuilding ThemeData
+          AppConstants.setAppTheme(currentTheme, isDark);
           
           _cachedLightTheme = ThemeData(
             useMaterial3: true,

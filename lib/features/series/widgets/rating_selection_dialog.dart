@@ -147,7 +147,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
           },
           style: FilledButton.styleFrom(
             backgroundColor: AppConstants.accentColor,
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),

@@ -140,7 +140,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppConstants.accentColor,
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             elevation: 0,

@@ -13,6 +13,9 @@ import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 
+import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/library/models/library_entry.dart';
+
 class MockSeriesSearchService extends Fake implements SeriesSearchService {
   List<Series> response = [];
   bool wasCalled = false;
@@ -50,6 +53,11 @@ class MockPublisherSearchService extends Fake implements PublisherSearchService 
   }
 }
 
+class MockLibraryService extends Fake implements LibraryService {
+  @override
+  Stream<LibraryEntry?> watchEntryFromDb(String id) => Stream.value(null);
+}
+
 void main() {
   late MockSeriesSearchService mockSearchService;
 
@@ -68,6 +76,7 @@ void main() {
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
     getIt.registerSingleton<SeriesService>(MockSeriesService());
     getIt.registerSingleton<PublisherSearchService>(MockPublisherSearchService());
+    getIt.registerSingleton<LibraryService>(MockLibraryService());
   });
 
   Widget createWidgetUnderTest() {
