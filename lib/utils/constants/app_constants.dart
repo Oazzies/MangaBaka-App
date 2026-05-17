@@ -5,7 +5,7 @@ export 'package:mangabaka_app/utils/theme/app_theme_colors.dart' show AppTheme;
 
 class AppConstants {
   static const String appName = 'MangaBaka';
-  static const String appVersion = '0.1.0-pre-release-6';
+  static const String appVersion = '0.1.0-pre-release-7';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
   static const String authBaseUrl = 'https://mangabaka.org/auth/oauth2';
   static const String userAgent = '$appName/$appVersion (oazziesmail@gmail.com)';

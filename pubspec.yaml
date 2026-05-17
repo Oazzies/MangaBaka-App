@@ -1,7 +1,7 @@
 name: mangabaka_app
 description: "Official MangaBaka mobile app"
 publish_to: 'none'
-version: 0.1.0-pre-release-6+6
+version: 0.1.0-pre-release-7+7
 
 
 environment:
