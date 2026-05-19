@@ -208,18 +208,20 @@ jobs:
             xattr -cr "$APP_PATH"
             # 2. Grant executable permissions recursively to the bundle
             chmod -R +x "$APP_PATH"
-            # 3. Code-sign all internal .framework bundles manually to avoid "ambiguous bundle format" with deep signing
-            if [ -d "$APP_PATH/Contents/Frameworks" ]; then
-              find "$APP_PATH/Contents/Frameworks" -name "*.framework" -maxdepth 1 | while read -r framework; do
-                  framework_name=$(basename "$framework" .framework)
-                  binary_path="$framework/Versions/A/$framework_name"
-                  if [ -f "$binary_path" ]; then
-                      echo "Signing inner framework binary: $binary_path"
-                      codesign --force --sign - "$binary_path"
-                  fi
-              done
-            fi
-            # 4. Sign the top-level application bundle wrapper container
+            # 3. Sign all nested .dylib files individually
+            find "$APP_PATH" -name "*.dylib" | while read -r dylib; do
+                echo "Signing dylib: $dylib"
+                codesign --force --sign - "$dylib"
+            done
+            # 4. Sign all nested .framework bundles depth-first
+            find "$APP_PATH" -name "*.framework" -depth | while read -r framework; do
+                echo "Signing framework: $framework"
+                codesign --force --sign - "$framework"
+            done
+            # 5. Sign the main executable binary
+            echo "Signing main executable binary..."
+            codesign --force --sign - "$APP_PATH/Contents/MacOS/MangaBaka"
+            # 6. Sign the top-level application bundle wrapper container
             echo "Signing top-level bundle wrapper..."
             codesign --force --sign - "$APP_PATH"
           else
@@ -350,8 +352,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Write detailed, formatted release notes to a temporary file
+          cat << 'EOF' > release_notes.md
+          ### 🍎 macOS Users
+          Because this app is ad-hoc signed to maintain user privacy, macOS Gatekeeper will block it upon first launch.
+          
+          To run the app:
+          1. Extract the downloaded `MangaBaka.app` from the ZIP file.
+          2. Double-click the app. When the warning "MangaBaka cannot be opened..." appears, click **Cancel**.
+          3. Open **System Settings > Privacy & Security** on your Mac.
+          4. Scroll down to the **Security** section.
+          5. You will see a notice saying: *"MangaBaka was blocked from use because it is not from an identified developer."* Click **Open Anyway**.
+          6. Enter your Mac password, click **Open**, and enjoy!
+          
+          ---
+          *Manual draft release compiled via GitHub Actions.*
+          EOF
+          
           # Use GitHub's native CLI to create the release draft and attach all files
           gh release create "v${VERSION_CLEAN}" release-artifacts/* \
-            --title "v${VERSION_CLEAN}" \
+            --title "MangaBaka App v${VERSION_CLEAN}" \
             --draft \
-            --notes "Manual draft release for version ${VERSION_CLEAN} compiled via GitHub Actions."
+            --notes-file release_notes.md

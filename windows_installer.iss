@@ -15,17 +15,17 @@ SetupIconFile=windows\runner\resources\app_icon.ico
 ArchitecturesInstallIn64BitMode=x64
 DisableDirPage=yes
 DisableProgramGroupPage=yes
-UninstallDisplayIcon={app}\mangabaka_app.exe
+UninstallDisplayIcon={app}\MangaBaka.exe
 
 [Files]
 Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\MangaBaka"; Filename: "{app}\mangabaka_app.exe"
-Name: "{userdesktop}\MangaBaka"; Filename: "{app}\mangabaka_app.exe"; Tasks: desktopicon
+Name: "{group}\MangaBaka"; Filename: "{app}\MangaBaka.exe"
+Name: "{userdesktop}\MangaBaka"; Filename: "{app}\MangaBaka.exe"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Run]
-Filename: "{app}\mangabaka_app.exe"; Description: "{cm:LaunchProgram,MangaBaka}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\MangaBaka.exe"; Description: "{cm:LaunchProgram,MangaBaka}"; Flags: nowait postinstall skipifsilent
