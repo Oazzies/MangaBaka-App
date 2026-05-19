@@ -228,6 +228,34 @@ jobs:
       - name: Build macOS Application
         run: flutter build macos --release
 
+      - name: Fix Permissions and Apply Ad-Hoc Code Signing
+        run: |
+          APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1)
+          if [ -n "$APP_PATH" ]; then
+            echo "Found compiled app at: $APP_PATH"
+            # 1. Clear any broken quarantine or attribute flags from the build
+            xattr -cr "$APP_PATH"
+            # 2. Grant executable permissions recursively to the bundle
+            chmod -R +x "$APP_PATH"
+            # 3. Code-sign all internal .framework bundles manually to avoid "ambiguous bundle format" with deep signing
+            if [ -d "$APP_PATH/Contents/Frameworks" ]; then
+              find "$APP_PATH/Contents/Frameworks" -name "*.framework" -maxdepth 1 | while read -r framework; do
+                  framework_name=$(basename "$framework" .framework)
+                  binary_path="$framework/Versions/A/$framework_name"
+                  if [ -f "$binary_path" ]; then
+                      echo "Signing inner framework binary: $binary_path"
+                      codesign --force --sign - "$binary_path"
+                  fi
+              done
+            fi
+            # 4. Sign the top-level application bundle wrapper container
+            echo "Signing top-level bundle wrapper..."
+            codesign --force --sign - "$APP_PATH"
+          else
+            echo "Error: Application bundle (.app) not found in build directory!"
+            exit 1
+          fi
+
       - name: Package and Compress App Bundle
         run: |
           VERSION_LINE=$(grep "^version:" pubspec.yaml)
