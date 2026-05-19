@@ -141,51 +141,22 @@ jobs:
       - name: Build Windows Executable
         run: flutter build windows --release
 
-      - name: Package Windows Artifacts
+      - name: Build Inno Setup Installer
         shell: pwsh
         run: |
           # Extract clean version from pubspec.yaml
           $versionLine = Get-Content pubspec.yaml | Select-String "^version:"
           $versionFull = ($versionLine -split " ")[1].Trim()
           $versionClean = ($versionFull -split "\+")[0]
-          echo "VERSION_CLEAN=$versionClean" >> $env:GITHUB_ENV
           
-          # Compress the direct runner output (executable and DLLs)
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "windows-mangabaka-app-v${versionClean}.zip"
-
-      - name: Build MSIX Installer
-        env:
-          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-        shell: pwsh
-        run: |
-          try {
-              if ($env:WINDOWS_CERTIFICATE_BASE64 -ne $null -and $env:WINDOWS_CERTIFICATE_BASE64 -ne "") {
-                  $bytes = [System.Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64)
-                  [System.IO.File]::WriteAllBytes("windows-certificate.pfx", $bytes)
-                  dart run msix:create --certificate-path windows-certificate.pfx --certificate-password $env:WINDOWS_CERTIFICATE_PASSWORD
-              } else {
-                  dart run msix:create
-              }
-              
-              $msixFile = Get-ChildItem -Path . -Filter *.msix -Recurse | Select-Object -First 1
-              if ($msixFile) {
-                  Copy-Item $msixFile.FullName "windows-mangabaka-app-v${env:VERSION_CLEAN}.msix"
-                  Write-Output "Successfully packaged MSIX installer: $($msixFile.FullName)"
-              } else {
-                  Write-Warning "MSIX packaging completed but no file was found!"
-              }
-          } catch {
-              Write-Warning "MSIX packaging failed: $_"
-          }
+          # Compile Inno Setup Script
+          iscc /DAppVersion=$versionClean windows_installer.iss
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-artifact
-          path: |
-            windows-mangabaka-app-v*.zip
-            windows-mangabaka-app-v*.msix
+          path: windows-mangabaka-app-v*.exe
 
   build-macos:
     name: Build macOS
