@@ -14,8 +14,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Dummy .env File
-        run: echo "" > .env
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -47,8 +55,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Dummy .env File
-        run: echo "" > .env
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -102,8 +118,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Dummy .env File
-        run: echo "" > .env
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -144,13 +168,15 @@ jobs:
                   dart run msix:create
               }
               
-              $msixFile = Get-ChildItem -Path build -Filter *.msix -Recurse | Select-Object -First 1
+              $msixFile = Get-ChildItem -Path . -Filter *.msix -Recurse | Select-Object -First 1
               if ($msixFile) {
                   Copy-Item $msixFile.FullName "windows-mangabaka-app-v${env:VERSION_CLEAN}.msix"
-                  Write-Output "Successfully packaged MSIX installer."
+                  Write-Output "Successfully packaged MSIX installer: $($msixFile.FullName)"
+              } else {
+                  Write-Warning "MSIX packaging completed but no file was found!"
               }
           } catch {
-              Write-Warning "MSIX packaging failed, zip backup remains primary: $_"
+              Write-Warning "MSIX packaging failed: $_"
           }
 
       - name: Upload Artifact
@@ -169,8 +195,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Dummy .env File
-        run: echo "" > .env
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -222,8 +256,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Create Dummy .env File
-        run: echo "" > .env
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
