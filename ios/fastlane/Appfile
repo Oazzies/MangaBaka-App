@@ -1,0 +1,9 @@
+app_identifier("dev.oazzies.mangabaka-app") # The bundle identifier of your app
+apple_id("")                  # Your Apple ID/Email (e.g. "developer@example.com")
+itc_team_id("")               # App Store Connect Team ID
+team_id("")                   # Apple Developer Portal Team ID
+
+# You can also use environment variables in GitHub Actions:
+# apple_id(ENV["APPLE_ID"])
+# itc_team_id(ENV["ITC_TEAM_ID"])
+# team_id(ENV["TEAM_ID"])

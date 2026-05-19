@@ -1,0 +1,37 @@
+default_platform(:android)
+
+platform :android do
+  desc "Submit a new build to Google Play Public Testing (beta)"
+  lane :publish_to_testing do |options|
+    aab_path = options[:aab_path]
+    version_code = options[:version_code]
+    
+    changelog = "New pre-release update"
+    if options[:changelog_path] && File.exist?(options[:changelog_path])
+      changelog = File.read(options[:changelog_path]).strip
+    elsif options[:changelog]
+      changelog = options[:changelog]
+    end
+
+    UI.message("Publishing to Google Play Beta...")
+    UI.message("AAB path: #{aab_path}")
+    UI.message("Changelog: #{changelog[0..100]}...") # truncate for logging
+
+    # Write changelog if version_code is provided
+    if version_code
+      changelog_dir = "metadata/android/en-US/changelogs"
+      sh("mkdir", "-p", changelog_dir)
+      File.write("#{changelog_dir}/#{version_code}.txt", changelog)
+      UI.message("Saved changelog to #{changelog_dir}/#{version_code}.txt")
+    end
+
+    supply(
+      package_name: "dev.oazzies.mangabaka_app",
+      track: "beta",
+      aab: aab_path,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false
+    )
+  end
+end

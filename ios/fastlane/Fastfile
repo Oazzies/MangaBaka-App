@@ -1,0 +1,27 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Submit a new build to TestFlight"
+  lane :publish_to_testflight do |options|
+    ipa_path = options[:ipa_path]
+    
+    changelog = "New pre-release update"
+    if options[:changelog_path] && File.exist?(options[:changelog_path])
+      changelog = File.read(options[:changelog_path]).strip
+    elsif options[:changelog]
+      changelog = options[:changelog]
+    end
+
+    UI.message("Uploading to TestFlight...")
+    UI.message("IPA path: #{ipa_path}")
+    UI.message("Changelog: #{changelog[0..100]}...") # truncate for logging
+
+    # Pilot uploads build to TestFlight
+    pilot(
+      ipa: ipa_path,
+      skip_submission: false,
+      skip_waiting_for_build_processing: true, # true to avoid blocking GitHub Actions workflow
+      changelog: changelog
+    )
+  end
+end

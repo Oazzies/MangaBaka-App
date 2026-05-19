@@ -1,0 +1,11 @@
+# The Deliverfile allows you to configure upload settings for App Store Connect / TestFlight
+app_identifier("dev.oazzies.mangabaka-app")
+username("") # Your Apple ID username
+
+# Delivery options
+submit_for_review(false)
+skip_metadata(false)
+skip_screenshots(false)
+skip_binary_upload(false)
+
+# Release notes/changelog can also be fetched/set automatically via lanes

@@ -1,0 +1,299 @@
+name: Publish Pre-Release to App Stores
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Specific GitHub Release/Pre-release tag to publish (e.g., v0.1.0-pre-release-7). If left blank, it will automatically find the latest pre-release."
+        required: false
+        type: string
+      publish_android:
+        description: "Publish to Google Play Public Testing (Beta)?"
+        required: true
+        type: boolean
+        default: true
+      publish_ios:
+        description: "Publish to Apple TestFlight?"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  get-release-info:
+    name: Identify Target Release
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release-info.outputs.tag }}
+      has_android_keystore: ${{ steps.check-secrets.outputs.has_android_keystore }}
+      has_play_store_key: ${{ steps.check-secrets.outputs.has_play_store_key }}
+      has_ios_cert: ${{ steps.check-secrets.outputs.has_ios_cert }}
+      has_apple_credentials: ${{ steps.check-secrets.outputs.has_apple_credentials }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check Available Secrets
+        id: check-secrets
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          IOS_CERT: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          ASC_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE" ]; then
+            echo "has_android_keystore=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_android_keystore=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ -n "$PLAY_STORE_KEY" ]; then
+            echo "has_play_store_key=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_play_store_key=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ -n "$IOS_CERT" ]; then
+            echo "has_ios_cert=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_ios_cert=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ -n "$APPLE_ID" ] || [ -n "$ASC_API_KEY" ]; then
+            echo "has_apple_credentials=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_apple_credentials=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine Target Release Tag
+        id: release-info
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_TAG: ${{ github.event.inputs.release_tag }}
+        run: |
+          # 1. Determine release tag to checkout
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+            echo "Using user-specified release tag: $TAG"
+          else
+            echo "No tag specified. Finding the latest GitHub pre-release..."
+            TAG=$(gh release list --exclude-drafts --limit 50 --json tagName,isPrerelease | jq -r '.[] | select(.isPrerelease == true) | .tagName' | head -n 1)
+            if [ -z "$TAG" ]; then
+              echo "No pre-release found! Fetching the latest release tag instead..."
+              TAG=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r '.[0].tagName')
+            fi
+            echo "Discovered release tag: $TAG"
+          fi
+          
+          if [ -z "$TAG" ]; then
+            echo "Error: Could not find any release tag to publish!"
+            exit 1
+          fi
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+          # 2. Extract changelog/description
+          echo "Fetching release description for tag $TAG..."
+          gh release view "$TAG" --json body -q ".body" > changelog.txt
+          
+          echo "=== Changelog Preview ==="
+          cat changelog.txt
+          echo "========================="
+
+      - name: Upload Changelog Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-changelog
+          path: changelog.txt
+
+  publish-android:
+    name: Deploy to Google Play Testing
+    needs: get-release-info
+    if: ${{ github.event.inputs.publish_android == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code at Target Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.get-release-info.outputs.tag }}
+
+      - name: Verify Android Credentials
+        run: |
+          if [ "${{ needs.get-release-info.outputs.has_android_keystore }}" != "true" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing! Android builds cannot be signed."
+            exit 1
+          fi
+          if [ "${{ needs.get-release-info.outputs.has_play_store_key }}" != "true" ]; then
+            echo "::error::PLAY_STORE_JSON_KEY secret is missing! Fastlane cannot upload AAB to Google Play."
+            exit 1
+          fi
+
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Set up Android Keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Download Changelog Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-changelog
+
+      - name: Build AAB (Android App Bundle)
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CODE=$(echo "$VERSION_FULL" | cut -d'+' -f2)
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          
+          flutter build appbundle --release
+        env:
+          ANDROID_KEYSTORE_PATH: upload-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Set up Google Play Credentials File
+        env:
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+        run: |
+          echo "$PLAY_STORE_JSON_KEY" > android/fastlane-service-account.json
+
+      - name: Set up Ruby & Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: android
+
+      - name: Run Fastlane to Google Play
+        working-directory: android
+        run: |
+          bundle exec fastlane publish_to_testing \
+            aab_path:"../build/app/outputs/bundle/release/app-release.aab" \
+            changelog_path:"../changelog.txt" \
+            version_code:"${{ env.VERSION_CODE }}"
+
+  publish-ios:
+    name: Deploy to Apple TestFlight
+    needs: get-release-info
+    if: ${{ github.event.inputs.publish_ios == true }}
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code at Target Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.get-release-info.outputs.tag }}
+
+      - name: Check iOS Credentials
+        id: check-credentials
+        run: |
+          if [ "${{ needs.get-release-info.outputs.has_ios_cert }}" != "true" ]; then
+            echo "::warning::IOS_CERTIFICATE_BASE64 secret is not configured. Skipping TestFlight publish step."
+            echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+          elif [ "${{ needs.get-release-info.outputs.has_apple_credentials }}" != "true" ]; then
+            echo "::warning::Apple Credentials (APPLE_ID or APP_STORE_CONNECT_API_KEY) are not configured. Skipping TestFlight publish step."
+            echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+          else
+            echo "SKIP_PUBLISH=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create .env File
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
+
+      - name: Set up Flutter
+        if: env.SKIP_PUBLISH != 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        if: env.SKIP_PUBLISH != 'true'
+        run: flutter pub get
+
+      - name: Import iOS Certificates
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+
+      - name: Download Changelog Artifact
+        if: env.SKIP_PUBLISH != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: release-changelog
+
+      - name: Build iOS IPA
+        if: env.SKIP_PUBLISH != 'true'
+        run: flutter build ipa --release
+
+      - name: Set up Ruby & Fastlane
+        if: env.SKIP_PUBLISH != 'true'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Run Fastlane to TestFlight
+        if: env.SKIP_PUBLISH != 'true'
+        working-directory: ios
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          # Alternatively, if using ASC API Key:
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+        run: |
+          # Find the exact IPA file path dynamically
+          IPA_PATH=$(find ../build/ios/ipa -name "*.ipa" | head -n 1)
+          echo "Found IPA at: $IPA_PATH"
+          
+          bundle exec fastlane publish_to_testflight \
+            ipa_path:"$IPA_PATH" \
+            changelog_path:"../changelog.txt"
