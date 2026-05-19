@@ -169,3 +169,8 @@ app.*.symbols
 
 .vscode
 .flutter-plugins-dependencies
+-
+anonymous-cert.pfx
+fakecrt.crt
+fakecsr.csr
+fakekey.key

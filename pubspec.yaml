@@ -77,5 +77,6 @@ msix_config:
   display_name: MangaBaka
   publisher_display_name: Oazzies
   identity_name: dev.oazzies.mangabaka
+  publisher: "CN=MangaBaka Organization"
   logo_path: assets/mangabaka512.png
   capabilities: internetClient
