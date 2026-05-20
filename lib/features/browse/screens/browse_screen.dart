@@ -234,18 +234,25 @@ class _BrowseScreenState extends State<BrowseScreen> {
                         if (_controller.isSearchMode &&
                             _controller.totalResults > 0)
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 4.0,
-                              horizontal: 12.0,
+                            padding: const EdgeInsets.only(
+                              left: 4.0,
+                              bottom: 4.0,
                             ),
                             child: Row(
                               children: [
+                                Icon(
+                                  Icons.article_outlined,
+                                  size: 14,
+                                  color: AppConstants.textMutedColor,
+                                ),
+                                const SizedBox(width: 6),
                                 Text(
                                   '${_controller.totalResults} ${LocalizationService().translate('series')}',
                                   style: TextStyle(
                                     color: AppConstants.textMutedColor,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
                                   ),
                                 ),
                               ],
@@ -274,6 +281,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     child: FloatingActionButton(
                       onPressed: _controller.scrollToTop,
                       backgroundColor: AppConstants.accentColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.pillRadius,
+                        ),
+                      ),
                       child: Icon(
                         Icons.arrow_upward,
                         color: AppConstants.primaryBackground,

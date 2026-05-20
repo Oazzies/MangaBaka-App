@@ -16,8 +16,9 @@ import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 
 class MainScreen extends StatefulWidget {
-  static final GlobalKey<MainScreenState> mainScreenKey = GlobalKey<MainScreenState>();
-  
+  static final GlobalKey<MainScreenState> mainScreenKey =
+      GlobalKey<MainScreenState>();
+
   MainScreen({Key? key}) : super(key: key ?? mainScreenKey);
 
   static void setTabIndex(int index) {
@@ -43,8 +44,8 @@ class MainScreenState extends State<MainScreen> {
   List<Widget> get _pages => [
     const HomeScreen(),
     const LibraryScreen(),
-    Platform.isWindows 
-        ? const ExcludeSemantics(child: BrowseScreen()) 
+    Platform.isWindows
+        ? const ExcludeSemantics(child: BrowseScreen())
         : const BrowseScreen(),
     const NewsScreen(),
     const ProfileScreen(),
@@ -70,10 +71,7 @@ class MainScreenState extends State<MainScreen> {
 
         Widget content = Stack(
           children: [
-            IndexedStack(
-              index: _selectedIndex,
-              children: _pages,
-            ),
+            IndexedStack(index: _selectedIndex, children: _pages),
             const SyncProgressOverlay(),
           ],
         );
@@ -84,50 +82,30 @@ class MainScreenState extends State<MainScreen> {
             body: Row(
               children: [
                 Container(
-                  width: 96,
+                  width: 88,
                   color: AppConstants.secondaryBackground,
                   child: SafeArea(
                     right: false,
                     child: NavigationRail(
-                      backgroundColor: AppConstants.secondaryBackground,
-                      indicatorColor: AppConstants.accentColor.withValues(alpha: 0.15),
-                      indicatorShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       selectedIndex: _selectedIndex,
                       onDestinationSelected: _onItemTapped,
-                      labelType: NavigationRailLabelType.all,
-                      unselectedLabelTextStyle: TextStyle(
-                        color: AppConstants.textColor.withValues(alpha: 0.5),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      selectedLabelTextStyle: TextStyle(
-                        color: AppConstants.accentColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      unselectedIconTheme: IconThemeData(
-                        color: AppConstants.textColor.withValues(alpha: 0.5),
-                        size: 26,
-                      ),
-                      selectedIconTheme: IconThemeData(
-                        color: AppConstants.accentColor,
-                        size: 26,
-                      ),
                       leading: Column(
                         children: [
                           const SizedBox(height: 20),
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppConstants.accentColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
+                              color: AppConstants.accentColor.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.denseRadius,
+                              ),
                             ),
                             child: Image.asset(
                               'assets/mangabaka512.png',
-                              width: 40,
-                              height: 40,
+                              width: 36,
+                              height: 36,
                             ),
                           ),
                           const SizedBox(height: 32),
@@ -169,14 +147,16 @@ class MainScreenState extends State<MainScreen> {
                               message: l10n.translate("settings"),
                               child: IconButton(
                                 icon: const Icon(Icons.settings_outlined),
-                                selectedIcon: const Icon(Icons.settings),
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SettingsScreen(),
+                                    ),
                                   );
                                 },
-                                color: AppConstants.textColor.withValues(alpha: 0.5),
+                                color: AppConstants.textMutedColor,
                               ),
                             ),
                           ),
@@ -185,7 +165,10 @@ class MainScreenState extends State<MainScreen> {
                     ),
                   ),
                 ),
-                const VerticalDivider(thickness: 1, width: 1),
+                Container(
+                  width: 1,
+                  color: AppConstants.borderColor.withValues(alpha: 0.3),
+                ),
                 Expanded(child: content),
               ],
             ),
@@ -193,54 +176,40 @@ class MainScreenState extends State<MainScreen> {
         }
 
         return Scaffold(
-          backgroundColor: AppConstants.secondaryBackground,
+          backgroundColor: AppConstants.primaryBackground,
           body: content,
-          bottomNavigationBar: SafeArea(
-            child: NavigationBarTheme(
-              data: NavigationBarThemeData(
-                backgroundColor: AppConstants.secondaryBackground,
-                labelTextStyle: WidgetStateProperty.all(
-                  TextStyle(color: AppConstants.textColor, fontSize: 12),
-                ),
-                iconTheme: WidgetStateProperty.all(
-                  IconThemeData(color: AppConstants.textColor, size: 28),
-                ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: _onItemTapped,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            height: 64,
+            destinations: [
+              NavigationDestination(
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home),
+                label: l10n.translate("home"),
               ),
-              child: NavigationBar(
-                backgroundColor: AppConstants.secondaryBackground,
-                indicatorColor: AppConstants.accentColor,
-                selectedIndex: _selectedIndex,
-                onDestinationSelected: _onItemTapped,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                destinations: [
-                  NavigationDestination(
-                    icon: const Icon(Icons.home_outlined),
-                    selectedIcon: const Icon(Icons.home),
-                    label: l10n.translate("home"),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.library_books_outlined),
-                    selectedIcon: const Icon(Icons.library_books),
-                    label: l10n.translate("library"),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.explore_outlined),
-                    selectedIcon: const Icon(Icons.explore),
-                    label: l10n.translate("browse"),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.article_outlined),
-                    selectedIcon: const Icon(Icons.article),
-                    label: l10n.translate("news"),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.person_outline),
-                    selectedIcon: const Icon(Icons.person),
-                    label: l10n.translate("profile"),
-                  ),
-                ],
+              NavigationDestination(
+                icon: const Icon(Icons.library_books_outlined),
+                selectedIcon: const Icon(Icons.library_books),
+                label: l10n.translate("library"),
               ),
-            ),
+              NavigationDestination(
+                icon: const Icon(Icons.explore_outlined),
+                selectedIcon: const Icon(Icons.explore),
+                label: l10n.translate("browse"),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.article_outlined),
+                selectedIcon: const Icon(Icons.article),
+                label: l10n.translate("news"),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.person_outline),
+                selectedIcon: const Icon(Icons.person),
+                label: l10n.translate("profile"),
+              ),
+            ],
           ),
         );
       },

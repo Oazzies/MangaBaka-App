@@ -20,7 +20,7 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  
+
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
     await windowManager.ensureInitialized();
     windowManager.waitUntilReadyToShow(null, () async {
@@ -50,7 +50,7 @@ void main() async {
 
   await dotenv.load();
   setupServiceLocator();
-  
+
   await getIt<ProfileAuthService>().init();
   await getIt<MetadataService>().init();
 
@@ -108,8 +108,8 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
         final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
         final showTooltips = SettingsManager().showTooltips;
 
-        if (_cachedLightTheme == null || 
-            _cachedDarkTheme == null || 
+        if (_cachedLightTheme == null ||
+            _cachedDarkTheme == null ||
             _lastShowTooltips != showTooltips ||
             _lastTheme != currentTheme ||
             _lastIsDarkMode != isDark) {
@@ -119,7 +119,7 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
 
           // Re-apply the current theme palette values to AppConstants before rebuilding ThemeData
           AppConstants.setAppTheme(currentTheme, isDark);
-          
+
           _cachedLightTheme = ThemeData(
             useMaterial3: true,
             tooltipTheme: TooltipThemeData(
@@ -137,14 +137,95 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
             cardColor: AppConstants.secondaryBackground,
             dialogTheme: DialogThemeData(
               backgroundColor: AppConstants.secondaryBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+              ),
             ),
-            dividerColor: AppConstants.borderColor,
+            dividerColor: Colors.transparent,
             bottomSheetTheme: BottomSheetThemeData(
               backgroundColor: AppConstants.secondaryBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppConstants.largeRadius),
+                ),
+              ),
             ),
             appBarTheme: AppBarTheme(
               backgroundColor: AppConstants.primaryBackground,
               surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: AppConstants.tertiaryBackground,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 20,
+              ),
+            ),
+            chipTheme: ChipThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                side: BorderSide.none,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            ),
+            cardTheme: CardThemeData(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(AppConstants.largeRadius),
+              ),
+              color: AppConstants.secondaryBackground,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              backgroundColor: AppConstants.secondaryBackground,
+              elevation: 0,
+              indicatorColor: AppConstants.accentColor.withValues(alpha: 0.15),
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+              ),
+              labelTextStyle: WidgetStateProperty.all(
+                TextStyle(
+                  color: AppConstants.textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              iconTheme: WidgetStateProperty.all(
+                IconThemeData(color: AppConstants.textColor, size: 26),
+              ),
+            ),
+            navigationRailTheme: NavigationRailThemeData(
+              backgroundColor: AppConstants.secondaryBackground,
+              indicatorColor: AppConstants.accentColor.withValues(alpha: 0.15),
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+              ),
+              labelType: NavigationRailLabelType.all,
+              unselectedLabelTextStyle: TextStyle(
+                color: AppConstants.textMutedColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+              selectedLabelTextStyle: TextStyle(
+                color: AppConstants.accentColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           );
 
@@ -164,14 +245,95 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
             cardColor: AppConstants.secondaryBackground,
             dialogTheme: DialogThemeData(
               backgroundColor: AppConstants.secondaryBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+              ),
             ),
-            dividerColor: AppConstants.borderColor,
+            dividerColor: Colors.transparent,
             bottomSheetTheme: BottomSheetThemeData(
               backgroundColor: AppConstants.secondaryBackground,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppConstants.largeRadius),
+                ),
+              ),
             ),
             appBarTheme: AppBarTheme(
               backgroundColor: AppConstants.primaryBackground,
               surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: AppConstants.tertiaryBackground,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 20,
+              ),
+            ),
+            chipTheme: ChipThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                side: BorderSide.none,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            ),
+            cardTheme: CardThemeData(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(AppConstants.largeRadius),
+              ),
+              color: AppConstants.secondaryBackground,
+            ),
+            navigationBarTheme: NavigationBarThemeData(
+              backgroundColor: AppConstants.secondaryBackground,
+              elevation: 0,
+              indicatorColor: AppConstants.accentColor.withValues(alpha: 0.15),
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+              ),
+              labelTextStyle: WidgetStateProperty.all(
+                TextStyle(
+                  color: AppConstants.textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              iconTheme: WidgetStateProperty.all(
+                IconThemeData(color: AppConstants.textColor, size: 26),
+              ),
+            ),
+            navigationRailTheme: NavigationRailThemeData(
+              backgroundColor: AppConstants.secondaryBackground,
+              indicatorColor: AppConstants.accentColor.withValues(alpha: 0.15),
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+              ),
+              labelType: NavigationRailLabelType.all,
+              unselectedLabelTextStyle: TextStyle(
+                color: AppConstants.textMutedColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+              selectedLabelTextStyle: TextStyle(
+                color: AppConstants.accentColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           );
         }

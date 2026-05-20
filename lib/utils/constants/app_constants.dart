@@ -8,7 +8,8 @@ class AppConstants {
   static const String appVersion = '0.1.0-pre-release-7';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
   static const String authBaseUrl = 'https://mangabaka.org/auth/oauth2';
-  static const String userAgent = '$appName/$appVersion (oazziesmail@gmail.com)';
+  static const String userAgent =
+      '$appName/$appVersion (oazziesmail@gmail.com)';
   static const int networkTimeoutSeconds = 30;
   static const int maxRetries = 3;
   static const int rateLimitRetryDelaySeconds = 5;
@@ -26,7 +27,7 @@ class AppConstants {
   static Color borderColor = const Color(0xFF3f3f46);
   static Color successColor = const Color(0xFF81e6ca);
   static Color warningColor = const Color(0xFFffc83e);
-  static Color errorColor = const Color(0xFFef4444); 
+  static Color errorColor = const Color(0xFFef4444);
   static Color infoColor = const Color(0xFF3b82f6);
   static Color textColor = const Color(0xFFFFFFFF);
   static Color textMutedColor = const Color(0x8AFFFFFF);
@@ -38,6 +39,13 @@ class AppConstants {
   static const double horizontalPadding = 16.0;
   static const double verticalPadding = 16.0;
   static const double cardRadius = 12.0;
+  static const double largeRadius = 24.0;
+  static const double denseRadius = 16.0;
+  static const double pillRadius = 999.0;
+
+  static const List<BoxShadow> softShadow = [
+    BoxShadow(color: Color(0x66000000), blurRadius: 32, offset: Offset(0, 8)),
+  ];
 
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);
   static const Duration mediumAnimationDuration = Duration(milliseconds: 500);
@@ -66,5 +74,6 @@ class AppConstants {
 
   static const Duration debounceDelay = Duration(milliseconds: 500);
 
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 }

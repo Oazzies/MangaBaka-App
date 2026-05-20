@@ -25,7 +25,9 @@ class SearchSuggestionsPanel extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
       alignment: Alignment.topCenter,
-      child: showSuggestions ? _buildSuggestionsList() : const SizedBox.shrink(),
+      child: showSuggestions
+          ? _buildSuggestionsList()
+          : const SizedBox.shrink(),
     );
   }
 
@@ -33,14 +35,8 @@ class SearchSuggestionsPanel extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+        boxShadow: AppConstants.softShadow,
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -65,12 +61,18 @@ class SearchSuggestionsPanel extends StatelessWidget {
     bool isLast = false,
   }) {
     final borderRadius = BorderRadius.vertical(
-      top: isFirst ? const Radius.circular(24) : Radius.zero,
-      bottom: isLast ? const Radius.circular(24) : Radius.zero,
+      top: isFirst
+          ? const Radius.circular(AppConstants.largeRadius)
+          : Radius.zero,
+      bottom: isLast
+          ? const Radius.circular(AppConstants.largeRadius)
+          : Radius.zero,
     );
 
     return Material(
-      color: isSelected ? AppConstants.accentColor.withValues(alpha: 0.12) : Colors.transparent,
+      color: isSelected
+          ? AppConstants.accentColor.withValues(alpha: 0.12)
+          : Colors.transparent,
       borderRadius: borderRadius,
       child: InkWell(
         onTap: () => onResultTapped(result),
@@ -135,11 +137,14 @@ class SearchSuggestionsPanel extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                        if (result.genres.isNotEmpty && (result.type.isNotEmpty || result.year != null))
+                        if (result.genres.isNotEmpty &&
+                            (result.type.isNotEmpty || result.year != null))
                           Text(
                             '  ·  ${result.genres.take(2).map((g) => g.isNotEmpty ? g[0].toUpperCase() + g.substring(1) : g).join(', ')}',
                             style: TextStyle(
-                              color: AppConstants.textMutedColor.withValues(alpha: 0.7),
+                              color: AppConstants.textMutedColor.withValues(
+                                alpha: 0.7,
+                              ),
                               fontSize: 11,
                             ),
                             overflow: TextOverflow.ellipsis,

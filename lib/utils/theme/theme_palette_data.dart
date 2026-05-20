@@ -51,24 +51,29 @@ class ThemePaletteData {
       border: border,
       accent: accent,
       primaryAccent: primaryAccent,
-      success: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+      success: isDark ? const Color(0xFF4ADE80) : const Color(0xFF059669),
       warning: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
       error: isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626),
       info: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
-      text: text ?? (isDark ? const Color(0xFFFAFAFA) : const Color(0xFF09090B)),
-      textMuted: textMuted ?? (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A)),
+      text:
+          text ?? (isDark ? const Color(0xFFFAFAFA) : const Color(0xFF09090B)),
+      textMuted:
+          textMuted ??
+          (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A)),
     );
   }
 
   static ThemePalette _getDefault(bool isDark) {
     return _createPalette(
       isDark: isDark,
-      primary: isDark ? const Color(0xFF09090B) : const Color(0xFFF4F4F5),
-      secondary: isDark ? const Color(0xFF18181B) : const Color(0xFFFFFFFF),
-      tertiary: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-      border: isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8),
-      accent: const Color(0xFF10B981),
-      primaryAccent: const Color(0xFF047857),
+      primary: isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF5F5F5),
+      secondary: isDark ? const Color(0xFF171717) : const Color(0xFFFFFFFF),
+      tertiary: isDark ? const Color(0xFF262626) : const Color(0xFFE8E6E3),
+      border: isDark ? const Color(0xFF262626) : const Color(0xFFE8E6E3),
+      accent: isDark ? const Color(0xFFE8E6E3) : const Color(0xFF121212),
+      primaryAccent: isDark ? const Color(0xFF121212) : const Color(0xFFE8E6E3),
+      text: isDark ? const Color(0xFFF5F5F5) : const Color(0xFF121212),
+      textMuted: isDark ? const Color(0xFFA3A3A3) : const Color(0xFF737373),
     );
   }
 

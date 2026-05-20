@@ -45,7 +45,7 @@ class TriStateChip extends StatelessWidget {
       side: BorderSide.none,
       avatar: icon != null ? Icon(icon, size: 16, color: textColor) : null,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+        borderRadius: BorderRadius.circular(AppConstants.pillRadius),
       ),
       onPressed: () {
         if (state == TriState.off) {

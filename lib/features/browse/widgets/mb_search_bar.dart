@@ -51,18 +51,18 @@ class _MBSearchBarState extends State<MBSearchBar> {
   int _selectedIndex = -1;
   String _originalQuery = '';
   bool _isNavigatingWithArrows = false;
-  
+
   bool _isAutocompleteSuppressed = false;
   String _suppressedQuery = '';
-  
+
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller is GhostTextEditingController 
-        ? widget.controller as GhostTextEditingController 
+    _controller = widget.controller is GhostTextEditingController
+        ? widget.controller as GhostTextEditingController
         : GhostTextEditingController();
     _focusNode = widget.focusNode ?? FocusNode();
     _currentFilters = widget.initialFilters ?? SearchFilters();
@@ -72,7 +72,8 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent)
+      return KeyEventResult.ignored;
 
     final query = _controller.text;
     final hasSuggestions = _results.isNotEmpty && _showSuggestions;
@@ -84,7 +85,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
         setState(() {
           _selectedIndex = (_selectedIndex + 1) % _results.length;
           _controller.text = _results[_selectedIndex].title;
-          _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+          _controller.selection = TextSelection.fromPosition(
+            TextPosition(offset: _controller.text.length),
+          );
           _ghostSuffix = '';
           _controller.ghostSuffix = '';
         });
@@ -102,7 +105,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
             _selectedIndex--;
             _controller.text = _results[_selectedIndex].title;
           }
-          _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+          _controller.selection = TextSelection.fromPosition(
+            TextPosition(offset: _controller.text.length),
+          );
           _ghostSuffix = '';
           _controller.ghostSuffix = '';
         });
@@ -127,13 +132,15 @@ class _MBSearchBarState extends State<MBSearchBar> {
     }
 
     // 2. Selection (Enter) - handled by onSubmitted
-    if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.numpadEnter) {
+    if (event.logicalKey == LogicalKeyboardKey.enter ||
+        event.logicalKey == LogicalKeyboardKey.numpadEnter) {
       // If we have a selection, we'll let onSubmitted handle it using the current text
-      return KeyEventResult.ignored; 
+      return KeyEventResult.ignored;
     }
 
     // 3. Rejection (Backspace)
-    if (event.logicalKey == LogicalKeyboardKey.backspace && (_ghostSuffix.isNotEmpty || _selectedIndex != -1)) {
+    if (event.logicalKey == LogicalKeyboardKey.backspace &&
+        (_ghostSuffix.isNotEmpty || _selectedIndex != -1)) {
       setState(() {
         _isAutocompleteSuppressed = true;
         _suppressedQuery = _originalQuery;
@@ -166,7 +173,8 @@ class _MBSearchBarState extends State<MBSearchBar> {
   @override
   void didUpdateWidget(MBSearchBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialFilters != oldWidget.initialFilters && widget.initialFilters != null) {
+    if (widget.initialFilters != oldWidget.initialFilters &&
+        widget.initialFilters != null) {
       setState(() => _currentFilters = widget.initialFilters!);
     }
   }
@@ -198,7 +206,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
       _controller.ghostSuffix = '';
       return;
     }
-    
+
     String? bestGhost;
     for (var result in results) {
       for (var t in result.allTitles) {
@@ -222,13 +230,13 @@ class _MBSearchBarState extends State<MBSearchBar> {
 
     _originalQuery = query;
     widget.onChanged(query);
-    
+
     if (query.isEmpty) {
       _isAutocompleteSuppressed = false;
       _suppressedQuery = '';
       _selectedIndex = -1;
     }
-    
+
     if (!_suppressedQuery.startsWith(query)) {
       _suppressedQuery = '';
     }
@@ -245,22 +253,22 @@ class _MBSearchBarState extends State<MBSearchBar> {
       query,
       onResults: (results) {
         if (!mounted) return;
-        
+
         final queryLower = query.toLowerCase();
         results.sort((a, b) {
           final aLower = a.title.toLowerCase();
           final bLower = b.title.toLowerCase();
-          
+
           bool aExact = aLower == queryLower;
           bool bExact = bLower == queryLower;
           if (aExact && !bExact) return -1;
           if (!aExact && bExact) return 1;
-          
+
           bool aStarts = aLower.startsWith(queryLower);
           bool bStarts = bLower.startsWith(queryLower);
           if (aStarts && !bStarts) return -1;
           if (!aStarts && bStarts) return 1;
-          
+
           return a.title.length.compareTo(b.title.length);
         });
 
@@ -317,7 +325,8 @@ class _MBSearchBarState extends State<MBSearchBar> {
               onResultTapped: _onResultTapped,
               showSuggestions: true,
               selectedIndex: _selectedIndex,
-              onResultHovered: (result) => getIt<SeriesService>().fetchSeries(result.id.toString()),
+              onResultHovered: (result) =>
+                  getIt<SeriesService>().fetchSeries(result.id.toString()),
             ),
           ),
         ),
@@ -339,14 +348,15 @@ class _MBSearchBarState extends State<MBSearchBar> {
 
   void _acceptGhostText() {
     if (_ghostSuffix.isEmpty || _results.isEmpty) return;
-    
+
     AutocompleteSeriesResult? matchedResult;
     String? matchedTitle;
-    
+
     final query = _controller.text;
     for (var result in _results) {
       for (var t in result.allTitles) {
-        if (t.toLowerCase().startsWith(query.toLowerCase()) && t.substring(query.length) == _ghostSuffix) {
+        if (t.toLowerCase().startsWith(query.toLowerCase()) &&
+            t.substring(query.length) == _ghostSuffix) {
           matchedResult = result;
           matchedTitle = t;
           break;
@@ -408,7 +418,11 @@ class _MBSearchBarState extends State<MBSearchBar> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([SettingsManager(), LocalizationService(), ThemeManager()]),
+      listenable: Listenable.merge([
+        SettingsManager(),
+        LocalizationService(),
+        ThemeManager(),
+      ]),
       builder: (context, _) {
         final autoSuggest = SettingsManager().autoSuggestBrowse;
         final effectiveShowSuggestions = _showSuggestions && autoSuggest;
@@ -424,17 +438,19 @@ class _MBSearchBarState extends State<MBSearchBar> {
   Widget _buildTextField(bool showSuggestions, bool autoSuggest) {
     final l10n = LocalizationService();
 
-    final baseStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-      color: AppConstants.textColor,
-      fontSize: 16,
-      letterSpacing: 0,
-      fontFeatures: const [FontFeature.disable('kern')],
-    ) ?? TextStyle(
-      color: AppConstants.textColor, 
-      fontSize: 16, 
-      letterSpacing: 0,
-      fontFeatures: const [FontFeature.disable('kern')],
-    );
+    final baseStyle =
+        Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: AppConstants.textColor,
+          fontSize: 16,
+          letterSpacing: 0,
+          fontFeatures: const [FontFeature.disable('kern')],
+        ) ??
+        TextStyle(
+          color: AppConstants.textColor,
+          fontSize: 16,
+          letterSpacing: 0,
+          fontFeatures: const [FontFeature.disable('kern')],
+        );
 
     return TextField(
       controller: _controller,
@@ -443,7 +459,10 @@ class _MBSearchBarState extends State<MBSearchBar> {
         hintText: l10n.translate('search_hint'),
         hintStyle: TextStyle(color: AppConstants.textMutedColor, fontSize: 16),
         prefixIcon: Icon(Icons.search, color: AppConstants.textColor),
-        prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
+        ),
         suffixIcon: MBSearchBarSuffix(
           controllerText: _controller.text,
           onClear: _clear,
@@ -452,20 +471,23 @@ class _MBSearchBarState extends State<MBSearchBar> {
           currentFilters: _currentFilters,
         ),
         filled: true,
-        fillColor: AppConstants.secondaryBackground,
+        fillColor: AppConstants.tertiaryBackground,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 20,
+        ),
       ),
       style: baseStyle,
       onChanged: _onSearchChanged,
@@ -489,14 +511,18 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   void _openFilterSheet() {
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
 
     if (isLandscape) {
       showDialog(
         context: context,
         builder: (context) => Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 20,
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
             child: SearchFilterBottomSheet(
@@ -518,8 +544,10 @@ class _MBSearchBarState extends State<MBSearchBar> {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: AppConstants.secondaryBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppConstants.largeRadius),
+        ),
       ),
       builder: (context) {
         return SearchFilterBottomSheet(

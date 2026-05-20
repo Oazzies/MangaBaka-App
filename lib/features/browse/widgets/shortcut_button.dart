@@ -17,10 +17,10 @@ class ShortcutButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppConstants.secondaryBackground,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppConstants.largeRadius),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 20.0),
           child: Row(
@@ -31,10 +31,19 @@ class ShortcutButton extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(color: AppConstants.textColor, fontSize: 16),
+                  style: TextStyle(
+                    color: AppConstants.textColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppConstants.textMutedColor,
+                size: 20,
               ),
             ],
           ),

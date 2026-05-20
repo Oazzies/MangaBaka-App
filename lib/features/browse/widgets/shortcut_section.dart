@@ -25,7 +25,7 @@ class ShortcutSection extends StatelessWidget {
       builder: (context, _) {
         final l10n = LocalizationService();
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 14.0),
+          padding: EdgeInsets.symmetric(vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -33,15 +33,15 @@ class ShortcutSection extends StatelessWidget {
                 header,
                 style: TextStyle(
                   color: AppConstants.textColor,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 20,
-                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  letterSpacing: -0.5,
+                  height: 1.15,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Determine column count based on available width
                   int crossAxisCount = 3;
                   if (constraints.maxWidth < 450) {
                     crossAxisCount = 1;
@@ -56,7 +56,7 @@ class ShortcutSection extends StatelessWidget {
                       crossAxisCount: crossAxisCount,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      mainAxisExtent: 72,
+                      mainAxisExtent: 64,
                     ),
                     children: [
                       ShortcutButton(

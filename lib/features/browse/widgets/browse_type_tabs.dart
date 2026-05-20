@@ -16,25 +16,26 @@ class BrowseTypeTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    
+
     return Container(
-      height: 40,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppConstants.borderColor.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-      ),
+      height: 44,
+      margin: const EdgeInsets.symmetric(vertical: 6),
       child: ListView(
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         children: [
           _buildTab(context, BrowseType.series, l10n.translate('series')),
-          _buildTab(context, BrowseType.publishers, l10n.translate('publishers')),
+          _buildTab(
+            context,
+            BrowseType.publishers,
+            l10n.translate('publishers'),
+          ),
           _buildTab(context, BrowseType.staff, l10n.translate('staff')),
-          _buildTab(context, BrowseType.characters, l10n.translate('characters')),
+          _buildTab(
+            context,
+            BrowseType.characters,
+            l10n.translate('characters'),
+          ),
         ],
       ),
     );
@@ -42,42 +43,31 @@ class BrowseTypeTabs extends StatelessWidget {
 
   Widget _buildTab(BuildContext context, BrowseType type, String label) {
     final isSelected = selectedType == type;
-    
-    return GestureDetector(
-      onTap: () => onTypeChanged(type),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? AppConstants.accentColor : AppConstants.textMutedColor,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 15,
-                letterSpacing: 0.5,
-              ),
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () => onTypeChanged(type),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppConstants.accentColor.withValues(alpha: 0.12)
+                : AppConstants.tertiaryBackground,
+            borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected
+                  ? AppConstants.accentColor
+                  : AppConstants.textMutedColor,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontSize: 14,
             ),
-            const SizedBox(height: 4),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              height: 3,
-              width: isSelected ? 24 : 0,
-              decoration: BoxDecoration(
-                color: AppConstants.accentColor,
-                borderRadius: BorderRadius.circular(2),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppConstants.accentColor.withValues(alpha: 0.4),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  )
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
