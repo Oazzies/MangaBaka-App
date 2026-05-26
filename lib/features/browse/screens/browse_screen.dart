@@ -192,85 +192,90 @@ class _BrowseScreenState extends State<BrowseScreen> {
           },
           child: Scaffold(
             backgroundColor: AppConstants.primaryBackground,
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              centerTitle: true,
+              title: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: MBSearchBar(
+                  focusNode: _searchFocusNode,
+                  controller: _controller.searchController,
+                  initialFilters: _controller.currentFilters,
+                  onScanTap: _handleBarcodeScan,
+                  onResultSelected: _handleResultSelected,
+                  onChanged: _controller.updateSearchQuery,
+                  onSubmitted: (_) => _controller.searchSeries(),
+                  onFilterApplied: _controller.updateFilters,
+                ),
+              ),
+            ),
             body: NotificationListener<ScrollMetricsNotification>(
               onNotification: (notification) {
                 _controller.checkScroll();
                 return false;
               },
               child: WidgetUtils.responsiveConstraint(
-                SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: AppConstants.horizontalPadding,
-                      right: AppConstants.horizontalPadding,
-                      top: AppConstants.verticalPadding,
-                      bottom: 8.0,
-                    ),
-                    child: Column(
-                      children: [
-                        MBSearchBar(
-                          focusNode: _searchFocusNode,
-                          controller: _controller.searchController,
-                          initialFilters: _controller.currentFilters,
-                          onScanTap: _handleBarcodeScan,
-                          onResultSelected: _handleResultSelected,
-                          onChanged: _controller.updateSearchQuery,
-                          onSubmitted: (_) => _controller.searchSeries(),
-                          onFilterApplied: _controller.updateFilters,
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: AppConstants.horizontalPadding,
+                    right: AppConstants.horizontalPadding,
+                    top: 8.0,
+                    bottom: 8.0,
+                  ),
+                  child: Column(
+                    children: [
+                      if (_controller.isSearchMode)
+                        BrowseTypeTabs(
+                          selectedType: _controller.currentType,
+                          onTypeChanged: _controller.setType,
                         ),
-                        if (_controller.isSearchMode)
-                          BrowseTypeTabs(
-                            selectedType: _controller.currentType,
-                            onTypeChanged: _controller.setType,
+                      if (_controller.currentType == BrowseType.series)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: FilterChipsRow(
+                            filters: _controller.currentFilters,
+                            onFiltersChanged: _controller.updateFilters,
                           ),
-                        if (_controller.currentType == BrowseType.series)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: FilterChipsRow(
-                              filters: _controller.currentFilters,
-                              onFiltersChanged: _controller.updateFilters,
-                            ),
+                        ),
+                      if (_controller.isSearchMode &&
+                          _controller.totalResults > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 4.0,
+                            bottom: 4.0,
                           ),
-                        if (_controller.isSearchMode &&
-                            _controller.totalResults > 0)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 4.0,
-                              bottom: 4.0,
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.article_outlined,
-                                  size: 14,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.article_outlined,
+                                size: 14,
+                                color: AppConstants.textMutedColor,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${_controller.totalResults} ${LocalizationService().translate('series')}',
+                                style: TextStyle(
                                   color: AppConstants.textMutedColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.0,
                                 ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '${_controller.totalResults} ${LocalizationService().translate('series')}',
-                                  style: TextStyle(
-                                    color: AppConstants.textMutedColor,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.0,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        BrowseContent(
-                          searchResults: _controller.searchResults,
-                          browseType: _controller.currentType,
-                          isLoading: _controller.isLoading,
-                          isLoadingMore: _controller.isLoadingMore,
-                          scrollController: _controller.scrollController,
-                          error: _controller.error,
-                          onRetry: _controller.searchSeries,
-                          onNavigateToDetail: _navigateToDetail,
-                          onNavigateToResults: _navigateToBrowseResults,
                         ),
-                      ],
-                    ),
+                      BrowseContent(
+                        searchResults: _controller.searchResults,
+                        browseType: _controller.currentType,
+                        isLoading: _controller.isLoading,
+                        isLoadingMore: _controller.isLoadingMore,
+                        scrollController: _controller.scrollController,
+                        error: _controller.error,
+                        onRetry: _controller.searchSeries,
+                        onNavigateToDetail: _navigateToDetail,
+                        onNavigateToResults: _navigateToBrowseResults,
+                      ),
+                    ],
                   ),
                 ),
               ),
