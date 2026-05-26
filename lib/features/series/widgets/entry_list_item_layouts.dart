@@ -56,8 +56,14 @@ class EntryListLayoutHelper {
 class CoverOnlyGridItem extends StatelessWidget {
   final Series series;
   final String? heroTagPrefix;
+  final Widget? trailing;
 
-  const CoverOnlyGridItem({super.key, required this.series, this.heroTagPrefix});
+  const CoverOnlyGridItem({
+    super.key,
+    required this.series,
+    this.heroTagPrefix,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +71,22 @@ class CoverOnlyGridItem extends StatelessWidget {
       color: AppConstants.secondaryBackground,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: EntryListLayoutHelper.buildCoverImage(
-        series: series,
-        heroTagPrefix: heroTagPrefix,
-        width: double.infinity,
-        borderRadius: BorderRadius.zero,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          EntryListLayoutHelper.buildCoverImage(
+            series: series,
+            heroTagPrefix: heroTagPrefix,
+            width: double.infinity,
+            borderRadius: BorderRadius.zero,
+          ),
+          if (trailing != null)
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: trailing!,
+            ),
+        ],
       ),
     );
   }
@@ -79,12 +96,14 @@ class CompactGridItem extends StatelessWidget {
   final Series series;
   final String? heroTagPrefix;
   final String displayTitle;
+  final Widget? trailing;
 
   const CompactGridItem({
     super.key,
     required this.series,
     this.heroTagPrefix,
     required this.displayTitle,
+    this.trailing,
   });
 
   @override
@@ -98,11 +117,22 @@ class CompactGridItem extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             margin: EdgeInsets.zero,
-            child: EntryListLayoutHelper.buildCoverImage(
-              series: series,
-              heroTagPrefix: heroTagPrefix,
-              width: double.infinity,
-              borderRadius: BorderRadius.zero,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                EntryListLayoutHelper.buildCoverImage(
+                  series: series,
+                  heroTagPrefix: heroTagPrefix,
+                  width: double.infinity,
+                  borderRadius: BorderRadius.zero,
+                ),
+                if (trailing != null)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: trailing!,
+                  ),
+              ],
             ),
           ),
         ),

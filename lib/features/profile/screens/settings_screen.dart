@@ -343,6 +343,15 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SettingsDivider(),
                   SettingsSwitchItem(
+                    icon: Icons.add_circle_outline,
+                    title: l10n.translate('show_quick_progress'),
+                    subtitle: l10n.translate('show_quick_progress_subtitle'),
+                    value: SettingsManager().showQuickProgress,
+                    onChanged: (val) =>
+                        SettingsManager().setShowQuickProgress(val),
+                  ),
+                  const SettingsDivider(),
+                  SettingsSwitchItem(
                     icon: Icons.layers_outlined,
                     title: l10n.translate('separate_list'),
                     subtitle: l10n.translate('separate_list_subtext'),

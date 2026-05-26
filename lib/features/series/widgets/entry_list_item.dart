@@ -66,7 +66,7 @@ class _EntryListItemState extends State<EntryListItem> {
 
         return Stack(
           children: [
-            _buildContent(context, style, l10n, displayTitle),
+            _buildContent(context, style, l10n, displayTitle, entry, settings),
 
             if (!style.isGrid && isInLibrary)
               Positioned(
@@ -80,7 +80,7 @@ class _EntryListItemState extends State<EntryListItem> {
                 child: _buildProgressBar(context, entry, style),
               ),
 
-            if (!style.isGrid)
+            if (!style.isGrid && settings.showQuickProgress)
               Positioned(
                 bottom: style == AppListStyle.comfortable ? 12 : 8,
                 right: style == AppListStyle.comfortable ? 12 : 10,
@@ -156,18 +156,35 @@ class _EntryListItemState extends State<EntryListItem> {
     AppListStyle style,
     LocalizationService l10n,
     String displayTitle,
+    LibraryEntry? entry,
+    SettingsManager settings,
   ) {
+    final trailingChip = (settings.showQuickProgress && entry != null)
+        ? SeriesQuickActionButton(
+            series: widget.series,
+            entry: entry,
+            isMini: true,
+            onOptimisticProgressChanged: (val) {
+              setState(() {
+                _optimisticProgress = val;
+              });
+            },
+          )
+        : null;
+
     switch (style) {
       case AppListStyle.coverOnlyGrid:
         return CoverOnlyGridItem(
           series: widget.series,
           heroTagPrefix: widget.heroTagPrefix,
+          trailing: trailingChip,
         );
       case AppListStyle.compactGrid:
         return CompactGridItem(
           series: widget.series,
           heroTagPrefix: widget.heroTagPrefix,
           displayTitle: displayTitle,
+          trailing: trailingChip,
         );
       case AppListStyle.minimalList:
         return MinimalListItem(

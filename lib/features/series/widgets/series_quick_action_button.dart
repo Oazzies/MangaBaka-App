@@ -11,12 +11,14 @@ class SeriesQuickActionButton extends StatefulWidget {
   final Series series;
   final LibraryEntry? entry;
   final ValueChanged<int?>? onOptimisticProgressChanged;
+  final bool isMini;
 
   const SeriesQuickActionButton({
     super.key,
     required this.series,
     this.entry,
     this.onOptimisticProgressChanged,
+    this.isMini = false,
   });
 
   @override
@@ -43,6 +45,44 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
     final totalChapters = int.tryParse(widget.series.totalChapters) ?? 0;
     final currentProgress =
         _optimisticProgress ?? widget.entry?.progressChapter ?? 0;
+
+    if (widget.isMini) {
+      return WidgetUtils.tooltip(
+        message: LocalizationService().translate('update_progress'),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _handlePress(widget.entry!),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              height: 26,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: AppConstants.accentColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  '+1',
+                  style: TextStyle(
+                    color: AppConstants.primaryBackground,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Row(
       mainAxisSize: MainAxisSize.min,

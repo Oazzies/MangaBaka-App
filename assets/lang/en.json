@@ -29,6 +29,8 @@
         "library_default": "Add to Library Default",
         "show_tooltips": "Show Tooltips",
         "show_tooltips_subtext": "Display helpful information when hovering over items",
+        "show_quick_progress": "Show Quick Progress",
+        "show_quick_progress_subtitle": "Display the +1 button to update progress quickly",
         "list": "List",
         "title_language": "Default Title Language",
         "separate_list": "Separate List Styles",

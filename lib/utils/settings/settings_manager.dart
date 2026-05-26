@@ -32,7 +32,11 @@ class SettingsManager extends ChangeNotifier {
     _instance._browseGridColumnCount = 0;
     _instance._collectionsListColumns = 0;
     _instance._worksListStyle = AppListStyle.comfortable;
+    _instance._showQuickProgress = true;
   }
+
+  bool _showQuickProgress = true;
+  bool get showQuickProgress => _showQuickProgress;
 
   AppListStyle _currentListStyle = AppListStyle.compactGrid;
   AppListStyle get currentListStyle => _currentListStyle;
@@ -166,6 +170,7 @@ class SettingsManager extends ChangeNotifier {
     if (worksStyleIndex != null && worksStyleIndex >= 0 && worksStyleIndex < AppListStyle.values.length) {
       _worksListStyle = AppListStyle.values[worksStyleIndex];
     }
+    _showQuickProgress = prefs.getBool(SettingsKeys.showQuickProgress) ?? true;
 
     notifyListeners();
   }
@@ -343,6 +348,14 @@ class SettingsManager extends ChangeNotifier {
     _worksListStyle = style;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(SettingsKeys.worksListStyle, style.index);
+    notifyListeners();
+  }
+
+  Future<void> setShowQuickProgress(bool value) async {
+    if (_showQuickProgress == value) return;
+    _showQuickProgress = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(SettingsKeys.showQuickProgress, value);
     notifyListeners();
   }
 }
