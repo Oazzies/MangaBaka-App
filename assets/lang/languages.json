@@ -1,4 +1,16 @@
 {
+  "as": {
+    "name": "Assamese",
+    "native_name": "অসমীয়া",
+    "translators": [
+      "itsmechinmoy"
+    ]
+  },
+  "de": {
+    "name": "German",
+    "native_name": "Deutsch",
+    "translators": []
+  },
   "en": {
     "name": "English",
     "native_name": "English",
@@ -16,11 +28,6 @@
   "fr": {
     "name": "French",
     "native_name": "Français",
-    "translators": []
-  },
-  "de": {
-    "name": "German",
-    "native_name": "Deutsch",
     "translators": []
   },
   "ja": {
