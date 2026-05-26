@@ -33,7 +33,8 @@ void main() {
           return ByteData.view(utf8.encode(json.encode({
             'strings': {
               'app_title': 'MangaBaka',
-              'open_link': 'Open {name}'
+              'open_link': 'Open {name}',
+              'only_in_english': 'Only in English'
             }
           })).buffer);
         } else if (key == 'assets/lang/ja.json') {
@@ -81,6 +82,18 @@ void main() {
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('mangabaka_app_language_pref'), 'ja');
+    });
+
+    test('defaults to English when translation is missing in target language', () async {
+      SharedPreferences.setMockInitialValues({
+        'mangabaka_app_language_pref': 'ja',
+      });
+
+      final service = LocalizationService();
+      await service.init();
+
+      // 'only_in_english' is not in Japanese, so it should fall back to English
+      expect(service.translate('only_in_english'), 'Only in English');
     });
 
     test('getLanguages returns correct list', () async {

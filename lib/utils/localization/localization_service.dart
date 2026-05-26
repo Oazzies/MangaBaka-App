@@ -13,6 +13,7 @@ class LocalizationService extends ChangeNotifier {
   static void resetForTesting() {
     _instance._manifest = {};
     _instance._currentStrings = {};
+    _instance._englishStrings = {};
     _instance._currentLanguage = 'en';
   }
 
@@ -20,6 +21,7 @@ class LocalizationService extends ChangeNotifier {
 
   Map<String, dynamic> _manifest = {};
   Map<String, dynamic> _currentStrings = {};
+  Map<String, dynamic> _englishStrings = {};
   String _currentLanguage = 'en';
 
   Future<void> init() async {
@@ -27,6 +29,15 @@ class LocalizationService extends ChangeNotifier {
       // Load manifest
       final manifestString = await rootBundle.loadString('assets/lang/languages.json');
       _manifest = json.decode(manifestString);
+
+      // Load English fallback strings
+      try {
+        final enString = await rootBundle.loadString('assets/lang/en.json');
+        final enData = json.decode(enString);
+        _englishStrings = enData['strings'] ?? {};
+      } catch (e) {
+        debugPrint('Error loading English fallback strings: $e');
+      }
       
       final prefs = await SharedPreferences.getInstance();
       final savedLang = prefs.getString(_languageKey);
@@ -84,7 +95,7 @@ class LocalizationService extends ChangeNotifier {
   }
 
   String translate(String key) {
-    return _currentStrings[key] ?? key;
+    return _currentStrings[key] ?? _englishStrings[key] ?? key;
   }
 
   String formatPossessive(String name) {
