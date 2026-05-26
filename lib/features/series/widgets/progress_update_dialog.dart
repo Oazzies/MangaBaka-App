@@ -48,10 +48,12 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    
+
     return AlertDialog(
       backgroundColor: AppConstants.tertiaryBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+      ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -81,8 +83,11 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: AppConstants.primaryBackground,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppConstants.secondaryBackground, width: 2),
+              borderRadius: BorderRadius.circular(AppConstants.denseRadius),
+              border: Border.all(
+                color: AppConstants.secondaryBackground,
+                width: 2,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,7 +146,9 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppConstants.accentColor,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             elevation: 0,
           ),

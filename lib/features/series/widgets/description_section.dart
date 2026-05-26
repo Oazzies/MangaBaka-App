@@ -15,16 +15,15 @@ class DescriptionSection extends StatefulWidget {
 class _DescriptionSectionState extends State<DescriptionSection> {
   bool expanded = false;
 
+  bool get _isLong {
+    final trimmed = widget.description.trim();
+    if (trimmed.isEmpty) return false;
+    final wordCount = trimmed.split(RegExp(r'\s+')).length;
+    return wordCount > 40 || trimmed.length > 400;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLong =
-        widget.description
-                .trim()
-                .split('\n')
-                .expand((l) => l.split(' '))
-                .length >
-            40 ||
-        widget.description.length > 400;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -32,47 +31,23 @@ class _DescriptionSectionState extends State<DescriptionSection> {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           alignment: Alignment.topCenter,
-          child: Stack(
-            children: [
-              Text(
-                widget.description,
-                maxLines: expanded ? null : 6,
-                overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.6,
-                      color: AppConstants.textColor.withValues(alpha: 0.9),
-                      fontSize: 15,
-                    ),
-              ),
-              if (isLong && !expanded)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppConstants.primaryBackground.withValues(alpha: 0),
-                          AppConstants.primaryBackground.withValues(alpha: 0.8),
-                          AppConstants.primaryBackground,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+          child: Text(
+            widget.description,
+            maxLines: expanded ? null : 6,
+            overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            style: TextStyle(
+              height: 1.7,
+              fontSize: 14,
+              color: AppConstants.textColor.withValues(alpha: 0.9),
+            ),
           ),
         ),
-        if (isLong || widget.description.isNotEmpty)
+        if (_isLong || widget.description.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Row(
               children: [
-                if (isLong)
+                if (_isLong)
                   Expanded(
                     child: Center(
                       child: InkWell(
@@ -84,12 +59,13 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                expanded ? LocalizationService().translate('show_less') : LocalizationService().translate('show_more'),
+                                expanded
+                                    ? LocalizationService().translate('show_less')
+                                    : LocalizationService().translate('show_more'),
                                 style: TextStyle(
                                   color: AppConstants.accentColor,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  letterSpacing: 0.5,
+                                  fontSize: 13,
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -112,9 +88,6 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                     color: AppConstants.textMutedColor,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: widget.description));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(LocalizationService().translate('description_copied')), behavior: SnackBarBehavior.floating),
-                      );
                     },
                   ),
                 ),

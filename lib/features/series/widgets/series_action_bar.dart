@@ -30,9 +30,12 @@ class SeriesActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (entry == null) return const SizedBox.shrink();
 
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    final hasChapters = series.totalChapters.isNotEmpty && series.totalChapters != 'null';
-    final hasVolumes = series.finalVolume.isNotEmpty && series.finalVolume != 'null';
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final hasChapters =
+        series.totalChapters.isNotEmpty && series.totalChapters != 'null';
+    final hasVolumes =
+        series.finalVolume.isNotEmpty && series.finalVolume != 'null';
 
     return Column(
       children: [
@@ -84,7 +87,6 @@ class SeriesActionBar extends StatelessWidget {
       ],
     );
   }
-
 }
 
 class _ProgressButton extends StatelessWidget {
@@ -104,14 +106,16 @@ class _ProgressButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTotal = (total == null || total == 'null' || total!.isEmpty) ? '?' : total;
+    final displayTotal = (total == null || total == 'null' || total!.isEmpty)
+        ? '?'
+        : total;
 
     return Material(
       color: AppConstants.secondaryBackground,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppConstants.denseRadius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppConstants.denseRadius),
         child: Container(
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -130,11 +134,7 @@ class _ProgressButton extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(
-                Icons.add,
-                size: 20,
-                color: AppConstants.textMutedColor,
-              ),
+              Icon(Icons.add, size: 20, color: AppConstants.textMutedColor),
             ],
           ),
         ),
@@ -142,5 +142,3 @@ class _ProgressButton extends StatelessWidget {
     );
   }
 }
-
-

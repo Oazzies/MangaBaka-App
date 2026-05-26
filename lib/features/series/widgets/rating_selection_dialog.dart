@@ -33,14 +33,14 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
     final l10n = LocalizationService();
     return AlertDialog(
       backgroundColor: AppConstants.secondaryBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.largeRadius)),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
       contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       title: Text(
         l10n.translate('rating_dialog_title'),
         style: TextStyle(
-          color: AppConstants.textColor, 
+          color: AppConstants.textColor,
           fontWeight: FontWeight.bold,
           fontSize: 20,
         ),
@@ -53,7 +53,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: AppConstants.primaryBackground,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppConstants.denseRadius),
               border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.3)),
             ),
             child: Row(
@@ -149,7 +149,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             backgroundColor: AppConstants.accentColor,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConstants.pillRadius)),
           ),
           child: Text(
             l10n.translate('update'),

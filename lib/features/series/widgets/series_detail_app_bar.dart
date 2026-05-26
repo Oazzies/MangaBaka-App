@@ -1,323 +1,82 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
-import 'package:mangabaka_app/utils/localization/localization_service.dart';
-import 'package:mangabaka_app/utils/theme/theme_manager.dart';
-import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 class SeriesDetailAppBar extends StatelessWidget {
   final Series series;
-  final String title;
-  final LibraryEntry? entry;
   final bool isWide;
-  final bool showCover;
-  final double horizontalPadding;
   final bool isLoaded;
   final VoidCallback onBack;
-  final VoidCallback onShare;
-  final VoidCallback onDelete;
-  final Function(String) onCopy;
 
   const SeriesDetailAppBar({
     super.key,
     required this.series,
-    required this.title,
-    this.entry,
     required this.isWide,
-    this.showCover = true,
-    this.horizontalPadding = 16.0,
     required this.isLoaded,
     required this.onBack,
-    required this.onShare,
-    required this.onDelete,
-    required this.onCopy,
   });
 
   @override
   Widget build(BuildContext context) {
-    final orientation = MediaQuery.of(context).orientation;
-    final isLandscape = orientation == Orientation.landscape;
-    final double expandedHeight = isWide 
-        ? (isLandscape ? 300 : 400) 
-        : (isLandscape ? 200 : 320);
-    
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        // Approximate collapse detection
-        final double offset = constraints.scrollOffset;
-        final bool isCollapsed = offset > (expandedHeight - 100);
-        final isDark = ThemeManager().isDarkMode;
-        
-        // Colors that adapt to collapse state
-        final Color buttonForeground = isCollapsed 
-            ? AppConstants.textColor 
-            : (isDark ? AppConstants.textColor : Colors.white);
-            
-        final Color? buttonBackground = (isCollapsed || isDark) 
-            ? null 
-            : Colors.black.withValues(alpha: 0.3);
+    final double height = isWide ? 500.0 : 380.0;
 
-        final buttonStyle = IconButton.styleFrom(
-          foregroundColor: buttonForeground,
-          backgroundColor: buttonBackground,
-          minimumSize: const Size(40, 40),
-          maximumSize: const Size(40, 40),
-          padding: EdgeInsets.zero,
-        );
-
-        return SliverAppBar(
-          expandedHeight: expandedHeight,
-          pinned: true,
-          backgroundColor: AppConstants.primaryBackground,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+    return SizedBox(
+      height: height,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(color: AppConstants.secondaryBackground),
           ),
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Center(
-              child: WidgetUtils.tooltip(
-                message: LocalizationService().translate('go_back'),
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: onBack,
-                  style: buttonStyle,
-                ),
-              ).animate().fadeIn(duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
+          Positioned.fill(
+            child: WidgetUtils.networkImage(
+              url: series.rawCoverUrl.isNotEmpty ? series.rawCoverUrl : series.coverUrl,
+              fit: BoxFit.cover,
+              memCacheWidth: isWide ? 1200 : 800,
             ),
           ),
-          actions: [
-            WidgetUtils.tooltip(
-              message: LocalizationService().translate('share_series'),
-              child: IconButton(
-                icon: const Icon(Icons.share),
-                onPressed: onShare,
-                style: buttonStyle,
-              ),
-            ).animate().fadeIn(delay: 100.ms, duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
-            if (entry != null)
-              WidgetUtils.tooltip(
-                message: LocalizationService().translate('delete_from_library'),
-                child: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: onDelete,
-                  style: buttonStyle,
-                ),
-              ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideX(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
-            const SizedBox(width: 8),
-          ],
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsetsDirectional.only(start: 56, bottom: 16),
-            centerTitle: false,
-            title: IgnorePointer(
-              ignoring: !isCollapsed,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: isCollapsed ? 1.0 : 0.0,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isWide ? 600 : 200),
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: AppConstants.textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppConstants.primaryBackground.withValues(alpha: 0),
+                    AppConstants.primaryBackground.withValues(alpha: 1),
+                  ],
+                  stops: const [0.3, 1.0],
                 ),
               ),
             ),
-            background: RepaintBoundary(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    color: Colors.black.withValues(alpha: 0.2),
-                  ),
-                  WidgetUtils.networkImage(
-                    url: series.coverUrl,
-                    fit: BoxFit.cover,
-                    memCacheWidth: isWide ? 1200 : 800,
-                  ).animate(target: isLoaded ? 1 : 0)
-                   .fadeIn(duration: 1200.ms, curve: Curves.easeOut)
-                   .scale(begin: const Offset(1.05, 1.05), end: const Offset(1, 1), curve: Curves.easeOut),
-                ClipRRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: Container(
-                      color: Colors.black.withValues(alpha: 0.3),
-                    ),
-                  ),
-                ).animate(target: isLoaded ? 1 : 0)
-                 .fadeIn(duration: 1200.ms, curve: Curves.easeOut),
-                Container(
+          ),
+          Positioned(
+            left: 16,
+            top: MediaQuery.of(context).padding.top + 8,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(shape: BoxShape.circle),
+              clipBehavior: Clip.antiAlias,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.5),
-                        Colors.black.withValues(alpha: 0),
-                        AppConstants.primaryBackground.withValues(alpha: 0.4),
-                        AppConstants.primaryBackground.withValues(alpha: 0.9),
-                        AppConstants.primaryBackground,
-                      ],
-                      stops: const [0.0, 0.15, 0.5, 0.85, 1.0],
-                    ),
+                    color: Colors.black.withValues(alpha: 0.4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    iconSize: 20,
+                    color: Colors.white,
+                    onPressed: onBack,
                   ),
                 ),
-                Positioned(
-                  bottom: 20,
-                  left: horizontalPadding,
-                  right: horizontalPadding,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      if (showCover) ...[
-                        SeriesHeroCover(
-                          series: series,
-                          height: isWide ? (isLandscape ? 180 : 220) : (isLandscape ? 140 : 180),
-                          width: isWide ? (isLandscape ? 120 : 150) : (isLandscape ? 100 : 125),
-                        ).animate().fadeIn(duration: 600.ms).slideX(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-                        const SizedBox(width: 16),
-                      ],
-                      Expanded(
-                        child: _buildMainInfo(context, isDark)
-                            .animate(target: isLoaded ? 1 : 0)
-                            .fadeIn(duration: 600.ms)
-                            .slideY(begin: 0.1, end: 0, curve: Curves.easeOutCubic),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-  Widget _buildMainInfo(BuildContext context, bool isDark) {
-    final otherTitles = <String>[];
-    if (series.title.isNotEmpty && series.title != title) {
-      otherTitles.add(series.title);
-    }
-    if (series.nativeTitle.isNotEmpty &&
-        series.nativeTitle != title &&
-        !otherTitles.contains(series.nativeTitle)) {
-      otherTitles.add(series.nativeTitle);
-    }
-    if (series.romanizedTitle.isNotEmpty &&
-        series.romanizedTitle != title &&
-        !otherTitles.contains(series.romanizedTitle)) {
-      otherTitles.add(series.romanizedTitle);
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _HoverableTitle(
-          text: title,
-          fontSize: isWide ? 32 : 22,
-          fontWeight: FontWeight.bold,
-          color: AppConstants.textColor,
-          maxLines: 3,
-          shadows: [
-            Shadow(
-              color: AppConstants.primaryBackground.withValues(alpha: 0.5),
-              offset: const Offset(0, 2),
-              blurRadius: 4,
-            ),
-          ],
-          onTap: () => onCopy(title),
-        ),
-        if (otherTitles.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          ...otherTitles.map((t) => Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: _HoverableTitle(
-                  text: t,
-                  fontSize: isWide ? 15 : 13,
-                  color: AppConstants.textMutedColor,
-                  fontStyle: FontStyle.italic,
-                  maxLines: 1,
-                  onTap: () => onCopy(t),
-                ),
-              )),
-        ],
-      ],
-    );
-  }
-}
-
-/// A title widget that underlines on hover to indicate it is clickable.
-class _HoverableTitle extends StatefulWidget {
-  final String text;
-  final double fontSize;
-  final FontWeight fontWeight;
-  final Color color;
-  final FontStyle? fontStyle;
-  final int maxLines;
-  final List<Shadow>? shadows;
-  final VoidCallback onTap;
-
-  const _HoverableTitle({
-    required this.text,
-    required this.fontSize,
-    this.fontWeight = FontWeight.normal,
-    required this.color,
-    this.fontStyle,
-    this.maxLines = 1,
-    this.shadows,
-    required this.onTap,
-  });
-
-  @override
-  State<_HoverableTitle> createState() => _HoverableTitleState();
-}
-
-class _HoverableTitleState extends State<_HoverableTitle> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: WidgetUtils.tooltip(
-        message: LocalizationService().translate('copy_title'),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2.0),
-            child: Text(
-              widget.text,
-              style: TextStyle(
-                fontSize: widget.fontSize,
-                fontWeight: widget.fontWeight,
-                color: widget.color,
-                fontStyle: widget.fontStyle,
-                height: 1.1,
-                shadows: widget.shadows,
-                decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
-                decorationColor: widget.color.withValues(alpha: 0.6),
               ),
-              maxLines: widget.maxLines,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
-        ),
+        ],
       ),
     );
   }

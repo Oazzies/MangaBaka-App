@@ -22,7 +22,7 @@ class SeriesDetailFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
     if (!isLoggedIn) return const SizedBox.shrink();
-    
+
     return StreamBuilder<LibraryEntry?>(
       stream: entryStream,
       builder: (context, snapshot) {
@@ -34,9 +34,22 @@ class SeriesDetailFAB extends StatelessWidget {
               onPressed: isAdding ? null : onAdd,
               backgroundColor: AppConstants.accentColor,
               foregroundColor: AppConstants.primaryBackground,
-              label: isAdding 
-                ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2, color: AppConstants.primaryBackground))
-                : Text(LocalizationService().translate('add_to_library'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+              ),
+              label: isAdding
+                  ? SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppConstants.primaryBackground,
+                      ),
+                    )
+                  : Text(
+                      LocalizationService().translate('add_to_library'),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
               icon: isAdding ? null : const Icon(Icons.add),
             ),
           );

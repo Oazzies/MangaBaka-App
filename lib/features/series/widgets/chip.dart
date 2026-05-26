@@ -21,14 +21,15 @@ class ChipBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chip = Container(
-      padding: padding ??
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: backgroundColor ?? AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppConstants.pillRadius),
       ),
       child: DefaultTextStyle(
-        style: labelStyle ??
+        style:
+            labelStyle ??
             TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -44,7 +45,7 @@ class ChipBase extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           child: chip,
         ),
       );

@@ -46,49 +46,75 @@ class StateSelectionSection extends StatelessWidget {
                     color: _getColorForState(tab.key),
                     size: 20,
                   ),
-                  trailingIcon: isSelected 
-                      ? Icon(Icons.check, color: AppConstants.accentColor, size: 18)
+                  trailingIcon: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: AppConstants.accentColor,
+                          size: 18,
+                        )
                       : null,
                   style: MenuItemButton.styleFrom(
                     foregroundColor: AppConstants.textColor,
-                    backgroundColor: isSelected ? AppConstants.accentColor.withValues(alpha: 0.1) : null,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    backgroundColor: isSelected
+                        ? AppConstants.accentColor.withValues(alpha: 0.1)
+                        : null,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
                   ),
                 );
               }).toList(),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: AppConstants.secondaryBackground,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 12.0,
+                ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(AppConstants.pillRadius),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(AppConstants.pillRadius),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(AppConstants.pillRadius),
                   borderSide: BorderSide.none,
                 ),
               ),
-              trailingIcon: Icon(Icons.keyboard_arrow_down_rounded, color: AppConstants.textColor, size: 24),
-              selectedTrailingIcon: Icon(Icons.keyboard_arrow_up_rounded, color: AppConstants.textColor, size: 24),
+              trailingIcon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppConstants.textColor,
+                size: 24,
+              ),
+              selectedTrailingIcon: Icon(
+                Icons.keyboard_arrow_up_rounded,
+                color: AppConstants.textColor,
+                size: 24,
+              ),
               textStyle: TextStyle(
                 color: AppConstants.textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
               menuStyle: MenuStyle(
-                backgroundColor: WidgetStateProperty.all(AppConstants.secondaryBackground),
+                backgroundColor: WidgetStateProperty.all(
+                  AppConstants.secondaryBackground,
+                ),
                 surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
                 shape: WidgetStateProperty.all(
                   RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.largeRadius,
+                    ),
                   ),
                 ),
-                padding: WidgetStateProperty.all(EdgeInsets.zero), // Removes the top/bottom gap!
+                padding: WidgetStateProperty.all(
+                  EdgeInsets.zero,
+                ), // Removes the top/bottom gap!
               ),
             );
           },

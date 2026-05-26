@@ -28,7 +28,7 @@ class SeriesSegmentedControl extends StatelessWidget {
       height: 48,
       decoration: BoxDecoration(
         color: AppConstants.tertiaryBackground.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -46,7 +46,9 @@ class SeriesSegmentedControl extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppConstants.accentColor,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.pillRadius,
+                    ),
                   ),
                 ),
               ),
@@ -70,7 +72,9 @@ class SeriesSegmentedControl extends StatelessWidget {
                           scale: isSelected ? 1.15 : 1.0,
                           child: Icon(
                             tab['icon'] as IconData,
-                            color: isSelected ? AppConstants.primaryBackground : AppConstants.textMutedColor,
+                            color: isSelected
+                                ? AppConstants.primaryBackground
+                                : AppConstants.textMutedColor,
                             size: 20,
                           ),
                         ),

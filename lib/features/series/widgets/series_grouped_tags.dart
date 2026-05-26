@@ -61,10 +61,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
     final sortedHeaders = grouped.keys.toList()..sort();
 
     _cachedContent = sortedHeaders.map((header) {
-      return SeriesTagGroup(
-        header: header,
-        subGroups: grouped[header]!,
-      );
+      return SeriesTagGroup(header: header, subGroups: grouped[header]!);
     }).toList();
   }
 
@@ -118,7 +115,9 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              AppConstants.primaryBackground.withValues(alpha: 0),
+                              AppConstants.primaryBackground.withValues(
+                                alpha: 0,
+                              ),
                               AppConstants.primaryBackground,
                             ],
                           ),
@@ -136,12 +135,17 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
               onTap: () => setState(() => _tagsExpanded = !_tagsExpanded),
               borderRadius: BorderRadius.circular(8),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 16,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _tagsExpanded ? widget.l10n.translate('show_less') : widget.l10n.translate('show_all_tags'),
+                      _tagsExpanded
+                          ? widget.l10n.translate('show_less')
+                          : widget.l10n.translate('show_all_tags'),
                       style: TextStyle(
                         color: AppConstants.accentColor,
                         fontWeight: FontWeight.bold,
@@ -151,7 +155,9 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                     ),
                     const SizedBox(width: 4),
                     Icon(
-                      _tagsExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      _tagsExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       color: AppConstants.accentColor,
                       size: 20,
                     ),
@@ -174,7 +180,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
           fontSize: 22,
           fontWeight: FontWeight.bold,
           color: AppConstants.textColor,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
         ),
       ),
     );

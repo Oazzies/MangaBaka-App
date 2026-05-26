@@ -52,24 +52,17 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 50),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppConstants.denseRadius),
               border: _hovered
                   ? Border.all(
                       color: AppConstants.accentColor.withValues(alpha: 0.6),
                       width: 2,
                     )
                   : Border.all(color: Colors.transparent, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: AppConstants.primaryBackground.withValues(
-                      alpha: _hovered ? 0.4 : 0.6),
-                  blurRadius: _hovered ? 28 : 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+              boxShadow: _hovered ? AppConstants.softShadow : null,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppConstants.denseRadius - 2),
               child: ListenableBuilder(
                 listenable: SettingsManager(),
                 builder: (context, _) {

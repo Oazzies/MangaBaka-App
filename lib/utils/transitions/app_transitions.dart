@@ -24,18 +24,15 @@ abstract final class AppTransitions {
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeInCubic,
+          curve: const Cubic(0.175, 0.885, 0.32, 1.1),
+          reverseCurve: const Cubic(0.6, 0.0, 0.8, 0.6),
         );
-        return FadeTransition(
-          opacity: curved,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.04),
-              end: Offset.zero,
-            ).animate(curved),
-            child: child,
-          ),
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1.0),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
         );
       },
       transitionDuration: const Duration(milliseconds: 350),

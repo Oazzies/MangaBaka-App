@@ -8,7 +8,7 @@ class SeriesSectionHeader extends StatelessWidget {
   const SeriesSectionHeader({
     super.key,
     required this.title,
-    this.bottomPadding = 16,
+    this.bottomPadding = 12,
   });
 
   @override
@@ -16,12 +16,13 @@ class SeriesSectionHeader extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Text(
-        title,
+        title.toUpperCase(),
         style: TextStyle(
-          fontSize: 22,
+          fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: AppConstants.textColor,
-          letterSpacing: 0.5,
+          color: AppConstants.textMutedColor,
+          letterSpacing: 1.0,
+          height: 1.2,
         ),
       ),
     );

@@ -31,6 +31,11 @@ class SeriesDetailTabContent extends StatelessWidget {
 
   final Function(String)? onAuthorTap;
   final Function(String)? onPublisherTap;
+  final VoidCallback? onAddToLibrary;
+  final Function(String)? onStateChanged;
+  final Function(int)? onRatingChanged;
+  final VoidCallback? onUpdateChapter;
+  final VoidCallback? onUpdateVolume;
 
   const SeriesDetailTabContent({
     super.key,
@@ -49,12 +54,17 @@ class SeriesDetailTabContent extends StatelessWidget {
     this.wideRightPaddingOnly = false,
     this.onAuthorTap,
     this.onPublisherTap,
+    this.onAddToLibrary,
+    this.onStateChanged,
+    this.onRatingChanged,
+    this.onUpdateChapter,
+    this.onUpdateVolume,
   });
 
   @override
   Widget build(BuildContext context) {
     final tabPadding = selectedTab == 'News' ? 0.0 : hPadding;
-    
+
     switch (selectedTab) {
       case 'Covers':
         return SeriesCoversTab(
@@ -64,8 +74,8 @@ class SeriesDetailTabContent extends StatelessWidget {
         );
       case 'Related':
         return SeriesRelatedTab(
-          related: related, 
-          l10n: l10n, 
+          related: related,
+          l10n: l10n,
           horizontalPadding: tabPadding,
           currentSeriesId: series.id,
           heroTagPrefix: 'related',
@@ -79,13 +89,22 @@ class SeriesDetailTabContent extends StatelessWidget {
       case 'Information':
       default:
         return SeriesDetailsGrid(
-          series: series, 
-          enrichedLinks: enrichedLinks, 
-          l10n: l10n, 
-          isWide: isWide, 
+          series: series,
+          enrichedLinks: enrichedLinks,
+          l10n: l10n,
+          isWide: isWide,
           horizontalPadding: tabPadding,
           onAuthorTap: onAuthorTap,
           onPublisherTap: onPublisherTap,
+          entry: entry,
+          onAddToLibrary: onAddToLibrary,
+          isInLibrary: entry != null,
+          status: series.status,
+          relatedSeries: related,
+          onStateChanged: onStateChanged,
+          onRatingChanged: onRatingChanged,
+          onUpdateChapter: onUpdateChapter,
+          onUpdateVolume: onUpdateVolume,
         );
     }
   }

@@ -26,7 +26,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   Future<void> fetchTabData(String tab) async {
     if (!mounted) return;
     final id = series.id;
-    
+
     switch (tab) {
       case 'Covers':
         if (covers == null) {
@@ -67,25 +67,32 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
         seriesService.fetchSeriesLinks(series.id),
         seriesService.fetchSeries(series.id),
       ]);
-      
+
       if (selectedTab != 'Information') {
         fetchTabData(selectedTab);
       }
-      
+
       if (mounted) {
-        setState(() {
-          enrichedLinks = results[0] as List<SeriesLink>?;
-          fullSeries = results[1] as Series?;
-          isDataLoaded = true;
-          fetchError = false;
+        // Defer heavy state update to next frame so route animation stays smooth
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() {
+            enrichedLinks = results[0] as List<SeriesLink>?;
+            fullSeries = results[1] as Series?;
+            isDataLoaded = true;
+            fetchError = false;
+          });
         });
       }
     } catch (e) {
       seriesService.logger.warning('Error fetching full data: $e');
       if (mounted) {
-        setState(() {
-          isDataLoaded = true; 
-          fetchError = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() {
+            isDataLoaded = true;
+            fetchError = true;
+          });
         });
       }
     }
