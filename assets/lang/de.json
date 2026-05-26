@@ -336,6 +336,20 @@
         "go_back": "Zurückgehen",
         "share_series": "Serie teilen",
         "copy_link": "Link kopieren",
-        "landscape_only": "Nur im Querformat"
+        "landscape_only": "Nur im Querformat",
+        "mix": "Mix",
+        "mix_subtitle": "Serien zu Empfehlungen mischen",
+        "mix_empty_title": "Deinen Mix starten",
+        "mix_empty_subtitle": "Füge Serien als Samen hinzu, um maßgeschneiderte Empfehlungen zu entdecken",
+        "mix_add_seed": "Eine Serie hinzufügen...",
+        "mix_seeds": "Samen",
+        "mix_dna": "Mix-DNA",
+        "mix_dna_subtitle": "Tags, die deine Empfehlungen steuern",
+        "mix_seed_suggestions": "Vorgeschlagene Samen",
+        "mix_generating": "Deinen Mix wird generiert...",
+        "mix_results": "Empfehlungen",
+        "mix_no_results": "Keine Empfehlungen gefunden. Versuche andere Samen.",
+        "mix_error": "Mix konnte nicht generiert werden",
+        "mix_refresh": "Mix aktualisieren"
     }
 }

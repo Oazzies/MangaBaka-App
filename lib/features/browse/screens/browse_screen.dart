@@ -20,6 +20,8 @@ import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/browse/widgets/filter_chips_row.dart';
 import 'package:mangabaka_app/features/browse/widgets/browse_type_tabs.dart';
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
+import 'package:mangabaka_app/features/browse/screens/mix_screen.dart';
+
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -82,6 +84,14 @@ class _BrowseScreenState extends State<BrowseScreen> {
     Navigator.push(
       context,
       AppTransitions.slideUp(SeriesDetailScreen(series: series)),
+    );
+  }
+
+  void _navigateToMix() {
+    _logger.info('Navigating to MixScreen');
+    Navigator.push(
+      context,
+      AppTransitions.slideRight(const MixScreen()),
     );
   }
 
@@ -274,6 +284,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                         onRetry: _controller.searchSeries,
                         onNavigateToDetail: _navigateToDetail,
                         onNavigateToResults: _navigateToBrowseResults,
+                        onNavigateToMix: _navigateToMix,
                       ),
                     ],
                   ),

@@ -26,6 +26,7 @@ class BrowseContent extends StatelessWidget {
   final VoidCallback onRetry;
   final Function(Series) onNavigateToDetail;
   final Function(String, String, {String? type, String? staff, String? publisher}) onNavigateToResults;
+  final VoidCallback onNavigateToMix;
 
   const BrowseContent({
     super.key,
@@ -38,7 +39,9 @@ class BrowseContent extends StatelessWidget {
     required this.onRetry,
     required this.onNavigateToDetail,
     required this.onNavigateToResults,
+    required this.onNavigateToMix,
   });
+
 
   Widget _buildLoadingState() {
     if (browseType == BrowseType.series) {
@@ -199,7 +202,12 @@ class BrowseContent extends StatelessWidget {
         Widget content;
         if (searchResults.isEmpty && !isLoading && error == null) {
           if (browseType == BrowseType.series) {
-            content = BrowseShortcuts(key: const ValueKey('shortcuts'), onNavigate: onNavigateToResults);
+            content = BrowseShortcuts(
+              key: const ValueKey('shortcuts'),
+              onNavigate: onNavigateToResults,
+              onMix: onNavigateToMix,
+            );
+
           } else {
             content = Center(
               key: const ValueKey('search_prompt'),

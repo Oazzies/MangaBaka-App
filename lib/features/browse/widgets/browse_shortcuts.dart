@@ -4,8 +4,13 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 
 class BrowseShortcuts extends StatelessWidget {
   final Function(String, String, {String? type}) onNavigate;
+  final VoidCallback onMix;
 
-  const BrowseShortcuts({super.key, required this.onNavigate});
+  const BrowseShortcuts({
+    super.key,
+    required this.onNavigate,
+    required this.onMix,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +22,18 @@ class BrowseShortcuts extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
           child: Column(
             children: [
+              // ── General ──────────────────────────────────────────────
+              ShortcutSection(
+                header: l10n.translate('general'),
+                customButtons: [
+                  ShortcutButtonEntry(
+                    icon: Icons.shuffle_rounded,
+                    label: l10n.translate('mix'),
+                    onPressed: onMix,
+                  ),
+                ],
+              ),
+              // ── Manga ────────────────────────────────────────────────
               ShortcutSection(
                 header: l10n.translate('type_manga'),
                 onMostPopular: () => onNavigate(
@@ -111,3 +128,4 @@ class BrowseShortcuts extends StatelessWidget {
     );
   }
 }
+

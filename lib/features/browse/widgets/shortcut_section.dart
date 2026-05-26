@@ -4,19 +4,40 @@ import 'package:mangabaka_app/utils/constants/app_constants.dart';
 
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 
+/// Describes a custom button entry for [ShortcutSection.customButtons].
+class ShortcutButtonEntry {
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  const ShortcutButtonEntry({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+}
+
 class ShortcutSection extends StatelessWidget {
   final String header;
-  final VoidCallback onMostPopular;
+  final VoidCallback? onMostPopular;
   final VoidCallback? onTopRated;
-  final VoidCallback onRandom;
+  final VoidCallback? onRandom;
+
+  /// When provided, overrides the default Most Popular / Top Rated / Random buttons.
+  /// Use this to render any custom set of buttons (e.g. a single "Mix" button).
+  final List<ShortcutButtonEntry>? customButtons;
 
   const ShortcutSection({
     required this.header,
-    required this.onMostPopular,
+    this.onMostPopular,
     this.onTopRated,
-    required this.onRandom,
+    this.onRandom,
+    this.customButtons,
     super.key,
-  });
+  }) : assert(
+          customButtons != null || onMostPopular != null,
+          'Either customButtons or onMostPopular must be provided',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +45,41 @@ class ShortcutSection extends StatelessWidget {
       listenable: LocalizationService(),
       builder: (context, _) {
         final l10n = LocalizationService();
+
+        // Build the list of buttons to display
+        final List<ShortcutButton> buttons;
+        if (customButtons != null) {
+          buttons = customButtons!
+              .map((e) => ShortcutButton(
+                    icon: e.icon,
+                    label: e.label,
+                    onPressed: e.onPressed,
+                  ))
+              .toList();
+        } else {
+          buttons = [
+            ShortcutButton(
+              icon: Icons.trending_up_rounded,
+              label: l10n.translate('most_popular'),
+              onPressed: onMostPopular!,
+            ),
+            if (onTopRated != null)
+              ShortcutButton(
+                icon: Icons.star_outline,
+                label: l10n.translate('top_rated'),
+                onPressed: onTopRated!,
+              ),
+            if (onRandom != null)
+              ShortcutButton(
+                icon: Icons.casino_outlined,
+                label: l10n.translate('random'),
+                onPressed: onRandom!,
+              ),
+          ];
+        }
+
         return Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -58,24 +112,7 @@ class ShortcutSection extends StatelessWidget {
                       crossAxisSpacing: 10,
                       mainAxisExtent: 64,
                     ),
-                    children: [
-                      ShortcutButton(
-                        icon: Icons.trending_up_rounded,
-                        label: l10n.translate('most_popular'),
-                        onPressed: onMostPopular,
-                      ),
-                      if (onTopRated != null)
-                        ShortcutButton(
-                          icon: Icons.star_outline,
-                          label: l10n.translate('top_rated'),
-                          onPressed: onTopRated!,
-                        ),
-                      ShortcutButton(
-                        icon: Icons.casino_outlined,
-                        label: l10n.translate('random'),
-                        onPressed: onRandom,
-                      ),
-                    ],
+                    children: buttons,
                   );
                 },
               ),
@@ -86,3 +123,4 @@ class ShortcutSection extends StatelessWidget {
     );
   }
 }
+

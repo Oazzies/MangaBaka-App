@@ -356,6 +356,25 @@
         "go_back": "Go Back",
         "share_series": "Share Series",
         "copy_link": "Copy Link",
-        "landscape_only": "Landscape only"
+        "landscape_only": "Landscape only",
+        "mix": "Mix",
+        "mix_subtitle": "Blend series into recommendations",
+        "mix_empty_title": "Start Your Mix",
+        "mix_empty_subtitle": "Add series as seeds to discover recommendations tailored to your taste",
+        "mix_add_seed": "Add a series...",
+        "mix_seeds": "Seeds",
+        "mix_dna": "Mix DNA",
+        "mix_dna_subtitle": "Tags driving your recommendations",
+        "mix_seed_suggestions": "Suggested Seeds",
+        "mix_generating": "Generating your mix...",
+        "mix_results": "Recommendations",
+        "mix_no_results": "No recommendations found. Try different seeds.",
+        "mix_error": "Failed to generate mix",
+        "mix_refresh": "Refresh Mix",
+        "general": "General",
+        "mix_strict_mode": "Strict Mode",
+        "mix_strict_mode_subtitle": "Hard-filter tags instead of vector boost",
+        "mix_blend_taste": "Blend My Taste",
+        "mix_blend_taste_subtitle": "Mix recommendations with your library taste"
     }
 }
