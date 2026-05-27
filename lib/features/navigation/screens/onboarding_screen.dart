@@ -37,8 +37,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   static const int _totalPages = 6;
 
-  final List<String> _contentOptions = ['safe', 'suggestive', 'erotica', 'pornographic'];
-
   @override
   void initState() {
     super.initState();
@@ -154,9 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         const WelcomePage(),
                         const LanguagePage(),
                         const ThemePage(),
-                        ContentPreferencesPage(
-                          contentOptions: _contentOptions,
-                        ),
+                        const ContentPreferencesPage(),
                         CameraPermissionPage(
                           onRequestPermission: _requestCameraPermission,
                         ),

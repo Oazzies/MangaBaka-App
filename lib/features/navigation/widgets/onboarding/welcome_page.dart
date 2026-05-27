@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/utils/constants/app_constants.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
+import 'package:mangabaka_app/features/navigation/widgets/onboarding/onboarding_hero_layout.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -14,50 +14,14 @@ class WelcomePage extends StatelessWidget {
         final localization = LocalizationService();
         return LayoutBuilder(
           builder: (context, constraints) {
-            final isShort = constraints.maxHeight < 500;
-            
-            return Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(isShort ? 16 : 24),
-                      decoration: BoxDecoration(
-                        color: AppConstants.accentColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Icon(
-                        Icons.auto_stories_rounded,
-                        size: isShort ? 48 : 64,
-                        color: AppConstants.accentColor,
-                      ),
-                    ),
-                    SizedBox(height: isShort ? 24 : 40),
-                    Text(
-                      localization.translate('app_name'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: isShort ? 24 : 32,
-                        fontWeight: FontWeight.w900,
-                        color: AppConstants.textColor,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      localization.translate('onboarding_welcome_subtitle'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: isShort ? 14 : 16,
-                        color: AppConstants.textMutedColor,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            return OnboardingHeroLayout(
+              icon: Icons.auto_stories_rounded,
+              title: localization.translate('app_name'),
+              subtitle: localization.translate('onboarding_welcome_subtitle'),
+              isShort: constraints.maxHeight < 500,
+              titleFontSize: 32,
+              titleFontWeight: FontWeight.w900,
+              titleLetterSpacing: -0.5,
             );
           },
         );

@@ -4,36 +4,34 @@ import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/theme_preview_item.dart';
 
+String _themeModeName(ThemeMode mode, LocalizationService localization) {
+  switch (mode) {
+    case ThemeMode.light: return localization.translate('theme_mode_light');
+    case ThemeMode.dark: return localization.translate('theme_mode_dark');
+    case ThemeMode.system: return localization.translate('theme_mode_system');
+  }
+}
+
+String _themeName(AppTheme theme, LocalizationService localization) {
+  switch (theme) {
+    case AppTheme.defaultTheme: return localization.translate('theme_default');
+    case AppTheme.catppuccin: return localization.translate('theme_catppuccin');
+    case AppTheme.greenApple: return localization.translate('theme_green_apple');
+    case AppTheme.lavender: return localization.translate('theme_lavender');
+    case AppTheme.midnightDusk: return localization.translate('theme_midnight_dusk');
+    case AppTheme.nord: return localization.translate('theme_nord');
+    case AppTheme.strawberryDaiquiri: return localization.translate('theme_strawberry_daiquiri');
+    case AppTheme.tako: return localization.translate('theme_tako');
+    case AppTheme.tealTurquoise: return localization.translate('theme_teal_turquoise');
+    case AppTheme.tidalWave: return localization.translate('theme_tidal_wave');
+    case AppTheme.yinYang: return localization.translate('theme_yin_yang');
+    case AppTheme.yotsuba: return localization.translate('theme_yotsuba');
+    case AppTheme.monochrome: return localization.translate('theme_monochrome');
+  }
+}
+
 class ThemePage extends StatelessWidget {
   const ThemePage({super.key});
-
-  String _getThemeModeName(ThemeMode mode, LocalizationService localization) {
-    switch (mode) {
-      case ThemeMode.light: return localization.translate('theme_mode_light');
-      case ThemeMode.dark: return localization.translate('theme_mode_dark');
-      case ThemeMode.system: return localization.translate('theme_mode_system');
-    }
-  }
-
-
-
-  String _getThemeName(AppTheme theme, LocalizationService localization) {
-    switch (theme) {
-      case AppTheme.defaultTheme: return localization.translate('theme_default');
-      case AppTheme.catppuccin: return localization.translate('theme_catppuccin');
-      case AppTheme.greenApple: return localization.translate('theme_green_apple');
-      case AppTheme.lavender: return localization.translate('theme_lavender');
-      case AppTheme.midnightDusk: return localization.translate('theme_midnight_dusk');
-      case AppTheme.nord: return localization.translate('theme_nord');
-      case AppTheme.strawberryDaiquiri: return localization.translate('theme_strawberry_daiquiri');
-      case AppTheme.tako: return localization.translate('theme_tako');
-      case AppTheme.tealTurquoise: return localization.translate('theme_teal_turquoise');
-      case AppTheme.tidalWave: return localization.translate('theme_tidal_wave');
-      case AppTheme.yinYang: return localization.translate('theme_yin_yang');
-      case AppTheme.yotsuba: return localization.translate('theme_yotsuba');
-      case AppTheme.monochrome: return localization.translate('theme_monochrome');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +41,11 @@ class ThemePage extends StatelessWidget {
         final localization = LocalizationService();
         final currentMode = ThemeManager().currentThemeMode;
         final currentTheme = ThemeManager().currentTheme;
-        
-        bool isActuallyDark = false;
-        if (currentMode == ThemeMode.system) {
-          isActuallyDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-        } else {
-          isActuallyDark = currentMode == ThemeMode.dark;
-        }
+
+        // Resolve actual brightness when mode follows the system setting.
+        final isActuallyDark = currentMode == ThemeMode.system
+            ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+            : currentMode == ThemeMode.dark;
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -89,7 +85,9 @@ class ThemePage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppConstants.secondaryBackground,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.5)),
+                            border: Border.all(
+                              color: AppConstants.borderColor.withValues(alpha: 0.5),
+                            ),
                           ),
                           child: Row(
                             children: ThemeMode.values.map((mode) {
@@ -105,10 +103,12 @@ class ThemePage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
-                                      _getThemeModeName(mode, localization),
+                                      _themeModeName(mode, localization),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: isSelected ? AppConstants.primaryBackground : AppConstants.textColor,
+                                        color: isSelected
+                                            ? AppConstants.primaryBackground
+                                            : AppConstants.textColor,
                                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                       ),
                                     ),
@@ -132,8 +132,7 @@ class ThemePage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final theme = AppTheme.values[index];
                           final isSelected = theme == currentTheme;
-                          final themeName = _getThemeName(theme, localization);
-                      
+
                           return Padding(
                             padding: const EdgeInsets.only(right: 32),
                             child: Center(
@@ -142,7 +141,7 @@ class ThemePage extends StatelessWidget {
                                 isDark: isActuallyDark,
                                 isSelected: isSelected,
                                 onTap: () => ThemeManager().setTheme(theme),
-                                label: themeName,
+                                label: _themeName(theme, localization),
                                 scale: themeScale,
                               ),
                             ),

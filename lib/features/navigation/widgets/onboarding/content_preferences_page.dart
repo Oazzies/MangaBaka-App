@@ -4,10 +4,23 @@ import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 
-class ContentPreferencesPage extends StatelessWidget {
-  final List<String> contentOptions;
+/// Ordered content-rating options, from least to most explicit.
+const _kContentOptions = ['safe', 'suggestive', 'erotica', 'pornographic'];
 
-  const ContentPreferencesPage({super.key, required this.contentOptions});
+class ContentPreferencesPage extends StatelessWidget {
+  const ContentPreferencesPage({super.key});
+
+  /// Toggles [option] in the user's preferences, enforcing a minimum of one
+  /// selection so the content filter is never fully empty.
+  void _toggleOption(String option, List<String> currentPrefs) {
+    final updated = List<String>.from(currentPrefs);
+    if (currentPrefs.contains(option)) {
+      if (updated.length > 1) updated.remove(option);
+    } else {
+      updated.add(option);
+    }
+    SettingsManager().setContentPreferences(updated);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +28,6 @@ class ContentPreferencesPage extends StatelessWidget {
       listenable: Listenable.merge([ThemeManager(), LocalizationService(), SettingsManager()]),
       builder: (context, _) {
         final localization = LocalizationService();
-        final options = ['safe', 'suggestive', 'erotica', 'pornographic'];
-        
         final labels = {
           'safe': localization.translate('safe'),
           'suggestive': localization.translate('suggestive'),
@@ -56,35 +67,25 @@ class ContentPreferencesPage extends StatelessWidget {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final option = options[index];
+                    final option = _kContentOptions[index];
                     final currentPrefs = SettingsManager().contentPreferences;
                     final isSelected = currentPrefs.contains(option);
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12.0),
                       child: InkWell(
-                        onTap: () {
-                          final newPrefs = List<String>.from(currentPrefs);
-                          if (isSelected) {
-                            if (newPrefs.length > 1) {
-                              newPrefs.remove(option);
-                            }
-                          } else {
-                            newPrefs.add(option);
-                          }
-                          SettingsManager().setContentPreferences(newPrefs);
-                        },
+                        onTap: () => _toggleOption(option, currentPrefs),
                         borderRadius: BorderRadius.circular(16),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           decoration: BoxDecoration(
-                            color: isSelected 
+                            color: isSelected
                                 ? AppConstants.accentColor.withValues(alpha: 0.1)
                                 : AppConstants.secondaryBackground,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: isSelected 
-                                  ? AppConstants.accentColor 
+                              color: isSelected
+                                  ? AppConstants.accentColor
                                   : AppConstants.borderColor.withValues(alpha: 0.5),
                             ),
                           ),
@@ -103,17 +104,7 @@ class ContentPreferencesPage extends StatelessWidget {
                               Checkbox(
                                 value: isSelected,
                                 activeColor: AppConstants.accentColor,
-                                onChanged: (val) {
-                                  final newPrefs = List<String>.from(currentPrefs);
-                                  if (isSelected) {
-                                    if (newPrefs.length > 1) {
-                                      newPrefs.remove(option);
-                                    }
-                                  } else {
-                                    newPrefs.add(option);
-                                  }
-                                  SettingsManager().setContentPreferences(newPrefs);
-                                },
+                                onChanged: (_) => _toggleOption(option, currentPrefs),
                               ),
                             ],
                           ),
@@ -121,7 +112,7 @@ class ContentPreferencesPage extends StatelessWidget {
                       ),
                     );
                   },
-                  childCount: options.length,
+                  childCount: _kContentOptions.length,
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 32)),
