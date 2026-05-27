@@ -72,8 +72,9 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent)
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
+    }
 
     final query = _controller.text;
     final hasSuggestions = _results.isNotEmpty && _showSuggestions;
@@ -346,37 +347,36 @@ class _MBSearchBarState extends State<MBSearchBar> {
     widget.onResultSelected?.call(result);
   }
 
-  void _acceptGhostText() {
-    if (_ghostSuffix.isEmpty || _results.isEmpty) return;
-
-    AutocompleteSeriesResult? matchedResult;
-    String? matchedTitle;
-
+  /// Finds the autocomplete result whose title matches the current ghost suffix.
+  /// Returns `null` when there is no ghost text or no matching result.
+  ({AutocompleteSeriesResult result, String title})? _findGhostMatch() {
+    if (_ghostSuffix.isEmpty || _results.isEmpty) return null;
     final query = _controller.text;
-    for (var result in _results) {
-      for (var t in result.allTitles) {
+    for (final result in _results) {
+      for (final t in result.allTitles) {
         if (t.toLowerCase().startsWith(query.toLowerCase()) &&
             t.substring(query.length) == _ghostSuffix) {
-          matchedResult = result;
-          matchedTitle = t;
-          break;
+          return (result: result, title: t);
         }
       }
-      if (matchedResult != null) break;
     }
+    return null;
+  }
 
-    if (matchedTitle != null) {
-      _isNavigatingWithArrows = true;
-      _controller.value = _controller.value.copyWith(
-        text: matchedTitle,
-        selection: TextSelection.collapsed(offset: matchedTitle.length),
-      );
-      _originalQuery = matchedTitle;
-      _ghostSuffix = '';
-      _controller.ghostSuffix = '';
-      _setSuggestions([]);
-      _isNavigatingWithArrows = false;
-    }
+  void _acceptGhostText() {
+    final match = _findGhostMatch();
+    if (match == null) return;
+
+    _isNavigatingWithArrows = true;
+    _controller.value = _controller.value.copyWith(
+      text: match.title,
+      selection: TextSelection.collapsed(offset: match.title.length),
+    );
+    _originalQuery = match.title;
+    _ghostSuffix = '';
+    _controller.ghostSuffix = '';
+    _setSuggestions([]);
+    _isNavigatingWithArrows = false;
   }
 
   void _clear() {
@@ -511,6 +511,12 @@ class _MBSearchBarState extends State<MBSearchBar> {
   }
 
   void _openFilterSheet() {
+    // Single callback shared by both the dialog (landscape) and bottom-sheet (portrait) paths.
+    void onApply(SearchFilters filters) {
+      setState(() => _currentFilters = filters);
+      widget.onFilterApplied?.call(filters);
+    }
+
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
 
@@ -528,10 +534,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
             child: SearchFilterBottomSheet(
               isDialog: true,
               initialFilters: _currentFilters,
-              onApply: (filters) {
-                setState(() => _currentFilters = filters);
-                widget.onFilterApplied?.call(filters);
-              },
+              onApply: onApply,
             ),
           ),
         ),
@@ -549,31 +552,14 @@ class _MBSearchBarState extends State<MBSearchBar> {
           top: Radius.circular(AppConstants.largeRadius),
         ),
       ),
-      builder: (context) {
-        return SearchFilterBottomSheet(
-          initialFilters: _currentFilters,
-          onApply: (filters) {
-            setState(() => _currentFilters = filters);
-            widget.onFilterApplied?.call(filters);
-          },
-        );
-      },
+      builder: (context) => SearchFilterBottomSheet(
+        initialFilters: _currentFilters,
+        onApply: onApply,
+      ),
     );
   }
 
-  AutocompleteSeriesResult? _getMatchedResultForGhost() {
-    if (_ghostSuffix.isEmpty || _results.isEmpty) return null;
-    final query = _controller.text;
-    for (var result in _results) {
-      for (var t in result.allTitles) {
-        if (t.toLowerCase().startsWith(query.toLowerCase()) &&
-            t.substring(query.length) == _ghostSuffix) {
-          return result;
-        }
-      }
-    }
-    return null;
-  }
+  AutocompleteSeriesResult? _getMatchedResultForGhost() => _findGhostMatch()?.result;
 }
 
 class GhostTextEditingController extends TextEditingController {

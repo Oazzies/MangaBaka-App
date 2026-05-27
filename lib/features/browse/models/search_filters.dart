@@ -88,65 +88,63 @@ class SearchFilters {
     );
   }
 
-  SearchFilters copyWithSortBy(String? sortBy) {
-    return SearchFilters(
-      type: type,
-      typeNot: typeNot,
-      status: status,
-      statusNot: statusNot,
-      genre: genre,
-      genreNot: genreNot,
-      tag: tag,
-      tagNot: tagNot,
-      sortBy: sortBy,
-      ratingLower: ratingLower,
-      ratingUpper: ratingUpper,
-      publishedYearLower: publishedYearLower,
-      publishedYearUpper: publishedYearUpper,
-      isLicensed: isLicensed,
-      tagMode: tagMode,
-    );
-  }
+  /// Convenience wrapper — clears or sets [sortBy] without touching other fields.
+  SearchFilters copyWithSortBy(String? sortBy) => SearchFilters(
+        type: type,
+        typeNot: typeNot,
+        status: status,
+        statusNot: statusNot,
+        genre: genre,
+        genreNot: genreNot,
+        tag: tag,
+        tagNot: tagNot,
+        sortBy: sortBy,
+        ratingLower: ratingLower,
+        ratingUpper: ratingUpper,
+        publishedYearLower: publishedYearLower,
+        publishedYearUpper: publishedYearUpper,
+        isLicensed: isLicensed,
+        tagMode: tagMode,
+      );
 
-  SearchFilters copyWithYear({int? publishedYearLower, int? publishedYearUpper}) {
-    return SearchFilters(
-      type: type,
-      typeNot: typeNot,
-      status: status,
-      statusNot: statusNot,
-      genre: genre,
-      genreNot: genreNot,
-      tag: tag,
-      tagNot: tagNot,
-      sortBy: sortBy,
-      ratingLower: ratingLower,
-      ratingUpper: ratingUpper,
-      publishedYearLower: publishedYearLower,
-      publishedYearUpper: publishedYearUpper,
-      isLicensed: isLicensed,
-      tagMode: tagMode,
-    );
-  }
+  /// Convenience wrapper — replaces publication-year bounds without touching other fields.
+  SearchFilters copyWithYear({int? publishedYearLower, int? publishedYearUpper}) =>
+      SearchFilters(
+        type: type,
+        typeNot: typeNot,
+        status: status,
+        statusNot: statusNot,
+        genre: genre,
+        genreNot: genreNot,
+        tag: tag,
+        tagNot: tagNot,
+        sortBy: sortBy,
+        ratingLower: ratingLower,
+        ratingUpper: ratingUpper,
+        publishedYearLower: publishedYearLower,
+        publishedYearUpper: publishedYearUpper,
+        isLicensed: isLicensed,
+        tagMode: tagMode,
+      );
 
-  SearchFilters copyWithIsLicensed(bool? isLicensed) {
-    return SearchFilters(
-      type: type,
-      typeNot: typeNot,
-      status: status,
-      statusNot: statusNot,
-      genre: genre,
-      genreNot: genreNot,
-      tag: tag,
-      tagNot: tagNot,
-      sortBy: sortBy,
-      ratingLower: ratingLower,
-      ratingUpper: ratingUpper,
-      publishedYearLower: publishedYearLower,
-      publishedYearUpper: publishedYearUpper,
-      isLicensed: isLicensed,
-      tagMode: tagMode,
-    );
-  }
+  /// Convenience wrapper — sets or clears [isLicensed] without touching other fields.
+  SearchFilters copyWithIsLicensed(bool? isLicensed) => SearchFilters(
+        type: type,
+        typeNot: typeNot,
+        status: status,
+        statusNot: statusNot,
+        genre: genre,
+        genreNot: genreNot,
+        tag: tag,
+        tagNot: tagNot,
+        sortBy: sortBy,
+        ratingLower: ratingLower,
+        ratingUpper: ratingUpper,
+        publishedYearLower: publishedYearLower,
+        publishedYearUpper: publishedYearUpper,
+        isLicensed: isLicensed,
+        tagMode: tagMode,
+      );
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};

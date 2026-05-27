@@ -223,192 +223,152 @@ class BrowseController extends ChangeNotifier {
     }
   }
 
+  /// After a page loads, schedules a scroll check so the list auto-loads the
+  /// next page if the content is short enough to fit on screen.
+  void _scheduleScrollCheckIfNeeded() {
+    if (_hasMore) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => checkScroll());
+    }
+  }
+
+  /// Resolves the current user ID when the "hide library series" setting is on.
+  String? _getExcludeUserId() {
+    if (!SettingsManager().hideLibrarySeriesInBrowse) return null;
+    final auth = getIt<ProfileAuthService>();
+    if (!auth.isLoggedIn) return null;
+    final profile = auth.cachedProfile;
+    if (profile == null) return null;
+    final userId = profile.id.replaceAll('-', '');
+    _logger.fine('Hiding library series for user: $userId');
+    return userId.isEmpty ? null : userId;
+  }
+
   Future<void> _fetchSeriesResults() async {
-    String? userId;
-    if (SettingsManager().hideLibrarySeriesInBrowse) {
-      final auth = getIt<ProfileAuthService>();
-      if (auth.isLoggedIn) {
-        final profile = auth.cachedProfile;
-        if (profile != null) {
-          userId = profile.id.replaceAll('-', '');
-          _logger.fine('Hiding library series for user: $userId');
-        }
-      }
-    }
+    final userId = _getExcludeUserId();
 
-    final extraParams = <String, dynamic>{
-      'page': _currentPage,
-      'limit': AppConstants.defaultPageLimit,
-    };
-
-    if (userId != null && userId.isNotEmpty) {
-      extraParams['exclude_user_library'] = userId;
-    }
-
-    try {
-      final result = await _searchService.searchSeries(
-        _currentSearchQuery,
-        sortBy: _currentFilters.sortBy,
-        type: _currentFilters.type.isNotEmpty
-            ? _currentFilters.type.first
-            : null,
-        extraParams: {
-          'page': _currentPage,
-          'limit': AppConstants.defaultPageLimit,
-          ..._currentFilters.toMap(),
-        },
-      );
-
-      final newResults = result.series;
-      
-      // Handle the total results (API sometimes returns 0 even with data)
-      _totalResults = result.total > 0 ? result.total : (newResults.length < AppConstants.defaultPageLimit ? _seriesResults.length + newResults.length : 1000);
-
-      _logger.info(
-        'Fetched ${newResults.length} series results for page $_currentPage (Total: $_totalResults)',
-      );
-
-      // HYBRID SORT: If searching and a custom sort is active, the API might ignore the query.
-      // We perform a local sort on the fetched results to ensure the most relevant ones appear at the top
-      // according to the user's chosen sort order.
-      if (_currentSearchQuery.isNotEmpty && _currentFilters.sortBy != null) {
-        final sortBy = _currentFilters.sortBy!;
-        _logger.fine('Applying local sort for query "$_currentSearchQuery": $sortBy');
-        
-        newResults.sort((a, b) {
-          if (sortBy.startsWith('score_')) {
-            final rA = double.tryParse(a.rating) ?? 0.0;
-            final rB = double.tryParse(b.rating) ?? 0.0;
-            return sortBy == 'score_desc' ? rB.compareTo(rA) : rA.compareTo(rB);
-          } else if (sortBy.startsWith('popularity_')) {
-            // Since we don't have the raw popularity rank easily accessible as a number in the model
-            // we'll stick to relevance if we can't sort accurately, but for score it's perfect.
-            return 0; 
-          } else if (sortBy.startsWith('name_')) {
-            return sortBy == 'name_desc' ? b.title.compareTo(a.title) : a.title.compareTo(b.title);
-          } else if (sortBy.startsWith('chapters_')) {
-            final cA = int.tryParse(a.totalChapters) ?? 0;
-            final cB = int.tryParse(b.totalChapters) ?? 0;
-            return sortBy == 'chapters_desc' ? cB.compareTo(cA) : cA.compareTo(cB);
-          }
-          return 0;
-        });
-      }
-
-      _hasMore = newResults.length == AppConstants.defaultPageLimit;
-      _isLoading = false;
-      _isLoadingMore = false;
-      _seriesResults.addAll(newResults);
-      notifyListeners();
-
-      if (_hasMore) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => checkScroll());
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> _fetchPublisherResults() async {
-    try {
-      final result = await _publisherSearchService.search({
-        'q': _currentSearchQuery,
-        'page': _currentPage,
-        'limit': AppConstants.defaultPageLimit,
-        ..._currentFilters.toMap(),
-      });
-
-      final newResults = result.publishers;
-      _totalResults = result.total;
-
-      _logger.info(
-        'Fetched ${newResults.length} publisher results for page $_currentPage (Total: $_totalResults)',
-      );
-
-      _hasMore = newResults.length == AppConstants.defaultPageLimit;
-      _isLoading = false;
-      _isLoadingMore = false;
-      _publisherResults.addAll(newResults);
-      notifyListeners();
-
-      if (_hasMore) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => checkScroll());
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> _fetchStaffResults() async {
-    final extraParams = <String, dynamic>{
-      'staff': _currentSearchQuery,
+    final requestParams = <String, dynamic>{
       'page': _currentPage,
       'limit': AppConstants.defaultPageLimit,
       ..._currentFilters.toMap(),
+      if (userId != null) 'exclude_user_library': userId,
     };
 
-    final newSeriesResults = await _searchService.searchSeriesByName(
-      '',
-      extraParams: extraParams,
+    final result = await _searchService.searchSeries(
+      _currentSearchQuery,
+      sortBy: _currentFilters.sortBy,
+      type: _currentFilters.type.isNotEmpty ? _currentFilters.type.first : null,
+      extraParams: requestParams,
     );
 
-    final Map<String, Staff> staffMap = {};
-    final queryLower = _currentSearchQuery.toLowerCase();
+    final newResults = result.series;
 
-    for (var series in newSeriesResults) {
-      for (var author in series.authors) {
-        if (queryLower.isNotEmpty && !author.toLowerCase().contains(queryLower)) {
-          continue;
-        }
+    // API sometimes returns 0 even with data; fall back to a calculated total.
+    _totalResults = result.total > 0
+        ? result.total
+        : (newResults.length < AppConstants.defaultPageLimit
+            ? _seriesResults.length + newResults.length
+            : 1000);
 
-        if (!staffMap.containsKey(author)) {
-          staffMap[author] = Staff(
-            id: author.hashCode,
-            name: author,
-            role: 'Author',
-            seriesCount: null,
-          );
-        } else {
-          final existing = staffMap[author]!;
-          staffMap[author] = Staff(
-            id: existing.id,
-            name: existing.name,
-            role: existing.role,
-            seriesCount: null,
-          );
-        }
-      }
-      for (var artist in series.artists) {
-        if (queryLower.isNotEmpty && !artist.toLowerCase().contains(queryLower)) {
-          continue;
-        }
+    _logger.info(
+      'Fetched ${newResults.length} series results for page $_currentPage (Total: $_totalResults)',
+    );
 
-        if (!staffMap.containsKey(artist)) {
-          staffMap[artist] = Staff(
-            id: artist.hashCode,
-            name: artist,
-            role: 'Artist',
-            seriesCount: null,
-          );
-        } else {
-          final existing = staffMap[artist]!;
-          final newRole = existing.role == 'Artist'
-              ? 'Artist'
-              : 'Author / Artist';
-          staffMap[artist] = Staff(
-            id: existing.id,
-            name: existing.name,
-            role: newRole,
-            seriesCount: null,
-          );
+    // HYBRID SORT: When a query and a custom sort are both active, the API
+    // may prioritise relevance over the requested sort order. We apply the
+    // sort locally on each page so the user's chosen order is always honoured.
+    if (_currentSearchQuery.isNotEmpty && _currentFilters.sortBy != null) {
+      final sortBy = _currentFilters.sortBy!;
+      _logger.fine('Applying local sort for query "$_currentSearchQuery": $sortBy');
+      newResults.sort((a, b) {
+        if (sortBy.startsWith('score_')) {
+          final rA = double.tryParse(a.rating) ?? 0.0;
+          final rB = double.tryParse(b.rating) ?? 0.0;
+          return sortBy == 'score_desc' ? rB.compareTo(rA) : rA.compareTo(rB);
+        } else if (sortBy.startsWith('name_')) {
+          return sortBy == 'name_desc'
+              ? b.title.compareTo(a.title)
+              : a.title.compareTo(b.title);
+        } else if (sortBy.startsWith('chapters_')) {
+          final cA = int.tryParse(a.totalChapters) ?? 0;
+          final cB = int.tryParse(b.totalChapters) ?? 0;
+          return sortBy == 'chapters_desc' ? cB.compareTo(cA) : cA.compareTo(cB);
         }
-      }
+        // popularity_ and others: keep API order (no reliable local field)
+        return 0;
+      });
     }
 
-    final newResults = staffMap.values.toList();
-    newResults.sort(
-      (a, b) => (b.seriesCount ?? 0).compareTo(a.seriesCount ?? 0),
+    _hasMore = newResults.length == AppConstants.defaultPageLimit;
+    _isLoading = false;
+    _isLoadingMore = false;
+    _seriesResults.addAll(newResults);
+    notifyListeners();
+    _scheduleScrollCheckIfNeeded();
+  }
+
+  Future<void> _fetchPublisherResults() async {
+    final result = await _publisherSearchService.search({
+      'q': _currentSearchQuery,
+      'page': _currentPage,
+      'limit': AppConstants.defaultPageLimit,
+      ..._currentFilters.toMap(),
+    });
+
+    final newResults = result.publishers;
+    _totalResults = result.total;
+
+    _logger.info(
+      'Fetched ${newResults.length} publisher results for page $_currentPage (Total: $_totalResults)',
     );
+
+    _hasMore = newResults.length == AppConstants.defaultPageLimit;
+    _isLoading = false;
+    _isLoadingMore = false;
+    _publisherResults.addAll(newResults);
+    notifyListeners();
+    _scheduleScrollCheckIfNeeded();
+  }
+
+  Future<void> _fetchStaffResults() async {
+    final newSeriesResults = await _searchService.searchSeriesByName(
+      '',
+      extraParams: {
+        'staff': _currentSearchQuery,
+        'page': _currentPage,
+        'limit': AppConstants.defaultPageLimit,
+        ..._currentFilters.toMap(),
+      },
+    );
+
+    // Deduplicate staff across all series on this page.
+    // If the same person appears as both author and artist, their role is
+    // promoted to 'Author / Artist'.
+    final staffMap = <String, Staff>{};
+    final queryLower = _currentSearchQuery.toLowerCase();
+
+    void upsertStaff(String name, String initialRole) {
+      if (queryLower.isNotEmpty && !name.toLowerCase().contains(queryLower)) {
+        return;
+      }
+      final existing = staffMap[name];
+      final resolvedRole = existing == null
+          ? initialRole
+          : (existing.role == initialRole ? existing.role : 'Author / Artist');
+      staffMap[name] = Staff(
+        id: existing?.id ?? name.hashCode,
+        name: name,
+        role: resolvedRole,
+        seriesCount: null,
+      );
+    }
+
+    for (final series in newSeriesResults) {
+      for (final author in series.authors) { upsertStaff(author, 'Author'); }
+      for (final artist in series.artists) { upsertStaff(artist, 'Artist'); }
+    }
+
+    final newResults = staffMap.values.toList()
+      ..sort((a, b) => (b.seriesCount ?? 0).compareTo(a.seriesCount ?? 0));
 
     _logger.info(
       'Fetched ${newResults.length} staff results extracted from ${newSeriesResults.length} series for page $_currentPage',
@@ -418,26 +378,26 @@ class BrowseController extends ChangeNotifier {
     _isLoading = false;
     _isLoadingMore = false;
 
-    for (var staff in newResults) {
+    // Merge with results from previous pages, promoting role when needed.
+    for (final staff in newResults) {
       final index = _staffResults.indexWhere((s) => s.name == staff.name);
       if (index != -1) {
         final existing = _staffResults[index];
-        _staffResults[index] = Staff(
-          id: existing.id,
-          name: existing.name,
-          role: existing.role != staff.role ? 'Author / Artist' : existing.role,
-          seriesCount: null,
-        );
+        if (existing.role != staff.role) {
+          _staffResults[index] = Staff(
+            id: existing.id,
+            name: existing.name,
+            role: 'Author / Artist',
+            seriesCount: null,
+          );
+        }
       } else {
         _staffResults.add(staff);
       }
     }
 
     notifyListeners();
-
-    if (_hasMore) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => checkScroll());
-    }
+    _scheduleScrollCheckIfNeeded();
   }
 
   static double generateRandomSeed() {

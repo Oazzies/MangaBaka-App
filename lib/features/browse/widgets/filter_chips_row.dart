@@ -35,102 +35,56 @@ class FilterChipsRow extends StatelessWidget {
         }
 
         // Types
-        for (final t in filters.type) {
-          chips.add(
-            _buildChip(l10n.translate('type_$t'), () {
-              onFiltersChanged(
-                filters.copyWith(
-                  type: filters.type.where((x) => x != t).toList(),
-                ),
-              );
-            }),
-          );
-        }
-        for (final t in filters.typeNot) {
-          chips.add(
-            _buildChip('- ${l10n.translate('type_$t')}', () {
-              onFiltersChanged(
-                filters.copyWith(
-                  typeNot: filters.typeNot.where((x) => x != t).toList(),
-                ),
-              );
-            }, isNegative: true),
-          );
-        }
+        chips.addAll(_buildFilterPairChips(
+          include: filters.type,
+          exclude: filters.typeNot,
+          labelFor: (v) => l10n.translate('type_$v'),
+          onRemoveInclude: (v) => onFiltersChanged(
+            filters.copyWith(type: filters.type.where((x) => x != v).toList()),
+          ),
+          onRemoveExclude: (v) => onFiltersChanged(
+            filters.copyWith(typeNot: filters.typeNot.where((x) => x != v).toList()),
+          ),
+        ));
 
         // Status
-        for (final s in filters.status) {
-          chips.add(
-            _buildChip(l10n.translate('status_$s'), () {
-              onFiltersChanged(
-                filters.copyWith(
-                  status: filters.status.where((x) => x != s).toList(),
-                ),
-              );
-            }),
-          );
-        }
-        for (final s in filters.statusNot) {
-          chips.add(
-            _buildChip('- ${l10n.translate('status_$s')}', () {
-              onFiltersChanged(
-                filters.copyWith(
-                  statusNot: filters.statusNot.where((x) => x != s).toList(),
-                ),
-              );
-            }, isNegative: true),
-          );
-        }
+        chips.addAll(_buildFilterPairChips(
+          include: filters.status,
+          exclude: filters.statusNot,
+          labelFor: (v) => l10n.translate('status_$v'),
+          onRemoveInclude: (v) => onFiltersChanged(
+            filters.copyWith(status: filters.status.where((x) => x != v).toList()),
+          ),
+          onRemoveExclude: (v) => onFiltersChanged(
+            filters.copyWith(statusNot: filters.statusNot.where((x) => x != v).toList()),
+          ),
+        ));
 
         // Genres
-        for (final g in filters.genre) {
-          chips.add(
-            _buildChip(metadata.getGenreLabel(g), () {
-              onFiltersChanged(
-                filters.copyWith(
-                  genre: filters.genre.where((x) => x != g).toList(),
-                ),
-              );
-            }),
-          );
-        }
-        for (final g in filters.genreNot) {
-          chips.add(
-            _buildChip('- ${metadata.getGenreLabel(g)}', () {
-              onFiltersChanged(
-                filters.copyWith(
-                  genreNot: filters.genreNot.where((x) => x != g).toList(),
-                ),
-              );
-            }, isNegative: true),
-          );
-        }
+        chips.addAll(_buildFilterPairChips(
+          include: filters.genre,
+          exclude: filters.genreNot,
+          labelFor: metadata.getGenreLabel,
+          onRemoveInclude: (v) => onFiltersChanged(
+            filters.copyWith(genre: filters.genre.where((x) => x != v).toList()),
+          ),
+          onRemoveExclude: (v) => onFiltersChanged(
+            filters.copyWith(genreNot: filters.genreNot.where((x) => x != v).toList()),
+          ),
+        ));
 
         // Tags
-        for (final t in filters.tag) {
-          final tagName = metadata.getTagName(int.tryParse(t) ?? 0);
-          chips.add(
-            _buildChip(tagName, () {
-              onFiltersChanged(
-                filters.copyWith(
-                  tag: filters.tag.where((x) => x != t).toList(),
-                ),
-              );
-            }),
-          );
-        }
-        for (final t in filters.tagNot) {
-          final tagName = metadata.getTagName(int.tryParse(t) ?? 0);
-          chips.add(
-            _buildChip('- $tagName', () {
-              onFiltersChanged(
-                filters.copyWith(
-                  tagNot: filters.tagNot.where((x) => x != t).toList(),
-                ),
-              );
-            }, isNegative: true),
-          );
-        }
+        chips.addAll(_buildFilterPairChips(
+          include: filters.tag,
+          exclude: filters.tagNot,
+          labelFor: (v) => metadata.getTagName(int.tryParse(v) ?? 0),
+          onRemoveInclude: (v) => onFiltersChanged(
+            filters.copyWith(tag: filters.tag.where((x) => x != v).toList()),
+          ),
+          onRemoveExclude: (v) => onFiltersChanged(
+            filters.copyWith(tagNot: filters.tagNot.where((x) => x != v).toList()),
+          ),
+        ));
 
         // Rating
         if (filters.ratingLower > 0 || filters.ratingUpper < 100) {
@@ -228,6 +182,24 @@ class FilterChipsRow extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Builds include and exclude chips for a single filter category.
+  /// Returns chips for every value in [include] (positive style) followed by
+  /// every value in [exclude] (negative / red style).
+  List<Widget> _buildFilterPairChips({
+    required List<String> include,
+    required List<String> exclude,
+    required String Function(String) labelFor,
+    required void Function(String) onRemoveInclude,
+    required void Function(String) onRemoveExclude,
+  }) {
+    return [
+      for (final v in include)
+        _buildChip(labelFor(v), () => onRemoveInclude(v)),
+      for (final v in exclude)
+        _buildChip('- ${labelFor(v)}', () => onRemoveExclude(v), isNegative: true),
+    ];
   }
 
   Widget _buildChip(

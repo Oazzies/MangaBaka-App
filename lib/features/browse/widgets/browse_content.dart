@@ -75,15 +75,27 @@ class BrowseContent extends StatelessWidget {
   }
 
   Widget _buildResultsList(LocalizationService l10n) {
-    if (browseType == BrowseType.series) {
-      return _buildSeriesResults(l10n);
-    } else if (browseType == BrowseType.publishers) {
-      return _buildPublisherResults(l10n);
-    } else if (browseType == BrowseType.staff) {
-      return _buildStaffResults(l10n);
-    } else {
-      return Center(child: Text(l10n.translate('no_results')));
-    }
+    return switch (browseType) {
+      BrowseType.series => _buildSeriesResults(l10n),
+      BrowseType.publishers => _buildPublisherResults(),
+      BrowseType.staff => _buildStaffResults(),
+      _ => Center(child: Text(l10n.translate('no_results'))),
+    };
+  }
+
+  /// Builds a single tappable series item with hover-prefetch for desktop.
+  Widget _buildSeriesItem(Series series, {required bool isGrid}) {
+    final seriesService = getIt<SeriesService>();
+    return MouseRegion(
+      onEnter: (_) => seriesService.fetchSeries(series.id),
+      child: InkWell(
+        onTap: () => onNavigateToDetail(series),
+        child: EntryListItem(
+          key: ValueKey('${isGrid ? 'grid' : 'list'}_${series.id}'),
+          series: series,
+        ),
+      ),
+    );
   }
 
   Widget _buildSeriesResults(LocalizationService l10n) {
@@ -91,10 +103,12 @@ class BrowseContent extends StatelessWidget {
       listenable: Listenable.merge([SettingsManager(), l10n]),
       builder: (context, _) {
         final settings = SettingsManager();
-        final activeStyle = settings.separateListStyles ? settings.browseListStyle : settings.currentListStyle;
+        final activeStyle = settings.separateListStyles
+            ? settings.browseListStyle
+            : settings.currentListStyle;
         final isGrid = activeStyle.isGrid;
+        final itemCount = searchResults.length + (isLoadingMore ? 1 : 0);
 
-        final seriesService = getIt<SeriesService>();
         if (isGrid) {
           return GridView.builder(
             controller: scrollController,
@@ -105,27 +119,19 @@ class BrowseContent extends StatelessWidget {
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
-            itemCount: searchResults.length + (isLoadingMore ? 1 : 0),
+            itemCount: itemCount,
             itemBuilder: (context, index) {
               if (index == searchResults.length) {
                 return const Center(child: CircularProgressIndicator());
               }
-
-              final series = searchResults[index] as Series;
-              return MouseRegion(
-                onEnter: (_) => seriesService.fetchSeries(series.id),
-                child: InkWell(
-                  onTap: () => onNavigateToDetail(series),
-                  child: EntryListItem(key: ValueKey('grid_${series.id}'), series: series),
-                ),
-              );
+              return _buildSeriesItem(searchResults[index] as Series, isGrid: true);
             },
           );
         }
 
         return ListView.builder(
           controller: scrollController,
-          itemCount: searchResults.length + (isLoadingMore ? 1 : 0),
+          itemCount: itemCount,
           itemBuilder: (context, index) {
             if (index == searchResults.length) {
               return const Padding(
@@ -133,22 +139,14 @@ class BrowseContent extends StatelessWidget {
                 child: Center(child: CircularProgressIndicator()),
               );
             }
-
-            final series = searchResults[index] as Series;
-            return MouseRegion(
-              onEnter: (_) => seriesService.fetchSeries(series.id),
-              child: InkWell(
-                onTap: () => onNavigateToDetail(series),
-                child: EntryListItem(key: ValueKey('list_${series.id}'), series: series),
-              ),
-            );
+            return _buildSeriesItem(searchResults[index] as Series, isGrid: false);
           },
         );
       },
     );
   }
 
-  Widget _buildPublisherResults(LocalizationService l10n) {
+  Widget _buildPublisherResults() {
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -160,17 +158,20 @@ class BrowseContent extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-
         final publisher = searchResults[index] as Publisher;
         return PublisherListItem(
           publisher: publisher,
-          onTap: () => onNavigateToResults(publisher.name, 'name_asc', publisher: publisher.name),
+          onTap: () => onNavigateToResults(
+            publisher.name,
+            'name_asc',
+            publisher: publisher.name,
+          ),
         );
       },
     );
   }
 
-  Widget _buildStaffResults(LocalizationService l10n) {
+  Widget _buildStaffResults() {
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -182,15 +183,25 @@ class BrowseContent extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-
         final staff = searchResults[index] as Staff;
         return StaffListItem(
           staff: staff,
-          onTap: () => onNavigateToResults(staff.name, 'popularity_desc', staff: staff.name),
+          onTap: () => onNavigateToResults(
+            staff.name,
+            'popularity_desc',
+            staff: staff.name,
+          ),
         );
       },
     );
   }
+
+  /// Returns an appropriate icon for the empty / prompt state of each browse type.
+  IconData _emptyStateIconFor(BrowseType type) => switch (type) {
+        BrowseType.publishers => Icons.business,
+        BrowseType.staff => Icons.people,
+        _ => Icons.search,
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -215,9 +226,7 @@ class BrowseContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    browseType == BrowseType.publishers 
-                      ? Icons.business 
-                      : (browseType == BrowseType.staff ? Icons.people : Icons.search),
+                    _emptyStateIconFor(browseType),
                     size: 64,
                     color: AppConstants.textMutedColor,
                   ),

@@ -95,6 +95,21 @@ class _BrowseScreenState extends State<BrowseScreen> {
     );
   }
 
+  void _showCameraPermissionDeniedSnackBar({bool offerSettings = false}) {
+    final l10n = LocalizationService();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.translate('camera_permission_denied')),
+        action: offerSettings
+            ? SnackBarAction(
+                label: l10n.translate('settings'),
+                onPressed: openAppSettings,
+              )
+            : null,
+      ),
+    );
+  }
+
   Future<void> _handleBarcodeScan() async {
     _logger.info('Requested barcode scan');
 
@@ -106,30 +121,14 @@ class _BrowseScreenState extends State<BrowseScreen> {
       if (status.isPermanentlyDenied) {
         _logger.warning('Camera permission permanently denied');
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              LocalizationService().translate('camera_permission_denied'),
-            ),
-            action: SnackBarAction(
-              label: LocalizationService().translate('settings'),
-              onPressed: () => openAppSettings(),
-            ),
-          ),
-        );
+        _showCameraPermissionDeniedSnackBar(offerSettings: true);
         return;
       }
 
       if (!status.isGranted) {
         _logger.warning('Camera permission denied (status: $status)');
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              LocalizationService().translate('camera_permission_denied'),
-            ),
-          ),
-        );
+        _showCameraPermissionDeniedSnackBar();
         return;
       }
     }

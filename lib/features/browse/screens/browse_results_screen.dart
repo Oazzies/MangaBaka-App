@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -11,6 +10,7 @@ import 'package:mangabaka_app/utils/transitions/app_transitions.dart';
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/browse/widgets/browse_results_body.dart';
+import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_enums.dart';
@@ -57,7 +57,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     super.initState();
     _searchService = getIt<SeriesSearchService>();
     _scrollController = ScrollController();
-    _currentRandomSeed = widget.randomSeed ?? _generateRandomSeed();
+    _currentRandomSeed = widget.randomSeed ?? BrowseController.generateRandomSeed();
     _scrollController.addListener(_onScroll);
     _fetchResults(initial: true);
   }
@@ -67,12 +67,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     _scrollController.dispose();
     super.dispose();
   }
-
-  static double _generateRandomSeed() {
-    return Random().nextDouble();
-  }
-
-
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
@@ -176,7 +170,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
 
     if (widget.sortBy == 'random') {
       if (!initial) {
-        _currentRandomSeed = _generateRandomSeed();
+        _currentRandomSeed = BrowseController.generateRandomSeed();
       }
       params['random_seed'] = _currentRandomSeed;
     }
@@ -200,6 +194,30 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     );
   }
 
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: AppConstants.mediumAnimationDuration,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  /// Computes the app-bar title text from the screen's parameters.
+  String _buildTitleText() {
+    final l10n = LocalizationService();
+    if (widget.staff != null) {
+      return l10n
+          .translate('staff_works_title')
+          .replaceAll('{name}', l10n.formatPossessive(widget.staff!));
+    }
+    if (widget.publisher != null) {
+      return l10n
+          .translate('staff_works_title')
+          .replaceAll('{name}', l10n.formatPossessive(widget.publisher!));
+    }
+    return widget.sortType;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -215,25 +233,9 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
               icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  () {
-                    final l10n = LocalizationService();
-                    if (widget.staff != null) {
-                      return l10n.translate('staff_works_title')
-                          .replaceAll('{name}', l10n.formatPossessive(widget.staff!));
-                    }
-                    if (widget.publisher != null) {
-                      return l10n.translate('staff_works_title')
-                          .replaceAll('{name}', l10n.formatPossessive(widget.publisher!));
-                    }
-                    return widget.sortType;
-                  }(),
-                  style: TextStyle(color: AppConstants.textColor, fontSize: 16),
-                ),
-              ],
+            title: Text(
+              _buildTitleText(),
+              style: TextStyle(color: AppConstants.textColor, fontSize: 16),
             ),
           ),
           body: ListenableBuilder(
@@ -272,13 +274,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           ),
           floatingActionButton: _showBackToTop
               ? FloatingActionButton(
-                  onPressed: () {
-                    _scrollController.animateTo(
-                      0,
-                      duration: AppConstants.mediumAnimationDuration,
-                      curve: Curves.easeInOut,
-                    );
-                  },
+                  onPressed: _scrollToTop,
                   backgroundColor: AppConstants.accentColor,
                   child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
                 )

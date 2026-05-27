@@ -12,6 +12,34 @@ class BrowseShortcuts extends StatelessWidget {
     required this.onMix,
   });
 
+  /// Builds a [ShortcutSection] for a content type (e.g. 'manga', 'novel').
+  /// [headerKey] is the l10n key for the section header; [typeValue] is the
+  /// API type string sent in the request.
+  ShortcutSection _buildTypeSection(
+    LocalizationService l10n, {
+    required String headerKey,
+    required String typeValue,
+  }) {
+    return ShortcutSection(
+      header: l10n.translate(headerKey),
+      onMostPopular: () => onNavigate(
+        l10n.translate('most_popular'),
+        'popularity_asc',
+        type: typeValue,
+      ),
+      onTopRated: () => onNavigate(
+        l10n.translate('top_rated'),
+        'score_desc',
+        type: typeValue,
+      ),
+      onRandom: () => onNavigate(
+        l10n.translate('random'),
+        'random',
+        type: typeValue,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
@@ -33,94 +61,12 @@ class BrowseShortcuts extends StatelessWidget {
                   ),
                 ],
               ),
-              // ── Manga ────────────────────────────────────────────────
-              ShortcutSection(
-                header: l10n.translate('type_manga'),
-                onMostPopular: () => onNavigate(
-                  l10n.translate('most_popular'),
-                  'popularity_asc',
-                  type: 'manga',
-                ),
-                onTopRated: () => onNavigate(
-                  l10n.translate('top_rated'),
-                  'score_desc',
-                  type: 'manga',
-                ),
-                onRandom: () => onNavigate(
-                  l10n.translate('random'),
-                  'random',
-                  type: 'manga',
-                ),
-              ),
-              ShortcutSection(
-                header: l10n.translate('type_manhwa'),
-                onMostPopular: () => onNavigate(
-                  l10n.translate('most_popular'),
-                  'popularity_asc',
-                  type: 'manhwa',
-                ),
-                onTopRated: () => onNavigate(
-                  l10n.translate('top_rated'),
-                  'score_desc',
-                  type: 'manhwa',
-                ),
-                onRandom: () => onNavigate(
-                  l10n.translate('random'),
-                  'random',
-                  type: 'manhwa',
-                ),
-              ),
-              ShortcutSection(
-                header: l10n.translate('type_manhua'),
-                onMostPopular: () => onNavigate(
-                  l10n.translate('most_popular'),
-                  'popularity_asc',
-                  type: 'manhua',
-                ),
-                onTopRated: () => onNavigate(
-                  l10n.translate('top_rated'),
-                  'score_desc',
-                  type: 'manhua',
-                ),
-                onRandom: () => onNavigate(
-                  l10n.translate('random'),
-                  'random',
-                  type: 'manhua',
-                ),
-              ),
-              ShortcutSection(
-                header: l10n.translate('novels'),
-                onMostPopular: () => onNavigate(
-                  l10n.translate('most_popular'),
-                  'popularity_asc',
-                  type: 'novel',
-                ),
-                onTopRated: () => onNavigate(
-                  l10n.translate('top_rated'),
-                  'score_desc',
-                  type: 'novel',
-                ),
-                onRandom: () => onNavigate(
-                  l10n.translate('random'),
-                  'random',
-                  type: 'novel',
-                ),
-              ),
-              ShortcutSection(
-                header: l10n.translate('oel_other'),
-                onMostPopular: () => onNavigate(
-                  l10n.translate('most_popular'),
-                  'popularity_asc',
-                  type: 'oel',
-                ),
-                onTopRated: () => onNavigate(
-                  l10n.translate('top_rated'),
-                  'score_desc',
-                  type: 'oel',
-                ),
-                onRandom: () =>
-                    onNavigate(l10n.translate('random'), 'random', type: 'oel'),
-              ),
+              // ── Content types ────────────────────────────────────────
+              _buildTypeSection(l10n, headerKey: 'type_manga', typeValue: 'manga'),
+              _buildTypeSection(l10n, headerKey: 'type_manhwa', typeValue: 'manhwa'),
+              _buildTypeSection(l10n, headerKey: 'type_manhua', typeValue: 'manhua'),
+              _buildTypeSection(l10n, headerKey: 'novels', typeValue: 'novel'),
+              _buildTypeSection(l10n, headerKey: 'oel_other', typeValue: 'oel'),
             ],
           ),
         );
