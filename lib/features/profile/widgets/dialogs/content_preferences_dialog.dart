@@ -7,15 +7,26 @@ import 'package:mangabaka_app/utils/widget_utils.dart';
 class ContentPreferencesDialogs {
   static String getContentPreferencesText(List<String> prefs) {
     final l10n = LocalizationService();
-    if (prefs.isEmpty) return l10n.translate('no_results');
-    if (prefs.length == 4)
-      return l10n.translate('all_ratings_hint'); // I might need a key for this
+    if (prefs.isEmpty) { return l10n.translate('no_results'); }
+    if (prefs.length == 4) { return l10n.translate('all_ratings_hint'); }
     return prefs.map((s) => l10n.translate(s)).join(', ');
+  }
+
+  /// Toggles [option] in [currentPrefs], enforcing a minimum of one selection.
+  static List<String> _toggleOption(String option, List<String> currentPrefs) {
+    final updated = List<String>.from(currentPrefs);
+    if (currentPrefs.contains(option)) {
+      // Always keep at least one rating selected.
+      if (updated.length > 1) updated.remove(option);
+    } else {
+      updated.add(option);
+    }
+    return updated;
   }
 
   static void showContentPreferencesDialog(BuildContext context) {
     final l10n = LocalizationService();
-    final options = ['safe', 'suggestive', 'erotica', 'pornographic'];
+    const options = ['safe', 'suggestive', 'erotica', 'pornographic'];
     final labels = {
       'safe': l10n.translate('safe'),
       'suggestive': l10n.translate('suggestive'),
@@ -83,9 +94,7 @@ class ContentPreferencesDialogs {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: AppConstants.borderColor.withValues(
-                              alpha: 0.05,
-                            ),
+                            color: AppConstants.borderColor.withValues(alpha: 0.05),
                             width: 1,
                           ),
                         ),
@@ -95,16 +104,8 @@ class ContentPreferencesDialogs {
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
-                                final newPrefs = List<String>.from(
-                                  currentPrefs,
-                                );
-                                if (isSelected) {
-                                  newPrefs.remove(option);
-                                } else {
-                                  newPrefs.add(option);
-                                }
                                 SettingsManager().setContentPreferences(
-                                  newPrefs,
+                                  _toggleOption(option, currentPrefs),
                                 );
                               },
                               behavior: HitTestBehavior.opaque,
@@ -149,9 +150,7 @@ class ContentPreferencesDialogs {
                             Container(
                               width: 1,
                               height: 24,
-                              color: AppConstants.borderColor.withValues(
-                                alpha: 0.1,
-                              ),
+                              color: AppConstants.borderColor.withValues(alpha: 0.1),
                             ),
                             const SizedBox(width: 16),
                             WidgetUtils.tooltip(
@@ -173,21 +172,16 @@ class ContentPreferencesDialogs {
                                       value: isBlurred,
                                       onChanged: (val) {
                                         final newBlurred = List<String>.from(
-                                          SettingsManager()
-                                              .blurredContentRatings,
+                                          SettingsManager().blurredContentRatings,
                                         );
                                         if (val) {
                                           newBlurred.add(option);
                                         } else {
                                           newBlurred.remove(option);
                                         }
-                                        SettingsManager()
-                                            .setBlurredContentRatings(
-                                              newBlurred,
-                                            );
+                                        SettingsManager().setBlurredContentRatings(newBlurred);
                                       },
-                                      activeThumbColor:
-                                          AppConstants.accentColor,
+                                      activeThumbColor: AppConstants.accentColor,
                                       activeTrackColor: AppConstants.accentColor
                                           .withValues(alpha: 0.3),
                                     ),

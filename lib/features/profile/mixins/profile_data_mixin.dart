@@ -8,7 +8,6 @@ import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/utils/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
 
-
 mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
   ProfileAuthService get auth;
   LibraryService get libraryService;
@@ -34,22 +33,22 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
   int pageChanged = 1;
   int pageAdded = 1;
 
+  /// Fetches the four summary statistics shown on the profile card.
+  /// Runs queries in parallel for performance.
   Future<void> fetchStatistics() async {
     final contentPrefs = SettingsManager().contentPreferences;
     final results = await Future.wait([
-      statisticsService.getTotalSeries(contentPreferences: contentPrefs),
-      statisticsService.getChaptersRead(contentPreferences: contentPrefs),
-      statisticsService.getVolumesRead(contentPreferences: contentPrefs),
-      statisticsService.getCompletionRate(contentPreferences: contentPrefs),
-      statisticsService.getTotalRereads(contentPreferences: contentPrefs),
-      statisticsService.getMeanScore(contentPreferences: contentPrefs),
+      statisticsService.getTotalSeries(contentPreferences: contentPrefs),   // [0]
+      statisticsService.getChaptersRead(contentPreferences: contentPrefs),  // [1]
+      statisticsService.getVolumesRead(contentPreferences: contentPrefs),   // [2]
+      statisticsService.getMeanScore(contentPreferences: contentPrefs),     // [3]
     ]);
     if (!mounted) return;
     setState(() {
       totalSeries = results[0] as int;
       chaptersRead = results[1] as int;
       volumesRead = results[2] as int;
-      meanScore = results[5] as double;
+      meanScore = results[3] as double;
     });
   }
 

@@ -15,7 +15,6 @@ import 'package:mangabaka_app/features/profile/widgets/profile_statistics_sectio
 import 'package:mangabaka_app/features/profile/widgets/profile_snapshot_section.dart';
 import 'package:mangabaka_app/features/profile/mixins/profile_data_mixin.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
-
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -63,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
         'Using cached profile for username: ${profile!.preferredUsername ?? profile!.id}',
       );
       loading = false;
-      // Fire all data fetches in parallel
+      // Fire all data fetches in parallel while showing cached data immediately.
       fetchStatistics();
       fetchRecentlyChanged(initial: true);
       fetchRecentlyAdded(initial: true);
@@ -102,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     if (!mounted) return;
     final isSyncing = _libraryService.syncStatus.value.isSyncing;
 
-    // Only trigger refresh when sync transitions from true -> false
+    // Only trigger refresh when sync transitions from active → idle.
     if (_wasSyncing && !isSyncing && _auth.isLoggedIn) {
       _logger.info('Library sync completed. Refreshing profile statistics.');
       fetchStatistics();
@@ -122,7 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
       profile = _auth.cachedProfile;
       if (!_auth.isLoggedIn) {
         _logger.fine('User logged out. Clearing profile UI state.');
-        // Clear all state on logout
         totalSeries = 0;
         chaptersRead = 0;
         volumesRead = 0;
@@ -134,14 +132,66 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
         profile = null;
       } else if (profile == null && _auth.isLoggedIn) {
         _logger.info('User logged in. Triggering bootstrap for profile data.');
-        // Logged in but profile not fetched yet — full load
         bootstrap();
       }
     });
   }
 
-  String _getPossessiveName(String name) {
-    return LocalizationService().formatPossessive(name);
+  // -------------------------------------------------------------------------
+  // Build helpers
+  // -------------------------------------------------------------------------
+
+  /// Builds the localised AppBar title, handling anonymous / named / language-
+  /// specific possessive forms.
+  String _buildProfileTitle(String? username, LocalizationService l10n) {
+    if (profile == null) return l10n.translate('profile');
+    if (username == null) return l10n.translate('your_profile');
+
+    final suffix = l10n.translate('profile_title_suffix');
+    return switch (l10n.currentLanguage) {
+      'es' || 'fr' => '$suffix de $username',
+      'ja' => '$usernameの$suffix',
+      _ => '${l10n.formatPossessive(username)} $suffix',
+    };
+  }
+
+  Widget _buildBody(LocalizationService l10n) {
+    if (loading) return const Center(child: CircularProgressIndicator());
+    if (error != null) return Center(child: Text(error!));
+    if (profile == null) {
+      return MBLoginPrompt(
+        onLogin: login,
+        message: l10n.translate('login_prompt_profile'),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: bootstrap,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            ProfileStatisticsSection(
+              totalSeries: totalSeries,
+              chaptersRead: chaptersRead,
+              volumesRead: volumesRead,
+              meanScore: meanScore,
+            ),
+            const SizedBox(height: 24),
+            ProfileSnapshotSection(
+              recentlyChanged: recentlyChanged,
+              hasMoreChanged: hasMoreChanged,
+              onFetchMoreChanged: () => fetchRecentlyChanged(),
+              recentlyAdded: recentlyAdded,
+              hasMoreAdded: hasMoreAdded,
+              onFetchMoreAdded: () => fetchRecentlyAdded(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -160,21 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
           appBar: AppBar(
             centerTitle: true,
             title: Text(
-              () {
-                if (profile == null) return l10n.translate('profile');
-                if (username == null) return l10n.translate('your_profile');
-
-                final suffix = l10n.translate('profile_title_suffix');
-                switch (l10n.currentLanguage) {
-                  case 'es':
-                  case 'fr':
-                    return '$suffix de $username';
-                  case 'ja':
-                    return '$usernameの$suffix';
-                  default:
-                    return '${_getPossessiveName(username)} $suffix';
-                }
-              }(),
+              _buildProfileTitle(username, l10n),
               style: TextStyle(
                 color: AppConstants.textColor,
                 fontWeight: FontWeight.bold,
@@ -200,58 +236,13 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
           body: Actions(
             actions: <Type, Action<Intent>>{
               RefreshIntent: CallbackAction<RefreshIntent>(
-                onInvoke: (intent) {
-                  bootstrap();
-                  return null;
-                },
+                onInvoke: (_) { bootstrap(); return null; },
               ),
             },
-            child: WidgetUtils.responsiveConstraint(
-              loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : error != null
-                  ? Center(child: Text(error!))
-                  : profile == null
-                  ? _buildLoginPrompt()
-                  : RefreshIndicator(
-                      onRefresh: bootstrap,
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 16),
-                            ProfileStatisticsSection(
-                              totalSeries: totalSeries,
-                              chaptersRead: chaptersRead,
-                              volumesRead: volumesRead,
-                              meanScore: meanScore,
-                            ),
-                            const SizedBox(height: 24),
-                            ProfileSnapshotSection(
-                              recentlyChanged: recentlyChanged,
-                              hasMoreChanged: hasMoreChanged,
-                              onFetchMoreChanged: () => fetchRecentlyChanged(),
-                              recentlyAdded: recentlyAdded,
-                              hasMoreAdded: hasMoreAdded,
-                              onFetchMoreAdded: () => fetchRecentlyAdded(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-            ),
+            child: WidgetUtils.responsiveConstraint(_buildBody(l10n)),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildLoginPrompt() {
-    final l10n = LocalizationService();
-    return MBLoginPrompt(
-      onLogin: login,
-      message: l10n.translate('login_prompt_profile'),
     );
   }
 }

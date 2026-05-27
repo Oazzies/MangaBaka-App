@@ -19,6 +19,8 @@ class _LogsScreenState extends State<LogsScreen> {
   final ScrollController _scrollController = ScrollController();
   List<String> _logs = [];
 
+  String get _logsText => _logs.join('\n');
+
   @override
   void initState() {
     super.initState();
@@ -30,11 +32,15 @@ class _LogsScreenState extends State<LogsScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _clearLogs() {
     LoggingService.clearLogs();
-    setState(() {
-      _logs = [];
-    });
+    setState(() => _logs = []);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(LocalizationService().translate('logs_cleared'))),
     );
@@ -42,8 +48,7 @@ class _LogsScreenState extends State<LogsScreen> {
 
   void _copyLogs() {
     if (_logs.isEmpty) return;
-    final text = _logs.join('\n');
-    Clipboard.setData(ClipboardData(text: text));
+    Clipboard.setData(ClipboardData(text: _logsText));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(LocalizationService().translate('logs_copied'))),
     );
@@ -52,21 +57,42 @@ class _LogsScreenState extends State<LogsScreen> {
   Future<void> _saveLogs() async {
     if (_logs.isEmpty) return;
     try {
-      final text = _logs.join('\n');
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/mangabaka_logs.txt');
-      await file.writeAsString(text);
-
+      await file.writeAsString(_logsText);
       await SharePlus.instance.share(
         ShareParams(files: [XFile(file.path)], subject: 'MangaBaka Logs'),
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to save logs: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save logs: $e')),
+        );
       }
     }
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    required Color backgroundColor,
+    required Color foregroundColor,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+        ),
+      ),
+    );
   }
 
   @override
@@ -126,9 +152,7 @@ class _LogsScreenState extends State<LogsScreen> {
                             child: Text(
                               _logs[index],
                               style: TextStyle(
-                                color: AppConstants.textColor.withValues(
-                                  alpha: 0.8,
-                                ),
+                                color: AppConstants.textColor.withValues(alpha: 0.8),
                                 fontFamily: 'monospace',
                                 fontSize: 11,
                               ),
@@ -143,40 +167,22 @@ class _LogsScreenState extends State<LogsScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: _buildActionButton(
+                      label: l10n.translate('copy_logs'),
+                      icon: Icons.copy,
                       onPressed: _logs.isEmpty ? null : _copyLogs,
-                      icon: const Icon(Icons.copy, size: 18),
-                      label: Text(l10n.translate('copy_logs')),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppConstants.tertiaryBackground,
-                        foregroundColor: AppConstants.textColor,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.pillRadius,
-                          ),
-                        ),
-                      ),
+                      backgroundColor: AppConstants.tertiaryBackground,
+                      foregroundColor: AppConstants.textColor,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: _buildActionButton(
+                      label: l10n.translate('save_logs'),
+                      icon: Icons.share,
                       onPressed: _logs.isEmpty ? null : _saveLogs,
-                      icon: const Icon(Icons.share, size: 18),
-                      label: Text(l10n.translate('save_logs')),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppConstants.accentColor,
-                        foregroundColor: AppConstants.primaryBackground,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.pillRadius,
-                          ),
-                        ),
-                      ),
+                      backgroundColor: AppConstants.accentColor,
+                      foregroundColor: AppConstants.primaryBackground,
                     ),
                   ),
                 ],

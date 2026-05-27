@@ -7,6 +7,7 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/library/services/mappers/db_to_api_mapper.dart';
+import 'package:mangabaka_app/database/database.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -22,6 +23,17 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   void initState() {
     super.initState();
     initStatistics();
+  }
+
+  void _openSeriesDetail(LibraryEntryWithSeries entry) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SeriesDetailScreen(
+          series: DbToApiMapper.seriesFromDb(entry.series),
+        ),
+      ),
+    );
   }
 
   @override
@@ -67,51 +79,23 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _buildStatRow(context, [
-                          _StatData(
-                            icon: Icons.book,
-                            label: l10n.translate('total_series'),
-                            value: '$totalSeries',
-                          ),
-                          _StatData(
-                            icon: Icons.article,
-                            label: l10n.translate('chapters_read'),
-                            value: '$chaptersRead',
-                          ),
+                        _buildStatRow([
+                          _StatData(Icons.book, l10n.translate('total_series'), '$totalSeries'),
+                          _StatData(Icons.article, l10n.translate('chapters_read'), '$chaptersRead'),
                         ]),
                         const SizedBox(height: 16),
-                        _buildStatRow(context, [
-                          _StatData(
-                            icon: Icons.library_books,
-                            label: l10n.translate('volumes_read'),
-                            value: '$volumesRead',
-                          ),
-                          _StatData(
-                            icon: Icons.check_circle,
-                            label: l10n.translate('completion'),
-                            value: '${completionRate.toStringAsFixed(1)}%',
-                          ),
+                        _buildStatRow([
+                          _StatData(Icons.library_books, l10n.translate('volumes_read'), '$volumesRead'),
+                          _StatData(Icons.check_circle, l10n.translate('completion'), '${completionRate.toStringAsFixed(1)}%'),
                         ]),
                         const SizedBox(height: 16),
-                        _buildStatRow(context, [
-                          _StatData(
-                            icon: Icons.replay,
-                            label: l10n.translate('total_rereads'),
-                            value: '$totalRereads',
-                          ),
-                          _StatData(
-                            icon: Icons.star,
-                            label: l10n.translate('mean_score'),
-                            value: meanScore.toStringAsFixed(1),
-                          ),
+                        _buildStatRow([
+                          _StatData(Icons.replay, l10n.translate('total_rereads'), '$totalRereads'),
+                          _StatData(Icons.star, l10n.translate('mean_score'), meanScore.toStringAsFixed(1)),
                         ]),
                         const SizedBox(height: 16),
-                        _buildStatRow(context, [
-                          _StatData(
-                            icon: Icons.flag,
-                            label: l10n.translate('finish_rate'),
-                            value: '${finishRate.toStringAsFixed(1)}%',
-                          ),
+                        _buildStatRow([
+                          _StatData(Icons.flag, l10n.translate('finish_rate'), '${finishRate.toStringAsFixed(1)}%'),
                         ]),
                         const SizedBox(height: 32),
                         Text(
@@ -129,20 +113,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             icon: Icons.star_rounded,
                             label: l10n.translate('highest_rated'),
                             title: highestRated!.series.title,
-                            value:
-                                '${l10n.translate('score')}: ${highestRated!.libraryEntry.rating ?? 0}',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SeriesDetailScreen(
-                                    series: DbToApiMapper.seriesFromDb(
-                                      highestRated!.series,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+                            value: '${l10n.translate('score')}: ${highestRated!.libraryEntry.rating ?? 0}',
+                            onTap: () => _openSeriesDetail(highestRated!),
                           ),
                         if (mostReread != null) ...[
                           const SizedBox(height: 16),
@@ -150,20 +122,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             icon: Icons.replay_rounded,
                             label: l10n.translate('most_reread'),
                             title: mostReread!.series.title,
-                            value:
-                                '${mostReread!.libraryEntry.numberOfRereads} ${l10n.translate('rereads')}',
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SeriesDetailScreen(
-                                    series: DbToApiMapper.seriesFromDb(
-                                      mostReread!.series,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
+                            value: '${mostReread!.libraryEntry.numberOfRereads} ${l10n.translate('rereads')}',
+                            onTap: () => _openSeriesDetail(mostReread!),
                           ),
                         ],
                         const SizedBox(height: 32),
@@ -176,21 +136,21 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     );
   }
 
-  Widget _buildStatRow(BuildContext context, List<_StatData> stats) {
+  Widget _buildStatRow(List<_StatData> stats) {
     return Row(
-      children: stats.map((stat) {
-        final isLast = stats.indexOf(stat) == stats.length - 1;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: isLast ? 0 : 16),
-            child: StatisticCard(
-              icon: stat.icon,
-              label: stat.label,
-              value: stat.value,
+      children: [
+        for (int i = 0; i < stats.length; i++)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: i < stats.length - 1 ? 16 : 0),
+              child: StatisticCard(
+                icon: stats[i].icon,
+                label: stats[i].label,
+                value: stats[i].value,
+              ),
             ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }
@@ -200,5 +160,5 @@ class _StatData {
   final String label;
   final String value;
 
-  _StatData({required this.icon, required this.label, required this.value});
+  const _StatData(this.icon, this.label, this.value);
 }

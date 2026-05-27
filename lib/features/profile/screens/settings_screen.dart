@@ -652,7 +652,16 @@ class SettingsScreen extends StatelessWidget {
                           context,
                         );
                     if (shouldLogout == true) {
-                      await auth.logout();
+                      try {
+                        await auth.logout();
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Logout failed: $e')),
+                          );
+                        }
+                        return;
+                      }
                       if (context.mounted) {
                         Navigator.pop(context); // Pop category screen
                         Navigator.pop(context); // Pop main settings screen
