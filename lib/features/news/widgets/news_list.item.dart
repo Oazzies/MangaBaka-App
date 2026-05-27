@@ -8,6 +8,17 @@ import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/services/series_id_service.dart';
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 
+/// Parses an ISO-8601 date string into a human-readable "MMM d, yyyy" label.
+/// Returns the raw string on parse failure, or empty string for empty input.
+String _formatDate(String date) {
+  if (date.isEmpty) return '';
+  try {
+    return DateFormat('MMM d, yyyy').format(DateTime.parse(date));
+  } catch (_) {
+    return date;
+  }
+}
+
 class NewsListItem extends StatelessWidget {
   final News news;
   final bool showReferencedSeries;
@@ -17,16 +28,6 @@ class NewsListItem extends StatelessWidget {
     required this.news,
     this.showReferencedSeries = true,
   });
-
-  String _formatDate(String date) {
-    if (date.isEmpty) return '';
-    try {
-      final dt = DateTime.parse(date);
-      return DateFormat('MMM d, yyyy').format(dt);
-    } catch (_) {
-      return date;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

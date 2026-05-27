@@ -4,11 +4,9 @@ import 'package:mangabaka_app/utils/app_shortcuts.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
 import 'package:mangabaka_app/features/news/widgets/news_list.item.dart';
 import 'package:mangabaka_app/utils/constants/app_constants.dart';
-
 import 'package:mangabaka_app/utils/localization/localization_service.dart';
 import 'package:mangabaka_app/utils/theme/theme_manager.dart';
 import 'package:mangabaka_app/utils/widget_utils.dart';
-
 import 'package:mangabaka_app/utils/di/service_locator.dart';
 import 'package:mangabaka_app/utils/services/logging_service.dart';
 import 'package:mangabaka_app/utils/settings/settings_manager.dart';
@@ -42,6 +40,16 @@ class _NewsScreenState extends State<NewsScreen> {
     _scrollController.addListener(_onScroll);
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // -------------------------------------------------------------------------
+  // Data loading
+  // -------------------------------------------------------------------------
+
   Future<void> _loadCachedAndFetch() async {
     _logger.fine('Loading cached news...');
     final cachedNews = await _newsService.getCachedNews();
@@ -49,54 +57,25 @@ class _NewsScreenState extends State<NewsScreen> {
       _logger.info('Loaded ${cachedNews.length} news items from cache');
       setState(() {
         _newsList.addAll(cachedNews);
-        _currentPage = 2; //in case user scrolls immediately
+        _currentPage = 2; // advance so an immediate scroll doesn't re-fetch page 1
       });
     }
     _fetchNews(initial: true, isBackground: cachedNews.isNotEmpty);
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent -
-            AppConstants.scrollThresholdPx) {
-      if (_hasMore && !_isLoading) {
-        _logger.fine(
-          'Scroll reached bottom, fetching more news (page $_currentPage)',
-        );
-        _fetchNews(initial: false);
-      }
-    }
-
-    final showBackToTop = _scrollController.offset > 500;
-    if (showBackToTop != _showBackToTop) {
-      setState(() {
-        _showBackToTop = showBackToTop;
-      });
-    }
-  }
-
-  Future<void> _fetchNews({
-    bool initial = false,
-    bool isBackground = false,
-  }) async {
+  Future<void> _fetchNews({bool initial = false, bool isBackground = false}) async {
     if (_isLoading || _isBackgroundRefresh) return;
 
     _logger.info(
       'Fetching news: initial=$initial, isBackground=$isBackground, page=$_currentPage',
     );
     setState(() {
+      _error = null;
       if (isBackground) {
         _isBackgroundRefresh = true;
       } else {
         _isLoading = true;
       }
-      _error = null;
     });
 
     try {
@@ -107,9 +86,7 @@ class _NewsScreenState extends State<NewsScreen> {
       );
       if (!mounted) return;
 
-      _logger.info(
-        'Received ${newNews.length} news items for page $pageToFetch',
-      );
+      _logger.info('Received ${newNews.length} news items for page $pageToFetch');
 
       setState(() {
         if (initial) {
@@ -135,18 +112,49 @@ class _NewsScreenState extends State<NewsScreen> {
 
   Future<void> _onRefresh() async {
     _logger.info('User triggered manual refresh for news');
+    // Do NOT set _isLoading = true here — _fetchNews guards against concurrent
+    // fetches by checking _isLoading, so pre-setting it would cause the fetch
+    // to return immediately and silently skip the refresh.
     setState(() {
-      _isLoading = true;
       _currentPage = 1;
       _hasMore = true;
     });
 
-    // Ensure the spinner is visible for at least 800ms for visual feedback
+    // Keep the RefreshIndicator visible for at least 800 ms for visual feedback.
     await Future.wait([
       _fetchNews(initial: true),
       Future.delayed(const Duration(milliseconds: 800)),
     ]);
   }
+
+  // -------------------------------------------------------------------------
+  // Scroll handling
+  // -------------------------------------------------------------------------
+
+  void _onScroll() {
+    _checkPaginationTrigger();
+    _checkBackToTopVisibility();
+  }
+
+  void _checkPaginationTrigger() {
+    final nearBottom = _scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - AppConstants.scrollThresholdPx;
+    if (nearBottom && _hasMore && !_isLoading) {
+      _logger.fine('Scroll reached bottom, fetching more news (page $_currentPage)');
+      _fetchNews(initial: false);
+    }
+  }
+
+  void _checkBackToTopVisibility() {
+    final shouldShow = _scrollController.offset > 500;
+    if (shouldShow != _showBackToTop) {
+      setState(() => _showBackToTop = shouldShow);
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Build
+  // -------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -160,193 +168,184 @@ class _NewsScreenState extends State<NewsScreen> {
         final l10n = LocalizationService();
         final settings = SettingsManager();
         final screenWidth = MediaQuery.of(context).size.width;
-        final orientation = MediaQuery.of(context).orientation;
-        final bool isLandscape = orientation == Orientation.landscape;
+        final isLandscape =
+            MediaQuery.of(context).orientation == Orientation.landscape;
 
-        // Settings/Screen dependent grid logic
-        // 2 column news should only be available for landscape mode not for portrait mode
-        final int columns = settings.newsListColumns;
-        final bool isGrid = columns > 1 && screenWidth > 400 && isLandscape;
-
-        Widget content =
-            _newsList.isEmpty && !_isLoading && !_isBackgroundRefresh
-            ? Center(
-                child: Text(
-                  _error != null
-                      ? '${l10n.translate('failed_to_load')}: $_error'
-                      : l10n.translate('no_results'),
-                  style: TextStyle(color: AppConstants.textMutedColor),
-                ),
-              )
-            : RefreshIndicator(
-                onRefresh: _onRefresh,
-                child: isGrid
-                    ? SingleChildScrollView(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 8.0,
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      for (
-                                        int i = 0;
-                                        i < _newsList.length;
-                                        i += 2
-                                      )
-                                        NewsListItem(
-                                          key: ValueKey(
-                                            'grid_${_newsList[i].id}',
-                                          ),
-                                          news: _newsList[i],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      for (
-                                        int i = 1;
-                                        i < _newsList.length;
-                                        i += 2
-                                      )
-                                        NewsListItem(
-                                          key: ValueKey(
-                                            'grid_${_newsList[i].id}',
-                                          ),
-                                          news: _newsList[i],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (_isLoading)
-                              const Padding(
-                                padding: EdgeInsets.all(24.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: _newsList.length + (_isLoading ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == _newsList.length) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          }
-                          return NewsListItem(
-                            key: ValueKey('list_${_newsList[index].id}'),
-                            news: _newsList[index],
-                          );
-                        },
-                      ),
-              );
+        // 2-column grid only makes sense in landscape on wider screens.
+        final isGrid = settings.newsListColumns > 1 && screenWidth > 400 && isLandscape;
 
         return Scaffold(
           backgroundColor: AppConstants.primaryBackground,
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text(
-              l10n.translate('news'),
-              style: TextStyle(
-                color: AppConstants.textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                letterSpacing: -0.5,
-              ),
-            ),
-            actions: [
-              if (isLandscape)
-                WidgetUtils.tooltip(
-                  message: l10n.translate('toggle_layout'),
-                  child: IconButton(
-                    icon: Icon(
-                      settings.newsListColumns == 2
-                          ? Icons.view_agenda_outlined
-                          : Icons.grid_view_rounded,
-                      color: AppConstants.textColor,
-                    ),
-                    onPressed: () {
-                      settings.setNewsListColumns(
-                        settings.newsListColumns == 1 ? 2 : 1,
-                      );
-                    },
-                  ),
-                ),
-              if (screenWidth < 600)
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SettingsScreen()),
-                    );
-                  },
-                ),
-            ],
-          ),
+          appBar: _buildAppBar(l10n, settings, screenWidth, isLandscape),
           body: Actions(
             actions: <Type, Action<Intent>>{
               RefreshIntent: CallbackAction<RefreshIntent>(
-                onInvoke: (intent) {
-                  _onRefresh();
-                  return null;
-                },
+                onInvoke: (_) { _onRefresh(); return null; },
               ),
             },
             child: WidgetUtils.responsiveConstraint(
-              SafeArea(child: content),
+              SafeArea(child: _buildContent(l10n, isGrid)),
               maxWidth: isGrid ? double.infinity : 800,
             ),
           ),
-          floatingActionButton: _showBackToTop
-              ? WidgetUtils.tooltip(
-                  message: LocalizationService().translate('back_to_top'),
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      _scrollController.animateTo(
-                        0,
-                        duration: AppConstants.mediumAnimationDuration,
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    backgroundColor: AppConstants.accentColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.pillRadius,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.arrow_upward,
-                      color: AppConstants.primaryBackground,
-                    ),
-                  ),
-                )
-              : null,
+          floatingActionButton: _buildBackToTopFab(l10n),
         );
       },
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(
+    LocalizationService l10n,
+    SettingsManager settings,
+    double screenWidth,
+    bool isLandscape,
+  ) {
+    return AppBar(
+      centerTitle: true,
+      title: Text(
+        l10n.translate('news'),
+        style: TextStyle(
+          color: AppConstants.textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+          letterSpacing: -0.5,
+        ),
+      ),
+      actions: [
+        if (isLandscape)
+          WidgetUtils.tooltip(
+            message: l10n.translate('toggle_layout'),
+            child: IconButton(
+              icon: Icon(
+                settings.newsListColumns == 2
+                    ? Icons.view_agenda_outlined
+                    : Icons.grid_view_rounded,
+                color: AppConstants.textColor,
+              ),
+              onPressed: () {
+                settings.setNewsListColumns(settings.newsListColumns == 1 ? 2 : 1);
+              },
+            ),
+          ),
+        if (screenWidth < 600)
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildContent(LocalizationService l10n, bool isGrid) {
+    if (_newsList.isEmpty && !_isLoading && !_isBackgroundRefresh) {
+      return Center(
+        child: Text(
+          _error != null
+              ? '${l10n.translate('failed_to_load')}: $_error'
+              : l10n.translate('no_results'),
+          style: TextStyle(color: AppConstants.textMutedColor),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: isGrid ? _buildGridView() : _buildListView(),
+    );
+  }
+
+  /// Hand-rolled 2-column masonry layout: odd-indexed items go left, even go right.
+  Widget _buildGridView() {
+    return SingleChildScrollView(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (int i = 0; i < _newsList.length; i += 2)
+                      NewsListItem(
+                        key: ValueKey('grid_${_newsList[i].id}'),
+                        news: _newsList[i],
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (int i = 1; i < _newsList.length; i += 2)
+                      NewsListItem(
+                        key: ValueKey('grid_${_newsList[i].id}'),
+                        news: _newsList[i],
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListView() {
+    return ListView.builder(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: _newsList.length + (_isLoading ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == _newsList.length) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        return NewsListItem(
+          key: ValueKey('list_${_newsList[index].id}'),
+          news: _newsList[index],
+        );
+      },
+    );
+  }
+
+  Widget? _buildBackToTopFab(LocalizationService l10n) {
+    if (!_showBackToTop) return null;
+    return WidgetUtils.tooltip(
+      message: l10n.translate('back_to_top'),
+      child: FloatingActionButton(
+        onPressed: () {
+          _scrollController.animateTo(
+            0,
+            duration: AppConstants.mediumAnimationDuration,
+            curve: Curves.easeInOut,
+          );
+        },
+        backgroundColor: AppConstants.accentColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+        ),
+        child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
+      ),
     );
   }
 }
