@@ -89,20 +89,36 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build APKs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          flutter build apk --release --split-per-abi
+
+          shopt -s nullglob
+          APK_FILES=(build/app/outputs/flutter-apk/app-*-release.apk)
+          shopt -u nullglob
+          if [ "${#APK_FILES[@]}" -eq 0 ]; then
+            echo "No split APKs found in build/app/outputs/flutter-apk/. Check the Flutter build logs above and verify the project still supports ABI split APK output."
+            exit 1
+          fi
+
+          for APK in "${APK_FILES[@]}"; do
+            FILE_NAME=$(basename "$APK")
+            ABI=${FILE_NAME#app-}
+            ABI=${ABI%-release.apk}
+            cp "$APK" "android-mangabaka-app-v${VERSION_CLEAN}-${ABI}.apk"
+          done
         env:
           ANDROID_KEYSTORE_PATH: upload-keystore.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-
-      - name: Rename and Prepare Artifact
-        run: |
-          VERSION_LINE=$(grep "^version:" pubspec.yaml)
-          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
-          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-          cp build/app/outputs/flutter-apk/app-release.apk "android-mangabaka-app-v${VERSION_CLEAN}.apk"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
