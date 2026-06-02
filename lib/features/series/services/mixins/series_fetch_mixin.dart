@@ -1,4 +1,4 @@
-import 'package:mangabaka_app/features/series/models/series.dart';
+﻿import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -16,44 +16,33 @@ mixin SeriesFetchMixin {
     _cache[series.id] = series;
   }
 
-  Map<String, Series> get cache => _cache;
-
-  /// Throws [ApiException] (403 / CONTENT_FILTERED) if [series] does not match
-  /// the user's current content-rating preferences. Optionally evicts the
-  /// series from the in-memory cache before throwing.
-  void _assertContentRatingAllowed(Series series, {bool evictOnBlock = false}) {
-    final contentPrefs = SettingsManager().contentPreferences;
-    if (contentPrefs.isNotEmpty &&
-        !contentPrefs.contains(series.contentRating.toLowerCase())) {
-      if (evictOnBlock) _cache.remove(series.id);
-      logger.warning(
-        'Series ${series.title} (${series.id}) blocked due to content rating: ${series.contentRating}',
-      );
-      throw ApiException(
-        message: 'This content is filtered by your content rating settings.',
-        statusCode: 403,
-        code: 'CONTENT_FILTERED',
-      );
-    }
-  }
-
   Future<Series> fetchSeries(String id) async {
     if (_cache.containsKey(id)) {
+      final cached = _cache[id]!;
+      final contentPrefs = SettingsManager().contentPreferences;
+      if (contentPrefs.isNotEmpty && !contentPrefs.contains(cached.contentRating.toLowerCase())) {
+        logger.warning('Cached series ${cached.title} ($id) no longer matches content preferences. Blocking.');
+        _cache.remove(id);
+        throw ApiException(
+          message: 'This content is filtered by your content rating settings.',
+          statusCode: 403,
+          code: 'CONTENT_FILTERED',
+        );
+      }
       logger.fine('Returning cached series data for ID: $id');
-      // Evict and block if the cached entry no longer passes content filters.
-      _assertContentRatingAllowed(_cache[id]!, evictOnBlock: true);
-      return _cache[id]!;
+      return cached;
     }
 
     try {
-      final url = Uri.parse('${AppConstants.baseApiUrl}/series/$id');
+      final url = Uri.parse("${AppConstants.baseApiUrl}/series/$id");
       logger.info('Fetching series details for ID: $id. URL: $url');
-
+      
       final response = await http
           .get(url, headers: {'User-Agent': AppConstants.userAgent})
           .timeout(
             Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Series fetch request timed out'),
+            onTimeout: () =>
+                throw TimeoutException('Series fetch request timed out'),
           );
 
       logger.fine('Series fetch status for $id: ${response.statusCode}');
@@ -62,14 +51,22 @@ mixin SeriesFetchMixin {
         try {
           final data = jsonDecode(response.body);
           final series = Series.fromJson(data['data']);
-
-          _assertContentRatingAllowed(series);
+          
+          // Enforce content rating filtering
+          final contentPrefs = SettingsManager().contentPreferences;
+          if (contentPrefs.isNotEmpty && !contentPrefs.contains(series.contentRating.toLowerCase())) {
+            logger.warning('Series ${series.title} (${series.id}) blocked due to content rating: ${series.contentRating}');
+            throw ApiException(
+              message: 'This content is filtered by your content rating settings.',
+              statusCode: 403,
+              code: 'CONTENT_FILTERED',
+            );
+          }
 
           logger.info('Successfully fetched series: ${series.title} ($id)');
           _cache[id] = series;
           return series;
         } catch (e, st) {
-          if (e is ApiException) rethrow;
           logger.severe('Failed to parse series data for $id: $e\n$st');
           throw ParseException(
             message: 'Failed to parse series data',
@@ -94,9 +91,7 @@ mixin SeriesFetchMixin {
           code: 'RATE_LIMITED',
         );
       } else {
-        logger.severe(
-          'Failed to fetch series $id. Status: ${response.statusCode}, Body: ${response.body}',
-        );
+        logger.severe('Failed to fetch series $id. Status: ${response.statusCode}, Body: ${response.body}');
         throw ApiException(
           message: 'Failed to fetch series',
           statusCode: response.statusCode,
@@ -126,7 +121,9 @@ mixin SeriesFetchMixin {
         stackTrace: st,
       );
     } catch (e, st) {
-      if (e is ParseException || e is ApiException || e is NetworkException) rethrow;
+      if (e is ParseException || e is ApiException || e is NetworkException) {
+        rethrow;
+      }
       logger.severe('Unexpected error while fetching series: $e\n$st');
       throw AppError(
         message: 'An unexpected error occurred while fetching the series',
@@ -135,4 +132,6 @@ mixin SeriesFetchMixin {
       );
     }
   }
+
+  Map<String, Series> get cache => _cache;
 }

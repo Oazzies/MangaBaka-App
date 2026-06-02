@@ -8,7 +8,7 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
-import 'package:mangabaka_app/features/series/widgets/list/entry_list_item.dart';
+import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';

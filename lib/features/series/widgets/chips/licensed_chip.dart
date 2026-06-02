@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/series/widgets/common/mini_badge.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
 
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 

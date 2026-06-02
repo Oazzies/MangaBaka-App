@@ -23,37 +23,41 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   bool isDataLoaded = false;
   bool fetchError = false;
 
-  /// Lazily fetches data for [tab] on first visit; subsequent visits are no-ops.
   Future<void> fetchTabData(String tab) async {
     if (!mounted) return;
     final id = series.id;
-
+    
     switch (tab) {
       case 'Covers':
         if (covers == null) {
           final data = await seriesService.fetchSeriesCovers(id);
           if (mounted) setState(() => covers = data);
         }
+        break;
       case 'Related':
         if (related == null) {
           final data = await seriesService.fetchSeriesRelated(id);
           if (mounted) setState(() => related = data);
         }
+        break;
       case 'News':
         if (news == null) {
           final data = await seriesService.fetchSeriesNews(id);
           if (mounted) setState(() => news = data);
         }
+        break;
       case 'Collections':
         if (collections == null) {
           final data = await seriesService.fetchSeriesCollections(id);
           if (mounted) setState(() => collections = data);
         }
+        break;
       case 'Works':
         if (works == null) {
           final data = await seriesService.fetchSeriesWorks(id);
           if (mounted) setState(() => works = data);
         }
+        break;
     }
   }
 
@@ -63,32 +67,25 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
         seriesService.fetchSeriesLinks(series.id),
         seriesService.fetchSeries(series.id),
       ]);
-
+      
       if (selectedTab != 'Information') {
         fetchTabData(selectedTab);
       }
-
+      
       if (mounted) {
-        // Defer heavy state update to the next frame to keep route animation smooth.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() {
-            enrichedLinks = results[0] as List<SeriesLink>?;
-            fullSeries = results[1] as Series?;
-            isDataLoaded = true;
-            fetchError = false;
-          });
+        setState(() {
+          enrichedLinks = results[0] as List<SeriesLink>?;
+          fullSeries = results[1] as Series?;
+          isDataLoaded = true;
+          fetchError = false;
         });
       }
     } catch (e) {
       seriesService.logger.warning('Error fetching full data: $e');
       if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          setState(() {
-            isDataLoaded = true;
-            fetchError = true;
-          });
+        setState(() {
+          isDataLoaded = true; 
+          fetchError = true;
         });
       }
     }

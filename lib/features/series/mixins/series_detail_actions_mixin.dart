@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -7,8 +7,8 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
-import 'package:mangabaka_app/features/series/widgets/actions/progress_update_dialog.dart';
-import 'package:mangabaka_app/features/series/widgets/actions/rating_selection_dialog.dart';
+import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
+import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
 
 mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   LibraryService get libraryService;
@@ -164,16 +164,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              try {
-                await libraryService.deleteEntry(series.id);
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(this.context).showSnackBar(
-                    SnackBar(content: Text(LocalizationService().translate('failed_to_delete'))),
-                  );
-                }
-                return;
-              }
+              await libraryService.deleteEntry(series.id);
               if (mounted) Navigator.pop(this.context);
             },
             child: Text(l10n.translate('confirm'), style: TextStyle(color: AppConstants.errorColor, fontWeight: FontWeight.bold)),
