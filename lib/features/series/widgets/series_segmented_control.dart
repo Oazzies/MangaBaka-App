@@ -1,87 +1,114 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 class SeriesSegmentedControl extends StatelessWidget {
   final String selectedTab;
   final ValueChanged<String> onTabChanged;
+  final double horizontalPadding;
 
   const SeriesSegmentedControl({
     super.key,
     required this.selectedTab,
     required this.onTabChanged,
+    this.horizontalPadding = 16.0,
+  });
+
+  static const _tabs = [
+    'Info',
+    'Covers',
+    'Related',
+    'News',
+    'Collections',
+    'Works',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        // Left padding aligns the first tab's text with badges; right adds end breathing room.
+        padding: EdgeInsets.only(
+          left: horizontalPadding,
+          right: horizontalPadding,
+        ),
+        child: Row(
+          children: _tabs.map((label) {
+            final isSelected = selectedTab == label;
+            return _TabItem(
+              label: label,
+              isSelected: isSelected,
+              onTap: () {
+                if (!isSelected) onTabChanged(label);
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _TabItem extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TabItem({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final tabs = [
-      {'value': 'Information', 'icon': Icons.info_outline},
-      {'value': 'Covers', 'icon': Icons.image_outlined},
-      {'value': 'Related', 'icon': Icons.auto_stories_outlined},
-      {'value': 'News', 'icon': Icons.newspaper_outlined},
-      {'value': 'Collections', 'icon': Icons.collections_bookmark_outlined},
-      {'value': 'Works', 'icon': Icons.work_outline},
-    ];
-
-    final selectedIndex = tabs.indexWhere((t) => t['value'] == selectedTab);
-
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: AppConstants.tertiaryBackground.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final tabWidth = constraints.maxWidth / tabs.length;
-          return Stack(
-            children: [
-              // Sliding background pill
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutExpo,
-                left: selectedIndex * tabWidth + 4,
-                top: 4,
-                width: tabWidth - 8,
-                height: constraints.maxHeight - 8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppConstants.accentColor,
-                    borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        // No left padding — the scroll view's left padding handles the first item.
+        // Right padding creates the visual gap between tabs.
+        padding: const EdgeInsets.only(right: 24),
+        child: IntrinsicWidth(
+          child: SizedBox(
+            height: 44,
+            child: Stack(
+              children: [
+                Center(
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: TextStyle(
+                      color: isSelected
+                          ? AppConstants.accentColor
+                          : AppConstants.textMutedColor,
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
+                    child: Text(label),
                   ),
                 ),
-              ),
-              // Tab Icons
-              Row(
-                children: tabs.asMap().entries.map((entry) {
-                  final tab = entry.value;
-                  final isSelected = selectedTab == tab['value'];
-
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (selectedTab != tab['value']) {
-                          onTabChanged(tab['value'] as String);
-                        }
-                      },
-                      behavior: HitTestBehavior.opaque,
-                      child: Center(
-                        child: AnimatedScale(
-                          duration: const Duration(milliseconds: 200),
-                          scale: isSelected ? 1.15 : 1.0,
-                          child: Icon(
-                            tab['icon'] as IconData,
-                            color: isSelected ? AppConstants.primaryBackground : AppConstants.textMutedColor,
-                            size: 20,
-                          ),
-                        ),
-                      ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppConstants.accentColor
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(1),
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
-          );
-        },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -53,7 +53,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
   @override
   set isAdding(bool value) => _isAdding = value;
 
-  String _selectedTab = 'Information';
+  String _selectedTab = 'Info';
 
   @override
   SeriesService get seriesService => _seriesService;

@@ -68,7 +68,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
         seriesService.fetchSeries(series.id),
       ]);
       
-      if (selectedTab != 'Information') {
+      if (selectedTab != 'Info') {
         fetchTabData(selectedTab);
       }
       

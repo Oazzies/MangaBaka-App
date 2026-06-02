@@ -67,45 +67,54 @@ class SeriesDetailMobileLayout extends StatelessWidget {
                 key: const ValueKey('full_layout'),
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: hPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SeriesMetadataChips(
-                          series: series, 
-                          entry: entry,
-                          onUpdateChapter: onUpdateChapter,
-                          onUpdateVolume: onUpdateVolume,
-                          onUpdateRating: onUpdateRating,
-                        ),
-                        const SizedBox(height: 16),
-                        SeriesActionBar(
-                          series: series,
-                          entry: entry, 
-                          l10n: l10n,
-                          onStateChanged: onStateChanged,
-                          onRatingChanged: onRatingChanged,
-                          onUpdateChapter: onUpdateChapter,
-                          onUpdateVolume: onUpdateVolume,
-                        ),
-                        const SizedBox(height: 20),
-                        ExternalRatingsSection(series: series),
-                        if (series.description.isNotEmpty) ...[
-                          SeriesSectionHeader(title: l10n.translate('description')),
-                          DescriptionSection(description: series.description),
-                          const SizedBox(height: 20),
-                        ],
-                        SeriesGenresSection(series: series, l10n: l10n),
-                        SeriesSegmentedControl(
-                          selectedTab: selectedTab,
-                          onTabChanged: onTabChanged,
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 16),
+                  SeriesSegmentedControl(
+                    selectedTab: selectedTab,
+                    onTabChanged: onTabChanged,
+                    horizontalPadding: hPadding,
+                  ),
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppConstants.tertiaryBackground,
+                  ),
+                  if (selectedTab == 'Info') ...[
+                    const SizedBox(height: 28),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: hPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SeriesMetadataChips(
+                            series: series,
+                            entry: entry,
+                            onUpdateChapter: onUpdateChapter,
+                            onUpdateVolume: onUpdateVolume,
+                            onUpdateRating: onUpdateRating,
+                          ),
+                          const SizedBox(height: 24),
+                          SeriesActionBar(
+                            series: series,
+                            entry: entry,
+                            l10n: l10n,
+                            onStateChanged: onStateChanged,
+                            onRatingChanged: onRatingChanged,
+                            onUpdateChapter: onUpdateChapter,
+                            onUpdateVolume: onUpdateVolume,
+                          ),
+                          const SizedBox(height: 28),
+                          ExternalRatingsSection(series: series),
+                          if (series.description.isNotEmpty) ...[
+                            SeriesSectionHeader(title: l10n.translate('description')),
+                            DescriptionSection(description: series.description),
+                            const SizedBox(height: 28),
+                          ],
+                          SeriesGenresSection(series: series, l10n: l10n),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
                   buildTabContent(hPadding),
                 ],
               ),

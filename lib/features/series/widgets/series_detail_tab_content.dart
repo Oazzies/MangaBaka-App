@@ -76,7 +76,7 @@ class SeriesDetailTabContent extends StatelessWidget {
         return SeriesCollectionsTab(collections: collections, horizontalPadding: tabPadding);
       case 'Works':
         return SeriesWorksTab(works: works, horizontalPadding: tabPadding);
-      case 'Information':
+      case 'Info':
       default:
         return SeriesDetailsGrid(
           series: series, 
