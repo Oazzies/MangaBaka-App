@@ -96,13 +96,16 @@ class SeriesSimilarTab extends StatelessWidget {
   }
 
   Widget _buildList(List<Series> series) {
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: series.length,
-      itemBuilder: (context, index) =>
-          EntryListItem(series: series[index], heroTagPrefix: 'similar'),
+    // Lay out items directly in a Column rather than a nested non-scrolling
+    // ListView: inside the detail screen's AnimatedSwitcher transition the
+    // ListView's overscroll viewport can be painted before layout completes,
+    // throwing "RenderBox was not laid out" / "Cannot hit test ... no size".
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final s in series)
+          EntryListItem(series: s, heroTagPrefix: 'similar'),
+      ],
     );
   }
 
