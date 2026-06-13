@@ -7,6 +7,7 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/utils/uri_utils.dart';
 
 class MixService {
   static const String _mixUrl = '${AppConstants.baseApiUrl}/series/mix';
@@ -48,12 +49,7 @@ class MixService {
     }
 
     final uri = Uri.parse(_mixUrl).replace(
-      queryParameters: params.map((key, value) {
-        if (value is List) {
-          return MapEntry(key, value.map((e) => e.toString()).toList());
-        }
-        return MapEntry(key, value.toString());
-      }),
+      queryParameters: UriUtils.encodeQueryParameters(params),
     );
 
     _logger.info('MixService.fetchMix URI: $uri');

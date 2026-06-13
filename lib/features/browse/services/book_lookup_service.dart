@@ -1,18 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 class BookLookupService {
   static final _logger = LoggingService.logger;
   static const String _baseUrl = 'https://www.googleapis.com/books/v1/volumes';
+  static const Duration _timeout =
+      Duration(seconds: AppConstants.networkTimeoutSeconds);
 
   Future<String?> lookupTitleByIsbn(String isbn) async {
     _logger.info('Looking up book title for ISBN: $isbn');
     try {
       // First try Google Books API
       _logger.fine('Attempting Google Books API lookup for ISBN: $isbn');
-      final googleResponse = await http.get(Uri.parse('$_baseUrl?q=isbn:$isbn'));
+      final googleResponse = await http
+          .get(Uri.parse('$_baseUrl?q=isbn:$isbn'))
+          .timeout(_timeout);
 
       if (googleResponse.statusCode == 200) {
         final data = json.decode(googleResponse.body);
@@ -34,7 +39,9 @@ class BookLookupService {
 
       // Fallback to OpenLibrary API if Google Books fails or returns no results
       _logger.fine('Attempting OpenLibrary API lookup fallback for ISBN: $isbn');
-      final openLibResponse = await http.get(Uri.parse('https://openlibrary.org/search.json?isbn=$isbn'));
+      final openLibResponse = await http
+          .get(Uri.parse('https://openlibrary.org/search.json?isbn=$isbn'))
+          .timeout(_timeout);
       
       if (openLibResponse.statusCode == 200) {
         final data = json.decode(openLibResponse.body);

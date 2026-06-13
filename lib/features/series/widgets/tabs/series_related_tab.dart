@@ -41,28 +41,32 @@ class SeriesRelatedTab extends StatelessWidget {
       return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_related_series'))));
     }
     
-    return ListenableBuilder(
-      listenable: SettingsManager(),
-      builder: (context, _) {
-        final settings = SettingsManager();
-        final style = settings.separateListStyles
-            ? settings.browseListStyle
-            : settings.currentListStyle;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: ListenableBuilder(
+        listenable: SettingsManager(),
+        builder: (context, _) {
+          final settings = SettingsManager();
+          final style = settings.separateListStyles
+              ? settings.browseListStyle
+              : settings.currentListStyle;
 
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Column(
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SeriesSectionHeader(title: l10n.translate('tab_related')),
-              if (style.isGrid)
-                _buildGrid(settings, finalRelated)
-              else
-                _buildList(finalRelated),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (style.isGrid) {
+                    return _buildGrid(settings, finalRelated, constraints.maxWidth);
+                  }
+                  return _buildList(finalRelated);
+                },
+              ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -77,31 +81,25 @@ class SeriesRelatedTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGrid(SettingsManager settings, List<Series> series) {
-    final columns = settings.separateGridColumnCounts
+  Widget _buildGrid(SettingsManager settings, List<Series> series, double maxWidth) {
+    final columnCount = settings.separateGridColumnCounts
         ? settings.browseGridColumnCount
         : settings.gridColumnCount;
+    const spacing = 10.0;
+    final cols = columnCount > 0 ? columnCount : (maxWidth / 160).floor().clamp(2, 6);
+    final itemWidth = (maxWidth - spacing * (cols - 1)) / cols;
+    final itemHeight = itemWidth / 0.65;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: columns > 0
-          ? SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            )
-          : const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-      itemCount: series.length,
-      itemBuilder: (context, index) =>
-          EntryListItem(series: series[index], heroTagPrefix: heroTagPrefix),
+    return Wrap(
+      spacing: spacing,
+      runSpacing: spacing,
+      children: series
+          .map((s) => SizedBox(
+                width: itemWidth,
+                height: itemHeight,
+                child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
+              ))
+          .toList(),
     );
   }
 }

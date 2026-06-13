@@ -38,7 +38,7 @@ class WidgetUtils {
       return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
     }
     
-    return CachedNetworkImage(
+    final Widget image = CachedNetworkImage(
       imageUrl: url,
       width: width,
       height: height,
@@ -52,17 +52,13 @@ class WidgetUtils {
       },
       fadeOutDuration: const Duration(milliseconds: 300),
       fadeInDuration: const Duration(milliseconds: 300),
-      imageBuilder: blurred ? (context, imageProvider) => ImageFiltered(
-        imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: imageProvider,
-              fit: fit,
-            ),
-          ),
-        ),
-      ) : null,
+    );
+
+    if (!blurred) return image;
+
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: image,
     );
   }
 

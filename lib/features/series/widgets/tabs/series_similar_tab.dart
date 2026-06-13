@@ -4,6 +4,9 @@ import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
+import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
+import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/utils/widget_utils.dart';
 
 class SeriesSimilarTab extends StatelessWidget {
   final List<Series>? similar;
@@ -28,7 +31,6 @@ class SeriesSimilarTab extends StatelessWidget {
       );
     }
 
-    // Filter out the current series and any duplicate IDs to prevent Hero tag collisions
     final unique = <String, Series>{};
     for (final s in similar!) {
       if (s.id != currentSeriesId) {
@@ -44,21 +46,52 @@ class SeriesSimilarTab extends StatelessWidget {
       );
     }
 
-    return ListenableBuilder(
-      listenable: SettingsManager(),
-      builder: (context, _) {
-        final settings = SettingsManager();
-        final style = settings.separateListStyles
-            ? settings.browseListStyle
-            : settings.currentListStyle;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: ListenableBuilder(
+        listenable: SettingsManager(),
+        builder: (context, _) {
+          final settings = SettingsManager();
+          final style = settings.similarListStyle;
 
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: style.isGrid
-              ? _buildGrid(settings, filtered)
-              : _buildList(filtered),
-        );
-      },
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: SeriesSectionHeader(
+                      title: l10n.translate('tab_similar'),
+                      bottomPadding: 0,
+                    ),
+                  ),
+                  WidgetUtils.tooltip(
+                    message: l10n.translate('toggle_layout'),
+                    child: IconButton(
+                      icon: Icon(
+                        style.next.icon,
+                        color: AppConstants.textColor,
+                      ),
+                      onPressed: () => settings.setSimilarListStyle(style.next),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  if (style.isGrid) {
+                    return _buildGrid(settings, filtered, constraints.maxWidth);
+                  }
+                  return _buildList(filtered);
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -73,31 +106,25 @@ class SeriesSimilarTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGrid(SettingsManager settings, List<Series> series) {
-    final columns = settings.separateGridColumnCounts
+  Widget _buildGrid(SettingsManager settings, List<Series> series, double maxWidth) {
+    final columnCount = settings.separateGridColumnCounts
         ? settings.browseGridColumnCount
         : settings.gridColumnCount;
+    const spacing = 10.0;
+    final cols = columnCount > 0 ? columnCount : (maxWidth / 160).floor().clamp(2, 6);
+    final itemWidth = (maxWidth - spacing * (cols - 1)) / cols;
+    final itemHeight = itemWidth / 0.65;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: columns > 0
-          ? SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            )
-          : const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-      itemCount: series.length,
-      itemBuilder: (context, index) =>
-          EntryListItem(series: series[index], heroTagPrefix: 'similar'),
+    return Wrap(
+      spacing: spacing,
+      runSpacing: spacing,
+      children: series
+          .map((s) => SizedBox(
+                width: itemWidth,
+                height: itemHeight,
+                child: EntryListItem(series: s, heroTagPrefix: 'similar'),
+              ))
+          .toList(),
     );
   }
 }

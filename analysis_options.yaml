@@ -9,6 +9,13 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # Dead snapshot left over from the reverted series-detail redesign.
+    # It does not compile and is not referenced by the app; kept out of
+    # analysis until it is removed from the repository.
+    - series-backup/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

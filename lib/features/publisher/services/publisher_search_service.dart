@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/utils/uri_utils.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
@@ -42,14 +43,9 @@ class PublisherSearchService {
     };
     
     final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: finalQueryParams.map((key, value) {
-        if (value is List) {
-          return MapEntry(key, value.map((e) => e.toString()).toList());
-        }
-        return MapEntry(key, value.toString());
-      }),
+      queryParameters: UriUtils.encodeQueryParameters(finalQueryParams),
     );
-    
+
     _logger.info('Performing publisher search. URI: $uri');
 
     try {
@@ -160,12 +156,7 @@ class PublisherSearchService {
     }
 
     final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: finalParams.map((key, value) {
-        if (value is List) {
-          return MapEntry(key, value.map((e) => e.toString()).toList());
-        }
-        return MapEntry(key, value.toString());
-      }),
+      queryParameters: UriUtils.encodeQueryParameters(finalParams),
     );
 
     _logger.info('Performing publisher search. URI: $uri');

@@ -42,7 +42,7 @@ class NewsService {
       final response = await http.get(
         Uri.parse(url),
         headers: {'User-Agent': AppConstants.userAgent},
-      );
+      ).timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
 
       if (response.statusCode == 200) {
         if (page == 1) {

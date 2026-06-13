@@ -55,6 +55,17 @@ class ListStyleDialogs {
     );
   }
 
+  static void showSimilarListStyleSelectionDialog(BuildContext context) {
+    final l10n = LocalizationService();
+    _showListStyleSelectionBottomSheet(
+      context: context,
+      title: l10n.translate('list_style'),
+      subtitle: l10n.translate('list_style_subtitle'),
+      currentValueGetter: () => SettingsManager().similarListStyle,
+      onSelected: (style) => SettingsManager().setSimilarListStyle(style),
+    );
+  }
+
   static void _showListStyleSelectionBottomSheet({
     required BuildContext context,
     required String title,

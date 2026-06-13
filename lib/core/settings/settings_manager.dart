@@ -122,6 +122,9 @@ class SettingsManager extends ChangeNotifier {
   AppListStyle _worksListStyle = AppListStyle.comfortable;
   AppListStyle get worksListStyle => _worksListStyle;
 
+  AppListStyle _similarListStyle = AppListStyle.compactGrid;
+  AppListStyle get similarListStyle => _similarListStyle;
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -185,6 +188,10 @@ class SettingsManager extends ChangeNotifier {
     final worksStyleIndex = prefs.getInt(SettingsKeys.worksListStyle);
     if (worksStyleIndex != null && worksStyleIndex >= 0 && worksStyleIndex < AppListStyle.values.length) {
       _worksListStyle = AppListStyle.values[worksStyleIndex];
+    }
+    final similarStyleIndex = prefs.getInt(SettingsKeys.similarListStyle);
+    if (similarStyleIndex != null && similarStyleIndex >= 0 && similarStyleIndex < AppListStyle.values.length) {
+      _similarListStyle = AppListStyle.values[similarStyleIndex];
     }
     _showQuickProgress = prefs.getBool(SettingsKeys.showQuickProgress) ?? true;
     _showLibraryProgress = prefs.getBool(SettingsKeys.showLibraryProgress) ?? true;
@@ -371,6 +378,14 @@ class SettingsManager extends ChangeNotifier {
     _worksListStyle = style;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(SettingsKeys.worksListStyle, style.index);
+    notifyListeners();
+  }
+
+  Future<void> setSimilarListStyle(AppListStyle style) async {
+    if (_similarListStyle == style) return;
+    _similarListStyle = style;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.similarListStyle, style.index);
     notifyListeners();
   }
 
