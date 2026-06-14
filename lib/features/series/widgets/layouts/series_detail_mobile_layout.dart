@@ -48,62 +48,65 @@ class SeriesDetailMobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     const hPadding = 16.0;
 
-    if (!isDataLoaded) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: hPadding),
-        child: const SeriesDetailSkeleton(),
-      );
-    }
-
-    return AnimatedOpacity(
+    return AnimatedSwitcher(
       duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-      opacity: isDataLoaded ? 1.0 : 0.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SeriesSegmentedControl(
-            selectedTab: selectedTab,
-            onTabChanged: onTabChanged,
-            horizontalPadding: hPadding,
-          ),
-          Divider(height: 1, thickness: 1, color: AppConstants.borderColor),
-          if (selectedTab == 'Info') ...[
-            const SizedBox(height: 22),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: hPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (entry != null) ...[
-                    SeriesMyListCard(
-                      series: series,
-                      entry: entry!,
-                      l10n: l10n,
-                      onStateChanged: onStateChanged,
-                      onUpdateChapter: onUpdateChapter,
-                      onUpdateVolume: onUpdateVolume,
-                      onUpdateRating: onUpdateRating,
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: isDataLoaded
+          ? Column(
+              key: const ValueKey('mobile_content'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SeriesSegmentedControl(
+                  selectedTab: selectedTab,
+                  onTabChanged: onTabChanged,
+                  horizontalPadding: hPadding,
+                ),
+                Divider(height: 1, thickness: 1, color: AppConstants.borderColor),
+                if (selectedTab == 'Info') ...[
+                  const SizedBox(height: 22),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: hPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (entry != null) ...[
+                          SeriesMyListCard(
+                            series: series,
+                            entry: entry!,
+                            l10n: l10n,
+                            onStateChanged: onStateChanged,
+                            onUpdateChapter: onUpdateChapter,
+                            onUpdateVolume: onUpdateVolume,
+                            onUpdateRating: onUpdateRating,
+                          ),
+                          const SizedBox(height: 22),
+                        ],
+                        ExternalRatingsSection(series: series),
+                        if (series.description.isNotEmpty) ...[
+                          SeriesSectionHeader(title: l10n.translate('description')),
+                          DescriptionSection(description: series.description),
+                          const SizedBox(height: 28),
+                        ],
+                        SeriesGenresSection(series: series, l10n: l10n),
+                        const SizedBox(height: 4),
+                        SeriesInformationCard(series: series, l10n: l10n),
+                      ],
                     ),
-                    const SizedBox(height: 22),
-                  ],
-                  ExternalRatingsSection(series: series),
-                  if (series.description.isNotEmpty) ...[
-                    SeriesSectionHeader(title: l10n.translate('description')),
-                    DescriptionSection(description: series.description),
-                    const SizedBox(height: 28),
-                  ],
-                  SeriesGenresSection(series: series, l10n: l10n),
-                  const SizedBox(height: 4),
-                  SeriesInformationCard(series: series, l10n: l10n),
+                  ),
                 ],
-              ),
+                const SizedBox(height: 32),
+                buildTabContent(hPadding),
+              ],
+            )
+          : Padding(
+              key: const ValueKey('mobile_skeleton'),
+              padding: const EdgeInsets.symmetric(horizontal: hPadding),
+              child: const SeriesDetailSkeleton(),
             ),
-          ],
-          const SizedBox(height: 32),
-          buildTabContent(hPadding),
-        ],
-      ),
     );
   }
 }

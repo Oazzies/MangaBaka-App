@@ -54,19 +54,20 @@ class SeriesDetailWideLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!isDataLoaded) {
-      return Padding(
-        key: const ValueKey('wide_skeleton'),
-        padding: const EdgeInsets.symmetric(horizontal: _hPadding),
-        child: const SeriesDetailSkeleton(isWide: true),
-      );
-    }
-
-    return AnimatedOpacity(
+    return AnimatedSwitcher(
       duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-      opacity: isDataLoaded ? 1.0 : 0.0,
-      child: _buildContent(),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: isDataLoaded
+          ? _buildContent()
+          : Padding(
+              key: const ValueKey('wide_skeleton'),
+              padding: const EdgeInsets.symmetric(horizontal: _hPadding),
+              child: const SeriesDetailSkeleton(isWide: true),
+            ),
     );
   }
 
