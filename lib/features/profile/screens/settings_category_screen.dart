@@ -89,7 +89,7 @@ class _CategoryDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 12, 8, 12),
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
               child: Row(
                 children: [
                   if (onBack != null)
@@ -101,11 +101,11 @@ class _CategoryDialog extends StatelessWidget {
                       },
                       color: AppConstants.textMutedColor,
                       padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
+                      constraints: const BoxConstraints(),
                     )
                   else
-                    const SizedBox(width: 48),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 24),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       title,

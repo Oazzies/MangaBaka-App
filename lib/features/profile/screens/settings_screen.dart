@@ -789,7 +789,7 @@ class _SettingsDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 8, 12),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
                   child: Row(
                     children: [
                       Text(
