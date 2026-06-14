@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 
@@ -50,39 +50,73 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
     final l10n = LocalizationService();
     
     return AlertDialog(
-      backgroundColor: AppConstants.tertiaryBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: AppConstants.secondaryBackground,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+        side: BorderSide(
+          color: AppConstants.borderColor.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      title: Row(
         children: [
-          Text(
-            widget.title,
-            style: TextStyle(
-              color: AppConstants.textColor,
-              fontWeight: FontWeight.w900,
-              fontSize: 20,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppConstants.accentColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.menu_book_rounded,
+              color: AppConstants.accentColor,
+              size: 24,
             ),
           ),
-          if (widget.maxValue != 'null' && widget.maxValue.isNotEmpty)
-            Text(
-              '${l10n.translate('total')}: ${widget.maxValue}',
-              style: TextStyle(
-                color: AppConstants.textMutedColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    color: AppConstants.textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                if (widget.maxValue != 'null' && widget.maxValue.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '${l10n.translate('total')}: ${widget.maxValue}',
+                    style: TextStyle(
+                      color: AppConstants.textMutedColor,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
             ),
+          ),
         ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: AppConstants.primaryBackground,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppConstants.secondaryBackground, width: 2),
+              border: Border.all(
+                color: AppConstants.borderColor.withValues(alpha: 0.15),
+                width: 1.5,
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -125,6 +159,9 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
           child: Text(
             l10n.translate('cancel'),
             style: TextStyle(
@@ -133,16 +170,19 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
             ),
           ),
         ),
-        ElevatedButton(
+        const SizedBox(width: 4),
+        FilledButton(
           onPressed: () {
             widget.onUpdate(_currentValue);
             Navigator.pop(context);
           },
-          style: ElevatedButton.styleFrom(
+          style: FilledButton.styleFrom(
             backgroundColor: AppConstants.accentColor,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+            ),
             elevation: 0,
           ),
           child: Text(
@@ -151,7 +191,6 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
           ),
         ),
       ],
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
     );
   }
 }
@@ -165,7 +204,7 @@ class _IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppConstants.secondaryBackground,
+      color: AppConstants.borderColor.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -33,28 +33,53 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
     final l10n = LocalizationService();
     return AlertDialog(
       backgroundColor: AppConstants.secondaryBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      title: Text(
-        l10n.translate('rating_dialog_title'),
-        style: TextStyle(
-          color: AppConstants.textColor, 
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
+        side: BorderSide(
+          color: AppConstants.borderColor.withValues(alpha: 0.2),
+          width: 1.5,
         ),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppConstants.warningColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.star_rounded,
+              color: AppConstants.warningColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              l10n.translate('rating_dialog_title'),
+              style: TextStyle(
+                color: AppConstants.textColor, 
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ),
+        ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: AppConstants.primaryBackground,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.3)),
+              border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.15)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -88,7 +113,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               ],
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: AppConstants.accentColor,
@@ -136,7 +161,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             style: TextStyle(color: AppConstants.textMutedColor, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
         FilledButton(
           onPressed: () {
             final newRating = _currentRating.toInt();
@@ -147,9 +172,12 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
           },
           style: FilledButton.styleFrom(
             backgroundColor: AppConstants.accentColor,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+            ),
+            elevation: 0,
           ),
           child: Text(
             l10n.translate('update'),
