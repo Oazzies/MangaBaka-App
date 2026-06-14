@@ -119,18 +119,20 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
           leadingWidth: (widget.isWide ? 150 : 120) + horizontalMargin,
           leading: Padding(
             padding: EdgeInsets.only(
-              left: (widget.isWide ? 40.0 : 16.0) + horizontalMargin, 
-              top: 6, 
+              left: (widget.isWide ? 40.0 : 16.0) + horizontalMargin,
+              top: 6,
               bottom: 6,
             ),
-            child: _GlassControl(
-              onTap: widget.onBack,
-              tooltip: LocalizationService().translate('go_back'),
-              icon: Icons.arrow_back,
-              // Design: "Back" label in both portrait and landscape.
-              label: LocalizationService().translate('back'),
-              showBg: titleOpacity < 0.5,
-            ).animate().fadeIn(duration: 400.ms),
+            child: AppTooltip(
+              message: LocalizationService().translate('go_back'),
+              child: _GlassControl(
+                onTap: widget.onBack,
+                icon: Icons.arrow_back,
+                // Design: "Back" label in both portrait and landscape.
+                label: LocalizationService().translate('back'),
+                showBg: titleOpacity < 0.5,
+              ).animate().fadeIn(duration: 400.ms),
+            ),
           ),
           // Landscape: no banner icons — clean behind the back pill.
           // Portrait: transparent circle share + delete (if in library).
@@ -142,20 +144,24 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
                   )
                 ]
               : [
-                  _SubbarIcon(
-                    onTap: widget.onShare,
-                    tooltip: LocalizationService().translate('share_series'),
-                    icon: Icons.share_outlined,
-                    showBg: titleOpacity < 0.5,
-                  ).animate().fadeIn(delay: 80.ms, duration: 400.ms),
+                  AppTooltip(
+                    message: LocalizationService().translate('share_series'),
+                    child: _SubbarIcon(
+                      onTap: widget.onShare,
+                      icon: Icons.share_outlined,
+                      showBg: titleOpacity < 0.5,
+                    ).animate().fadeIn(delay: 80.ms, duration: 400.ms),
+                  ),
                   if (widget.entry != null) ...[
                     const SizedBox(width: 8),
-                    _SubbarIcon(
-                      onTap: widget.onDelete,
-                      tooltip: LocalizationService().translate('delete_from_library'),
-                      icon: Icons.delete_outline,
-                      showBg: titleOpacity < 0.5,
-                    ).animate().fadeIn(delay: 160.ms, duration: 400.ms),
+                    AppTooltip(
+                      message: LocalizationService().translate('delete_from_library'),
+                      child: _SubbarIcon(
+                        onTap: widget.onDelete,
+                        icon: Icons.delete_outline,
+                        showBg: titleOpacity < 0.5,
+                      ).animate().fadeIn(delay: 160.ms, duration: 400.ms),
+                    ),
                   ],
                   Padding(
                     padding: EdgeInsets.only(right: horizontalMargin + 8),
@@ -282,14 +288,12 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
 /// A frosted-glass control (back pill / icon button) that floats on the banner.
 class _GlassControl extends StatelessWidget {
   final VoidCallback onTap;
-  final String tooltip;
   final IconData icon;
   final String? label;
   final bool showBg;
 
   const _GlassControl({
     required this.onTap,
-    required this.tooltip,
     required this.icon,
     this.label,
     this.showBg = true,
@@ -340,12 +344,9 @@ class _GlassControl extends StatelessWidget {
       ),
     );
 
-    return WidgetUtils.tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(onTap: onTap, borderRadius: radius, child: child),
-      ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(onTap: onTap, borderRadius: radius, child: child),
     );
   }
 }
@@ -353,13 +354,11 @@ class _GlassControl extends StatelessWidget {
 /// Frosted-glass circular icon button for portrait banner right-side controls.
 class _SubbarIcon extends StatelessWidget {
   final VoidCallback onTap;
-  final String tooltip;
   final IconData icon;
   final bool showBg;
 
   const _SubbarIcon({
     required this.onTap,
-    required this.tooltip,
     required this.icon,
     this.showBg = true,
   });
@@ -390,12 +389,9 @@ class _SubbarIcon extends StatelessWidget {
       ),
     );
 
-    return WidgetUtils.tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(onTap: onTap, borderRadius: radius, child: child),
-      ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(onTap: onTap, borderRadius: radius, child: child),
     );
   }
 }
