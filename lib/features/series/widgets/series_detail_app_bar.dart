@@ -23,7 +23,6 @@ class SeriesDetailAppBar extends StatelessWidget {
   final bool isWide;
   final bool showCover;
   final double horizontalPadding;
-  final bool isLoaded;
   final VoidCallback onBack;
   final VoidCallback onShare;
   final VoidCallback onDelete;
@@ -37,7 +36,6 @@ class SeriesDetailAppBar extends StatelessWidget {
     required this.isWide,
     this.showCover = true,
     this.horizontalPadding = 16.0,
-    required this.isLoaded,
     required this.onBack,
     required this.onShare,
     required this.onDelete,
@@ -147,22 +145,19 @@ class SeriesDetailAppBar extends StatelessWidget {
                 children: [
                   Container(color: AppConstants.tertiaryBackground),
                   if (series.coverUrl.isNotEmpty)
-                    seriesBannerImage(series, memCacheWidth: isWide ? 1200 : 800)
-                        .animate(target: isLoaded ? 1 : 0)
+                    ImageFiltered(
+                      imageFilter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+                      child: seriesBannerImage(series, memCacheWidth: isWide ? 1200 : 800),
+                    )
+                        .animate()
                         .fadeIn(duration: 1000.ms, curve: Curves.easeOut)
                         .scale(
                           begin: const Offset(1.06, 1.06),
                           end: const Offset(1, 1),
                           curve: Curves.easeOut,
                         ),
-                  // Heavy blur so the cover reads as an ambient banner.
-                  ClipRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
-                      child: Container(
-                        color: AppConstants.primaryBackground.withValues(alpha: 0.2),
-                      ),
-                    ),
+                  Container(
+                    color: AppConstants.primaryBackground.withValues(alpha: 0.2),
                   ),
                   IgnorePointer(
                     child: CustomPaint(
@@ -205,10 +200,7 @@ class SeriesDetailAppBar extends StatelessWidget {
                                   series: series,
                                   height: coverHeight,
                                   width: coverWidth,
-                                )
-                                    .animate(target: isLoaded ? 1 : 0)
-                                    .fadeIn(duration: 500.ms)
-                                    .slideY(begin: 0.08, end: 0, curve: Curves.easeOutCubic),
+                                ),
                                 SizedBox(width: isWide ? 22 : 16),
                                 Expanded(
                                   child: Padding(
@@ -218,7 +210,7 @@ class SeriesDetailAppBar extends StatelessWidget {
                                       title: title,
                                       isWide: isWide,
                                     )
-                                        .animate(target: isLoaded ? 1 : 0)
+                                        .animate()
                                         .fadeIn(duration: 600.ms)
                                         .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
                                   ),

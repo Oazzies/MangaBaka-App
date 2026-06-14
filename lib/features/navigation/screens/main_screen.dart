@@ -203,14 +203,7 @@ class MainScreenState extends State<MainScreen> {
                           message: l10n.translate('settings'),
                           child: IconButton(
                             icon: const Icon(Icons.settings_outlined),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SettingsScreen(),
-                                ),
-                              );
-                            },
+                            onPressed: () => SettingsScreen.show(context),
                             color: AppConstants.textMutedColor,
                           ),
                         ),
@@ -272,14 +265,7 @@ class MainScreenState extends State<MainScreen> {
                         message: l10n.translate('settings'),
                         child: IconButton(
                           icon: const Icon(Icons.settings_outlined),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SettingsScreen(),
-                              ),
-                            );
-                          },
+                          onPressed: () => SettingsScreen.show(context),
                           color: AppConstants.textMutedColor,
                         ),
                       ),
@@ -401,14 +387,7 @@ class MainScreenState extends State<MainScreen> {
                 child: IconButton(
                   icon: const Icon(Icons.settings_outlined),
                   iconSize: 20,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => SettingsScreen.show(context),
                   color: AppConstants.textMutedColor,
                 ),
               ),

@@ -68,9 +68,8 @@ class AppShortcuts extends StatelessWidget {
           ),
           SettingsIntent: CallbackAction<SettingsIntent>(
             onInvoke: (intent) {
-              AppConstants.navigatorKey.currentState?.push(
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
+              final context = AppConstants.navigatorKey.currentContext;
+              if (context != null) SettingsScreen.show(context);
               return null;
             },
           ),

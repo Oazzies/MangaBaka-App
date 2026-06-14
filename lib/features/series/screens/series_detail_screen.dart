@@ -40,6 +40,65 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
   late final SeriesService _seriesService;
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
+  bool _routeAnimationListenerAdded = false;
+  bool _routeTransitionComplete = false;
+  bool _fetchStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_routeAnimationListenerAdded) {
+      final route = ModalRoute.of(context);
+      if (route != null) {
+        _routeAnimationListenerAdded = true;
+        final animation = route.animation;
+        if (animation != null) {
+          if (animation.isCompleted) {
+            _routeTransitionComplete = true;
+            _startFetch();
+          } else {
+            animation.addStatusListener(_onRouteAnimationStatusChanged);
+          }
+        } else {
+          _routeTransitionComplete = true;
+          _startFetch();
+        }
+      }
+    }
+  }
+
+  void _onRouteAnimationStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      if (mounted) {
+        setState(() {
+          _routeTransitionComplete = true;
+        });
+        _startFetch();
+      }
+      final route = ModalRoute.of(context);
+      route?.animation?.removeStatusListener(_onRouteAnimationStatusChanged);
+    }
+  }
+
+  void _startFetch() {
+    if (_fetchStarted) return;
+    _fetchStarted = true;
+    _logger.fine('Starting full data fetch for series: ${widget.series.id}');
+    fetchFullData().then((_) {
+      _logger.info('Full data fetch complete for series: ${widget.series.id}');
+    }).catchError((e) {
+      _logger.severe('Full data fetch failed for series: ${widget.series.id}. Error: $e');
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_routeAnimationListenerAdded) {
+      final route = ModalRoute.of(context);
+      route?.animation?.removeStatusListener(_onRouteAnimationStatusChanged);
+    }
+    super.dispose();
+  }
 
   @override
   LibraryService get libraryService => _libraryService;
@@ -69,13 +128,6 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
     _seriesService = getIt<SeriesService>();
     _entryStream = _libraryService.watchEntryFromDb(widget.series.id);
     fullSeries = widget.series; 
-    
-    _logger.fine('Starting full data fetch for series: ${widget.series.id}');
-    fetchFullData().then((_) {
-      _logger.info('Full data fetch complete for series: ${widget.series.id}');
-    }).catchError((e) {
-      _logger.severe('Full data fetch failed for series: ${widget.series.id}. Error: $e');
-    });
   }
 
   void _navigateToAuthorSeries(String authorName) {
@@ -108,6 +160,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
     final screenWidth = MediaQuery.of(context).size.width;
     final isWide = screenWidth > 900;
     final isTablet = screenWidth > 600 && screenWidth <= 900;
+    final displayLoaded = isDataLoaded && _routeTransitionComplete;
 
     return ListenableBuilder(
       listenable: Listenable.merge([LocalizationService(), ThemeManager(), getIt<ProfileAuthService>()]),
@@ -142,7 +195,6 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                           entry: entry,
                           isWide: isWide || isTablet,
                           horizontalPadding: isWide ? 40.0 : 16.0,
-                          isLoaded: isDataLoaded,
                           onBack: () => Navigator.pop(context),
                           onShare: shareLink,
                           onDelete: showDeleteConfirmationDialog,
@@ -166,7 +218,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                                   title: (fullSeries ?? widget.series).getDisplayTitle(settings.defaultTitleLanguage),
                                   entry: entry,
                                   l10n: l10n,
-                                  isDataLoaded: isDataLoaded,
+                                  isDataLoaded: displayLoaded,
                                   selectedTab: _selectedTab,
                                   onAuthorTap: _navigateToAuthorSeries,
                                   onPublisherTap: _navigateToPublisherSeries,
@@ -204,7 +256,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                                   title: (fullSeries ?? widget.series).getDisplayTitle(settings.defaultTitleLanguage),
                                   entry: entry,
                                   l10n: l10n,
-                                  isDataLoaded: isDataLoaded,
+                                  isDataLoaded: displayLoaded,
                                   selectedTab: _selectedTab,
                                   onTabChanged: (tab) {
                                     _logger.info('Series detail tab switched to: $tab');
