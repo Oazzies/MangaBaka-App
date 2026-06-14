@@ -206,10 +206,10 @@ class _HoverableLinkChip extends StatelessWidget {
           .replaceAll('{name}', displayName),
       child: Material(
         color: AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         child: InkWell(
           onTap: () => launchUrl(uri),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
           hoverColor: AppConstants.accentColor.withValues(alpha: 0.1),
           splashColor: AppConstants.accentColor.withValues(alpha: 0.1),
           highlightColor: AppConstants.accentColor.withValues(alpha: 0.05),

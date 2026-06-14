@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/state_selection_section.dart';
@@ -108,10 +108,10 @@ class _ProgressButton extends StatelessWidget {
 
     return Material(
       color: AppConstants.secondaryBackground,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(AppConstants.cardRadius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         child: Container(
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),

@@ -39,8 +39,8 @@ class AppConstants {
   static const double horizontalPadding = 16.0;
   static const double verticalPadding = 16.0;
   static const double cardRadius = 12.0;
-  static const double largeRadius = 24.0;
-  static const double denseRadius = 16.0;
+  static const double largeRadius = 12.0;
+  static const double denseRadius = 8.0;
   static const double pillRadius = 999.0;
 
   static const List<BoxShadow> softShadow = [
