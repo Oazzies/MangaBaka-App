@@ -146,13 +146,17 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
                     onTap: widget.onShare,
                     tooltip: LocalizationService().translate('share_series'),
                     icon: Icons.share_outlined,
+                    showBg: titleOpacity < 0.5,
                   ).animate().fadeIn(delay: 80.ms, duration: 400.ms),
-                  if (widget.entry != null)
+                  if (widget.entry != null) ...[
+                    const SizedBox(width: 8),
                     _SubbarIcon(
                       onTap: widget.onDelete,
                       tooltip: LocalizationService().translate('delete_from_library'),
                       icon: Icons.delete_outline,
+                      showBg: titleOpacity < 0.5,
                     ).animate().fadeIn(delay: 160.ms, duration: 400.ms),
+                  ],
                   Padding(
                     padding: EdgeInsets.only(right: horizontalMargin + 8),
                     child: const SizedBox(width: 8),
@@ -162,7 +166,12 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
             titlePadding: EdgeInsetsDirectional.only(
               start: (widget.isWide ? 166 : 136) + horizontalMargin,
               bottom: 16,
-              end: 16 + horizontalMargin,
+              end: (widget.isWide
+                      ? 16.0
+                      : widget.entry != null
+                          ? 104.0
+                          : 60.0) +
+                  horizontalMargin,
             ),
             centerTitle: false,
             title: IgnorePointer(
@@ -305,12 +314,6 @@ class _GlassControl extends StatelessWidget {
                 ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
                 : Colors.transparent,
             borderRadius: radius,
-            border: Border.all(
-              color: showBg
-                  ? AppConstants.borderColor.withValues(alpha: 0.7)
-                  : Colors.transparent,
-              width: 1,
-            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -347,36 +350,51 @@ class _GlassControl extends StatelessWidget {
   }
 }
 
-/// Transparent circular icon button for portrait banner right-side controls.
-/// Matches the design's `.mb-subbar-icon` style — no glass, no border, just ink.
+/// Frosted-glass circular icon button for portrait banner right-side controls.
 class _SubbarIcon extends StatelessWidget {
   final VoidCallback onTap;
   final String tooltip;
   final IconData icon;
+  final bool showBg;
 
   const _SubbarIcon({
     required this.onTap,
     required this.tooltip,
     required this.icon,
+    this.showBg = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(999);
+    final child = ClipRRect(
+      borderRadius: radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: showBg ? 10 : 0,
+          sigmaY: showBg ? 10 : 0,
+        ),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: showBg
+                ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
+                : Colors.transparent,
+            borderRadius: radius,
+          ),
+          child: Center(
+            child: Icon(icon, size: 20, color: AppConstants.textColor),
+          ),
+        ),
+      ),
+    );
+
     return WidgetUtils.tooltip(
       message: tooltip,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: SizedBox(
-            width: 36,
-            height: 36,
-            child: Center(
-              child: Icon(icon, size: 20, color: AppConstants.textColor),
-            ),
-          ),
-        ),
+        child: InkWell(onTap: onTap, borderRadius: radius, child: child),
       ),
     );
   }
