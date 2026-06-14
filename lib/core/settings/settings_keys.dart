@@ -29,5 +29,6 @@ class SettingsKeys {
   static const String libraryProgressType = '${AppConstants.prefixStorageKey}library_progress_type';
   static const String showRemainingProgress = '${AppConstants.prefixStorageKey}show_remaining_progress';
   static const String showLibraryTabCounts = '${AppConstants.prefixStorageKey}show_library_tab_counts';
+  static const String landscapeAppBarPosition = '${AppConstants.prefixStorageKey}landscape_appbar_position';
 }
 

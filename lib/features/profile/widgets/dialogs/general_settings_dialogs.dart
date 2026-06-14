@@ -129,4 +129,31 @@ class GeneralSettingsDialogs {
       onSelected: (type) => SettingsManager().setLibraryProgressType(type),
     );
   }
+
+  static String getLandscapeAppBarPositionName(LandscapeAppBarPosition position) {
+    final l10n = LocalizationService();
+    switch (position) {
+      case LandscapeAppBarPosition.top:
+        return l10n.translate('landscape_appbar_top');
+      case LandscapeAppBarPosition.bottom:
+        return l10n.translate('landscape_appbar_bottom');
+      case LandscapeAppBarPosition.left:
+        return l10n.translate('landscape_appbar_left');
+      case LandscapeAppBarPosition.right:
+        return l10n.translate('landscape_appbar_right');
+    }
+  }
+
+  static void showLandscapeAppBarPositionDialog(BuildContext context) {
+    final l10n = LocalizationService();
+    SelectionBottomSheet.showSelectionBottomSheet<LandscapeAppBarPosition>(
+      context: context,
+      title: l10n.translate('landscape_appbar_position'),
+      subtitle: l10n.translate('landscape_appbar_position_subtitle'),
+      options: LandscapeAppBarPosition.values,
+      currentValue: SettingsManager().landscapeAppBarPosition,
+      getLabel: getLandscapeAppBarPositionName,
+      onSelected: (position) => SettingsManager().setLandscapeAppBarPosition(position),
+    );
+  }
 }

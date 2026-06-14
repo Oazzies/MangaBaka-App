@@ -403,12 +403,24 @@ class SettingsScreen extends StatelessWidget {
                                   GridColumnDialogs.showBrowseGridColumnCountDialog(
                                     context,
                                   ),
-                              isLast: true,
                             ),
                           ],
                         ],
                       ),
                     ),
+                  ),
+                  const SettingsDivider(),
+                  SettingsItem(
+                    icon: Icons.stay_primary_landscape_outlined,
+                    title: l10n.translate('landscape_appbar_position'),
+                    subtitle: GeneralSettingsDialogs.getLandscapeAppBarPositionName(
+                      SettingsManager().landscapeAppBarPosition,
+                    ),
+                    onTap: () =>
+                        GeneralSettingsDialogs.showLandscapeAppBarPositionDialog(
+                          context,
+                        ),
+                    isLast: true,
                   ),
                 ],
               ),

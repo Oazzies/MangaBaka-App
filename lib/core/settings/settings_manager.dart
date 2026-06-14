@@ -37,6 +37,7 @@ class SettingsManager extends ChangeNotifier {
     _instance._libraryProgressType = LibraryProgressType.chapters;
     _instance._showRemainingProgress = false;
     _instance._showLibraryTabCounts = true;
+    _instance._landscapeAppBarPosition = LandscapeAppBarPosition.left;
   }
 
   bool _showQuickProgress = true;
@@ -53,6 +54,9 @@ class SettingsManager extends ChangeNotifier {
 
   bool _showLibraryTabCounts = true;
   bool get showLibraryTabCounts => _showLibraryTabCounts;
+
+  LandscapeAppBarPosition _landscapeAppBarPosition = LandscapeAppBarPosition.left;
+  LandscapeAppBarPosition get landscapeAppBarPosition => _landscapeAppBarPosition;
 
   AppListStyle _currentListStyle = AppListStyle.compactGrid;
   AppListStyle get currentListStyle => _currentListStyle;
@@ -201,6 +205,12 @@ class SettingsManager extends ChangeNotifier {
     }
     _showRemainingProgress = prefs.getBool(SettingsKeys.showRemainingProgress) ?? false;
     _showLibraryTabCounts = prefs.getBool(SettingsKeys.showLibraryTabCounts) ?? true;
+    final landscapePositionIndex = prefs.getInt(SettingsKeys.landscapeAppBarPosition);
+    if (landscapePositionIndex != null &&
+        landscapePositionIndex >= 0 &&
+        landscapePositionIndex < LandscapeAppBarPosition.values.length) {
+      _landscapeAppBarPosition = LandscapeAppBarPosition.values[landscapePositionIndex];
+    }
 
     notifyListeners();
   }
@@ -426,6 +436,14 @@ class SettingsManager extends ChangeNotifier {
     _showLibraryTabCounts = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(SettingsKeys.showLibraryTabCounts, value);
+    notifyListeners();
+  }
+
+  Future<void> setLandscapeAppBarPosition(LandscapeAppBarPosition position) async {
+    if (_landscapeAppBarPosition == position) return;
+    _landscapeAppBarPosition = position;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.landscapeAppBarPosition, position.index);
     notifyListeners();
   }
 }
