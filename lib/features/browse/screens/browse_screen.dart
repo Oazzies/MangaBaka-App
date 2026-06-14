@@ -21,24 +21,36 @@ import 'package:mangabaka_app/features/browse/widgets/filters/filter_chips_row.d
 import 'package:mangabaka_app/features/browse/widgets/browse_type_tabs.dart';
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/browse/screens/mix_screen.dart';
+import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 
 
 class BrowseScreen extends StatefulWidget {
+  static final GlobalKey<BrowseScreenState> browseScreenKey = GlobalKey<BrowseScreenState>();
   const BrowseScreen({super.key});
 
   @override
-  State<BrowseScreen> createState() => _BrowseScreenState();
+  State<BrowseScreen> createState() => BrowseScreenState();
 }
 
-class _BrowseScreenState extends State<BrowseScreen> {
+class BrowseScreenState extends State<BrowseScreen> {
   static final _logger = LoggingService.logger;
   late final BrowseController _controller;
   final FocusNode _searchFocusNode = FocusNode();
+
+  FocusNode get searchFocusNode => _searchFocusNode;
+  BrowseController get controller => _controller;
+  Future<void> handleBarcodeScan() => _handleBarcodeScan();
+  void handleResultSelected(AutocompleteSeriesResult result) => _handleResultSelected(result);
 
   @override
   void initState() {
     super.initState();
     _controller = BrowseController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.findAncestorStateOfType<MainScreenState>()?.updateTopNavBar();
+      }
+    });
   }
 
   @override
@@ -201,23 +213,25 @@ class _BrowseScreenState extends State<BrowseScreen> {
           },
           child: Scaffold(
             backgroundColor: AppConstants.primaryBackground,
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              centerTitle: true,
-              title: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: MBSearchBar(
-                  focusNode: _searchFocusNode,
-                  controller: _controller.searchController,
-                  initialFilters: _controller.currentFilters,
-                  onScanTap: _handleBarcodeScan,
-                  onResultSelected: _handleResultSelected,
-                  onChanged: _controller.updateSearchQuery,
-                  onSubmitted: (_) => _controller.searchSeries(),
-                  onFilterApplied: _controller.updateFilters,
-                ),
-              ),
-            ),
+            appBar: MainScreen.showSearchBarInTopNavBar(context)
+                ? null
+                : AppBar(
+                    automaticallyImplyLeading: false,
+                    centerTitle: true,
+                    title: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: MBSearchBar(
+                        focusNode: _searchFocusNode,
+                        controller: _controller.searchController,
+                        initialFilters: _controller.currentFilters,
+                        onScanTap: _handleBarcodeScan,
+                        onResultSelected: _handleResultSelected,
+                        onChanged: _controller.updateSearchQuery,
+                        onSubmitted: (_) => _controller.searchSeries(),
+                        onFilterApplied: _controller.updateFilters,
+                      ),
+                    ),
+                  ),
             body: NotificationListener<ScrollMetricsNotification>(
               onNotification: (notification) {
                 _controller.checkScroll();

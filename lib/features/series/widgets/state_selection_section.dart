@@ -1,9 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/constants/library_screen_constants.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 
-class StateSelectionSection extends StatelessWidget {
+class StateSelectionSection extends StatefulWidget {
   final String? currentState;
   final Function(String) onStateChanged;
 
@@ -14,8 +14,30 @@ class StateSelectionSection extends StatelessWidget {
   });
 
   @override
+  State<StateSelectionSection> createState() => _StateSelectionSectionState();
+}
+
+class _StateSelectionSectionState extends State<StateSelectionSection> {
+  String? _tempState;
+
+  @override
+  void initState() {
+    super.initState();
+    _tempState = widget.currentState;
+  }
+
+  @override
+  void didUpdateWidget(covariant StateSelectionSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentState != oldWidget.currentState) {
+      _tempState = widget.currentState;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (currentState == null) {
+    final activeState = _tempState;
+    if (activeState == null) {
       return const SizedBox.shrink();
     }
 
@@ -25,19 +47,29 @@ class StateSelectionSection extends StatelessWidget {
         final l10n = LocalizationService();
         return LayoutBuilder(
           builder: (context, constraints) {
+            final stateColor = _getColorForState(activeState);
             return DropdownMenu<String>(
+              key: ValueKey(activeState),
               width: constraints.maxWidth,
-              initialSelection: currentState,
+              initialSelection: activeState,
               requestFocusOnTap: false,
               enableSearch: false,
               enableFilter: false,
               onSelected: (value) {
-                if (value != null && value != currentState) {
-                  onStateChanged(value);
+                if (value != null && value != activeState) {
+                  setState(() {
+                    _tempState = value;
+                  });
+                  widget.onStateChanged(value);
                 }
               },
+              leadingIcon: Icon(
+                _getIconForState(activeState),
+                color: AppConstants.primaryBackground,
+                size: 20,
+              ),
               dropdownMenuEntries: LibraryScreenConstants.tabs.map((tab) {
-                final isSelected = currentState == tab.key;
+                final isSelected = activeState == tab.key;
                 return DropdownMenuEntry<String>(
                   value: tab.key,
                   label: l10n.translate(tab.key),
@@ -58,7 +90,7 @@ class StateSelectionSection extends StatelessWidget {
               }).toList(),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
-                fillColor: AppConstants.secondaryBackground,
+                fillColor: stateColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 11.0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),
@@ -73,10 +105,10 @@ class StateSelectionSection extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
               ),
-              trailingIcon: Icon(Icons.keyboard_arrow_down_rounded, color: AppConstants.textColor, size: 20),
-              selectedTrailingIcon: Icon(Icons.keyboard_arrow_up_rounded, color: AppConstants.textColor, size: 20),
+              trailingIcon: Icon(Icons.keyboard_arrow_down_rounded, color: AppConstants.primaryBackground, size: 20),
+              selectedTrailingIcon: Icon(Icons.keyboard_arrow_up_rounded, color: AppConstants.primaryBackground, size: 20),
               textStyle: TextStyle(
-                color: AppConstants.textColor,
+                color: AppConstants.primaryBackground,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),

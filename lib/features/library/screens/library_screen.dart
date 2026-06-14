@@ -27,15 +27,17 @@ import 'package:mangabaka_app/features/browse/widgets/filters/filter_chips_row.d
 import 'package:mangabaka_app/features/library/helpers/library_filter_helper.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/browse/utils/browse_helpers.dart';
+import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 
 class LibraryScreen extends StatefulWidget {
+  static final GlobalKey<LibraryScreenState> libraryScreenKey = GlobalKey<LibraryScreenState>();
   const LibraryScreen({super.key});
 
   @override
-  State<LibraryScreen> createState() => _LibraryScreenState();
+  State<LibraryScreen> createState() => LibraryScreenState();
 }
 
-class _LibraryScreenState extends State<LibraryScreen>
+class LibraryScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
   static final _logger = LoggingService.logger;
   late final ProfileAuthService _auth;
@@ -52,6 +54,27 @@ class _LibraryScreenState extends State<LibraryScreen>
   List<LibraryEntry> _lastEntries = [];
   bool _isLibraryIncomplete = false;
 
+  FocusNode get searchFocusNode => _searchFocusNode;
+  Stream<List<LibraryEntry>>? get entriesStream => _entriesStream;
+  SearchFilters get filters => _filters;
+  String get query => _query;
+
+  void updateQuery(String value) {
+    setState(() {
+      _query = value;
+    });
+    _performAutoTabSwitching();
+  }
+
+  void updateFilters(SearchFilters filters) {
+    setState(() {
+      _filters = filters;
+    });
+    _performAutoTabSwitching();
+  }
+
+  void handleResultSelected(AutocompleteSeriesResult result) => _handleResultSelected(result);
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +83,11 @@ class _LibraryScreenState extends State<LibraryScreen>
     _auth.addListener(_onAuthStateChanged);
     _initializeControllers();
     _bootstrap();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.findAncestorStateOfType<MainScreenState>()?.updateTopNavBar();
+      }
+    });
   }
 
   void _initializeServices() {
@@ -363,25 +391,29 @@ class _LibraryScreenState extends State<LibraryScreen>
         ? settings.libraryListStyle
         : settings.currentListStyle;
 
+    final useTopNavBarSearch = MainScreen.showSearchBarInTopNavBar(context);
+
     return AppBar(
-      centerTitle: isLandscape,
-      title: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 800),
-        child: LibrarySearchBar(
-          focusNode: _searchFocusNode,
-          entriesStream: _entriesStream,
-          onResultSelected: _handleResultSelected,
-          onChanged: (value) {
-            setState(() => _query = value);
-            _performAutoTabSwitching();
-          },
-          initialFilters: _filters,
-          onFilterApplied: (filters) {
-            setState(() => _filters = filters);
-            _performAutoTabSwitching();
-          },
-        ),
-      ),
+      centerTitle: isLandscape && !useTopNavBarSearch,
+      title: useTopNavBarSearch
+          ? Text(l10n.translate('library'))
+          : ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: LibrarySearchBar(
+                focusNode: _searchFocusNode,
+                entriesStream: _entriesStream,
+                onResultSelected: _handleResultSelected,
+                onChanged: (value) {
+                  setState(() => _query = value);
+                  _performAutoTabSwitching();
+                },
+                initialFilters: _filters,
+                onFilterApplied: (filters) {
+                  setState(() => _filters = filters);
+                  _performAutoTabSwitching();
+                },
+              ),
+            ),
       actions: isLandscape
           ? [
               WidgetUtils.tooltip(

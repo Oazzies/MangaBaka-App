@@ -46,6 +46,7 @@ class MockPublisherSearchService extends Fake implements PublisherSearchService 
 
 class MockSeriesService extends Fake implements SeriesService {}
 
+
 void main() {
   setUp(() async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

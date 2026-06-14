@@ -14,6 +14,8 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/features/library/widgets/library_search_bar.dart';
+import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar.dart';
 
 // ---------------------------------------------------------------------------
 // Nav destination data
@@ -54,6 +56,15 @@ class MainScreen extends StatefulWidget {
     mainScreenKey.currentState?._onItemTapped(index);
   }
 
+  static bool showSearchBarInTopNavBar(BuildContext context) {
+    final orientation = MediaQuery.of(context).orientation;
+    final isLandscape = orientation == Orientation.landscape;
+    final position = SettingsManager().landscapeAppBarPosition;
+    final isTopNavBar = isLandscape && position == LandscapeAppBarPosition.top;
+    if (!isTopNavBar) return false;
+    return MediaQuery.of(context).size.width >= 1050;
+  }
+
   @override
   State<MainScreen> createState() => MainScreenState();
 }
@@ -65,6 +76,12 @@ class MainScreenState extends State<MainScreen> {
   // Cached once so IndexedStack never recreates its children.
   late final List<Widget> _pages;
 
+  void updateTopNavBar() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,10 +90,12 @@ class MainScreenState extends State<MainScreen> {
     // accessibility warning triggered by the web-view component.
     _pages = [
       const HomeScreen(),
-      const LibraryScreen(),
+      LibraryScreen(key: LibraryScreen.libraryScreenKey),
       Platform.isWindows
-          ? const ExcludeSemantics(child: BrowseScreen())
-          : const BrowseScreen(),
+          ? ExcludeSemantics(
+              child: BrowseScreen(key: BrowseScreen.browseScreenKey),
+            )
+          : BrowseScreen(key: BrowseScreen.browseScreenKey),
       const NewsScreen(),
       const ProfileScreen(),
     ];
@@ -286,6 +305,37 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildTopNavBar(BuildContext context, LocalizationService l10n) {
+    Widget? searchBarWidget;
+    if (MainScreen.showSearchBarInTopNavBar(context)) {
+      if (_selectedIndex == 1) { // Library
+        final libState = LibraryScreen.libraryScreenKey.currentState;
+        if (libState != null) {
+          searchBarWidget = LibrarySearchBar(
+            focusNode: libState.searchFocusNode,
+            entriesStream: libState.entriesStream,
+            onResultSelected: libState.handleResultSelected,
+            onChanged: libState.updateQuery,
+            initialFilters: libState.filters,
+            onFilterApplied: libState.updateFilters,
+          );
+        }
+      } else if (_selectedIndex == 2) { // Browse
+        final browseState = BrowseScreen.browseScreenKey.currentState;
+        if (browseState != null) {
+          searchBarWidget = MBSearchBar(
+            focusNode: browseState.searchFocusNode,
+            controller: browseState.controller.searchController,
+            initialFilters: browseState.controller.currentFilters,
+            onScanTap: browseState.handleBarcodeScan,
+            onResultSelected: browseState.handleResultSelected,
+            onChanged: browseState.controller.updateSearchQuery,
+            onSubmitted: (_) => browseState.controller.searchSeries(),
+            onFilterApplied: browseState.controller.updateFilters,
+          );
+        }
+      }
+    }
+
     return Container(
       height: 72,
       decoration: BoxDecoration(
@@ -328,59 +378,66 @@ class MainScreenState extends State<MainScreen> {
               ),
               const SizedBox(width: 32),
               // Nav items
-              Expanded(
-                child: Row(
-                  children: List.generate(_navItems.length, (i) {
-                    final item = _navItems[i];
-                    final isSelected = _selectedIndex == i;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 22),
-                      child: InkWell(
-                        onTap: () => _onItemTapped(i),
-                        borderRadius: BorderRadius.zero,
-                        child: AnimatedContainer(
-                          duration: AppConstants.shortAnimationDuration,
-                          curve: Curves.easeInOut,
-                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: isSelected
-                                    ? AppConstants.accentColor
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(_navItems.length, (i) {
+                  final item = _navItems[i];
+                  final isSelected = _selectedIndex == i;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 22),
+                    child: InkWell(
+                      onTap: () => _onItemTapped(i),
+                      borderRadius: BorderRadius.zero,
+                      child: AnimatedContainer(
+                        duration: AppConstants.shortAnimationDuration,
+                        curve: Curves.easeInOut,
+                        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: isSelected
+                                  ? AppConstants.accentColor
+                                  : Colors.transparent,
+                              width: 2,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isSelected ? item.selectedIcon : item.icon,
-                                size: 18,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isSelected ? item.selectedIcon : item.icon,
+                              size: 18,
+                              color: isSelected
+                                  ? AppConstants.textColor
+                                  : AppConstants.textMutedColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              l10n.translate(item.labelKey),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                                 color: isSelected
                                     ? AppConstants.textColor
                                     : AppConstants.textMutedColor,
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                l10n.translate(item.labelKey),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: isSelected
-                                      ? AppConstants.textColor
-                                      : AppConstants.textMutedColor,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  }),
-                ),
+                    ),
+                  );
+                }),
               ),
+              const Spacer(),
+              if (searchBarWidget != null) ...[
+                SizedBox(
+                  width: 320,
+                  child: searchBarWidget,
+                ),
+                const SizedBox(width: 24),
+              ],
               // Settings button on the right
               WidgetUtils.tooltip(
                 message: l10n.translate('settings'),

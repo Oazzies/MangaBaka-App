@@ -41,6 +41,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
   bool _routeAnimationListenerAdded = false;
+  Animation<double>? _routeAnimation;
   bool _routeTransitionComplete = false;
   bool _fetchStarted = false;
 
@@ -53,6 +54,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
         _routeAnimationListenerAdded = true;
         final animation = route.animation;
         if (animation != null) {
+          _routeAnimation = animation;
           if (animation.isCompleted) {
             _routeTransitionComplete = true;
             _startFetch();
@@ -75,8 +77,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
         });
         _startFetch();
       }
-      final route = ModalRoute.of(context);
-      route?.animation?.removeStatusListener(_onRouteAnimationStatusChanged);
+      _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     }
   }
 
@@ -93,10 +94,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
 
   @override
   void dispose() {
-    if (_routeAnimationListenerAdded) {
-      final route = ModalRoute.of(context);
-      route?.animation?.removeStatusListener(_onRouteAnimationStatusChanged);
-    }
+    _routeAnimation?.removeStatusListener(_onRouteAnimationStatusChanged);
     super.dispose();
   }
 
