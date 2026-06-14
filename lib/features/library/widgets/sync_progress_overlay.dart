@@ -18,7 +18,7 @@ class SyncProgressOverlay extends StatelessWidget {
     return ValueListenableBuilder<LibrarySyncStatus>(
       valueListenable: libraryService.syncStatus,
       builder: (context, status, child) {
-        if (!status.isSyncing && status.currentEntries == 0) {
+        if (status.currentEntries == 0 && status.error == null) {
           return const SizedBox.shrink();
         }
 

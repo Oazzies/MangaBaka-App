@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -44,91 +44,106 @@ class SeriesDetailWideLayout extends StatelessWidget {
     required this.buildTabContent,
   });
 
+  static const double _hPadding = 40.0;
+  static const double _sidebarWidth = 300.0;
+  static const double _columnGap = 48.0;
+
   @override
   Widget build(BuildContext context) {
-    const hPadding = 40.0;
-    final showInfoPanel = isDataLoaded && selectedTab == 'Info';
+    return AnimatedSwitcher(
+      duration: 600.ms,
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: isDataLoaded
+          ? _buildContent()
+          : Padding(
+              key: const ValueKey('wide_skeleton'),
+              padding: const EdgeInsets.symmetric(horizontal: _hPadding),
+              child: const SeriesDetailSkeleton(isWide: true),
+            ),
+    );
+  }
 
-    return Row(
+  Widget _buildContent() {
+    return Column(
+      key: const ValueKey('wide_full_layout'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showInfoPanel) ...[
-          Padding(
-            padding: const EdgeInsets.only(left: hPadding),
-            child: SizedBox(
-              width: 300,
-              child: SeriesMetadataChips(
-                series: series,
-                entry: entry,
-                isVertical: false,
-                onUpdateChapter: onUpdateChapter,
-                onUpdateVolume: onUpdateVolume,
-                onUpdateRating: onUpdateRating,
-              ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.1, end: 0),
-            ),
-          ),
-          const SizedBox(width: 48),
-        ],
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: 600.ms,
-            child: isDataLoaded
-              ? Column(
-                  key: const ValueKey('wide_full_layout'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: showInfoPanel ? 0 : hPadding),
-                      child: SeriesSegmentedControl(
-                        selectedTab: selectedTab,
-                        onTabChanged: onTabChanged,
-                        horizontalPadding: 0,
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: AppConstants.tertiaryBackground,
-                    ),
-                    if (selectedTab == 'Info') ...[
-                      const SizedBox(height: 28),
-                      Padding(
-                        padding: const EdgeInsets.only(right: hPadding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SeriesActionBar(
-                              series: series,
-                              entry: entry,
-                              l10n: l10n,
-                              onStateChanged: onStateChanged,
-                              onRatingChanged: onRatingChanged,
-                              onUpdateChapter: onUpdateChapter,
-                              onUpdateVolume: onUpdateVolume,
-                            ),
-                            const SizedBox(height: 28),
-                            ExternalRatingsSection(series: series),
-                            if (series.description.isNotEmpty) ...[
-                              SeriesSectionHeader(title: l10n.translate('description')),
-                              DescriptionSection(description: series.description),
-                              const SizedBox(height: 32),
-                            ],
-                            SeriesGenresSection(series: series, l10n: l10n),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    buildTabContent(hPadding, isWide: true, wideRightPaddingOnly: true),
-                  ],
-                ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic)
-              : Padding(
-                  padding: const EdgeInsets.only(right: hPadding),
-                  child: const SeriesDetailSkeleton(key: ValueKey('wide_skeleton'), isWide: true),
-                ),
+        // Tab bar and divider stay in a fixed position across every tab so
+        // switching tabs never shifts the chrome sideways.
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: _hPadding),
+          child: SeriesSegmentedControl(
+            selectedTab: selectedTab,
+            onTabChanged: onTabChanged,
+            horizontalPadding: 0,
           ),
         ),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: AppConstants.tertiaryBackground,
+        ),
+        if (selectedTab == 'Info') _buildInfoBody(),
+        const SizedBox(height: 24),
+        buildTabContent(_hPadding, isWide: true, wideRightPaddingOnly: false),
       ],
+    ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.02, end: 0, curve: Curves.easeOutCubic);
+  }
+
+  /// Two balanced columns that both start on the same line below the divider:
+  /// left holds the at-a-glance facts and actions, right holds the longer-form
+  /// ratings, description and genres.
+  Widget _buildInfoBody() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(_hPadding, 32, _hPadding, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: _sidebarWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SeriesMetadataChips(
+                  series: series,
+                  entry: entry,
+                  onUpdateChapter: onUpdateChapter,
+                  onUpdateVolume: onUpdateVolume,
+                  onUpdateRating: onUpdateRating,
+                ),
+                if (entry != null) ...[
+                  const SizedBox(height: 24),
+                  SeriesActionBar(
+                    series: series,
+                    entry: entry,
+                    l10n: l10n,
+                    onStateChanged: onStateChanged,
+                    onRatingChanged: onRatingChanged,
+                    onUpdateChapter: onUpdateChapter,
+                    onUpdateVolume: onUpdateVolume,
+                  ),
+                ],
+              ],
+            ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.08, end: 0, curve: Curves.easeOutCubic),
+          ),
+          const SizedBox(width: _columnGap),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExternalRatingsSection(series: series),
+                if (series.description.isNotEmpty) ...[
+                  SeriesSectionHeader(title: l10n.translate('description')),
+                  DescriptionSection(description: series.description),
+                  const SizedBox(height: 32),
+                ],
+                SeriesGenresSection(series: series, l10n: l10n),
+              ],
+            ).animate().fadeIn(duration: 500.ms, delay: 80.ms).slideX(begin: 0.04, end: 0, curve: Curves.easeOutCubic),
+          ),
+        ],
+      ),
     );
   }
 }
