@@ -81,9 +81,10 @@ class LibraryGridList extends StatelessWidget {
       builder: (context, _) {
         final settings = SettingsManager();
         final seriesService = getIt<SeriesService>();
-        final isGrid = settings.separateListStyles
-            ? settings.libraryListStyle.isGrid
-            : settings.currentListStyle.isGrid;
+        final activeStyle = settings.separateListStyles
+            ? settings.libraryListStyle
+            : settings.currentListStyle;
+        final isGrid = activeStyle.isGrid;
 
         if (isGrid) {
           final columns = settings.separateGridColumnCounts
@@ -97,13 +98,13 @@ class LibraryGridList extends StatelessWidget {
             gridDelegate: columns > 0
                 ? SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columns,
-                    childAspectRatio: 0.65,
+                    childAspectRatio: activeStyle.childAspectRatio,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   )
-                : const SliverGridDelegateWithMaxCrossAxisExtent(
+                : SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 160,
-                    childAspectRatio: 0.65,
+                    childAspectRatio: activeStyle.childAspectRatio,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),

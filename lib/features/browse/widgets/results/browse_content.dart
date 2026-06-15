@@ -113,9 +113,9 @@ class BrowseContent extends StatelessWidget {
           return GridView.builder(
             controller: scrollController,
             padding: const EdgeInsets.all(12),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 160,
-              childAspectRatio: 0.65,
+              childAspectRatio: activeStyle.childAspectRatio,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),

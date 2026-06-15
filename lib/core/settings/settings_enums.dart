@@ -12,6 +12,13 @@ extension AppListStyleExtension on AppListStyle {
   bool get isGrid => this == AppListStyle.coverOnlyGrid || 
                      this == AppListStyle.compactGrid;
 
+  double get childAspectRatio {
+    if (this == AppListStyle.compactGrid) {
+      return 0.56;
+    }
+    return 0.65;
+  }
+
   AppListStyle get next {
     final nextIndex = (index + 1) % AppListStyle.values.length;
     return AppListStyle.values[nextIndex];

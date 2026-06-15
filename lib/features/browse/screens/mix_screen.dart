@@ -14,6 +14,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 
@@ -900,6 +901,11 @@ class _MixScreenState extends State<MixScreen> {
       );
     }
 
+    final settings = SettingsManager();
+    final activeStyle = settings.separateListStyles
+        ? settings.browseListStyle
+        : settings.currentListStyle;
+
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       sliver: SliverGrid(
@@ -918,11 +924,11 @@ class _MixScreenState extends State<MixScreen> {
           childCount: _controller.results.length,
         ),
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: SettingsManager().browseGridColumnCount > 0
+          maxCrossAxisExtent: settings.browseGridColumnCount > 0
               ? (availableWidth ?? MediaQuery.of(context).size.width) /
-                  SettingsManager().browseGridColumnCount
+                  settings.browseGridColumnCount
               : 160,
-          childAspectRatio: 0.65,
+          childAspectRatio: activeStyle.childAspectRatio,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
         ),
