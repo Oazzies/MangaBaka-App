@@ -133,6 +133,10 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
                   // Design: "Back" label in both portrait and landscape.
                   label: LocalizationService().translate('back'),
                   showBg: titleOpacity < 0.5,
+                  // Skip the backdrop blur until the route slide finishes;
+                  // BackdropFilter defeats layer caching and forces a full
+                  // re-render every frame of the transition.
+                  blurEnabled: _transitionComplete,
                 ).animate().fadeIn(duration: 400.ms),
               ),
             ),
@@ -153,6 +157,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
                       onTap: widget.onShare,
                       icon: Icons.share_outlined,
                       showBg: titleOpacity < 0.5,
+                      blurEnabled: _transitionComplete,
                     ).animate().fadeIn(delay: 80.ms, duration: 400.ms),
                   ),
                   if (widget.entry != null) ...[
@@ -163,6 +168,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
                         onTap: widget.onDelete,
                         icon: Icons.delete_outline,
                         showBg: titleOpacity < 0.5,
+                        blurEnabled: _transitionComplete,
                       ).animate().fadeIn(delay: 160.ms, duration: 400.ms),
                     ),
                   ],
@@ -294,57 +300,64 @@ class _GlassControl extends StatelessWidget {
   final IconData icon;
   final String? label;
   final bool showBg;
+  final bool blurEnabled;
 
   const _GlassControl({
     required this.onTap,
     required this.icon,
     this.label,
     this.showBg = true,
+    this.blurEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(999);
+    // Only blur when the pill has a visible background AND we're not mid-route
+    // transition. A BackdropFilter can't be raster-cached, so leaving it active
+    // during the slide forces a full re-render every frame.
+    final useBlur = showBg && blurEnabled;
+    Widget body = Container(
+      height: 40,
+      padding: EdgeInsets.symmetric(horizontal: label != null ? 14 : 0),
+      width: label != null ? null : 40,
+      decoration: BoxDecoration(
+        color: showBg
+            ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
+            : Colors.transparent,
+        borderRadius: radius,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 19, color: AppConstants.textColor),
+          if (label != null) ...[
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label!,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.sans(
+                  color: AppConstants.textColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+
     final child = ClipRRect(
       borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: showBg ? 10 : 0,
-          sigmaY: showBg ? 10 : 0,
-        ),
-        child: Container(
-          height: 40,
-          padding: EdgeInsets.symmetric(horizontal: label != null ? 14 : 0),
-          width: label != null ? null : 40,
-          decoration: BoxDecoration(
-            color: showBg
-                ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
-                : Colors.transparent,
-            borderRadius: radius,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 19, color: AppConstants.textColor),
-              if (label != null) ...[
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label!,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.sans(
-                      color: AppConstants.textColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
+      child: useBlur
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: body,
+            )
+          : body,
     );
 
     return Material(
@@ -359,37 +372,41 @@ class _SubbarIcon extends StatelessWidget {
   final VoidCallback onTap;
   final IconData icon;
   final bool showBg;
+  final bool blurEnabled;
 
   const _SubbarIcon({
     required this.onTap,
     required this.icon,
     this.showBg = true,
+    this.blurEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(999);
+    final useBlur = showBg && blurEnabled;
+    Widget body = Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: showBg
+            ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
+            : Colors.transparent,
+        borderRadius: radius,
+      ),
+      child: Center(
+        child: Icon(icon, size: 20, color: AppConstants.textColor),
+      ),
+    );
+
     final child = ClipRRect(
       borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: showBg ? 10 : 0,
-          sigmaY: showBg ? 10 : 0,
-        ),
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: showBg
-                ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
-                : Colors.transparent,
-            borderRadius: radius,
-          ),
-          child: Center(
-            child: Icon(icon, size: 20, color: AppConstants.textColor),
-          ),
-        ),
-      ),
+      child: useBlur
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: body,
+            )
+          : body,
     );
 
     return Material(

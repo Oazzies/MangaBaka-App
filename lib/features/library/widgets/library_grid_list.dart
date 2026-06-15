@@ -70,7 +70,17 @@ class LibraryGridList extends StatelessWidget {
       onEnter: (_) => seriesService.fetchSeries(entry.series.id),
       child: GestureDetector(
         onTap: () => onItemTap(entry.series),
-        child: EntryListItem(series: entry.series, isLibrary: true),
+        // Use a library-scoped hero tag so the cover does NOT share the
+        // 'series_cover_<id>' tag with the detail screen. That match would
+        // trigger a Hero flight on top of the slideUp transition; the two
+        // animations fight and drop frames (worst for top-of-list items,
+        // whose flight overlaps the heavy app-bar region the whole way).
+        // The slideUp already animates the cover into place on its own.
+        child: EntryListItem(
+          series: entry.series,
+          isLibrary: true,
+          heroTagPrefix: 'library',
+        ),
       ),
     );
   }
