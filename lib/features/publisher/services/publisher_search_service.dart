@@ -150,8 +150,12 @@ class PublisherSearchService {
   }
 
   Future<PublisherSearchResult> search(Map<String, dynamic> params) async {
+    final effectiveParams = params.containsKey('content_rating')
+        ? params
+        : {...params, 'content_rating': SettingsManager().contentPreferences};
+
     final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: UriUtils.encodeQueryParameters(params),
+      queryParameters: UriUtils.encodeQueryParameters(effectiveParams),
     );
 
     _logger.info('Performing publisher search. URI: $uri');
