@@ -5,7 +5,7 @@ export 'package:mangabaka_app/core/theme/app_theme_colors.dart' show AppTheme;
 
 class AppConstants {
   static const String appName = 'MangaBaka';
-  static const String appVersion = '0.2.3';
+  static const String appVersion = '0.2.4';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
 
   // GitHub repository used by the in-app update system.
