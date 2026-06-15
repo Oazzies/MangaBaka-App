@@ -68,7 +68,7 @@ class _EntryListItemState extends State<EntryListItem> {
 
         return Stack(
           children: [
-            _buildContent(context, style, l10n, displayTitle),
+            _buildContent(context, style, l10n, displayTitle, entry),
 
             if (!style.isGrid && isInLibrary)
               Positioned(
@@ -158,18 +158,23 @@ class _EntryListItemState extends State<EntryListItem> {
     AppListStyle style,
     LocalizationService l10n,
     String displayTitle,
+    LibraryEntry? entry,
   ) {
     switch (style) {
       case AppListStyle.coverOnlyGrid:
         return CoverOnlyGridItem(
           series: widget.series,
           heroTagPrefix: widget.heroTagPrefix,
+          entry: entry,
+          progressOverride: _optimisticProgress,
         );
       case AppListStyle.compactGrid:
         return CompactGridItem(
           series: widget.series,
           heroTagPrefix: widget.heroTagPrefix,
           displayTitle: displayTitle,
+          entry: entry,
+          progressOverride: _optimisticProgress,
         );
       case AppListStyle.minimalList:
         return MinimalListItem(
