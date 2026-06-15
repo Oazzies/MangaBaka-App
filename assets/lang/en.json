@@ -77,6 +77,7 @@
         "auto_suggest_browse": "Auto-Suggest Browse",
         "auto_suggest_browse_subtitle": "Show suggestions while typing in browse search",
         "general_settings_subtitle": "App language, start page, tooltips",
+        "general_settings_subtitle_mobile": "App language, start page",
         "display_settings_subtitle": "Theme, colors, list styles",
         "theme_colors": "Theme & Colors",
         "layout_columns": "Layout & Columns",

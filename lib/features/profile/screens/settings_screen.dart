@@ -81,13 +81,18 @@ List<Widget> _buildSettingsGroups(
   LocalizationService l10n,
   ProfileAuthService auth,
 ) {
+  final isSmallDevice = MediaQuery.of(context).size.width < 600;
   return [
     SettingsGroup(
       children: [
         SettingsItem(
           icon: Icons.settings_outlined,
           title: l10n.translate('general'),
-          subtitle: l10n.translate('general_settings_subtitle'),
+          subtitle: l10n.translate(
+            isSmallDevice
+                ? 'general_settings_subtitle_mobile'
+                : 'general_settings_subtitle',
+          ),
           onTap: () => _navigateToGeneral(context, l10n),
           isFirst: true,
           isLast: true,
@@ -220,6 +225,7 @@ void _navigateToGeneral(BuildContext context, LocalizationService l10n) {
     listenable: Listenable.merge([LocalizationService(), SettingsManager()]),
     buildChildren: (ctx) {
       final l10n = LocalizationService();
+      final isSmallDevice = MediaQuery.of(ctx).size.width < 600;
       return [
         SettingsGroup(
           children: [
@@ -253,14 +259,16 @@ void _navigateToGeneral(BuildContext context, LocalizationService l10n) {
               onTap: () =>
                   GeneralSettingsDialogs.showTitleLanguageSelectionDialog(ctx),
             ),
-            const SettingsDivider(),
-            SettingsSwitchItem(
-              icon: Icons.help_outline,
-              title: l10n.translate('show_tooltips'),
-              subtitle: l10n.translate('show_tooltips_subtext'),
-              value: SettingsManager().showTooltips,
-              onChanged: (val) => SettingsManager().setShowTooltips(val),
-            ),
+            if (!isSmallDevice) ...[
+              const SettingsDivider(),
+              SettingsSwitchItem(
+                icon: Icons.help_outline,
+                title: l10n.translate('show_tooltips'),
+                subtitle: l10n.translate('show_tooltips_subtext'),
+                value: SettingsManager().showTooltips,
+                onChanged: (val) => SettingsManager().setShowTooltips(val),
+              ),
+            ],
             const SettingsDivider(),
             SettingsSwitchItem(
               icon: Icons.search,

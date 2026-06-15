@@ -62,6 +62,7 @@
         "auto_suggest_browse": "Auto-Vorschläge beim Durchsuchen",
         "auto_suggest_browse_subtitle": "Vorschläge während der Eingabe in der Suche anzeigen",
         "general_settings_subtitle": "App-Sprache, Startseite, Tooltips",
+        "general_settings_subtitle_mobile": "App-Sprache, Startseite",
         "display_settings_subtitle": "Theme, Farben, Listenstile",
         "library_settings_subtitle": "Bewertung, Inhaltsfilter",
         "account_settings_subtitle": "Dein MangaBaka-Konto verwalten",

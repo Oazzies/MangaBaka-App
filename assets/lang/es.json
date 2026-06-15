@@ -20,6 +20,7 @@
         "settings": "Ajustes",
         "general": "General",
         "general_settings_subtitle": "Idioma de la app, página de inicio, sugerencias",
+        "general_settings_subtitle_mobile": "Idioma de la app, página de inicio",
         "display": "Pantalla",
         "display_settings_subtitle": "Tema, colores, estilos de lista",
         "library_settings_subtitle": "Puntuación, filtros de contenido",
