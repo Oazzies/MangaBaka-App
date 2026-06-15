@@ -32,11 +32,9 @@ class UpdateService {
   /// platforms fall back to opening the release page in a browser.
   bool get supportsInAppUpdate => Platform.isAndroid || Platform.isWindows;
 
-  /// Returns the newest non-draft release, or `null` on failure. Includes
-  /// pre-releases (the project ships pre-releases), so we query the list
-  /// endpoint rather than `/releases/latest` (which skips pre-releases).
+  /// Returns the newest non-draft release (including pre-releases), or `null` on failure.
   Future<AppRelease?> fetchLatestRelease() async {
-    final url = '${AppConstants.githubReleasesApi}?per_page=10';
+    final url = '${AppConstants.githubReleasesApi}?per_page=5';
     try {
       final response = await _client
           .get(
@@ -59,7 +57,7 @@ class UpdateService {
       for (final item in data) {
         if (item is Map<String, dynamic>) {
           final release = AppRelease.fromJson(item);
-          if (!release.draft) return release; // newest non-draft
+          if (!release.draft) return release; // newest non-draft release
         }
       }
       return null;

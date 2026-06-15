@@ -7,7 +7,7 @@ class AppConstants {
   static const String appName = 'MangaBaka';
   // Canonical installed version used for the GitHub release update check.
   // Keep in sync with `version:` in pubspec.yaml on every release.
-  static const String appVersion = '0.1.0-pre-release-8';
+  static const String appVersion = '0.2.2';
   static const String baseApiUrl = 'https://api.mangabaka.dev/v1';
 
   // GitHub repository used by the in-app update system.

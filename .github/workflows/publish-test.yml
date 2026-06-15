@@ -1,10 +1,10 @@
-name: Publish Pre-Release to App Stores
+name: Publish Release to App Stores
 
 on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Specific GitHub Release/Pre-release tag to publish (e.g., v0.1.0-pre-release-7). If left blank, it will automatically find the latest pre-release."
+        description: "Specific GitHub Release tag to publish (e.g., v0.2.2). If left blank, it will automatically find the latest release."
         required: false
         type: string
       publish_android:
@@ -79,12 +79,8 @@ jobs:
             TAG="$INPUT_TAG"
             echo "Using user-specified release tag: $TAG"
           else
-            echo "No tag specified. Finding the latest GitHub pre-release..."
-            TAG=$(gh release list --exclude-drafts --limit 50 --json tagName,isPrerelease | jq -r '.[] | select(.isPrerelease == true) | .tagName' | head -n 1)
-            if [ -z "$TAG" ]; then
-              echo "No pre-release found! Fetching the latest release tag instead..."
-              TAG=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r '.[0].tagName')
-            fi
+            echo "No tag specified. Finding the latest GitHub release..."
+            TAG=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r '.[0].tagName')
             echo "Discovered release tag: $TAG"
           fi
           

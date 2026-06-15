@@ -15,6 +15,14 @@ void main() {
       final v = AppVersion.parse('1.2.3');
       expect(v.preRelease, isNull);
     });
+
+    test('parses the new tag format v0.2.2', () {
+      final v = AppVersion.parse('v0.2.2');
+      expect(v.major, 0);
+      expect(v.minor, 2);
+      expect(v.patch, 2);
+      expect(v.preRelease, isNull);
+    });
   });
 
   group('AppVersion comparison', () {
@@ -41,6 +49,12 @@ void main() {
       expect(p('0.2.0-pre-release-1').isNewerThan(p('0.1.0-pre-release-99')),
           isTrue);
       expect(p('1.0.0').isNewerThan(p('0.9.9')), isTrue);
+    });
+
+    test('new tag format v0.2.2 comparison', () {
+      expect(p('v0.2.2').isNewerThan(p('v0.2.1')), isTrue);
+      expect(p('v0.2.2').isNewerThan(p('0.1.0-pre-release-10')), isTrue);
+      expect(p('v0.2.2').isNewerThan(p('v0.2.2')), isFalse);
     });
   });
 }
