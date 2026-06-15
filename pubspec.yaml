@@ -71,6 +71,7 @@ flutter:
     - .env
     - assets/lang/
     - assets/mangabaka512.png
+    - assets/series_222_cover.jpg
   uses-material-design: true
 
 msix_config:

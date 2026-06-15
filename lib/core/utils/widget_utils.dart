@@ -38,21 +38,32 @@ class WidgetUtils {
       return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
     }
     
-    final Widget image = CachedNetworkImage(
-      imageUrl: url,
-      width: width,
-      height: height,
-      fit: fit,
-      memCacheWidth: memCacheWidth,
-      memCacheHeight: memCacheHeight,
-      placeholder: (context, url) => placeholder ?? Container(color: AppConstants.secondaryBackground),
-      errorWidget: (context, url, error) {
-        final iconSize = (width != null && width.isFinite) ? width : 24.0;
-        return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
-      },
-      fadeOutDuration: const Duration(milliseconds: 300),
-      fadeInDuration: const Duration(milliseconds: 300),
-    );
+    final Widget image = url.startsWith('assets/')
+        ? Image.asset(
+            url,
+            width: width,
+            height: height,
+            fit: fit,
+            errorBuilder: (context, error, stackTrace) {
+              final iconSize = (width != null && width.isFinite) ? width : 24.0;
+              return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
+            },
+          )
+        : CachedNetworkImage(
+            imageUrl: url,
+            width: width,
+            height: height,
+            fit: fit,
+            memCacheWidth: memCacheWidth,
+            memCacheHeight: memCacheHeight,
+            placeholder: (context, url) => placeholder ?? Container(color: AppConstants.secondaryBackground),
+            errorWidget: (context, url, error) {
+              final iconSize = (width != null && width.isFinite) ? width : 24.0;
+              return errorWidget ?? Icon(Icons.broken_image, size: iconSize, color: AppConstants.textMutedColor);
+            },
+            fadeOutDuration: const Duration(milliseconds: 300),
+            fadeInDuration: const Duration(milliseconds: 300),
+          );
 
     if (!blurred) return image;
 

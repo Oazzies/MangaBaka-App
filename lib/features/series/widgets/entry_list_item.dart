@@ -18,6 +18,7 @@ class EntryListItem extends StatefulWidget {
   final bool isLibrary;
   final String? heroTagPrefix;
   final AppListStyle? listStyle;
+  final LibraryEntry? previewEntry;
 
   const EntryListItem({
     super.key,
@@ -26,6 +27,7 @@ class EntryListItem extends StatefulWidget {
     this.isLibrary = false,
     this.heroTagPrefix,
     this.listStyle,
+    this.previewEntry,
   });
 
   @override
@@ -51,6 +53,71 @@ class _EntryListItemState extends State<EntryListItem> {
     final auth = getIt<ProfileAuthService>();
     final libraryService = getIt<LibraryService>();
 
+    if (widget.previewEntry != null) {
+      final entry = widget.previewEntry;
+      final isInLibrary = entry != null;
+
+      return Stack(
+        children: [
+          _buildContent(context, style, l10n, displayTitle, entry),
+
+          if (!style.isGrid && isInLibrary && (settings.showLibraryProgress || settings.showRemainingProgress))
+            Positioned(
+              bottom: style == AppListStyle.comfortable ? 6 : 4,
+              left:
+                  (style == AppListStyle.minimalList
+                      ? 48.0
+                      : (style == AppListStyle.compact ? 60.0 : 72.0)) +
+                  12,
+              right: 12,
+              child: _buildProgressBar(context, entry, style),
+            ),
+
+          if (!style.isGrid)
+            Positioned(
+              bottom: style == AppListStyle.comfortable ? 12 : 8,
+              right: style == AppListStyle.comfortable ? 12 : 10,
+              child: SeriesQuickActionButton(
+                series: widget.series,
+                entry: entry,
+                onOptimisticProgressChanged: (val) {
+                  setState(() {
+                    _optimisticProgress = val;
+                  });
+                },
+              ),
+            ),
+
+          if (widget.ranking != null)
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                child: Text(
+                  '${widget.ranking}',
+                  style: TextStyle(
+                    color: AppConstants.primaryBackground,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
     return StreamBuilder<LibraryEntry?>(
       stream: auth.isLoggedIn
           ? libraryService.watchEntryFromDb(widget.series.id)
@@ -70,7 +137,7 @@ class _EntryListItemState extends State<EntryListItem> {
           children: [
             _buildContent(context, style, l10n, displayTitle, entry),
 
-            if (!style.isGrid && isInLibrary)
+            if (!style.isGrid && isInLibrary && (settings.showLibraryProgress || settings.showRemainingProgress))
               Positioned(
                 bottom: style == AppListStyle.comfortable ? 6 : 4,
                 left:

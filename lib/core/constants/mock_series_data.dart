@@ -1,0 +1,30 @@
+import 'package:mangabaka_app/features/series/models/series.dart';
+
+final Series mockSeries222 = Series(
+  id: '222',
+  state: 'active',
+  title: 'The Apothecary Diaries',
+  nativeTitle: '薬屋のひとりごと',
+  romanizedTitle: 'Kusuriya no Hitorigoto',
+  secondaryTitles: const [],
+  coverUrl: 'assets/series_222_cover.jpg',
+  rawCoverUrl: 'assets/series_222_cover.jpg',
+  authors: const ['Erika Ikeda', 'Natsu Hyuuga'],
+  artists: const ['Erika Ikeda'],
+  description:
+      'After breaking a "curse" on the imperial heirs, a palace servant with training in herbal medicine is promoted up the ranks to food taster…and right into the thick of palace intrigue!',
+  year: '2017',
+  status: 'releasing',
+  isLicensed: 'true',
+  hasAnime: 'true',
+  contentRating: 'safe',
+  type: 'manga',
+  rating: '86.0',
+  finalVolume: '16',
+  totalChapters: '83',
+  links: const [],
+  publishers: const [],
+  genres: const ['drama', 'mystery', 'historical', 'romance', 'seinen', 'slice_of_life'],
+  tags: const [],
+  lastUpdated: '',
+);
