@@ -50,22 +50,22 @@ class SeriesInformationCard extends StatelessWidget {
       if (_validNum(series.finalVolume) != null)
         _Row(label: l10n.translate('volumes'), value: series.finalVolume),
       if (series.authors.isNotEmpty)
-        _Row(
+        _LinkedRow(
           label: l10n.translate('authors'),
-          value: series.authors.join(', '),
-          onTap: onAuthorTap == null ? null : () => onAuthorTap!(series.authors.first),
+          items: series.authors,
+          onTap: onAuthorTap,
         ),
       if (series.artists.isNotEmpty)
-        _Row(
+        _LinkedRow(
           label: l10n.translate('artists'),
-          value: series.artists.join(', '),
-          onTap: onAuthorTap == null ? null : () => onAuthorTap!(series.artists.first),
+          items: series.artists,
+          onTap: onAuthorTap,
         ),
       if (series.publishers.isNotEmpty)
-        _Row(
+        _LinkedRow(
           label: l10n.translate('publishers'),
-          value: series.publishers.join(', '),
-          onTap: onPublisherTap == null ? null : () => onPublisherTap!(series.publishers.first),
+          items: series.publishers,
+          onTap: onPublisherTap,
         ),
       if (series.contentRating.isNotEmpty && series.contentRating != 'null')
         _Row(label: l10n.translate('content_rating'), value: _cap(series.contentRating)),
@@ -93,18 +93,16 @@ class _Row extends StatelessWidget {
   final String label;
   final String value;
   final bool accent;
-  final VoidCallback? onTap;
 
   const _Row({
     required this.label,
     required this.value,
     this.accent = false,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final content = Padding(
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: 11),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,8 +127,54 @@ class _Row extends StatelessWidget {
         ],
       ),
     );
+  }
+}
 
-    if (onTap == null) return content;
-    return InkWell(onTap: onTap, child: content);
+class _LinkedRow extends StatelessWidget {
+  final String label;
+  final List<String> items;
+  final Function(String)? onTap;
+
+  const _LinkedRow({
+    required this.label,
+    required this.items,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final plainStyle = AppTypography.sans(
+      color: AppConstants.textColor,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      height: 1.4,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: AppTypography.monoLabel(color: AppConstants.textMutedColor, fontSize: 10),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            runSpacing: 2,
+            children: [
+              for (var i = 0; i < items.length; i++) ...[
+                GestureDetector(
+                  onTap: onTap != null ? () => onTap!(items[i]) : null,
+                  child: Text(items[i], style: plainStyle),
+                ),
+                if (i < items.length - 1)
+                  Text(', ', style: plainStyle),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
