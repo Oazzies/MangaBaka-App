@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
 
 class WidgetUtils {
   static Widget responsiveConstraint(Widget child, {double maxWidth = 800}) {
@@ -78,16 +79,16 @@ class WidgetUtils {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppConstants.textColor,
-            letterSpacing: 0.5,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Text(
+            label.toUpperCase(),
+            style: AppTypography.monoLabel(
+              color: AppConstants.textMutedColor,
+              fontSize: 11.5,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -109,16 +110,16 @@ class WidgetUtils {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Links',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppConstants.textColor,
-            letterSpacing: 0.5,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: Text(
+            'Links'.toUpperCase(),
+            style: AppTypography.monoLabel(
+              color: AppConstants.textMutedColor,
+              fontSize: 11.5,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -211,58 +212,69 @@ class _HoverableLinkChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(AppConstants.cardRadius);
     return WidgetUtils.tooltip(
       message: LocalizationService()
           .translate('open_link')
           .replaceAll('{name}', displayName),
-      child: Material(
-        color: AppConstants.secondaryBackground,
-        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-        child: InkWell(
-          onTap: () => launchUrl(uri),
-          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-          hoverColor: AppConstants.accentColor.withValues(alpha: 0.1),
-          splashColor: AppConstants.accentColor.withValues(alpha: 0.1),
-          highlightColor: AppConstants.accentColor.withValues(alpha: 0.05),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                WidgetUtils.networkImage(
-                  url: faviconUrl,
-                  width: 18,
-                  height: 18,
-                  errorWidget: Icon(Icons.link, size: 18, color: AppConstants.textMutedColor),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  displayName,
-                  style: TextStyle(
-                    color: AppConstants.textColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (language?.isNotEmpty ?? false) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppConstants.tertiaryBackground,
-                      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppConstants.secondaryBackground,
+          border: Border.all(color: AppConstants.borderColor, width: 1),
+          borderRadius: borderRadius,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => launchUrl(uri),
+            borderRadius: borderRadius,
+            hoverColor: AppConstants.accentColor.withValues(alpha: 0.1),
+            splashColor: AppConstants.accentColor.withValues(alpha: 0.1),
+            highlightColor: AppConstants.accentColor.withValues(alpha: 0.05),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: WidgetUtils.networkImage(
+                      url: faviconUrl,
+                      width: 18,
+                      height: 18,
+                      errorWidget: Icon(Icons.link, size: 18, color: AppConstants.textMutedColor),
                     ),
-                    child: Text(
-                      language!,
-                      style: TextStyle(
-                        color: AppConstants.textMutedColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    displayName,
+                    style: AppTypography.sans(
+                      color: AppConstants.textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (language?.isNotEmpty ?? false) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppConstants.tertiaryBackground,
+                        border: Border.all(color: AppConstants.borderColor, width: 1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        language!,
+                        style: AppTypography.mono(
+                          color: AppConstants.textMutedColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

@@ -25,6 +25,8 @@ class SeriesDetailMobileLayout extends StatelessWidget {
   final VoidCallback onUpdateChapter;
   final VoidCallback onUpdateVolume;
   final VoidCallback onUpdateRating;
+  final Function(String)? onAuthorTap;
+  final Function(String)? onPublisherTap;
   final Widget Function(double hPadding) buildTabContent;
 
   const SeriesDetailMobileLayout({
@@ -41,6 +43,8 @@ class SeriesDetailMobileLayout extends StatelessWidget {
     required this.onUpdateChapter,
     required this.onUpdateVolume,
     required this.onUpdateRating,
+    this.onAuthorTap,
+    this.onPublisherTap,
     required this.buildTabContent,
   });
 
@@ -93,7 +97,12 @@ class SeriesDetailMobileLayout extends StatelessWidget {
                         ],
                         SeriesGenresSection(series: series, l10n: l10n),
                         const SizedBox(height: 4),
-                        SeriesInformationCard(series: series, l10n: l10n),
+                        SeriesInformationCard(
+                          series: series,
+                          l10n: l10n,
+                          onAuthorTap: onAuthorTap,
+                          onPublisherTap: onPublisherTap,
+                        ),
                       ],
                     ),
                   ),

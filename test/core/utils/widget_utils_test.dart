@@ -100,7 +100,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Tags'), findsOneWidget);
+      expect(find.text('TAGS'), findsOneWidget);
       expect(find.text('Action'), findsOneWidget);
       expect(find.text('Comedy'), findsOneWidget);
     });
