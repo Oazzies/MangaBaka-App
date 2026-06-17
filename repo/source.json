@@ -1,0 +1,35 @@
+{
+  "name": "MangaBaka",
+  "identifier": "REPLACE_WITH_BUNDLE_ID",
+  "headerURL": "REPLACE_WITH_HEADER_IMAGE_URL",
+  "website": "https://github.com/Oazzies/MangaBaka-App",
+  "iconURL": "REPLACE_WITH_ICON_URL",
+  "subtitle": "Official app for the largest manga and sorts database",
+  "description": "This is the official sideloading source for MangaBaka.\n\nFor full details, check the GitHub repository:\nhttps://github.com/Oazzies/MangaBaka-App",
+  "tintColor": "REPLACE_WITH_BRAND_HEX",
+  "apps": [
+    {
+      "beta": false,
+      "name": "MangaBaka",
+      "bundleIdentifier": "REPLACE_WITH_BUNDLE_ID",
+      "developerName": "Oazzies",
+      "subtitle": "Official app for the largest manga and sorts database",
+      "version": "0.0.0",
+      "versionDate": "1970-01-01T00:00:00Z",
+      "versionDescription": "Placeholder entry. This is overwritten automatically by repo/update_source.py the first time the Update Sideloading Source workflow runs after a release is published.",
+      "downloadURL": "",
+      "localizedDescription": "MangaBaka is the official app for the largest manga and sorts database.",
+      "iconURL": "REPLACE_WITH_ICON_URL",
+      "tintColor": "REPLACE_WITH_BRAND_HEX",
+      "category": "entertainment",
+      "size": 0,
+      "screenshotURLs": [],
+      "versions": [],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": []
+      }
+    }
+  ],
+  "news": []
+}
