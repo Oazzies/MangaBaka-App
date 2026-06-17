@@ -7,6 +7,10 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 
 class SeriesSimilarTab extends StatelessWidget {
   final List<Series>? similar;
@@ -81,9 +85,9 @@ class SeriesSimilarTab extends StatelessWidget {
                 ),
               ),
               if (style.isGrid)
-                _buildGrid(filtered, style)
+                _buildGrid(context, filtered, style)
               else
-                _buildList(filtered, style),
+                _buildList(context, filtered, style),
             ],
           );
         },
@@ -91,25 +95,37 @@ class SeriesSimilarTab extends StatelessWidget {
     );
   }
 
-  Widget _buildList(List<Series> series, AppListStyle style) {
+  Widget _buildList(BuildContext context, List<Series> series, AppListStyle style) {
     // Lay out items directly in a Column rather than a nested non-scrolling
     // ListView: inside the detail screen's AnimatedSwitcher transition the
     // ListView's overscroll viewport can be painted before layout completes,
     // throwing "RenderBox was not laid out" / "Cannot hit test ... no size".
+    final seriesService = getIt<SeriesService>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final s in series)
-          EntryListItem(
-            series: s,
-            heroTagPrefix: 'similar',
-            listStyle: style,
+          MouseRegion(
+            onEnter: (_) => seriesService.fetchSeries(s.id),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                );
+              },
+              child: EntryListItem(
+                series: s,
+                heroTagPrefix: 'similar',
+                listStyle: style,
+              ),
+            ),
           ),
       ],
     );
   }
 
-  Widget _buildGrid(List<Series> series, AppListStyle style) {
+  Widget _buildGrid(BuildContext context, List<Series> series, AppListStyle style) {
+    final seriesService = getIt<SeriesService>();
     return GridView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
@@ -122,10 +138,21 @@ class SeriesSimilarTab extends StatelessWidget {
       ),
       itemCount: series.length,
       itemBuilder: (context, index) {
-        return EntryListItem(
-          series: series[index],
-          heroTagPrefix: 'similar',
-          listStyle: style,
+        final s = series[index];
+        return MouseRegion(
+          onEnter: (_) => seriesService.fetchSeries(s.id),
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+              );
+            },
+            child: EntryListItem(
+              series: s,
+              heroTagPrefix: 'similar',
+              listStyle: style,
+            ),
+          ),
         );
       },
     );

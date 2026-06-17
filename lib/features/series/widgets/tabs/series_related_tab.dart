@@ -1,10 +1,14 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 
 class SeriesRelatedTab extends StatelessWidget {
   final List<Series>? related;
@@ -58,9 +62,9 @@ class SeriesRelatedTab extends StatelessWidget {
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (style.isGrid) {
-                    return _buildGrid(settings, finalRelated, constraints.maxWidth);
+                    return _buildGrid(context, settings, finalRelated, constraints.maxWidth);
                   }
-                  return _buildList(finalRelated);
+                  return _buildList(context, finalRelated);
                 },
               ),
             ],
@@ -70,18 +74,32 @@ class SeriesRelatedTab extends StatelessWidget {
     );
   }
 
-  Widget _buildList(List<Series> series) {
+  Widget _buildList(BuildContext context, List<Series> series) {
+    final seriesService = getIt<SeriesService>();
     return ListView.builder(
       shrinkWrap: true,
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: series.length,
-      itemBuilder: (context, index) =>
-          EntryListItem(series: series[index], heroTagPrefix: heroTagPrefix),
+      itemBuilder: (context, index) {
+        final s = series[index];
+        return MouseRegion(
+          onEnter: (_) => seriesService.fetchSeries(s.id),
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+              );
+            },
+            child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildGrid(SettingsManager settings, List<Series> series, double maxWidth) {
+  Widget _buildGrid(BuildContext context, SettingsManager settings, List<Series> series, double maxWidth) {
+    final seriesService = getIt<SeriesService>();
     final columnCount = settings.separateGridColumnCounts
         ? settings.browseGridColumnCount
         : settings.gridColumnCount;
@@ -97,7 +115,17 @@ class SeriesRelatedTab extends StatelessWidget {
           .map((s) => SizedBox(
                 width: itemWidth,
                 height: itemHeight,
-                child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
+                child: MouseRegion(
+                  onEnter: (_) => seriesService.fetchSeries(s.id),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                      );
+                    },
+                    child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
+                  ),
+                ),
               ))
           .toList(),
     );
