@@ -164,7 +164,7 @@ jobs:
           $versionLine = Get-Content pubspec.yaml | Select-String "^version:"
           $versionFull = ($versionLine -split " ")[1].Trim()
           $versionClean = ($versionFull -split "\+")[0]
-          
+
           # Compile Inno Setup Script
           iscc /DAppVersion=$versionClean windows_installer.iss
 
@@ -257,10 +257,10 @@ jobs:
           VERSION_LINE=$(grep "^version:" pubspec.yaml)
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-          
+
           # Find the built .app bundle
           APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1)
-          
+
           # Compress the relative .app bundle directory into workspace root
           cd "$(dirname "$APP_PATH")"
           zip -r "$GITHUB_WORKSPACE/macos-mangabaka-app-v${VERSION_CLEAN}.zip" "$(basename "$APP_PATH")"
@@ -333,7 +333,7 @@ jobs:
           VERSION_LINE=$(grep "^version:" pubspec.yaml)
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-          
+
           if [ -d "build/ios/ipa" ]; then
             ipa_file=$(find build/ios/ipa -name "*.ipa" | head -n 1)
             if [ -n "$ipa_file" ]; then
@@ -358,9 +358,87 @@ jobs:
             ios-mangabaka-app-v*.ipa
             ios-mangabaka-app-v*.xcarchive.zip
 
+  build-ios-sideload:
+    name: Build iOS (Sideload IPA)
+    needs: analyze-and-test
+    runs-on: macos-latest
+    env:
+      ZSIGN_VERSION: "0.7"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Same SDK requirement as the official iOS build above: device_info_plus
+      # 13.1.0 needs the iOS 26.1+ SDK that only ships with Xcode 26.x.
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Unsigned iOS App
+        run: flutter build ios --release --no-codesign
+
+      - name: Package and Sign Sideload IPA
+        env:
+          P12_BASE64: ${{ secrets.SIDELOAD_P12_CERTIFICATE }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.SIDELOAD_PROVISIONING_PROFILE }}
+          P12_PASSWORD: ${{ secrets.SIDELOAD_P12_PASSWORD }}
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          mkdir -p build/ios/iphoneos/Payload
+          ln -s ../Runner.app build/ios/iphoneos/Payload/Runner.app
+
+          if [ -n "$P12_BASE64" ] && [ -n "$PROVISIONING_PROFILE_BASE64" ] && [ -n "$P12_PASSWORD" ]; then
+            echo "$P12_BASE64" | base64 --decode > certificate.p12
+            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > profile.mobileprovision
+            curl -sL -o zsign.zip "https://github.com/zhlynn/zsign/releases/download/v${ZSIGN_VERSION}/zsign-v${ZSIGN_VERSION}-macos-x64.zip"
+            unzip -q zsign.zip
+            chmod +x zsign || chmod +x zsign-*
+            if [ -f "./zsign" ]; then
+              ZSIGN_EXEC="./zsign"
+            else
+              ZSIGN_EXEC=$(ls zsign* 2>/dev/null | head -n 1)
+            fi
+            $ZSIGN_EXEC -f -k ./certificate.p12 -p "$P12_PASSWORD" -m ./profile.mobileprovision ./build/ios/iphoneos/Payload/Runner.app
+          else
+            echo "⚠️ No sideload signing secrets provided — building unsigned .ipa"
+          fi
+
+          cd build/ios/iphoneos
+          zip -qr "$GITHUB_WORKSPACE/ios-mangabaka-app-v${VERSION_CLEAN}-sideload.ipa" Payload
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-sideload-artifact
+          path: ios-mangabaka-app-v*-sideload.ipa
+
   create-draft-release:
     name: Create Draft Release
-    needs: [build-android, build-windows, build-macos, build-ios]
+    needs: [build-android, build-windows, build-macos, build-ios, build-ios-sideload]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
