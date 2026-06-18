@@ -182,8 +182,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Match the iOS job on Xcode 26.x so both Apple builds use a current SDK
-      # (Apple mandates Xcode 26 for App Store submissions as of 2026).
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -227,24 +225,18 @@ jobs:
           APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1)
           if [ -n "$APP_PATH" ]; then
             echo "Found compiled app at: $APP_PATH"
-            # 1. Clear any broken quarantine or attribute flags from the build
             xattr -cr "$APP_PATH"
-            # 2. Grant executable permissions recursively to the bundle
             chmod -R +x "$APP_PATH"
-            # 3. Sign all nested .dylib files individually
             find "$APP_PATH" -name "*.dylib" | while read -r dylib; do
                 echo "Signing dylib: $dylib"
                 codesign --force --sign - "$dylib"
             done
-            # 4. Sign all nested .framework bundles depth-first
             find "$APP_PATH" -name "*.framework" -depth | while read -r framework; do
                 echo "Signing framework: $framework"
                 codesign --force --sign - "$framework"
             done
-            # 5. Sign the main executable binary
             echo "Signing main executable binary..."
             codesign --force --sign - "$APP_PATH/Contents/MacOS/MangaBaka"
-            # 6. Sign the top-level application bundle wrapper container
             echo "Signing top-level bundle wrapper..."
             codesign --force --sign - "$APP_PATH"
           else
@@ -258,19 +250,23 @@ jobs:
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
 
-          # Find the built .app bundle
           APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1)
-
-          # Compress the relative .app bundle directory into workspace root
-          cd "$(dirname "$APP_PATH")"
-          zip -r "$GITHUB_WORKSPACE/macos-mangabaka-app-v${VERSION_CLEAN}.zip" "$(basename "$APP_PATH")"
-          cd -
+          
+          # Create DMG
+          APP_NAME=$(basename "$APP_PATH" .app)
+          mkdir -p build/macos/Release temp_dir
+          cp -R "$APP_PATH" temp_dir/
+          ln -s /Applications temp_dir/Applications
+          hdiutil create -volname "$APP_NAME" -srcfolder temp_dir -ov -format UDZO "build/macos/Release/macos-mangabaka-app-v${VERSION_CLEAN}.dmg"
+          rm -rf temp_dir
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifact
-          path: macos-mangabaka-app-v*.zip
+          path: |
+            macos-mangabaka-app-v*.zip
+            build/macos/Release/macos-mangabaka-app-v*.dmg
 
   build-ios:
     name: Build iOS
@@ -280,9 +276,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # device_info_plus 13.1.0 references the iOS 26.1 selector `isiOSAppOnVision`,
-      # which is only declared in the iOS 26.1+ SDK. The macos-latest default Xcode
-      # (16.x, iOS 18 SDK) can't compile it, so pin to the latest stable Xcode 26.x.
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -368,8 +361,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Same SDK requirement as the official iOS build above: device_info_plus
-      # 13.1.0 needs the iOS 26.1+ SDK that only ships with Xcode 26.x.
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -436,9 +427,154 @@ jobs:
           name: ios-sideload-artifact
           path: ios-mangabaka-app-v*-sideload.ipa
 
+  build-linux:
+    name: Build Linux
+    needs: analyze-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ninja-build cmake maven clang mpv libgtk-3-dev \
+            libblkid-dev liblzma-dev pkg-config libmpv-dev webkit2gtk-4.1 fuse rpm
+          wget -qO appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool && sudo mv appimagetool /usr/local/bin/
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Linux Application
+        run: flutter build linux --release
+
+      - name: Package AppImage
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          # Create AppDir structure
+          rm -rf AppDir && mkdir -p AppDir/usr/{bin,share/icons/hicolor/256x256/apps,lib}
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
+          # Copy icon if exists
+          if [ -f "assets/images/logo.png" ]; then
+            cp assets/images/logo.png AppDir/usr/share/icons/hicolor/256x256/apps/mangabaka.png
+            cp assets/images/logo.png AppDir/mangabaka.png
+          fi
+
+          # Create desktop file
+          cat > AppDir/mangabaka.desktop << 'EOF'
+          [Desktop Entry]
+          Name=MangaBaka
+          Exec=usr/bin/mangabaka
+          Icon=mangabaka
+          Type=Application
+          Categories=Utility;
+          EOF
+
+          # Create AppRun script
+          cat > AppDir/AppRun << 'EOF'
+          #!/bin/sh
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export PATH="${HERE}/usr/bin/:${PATH}"
+          export LD_LIBRARY_PATH="${HERE}/usr/bin/lib/:${HERE}/usr/lib/:${LD_LIBRARY_PATH}"
+          exec "${HERE}/usr/bin/mangabaka" "$@"
+          EOF
+          chmod +x AppDir/AppRun
+
+          # Build AppImage
+          /usr/local/bin/appimagetool AppDir
+          mv MangaBaka-x86_64.AppImage "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.AppImage"
+
+      - name: Package RPM
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          mkdir -p rpm_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp -r build/linux/x64/release/bundle rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}
+          tar czf rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}.tar.gz -C rpm_build/SOURCES mangabaka-${VERSION_CLEAN}
+          
+          mkdir -p rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps
+          if [ -f "assets/images/logo.png" ]; then
+            cp assets/images/logo.png rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps/mangabaka.png
+          fi
+
+          cat > rpm_build/SPECS/mangabaka.spec << EOF
+          Name: mangabaka
+          Version: ${VERSION_CLEAN}
+          Release: 1%{?dist}
+          Summary: MangaBaka - A manga reader application
+          License: MIT
+          Source0: %{name}-%{version}.tar.gz
+          BuildArch: x86_64
+          %description
+          MangaBaka is a Flutter-based manga reader application.
+          %prep
+          %setup -q
+          %install
+          mkdir -p %{buildroot}/usr/bin
+          mkdir -p %{buildroot}/usr/share/applications
+          mkdir -p %{buildroot}/usr/share/icons/hicolor/256x256/apps
+          cp -r * %{buildroot}/usr/bin/
+          cp -r %{_sourcedir}/usr/share/* %{buildroot}/usr/share/
+          cat > %{buildroot}/usr/share/applications/mangabaka.desktop << 'EOL'
+          [Desktop Entry]
+          Name=MangaBaka
+          Exec=/usr/bin/mangabaka
+          Icon=mangabaka
+          Type=Application
+          Categories=Utility;
+          EOL
+          %files
+          /usr/bin/*
+          /usr/share/applications/mangabaka.desktop
+          /usr/share/icons/hicolor/256x256/apps/mangabaka.png
+          EOF
+
+          rpmbuild --define "_topdir $(pwd)/rpm_build" -ba rpm_build/SPECS/mangabaka.spec
+          mv rpm_build/RPMS/x86_64/*.rpm "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.rpm"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifact
+          path: |
+            build/linux/x64/release/linux-mangabaka-app-v*.AppImage
+            build/linux/x64/release/linux-mangabaka-app-v*.rpm
+
   create-draft-release:
     name: Create Draft Release
-    needs: [build-android, build-windows, build-macos, build-ios, build-ios-sideload]
+    needs: [build-android, build-windows, build-macos, build-ios, build-ios-sideload, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
