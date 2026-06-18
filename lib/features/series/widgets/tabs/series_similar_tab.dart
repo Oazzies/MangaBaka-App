@@ -110,7 +110,10 @@ class SeriesSimilarTab extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
-                  AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                  AppTransitions.slideUp(SeriesDetailScreen(
+                    series: s,
+                    heroTagPrefix: 'similar',
+                  )),
                 );
               },
               child: EntryListItem(
@@ -144,7 +147,10 @@ class SeriesSimilarTab extends StatelessWidget {
           child: InkWell(
             onTap: () {
               Navigator.of(context).push(
-                AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                AppTransitions.slideUp(SeriesDetailScreen(
+                  series: s,
+                  heroTagPrefix: 'similar',
+                )),
               );
             },
             child: EntryListItem(

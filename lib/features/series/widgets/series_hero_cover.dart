@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/screens/full_screen_image_screen.dart';
@@ -9,12 +9,14 @@ class SeriesHeroCover extends StatefulWidget {
   final Series series;
   final double height;
   final double width;
+  final String? heroTagPrefix;
 
   const SeriesHeroCover({
     super.key,
     required this.series,
     required this.height,
     required this.width,
+    this.heroTagPrefix,
   });
 
   @override
@@ -27,7 +29,9 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
   @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: 'series_cover_${widget.series.id}',
+      tag: widget.heroTagPrefix != null
+          ? '${widget.heroTagPrefix}_${widget.series.id}'
+          : 'series_cover_${widget.series.id}',
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
@@ -43,7 +47,9 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
                 MaterialPageRoute(
                   builder: (context) => FullScreenImageScreen(
                     imageUrls: [imageUrl],
-                    heroTag: 'series_cover_${widget.series.id}',
+                    heroTag: widget.heroTagPrefix != null
+                        ? '${widget.heroTagPrefix}_${widget.series.id}'
+                        : 'series_cover_${widget.series.id}',
                   ),
                 ),
               );

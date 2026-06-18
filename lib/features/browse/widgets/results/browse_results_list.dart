@@ -10,6 +10,7 @@ class BrowseResultsList extends StatelessWidget {
   final bool isLoading;
   final bool shouldShowRanking;
   final Function(Series) onSeriesTap;
+  final String? heroTagPrefix;
 
   const BrowseResultsList({
     required this.results,
@@ -17,6 +18,7 @@ class BrowseResultsList extends StatelessWidget {
     required this.isLoading,
     required this.shouldShowRanking,
     required this.onSeriesTap,
+    this.heroTagPrefix,
     super.key,
   });
 
@@ -62,8 +64,8 @@ class BrowseResultsList extends StatelessWidget {
               return InkWell(
                 onTap: () => onSeriesTap(series),
                 child: shouldShowRanking
-                    ? EntryListItem(series: series, ranking: index + 1)
-                    : EntryListItem(series: series),
+                    ? EntryListItem(series: series, ranking: index + 1, heroTagPrefix: heroTagPrefix)
+                    : EntryListItem(series: series, heroTagPrefix: heroTagPrefix),
               );
             },
           );
@@ -97,8 +99,8 @@ class BrowseResultsList extends StatelessWidget {
             return InkWell(
               onTap: () => onSeriesTap(series),
               child: shouldShowRanking
-                  ? EntryListItem(series: series, ranking: index + 1)
-                  : EntryListItem(series: series),
+                  ? EntryListItem(series: series, ranking: index + 1, heroTagPrefix: heroTagPrefix)
+                  : EntryListItem(series: series, heroTagPrefix: heroTagPrefix),
             );
           },
         );

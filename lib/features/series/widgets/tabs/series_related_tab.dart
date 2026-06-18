@@ -88,7 +88,10 @@ class SeriesRelatedTab extends StatelessWidget {
           child: InkWell(
             onTap: () {
               Navigator.of(context).push(
-                AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                AppTransitions.slideUp(SeriesDetailScreen(
+                  series: s,
+                  heroTagPrefix: heroTagPrefix,
+                )),
               );
             },
             child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
@@ -120,7 +123,10 @@ class SeriesRelatedTab extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       Navigator.of(context).push(
-                        AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                        AppTransitions.slideUp(SeriesDetailScreen(
+                          series: s,
+                          heroTagPrefix: heroTagPrefix,
+                        )),
                       );
                     },
                     child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),

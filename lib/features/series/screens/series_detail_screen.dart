@@ -27,8 +27,13 @@ import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart
 
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
+  final String? heroTagPrefix;
 
-  const SeriesDetailScreen({super.key, required this.series});
+  const SeriesDetailScreen({
+    super.key,
+    required this.series,
+    this.heroTagPrefix,
+  });
 
   @override
   State<SeriesDetailScreen> createState() => _SeriesDetailScreenState();
@@ -153,6 +158,7 @@ class _SeriesDetailScreenState extends State<SeriesDetailScreen> with SeriesDeta
                           onShare: shareLink,
                           onDelete: showDeleteConfirmationDialog,
                           onCopy: copyToClipboard,
+                          heroTagPrefix: widget.heroTagPrefix,
                         ),
                         if (fetchError)
                           SeriesDetailErrorBanner(onRetry: () {

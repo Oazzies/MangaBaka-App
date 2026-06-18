@@ -33,6 +33,16 @@ class BrowseResultsScreen extends StatefulWidget {
     super.key,
   });
 
+  String get heroTagPrefix {
+    if (staff != null) {
+      return 'staff_${staff!.replaceAll(' ', '_')}';
+    }
+    if (publisher != null) {
+      return 'publisher_${publisher!.replaceAll(' ', '_')}';
+    }
+    return 'browse_${sortType.replaceAll(' ', '_')}';
+  }
+
   @override
   State<BrowseResultsScreen> createState() => _BrowseResultsScreenState();
 }
@@ -190,7 +200,10 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   void _navigateToDetail(Series series) {
     Navigator.push(
       context,
-      AppTransitions.slideUp(SeriesDetailScreen(series: series)),
+      AppTransitions.slideUp(SeriesDetailScreen(
+        series: series,
+        heroTagPrefix: widget.heroTagPrefix,
+      )),
     );
   }
 
@@ -264,6 +277,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
                         scrollController: _scrollController,
                         onRetry: () => _fetchResults(initial: true),
                         onSeriesTap: _navigateToDetail,
+                        heroTagPrefix: widget.heroTagPrefix,
                       ),
                     ),
                   ),
