@@ -6,6 +6,7 @@ import 'package:mangabaka_app/features/browse/models/mix_result.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/utils/uri_utils.dart';
 
@@ -84,14 +85,28 @@ class MixService {
         return MixResult(series: series, dna: dna, seedCount: seedCount);
       } else {
         _logger.warning('MixService.fetchMix failed: ${response.statusCode}');
-        throw Exception('Mix request failed: ${response.statusCode}');
+        throw ApiException(
+          message: 'Mix request failed',
+          statusCode: response.statusCode,
+          responseBody: response.body,
+        );
       }
-    } on SocketException catch (e) {
+    } on SocketException catch (e, st) {
       _logger.severe('MixService network error: $e');
-      throw Exception('Network error. Please check your connection.');
-    } on TimeoutException {
+      throw NetworkException(
+        message: 'Network error. Please check your connection.',
+        code: 'NETWORK_ERROR',
+        originalError: e,
+        stackTrace: st,
+      );
+    } on TimeoutException catch (e, st) {
       _logger.severe('MixService request timed out');
-      throw Exception('Request timed out. Please try again.');
+      throw NetworkException(
+        message: 'Request timed out. Please try again.',
+        code: 'TIMEOUT',
+        originalError: e,
+        stackTrace: st,
+      );
     }
   }
 

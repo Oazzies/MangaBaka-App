@@ -7,9 +7,13 @@ class SettingsManager extends ChangeNotifier {
   static final SettingsManager _instance = SettingsManager._internal();
   factory SettingsManager() => _instance;
   SettingsManager._internal();
+
+  SharedPreferences? _prefs;
+  Future<SharedPreferences> _getPrefs() async => _prefs ??= await SharedPreferences.getInstance();
   
   @visibleForTesting
   static void resetForTesting() {
+    _instance._prefs = null;
     _instance._currentListStyle = AppListStyle.compactGrid;
     _instance._hideLibrarySeriesInBrowse = false;
     _instance._contentPreferences = ['safe', 'suggestive'];
@@ -84,7 +88,7 @@ class SettingsManager extends ChangeNotifier {
   TitleLanguage get defaultTitleLanguage => _defaultTitleLanguage;
 
   bool _separateListStyles = true;
-  bool get separateListStyles => true;
+  bool get separateListStyles => _separateListStyles;
 
   AppListStyle _libraryListStyle = AppListStyle.compactGrid;
   AppListStyle get libraryListStyle => _libraryListStyle;
@@ -134,7 +138,7 @@ class SettingsManager extends ChangeNotifier {
   int get compactGridTitleRows => _compactGridTitleRows;
 
   Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     
     // Load preferences
 
@@ -223,7 +227,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setListStyle(AppListStyle style) async {
     if (_currentListStyle == style) return;
     _currentListStyle = style;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.listStylePref, style.index);
     notifyListeners();
   }
@@ -231,14 +235,14 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setHideLibrarySeriesInBrowse(bool value) async {
     if (_hideLibrarySeriesInBrowse == value) return;
     _hideLibrarySeriesInBrowse = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.hideLibrarySeriesInBrowse, value);
     notifyListeners();
   }
 
   Future<void> setContentPreferences(List<String> prefsList) async {
     _contentPreferences = prefsList;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setStringList(SettingsKeys.contentPreferences, prefsList);
     notifyListeners();
   }
@@ -246,7 +250,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setHasCompletedOnboarding(bool value) async {
     if (_hasCompletedOnboarding == value) return;
     _hasCompletedOnboarding = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.onboardingCompleted, value);
     notifyListeners();
   }
@@ -254,7 +258,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setDefaultStartPage(AppStartPage page) async {
     if (_defaultStartPage == page) return;
     _defaultStartPage = page;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.defaultStartPage, page.index);
     notifyListeners();
   }
@@ -262,7 +266,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setRatingSliderStep(RatingSliderStep step) async {
     if (_ratingSliderStep == step) return;
     _ratingSliderStep = step;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.ratingSliderStep, step.index);
     notifyListeners();
   }
@@ -270,7 +274,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setAddLibraryDefaultTab(String tabKey) async {
     if (_addLibraryDefaultTab == tabKey) return;
     _addLibraryDefaultTab = tabKey;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setString(SettingsKeys.addLibraryDefaultTab, tabKey);
     notifyListeners();
   }
@@ -278,7 +282,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setDefaultTitleLanguage(TitleLanguage lang) async {
     if (_defaultTitleLanguage == lang) return;
     _defaultTitleLanguage = lang;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.defaultTitleLanguage, lang.index);
     notifyListeners();
   }
@@ -286,7 +290,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setSeparateListStyles(bool value) async {
     if (_separateListStyles == value) return;
     _separateListStyles = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.separateListStyles, value);
     notifyListeners();
   }
@@ -294,7 +298,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setLibraryListStyle(AppListStyle style) async {
     if (_libraryListStyle == style) return;
     _libraryListStyle = style;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.libraryListStyle, style.index);
     notifyListeners();
   }
@@ -302,7 +306,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setBrowseListStyle(AppListStyle style) async {
     if (_browseListStyle == style) return;
     _browseListStyle = style;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.browseListStyle, style.index);
     notifyListeners();
   }
@@ -310,7 +314,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setPushNotifications(bool value) async {
     if (_pushNotifications == value) return;
     _pushNotifications = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.pushNotifications, value);
     notifyListeners();
   }
@@ -318,7 +322,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setAutoSuggestBrowse(bool value) async {
     if (_autoSuggestBrowse == value) return;
     _autoSuggestBrowse = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.autoSuggestBrowse, value);
     notifyListeners();
   }
@@ -326,7 +330,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setNewsListColumns(int columns) async {
     if (_newsListColumns == columns) return;
     _newsListColumns = columns;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.newsListColumns, columns);
     notifyListeners();
   }
@@ -336,14 +340,14 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setShowTooltips(bool value) async {
     if (_showTooltips == value) return;
     _showTooltips = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.showTooltips, value);
     notifyListeners();
   }
 
   Future<void> setBlurredContentRatings(List<String> ratings) async {
     _blurredContentRatings = ratings;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setStringList(SettingsKeys.blurredContentRatings, ratings);
     notifyListeners();
   }
@@ -351,7 +355,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setSeparateGridColumnCounts(bool value) async {
     if (_separateGridColumnCounts == value) return;
     _separateGridColumnCounts = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.separateGridColumnCounts, value);
     notifyListeners();
   }
@@ -359,7 +363,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setGridColumnCount(int value) async {
     if (_gridColumnCount == value) return;
     _gridColumnCount = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.gridColumnCount, value);
     notifyListeners();
   }
@@ -367,7 +371,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setLibraryGridColumnCount(int value) async {
     if (_libraryGridColumnCount == value) return;
     _libraryGridColumnCount = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.libraryGridColumnCount, value);
     notifyListeners();
   }
@@ -375,7 +379,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setBrowseGridColumnCount(int value) async {
     if (_browseGridColumnCount == value) return;
     _browseGridColumnCount = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.browseGridColumnCount, value);
     notifyListeners();
   }
@@ -383,7 +387,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setCompactGridTitleRows(int value) async {
     if (_compactGridTitleRows == value) return;
     _compactGridTitleRows = value.clamp(1, 99);
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.compactGridTitleRows, _compactGridTitleRows);
     notifyListeners();
   }
@@ -391,7 +395,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setCollectionsListColumns(int value) async {
     if (_collectionsListColumns == value) return;
     _collectionsListColumns = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.collectionsGridColumns, value);
     notifyListeners();
   }
@@ -399,7 +403,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setWorksListStyle(AppListStyle style) async {
     if (_worksListStyle == style) return;
     _worksListStyle = style;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.worksListStyle, style.index);
     notifyListeners();
   }
@@ -407,7 +411,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setSimilarListStyle(AppListStyle style) async {
     if (_similarListStyle == style) return;
     _similarListStyle = style;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.similarListStyle, style.index);
     notifyListeners();
   }
@@ -415,7 +419,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setShowQuickProgress(bool value) async {
     if (_showQuickProgress == value) return;
     _showQuickProgress = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.showQuickProgress, value);
     notifyListeners();
   }
@@ -423,7 +427,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setShowLibraryProgress(bool value) async {
     if (_showLibraryProgress == value) return;
     _showLibraryProgress = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.showLibraryProgress, value);
     notifyListeners();
   }
@@ -431,7 +435,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setLibraryProgressType(LibraryProgressType type) async {
     if (_libraryProgressType == type) return;
     _libraryProgressType = type;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.libraryProgressType, type.index);
     notifyListeners();
   }
@@ -439,7 +443,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setShowRemainingProgress(bool value) async {
     if (_showRemainingProgress == value) return;
     _showRemainingProgress = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.showRemainingProgress, value);
     notifyListeners();
   }
@@ -447,7 +451,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setShowLibraryTabCounts(bool value) async {
     if (_showLibraryTabCounts == value) return;
     _showLibraryTabCounts = value;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setBool(SettingsKeys.showLibraryTabCounts, value);
     notifyListeners();
   }
@@ -455,7 +459,7 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setLandscapeAppBarPosition(LandscapeAppBarPosition position) async {
     if (_landscapeAppBarPosition == position) return;
     _landscapeAppBarPosition = position;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _getPrefs();
     await prefs.setInt(SettingsKeys.landscapeAppBarPosition, position.index);
     notifyListeners();
   }

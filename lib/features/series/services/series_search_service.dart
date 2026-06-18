@@ -41,20 +41,47 @@ class SeriesSearchService {
     String? type,
     Map<String, dynamic>? extraParams,
   }) async {
+    final result = await _executeSearch(
+      query,
+      sortBy: sortBy,
+      type: type,
+      extraParams: extraParams,
+      removeSortByWithQuery: true,
+    );
+    return result.series;
+  }
+
+  Future<SeriesSearchResult> searchSeries(
+    String query, {
+    String? sortBy,
+    String? type,
+    Map<String, dynamic>? extraParams,
+  }) async {
+    return _executeSearch(
+      query,
+      sortBy: sortBy,
+      type: type,
+      extraParams: extraParams,
+      removeSortByWithQuery: true,
+    );
+  }
+
+  Future<SeriesSearchResult> _executeSearch(
+    String query, {
+    String? sortBy,
+    String? type,
+    Map<String, dynamic>? extraParams,
+    bool removeSortByWithQuery = false,
+  }) async {
     final queryParams = <String, String>{};
-    if (query.isNotEmpty) {
-      queryParams['q'] = query;
-    }
-    if (sortBy != null && sortBy.isNotEmpty) {
+    if (query.isNotEmpty) queryParams['q'] = query;
+    if (sortBy != null && sortBy.isNotEmpty && (query.isEmpty || !removeSortByWithQuery)) {
       queryParams['sort_by'] = sortBy;
     }
-    if (type != null && type.isNotEmpty) {
-      queryParams['type'] = type;
-    }
+    if (type != null && type.isNotEmpty) queryParams['type'] = type;
 
     final contentPrefs = SettingsManager().contentPreferences;
-    
-    // Build the final URI
+
     final finalQueryParams = <String, dynamic>{
       ...queryParams,
       'content_rating': contentPrefs,
@@ -62,9 +89,9 @@ class SeriesSearchService {
 
     if (extraParams != null) {
       finalQueryParams.addAll(extraParams);
-      if (query.isNotEmpty) {
-        finalQueryParams.remove('sort_by');
-      }
+      // Backend ignores 'sort_by' when 'q' is present — strip it so the
+      // locally-applied sort in BrowseController is the source of truth.
+      if (query.isNotEmpty) finalQueryParams.remove('sort_by');
     }
 
     final uri = Uri.parse(_baseUrl).replace(
@@ -78,8 +105,7 @@ class SeriesSearchService {
           .get(uri, headers: {'User-Agent': AppConstants.userAgent})
           .timeout(
             Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () =>
-                throw TimeoutException('Series search request timed out'),
+            onTimeout: () => throw TimeoutException('Series search request timed out'),
           );
 
       _logger.fine('Series search response status: ${response.statusCode}');
@@ -87,16 +113,14 @@ class SeriesSearchService {
       if (response.statusCode == 200) {
         try {
           final json = jsonDecode(response.body);
+          final total = json['total'] as int? ?? 0;
           final List data = json['data'] ?? [];
-          if (data.isNotEmpty) {
-            _logger.fine('Search result sample item keys: ${data.first.keys.toList()}');
-            _logger.fine('Search result sample item rating: ${data.first['rating']}');
-            _logger.fine('Search result sample item popularity: ${data.first['popularity']}');
-          }
+
           final results = data
               .map((item) => Series.fromJson(item as Map<String, dynamic>))
               .where((s) {
-                if (contentPrefs.isNotEmpty && !contentPrefs.contains(s.contentRating.toLowerCase())) {
+                if (contentPrefs.isNotEmpty &&
+                    !contentPrefs.contains(s.contentRating.toLowerCase())) {
                   return false;
                 }
 
@@ -113,18 +137,17 @@ class SeriesSearchService {
                   final rating = double.tryParse(s.rating) ?? 0;
                   if (rating == 0) return false;
                 }
-                
+
                 return true;
               })
               .toList();
-          
-          _logger.info('Search successful. Found ${results.length} results');
-          
-          for (var series in results) {
+
+          _logger.info('Search successful. Found ${results.length} results (total: $total)');
+          for (final series in results) {
             _seriesService.precacheSeries(series);
           }
-          
-          return results;
+
+          return SeriesSearchResult(series: results, total: total);
         } catch (e, st) {
           _logger.severe('Failed to parse series search response', e, st);
           throw ParseException(
@@ -181,106 +204,6 @@ class SeriesSearchService {
         originalError: e,
         stackTrace: st,
       );
-    }
-  }
-
-  Future<SeriesSearchResult> searchSeries(
-    String query, {
-    String? sortBy,
-    String? type,
-    Map<String, dynamic>? extraParams,
-  }) async {
-    final queryParams = <String, String>{};
-    if (query.isNotEmpty) {
-      queryParams['q'] = query;
-    }
-    if (sortBy != null && sortBy.isNotEmpty && query.isEmpty) {
-      queryParams['sort_by'] = sortBy;
-    }
-    if (type != null && type.isNotEmpty) {
-      queryParams['type'] = type;
-    }
-
-    final contentPrefs = SettingsManager().contentPreferences;
-    
-    // Build the final URI
-    final finalQueryParams = <String, dynamic>{
-      ...queryParams,
-      'content_rating': contentPrefs,
-    };
-
-    if (extraParams != null) {
-      finalQueryParams.addAll(extraParams);
-      // Backend ignores 'q' if 'sort_by' is present, so we remove it here 
-      // if we have a search query.
-      if (query.isNotEmpty) {
-        finalQueryParams.remove('sort_by');
-      }
-    }
-
-    final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: UriUtils.encodeQueryParameters(finalQueryParams),
-    );
-
-    _logger.info('Performing series search. URI: $uri');
-    try {
-      final response = await _client
-          .get(uri, headers: {'User-Agent': AppConstants.userAgent})
-          .timeout(
-            Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () =>
-                throw TimeoutException('Series search request timed out'),
-          );
-
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        final total = json['total'] as int? ?? 0;
-        _logger.info('Series search returned total: $total');
-        final List data = json['data'] ?? [];
-        
-        final results = data
-            .map((item) => Series.fromJson(item as Map<String, dynamic>))
-            .where((s) {
-              if (contentPrefs.isNotEmpty && !contentPrefs.contains(s.contentRating.toLowerCase())) {
-                return false;
-              }
-
-              // Local rating filtering to ensure it matches our calculated combined average
-              final ratingLower = extraParams?['rating_lower'] as num?;
-              final ratingUpper = extraParams?['rating_upper'] as num?;
-              if (ratingLower != null || ratingUpper != null) {
-                final rawRating = double.tryParse(s.rating) ?? 0.0;
-                final rating = rawRating <= 10.0 ? rawRating * 10 : rawRating;
-                if (ratingLower != null && rating < ratingLower) return false;
-                if (ratingUpper != null && rating > ratingUpper) return false;
-              } else if (sortBy != null && sortBy.startsWith('score_')) {
-                // Explicitly exclude unrated series when sorting by community rating
-                final rating = double.tryParse(s.rating) ?? 0;
-                if (rating == 0) return false;
-              }
-              
-              return true;
-            })
-            .toList();
-        
-        for (var series in results) {
-          _seriesService.precacheSeries(series);
-        }
-        
-        return SeriesSearchResult(series: results, total: total);
-      } else {
-        _logger.severe(
-          'Series search failed. Status: ${response.statusCode}, Body: ${response.body}',
-        );
-        throw ApiException(
-          message: 'Failed to search series',
-          statusCode: response.statusCode,
-          responseBody: response.body,
-        );
-      }
-    } catch (e) {
-      _logger.severe('Error during series search: $e');
-      rethrow;
     }
   }
 }

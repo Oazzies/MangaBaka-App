@@ -452,7 +452,7 @@ class BrowseController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final lookupService = BookLookupService();
+      final lookupService = getIt<BookLookupService>();
       final title = await lookupService.lookupTitleByIsbn(isbn);
 
       if (title != null && title.isNotEmpty) {

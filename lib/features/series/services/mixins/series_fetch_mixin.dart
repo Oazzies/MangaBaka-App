@@ -11,6 +11,7 @@ import 'dart:async';
 mixin SeriesFetchMixin {
   final logger = LoggingService.logger;
   final Map<String, Series> _cache = {};
+  static const int _maxCacheSize = 200;
 
   void precacheSeries(Series series) {
     _cache[series.id] = series;
@@ -64,6 +65,9 @@ mixin SeriesFetchMixin {
           }
 
           logger.info('Successfully fetched series: ${series.title} ($id)');
+          if (_cache.length >= _maxCacheSize) {
+            _cache.remove(_cache.keys.first);
+          }
           _cache[id] = series;
           return series;
         } catch (e, st) {

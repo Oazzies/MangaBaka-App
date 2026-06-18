@@ -27,8 +27,16 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
         ),
         child: RatingSelectionDialog(
           initialRating: entry.rating ?? 0,
-          onRatingChanged: (rating) {
-            libraryService.updateLibraryEntryRating(series.id, rating);
+          onRatingChanged: (rating) async {
+            try {
+              await libraryService.updateLibraryEntryRating(series.id, rating);
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  SnackBar(content: Text(LocalizationService().translate('failed_to_update'))),
+                );
+              }
+            }
           },
         ),
       ),
@@ -107,7 +115,9 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
                     final box = this.context.findRenderObject() as RenderBox?;
                     SharePlus.instance.share(ShareParams(
                       text: link,
-                      sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+                      sharePositionOrigin: box != null
+                          ? box.localToGlobal(Offset.zero) & box.size
+                          : null,
                     ));
                   },
                 ),
@@ -229,8 +239,16 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
           FilledButton(
             onPressed: () async {
               Navigator.pop(context);
-              await libraryService.deleteEntry(series.id);
-              if (mounted) Navigator.pop(this.context);
+              try {
+                await libraryService.deleteEntry(series.id);
+                if (mounted) Navigator.pop(this.context);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    SnackBar(content: Text(LocalizationService().translate('failed_to_delete'))),
+                  );
+                }
+              }
             },
             style: FilledButton.styleFrom(
               backgroundColor: AppConstants.errorColor,
