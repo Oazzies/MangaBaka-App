@@ -247,7 +247,8 @@ class BrowseScreenState extends State<BrowseScreen> {
                   ),
                   child: Column(
                     children: [
-                      if (_controller.isSearchMode)
+                      if (_controller.isSearchMode &&
+                          _controller.currentFilters.isEmpty)
                         BrowseTypeTabs(
                           selectedType: _controller.currentType,
                           onTypeChanged: _controller.setType,

@@ -160,6 +160,12 @@ class BrowseController extends ChangeNotifier {
   void updateFilters(SearchFilters filters) {
     _logger.info('Filters updated: ${filters.toMap()}');
     _currentFilters = filters;
+    // When filters are active, Publishers/Staff tabs are hidden — fall back to Series.
+    if (!filters.isEmpty &&
+        (_currentType == BrowseType.publishers ||
+            _currentType == BrowseType.staff)) {
+      _currentType = BrowseType.series;
+    }
     searchSeries();
   }
 
