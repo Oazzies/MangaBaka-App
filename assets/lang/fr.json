@@ -229,6 +229,7 @@
         "library_grid_columns": "Colonnes de la bibliothèque",
         "browse_grid_columns": "Colonnes de la recherche",
         "grid_columns_auto": "Auto",
+        "compact_grid_title_rows": "Lignes du titre dans la grille compacte",
         "news_columns": "Colonnes d'actualités",
         "one_column": "1 Colonne",
         "two_columns": "2 Colonnes",

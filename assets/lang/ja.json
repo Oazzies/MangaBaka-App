@@ -242,6 +242,7 @@
         "library_grid_columns": "ライブラリのグリッド列数",
         "browse_grid_columns": "ブラウズのグリッド列数",
         "grid_columns_auto": "自動",
+        "compact_grid_title_rows": "コンパクトグリッドのタイトル行数",
         "news_columns": "ニュースの列数",
         "one_column": "1列",
         "two_columns": "2列",

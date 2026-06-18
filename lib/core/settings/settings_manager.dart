@@ -38,6 +38,7 @@ class SettingsManager extends ChangeNotifier {
     _instance._showRemainingProgress = false;
     _instance._showLibraryTabCounts = true;
     _instance._landscapeAppBarPosition = LandscapeAppBarPosition.left;
+    _instance._compactGridTitleRows = 1;
   }
 
   bool _showQuickProgress = true;
@@ -129,6 +130,9 @@ class SettingsManager extends ChangeNotifier {
   AppListStyle _similarListStyle = AppListStyle.compactGrid;
   AppListStyle get similarListStyle => _similarListStyle;
 
+  int _compactGridTitleRows = 1;
+  int get compactGridTitleRows => _compactGridTitleRows;
+
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -205,6 +209,7 @@ class SettingsManager extends ChangeNotifier {
     }
     _showRemainingProgress = prefs.getBool(SettingsKeys.showRemainingProgress) ?? false;
     _showLibraryTabCounts = prefs.getBool(SettingsKeys.showLibraryTabCounts) ?? true;
+    _compactGridTitleRows = prefs.getInt(SettingsKeys.compactGridTitleRows) ?? 1;
     final landscapePositionIndex = prefs.getInt(SettingsKeys.landscapeAppBarPosition);
     if (landscapePositionIndex != null &&
         landscapePositionIndex >= 0 &&
@@ -372,6 +377,14 @@ class SettingsManager extends ChangeNotifier {
     _browseGridColumnCount = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(SettingsKeys.browseGridColumnCount, value);
+    notifyListeners();
+  }
+
+  Future<void> setCompactGridTitleRows(int value) async {
+    if (_compactGridTitleRows == value) return;
+    _compactGridTitleRows = value.clamp(1, 99);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(SettingsKeys.compactGridTitleRows, _compactGridTitleRows);
     notifyListeners();
   }
 

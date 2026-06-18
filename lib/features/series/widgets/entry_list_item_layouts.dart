@@ -284,10 +284,13 @@ class CompactGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = SettingsManager();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
+        AspectRatio(
+          aspectRatio: 0.65,
           child: Card(
             color: AppConstants.secondaryBackground,
             clipBehavior: Clip.antiAlias,
@@ -296,7 +299,6 @@ class CompactGridItem extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final l10n = LocalizationService();
-                final settings = SettingsManager();
 
                 return Stack(
                   fit: StackFit.expand,
@@ -322,10 +324,9 @@ class CompactGridItem extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-          child: SizedBox(
-            height: 18,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
             child: Text(
               displayTitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -333,7 +334,7 @@ class CompactGridItem extends StatelessWidget {
                     color: AppConstants.textColor,
                     fontSize: 12,
                   ),
-              maxLines: 1,
+              maxLines: settings.compactGridTitleRows,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
             ),

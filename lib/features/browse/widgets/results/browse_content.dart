@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
@@ -110,21 +111,50 @@ class BrowseContent extends StatelessWidget {
         final itemCount = searchResults.length + (isLoadingMore ? 1 : 0);
 
         if (isGrid) {
-          return GridView.builder(
-            controller: scrollController,
-            padding: const EdgeInsets.all(12),
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              childAspectRatio: activeStyle.childAspectRatio,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (index == searchResults.length) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return _buildSeriesItem(searchResults[index] as Series, isGrid: true);
+          final isCompactGrid = activeStyle == AppListStyle.compactGrid;
+
+          Widget buildGridContent(BuildContext context, int calculatedColumns) {
+            if (isCompactGrid) {
+              return DynamicRowHeightGrid(
+                controller: scrollController,
+                padding: const EdgeInsets.all(12),
+                crossAxisCount: calculatedColumns,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                itemCount: itemCount,
+                itemBuilder: (context, index) {
+                  if (index == searchResults.length) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return _buildSeriesItem(searchResults[index] as Series, isGrid: true);
+                },
+              );
+            }
+
+            return GridView.builder(
+              controller: scrollController,
+              padding: const EdgeInsets.all(12),
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 160,
+                childAspectRatio: activeStyle.childAspectRatio,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: itemCount,
+              itemBuilder: (context, index) {
+                if (index == searchResults.length) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return _buildSeriesItem(searchResults[index] as Series, isGrid: true);
+              },
+            );
+          }
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final calculatedColumns = ((width + 10) / 170).ceil().clamp(1, 12);
+              return buildGridContent(context, calculatedColumns);
             },
           );
         }

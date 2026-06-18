@@ -262,6 +262,7 @@
         "library_grid_columns": "Library Grid Columns",
         "browse_grid_columns": "Browse Grid Columns",
         "grid_columns_auto": "Auto",
+        "compact_grid_title_rows": "Compact Grid Title Rows",
         "copy_to_browse": "Copy to Browse",
         "copy_to_library": "Copy to Library",
         "copied_to_browse": "Copied settings to Browse!",

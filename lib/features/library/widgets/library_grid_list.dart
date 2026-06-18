@@ -8,6 +8,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 
 class LibraryGridList extends StatelessWidget {
   final List<LibraryEntry> items;
@@ -101,29 +102,56 @@ class LibraryGridList extends StatelessWidget {
               ? settings.libraryGridColumnCount
               : settings.gridColumnCount;
 
-          Widget grid = GridView.builder(
-            controller: scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(12),
-            gridDelegate: columns > 0
-                ? SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: columns,
-                    childAspectRatio: activeStyle.childAspectRatio,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  )
-                : SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 160,
-                    childAspectRatio: activeStyle.childAspectRatio,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-            itemCount: items.length,
-            itemBuilder: (context, index) =>
-                _buildEntryItem(items[index], seriesService),
-          );
+          final isCompactGrid = activeStyle == AppListStyle.compactGrid;
 
-          if (columns > 0) {
+          Widget buildGridContent(BuildContext context, int calculatedColumns) {
+            if (isCompactGrid) {
+              return DynamicRowHeightGrid(
+                controller: scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(12),
+                crossAxisCount: calculatedColumns,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                itemCount: items.length,
+                itemBuilder: (context, index) =>
+                    _buildEntryItem(items[index], seriesService),
+              );
+            }
+
+            return GridView.builder(
+              controller: scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(12),
+              gridDelegate: columns > 0
+                  ? SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columns,
+                      childAspectRatio: activeStyle.childAspectRatio,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    )
+                  : SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 160,
+                      childAspectRatio: activeStyle.childAspectRatio,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+              itemCount: items.length,
+              itemBuilder: (context, index) =>
+                  _buildEntryItem(items[index], seriesService),
+            );
+          }
+
+          if (columns == 0) {
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final calculatedColumns = ((width + 10) / 170).ceil().clamp(1, 12);
+                return buildGridContent(context, calculatedColumns);
+              },
+            );
+          } else {
+            Widget grid = buildGridContent(context, columns);
             final expectedWidth = columns * 160.0 + (columns - 1) * 10.0 + 24.0;
             return Align(
               alignment: Alignment.topCenter,
@@ -133,8 +161,6 @@ class LibraryGridList extends StatelessWidget {
               ),
             );
           }
-
-          return grid;
         }
 
         return ListView.builder(

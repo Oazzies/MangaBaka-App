@@ -230,6 +230,7 @@
         "library_grid_columns": "Columnas de la biblioteca",
         "browse_grid_columns": "Columnas de explorar",
         "grid_columns_auto": "Auto",
+        "compact_grid_title_rows": "Filas del título en cuadrícula compacta",
         "news_columns": "Columnas de Noticias",
         "one_column": "1 Columna",
         "two_columns": "2 Columnas",

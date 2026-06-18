@@ -29,6 +29,7 @@ void main() {
       expect(manager.hideLibrarySeriesInBrowse, false);
       expect(manager.contentPreferences, ['safe', 'suggestive']);
       expect(manager.showTooltips, true);
+      expect(manager.compactGridTitleRows, 1);
     });
 
     test('loads values from SharedPreferences', () async {
@@ -37,6 +38,7 @@ void main() {
         SettingsKeys.hideLibrarySeriesInBrowse: true,
         SettingsKeys.contentPreferences: ['safe', 'suggestive', 'erotica'],
         SettingsKeys.showTooltips: false,
+        SettingsKeys.compactGridTitleRows: 3,
       });
 
       final manager = SettingsManager();
@@ -46,6 +48,7 @@ void main() {
       expect(manager.hideLibrarySeriesInBrowse, true);
       expect(manager.contentPreferences, contains('erotica'));
       expect(manager.showTooltips, false);
+      expect(manager.compactGridTitleRows, 3);
     });
 
     test('updates values and notifies listeners', () async {
@@ -85,6 +88,24 @@ void main() {
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool(SettingsKeys.separateListStyles), true);
+    });
+
+    test('compactGridTitleRows updates and persists within limits', () async {
+      final manager = SettingsManager();
+      await manager.init();
+
+      await manager.setCompactGridTitleRows(5);
+      expect(manager.compactGridTitleRows, 5);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt(SettingsKeys.compactGridTitleRows), 5);
+
+      // Test clamping/limits
+      await manager.setCompactGridTitleRows(100);
+      expect(manager.compactGridTitleRows, 99); // Clamped to 99
+
+      await manager.setCompactGridTitleRows(0);
+      expect(manager.compactGridTitleRows, 1); // Clamped to 1
     });
   });
 }
