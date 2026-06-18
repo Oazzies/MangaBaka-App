@@ -252,6 +252,14 @@ class BrowseScreenState extends State<BrowseScreen> {
                           selectedType: _controller.currentType,
                           onTypeChanged: _controller.setType,
                         ),
+                      if (_controller.currentType == BrowseType.series)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: FilterChipsRow(
+                            filters: _controller.currentFilters,
+                            onFiltersChanged: _controller.updateFilters,
+                          ),
+                        ),
                       if (_controller.isSearchMode &&
                           _controller.totalResults > 0)
                         Padding(
@@ -277,14 +285,6 @@ class BrowseScreenState extends State<BrowseScreen> {
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                      if (_controller.currentType == BrowseType.series)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: FilterChipsRow(
-                            filters: _controller.currentFilters,
-                            onFiltersChanged: _controller.updateFilters,
                           ),
                         ),
                       BrowseContent(

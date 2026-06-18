@@ -87,6 +87,8 @@
         "select_tags": "Tags auswählen...",
         "included": "Inklusive",
         "excluded": "Exklusive",
+        "tags_selected": "{count} Tags ausgewählt",
+        "hold_to_select_more_hint": "Tippe andere Tags an zum Hinzufügen",
         "licensed_status": "Lizenzstatus",
         "rating_range": "Bewertungsbereich",
         "publication_year": "Veröffentlichungsjahr",

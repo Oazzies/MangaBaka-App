@@ -114,6 +114,8 @@
         "select_tags": "Select Tags...",
         "included": "Included",
         "excluded": "Excluded",
+        "tags_selected": "{count} tags selected",
+        "hold_to_select_more_hint": "Tap other tags to add",
         "licensed_status": "Licensed Status",
         "rating_range": "Rating Range",
         "publication_year": "Publication Year",

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 
 class SeriesTagGroup extends StatefulWidget {
   final String header;
@@ -120,12 +123,45 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
   }
 
   Widget _buildTagChip(String tag) {
-    final tagParts = tag.split(' > ');
+    final metadataService = getIt<MetadataService>();
+    final path = metadataService.getTagPath(tag) ?? tag;
+    final parts = path.split(' > ');
+    
+    String displayName = tag;
+    if (parts.length >= 2) {
+      if (parts.length == 2) {
+        displayName = parts[1];
+      } else if (parts.length == 3) {
+        displayName = parts[2];
+      } else {
+        displayName = parts.sublist(2).join(' > ');
+      }
+    }
+
+    final tagParts = displayName.split(' > ');
+
+    final detailState = SeriesDetailScreen.of(context);
+    final tagId = metadataService.getTagId(tag) ?? tag;
+    final isSelected = detailState?.drawerFilters?.tag.contains(tagId) ?? false;
+
     return ChipBase(
       borderRadius: AppConstants.pillRadius,
-      backgroundColor: AppConstants.secondaryBackground,
-      borderColor: AppConstants.borderColor,
+      backgroundColor: isSelected
+          ? AppConstants.accentColor
+          : AppConstants.secondaryBackground,
+      borderColor: isSelected
+          ? AppConstants.accentColor
+          : AppConstants.borderColor,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      onTap: () {
+        final isSelecting = detailState?.drawerFilters != null;
+        if (isSelecting) {
+          detailState?.handleTagLongPress(tag);
+        } else {
+          detailState?.handleTagTap(tag);
+        }
+      },
+      onLongPress: () => detailState?.handleTagLongPress(tag),
       label: Text.rich(
         TextSpan(
           children: [
@@ -133,7 +169,7 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
               TextSpan(
                 text: '${tagParts.sublist(0, tagParts.length - 1).join(' > ')} > ',
                 style: TextStyle(
-                  color: AppConstants.textMutedColor,
+                  color: isSelected ? Colors.white70 : AppConstants.textMutedColor,
                   fontSize: 11,
                   fontWeight: FontWeight.w400,
                   height: 1.2,
@@ -143,7 +179,7 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
             TextSpan(
               text: tagParts.last,
               style: TextStyle(
-                color: AppConstants.textColor,
+                color: isSelected ? Colors.white : AppConstants.textColor,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 height: 1.2,

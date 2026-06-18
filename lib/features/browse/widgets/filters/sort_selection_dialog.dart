@@ -49,17 +49,6 @@ class SortSelectionDialog {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ...sortOptions.entries.map((e) {
-                        final isSelected = currentFilters.sortBy == e.key;
-                        return _SelectionTile(
-                          label: e.value,
-                          isSelected: isSelected,
-                          onTap: () {
-                            onSortSelected(e.key);
-                            Navigator.pop(dialogContext);
-                          },
-                        );
-                      }),
                       _SelectionTile(
                         label: l10n.translate('default'),
                         isSelected: currentFilters.sortBy == null,
@@ -67,8 +56,21 @@ class SortSelectionDialog {
                           onSortSelected(null);
                           Navigator.pop(dialogContext);
                         },
-                        isLast: true,
+                        isLast: false,
                       ),
+                      ...sortOptions.entries.map((e) {
+                        final isSelected = currentFilters.sortBy == e.key;
+                        final isEntryLast = e.key == sortOptions.entries.last.key;
+                        return _SelectionTile(
+                          label: e.value,
+                          isSelected: isSelected,
+                          onTap: () {
+                            onSortSelected(e.key);
+                            Navigator.pop(dialogContext);
+                          },
+                          isLast: isEntryLast,
+                        );
+                      }),
                     ],
                   ),
                 ),

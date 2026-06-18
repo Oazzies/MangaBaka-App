@@ -163,6 +163,33 @@ class BrowseController extends ChangeNotifier {
     searchSeries();
   }
 
+  void startTagSearch(List<String> tagIds) {
+    _logger.info('Starting tag search with tag IDs: $tagIds');
+    searchController.clear();
+    _currentSearchQuery = '';
+    _currentType = BrowseType.series;
+    _currentFilters = SearchFilters(tag: tagIds);
+    searchSeries();
+  }
+
+  void startGenreSearch(String genre) {
+    _logger.info('Starting genre search with genre: $genre');
+    searchController.clear();
+    _currentSearchQuery = '';
+    _currentType = BrowseType.series;
+    _currentFilters = SearchFilters(genre: [genre]);
+    searchSeries();
+  }
+
+  void startSearchWithFilters(SearchFilters filters) {
+    _logger.info('Starting search with filters: ${filters.toMap()}');
+    searchController.clear();
+    _currentSearchQuery = '';
+    _currentType = BrowseType.series;
+    _currentFilters = filters;
+    searchSeries();
+  }
+
   Future<void> searchSeries() async {
     if (_currentSearchQuery.trim().isEmpty && _currentFilters.toMap().isEmpty) {
       _logger.fine('Search query and filters are empty, skipping search');

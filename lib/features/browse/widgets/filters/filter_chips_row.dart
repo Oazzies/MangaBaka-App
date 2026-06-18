@@ -77,7 +77,11 @@ class FilterChipsRow extends StatelessWidget {
         chips.addAll(_buildFilterPairChips(
           include: filters.tag,
           exclude: filters.tagNot,
-          labelFor: (v) => metadata.getTagName(int.tryParse(v) ?? 0),
+          labelFor: (v) {
+            final id = int.tryParse(v);
+            if (id == null) return v;
+            return metadata.getTagName(id);
+          },
           onRemoveInclude: (v) => onFiltersChanged(
             filters.copyWith(tag: filters.tag.where((x) => x != v).toList()),
           ),
@@ -85,6 +89,26 @@ class FilterChipsRow extends StatelessWidget {
             filters.copyWith(tagNot: filters.tagNot.where((x) => x != v).toList()),
           ),
         ));
+
+        // Staff / Authors / Artists
+        if (filters.staff.isNotEmpty) {
+          chips.addAll(filters.staff.map((v) => _buildChip(
+            v,
+            () => onFiltersChanged(
+              filters.copyWith(staff: filters.staff.where((x) => x != v).toList()),
+            ),
+          )));
+        }
+
+        // Publisher
+        if (filters.publisher.isNotEmpty) {
+          chips.addAll(filters.publisher.map((v) => _buildChip(
+            v,
+            () => onFiltersChanged(
+              filters.copyWith(publisher: filters.publisher.where((x) => x != v).toList()),
+            ),
+          )));
+        }
 
         // Rating
         if (filters.ratingLower > 0 || filters.ratingUpper < 100) {

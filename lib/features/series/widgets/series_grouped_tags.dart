@@ -6,6 +6,8 @@ import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_tag_group.dart';
 import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 
 class SeriesGroupedTags extends StatefulWidget {
   final Series series;
@@ -29,6 +31,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
   final GlobalKey _contentKey = GlobalKey();
   bool _needsShowMore = false;
   double _contentHeight = 0.0;
+  SearchFilters? _lastDrawerFilters;
 
   void _measureContent() {
     if (!mounted) return;
@@ -46,44 +49,46 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
   }
 
   void _ensureGrouped() {
-    if (_cachedGrouped != null) return;
+    final detailState = SeriesDetailScreen.of(context);
+    final currentFilters = detailState?.drawerFilters;
+    if (currentFilters != _lastDrawerFilters) {
+      _cachedContent = null;
+      _lastDrawerFilters = currentFilters;
+    }
+
+    if (_cachedGrouped != null && _cachedContent != null) return;
 
     final metadataService = getIt<MetadataService>();
     final Map<String, Map<String, List<String>>> grouped = {};
 
-    for (var tag in widget.series.tags) {
-      final path = metadataService.getTagPath(tag) ?? tag;
-      final parts = path.split(' > ');
+    if (_cachedGrouped == null) {
+      for (var tag in widget.series.tags) {
+        final path = metadataService.getTagPath(tag) ?? tag;
+        final parts = path.split(' > ');
 
-      String header = 'Other';
-      String subheader = '';
-      String tagName = tag;
+        String header = 'Other';
+        String subheader = '';
 
-      if (parts.length >= 2) {
-        header = parts[0];
-        if (parts.length == 2) {
-          tagName = parts[1];
-        } else if (parts.length == 3) {
-          subheader = parts[1];
-          tagName = parts[2];
-        } else if (parts.length >= 4) {
-          subheader = parts[1];
-          tagName = parts.sublist(2).join(' > ');
+        if (parts.length >= 2) {
+          header = parts[0];
+          if (parts.length >= 3) {
+            subheader = parts[1];
+          }
         }
-      }
 
-      grouped.putIfAbsent(header, () => {});
-      grouped[header]!.putIfAbsent(subheader, () => []);
-      grouped[header]![subheader]!.add(tagName);
+        grouped.putIfAbsent(header, () => {});
+        grouped[header]!.putIfAbsent(subheader, () => []);
+        grouped[header]![subheader]!.add(tag);
+      }
+      _cachedGrouped = grouped;
     }
 
-    _cachedGrouped = grouped;
-    final sortedHeaders = grouped.keys.toList()..sort();
+    final sortedHeaders = _cachedGrouped!.keys.toList()..sort();
 
     _cachedContent = sortedHeaders.map((header) {
       return SeriesTagGroup(
         header: header,
-        subGroups: grouped[header]!,
+        subGroups: _cachedGrouped![header]!,
         onToggle: () {
           WidgetsBinding.instance.addPostFrameCallback((_) => _measureContent());
         },

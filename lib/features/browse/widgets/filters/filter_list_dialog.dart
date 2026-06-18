@@ -11,6 +11,7 @@ class FilterListDialog extends StatefulWidget {
   final List<String> initialIncludes;
   final List<String> initialExcludes;
   final Function(List<String>, List<String>) onApply;
+  final bool showSearch;
 
   const FilterListDialog({
     super.key,
@@ -21,6 +22,7 @@ class FilterListDialog extends StatefulWidget {
     required this.initialIncludes,
     required this.initialExcludes,
     required this.onApply,
+    this.showSearch = true,
   });
 
   @override
@@ -62,19 +64,45 @@ class _FilterListDialogState extends State<FilterListDialog> {
       return name.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
+    // Sort included/excluded items to the top
+    filteredItems.sort((a, b) {
+      final idA = a[widget.idKey]?.toString() ?? '';
+      final idB = b[widget.idKey]?.toString() ?? '';
+      
+      final stateA = _getTriState(idA);
+      final stateB = _getTriState(idB);
+      
+      final isSelectedA = stateA != TriState.off;
+      final isSelectedB = stateB != TriState.off;
+      
+      if (isSelectedA && !isSelectedB) {
+        return -1;
+      } else if (!isSelectedA && isSelectedB) {
+        return 1;
+      }
+      return 0; // maintain original sorting for others
+    });
+
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final double? containerHeight = widget.showSearch ? MediaQuery.of(context).size.height * 0.8 : null;
+
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: containerHeight,
       decoration: BoxDecoration(
         color: AppConstants.primaryBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      padding: EdgeInsets.only(bottom: bottomPadding),
       child: Column(
+        mainAxisSize: widget.showSearch ? MainAxisSize.max : MainAxisSize.min,
         children: [
           const SizedBox(height: 12),
           _buildDragHandle(),
           _buildHeader(),
-          Expanded(
+          Flexible(
             child: ListView.separated(
+              shrinkWrap: !widget.showSearch,
+              physics: widget.showSearch ? null : const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               itemCount: filteredItems.length,
               separatorBuilder: (context, index) => _buildDivider(),
@@ -113,7 +141,9 @@ class _FilterListDialogState extends State<FilterListDialog> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+      padding: widget.showSearch 
+          ? const EdgeInsets.fromLTRB(24, 20, 24, 16)
+          : const EdgeInsets.fromLTRB(24, 20, 24, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -125,25 +155,27 @@ class _FilterListDialogState extends State<FilterListDialog> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            style: TextStyle(color: AppConstants.textColor),
-            decoration: InputDecoration(
-              hintText: 'Search ${widget.title.toLowerCase()}...',
-              hintStyle: TextStyle(color: AppConstants.textMutedColor, fontSize: 15),
-              prefixIcon: Icon(Icons.search, color: AppConstants.textMutedColor, size: 20),
-              filled: true,
-              fillColor: AppConstants.secondaryBackground,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: AppConstants.accentColor.withValues(alpha: 0.3), width: 1),
+          if (widget.showSearch) ...[
+            const SizedBox(height: 16),
+            TextField(
+              style: TextStyle(color: AppConstants.textColor),
+              decoration: InputDecoration(
+                hintText: 'Search ${widget.title.toLowerCase()}...',
+                hintStyle: TextStyle(color: AppConstants.textMutedColor, fontSize: 15),
+                prefixIcon: Icon(Icons.search, color: AppConstants.textMutedColor, size: 20),
+                filled: true,
+                fillColor: AppConstants.secondaryBackground,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: AppConstants.accentColor.withValues(alpha: 0.3), width: 1),
+                ),
               ),
+              onChanged: (val) => setState(() => _searchQuery = val),
             ),
-            onChanged: (val) => setState(() => _searchQuery = val),
-          ),
+          ],
         ],
       ),
     );

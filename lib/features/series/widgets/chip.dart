@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 class ChipBase extends StatelessWidget {
@@ -10,6 +10,7 @@ class ChipBase extends StatelessWidget {
   final TextStyle? labelStyle;
 
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const ChipBase({
     required this.label,
@@ -19,6 +20,7 @@ class ChipBase extends StatelessWidget {
     this.padding,
     this.labelStyle,
     this.onTap,
+    this.onLongPress,
     super.key,
   });
 
@@ -46,11 +48,12 @@ class ChipBase extends StatelessWidget {
       ),
     );
 
-    if (onTap != null) {
+    if (onTap != null || onLongPress != null) {
       return Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
+          onLongPress: onLongPress,
           borderRadius: BorderRadius.circular(borderRadius),
           child: chip,
         ),

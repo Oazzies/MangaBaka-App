@@ -88,6 +88,8 @@
         "select_tags": "Sélectionner les tags...",
         "included": "Inclus",
         "excluded": "Exclus",
+        "tags_selected": "{count} tags sélectionnés",
+        "hold_to_select_more_hint": "Appuyez sur d'autres tags pour ajouter",
         "licensed_status": "Statut de licence",
         "rating_range": "Plage de notes",
         "publication_year": "Année de publication",

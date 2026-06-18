@@ -89,6 +89,8 @@
         "select_tags": "Seleccionar etiquetas...",
         "included": "Incluidos",
         "excluded": "Excluidos",
+        "tags_selected": "{count} etiquetas seleccionadas",
+        "hold_to_select_more_hint": "Toca otras etiquetas para agregar",
         "licensed_status": "Estado de licencia",
         "rating_range": "Rango de clasificación",
         "publication_year": "Año de publicación",

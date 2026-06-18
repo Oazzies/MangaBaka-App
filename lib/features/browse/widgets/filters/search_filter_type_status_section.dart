@@ -30,6 +30,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
     required List<String> includes,
     required List<String> excludes,
     required Function(List<String>, List<String>) onApply,
+    bool showSearch = true,
   }) {
     showModalBottomSheet(
       context: context,
@@ -49,6 +50,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
             initialIncludes: includes,
             initialExcludes: excludes,
             onApply: onApply,
+            showSearch: showSearch,
           ),
         );
       },
@@ -80,6 +82,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                 onApply: (inc, exc) => onFiltersChanged(
                   filters.copyWith(type: inc, typeNot: exc),
                 ),
+                showSearch: false,
               ),
             ),
             const SettingsDivider(),
@@ -101,6 +104,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                 onApply: (inc, exc) => onFiltersChanged(
                   filters.copyWith(status: inc, statusNot: exc),
                 ),
+                showSearch: false,
               ),
             ),
           ],
