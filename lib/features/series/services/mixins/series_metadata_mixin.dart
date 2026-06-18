@@ -1,4 +1,4 @@
-﻿import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
 import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
