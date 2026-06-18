@@ -285,6 +285,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # device_info_plus 13.1.0 references the iOS 26.1 selector `isiOSAppOnVision`,
+      # which is only declared in the iOS 26.1+ SDK. The macos-latest default Xcode
+      # (16.x, iOS 18 SDK) can't compile it, so pin to the latest stable Xcode 26.x.
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
