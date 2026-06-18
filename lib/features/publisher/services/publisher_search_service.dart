@@ -7,7 +7,6 @@ import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/utils/uri_utils.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
-import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
 class PublisherSearchService {
   static final String _baseUrl = '${AppConstants.baseApiUrl}/publishers/search';
