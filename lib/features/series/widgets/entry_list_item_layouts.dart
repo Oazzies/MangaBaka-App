@@ -122,20 +122,27 @@ class EntryListLayoutHelper {
     }
 
     void openUpdateDialog() {
-      showDialog(
+      showModalBottomSheet(
         context: context,
-        builder: (context) => ProgressUpdateDialog(
-          initialValue: progress,
-          title: isChapter ? l10n.translate('update_chapters') : l10n.translate('update_volumes'),
-          maxValue: isChapter ? series.totalChapters : series.finalVolume,
-          onUpdate: (value) {
-            final libraryService = getIt<LibraryService>();
-            if (isChapter) {
-              libraryService.updateLibraryEntryProgress(series.id, progressChapter: value);
-            } else {
-              libraryService.updateLibraryEntryProgress(series.id, progressVolume: value);
-            }
-          },
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: ProgressUpdateDialog(
+            initialValue: progress,
+            title: isChapter ? l10n.translate('update_chapters') : l10n.translate('update_volumes'),
+            maxValue: isChapter ? series.totalChapters : series.finalVolume,
+            onUpdate: (value) {
+              final libraryService = getIt<LibraryService>();
+              if (isChapter) {
+                libraryService.updateLibraryEntryProgress(series.id, progressChapter: value);
+              } else {
+                libraryService.updateLibraryEntryProgress(series.id, progressVolume: value);
+              }
+            },
+          ),
         ),
       );
     }
@@ -284,10 +291,13 @@ class CompactGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = SettingsManager();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
+        AspectRatio(
+          aspectRatio: 0.65,
           child: Card(
             color: AppConstants.secondaryBackground,
             clipBehavior: Clip.antiAlias,
@@ -296,7 +306,6 @@ class CompactGridItem extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final l10n = LocalizationService();
-                final settings = SettingsManager();
 
                 return Stack(
                   fit: StackFit.expand,
@@ -322,10 +331,9 @@ class CompactGridItem extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-          child: SizedBox(
-            height: 18,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
             child: Text(
               displayTitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -333,7 +341,7 @@ class CompactGridItem extends StatelessWidget {
                     color: AppConstants.textColor,
                     fontSize: 12,
                   ),
-              maxLines: 1,
+              maxLines: settings.compactGridTitleRows,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
             ),

@@ -7,6 +7,8 @@ class SearchFilters {
   final List<String> genreNot;
   final List<String> tag;
   final List<String> tagNot;
+  final List<String> staff;
+  final List<String> publisher;
   final String? sortBy;
   final double ratingLower;
   final double ratingUpper;
@@ -24,6 +26,8 @@ class SearchFilters {
       genreNot.isEmpty &&
       tag.isEmpty &&
       tagNot.isEmpty &&
+      staff.isEmpty &&
+      publisher.isEmpty &&
       sortBy == null &&
       ratingLower == 0 &&
       ratingUpper == 100 &&
@@ -31,6 +35,25 @@ class SearchFilters {
       publishedYearUpper == null &&
       isLicensed == null &&
       tagMode == 'and';
+
+  int get activeFiltersCount {
+    int count = 0;
+    count += type.length;
+    count += typeNot.length;
+    count += status.length;
+    count += statusNot.length;
+    count += genre.length;
+    count += genreNot.length;
+    count += tag.length;
+    count += tagNot.length;
+    count += staff.length;
+    count += publisher.length;
+    if (sortBy != null && sortBy!.isNotEmpty) count++;
+    if (ratingLower > 0 || ratingUpper < 100) count++;
+    if (publishedYearLower != null || publishedYearUpper != null) count++;
+    if (isLicensed != null) count++;
+    return count;
+  }
 
   SearchFilters({
     this.type = const [],
@@ -41,6 +64,8 @@ class SearchFilters {
     this.genreNot = const [],
     this.tag = const [],
     this.tagNot = const [],
+    this.staff = const [],
+    this.publisher = const [],
     this.sortBy,
     this.ratingLower = 0,
     this.ratingUpper = 100,
@@ -59,6 +84,8 @@ class SearchFilters {
     List<String>? genreNot,
     List<String>? tag,
     List<String>? tagNot,
+    List<String>? staff,
+    List<String>? publisher,
     String? sortBy,
     double? ratingLower,
     double? ratingUpper,
@@ -76,6 +103,8 @@ class SearchFilters {
       genreNot: genreNot ?? this.genreNot,
       tag: tag ?? this.tag,
       tagNot: tagNot ?? this.tagNot,
+      staff: staff ?? this.staff,
+      publisher: publisher ?? this.publisher,
       sortBy: sortBy ?? this.sortBy,
       ratingLower: ratingLower ?? this.ratingLower,
       ratingUpper: ratingUpper ?? this.ratingUpper,
@@ -98,6 +127,8 @@ class SearchFilters {
         genreNot: genreNot,
         tag: tag,
         tagNot: tagNot,
+        staff: staff,
+        publisher: publisher,
         sortBy: sortBy,
         ratingLower: ratingLower,
         ratingUpper: ratingUpper,
@@ -118,6 +149,8 @@ class SearchFilters {
         genreNot: genreNot,
         tag: tag,
         tagNot: tagNot,
+        staff: staff,
+        publisher: publisher,
         sortBy: sortBy,
         ratingLower: ratingLower,
         ratingUpper: ratingUpper,
@@ -137,6 +170,8 @@ class SearchFilters {
         genreNot: genreNot,
         tag: tag,
         tagNot: tagNot,
+        staff: staff,
+        publisher: publisher,
         sortBy: sortBy,
         ratingLower: ratingLower,
         ratingUpper: ratingUpper,
@@ -157,6 +192,8 @@ class SearchFilters {
     if (genreNot.isNotEmpty) map['genre_not'] = genreNot;
     if (tag.isNotEmpty) map['tag'] = tag;
     if (tagNot.isNotEmpty) map['tag_not'] = tagNot;
+    if (staff.isNotEmpty) map['staff'] = staff;
+    if (publisher.isNotEmpty) map['publisher'] = publisher;
 
     if (sortBy != null && sortBy!.isNotEmpty) {
       map['sort_by'] = sortBy;

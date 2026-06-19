@@ -27,44 +27,49 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   Future<void> fetchTabData(String tab) async {
     if (!mounted) return;
     final id = series.id;
-    
-    switch (tab) {
-      case 'Covers':
-        if (covers == null) {
-          final data = await seriesService.fetchSeriesCovers(id);
-          if (mounted) setState(() => covers = data);
-        }
-        break;
-      case 'Related':
-        if (related == null) {
-          final data = await seriesService.fetchSeriesRelated(id);
-          if (mounted) setState(() => related = data);
-        }
-        break;
-      case 'News':
-        if (news == null) {
-          final data = await seriesService.fetchSeriesNews(id);
-          if (mounted) setState(() => news = data);
-        }
-        break;
-      case 'Collections':
-        if (collections == null) {
-          final data = await seriesService.fetchSeriesCollections(id);
-          if (mounted) setState(() => collections = data);
-        }
-        break;
-      case 'Works':
-        if (works == null) {
-          final data = await seriesService.fetchSeriesWorks(id);
-          if (mounted) setState(() => works = data);
-        }
-        break;
-      case 'Similar':
-        if (similar == null) {
-          final data = await seriesService.fetchSeriesSimilar(id);
-          if (mounted) setState(() => similar = data);
-        }
-        break;
+
+    try {
+      switch (tab) {
+        case 'Covers':
+          if (covers == null) {
+            final data = await seriesService.fetchSeriesCovers(id);
+            if (mounted) setState(() => covers = data);
+          }
+          break;
+        case 'Related':
+          if (related == null) {
+            final data = await seriesService.fetchSeriesRelated(id);
+            if (mounted) setState(() => related = data);
+          }
+          break;
+        case 'News':
+          if (news == null) {
+            final data = await seriesService.fetchSeriesNews(id);
+            if (mounted) setState(() => news = data);
+          }
+          break;
+        case 'Collections':
+          if (collections == null) {
+            final data = await seriesService.fetchSeriesCollections(id);
+            if (mounted) setState(() => collections = data);
+          }
+          break;
+        case 'Works':
+          if (works == null) {
+            final data = await seriesService.fetchSeriesWorks(id);
+            if (mounted) setState(() => works = data);
+          }
+          break;
+        case 'Similar':
+          if (similar == null) {
+            final data = await seriesService.fetchSeriesSimilar(id);
+            if (mounted) setState(() => similar = data);
+          }
+          break;
+      }
+    } catch (e) {
+      seriesService.logger.warning('Error fetching tab "$tab" data: $e');
+      if (mounted) setState(() => fetchError = true);
     }
   }
 

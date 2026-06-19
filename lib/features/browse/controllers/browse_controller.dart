@@ -160,6 +160,39 @@ class BrowseController extends ChangeNotifier {
   void updateFilters(SearchFilters filters) {
     _logger.info('Filters updated: ${filters.toMap()}');
     _currentFilters = filters;
+    // When filters are active, Publishers/Staff tabs are hidden — fall back to Series.
+    if (!filters.isEmpty &&
+        (_currentType == BrowseType.publishers ||
+            _currentType == BrowseType.staff)) {
+      _currentType = BrowseType.series;
+    }
+    searchSeries();
+  }
+
+  void startTagSearch(List<String> tagIds) {
+    _logger.info('Starting tag search with tag IDs: $tagIds');
+    searchController.clear();
+    _currentSearchQuery = '';
+    _currentType = BrowseType.series;
+    _currentFilters = SearchFilters(tag: tagIds);
+    searchSeries();
+  }
+
+  void startGenreSearch(String genre) {
+    _logger.info('Starting genre search with genre: $genre');
+    searchController.clear();
+    _currentSearchQuery = '';
+    _currentType = BrowseType.series;
+    _currentFilters = SearchFilters(genre: [genre]);
+    searchSeries();
+  }
+
+  void startSearchWithFilters(SearchFilters filters) {
+    _logger.info('Starting search with filters: ${filters.toMap()}');
+    searchController.clear();
+    _currentSearchQuery = '';
+    _currentType = BrowseType.series;
+    _currentFilters = filters;
     searchSeries();
   }
 
@@ -425,7 +458,7 @@ class BrowseController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final lookupService = BookLookupService();
+      final lookupService = getIt<BookLookupService>();
       final title = await lookupService.lookupTitleByIsbn(isbn);
 
       if (title != null && title.isNotEmpty) {

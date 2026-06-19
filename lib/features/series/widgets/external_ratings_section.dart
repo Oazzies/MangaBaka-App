@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -161,7 +161,7 @@ class ExternalRatingsSection extends StatelessWidget {
         case 'kitsu': return 'https://kitsu.io/manga/$id';
         case 'anime_planet': return 'https://www.anime-planet.com/manga/$id';
         case 'shikimori': return 'https://shikimori.one/mangas/$id';
-        case 'manga_updates': return 'https://www.mangaupdates.com/series.html?id=$id';
+        case 'manga_updates': return 'https://www.mangaupdates.com/series/$id';
       }
     }
 

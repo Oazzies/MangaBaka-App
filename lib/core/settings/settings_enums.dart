@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
 enum AppListStyle {
   comfortable,
@@ -14,7 +15,9 @@ extension AppListStyleExtension on AppListStyle {
 
   double get childAspectRatio {
     if (this == AppListStyle.compactGrid) {
-      return 0.56;
+      final rows = SettingsManager().compactGridTitleRows;
+      final effectiveRows = rows.clamp(1, 3);
+      return 120.0 / (196.3 + 18.0 * effectiveRows);
     }
     return 0.65;
   }

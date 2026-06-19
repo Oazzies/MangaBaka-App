@@ -48,14 +48,11 @@ void main() {
   });
 
   group('PublisherSearchService.searchPublishers', () {
-    test('sends content_rating from SettingsManager preferences', () async {
+    test('sends query parameter', () async {
       client.response = http.Response('{"data": []}', 200);
       await service.searchPublishers(query: 'shueisha');
-      expect(
-        client.lastUri!.queryParametersAll['content_rating'],
-        SettingsManager().contentPreferences,
-      );
       expect(client.lastUri!.queryParameters['q'], 'shueisha');
+      expect(client.lastUri!.queryParameters.containsKey('content_rating'), isFalse);
     });
 
     test('passes optional filter params', () async {
@@ -148,19 +145,12 @@ void main() {
   });
 
   group('PublisherSearchService.search (params map)', () {
-    test('falls back to SettingsManager content_rating when not in params', () async {
+    test('filters out unauthorized keys like content_rating', () async {
       client.response = http.Response('{"data": [], "total": 0}', 200);
-      await service.search({'q': 'x'});
-      expect(
-        client.lastUri!.queryParametersAll['content_rating'],
-        SettingsManager().contentPreferences,
-      );
-    });
-
-    test('respects explicit content_rating', () async {
-      client.response = http.Response('{"data": [], "total": 0}', 200);
-      await service.search({'q': 'x', 'content_rating': ['erotica']});
-      expect(client.lastUri!.queryParametersAll['content_rating'], ['erotica']);
+      await service.search({'q': 'x', 'content_rating': ['erotica'], 'invalid_param': 'foo'});
+      expect(client.lastUri!.queryParameters.containsKey('content_rating'), isFalse);
+      expect(client.lastUri!.queryParameters.containsKey('invalid_param'), isFalse);
+      expect(client.lastUri!.queryParameters['q'], 'x');
     });
 
     test('returns total alongside publishers', () async {

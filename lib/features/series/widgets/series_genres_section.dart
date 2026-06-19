@@ -6,6 +6,7 @@ import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 
 class SeriesGenresSection extends StatelessWidget {
   final Series series;
@@ -17,6 +18,8 @@ class SeriesGenresSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (series.genres.isEmpty) return const SizedBox.shrink();
     final metadataService = getIt<MetadataService>();
+    final detailState = SeriesDetailScreen.of(context);
+    final isSelecting = detailState?.drawerFilters != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,17 +30,37 @@ class SeriesGenresSection extends StatelessWidget {
           runSpacing: 8,
           children: [
             for (var i = 0; i < series.genres.length; i++)
-              ChipBase(
-                label: Text(metadataService.getGenreLabel(series.genres[i])),
-                borderRadius: AppConstants.pillRadius,
-                backgroundColor: AppConstants.secondaryBackground,
-                borderColor: AppConstants.borderColor,
-                labelStyle: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  height: 1.2,
-                  color: AppConstants.textColor,
-                ),
+              Builder(
+                builder: (context) {
+                  final genre = series.genres[i];
+                  final isSelected = detailState?.drawerFilters?.genre.contains(genre) ?? false;
+                  return ChipBase(
+                    label: Text(
+                      metadataService.getGenreLabel(genre),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        height: 1.2,
+                        color: isSelected ? Colors.white : AppConstants.textColor,
+                      ),
+                    ),
+                    borderRadius: AppConstants.pillRadius,
+                    backgroundColor: isSelected
+                        ? AppConstants.accentColor
+                        : AppConstants.secondaryBackground,
+                    borderColor: isSelected
+                        ? AppConstants.accentColor
+                        : AppConstants.borderColor,
+                    onTap: () {
+                      if (isSelecting) {
+                        detailState?.handleGenreLongPress(genre);
+                      } else {
+                        detailState?.handleGenreTap(genre);
+                      }
+                    },
+                    onLongPress: () => detailState?.handleGenreLongPress(genre),
+                  );
+                },
               ),
           ],
         ),

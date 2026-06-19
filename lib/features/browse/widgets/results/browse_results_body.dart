@@ -11,6 +11,7 @@ class BrowseResultsBody extends StatelessWidget {
   final ScrollController scrollController;
   final VoidCallback onRetry;
   final Function(Series) onSeriesTap;
+  final String? heroTagPrefix;
 
   const BrowseResultsBody({
     required this.error,
@@ -20,6 +21,7 @@ class BrowseResultsBody extends StatelessWidget {
     required this.scrollController,
     required this.onRetry,
     required this.onSeriesTap,
+    this.heroTagPrefix,
     super.key,
   });
 
@@ -61,6 +63,7 @@ class BrowseResultsBody extends StatelessWidget {
                   isLoading: isLoading,
                   shouldShowRanking: sortBy == 'popularity_asc',
                   onSeriesTap: onSeriesTap,
+                  heroTagPrefix: heroTagPrefix,
                 ),
     );
   }

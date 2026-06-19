@@ -49,65 +49,78 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
     
-    return AlertDialog(
-      backgroundColor: AppConstants.secondaryBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
-        side: BorderSide(
-          color: AppConstants.borderColor.withValues(alpha: 0.2),
-          width: 1.5,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppConstants.secondaryBackground,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppConstants.largeRadius),
         ),
       ),
-      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-      contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppConstants.accentColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.menu_book_rounded,
-              color: AppConstants.accentColor,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: TextStyle(
-                    color: AppConstants.textColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                if (widget.maxValue != 'null' && widget.maxValue.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    '${l10n.translate('total')}: ${widget.maxValue}',
-                    style: TextStyle(
-                      color: AppConstants.textMutedColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(
+        24,
+        12,
+        24,
+        24 + MediaQuery.of(context).padding.bottom,
       ),
-      content: Column(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
+          Center(
+            child: Container(
+              width: 32,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppConstants.borderColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.accentColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.menu_book_rounded,
+                  color: AppConstants.accentColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: TextStyle(
+                        color: AppConstants.textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    if (widget.maxValue != 'null' && widget.maxValue.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '${l10n.translate('total')}: ${widget.maxValue}',
+                        style: TextStyle(
+                          color: AppConstants.textMutedColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -154,43 +167,47 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: Text(
+                  l10n.translate('cancel'),
+                  style: TextStyle(
+                    color: AppConstants.textMutedColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton(
+                onPressed: () {
+                  widget.onUpdate(_currentValue);
+                  Navigator.pop(context);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppConstants.accentColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  l10n.translate('save'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          child: Text(
-            l10n.translate('cancel'),
-            style: TextStyle(
-              color: AppConstants.textMutedColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const SizedBox(width: 4),
-        FilledButton(
-          onPressed: () {
-            widget.onUpdate(_currentValue);
-            Navigator.pop(context);
-          },
-          style: FilledButton.styleFrom(
-            backgroundColor: AppConstants.accentColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            l10n.translate('save'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 }

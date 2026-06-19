@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -137,8 +137,20 @@ class MetadataService {
         .join(' ');
   }
 
+  String? getTagId(String tagName) {
+    final tag = _tagMap[tagName] ?? _tagMap.entries.firstWhere(
+      (entry) => entry.key.toLowerCase() == tagName.toLowerCase(),
+      orElse: () => const MapEntry('', {}),
+    ).value;
+    return tag['id']?.toString();
+  }
+
   String? getTagPath(String tagName) {
-    return _tagMap[tagName]?['name_path']?.toString();
+    final tag = _tagMap[tagName] ?? _tagMap.entries.firstWhere(
+      (entry) => entry.key.toLowerCase() == tagName.toLowerCase(),
+      orElse: () => const MapEntry('', {}),
+    ).value;
+    return tag['name_path']?.toString();
   }
 
   String getTagName(int id) {

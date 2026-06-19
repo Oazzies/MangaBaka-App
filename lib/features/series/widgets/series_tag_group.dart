@@ -1,175 +1,188 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 
-class SeriesTagGroup extends StatelessWidget {
+class SeriesTagGroup extends StatefulWidget {
   final String header;
   final Map<String, List<String>> subGroups;
+  final VoidCallback? onToggle;
 
   const SeriesTagGroup({
     super.key,
     required this.header,
     required this.subGroups,
+    this.onToggle,
   });
 
   @override
+  State<SeriesTagGroup> createState() => _SeriesTagGroupState();
+}
+
+class _SeriesTagGroupState extends State<SeriesTagGroup> {
+  bool _isCollapsed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final entries = subGroups.entries.toList();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            header.toUpperCase(),
-            style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
-              fontSize: 11,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          _isCollapsed = !_isCollapsed;
+        });
+        widget.onToggle?.call();
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: AppConstants.accentColor.withValues(alpha: 0.5),
+                width: 3,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          Column(
+          padding: const EdgeInsets.only(left: 16),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (var i = 0; i < entries.length; i++) ...[
-                _buildSubGroupItem(entries[i], isLast: i == entries.length - 1),
-                if (i != entries.length - 1)
-                  _buildDividerRow(),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.header.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        color: AppConstants.textMutedColor,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _isCollapsed ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
+                    size: 16,
+                    color: AppConstants.textMutedColor.withValues(alpha: 0.7),
+                  ),
+                ],
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topCenter,
+                child: _isCollapsed
+                    ? const SizedBox(width: double.infinity)
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 12),
+                            ...widget.subGroups.entries.map((subEntry) {
+                              final subheader = subEntry.key;
+                              final tags = subEntry.value;
 
-  Widget _buildDividerRow() {
-    return Row(
-      children: [
-        SizedBox(
-          width: 24,
-          height: 24,
-          child: Stack(
-            children: [
-              Positioned(
-                left: 8,
-                top: 0,
-                bottom: 0,
-                child: Container(
-                  width: 1.5,
-                  color: AppConstants.accentColor,
-                ),
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (subheader.isNotEmpty) ...[
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Text(
+                                        subheader,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppConstants.textMutedColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: tags.map((tag) => _buildTagChip(tag)).toList(),
+                                  ),
+                                  if (subEntry.key != widget.subGroups.keys.last)
+                                    const SizedBox(height: 16),
+                                ],
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
               ),
             ],
           ),
         ),
-        Expanded(
-          child: Divider(
-            height: 24,
-            thickness: 1,
-            color: AppConstants.borderColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubGroupItem(MapEntry<String, List<String>> entry, {required bool isLast}) {
-    final subheader = entry.key;
-    final tags = entry.value;
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 24,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 8,
-                  top: 0,
-                  bottom: isLast ? null : 0,
-                  height: isLast ? 10 : null,
-                  child: Container(
-                    width: 1.5,
-                    color: AppConstants.accentColor,
-                  ),
-                ),
-                Positioned(
-                  left: 8,
-                  top: 9.25,
-                  child: Container(
-                    width: 16,
-                    height: 1.5,
-                    color: AppConstants.accentColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (subheader.isNotEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 0, bottom: 8),
-                    child: Text(
-                      subheader,
-                      style: AppTypography.sans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppConstants.textMutedColor,
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  const SizedBox(height: 18),
-                ],
-                Padding(
-                  padding: const EdgeInsets.only(left: 12, bottom: 8),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: tags.map((tag) => _buildTagChip(tag)).toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildTagChip(String tag) {
-    final tagParts = tag.split(' > ');
+    final metadataService = getIt<MetadataService>();
+    final path = metadataService.getTagPath(tag) ?? tag;
+    final parts = path.split(' > ');
+    
+    String displayName = tag;
+    if (parts.length >= 2) {
+      if (parts.length == 2) {
+        displayName = parts[1];
+      } else if (parts.length == 3) {
+        displayName = parts[2];
+      } else {
+        displayName = parts.sublist(2).join(' > ');
+      }
+    }
+
+    final tagParts = displayName.split(' > ');
+
+    final detailState = SeriesDetailScreen.of(context);
+    final tagId = metadataService.getTagId(tag) ?? tag;
+    final isSelected = detailState?.drawerFilters?.tag.contains(tagId) ?? false;
+
     return ChipBase(
-      borderColor: AppConstants.borderColor,
-      backgroundColor: AppConstants.secondaryBackground,
-      borderRadius: AppConstants.denseRadius,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      borderRadius: AppConstants.pillRadius,
+      backgroundColor: isSelected
+          ? AppConstants.accentColor
+          : AppConstants.secondaryBackground,
+      borderColor: isSelected
+          ? AppConstants.accentColor
+          : AppConstants.borderColor,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      onTap: () {
+        final isSelecting = detailState?.drawerFilters != null;
+        if (isSelecting) {
+          detailState?.handleTagLongPress(tag);
+        } else {
+          detailState?.handleTagTap(tag);
+        }
+      },
+      onLongPress: () => detailState?.handleTagLongPress(tag),
       label: Text.rich(
         TextSpan(
           children: [
             if (tagParts.length > 1) ...[
               TextSpan(
                 text: '${tagParts.sublist(0, tagParts.length - 1).join(' > ')} > ',
-                style: AppTypography.sans(
-                  color: AppConstants.textMutedColor,
+                style: TextStyle(
+                  color: isSelected ? Colors.white70 : AppConstants.textMutedColor,
                   fontSize: 11,
                   fontWeight: FontWeight.w400,
+                  height: 1.2,
                 ),
               ),
             ],
             TextSpan(
               text: tagParts.last,
-              style: AppTypography.sans(
-                color: AppConstants.textColor,
+              style: TextStyle(
+                color: isSelected ? Colors.white : AppConstants.textColor,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
+                height: 1.2,
               ),
             ),
           ],

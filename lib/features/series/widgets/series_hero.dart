@@ -27,12 +27,15 @@ class SeriesTitleBlock extends StatelessWidget {
     if (series.type.isNotEmpty && series.type.toLowerCase() != 'null') {
       parts.add(series.type.toUpperCase());
     }
+    if (series.status.isNotEmpty && series.status.toLowerCase() != 'null') {
+      parts.add(series.status.toUpperCase());
+    }
     final rating = series.rating;
     final parsed = double.tryParse(rating);
     if (parsed != null && parsed > 0) {
       parts.add('★ ${parsed.toStringAsFixed(1)}');
     }
-    return parts.join('   ·   ');
+    return parts.join(' · ');
   }
 
   String _buildByline(LocalizationService l10n) {
@@ -52,7 +55,7 @@ class SeriesTitleBlock extends StatelessWidget {
     if (artists.isNotEmpty) {
       pieces.add('${l10n.translate('art_by')} ${artists.join(', ')}');
     }
-    return pieces.join('  ·  ');
+    return pieces.join(' · ');
   }
 
   @override

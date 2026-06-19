@@ -14,6 +14,7 @@ import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_section_header.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_item.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_dialogs.dart';
+import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 
 class ListStyleLivePreview extends StatelessWidget {
   final AppListStyle style;
@@ -47,40 +48,74 @@ class ListStyleLivePreview extends StatelessWidget {
 
     if (style.isGrid) {
       final columns = gridColumnCount;
-      final gridDelegate = columns > 0
-          ? SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              childAspectRatio: style.childAspectRatio,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            )
-          : SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 160,
-              childAspectRatio: style.childAspectRatio,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            );
+      final isCompactGrid = style == AppListStyle.compactGrid;
 
-      final itemCount = columns > 0 ? columns : 3;
+      Widget buildGridContent(BuildContext context, int calculatedColumns) {
+        final itemCount = calculatedColumns > 0 ? calculatedColumns : 3;
 
-      Widget grid = GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        gridDelegate: gridDelegate,
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
-          return EntryListItem(
-            series: mockSeries222,
-            isLibrary: true,
-            listStyle: style,
-            heroTagPrefix: 'preview_${style.name}_$index',
-            previewEntry: mockLibraryEntry222,
+        if (isCompactGrid) {
+          return DynamicRowHeightGrid(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            crossAxisCount: calculatedColumns > 0 ? calculatedColumns : 3,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              return EntryListItem(
+                series: mockSeries222,
+                isLibrary: true,
+                listStyle: style,
+                heroTagPrefix: 'preview_${style.name}_$index',
+                previewEntry: mockLibraryEntry222,
+              );
+            },
           );
-        },
-      );
+        }
 
-      if (columns > 0) {
+        final gridDelegate = columns > 0
+            ? SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                childAspectRatio: style.childAspectRatio,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              )
+            : SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 160,
+                childAspectRatio: style.childAspectRatio,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              );
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          gridDelegate: gridDelegate,
+          itemCount: itemCount,
+          itemBuilder: (context, index) {
+            return EntryListItem(
+              series: mockSeries222,
+              isLibrary: true,
+              listStyle: style,
+              heroTagPrefix: 'preview_${style.name}_$index',
+              previewEntry: mockLibraryEntry222,
+            );
+          },
+        );
+      }
+
+      if (columns == 0) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final calculatedColumns = ((width + 10) / 170).ceil().clamp(1, 12);
+            return buildGridContent(context, calculatedColumns);
+          },
+        );
+      } else {
+        Widget grid = buildGridContent(context, columns);
         final expectedWidth = columns * 160.0 + (columns - 1) * 10.0 + 24.0;
         return Align(
           alignment: Alignment.topCenter,
@@ -90,8 +125,6 @@ class ListStyleLivePreview extends StatelessWidget {
           ),
         );
       }
-
-      return grid;
     }
 
     return EntryListItem(
@@ -317,6 +350,63 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings> {
     );
   }
 
+  Widget _buildTitleRowsCounter({
+    required String label,
+    required int currentValue,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: AppConstants.textColor,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove_circle_outline),
+                onPressed: currentValue > 1
+                    ? () => onChanged(currentValue - 1)
+                    : null,
+                color: AppConstants.accentColor,
+                disabledColor: AppConstants.textMutedColor.withValues(alpha: 0.3),
+              ),
+              Container(
+                constraints: const BoxConstraints(minWidth: 50),
+                alignment: Alignment.center,
+                child: Text(
+                  currentValue.toString(),
+                  style: TextStyle(
+                    color: AppConstants.textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline),
+                onPressed: currentValue < 99
+                    ? () => onChanged(currentValue + 1)
+                    : null,
+                color: AppConstants.accentColor,
+                disabledColor: AppConstants.textMutedColor.withValues(alpha: 0.3),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = SettingsManager();
@@ -375,7 +465,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings> {
               );
             },
             child: ListStyleLivePreview(
-              key: ValueKey('${activeStyle.name}_${settings.showLibraryProgress}_${settings.showRemainingProgress}_${settings.libraryProgressType.name}_$gridColumnsValue'),
+              key: ValueKey('${activeStyle.name}_${settings.showLibraryProgress}_${settings.showRemainingProgress}_${settings.libraryProgressType.name}_${gridColumnsValue}_${settings.compactGridTitleRows}'),
               style: activeStyle,
               showLibraryProgress: settings.showLibraryProgress,
               showRemainingProgress: settings.showRemainingProgress,
@@ -445,6 +535,14 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings> {
               }
             },
           ),
+          if (activeStyle == AppListStyle.compactGrid) ...[
+            const SizedBox(height: 16),
+            _buildTitleRowsCounter(
+              label: widget.l10n.translate('compact_grid_title_rows'),
+              currentValue: settings.compactGridTitleRows,
+              onChanged: (val) => settings.setCompactGridTitleRows(val),
+            ),
+          ],
         ],
         if (!isSmallDevice) ...[
           const SizedBox(height: 16),

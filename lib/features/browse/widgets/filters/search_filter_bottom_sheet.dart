@@ -149,7 +149,9 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                       ),
                     ),
                     Text(
-                      l10n.translate('filters'),
+                      _filters.activeFiltersCount > 0
+                          ? '${l10n.translate('filters')} (${_filters.activeFiltersCount})'
+                          : l10n.translate('filters'),
                       style: TextStyle(
                         color: AppConstants.textColor,
                         fontSize: 20,

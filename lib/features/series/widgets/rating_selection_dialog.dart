@@ -31,86 +31,101 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    return AlertDialog(
-      backgroundColor: AppConstants.secondaryBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.largeRadius),
-        side: BorderSide(
-          color: AppConstants.borderColor.withValues(alpha: 0.2),
-          width: 1.5,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppConstants.secondaryBackground,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppConstants.largeRadius),
         ),
       ),
-      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-      contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      title: Row(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        12,
+        24,
+        24 + MediaQuery.of(context).padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppConstants.warningColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.star_rounded,
-              color: AppConstants.warningColor,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              l10n.translate('rating_dialog_title'),
-              style: TextStyle(
-                color: AppConstants.textColor, 
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
+          Center(
+            child: Container(
+              width: 32,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppConstants.borderColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppConstants.primaryBackground,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.15)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _currentRating.toInt() == 0 ? Icons.star_outline : Icons.star,
-                  color: _currentRating.toInt() == 0 ? AppConstants.textMutedColor : AppConstants.warningColor,
-                  size: 28,
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppConstants.warningColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  _currentRating.toInt() == 0
-                      ? l10n.translate('rating_unrated')
-                      : _currentRating.toInt().toString(),
+                child: Icon(
+                  Icons.star_rounded,
+                  color: AppConstants.warningColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.translate('rating_dialog_title'),
                   style: TextStyle(
-                    color: AppConstants.textColor,
-                    fontSize: 28,
+                    color: AppConstants.textColor, 
                     fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
+                    fontSize: 20,
                   ),
                 ),
-                if (_currentRating.toInt() > 0)
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppConstants.primaryBackground,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.15)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _currentRating.toInt() == 0 ? Icons.star_outline : Icons.star,
+                    color: _currentRating.toInt() == 0 ? AppConstants.textMutedColor : AppConstants.warningColor,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
                   Text(
-                    ' / 100',
+                    _currentRating.toInt() == 0
+                        ? l10n.translate('rating_unrated')
+                        : _currentRating.toInt().toString(),
                     style: TextStyle(
-                      color: AppConstants.textMutedColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                      color: AppConstants.textColor,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
                     ),
                   ),
-              ],
+                  if (_currentRating.toInt() > 0)
+                    Text(
+                      ' / 100',
+                      style: TextStyle(
+                        color: AppConstants.textMutedColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -147,44 +162,47 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: Text(
+                  l10n.translate('cancel'),
+                  style: TextStyle(color: AppConstants.textMutedColor, fontWeight: FontWeight.w600),
+                ),
+              ),
+              const SizedBox(width: 12),
+              FilledButton(
+                onPressed: () {
+                  final newRating = _currentRating.toInt();
+                  if (newRating != widget.initialRating) {
+                    widget.onRatingChanged(newRating);
+                  }
+                  Navigator.of(context).pop();
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppConstants.accentColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  l10n.translate('update'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          child: Text(
-            l10n.translate('cancel'),
-            style: TextStyle(color: AppConstants.textMutedColor, fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(width: 4),
-        FilledButton(
-          onPressed: () {
-            final newRating = _currentRating.toInt();
-            if (newRating != widget.initialRating) {
-              widget.onRatingChanged(newRating);
-            }
-            Navigator.of(context).pop();
-          },
-          style: FilledButton.styleFrom(
-            backgroundColor: AppConstants.accentColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-            ),
-            elevation: 0,
-          ),
-          child: Text(
-            l10n.translate('update'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 

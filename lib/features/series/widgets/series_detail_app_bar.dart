@@ -27,6 +27,7 @@ class SeriesDetailAppBar extends StatefulWidget {
   final VoidCallback onShare;
   final VoidCallback onDelete;
   final Function(String) onCopy;
+  final String? heroTagPrefix;
 
   const SeriesDetailAppBar({
     super.key,
@@ -40,6 +41,7 @@ class SeriesDetailAppBar extends StatefulWidget {
     required this.onShare,
     required this.onDelete,
     required this.onCopy,
+    this.heroTagPrefix,
   });
 
   @override
@@ -266,6 +268,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
                                   series: widget.series,
                                   height: coverHeight,
                                   width: coverWidth,
+                                  heroTagPrefix: widget.heroTagPrefix,
                                 ),
                                 SizedBox(width: widget.isWide ? 22 : 16),
                                 Expanded(

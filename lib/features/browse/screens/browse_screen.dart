@@ -247,10 +247,19 @@ class BrowseScreenState extends State<BrowseScreen> {
                   ),
                   child: Column(
                     children: [
-                      if (_controller.isSearchMode)
+                      if (_controller.isSearchMode &&
+                          _controller.currentFilters.isEmpty)
                         BrowseTypeTabs(
                           selectedType: _controller.currentType,
                           onTypeChanged: _controller.setType,
+                        ),
+                      if (_controller.currentType == BrowseType.series)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: FilterChipsRow(
+                            filters: _controller.currentFilters,
+                            onFiltersChanged: _controller.updateFilters,
+                          ),
                         ),
                       if (_controller.isSearchMode &&
                           _controller.totalResults > 0)
@@ -277,14 +286,6 @@ class BrowseScreenState extends State<BrowseScreen> {
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                      if (_controller.currentType == BrowseType.series)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: FilterChipsRow(
-                            filters: _controller.currentFilters,
-                            onFiltersChanged: _controller.updateFilters,
                           ),
                         ),
                       BrowseContent(

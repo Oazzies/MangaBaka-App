@@ -7,7 +7,6 @@ import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/utils/uri_utils.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
-import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
 class PublisherSearchService {
   static final String _baseUrl = '${AppConstants.baseApiUrl}/publishers/search';
@@ -36,14 +35,8 @@ class PublisherSearchService {
     if (limit != null) queryParams['limit'] = limit.toString();
     if (sortBy != null && sortBy.isNotEmpty) queryParams['sort_by'] = sortBy;
     
-    final contentPrefs = SettingsManager().contentPreferences;
-    final finalQueryParams = <String, dynamic>{
-      ...queryParams,
-      'content_rating': contentPrefs,
-    };
-    
     final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: UriUtils.encodeQueryParameters(finalQueryParams),
+      queryParameters: UriUtils.encodeQueryParameters(queryParams),
     );
 
     _logger.info('Performing publisher search. URI: $uri');
@@ -150,12 +143,16 @@ class PublisherSearchService {
   }
 
   Future<PublisherSearchResult> search(Map<String, dynamic> params) async {
-    final effectiveParams = params.containsKey('content_rating')
-        ? params
-        : {...params, 'content_rating': SettingsManager().contentPreferences};
+    final allowedKeys = {'q', 'page', 'limit', 'type', 'closed', 'year_lower', 'year_upper', 'sort_by'};
+    final cleanParams = <String, dynamic>{};
+    for (final entry in params.entries) {
+      if (allowedKeys.contains(entry.key)) {
+        cleanParams[entry.key] = entry.value;
+      }
+    }
 
     final uri = Uri.parse(_baseUrl).replace(
-      queryParameters: UriUtils.encodeQueryParameters(effectiveParams),
+      queryParameters: UriUtils.encodeQueryParameters(cleanParams),
     );
 
     _logger.info('Performing publisher search. URI: $uri');

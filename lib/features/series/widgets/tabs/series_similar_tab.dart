@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 
 class SeriesSimilarTab extends StatelessWidget {
   final List<Series>? similar;
@@ -110,7 +111,10 @@ class SeriesSimilarTab extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
-                  AppTransitions.slideUp(SeriesDetailScreen(series: s)),
+                  AppTransitions.slideUp(SeriesDetailScreen(
+                    series: s,
+                    heroTagPrefix: 'similar',
+                  )),
                 );
               },
               child: EntryListItem(
@@ -126,34 +130,82 @@ class SeriesSimilarTab extends StatelessWidget {
 
   Widget _buildGrid(BuildContext context, List<Series> series, AppListStyle style) {
     final seriesService = getIt<SeriesService>();
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 150,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.65,
-      ),
-      itemCount: series.length,
-      itemBuilder: (context, index) {
-        final s = series[index];
-        return MouseRegion(
-          onEnter: (_) => seriesService.fetchSeries(s.id),
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                AppTransitions.slideUp(SeriesDetailScreen(series: s)),
-              );
-            },
-            child: EntryListItem(
-              series: s,
-              heroTagPrefix: 'similar',
-              listStyle: style,
-            ),
-          ),
+    final isCompactGrid = style == AppListStyle.compactGrid;
+
+    Widget buildGridContent(BuildContext context, int calculatedColumns) {
+      if (isCompactGrid) {
+        return DynamicRowHeightGrid(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: calculatedColumns,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          itemCount: series.length,
+          itemBuilder: (context, index) {
+            final s = series[index];
+            return MouseRegion(
+              onEnter: (_) => seriesService.fetchSeries(s.id),
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    AppTransitions.slideUp(SeriesDetailScreen(
+                      series: s,
+                      heroTagPrefix: 'similar',
+                    )),
+                  );
+                },
+                child: EntryListItem(
+                  series: s,
+                  heroTagPrefix: 'similar',
+                  listStyle: style,
+                ),
+              ),
+            );
+          },
         );
+      }
+
+      return GridView.builder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 150,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.65,
+        ),
+        itemCount: series.length,
+        itemBuilder: (context, index) {
+          final s = series[index];
+          return MouseRegion(
+            onEnter: (_) => seriesService.fetchSeries(s.id),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  AppTransitions.slideUp(SeriesDetailScreen(
+                    series: s,
+                    heroTagPrefix: 'similar',
+                  )),
+                );
+              },
+              child: EntryListItem(
+                series: s,
+                heroTagPrefix: 'similar',
+                listStyle: style,
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final calculatedColumns = ((width + 16) / 166).ceil().clamp(1, 12);
+        return buildGridContent(context, calculatedColumns);
       },
     );
   }

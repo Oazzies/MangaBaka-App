@@ -40,8 +40,10 @@ class SeriesMyListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final chapterTotal = _parseTotal(series.totalChapters);
     final volumeTotal = _parseTotal(series.finalVolume);
-    final hasChapters = series.totalChapters.isNotEmpty && series.totalChapters != 'null';
-    final hasVolumes = series.finalVolume.isNotEmpty && series.finalVolume != 'null';
+    final hasChapters =
+        series.totalChapters.isNotEmpty && series.totalChapters != 'null';
+    final hasVolumes =
+        series.finalVolume.isNotEmpty && series.finalVolume != 'null';
 
     final pct = (chapterTotal != null && chapterTotal > 0)
         ? ((entry.progressChapter ?? 0) / chapterTotal).clamp(0.0, 1.0)
@@ -111,7 +113,9 @@ class _ProgressRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = (total != null && total! > 0) ? (value / total!).clamp(0.0, 1.0) : 0.0;
+    final pct = (total != null && total! > 0)
+        ? (value / total!).clamp(0.0, 1.0)
+        : 0.0;
     final totalLabel = total != null ? '$total' : '?';
 
     return InkWell(
@@ -177,7 +181,11 @@ class _ProgressRow extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         AppConstants.accentColor,
-                        Color.lerp(AppConstants.accentColor, Colors.white, 0.28)!,
+                        Color.lerp(
+                          AppConstants.accentColor,
+                          Colors.white,
+                          0.28,
+                        )!,
                       ],
                     ),
                   ),
@@ -196,17 +204,22 @@ class _ScoreRow extends StatelessWidget {
   final int rating; // 0–100
   final VoidCallback onTap;
 
-  const _ScoreRow({required this.label, required this.rating, required this.onTap});
+  const _ScoreRow({
+    required this.label,
+    required this.rating,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Map the app's 0–100 score onto five stars (each star = 20 points).
-    final filled = (rating / 20).round().clamp(0, 5);
+    final pct = (rating / 100.0).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: AppConstants.borderColor, width: 1)),
+        border: Border(
+          top: BorderSide(color: AppConstants.borderColor, width: 1),
+        ),
       ),
       child: InkWell(
         onTap: onTap,
@@ -215,6 +228,7 @@ class _ScoreRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: Text(
@@ -232,36 +246,55 @@ class _ScoreRow extends StatelessWidget {
                       TextSpan(
                         text: rating > 0 ? '$rating' : '–',
                         style: AppTypography.mono(
-                          color: AppConstants.textColor,
-                          fontSize: 13,
+                          color: AppConstants.accentColor,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       TextSpan(
                         text: ' / 100',
                         style: AppTypography.mono(
-                          color: AppConstants.textMutedColor,
-                          fontSize: 13,
+                          color: AppConstants.textColor,
+                          fontSize: 14,
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
+                Icon(Icons.edit, size: 16, color: AppConstants.textMutedColor),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: List.generate(5, (i) {
-                final on = i < filled;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Icon(
-                    on ? Icons.star_rounded : Icons.star_outline_rounded,
-                    size: 24,
-                    color: on ? AppConstants.accentColor : AppConstants.borderColor,
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                height: 7,
+                decoration: BoxDecoration(
+                  color: AppConstants.tertiaryBackground,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: AppConstants.borderColor, width: 1),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: pct,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppConstants.accentColor,
+                          Color.lerp(
+                            AppConstants.accentColor,
+                            Colors.white,
+                            0.28,
+                          )!,
+                        ],
+                      ),
+                    ),
                   ),
-                );
-              }),
+                ),
+              ),
             ),
           ],
         ),

@@ -31,11 +31,18 @@ class RatingIconButton extends StatelessWidget {
           size: 24,
         ),
         onPressed: () {
-          showDialog(
+          showModalBottomSheet(
             context: context,
-            builder: (ctx) => RatingSelectionDialog(
-              initialRating: rating,
-              onRatingChanged: onRatingChanged,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (ctx) => Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              ),
+              child: RatingSelectionDialog(
+                initialRating: rating,
+                onRatingChanged: onRatingChanged,
+              ),
             ),
           );
         },

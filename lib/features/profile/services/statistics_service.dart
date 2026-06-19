@@ -88,38 +88,22 @@ class StatisticsService {
         filter: _db.libraryEntriesTable.state.equals('completed'),
       );
 
-      final queryTotal = _db.selectOnly(_db.libraryEntriesTable).join([
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
         drift.innerJoin(
           _db.seriesTable,
           _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
         ),
-      ])..addColumns([totalCount]);
+      ])..addColumns([totalCount, completedCount]);
 
       if (contentPreferences != null && contentPreferences.isNotEmpty) {
-        queryTotal.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
+        query.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
       }
 
-      final totalResult = await queryTotal.getSingle();
-      final total = totalResult.read(totalCount) ?? 0;
-
+      final result = await query.getSingle();
+      final total = result.read(totalCount) ?? 0;
       if (total == 0) return 0.0;
 
-      final queryCompleted = _db.selectOnly(_db.libraryEntriesTable).join([
-        drift.innerJoin(
-          _db.seriesTable,
-          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
-        ),
-      ])
-        ..addColumns([completedCount])
-        ..where(_db.libraryEntriesTable.state.equals('completed'));
-
-      if (contentPreferences != null && contentPreferences.isNotEmpty) {
-        queryCompleted.where(_db.seriesTable.contentRating.isIn(contentPreferences.map((e) => e.toLowerCase()).toList()));
-      }
-
-      final completedResult = await queryCompleted.getSingle();
-      final completed = completedResult.read(completedCount) ?? 0;
-
+      final completed = result.read(completedCount) ?? 0;
       final rate = (completed / total) * 100;
       _logger.fine('Completion rate: $rate% ($completed/$total)');
       return rate;

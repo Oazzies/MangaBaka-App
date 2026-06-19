@@ -140,7 +140,7 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
       if (response.statusCode == 429) {
         _logger.warning('Rate limited while fetching library page $page. Retrying in ${AppConstants.rateLimitRetryDelaySeconds}s...');
         await Future.delayed(Duration(seconds: AppConstants.rateLimitRetryDelaySeconds));
-        return _fetchPage(token, page, state: state, sortBy: sortBy);
+        return _fetchPage(token, page, state: state, type: type, sortBy: sortBy);
       }
 
       if (response.statusCode == 401) {
@@ -149,7 +149,7 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
       }
       if (response.statusCode == 400) {
         _logger.warning('Bad request for library page $page: ${response.body}');
-        return FetchPageResult(entries: [], totalEntries: 0, isError: true);
+        return FetchPageResult(entries: [], isError: true);
       }
       if (response.statusCode != 200) {
         _logger.severe('Failed to fetch library page $page. Status: ${response.statusCode}, Body: ${response.body}');
@@ -184,14 +184,13 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
 
 class FetchPageResult {
   final List<api.LibraryEntry> entries;
-  final int totalEntries;
   final bool isError;
-  FetchPageResult({required this.entries, required this.totalEntries, this.isError = false});
+  FetchPageResult({required this.entries, this.isError = false});
 }
 
 FetchPageResult _parseLibraryPage(String responseBody) {
   final body = jsonDecode(responseBody) as Map<String, dynamic>;
   final data = (body['data'] as List<dynamic>? ?? const []);
   final entries = data.map((item) => api.LibraryEntry.fromJson(item as Map<String, dynamic>)).toList();
-  return FetchPageResult(entries: entries, totalEntries: 0);
+  return FetchPageResult(entries: entries);
 }

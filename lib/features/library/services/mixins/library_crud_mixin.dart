@@ -5,8 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/features/library/constants/library_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/database/database.dart' as db;
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+const String _isIncompleteKey = '${AppConstants.prefixStorageKey}library_is_incomplete';
 
 mixin LibraryCrudMixin on LibraryServiceBase {
 
@@ -119,7 +122,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
   }
 
   /// Restores local progress to the values captured before an optimistic update.
-  Future<void> _rollbackProgress(String seriesId, dynamic snapshot) async {
+  Future<void> _rollbackProgress(String seriesId, db.LibraryEntryWithSeries? snapshot) async {
     if (snapshot == null) return;
     await database.libraryEntriesDao.updateEntryProgress(
       seriesId,
@@ -254,7 +257,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(AppConstants.lastSyncKey);
-      await prefs.remove('${AppConstants.prefixStorageKey}library_is_incomplete');
+      await prefs.remove(_isIncompleteKey);
       logger.info('Library sync preferences reset');
     } catch (e, st) {
       logger.severe('Failed to clear library', e, st);
