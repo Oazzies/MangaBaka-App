@@ -1,10 +1,10 @@
 {
   "repo_url": "Oazzies/MangaBaka-App",
   "json_file": "repo/source.json",
-  "app_id": "REPLACE_WITH_BUNDLE_ID",
+  "app_id": "dev.oazzies.mangabaka",
   "app_name": "MangaBaka",
   "caption": "Update for MangaBaka now available!",
-  "tint_colour": "REPLACE_WITH_BRAND_HEX",
+  "tint_colour": "0a0a0a",
   "image_url": "REPLACE_WITH_NEWS_IMAGE_URL",
   "sideload_asset_keyword": "sideload"
 }
