@@ -16,7 +16,7 @@
       "subtitle": "Official app for the largest manga and sorts database",
       "version": "0.0.0",
       "versionDate": "1970-01-01T00:00:00Z",
-      "versionDescription": "Placeholder entry. This is overwritten automatically by repo/update_source.py the first time the Update Sideloading Source workflow runs after a release is published.",
+      "versionDescription": "Placeholder entry. This is overwritten automatically the first time the Update Sideloading Source workflow runs after a release is published.",
       "downloadURL": "",
       "localizedDescription": "MangaBaka is the official app for the largest manga and sorts database.",
       "iconURL": "https://raw.githubusercontent.com/Oazzies/MangaBaka-App/refs/heads/main/assets/mangabaka512.png",

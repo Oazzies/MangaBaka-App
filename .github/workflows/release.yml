@@ -273,9 +273,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifact
-          path: |
-            macos-mangabaka-app-v*.zip
-            build/macos/Release/macos-mangabaka-app-v*.dmg
+          path: build/macos/Release/macos-mangabaka-app-v*.dmg
 
   build-ios:
     name: Build iOS
@@ -411,19 +409,28 @@ jobs:
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
 
+          RUNNER_APP=$(find build/ios/iphoneos -maxdepth 1 -name "Runner.app" | head -1)
+          if [ -z "$RUNNER_APP" ]; then
+            echo "Error: Runner.app not found in build/ios/iphoneos/"
+            exit 1
+          fi
           mkdir -p build/ios/iphoneos/Payload
-          ln -s ../Runner.app build/ios/iphoneos/Payload/Runner.app
+          cp -R "$RUNNER_APP" build/ios/iphoneos/Payload/Runner.app
 
           if [ -n "$P12_BASE64" ] && [ -n "$PROVISIONING_PROFILE_BASE64" ] && [ -n "$P12_PASSWORD" ]; then
             echo "$P12_BASE64" | base64 --decode > certificate.p12
             echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > profile.mobileprovision
             curl -sL -o zsign.zip "https://github.com/zhlynn/zsign/releases/download/v${ZSIGN_VERSION}/zsign-v${ZSIGN_VERSION}-macos-x64.zip"
             unzip -q zsign.zip
-            chmod +x zsign || chmod +x zsign-*
+            chmod +x zsign 2>/dev/null || chmod +x zsign-* 2>/dev/null || true
             if [ -f "./zsign" ]; then
               ZSIGN_EXEC="./zsign"
             else
               ZSIGN_EXEC=$(ls zsign* 2>/dev/null | head -n 1)
+            fi
+            if [ -z "$ZSIGN_EXEC" ]; then
+              echo "Error: zsign binary not found after extracting zip"
+              exit 1
             fi
             $ZSIGN_EXEC -f -k ./certificate.p12 -p "$P12_PASSWORD" -m ./profile.mobileprovision ./build/ios/iphoneos/Payload/Runner.app
           else
@@ -457,13 +464,6 @@ jobs:
           else
             echo "" > .env
           fi
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -501,25 +501,25 @@ jobs:
             cp assets/images/logo.png AppDir/mangabaka.png
           fi
 
-          # Create desktop file
-          cat > AppDir/mangabaka.desktop << 'EOF'
-          [Desktop Entry]
-          Name=MangaBaka
-          Exec=usr/bin/mangabaka
-          Icon=mangabaka
-          Type=Application
-          Categories=Utility;
-          EOF
+          # Create desktop file (printf avoids heredoc indentation issues in YAML)
+          printf '%s\n' \
+            '[Desktop Entry]' \
+            'Name=MangaBaka' \
+            'Exec=usr/bin/mangabaka_app' \
+            'Icon=mangabaka' \
+            'Type=Application' \
+            'Categories=Utility;' \
+            > AppDir/mangabaka.desktop
 
           # Create AppRun script
-          cat > AppDir/AppRun << 'EOF'
-          #!/bin/sh
-          SELF=$(readlink -f "$0")
-          HERE=${SELF%/*}
-          export PATH="${HERE}/usr/bin/:${PATH}"
-          export LD_LIBRARY_PATH="${HERE}/usr/bin/lib/:${HERE}/usr/lib/:${LD_LIBRARY_PATH}"
-          exec "${HERE}/usr/bin/mangabaka" "$@"
-          EOF
+          printf '%s\n' \
+            '#!/bin/sh' \
+            'SELF=$(readlink -f "$0")' \
+            'HERE=${SELF%/*}' \
+            'export PATH="${HERE}/usr/bin/:${PATH}"' \
+            'export LD_LIBRARY_PATH="${HERE}/usr/bin/lib/:${HERE}/usr/lib/:${LD_LIBRARY_PATH}"' \
+            'exec "${HERE}/usr/bin/mangabaka_app" "$@"' \
+            > AppDir/AppRun
           chmod +x AppDir/AppRun
 
           # Build AppImage
@@ -535,43 +535,52 @@ jobs:
           mkdir -p rpm_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
           cp -r build/linux/x64/release/bundle rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}
           tar czf rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}.tar.gz -C rpm_build/SOURCES mangabaka-${VERSION_CLEAN}
-          
-          mkdir -p rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps
+
+          HAS_ICON=0
           if [ -f "assets/images/logo.png" ]; then
+            mkdir -p rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps
             cp assets/images/logo.png rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps/mangabaka.png
+            HAS_ICON=1
           fi
 
-          cat > rpm_build/SPECS/mangabaka.spec << EOF
-          Name: mangabaka
-          Version: ${VERSION_CLEAN}
-          Release: 1%{?dist}
-          Summary: MangaBaka - A manga reader application
-          License: MIT
-          Source0: %{name}-%{version}.tar.gz
-          BuildArch: x86_64
-          %description
-          MangaBaka is a Flutter-based manga reader application.
-          %prep
-          %setup -q
-          %install
-          mkdir -p %{buildroot}/usr/bin
-          mkdir -p %{buildroot}/usr/share/applications
-          mkdir -p %{buildroot}/usr/share/icons/hicolor/256x256/apps
-          cp -r * %{buildroot}/usr/bin/
-          cp -r %{_sourcedir}/usr/share/* %{buildroot}/usr/share/
-          cat > %{buildroot}/usr/share/applications/mangabaka.desktop << 'EOL'
-          [Desktop Entry]
-          Name=MangaBaka
-          Exec=/usr/bin/mangabaka
-          Icon=mangabaka
-          Type=Application
-          Categories=Utility;
-          EOL
-          %files
-          /usr/bin/*
-          /usr/share/applications/mangabaka.desktop
-          /usr/share/icons/hicolor/256x256/apps/mangabaka.png
-          EOF
+          # Build spec with printf to avoid heredoc indentation issues in YAML
+          {
+            printf 'Name: mangabaka\n'
+            printf 'Version: %s\n' "${VERSION_CLEAN}"
+            printf 'Release: 1%%{?dist}\n'
+            printf 'Summary: MangaBaka - A manga reader application\n'
+            printf 'License: MIT\n'
+            printf 'Source0: %%{name}-%%{version}.tar.gz\n'
+            printf 'BuildArch: x86_64\n'
+            printf '\n'
+            printf '%%description\n'
+            printf 'MangaBaka is a Flutter-based manga reader application.\n'
+            printf '\n'
+            printf '%%prep\n'
+            printf '%%setup -q\n'
+            printf '\n'
+            printf '%%install\n'
+            printf 'mkdir -p %%{buildroot}/usr/bin\n'
+            printf 'mkdir -p %%{buildroot}/usr/share/applications\n'
+            printf 'cp -r * %%{buildroot}/usr/bin/\n'
+            if [ "$HAS_ICON" = "1" ]; then
+              printf 'mkdir -p %%{buildroot}/usr/share/icons/hicolor/256x256/apps\n'
+              printf 'cp %%{_sourcedir}/usr/share/icons/hicolor/256x256/apps/mangabaka.png %%{buildroot}/usr/share/icons/hicolor/256x256/apps/mangabaka.png\n'
+            fi
+            printf 'echo '"'"'[Desktop Entry]'"'"' > %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Name=MangaBaka'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Exec=/usr/bin/mangabaka_app'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Icon=mangabaka'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Type=Application'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Categories=Utility;'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf '\n'
+            printf '%%files\n'
+            printf '/usr/bin/*\n'
+            printf '/usr/share/applications/mangabaka.desktop\n'
+            if [ "$HAS_ICON" = "1" ]; then
+              printf '/usr/share/icons/hicolor/256x256/apps/mangabaka.png\n'
+            fi
+          } > rpm_build/SPECS/mangabaka.spec
 
           rpmbuild --define "_topdir $(pwd)/rpm_build" -ba rpm_build/SPECS/mangabaka.spec
           mv rpm_build/RPMS/x86_64/*.rpm "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.rpm"
