@@ -23,6 +23,14 @@ Go to the [releases](https://github.com/Oazzies/MangaBaka-App/releases) page.
 
 *Requires Android 6.0 or higher.*
 
+### iOS Sideloading Sources
+  <p>
+    <a href="https://intradeus.github.io/http-protocol-redirector?r=altstore://source?url=https://raw.githubusercontent.com/Oazzies/MangaBaka-App/refs/heads/main/repo/source.json"><img alt="AltStore Source" src="https://img.shields.io/badge/open_in_app-_?style=for-the-badge&label=AltStore&labelColor=black&color=f2cfb8"></a>
+    <a href="https://intradeus.github.io/http-protocol-redirector?r=feather://source/https://raw.githubusercontent.com/Oazzies/MangaBaka-App/refs/heads/main/repo/source.json"><img alt="Feather Source" src="https://img.shields.io/badge/open_in_app-_?style=for-the-badge&label=Feather&labelColor=black&color=f2cfb8"></a>
+    <a href="https://intradeus.github.io/http-protocol-redirector?r=sidestore://source?url=https://raw.githubusercontent.com/Oazzies/MangaBaka-App/refs/heads/main/repo/source.json"><img alt="SideStore Source" src="https://img.shields.io/badge/open_in_app-_?style=for-the-badge&label=SideStore&labelColor=black&color=f2cfb8"></a><br>
+    <a href="https://raw.githubusercontent.com/Oazzies/MangaBaka-App/refs/heads/main/repo/source.json"><img alt="Direct Source URL" src="https://img.shields.io/badge/copy_%2F_paste-_?style=for-the-badge&label=Direct%20Source%20URL&labelColor=black&color=f2cfb8"></a>
+  </p>
+
 ## Features
 
 <div align="left">

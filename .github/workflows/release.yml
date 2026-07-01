@@ -164,7 +164,7 @@ jobs:
           $versionLine = Get-Content pubspec.yaml | Select-String "^version:"
           $versionFull = ($versionLine -split " ")[1].Trim()
           $versionClean = ($versionFull -split "\+")[0]
-          
+
           # Compile Inno Setup Script
           iscc /DAppVersion=$versionClean windows_installer.iss
 
@@ -257,20 +257,23 @@ jobs:
           VERSION_LINE=$(grep "^version:" pubspec.yaml)
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-          
+
           # Find the built .app bundle
           APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1)
           
-          # Compress the relative .app bundle directory into workspace root
-          cd "$(dirname "$APP_PATH")"
-          zip -r "$GITHUB_WORKSPACE/macos-mangabaka-app-v${VERSION_CLEAN}.zip" "$(basename "$APP_PATH")"
-          cd -
+          # Create DMG
+          APP_NAME=$(basename "$APP_PATH" .app)
+          mkdir -p build/macos/Release temp_dir
+          cp -R "$APP_PATH" temp_dir/
+          ln -s /Applications temp_dir/Applications
+          hdiutil create -volname "$APP_NAME" -srcfolder temp_dir -ov -format UDZO "build/macos/Release/macos-mangabaka-app-v${VERSION_CLEAN}.dmg"
+          rm -rf temp_dir
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-artifact
-          path: macos-mangabaka-app-v*.zip
+          path: build/macos/Release/macos-mangabaka-app-v*.dmg
 
   build-ios:
     name: Build iOS
@@ -333,7 +336,7 @@ jobs:
           VERSION_LINE=$(grep "^version:" pubspec.yaml)
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-          
+
           if [ -d "build/ios/ipa" ]; then
             ipa_file=$(find build/ios/ipa -name "*.ipa" | head -n 1)
             if [ -n "$ipa_file" ]; then
@@ -358,9 +361,241 @@ jobs:
             ios-mangabaka-app-v*.ipa
             ios-mangabaka-app-v*.xcarchive.zip
 
+  build-ios-sideload:
+    name: Build iOS (Sideload IPA)
+    needs: analyze-and-test
+    runs-on: macos-latest
+    env:
+      ZSIGN_VERSION: "0.7"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Unsigned iOS App
+        run: flutter build ios --release --no-codesign
+
+      - name: Package and Sign Sideload IPA
+        env:
+          P12_BASE64: ${{ secrets.SIDELOAD_P12_CERTIFICATE }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.SIDELOAD_PROVISIONING_PROFILE }}
+          P12_PASSWORD: ${{ secrets.SIDELOAD_P12_PASSWORD }}
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          RUNNER_APP=$(find build/ios/iphoneos -maxdepth 1 -name "Runner.app" | head -1)
+          if [ -z "$RUNNER_APP" ]; then
+            echo "Error: Runner.app not found in build/ios/iphoneos/"
+            exit 1
+          fi
+          mkdir -p build/ios/iphoneos/Payload
+          cp -R "$RUNNER_APP" build/ios/iphoneos/Payload/Runner.app
+
+          if [ -n "$P12_BASE64" ] && [ -n "$PROVISIONING_PROFILE_BASE64" ] && [ -n "$P12_PASSWORD" ]; then
+            echo "$P12_BASE64" | base64 --decode > certificate.p12
+            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > profile.mobileprovision
+            curl -sL -o zsign.zip "https://github.com/zhlynn/zsign/releases/download/v${ZSIGN_VERSION}/zsign-v${ZSIGN_VERSION}-macos-x64.zip"
+            unzip -q zsign.zip
+            chmod +x zsign 2>/dev/null || chmod +x zsign-* 2>/dev/null || true
+            if [ -f "./zsign" ]; then
+              ZSIGN_EXEC="./zsign"
+            else
+              ZSIGN_EXEC=$(ls zsign* 2>/dev/null | head -n 1)
+            fi
+            if [ -z "$ZSIGN_EXEC" ]; then
+              echo "Error: zsign binary not found after extracting zip"
+              exit 1
+            fi
+            $ZSIGN_EXEC -f -k ./certificate.p12 -p "$P12_PASSWORD" -m ./profile.mobileprovision ./build/ios/iphoneos/Payload/Runner.app
+          else
+            echo "⚠️ No sideload signing secrets provided — building unsigned .ipa"
+          fi
+
+          cd build/ios/iphoneos
+          zip -qr "$GITHUB_WORKSPACE/ios-mangabaka-app-v${VERSION_CLEAN}-sideload.ipa" Payload
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-sideload-artifact
+          path: ios-mangabaka-app-v*-sideload.ipa
+
+  build-linux:
+    name: Build Linux
+    needs: analyze-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -n "$ENV_FILE" ]; then
+            echo "$ENV_FILE" > .env
+          else
+            echo "" > .env
+          fi
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ninja-build cmake maven clang mpv libgtk-3-dev \
+            libblkid-dev liblzma-dev pkg-config libmpv-dev webkit2gtk-4.1 fuse rpm
+          wget -qO appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool && sudo mv appimagetool /usr/local/bin/
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Linux Application
+        run: flutter build linux --release
+
+      - name: Package AppImage
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          # Create AppDir structure
+          rm -rf AppDir && mkdir -p AppDir/usr/{bin,share/icons/hicolor/256x256/apps,lib}
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
+          # Copy icon if exists
+          if [ -f "assets/images/logo.png" ]; then
+            cp assets/images/logo.png AppDir/usr/share/icons/hicolor/256x256/apps/mangabaka.png
+            cp assets/images/logo.png AppDir/mangabaka.png
+          fi
+
+          # Create desktop file (printf avoids heredoc indentation issues in YAML)
+          printf '%s\n' \
+            '[Desktop Entry]' \
+            'Name=MangaBaka' \
+            'Exec=usr/bin/mangabaka_app' \
+            'Icon=mangabaka' \
+            'Type=Application' \
+            'Categories=Utility;' \
+            > AppDir/mangabaka.desktop
+
+          # Create AppRun script
+          printf '%s\n' \
+            '#!/bin/sh' \
+            'SELF=$(readlink -f "$0")' \
+            'HERE=${SELF%/*}' \
+            'export PATH="${HERE}/usr/bin/:${PATH}"' \
+            'export LD_LIBRARY_PATH="${HERE}/usr/bin/lib/:${HERE}/usr/lib/:${LD_LIBRARY_PATH}"' \
+            'exec "${HERE}/usr/bin/mangabaka_app" "$@"' \
+            > AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          # Build AppImage
+          /usr/local/bin/appimagetool AppDir
+          mv MangaBaka-x86_64.AppImage "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.AppImage"
+
+      - name: Package RPM
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          mkdir -p rpm_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp -r build/linux/x64/release/bundle rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}
+          tar czf rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}.tar.gz -C rpm_build/SOURCES mangabaka-${VERSION_CLEAN}
+
+          HAS_ICON=0
+          if [ -f "assets/images/logo.png" ]; then
+            mkdir -p rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps
+            cp assets/images/logo.png rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps/mangabaka.png
+            HAS_ICON=1
+          fi
+
+          # Build spec with printf to avoid heredoc indentation issues in YAML
+          {
+            printf 'Name: mangabaka\n'
+            printf 'Version: %s\n' "${VERSION_CLEAN}"
+            printf 'Release: 1%%{?dist}\n'
+            printf 'Summary: MangaBaka - A manga reader application\n'
+            printf 'License: MIT\n'
+            printf 'Source0: %%{name}-%%{version}.tar.gz\n'
+            printf 'BuildArch: x86_64\n'
+            printf '\n'
+            printf '%%description\n'
+            printf 'MangaBaka is a Flutter-based manga reader application.\n'
+            printf '\n'
+            printf '%%prep\n'
+            printf '%%setup -q\n'
+            printf '\n'
+            printf '%%install\n'
+            printf 'mkdir -p %%{buildroot}/usr/bin\n'
+            printf 'mkdir -p %%{buildroot}/usr/share/applications\n'
+            printf 'cp -r * %%{buildroot}/usr/bin/\n'
+            if [ "$HAS_ICON" = "1" ]; then
+              printf 'mkdir -p %%{buildroot}/usr/share/icons/hicolor/256x256/apps\n'
+              printf 'cp %%{_sourcedir}/usr/share/icons/hicolor/256x256/apps/mangabaka.png %%{buildroot}/usr/share/icons/hicolor/256x256/apps/mangabaka.png\n'
+            fi
+            printf 'echo '"'"'[Desktop Entry]'"'"' > %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Name=MangaBaka'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Exec=/usr/bin/mangabaka_app'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Icon=mangabaka'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Type=Application'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'echo '"'"'Categories=Utility;'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf '\n'
+            printf '%%files\n'
+            printf '/usr/bin/*\n'
+            printf '/usr/share/applications/mangabaka.desktop\n'
+            if [ "$HAS_ICON" = "1" ]; then
+              printf '/usr/share/icons/hicolor/256x256/apps/mangabaka.png\n'
+            fi
+          } > rpm_build/SPECS/mangabaka.spec
+
+          rpmbuild --define "_topdir $(pwd)/rpm_build" -ba rpm_build/SPECS/mangabaka.spec
+          mv rpm_build/RPMS/x86_64/*.rpm "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.rpm"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifact
+          path: |
+            build/linux/x64/release/linux-mangabaka-app-v*.AppImage
+            build/linux/x64/release/linux-mangabaka-app-v*.rpm
+
   create-draft-release:
     name: Create Draft Release
-    needs: [build-android, build-windows, build-macos, build-ios]
+    needs: [build-android, build-windows, build-macos, build-ios, build-ios-sideload, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code

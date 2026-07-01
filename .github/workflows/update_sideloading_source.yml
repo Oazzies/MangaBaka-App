@@ -1,0 +1,152 @@
+name: Update Sideloading Source
+on:
+  release:
+    types:
+      - released
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: "Branch to update when running manually"
+        required: false
+        default: "main"
+permissions:
+  contents: write
+jobs:
+  update-source:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.target_branch || 'main' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+
+      - name: Update sideloading source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          REPO=$(jq -r '.repo_url' repo/config.json)
+          SOURCE_FILE=$(jq -r '.json_file' repo/config.json)
+          APP_ID=$(jq -r '.app_id' repo/config.json)
+          CAPTION=$(jq -r '.caption' repo/config.json)
+          TINT_COLOR=$(jq -r '.tint_colour' repo/config.json)
+          IMAGE_URL=$(jq -r '.image_url' repo/config.json)
+          KEYWORD=$(jq -r '.sideload_asset_keyword // "sideload"' repo/config.json)
+          MAX_ENTRIES=5
+
+          echo "Fetching releases for ${REPO}..."
+          ALL_RELEASES=$(gh api --paginate "/repos/${REPO}/releases" | jq -s 'add // [] | sort_by(.published_at)')
+          echo "Fetched $(echo "$ALL_RELEASES" | jq 'length') releases"
+
+          # Find latest release that has a sideload IPA (keyword match preferred, any IPA as fallback)
+          LATEST=$(echo "$ALL_RELEASES" | jq --arg kw "$KEYWORD" '
+            reverse |
+            (map(select(.assets | any(.name | ascii_downcase | (contains($kw | ascii_downcase)) and endswith(".ipa")))) | first) //
+            (map(select(.assets | any(.name | endswith(".ipa")))) | first) //
+            empty
+          ')
+
+          if [ -z "$LATEST" ]; then
+            echo "No installable release with an IPA asset found — nothing to update"
+            exit 0
+          fi
+
+          LATEST_TAG=$(echo "$LATEST" | jq -r '.tag_name')
+          echo "Latest installable release: ${LATEST_TAG}"
+
+          LATEST_VERSION=$(echo "$LATEST_TAG" | sed 's/^v//' | grep -oP '\d+\.\d+\.\d+' | head -1)
+          LATEST_DATE=$(echo "$LATEST" | jq -r '.published_at')
+          LATEST_DESC=$(echo "$LATEST" | jq -r '.body // ""' | sed 's/<[^>]*>//g; s/^#{1,6} \?//; s/^[[:space:]]*[-*] /• /')
+
+          # Find download URL and size for latest (keyword match preferred)
+          LATEST_ASSET=$(echo "$LATEST" | jq --arg kw "$KEYWORD" '
+            .assets |
+            ((map(select(.name | ascii_downcase | (contains($kw | ascii_downcase)) and endswith(".ipa"))) +
+              map(select(.name | endswith(".ipa")))) | first) // empty
+          ')
+          LATEST_URL=$(echo "$LATEST_ASSET" | jq -r '.browser_download_url // ""')
+          LATEST_SIZE=$(echo "$LATEST_ASSET" | jq '.size // 0')
+
+          # Build version list: all releases with a sideload IPA, deduped by version, newest first, capped
+          VERSION_ENTRIES=$(echo "$ALL_RELEASES" | jq --arg kw "$KEYWORD" --argjson max "$MAX_ENTRIES" '
+            reverse |
+            map(
+              . as $rel |
+              ($rel.tag_name | ltrimstr("v") | capture("(?<v>[0-9]+\\.[0-9]+\\.[0-9]+)").v // null) as $ver |
+              (($rel.assets |
+                  (map(select(.name | ascii_downcase | (contains($kw | ascii_downcase)) and endswith(".ipa"))) +
+                   map(select(.name | endswith(".ipa")))) | first) // null) as $asset |
+              select($ver != null and $asset != null) |
+              {
+                version: $ver,
+                date: $rel.published_at,
+                localizedDescription: ($rel.body // "" | gsub("<[^>]+>"; "")),
+                downloadURL: $asset.browser_download_url,
+                size: $asset.size
+              }
+            ) |
+            reduce .[] as $e (
+              {"seen": {}, "list": []};
+              if .seen[$e.version] then . else .seen[$e.version] = true | .list += [$e] end
+            ) |
+            .list[:$max]
+          ')
+
+          # Check if a news entry already exists for this version
+          NEWS_ID="release-${LATEST_VERSION}"
+          NEWS_EXISTS=$(jq --arg id "$NEWS_ID" '.news | any(.identifier == $id)' "$SOURCE_FILE")
+
+          NEW_NEWS_ENTRY="null"
+          if [ "$NEWS_EXISTS" = "false" ]; then
+            FORMATTED_DATE=$(date -d "$LATEST_DATE" '+%d %b' 2>/dev/null || echo "Unknown")
+            NEW_NEWS_ENTRY=$(jq -n \
+              --arg appID "$APP_ID" \
+              --arg title "${LATEST_VERSION} - ${FORMATTED_DATE}" \
+              --arg identifier "$NEWS_ID" \
+              --arg caption "$CAPTION" \
+              --arg date "$LATEST_DATE" \
+              --arg tintColor "$TINT_COLOR" \
+              --arg imageURL "$IMAGE_URL" \
+              --arg url "https://github.com/${REPO}/releases/tag/${LATEST_TAG}" \
+              '{appID: $appID, title: $title, identifier: $identifier, caption: $caption, date: $date, tintColor: $tintColor, imageURL: $imageURL, notify: true, url: $url}')
+            echo "Adding news entry for ${LATEST_VERSION}"
+          fi
+
+          # Write updated source.json
+          jq \
+            --arg ver "$LATEST_VERSION" \
+            --arg date "$LATEST_DATE" \
+            --arg desc "$LATEST_DESC" \
+            --arg url "$LATEST_URL" \
+            --argjson size "$LATEST_SIZE" \
+            --argjson versions "$VERSION_ENTRIES" \
+            --argjson newsExists "$NEWS_EXISTS" \
+            --argjson newEntry "$NEW_NEWS_ENTRY" \
+            --argjson max "$MAX_ENTRIES" \
+            '
+            .apps[0].version = $ver |
+            .apps[0].versionDate = $date |
+            .apps[0].versionDescription = $desc |
+            .apps[0].downloadURL = $url |
+            .apps[0].size = $size |
+            .apps[0].versions = $versions |
+            if ($newsExists | not) and $newEntry != null then
+              .news = ([.news[], $newEntry] | sort_by(.date) | reverse | .[:$max])
+            else
+              .news = (.news | sort_by(.date) | reverse | .[:$max])
+            end
+            ' "$SOURCE_FILE" > "${SOURCE_FILE}.tmp" && mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
+
+          echo "Successfully updated ${SOURCE_FILE}"
+
+      - name: Commit and push changes
+        run: |
+          SOURCE_FILE=$(jq -r '.json_file' repo/config.json)
+          git config --local user.email "github-actions@users.noreply.github.com"
+          git config --local user.name "github-actions"
+          git add "$SOURCE_FILE"
+          git diff --staged --quiet || git commit -m "chore: update sideloading source"
+          git push origin HEAD:"$TARGET_BRANCH"
