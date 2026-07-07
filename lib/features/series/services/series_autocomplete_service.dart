@@ -32,6 +32,10 @@ class SeriesAutocompleteService {
 
   final Map<String, List<AutocompleteSeriesResult>> _cache = {};
 
+  /// Upper bound on cached queries. A long browsing session would otherwise
+  /// grow the cache without limit. Eviction is LRU: hits refresh recency.
+  static const int _maxCacheEntries = 64;
+
   Timer? _debounceTimer;
   http.Client? _activeClient;
   String? _pendingQuery;
@@ -57,9 +61,11 @@ class SeriesAutocompleteService {
     }
 
     // 1. Exact cache hit — instant, zero network cost
-    if (_cache.containsKey(trimmed)) {
+    final cached = _cache.remove(trimmed);
+    if (cached != null) {
+      _cache[trimmed] = cached; // re-insert to refresh LRU recency
       _cancelActiveRequest();
-      onResults(_cache[trimmed]!);
+      onResults(cached);
       return;
     }
 
@@ -182,6 +188,9 @@ class SeriesAutocompleteService {
             .toList();
 
         _cache[query] = results;
+        while (_cache.length > _maxCacheEntries) {
+          _cache.remove(_cache.keys.first);
+        }
         _logger.fine('Autocomplete: ${results.length} results for "$query" '
             '(cache: ${response.headers['cf-cache-status'] ?? 'unknown'})');
         onResults(results);
