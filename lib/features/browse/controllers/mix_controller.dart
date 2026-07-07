@@ -65,6 +65,11 @@ class MixController extends ChangeNotifier {
 
   bool get hasSeeds => _seeds.isNotEmpty;
 
+  /// Generation guards: rapid seed/option changes fire overlapping requests;
+  /// a response only applies if it still belongs to the newest request.
+  int _mixGeneration = 0;
+  int _suggestionsGeneration = 0;
+
 
   // ─── Seed Management ─────────────────────────────────────────────────────
 
@@ -86,6 +91,10 @@ class MixController extends ChangeNotifier {
     _logger.info('MixController: removed seed "${series.title}"');
     notifyListeners();
     if (_seeds.isEmpty) {
+      _mixGeneration++;
+      _suggestionsGeneration++;
+      _isLoading = false;
+      _isSuggestionsLoading = false;
       _results = [];
       _dna = [];
       _error = null;
@@ -104,6 +113,10 @@ class MixController extends ChangeNotifier {
 
   void clearSeeds() {
     _seeds.clear();
+    _mixGeneration++;
+    _suggestionsGeneration++;
+    _isLoading = false;
+    _isSuggestionsLoading = false;
     _results = [];
     _dna = [];
     _error = null;
@@ -116,6 +129,7 @@ class MixController extends ChangeNotifier {
   Future<void> _fetchMix() async {
     if (_seeds.isEmpty) return;
 
+    final generation = ++_mixGeneration;
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -135,17 +149,21 @@ class MixController extends ChangeNotifier {
         excludeUserLibrary: (_excludeLibrary && userId.isNotEmpty) ? userId : null,
       );
 
+      if (generation != _mixGeneration) return;
       _results = result.series;
       _dna = result.dna;
       _logger.info('MixController: got ${_results.length} recommendations');
     } catch (e) {
+      if (generation != _mixGeneration) return;
       _logger.severe('MixController._fetchMix error: $e');
       _error = e.toString();
       _results = [];
       _dna = [];
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      if (generation == _mixGeneration) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -156,6 +174,7 @@ class MixController extends ChangeNotifier {
   Future<void> _fetchSeedSuggestions() async {
     if (_seeds.length < 2) return;
 
+    final generation = ++_suggestionsGeneration;
     _isSuggestionsLoading = true;
     notifyListeners();
 
@@ -163,17 +182,21 @@ class MixController extends ChangeNotifier {
       final ids = _seeds.map((s) => int.tryParse(s.id) ?? 0).where((id) => id > 0).toList();
       final suggestions = await _mixService.fetchSeedSuggestions(ids);
 
+      if (generation != _suggestionsGeneration) return;
       // Filter out series already added as seeds
       _seedSuggestions = suggestions
           .where((sug) => !isSeed(sug.id))
           .toList();
       _logger.info('MixController: got ${_seedSuggestions.length} seed suggestions');
     } catch (e) {
+      if (generation != _suggestionsGeneration) return;
       _logger.warning('MixController._fetchSeedSuggestions error: $e');
       _seedSuggestions = [];
     } finally {
-      _isSuggestionsLoading = false;
-      notifyListeners();
+      if (generation == _suggestionsGeneration) {
+        _isSuggestionsLoading = false;
+        notifyListeners();
+      }
     }
   }
 }

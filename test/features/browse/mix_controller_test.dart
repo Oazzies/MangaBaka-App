@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -20,6 +22,10 @@ class _MockMixService extends Fake implements MixService {
   int fetchSeedCalls = 0;
   Map<String, dynamic>? lastFetchMixArgs;
 
+  /// When set, fetchMix returns this future instead of [mixResult] (used to
+  /// simulate a slow request that overlaps a newer one).
+  Future<MixResult>? pendingMixResponse;
+
   @override
   Future<MixResult> fetchMix({
     required List<int> seriesIds,
@@ -37,6 +43,11 @@ class _MockMixService extends Fake implements MixService {
       'excludeUserLibrary': excludeUserLibrary,
       'contentRating': contentRating,
     };
+    final pending = pendingMixResponse;
+    if (pending != null) {
+      pendingMixResponse = null;
+      return pending;
+    }
     if (mixError != null) throw mixError!;
     return mixResult;
   }
@@ -199,6 +210,53 @@ void main() {
 
       await controller.refresh();
       expect(mockMix.fetchMixCalls, calls + 1);
+    });
+  });
+
+  group('MixController stale responses', () {
+    test('slow mix response is discarded after seeds are cleared', () async {
+      final slowResponse = Completer<MixResult>();
+      mockMix.pendingMixResponse = slowResponse.future;
+
+      controller.addSeed(_series('1'));
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.isLoading, isTrue);
+
+      controller.clearSeeds();
+      expect(controller.isLoading, isFalse);
+
+      slowResponse.complete(
+        MixResult(series: [_series('99')], dna: const [], seedCount: 1),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.results, isEmpty);
+      expect(controller.isLoading, isFalse);
+    });
+
+    test('slow mix response is discarded when a newer fetch finished', () async {
+      final slowResponse = Completer<MixResult>();
+      mockMix.pendingMixResponse = slowResponse.future;
+
+      // First fetch hangs.
+      controller.addSeed(_series('1'));
+      await Future<void>.delayed(Duration.zero);
+
+      // Second fetch resolves immediately with the fresh result.
+      mockMix.mixResult =
+          MixResult(series: [_series('2', title: 'Fresh')], dna: const [], seedCount: 2);
+      controller.addSeed(_series('2'));
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.results.map((s) => s.title), ['Fresh']);
+
+      // The old response arrives late — it must not overwrite the fresh one.
+      slowResponse.complete(
+        MixResult(series: [_series('99', title: 'Stale')], dna: const [], seedCount: 1),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.results.map((s) => s.title), ['Fresh']);
+      expect(controller.isLoading, isFalse);
     });
   });
 
