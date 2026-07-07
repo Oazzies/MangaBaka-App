@@ -39,6 +39,10 @@ class MockSeriesSearchService extends Fake implements SeriesSearchService {
 class MockProfileAuthService extends Fake implements ProfileAuthService {
   @override
   bool get isLoggedIn => false;
+  @override
+  void addListener(VoidCallback listener) {}
+  @override
+  void removeListener(VoidCallback listener) {}
 }
 
 class MockSeriesService extends Fake implements SeriesService {

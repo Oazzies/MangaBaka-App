@@ -37,6 +37,48 @@ class EntryListItem extends StatefulWidget {
 class _EntryListItemState extends State<EntryListItem> {
   int? _optimisticProgress;
 
+  // The DB watch stream is created once and cached. Creating it inline in
+  // build() would tear down and re-register a drift watch query on every
+  // rebuild of every visible list item — a real cost while scrolling,
+  // especially on older devices.
+  late final ProfileAuthService _auth;
+  late final LibraryService _libraryService;
+  Stream<LibraryEntry?>? _entryStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _auth = getIt<ProfileAuthService>();
+    _libraryService = getIt<LibraryService>();
+    _auth.addListener(_onAuthChanged);
+    _updateEntryStream();
+  }
+
+  @override
+  void didUpdateWidget(EntryListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.series.id != widget.series.id) {
+      _updateEntryStream();
+    }
+  }
+
+  @override
+  void dispose() {
+    _auth.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    if (!mounted) return;
+    setState(_updateEntryStream);
+  }
+
+  void _updateEntryStream() {
+    _entryStream = _auth.isLoggedIn
+        ? _libraryService.watchEntryFromDb(widget.series.id)
+        : Stream<LibraryEntry?>.value(null);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
@@ -50,81 +92,15 @@ class _EntryListItemState extends State<EntryListItem> {
               : settings.browseListStyle)
         : settings.currentListStyle);
 
-    final auth = getIt<ProfileAuthService>();
-    final libraryService = getIt<LibraryService>();
-
     if (widget.previewEntry != null) {
-      final entry = widget.previewEntry;
-      final isInLibrary = entry != null;
-
-      return Stack(
-        children: [
-          _buildContent(context, style, l10n, displayTitle, entry),
-
-          if (!style.isGrid && isInLibrary && (settings.showLibraryProgress || settings.showRemainingProgress))
-            Positioned(
-              bottom: style == AppListStyle.comfortable ? 6 : 4,
-              left:
-                  (style == AppListStyle.minimalList
-                      ? 48.0
-                      : (style == AppListStyle.compact ? 60.0 : 72.0)) +
-                  12,
-              right: 12,
-              child: _buildProgressBar(context, entry, style),
-            ),
-
-          if (!style.isGrid)
-            Positioned(
-              bottom: style == AppListStyle.comfortable ? 12 : 8,
-              right: style == AppListStyle.comfortable ? 12 : 10,
-              child: SeriesQuickActionButton(
-                series: widget.series,
-                entry: entry,
-                onOptimisticProgressChanged: (val) {
-                  setState(() {
-                    _optimisticProgress = val;
-                  });
-                },
-              ),
-            ),
-
-          if (widget.ranking != null)
-            Positioned(
-              top: 0,
-              left: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppConstants.warningColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                child: Text(
-                  '${widget.ranking}',
-                  style: TextStyle(
-                    color: AppConstants.primaryBackground,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      );
+      return _buildStack(
+        context, style, l10n, displayTitle, settings, widget.previewEntry);
     }
 
     return StreamBuilder<LibraryEntry?>(
-      stream: auth.isLoggedIn
-          ? libraryService.watchEntryFromDb(widget.series.id)
-          : Stream.value(null),
+      stream: _entryStream,
       builder: (context, snapshot) {
         final entry = snapshot.data;
-        final isInLibrary = entry != null;
 
         // Reset optimistic progress if the DB entry catches up
         if (entry != null &&
@@ -133,66 +109,79 @@ class _EntryListItemState extends State<EntryListItem> {
           _optimisticProgress = null;
         }
 
-        return Stack(
-          children: [
-            _buildContent(context, style, l10n, displayTitle, entry),
-
-            if (!style.isGrid && isInLibrary && (settings.showLibraryProgress || settings.showRemainingProgress))
-              Positioned(
-                bottom: style == AppListStyle.comfortable ? 6 : 4,
-                left:
-                    (style == AppListStyle.minimalList
-                        ? 48.0
-                        : (style == AppListStyle.compact ? 60.0 : 72.0)) +
-                    12,
-                right: 12,
-                child: _buildProgressBar(context, entry, style),
-              ),
-
-            if (!style.isGrid)
-              Positioned(
-                bottom: style == AppListStyle.comfortable ? 12 : 8,
-                right: style == AppListStyle.comfortable ? 12 : 10,
-                child: SeriesQuickActionButton(
-                  series: widget.series,
-                  entry: entry,
-                  onOptimisticProgressChanged: (val) {
-                    setState(() {
-                      _optimisticProgress = val;
-                    });
-                  },
-                ),
-              ),
-
-            if (widget.ranking != null)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppConstants.warningColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      bottomRight: Radius.circular(8),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  child: Text(
-                    '${widget.ranking}',
-                    style: TextStyle(
-                      color: AppConstants.primaryBackground,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
+        return _buildStack(context, style, l10n, displayTitle, settings, entry);
       },
+    );
+  }
+
+  Widget _buildStack(
+    BuildContext context,
+    AppListStyle style,
+    LocalizationService l10n,
+    String displayTitle,
+    SettingsManager settings,
+    LibraryEntry? entry,
+  ) {
+    final isInLibrary = entry != null;
+
+    return Stack(
+      children: [
+        _buildContent(context, style, l10n, displayTitle, entry),
+
+        if (!style.isGrid && isInLibrary && (settings.showLibraryProgress || settings.showRemainingProgress))
+          Positioned(
+            bottom: style == AppListStyle.comfortable ? 6 : 4,
+            left:
+                (style == AppListStyle.minimalList
+                    ? 48.0
+                    : (style == AppListStyle.compact ? 60.0 : 72.0)) +
+                12,
+            right: 12,
+            child: _buildProgressBar(context, entry, style),
+          ),
+
+        if (!style.isGrid)
+          Positioned(
+            bottom: style == AppListStyle.comfortable ? 12 : 8,
+            right: style == AppListStyle.comfortable ? 12 : 10,
+            child: SeriesQuickActionButton(
+              series: widget.series,
+              entry: entry,
+              onOptimisticProgressChanged: (val) {
+                setState(() {
+                  _optimisticProgress = val;
+                });
+              },
+            ),
+          ),
+
+        if (widget.ranking != null)
+          Positioned(
+            top: 0,
+            left: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppConstants.warningColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              child: Text(
+                '${widget.ranking}',
+                style: TextStyle(
+                  color: AppConstants.primaryBackground,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
