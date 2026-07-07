@@ -21,12 +21,25 @@ class LibraryFilterHelper {
   List<LibraryEntry> getFilteredAndSorted() {
     if (_cachedFiltered != null) return _cachedFiltered!;
 
+    // Lowercase the query and filter lists once, not per entry — this runs on
+    // every keystroke against the whole library.
+    final queryLower = query.toLowerCase();
+    final f = filters;
+    final typeLower = f?.type.map((t) => t.toLowerCase()).toSet() ?? const <String>{};
+    final typeNotLower = f?.typeNot.map((t) => t.toLowerCase()).toSet() ?? const <String>{};
+    final statusLower = f?.status.map((s) => s.toLowerCase()).toSet() ?? const <String>{};
+    final statusNotLower = f?.statusNot.map((s) => s.toLowerCase()).toSet() ?? const <String>{};
+    final genreLower = f?.genre.map((g) => g.toLowerCase()).toList() ?? const <String>[];
+    final genreNotLower = f?.genreNot.map((g) => g.toLowerCase()).toList() ?? const <String>[];
+    final tagLower = f?.tag.map((t) => t.toLowerCase()).toList() ?? const <String>[];
+    final tagNotLower = f?.tagNot.map((t) => t.toLowerCase()).toList() ?? const <String>[];
+
     List<LibraryEntry> filtered = allEntries.where((entry) {
       // 1. Query Search
-      final matchesQuery = query.isEmpty ||
-          entry.series.title.toLowerCase().contains(query.toLowerCase()) ||
-          entry.series.nativeTitle.toLowerCase().contains(query.toLowerCase()) ||
-          entry.series.romanizedTitle.toLowerCase().contains(query.toLowerCase());
+      final matchesQuery = queryLower.isEmpty ||
+          entry.series.title.toLowerCase().contains(queryLower) ||
+          entry.series.nativeTitle.toLowerCase().contains(queryLower) ||
+          entry.series.romanizedTitle.toLowerCase().contains(queryLower);
       if (!matchesQuery) return false;
 
       // 2. Content Rating (Settings)
@@ -34,39 +47,33 @@ class LibraryFilterHelper {
           contentPreferences.contains(entry.series.contentRating.toLowerCase());
       if (!matchesRating) return false;
 
-      if (filters != null) {
-        final f = filters!;
-
+      if (f != null) {
         // 3. Series Type
-        if (f.type.isNotEmpty && !f.type.contains(entry.series.type.toLowerCase())) return false;
-        if (f.typeNot.isNotEmpty && f.typeNot.contains(entry.series.type.toLowerCase())) return false;
+        if (typeLower.isNotEmpty && !typeLower.contains(entry.series.type.toLowerCase())) return false;
+        if (typeNotLower.isNotEmpty && typeNotLower.contains(entry.series.type.toLowerCase())) return false;
 
         // 4. Series Status
-        if (f.status.isNotEmpty && !f.status.contains(entry.series.status.toLowerCase())) return false;
-        if (f.statusNot.isNotEmpty && f.statusNot.contains(entry.series.status.toLowerCase())) return false;
+        if (statusLower.isNotEmpty && !statusLower.contains(entry.series.status.toLowerCase())) return false;
+        if (statusNotLower.isNotEmpty && statusNotLower.contains(entry.series.status.toLowerCase())) return false;
 
         // 5. Genres
-        if (f.genre.isNotEmpty) {
+        if (genreLower.isNotEmpty || genreNotLower.isNotEmpty) {
           final entryGenres = entry.series.genres.map((g) => g.toLowerCase()).toSet();
-          if (!f.genre.every((g) => entryGenres.contains(g.toLowerCase()))) return false;
-        }
-        if (f.genreNot.isNotEmpty) {
-          final entryGenres = entry.series.genres.map((g) => g.toLowerCase()).toSet();
-          if (f.genreNot.any((g) => entryGenres.contains(g.toLowerCase()))) return false;
+          if (genreLower.isNotEmpty && !genreLower.every(entryGenres.contains)) return false;
+          if (genreNotLower.isNotEmpty && genreNotLower.any(entryGenres.contains)) return false;
         }
 
         // 5b. Tags
-        if (f.tag.isNotEmpty) {
+        if (tagLower.isNotEmpty || tagNotLower.isNotEmpty) {
           final entryTags = entry.series.tags.map((t) => t.toLowerCase()).toSet();
-          if (f.tagMode == 'and') {
-            if (!f.tag.every((t) => entryTags.contains(t.toLowerCase()))) return false;
-          } else {
-            if (!f.tag.any((t) => entryTags.contains(t.toLowerCase()))) return false;
+          if (tagLower.isNotEmpty) {
+            if (f.tagMode == 'and') {
+              if (!tagLower.every(entryTags.contains)) return false;
+            } else {
+              if (!tagLower.any(entryTags.contains)) return false;
+            }
           }
-        }
-        if (f.tagNot.isNotEmpty) {
-          final entryTags = entry.series.tags.map((t) => t.toLowerCase()).toSet();
-          if (f.tagNot.any((t) => entryTags.contains(t.toLowerCase()))) return false;
+          if (tagNotLower.isNotEmpty && tagNotLower.any(entryTags.contains)) return false;
         }
 
         // 6. Rating (0-100)
