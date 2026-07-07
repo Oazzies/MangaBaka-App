@@ -111,12 +111,17 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
   }
 
 
+  /// How many times a rate-limited (429) page fetch is retried before giving
+  /// up. Without a cap, a persistently rate-limited sync would retry forever.
+  static const int _maxRateLimitRetries = 3;
+
   Future<FetchPageResult> _fetchPage(
     String token,
     int page, {
     String? state,
     String? type,
     String? sortBy,
+    int retryCount = 0,
   }) async {
     final queryParams = <String, String>{
       'page': page.toString(),
@@ -138,9 +143,17 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
       _logger.fine('Library page $page fetch completed with status ${response.statusCode}');
 
       if (response.statusCode == 429) {
+        if (retryCount >= _maxRateLimitRetries) {
+          _logger.severe('Rate limited while fetching library page $page after $_maxRateLimitRetries retries. Giving up.');
+          throw ApiException(
+            message: 'Rate limited by server',
+            statusCode: response.statusCode,
+            code: 'RATE_LIMITED',
+          );
+        }
         _logger.warning('Rate limited while fetching library page $page. Retrying in ${AppConstants.rateLimitRetryDelaySeconds}s...');
         await Future.delayed(Duration(seconds: AppConstants.rateLimitRetryDelaySeconds));
-        return _fetchPage(token, page, state: state, type: type, sortBy: sortBy);
+        return _fetchPage(token, page, state: state, type: type, sortBy: sortBy, retryCount: retryCount + 1);
       }
 
       if (response.statusCode == 401) {
