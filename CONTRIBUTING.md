@@ -24,6 +24,16 @@ Before you start, please note that the ability to use following technologies is 
 - Any code editor
 - Emulator or phone with developer options enabled to test changes.
 
+## Local setup
+
+The app bundles a `.env` file as an asset, but the file itself is gitignored. On a fresh clone, create it before building or running tests (an empty file is enough unless you need OAuth login):
+
+```sh
+cp .env.example .env
+```
+
+Without it, `flutter build`, `flutter run`, and `flutter test` fail with `No file or variants found for asset: .env`.
+
 ## Getting help
 
 - Join [the Discord server](https://mangabaka.org/discord) for online help and to ask questions while developing.
