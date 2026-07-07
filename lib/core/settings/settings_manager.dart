@@ -36,6 +36,7 @@ class SettingsManager extends ChangeNotifier {
     _instance._browseGridColumnCount = 0;
     _instance._collectionsListColumns = 0;
     _instance._worksListStyle = AppListStyle.comfortable;
+    _instance._similarListStyle = AppListStyle.compactGrid;
     _instance._showQuickProgress = true;
     _instance._showLibraryProgress = true;
     _instance._libraryProgressType = LibraryProgressType.chapters;
