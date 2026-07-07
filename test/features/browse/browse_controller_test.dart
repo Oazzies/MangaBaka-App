@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
@@ -13,8 +15,13 @@ class MockSeriesSearchService extends Fake implements SeriesSearchService {
   List<Series> mockResults = [];
   bool throwError = false;
 
+  /// When set, takes over responses entirely (used to simulate slow/overlapping
+  /// requests).
+  Future<SeriesSearchResult> Function(String query)? onSearch;
+
   @override
   Future<SeriesSearchResult> searchSeries(String query, {String? sortBy, String? type, Map<String, dynamic>? extraParams}) async {
+    if (onSearch != null) return onSearch!(query);
     if (throwError) throw Exception('Search failed');
     return SeriesSearchResult(series: mockResults, total: mockResults.length);
   }
@@ -133,6 +140,102 @@ void main() {
       expect(controller.currentSearchQuery, isEmpty);
       expect(controller.searchResults, isEmpty);
       expect(controller.error, isNull);
+    });
+
+    Series makeSeries(String id, String title) => Series(
+          id: id,
+          title: title,
+          state: '',
+          nativeTitle: '',
+          romanizedTitle: '',
+          secondaryTitles: [],
+          coverUrl: '',
+          rawCoverUrl: '',
+          authors: [],
+          artists: [],
+          description: '',
+          year: '',
+          status: '',
+          isLicensed: '',
+          hasAnime: '',
+          contentRating: '',
+          type: '',
+          rating: '',
+          finalVolume: '',
+          totalChapters: '',
+          links: [],
+          publishers: [],
+          genres: [],
+          tags: [],
+          lastUpdated: '',
+        );
+
+    test('slow results from a superseded search are discarded', () async {
+      final slowResponse = Completer<SeriesSearchResult>();
+      mockSearchService.onSearch = (query) {
+        if (query == 'first') return slowResponse.future;
+        return Future.value(
+          SeriesSearchResult(series: [makeSeries('2', 'Second')], total: 1),
+        );
+      };
+
+      // Kick off a search whose response hangs...
+      controller.updateSearchQuery('first');
+      final firstSearch = controller.searchSeries();
+
+      // ...then start a newer search that completes immediately.
+      controller.updateSearchQuery('second');
+      await controller.searchSeries();
+      expect(controller.searchResults.map((s) => s.title), ['Second']);
+
+      // The old response finally arrives — it must not touch the results.
+      slowResponse.complete(
+        SeriesSearchResult(series: [makeSeries('1', 'First')], total: 1),
+      );
+      await firstSearch;
+
+      expect(controller.searchResults.map((s) => s.title), ['Second']);
+      expect(controller.isLoading, isFalse);
+      expect(controller.error, isNull);
+    });
+
+    test('slow error from a superseded search does not surface', () async {
+      final slowResponse = Completer<SeriesSearchResult>();
+      mockSearchService.onSearch = (query) {
+        if (query == 'first') return slowResponse.future;
+        return Future.value(
+          SeriesSearchResult(series: [makeSeries('2', 'Second')], total: 1),
+        );
+      };
+
+      controller.updateSearchQuery('first');
+      final firstSearch = controller.searchSeries();
+
+      controller.updateSearchQuery('second');
+      await controller.searchSeries();
+
+      slowResponse.completeError(Exception('boom'));
+      await firstSearch;
+
+      expect(controller.error, isNull);
+      expect(controller.searchResults.map((s) => s.title), ['Second']);
+    });
+
+    test('in-flight results are discarded after resetSearchState', () async {
+      final slowResponse = Completer<SeriesSearchResult>();
+      mockSearchService.onSearch = (_) => slowResponse.future;
+
+      controller.updateSearchQuery('query');
+      final search = controller.searchSeries();
+
+      controller.resetSearchState();
+
+      slowResponse.complete(
+        SeriesSearchResult(series: [makeSeries('1', 'Stale')], total: 1),
+      );
+      await search;
+
+      expect(controller.searchResults, isEmpty);
     });
   });
 }

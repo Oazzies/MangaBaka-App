@@ -71,6 +71,12 @@ class BrowseController extends ChangeNotifier {
   SearchFilters _currentFilters = SearchFilters();
   SearchFilters get currentFilters => _currentFilters;
 
+  /// Incremented whenever the search context changes (new query, reset, tab
+  /// switch). In-flight responses compare their captured generation against
+  /// this before touching state, so a slow page from an old search can never
+  /// be appended to the results of a newer one.
+  int _requestGeneration = 0;
+
   bool get isSearchMode =>
       _currentSearchQuery.trim().isNotEmpty ||
       !_currentFilters.isEmpty ||
@@ -125,6 +131,7 @@ class BrowseController extends ChangeNotifier {
 
   void resetSearchState() {
     _logger.fine('Resetting search state');
+    _requestGeneration++;
     _seriesResults = [];
     _publisherResults = [];
     _staffResults = [];
@@ -132,6 +139,7 @@ class BrowseController extends ChangeNotifier {
     _currentSearchQuery = '';
     _currentPage = 1;
     _hasMore = true;
+    _isLoading = false;
     _isLoadingMore = false;
     _totalResults = 0;
     _isTotalCapped = false;
@@ -206,6 +214,7 @@ class BrowseController extends ChangeNotifier {
     _logger.info(
       'Starting new search for $_currentType with query: "$_currentSearchQuery" with filters: ${_currentFilters.toMap()}',
     );
+    _requestGeneration++;
     _isLoading = true;
     _error = null;
     _seriesResults = [];
@@ -222,7 +231,10 @@ class BrowseController extends ChangeNotifier {
   }
 
   Future<void> loadMoreResults() async {
-    if (_isLoadingMore || !_hasMore) return;
+    // _isLoading guards against the initial page still being in flight: an
+    // empty list has maxScrollExtent 0, which counts as "near end", so the
+    // scroll listener could otherwise fire page 2 concurrently with page 1.
+    if (_isLoading || _isLoadingMore || !_hasMore) return;
 
     _logger.info(
       'Loading more results for query: "$_currentSearchQuery", page: ${_currentPage + 1}',
@@ -235,13 +247,14 @@ class BrowseController extends ChangeNotifier {
   }
 
   Future<void> _fetchSearchResults() async {
+    final generation = _requestGeneration;
     try {
       if (_currentType == BrowseType.series) {
-        await _fetchSeriesResults();
+        await _fetchSeriesResults(generation);
       } else if (_currentType == BrowseType.publishers) {
-        await _fetchPublisherResults();
+        await _fetchPublisherResults(generation);
       } else if (_currentType == BrowseType.staff) {
-        await _fetchStaffResults();
+        await _fetchStaffResults(generation);
       } else {
         // Not implemented yet
         _hasMore = false;
@@ -250,6 +263,7 @@ class BrowseController extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
+      if (generation != _requestGeneration) return;
       _logger.severe(
         'Failed to fetch search results for type $_currentType, query "$_currentSearchQuery" at page $_currentPage: $e',
       );
@@ -280,7 +294,7 @@ class BrowseController extends ChangeNotifier {
     return userId.isEmpty ? null : userId;
   }
 
-  Future<void> _fetchSeriesResults() async {
+  Future<void> _fetchSeriesResults(int generation) async {
     final userId = _getExcludeUserId();
 
     final requestParams = <String, dynamic>{
@@ -296,6 +310,11 @@ class BrowseController extends ChangeNotifier {
       type: _currentFilters.type.isNotEmpty ? _currentFilters.type.first : null,
       extraParams: requestParams,
     );
+
+    if (generation != _requestGeneration) {
+      _logger.fine('Discarding stale series results for superseded search');
+      return;
+    }
 
     final newResults = result.series;
 
@@ -348,13 +367,18 @@ class BrowseController extends ChangeNotifier {
     _scheduleScrollCheckIfNeeded();
   }
 
-  Future<void> _fetchPublisherResults() async {
+  Future<void> _fetchPublisherResults(int generation) async {
     final result = await _publisherSearchService.search({
       'q': _currentSearchQuery,
       'page': _currentPage,
       'limit': AppConstants.defaultPageLimit,
       ..._currentFilters.toMap(),
     });
+
+    if (generation != _requestGeneration) {
+      _logger.fine('Discarding stale publisher results for superseded search');
+      return;
+    }
 
     final newResults = result.publishers;
     _totalResults = result.total > 0
@@ -373,7 +397,7 @@ class BrowseController extends ChangeNotifier {
     _scheduleScrollCheckIfNeeded();
   }
 
-  Future<void> _fetchStaffResults() async {
+  Future<void> _fetchStaffResults(int generation) async {
     final newSeriesResults = await _searchService.searchSeriesByName(
       '',
       extraParams: {
@@ -383,6 +407,11 @@ class BrowseController extends ChangeNotifier {
         ..._currentFilters.toMap(),
       },
     );
+
+    if (generation != _requestGeneration) {
+      _logger.fine('Discarding stale staff results for superseded search');
+      return;
+    }
 
     // Deduplicate staff across all series on this page.
     // If the same person appears as both author and artist, their role is
