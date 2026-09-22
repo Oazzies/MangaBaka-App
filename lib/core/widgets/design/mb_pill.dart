@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Uppercase pill — the design system's single selectable-chip shape.
 ///
@@ -19,6 +20,11 @@ class MbPill extends StatelessWidget {
   /// count). Rendered in the same ink as the label at reduced opacity.
   final String? trailingText;
 
+  /// Fills the available width with the content centred — for a row of
+  /// equal-width segments. Tightens the padding and ellipsises the label so
+  /// three segments still fit a phone.
+  final bool expand;
+
   const MbPill({
     super.key,
     required this.label,
@@ -27,11 +33,22 @@ class MbPill extends StatelessWidget {
     this.onLongPress,
     this.icon,
     this.trailingText,
+    this.expand = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? AppConstants.onAccent : AppConstants.textColor;
+    final fg = selected ? context.colors.onAccent : context.colors.text;
+    final labelText = AnimatedDefaultTextStyle(
+      duration: AppMotion.fast,
+      curve: AppMotion.emphasized,
+      style: AppTypography.display(color: fg, fontSize: 13),
+      child: Text(
+        label.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
 
     return MbTappable(
       onTap: onTap,
@@ -41,25 +58,26 @@ class MbPill extends StatelessWidget {
         curve: AppMotion.emphasized,
         decoration: BoxDecoration(
           color: selected
-              ? AppConstants.accentColor
-              : AppConstants.tertiaryBackground,
+              ? context.colors.accent
+              : context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppConstants.pillRadius),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+          padding: EdgeInsets.symmetric(
+            horizontal: expand ? 10 : 18,
+            vertical: 11,
+          ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 15, color: fg),
                 const SizedBox(width: 7),
               ],
-              AnimatedDefaultTextStyle(
-                duration: AppMotion.fast,
-                curve: AppMotion.emphasized,
-                style: AppTypography.display(color: fg, fontSize: 13),
-                child: Text(label.toUpperCase()),
-              ),
+              // Flexible only when expanding: pills also sit in horizontal
+              // scroll strips, where the width is unbounded.
+              if (expand) Flexible(child: labelText) else labelText,
               if (trailingText != null) ...[
                 const SizedBox(width: 6),
                 Text(

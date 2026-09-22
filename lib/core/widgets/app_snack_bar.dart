@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -24,6 +25,7 @@ class AppSnackBar {
     if (messenger == null) return;
 
     messenger.hideCurrentSnackBar();
+    final c = context.colors;
 
     final isDesktop = DesktopLayout.isDesktopPlatform;
 
@@ -34,11 +36,11 @@ class AppSnackBar {
       messenger.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppConstants.secondaryBackground,
+          backgroundColor: c.surface,
           elevation: 6,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: BorderSide(color: AppConstants.borderColor),
+            side: BorderSide(color: c.border),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           margin: EdgeInsets.only(
@@ -56,15 +58,15 @@ class AppSnackBar {
                     : Icons.check_circle_outline_rounded,
                 size: 18,
                 color: isError
-                    ? AppConstants.errorColor
-                    : AppConstants.accentColor,
+                    ? c.error
+                    : c.accent,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   message,
                   style: AppTypography.sans(
-                    color: AppConstants.textColor,
+                    color: c.text,
                     fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -79,7 +81,7 @@ class AppSnackBar {
                   },
                   style: TextButton.styleFrom(
                     foregroundColor:
-                        action.textColor ?? AppConstants.accentColor,
+                        action.textColor ?? c.accent,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
@@ -104,11 +106,11 @@ class AppSnackBar {
       messenger.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppConstants.secondaryBackground,
+          backgroundColor: c.surface,
           duration: duration,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.denseRadius),
-            side: BorderSide(color: AppConstants.borderColor),
+            side: BorderSide(color: c.border),
           ),
           content: Row(
             children: [
@@ -118,15 +120,15 @@ class AppSnackBar {
                     : Icons.check_circle_outline_rounded,
                 size: 18,
                 color: isError
-                    ? AppConstants.errorColor
-                    : AppConstants.accentColor,
+                    ? c.error
+                    : c.accent,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   message,
                   style: AppTypography.sans(
-                    color: AppConstants.textColor,
+                    color: c.text,
                     fontSize: 13.5,
                   ),
                 ),

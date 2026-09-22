@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class WidgetUtils {
   static Widget responsiveConstraint(Widget child, {double maxWidth = 800}) {
@@ -45,11 +46,7 @@ class WidgetUtils {
     if (url.isEmpty) {
       final iconSize = (width != null && width.isFinite) ? width : 24.0;
       return errorWidget ??
-          Icon(
-            Icons.broken_image,
-            size: iconSize,
-            color: AppConstants.textMutedColor,
-          );
+          _BrokenImageIcon(size: iconSize);
     }
 
     final Widget image = url.startsWith('assets/')
@@ -61,11 +58,7 @@ class WidgetUtils {
             errorBuilder: (context, error, stackTrace) {
               final iconSize = (width != null && width.isFinite) ? width : 24.0;
               return errorWidget ??
-                  Icon(
-                    Icons.broken_image,
-                    size: iconSize,
-                    color: AppConstants.textMutedColor,
-                  );
+                  _BrokenImageIcon(size: iconSize);
             },
           )
         : CachedNetworkImage(
@@ -78,7 +71,7 @@ class WidgetUtils {
             memCacheHeight: memCacheHeight,
             placeholder: (context, url) =>
                 placeholder ??
-                Container(color: AppConstants.secondaryBackground),
+                const _ImagePlaceholder(),
             errorWidget: (context, url, error) {
               // Surface the failing host + error so image outages (dead CDN,
               // TLS handshake, cleartext block, rate limit) are diagnosable from
@@ -86,11 +79,7 @@ class WidgetUtils {
               LoggingService.logger.warning('Image load failed: $url — $error');
               final iconSize = (width != null && width.isFinite) ? width : 24.0;
               return errorWidget ??
-                  Icon(
-                    Icons.broken_image,
-                    size: iconSize,
-                    color: AppConstants.textMutedColor,
-                  );
+                  _BrokenImageIcon(size: iconSize);
             },
             fadeOutDuration: const Duration(milliseconds: 300),
             fadeInDuration: const Duration(milliseconds: 300),
@@ -116,13 +105,7 @@ class WidgetUtils {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 14),
-          child: Text(
-            label.toUpperCase(),
-            style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
-              fontSize: 11.5,
-            ),
-          ),
+          child: _SectionLabel(label),
         ),
         Wrap(
           spacing: 10,
@@ -149,13 +132,7 @@ class WidgetUtils {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 14),
-          child: Text(
-            'Links'.toUpperCase(),
-            style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
-              fontSize: 11.5,
-            ),
-          ),
+          child: _SectionLabel('Links'),
         ),
         Wrap(
           spacing: 12,
@@ -253,8 +230,8 @@ class _HoverableLinkChip extends StatelessWidget {
           .replaceAll('{name}', displayName),
       child: Container(
         decoration: BoxDecoration(
-          color: AppConstants.secondaryBackground,
-          border: Border.all(color: AppConstants.borderColor, width: 1),
+          color: context.colors.surface,
+          border: Border.all(color: context.colors.border, width: 1),
           borderRadius: borderRadius,
         ),
         child: Material(
@@ -262,9 +239,9 @@ class _HoverableLinkChip extends StatelessWidget {
           child: InkWell(
             onTap: () => launchUrl(uri),
             borderRadius: borderRadius,
-            hoverColor: AppConstants.accentColor.withValues(alpha: 0.1),
-            splashColor: AppConstants.accentColor.withValues(alpha: 0.1),
-            highlightColor: AppConstants.accentColor.withValues(alpha: 0.05),
+            hoverColor: context.colors.accent.withValues(alpha: 0.1),
+            splashColor: context.colors.accent.withValues(alpha: 0.1),
+            highlightColor: context.colors.accent.withValues(alpha: 0.05),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: Row(
@@ -279,7 +256,7 @@ class _HoverableLinkChip extends StatelessWidget {
                       errorWidget: Icon(
                         Icons.link,
                         size: 18,
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                       ),
                     ),
                   ),
@@ -287,7 +264,7 @@ class _HoverableLinkChip extends StatelessWidget {
                   Text(
                     displayName,
                     style: AppTypography.sans(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -300,9 +277,9 @@ class _HoverableLinkChip extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: AppConstants.tertiaryBackground,
+                        color: context.colors.surfaceRaised,
                         border: Border.all(
-                          color: AppConstants.borderColor,
+                          color: context.colors.border,
                           width: 1,
                         ),
                         borderRadius: BorderRadius.circular(4),
@@ -310,7 +287,7 @@ class _HoverableLinkChip extends StatelessWidget {
                       child: Text(
                         language!,
                         style: AppTypography.monoLabel(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 10,
                         ),
                       ),
@@ -324,4 +301,34 @@ class _HoverableLinkChip extends StatelessWidget {
       ),
     );
   }
+}
+
+class _BrokenImageIcon extends StatelessWidget {
+  final double size;
+  const _BrokenImageIcon({required this.size});
+
+  @override
+  Widget build(BuildContext context) =>
+      Icon(Icons.broken_image, size: size, color: context.colors.textMuted);
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(color: context.colors.surface);
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text.toUpperCase(),
+    style: AppTypography.monoLabel(
+      color: context.colors.textMuted,
+      fontSize: 11.5,
+    ),
+  );
 }

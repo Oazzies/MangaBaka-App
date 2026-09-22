@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/network/backend_health_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A slim bar that appears at the top of the app while the MangaBaka backend is
 /// unreachable, so a screen full of "Failed to load" states reads as an outage
@@ -49,7 +49,7 @@ class _DownBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    const color = AppConstants.warningColor;
+    final color = context.colors.warning;
 
     return Material(
       color: Colors.transparent,
@@ -61,7 +61,7 @@ class _DownBar extends StatelessWidget {
           color: color.withValues(alpha: 0.14),
           child: Row(
             children: [
-              const Icon(Icons.cloud_off_rounded, color: color, size: 18),
+              Icon(Icons.cloud_off_rounded, color: color, size: 18),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -79,8 +79,10 @@ class _DownBar extends StatelessWidget {
                 onPressed: onRetry,
                 style: TextButton.styleFrom(
                   foregroundColor: color,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   minimumSize: const Size(0, 0),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),

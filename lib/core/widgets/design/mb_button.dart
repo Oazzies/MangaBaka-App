@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Solid amber pill CTA with ink-black uppercase caps — the reference's
 /// "CONTINUE READING" button. The app's single primary action shape.
@@ -29,8 +30,8 @@ class MbPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !busy;
     final bg = enabled
-        ? AppConstants.accentColor
-        : AppConstants.accentColor.withValues(alpha: 0.35);
+        ? context.colors.accent
+        : context.colors.accent.withValues(alpha: 0.35);
 
     final row = Row(
       mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
@@ -42,25 +43,25 @@ class MbPrimaryButton extends StatelessWidget {
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(AppConstants.onAccent),
+              valueColor: AlwaysStoppedAnimation(context.colors.onAccent),
             ),
           )
         else if (icon != null)
-          Icon(icon, size: 18, color: AppConstants.onAccent),
+          Icon(icon, size: 18, color: context.colors.onAccent),
         if (busy || icon != null) const SizedBox(width: 10),
         Flexible(
           child: Text(
             label.toUpperCase(),
             overflow: TextOverflow.ellipsis,
             style: AppTypography.display(
-              color: AppConstants.onAccent,
+              color: context.colors.onAccent,
               fontSize: 15,
             ),
           ),
         ),
         if (trailingIcon != null) ...[
           const SizedBox(width: 10),
-          Icon(trailingIcon, size: 18, color: AppConstants.onAccent),
+          Icon(trailingIcon, size: 18, color: context.colors.onAccent),
         ],
       ],
     );
@@ -105,29 +106,29 @@ class MbSecondaryButton extends StatelessWidget {
       pressedScale: 0.975,
       child: Container(
         decoration: BoxDecoration(
-          color: AppConstants.tertiaryBackground,
+          color: context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppConstants.pillRadius),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
         child: Row(
-            mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18, color: AppConstants.textColor),
-                const SizedBox(width: 10),
-              ],
-              Flexible(
-                child: Text(
-                  label.toUpperCase(),
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.display(
-                    color: AppConstants.textColor,
-                    fontSize: 15,
-                  ),
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 18, color: context.colors.text),
+              const SizedBox(width: 10),
+            ],
+            Flexible(
+              child: Text(
+                label.toUpperCase(),
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.display(
+                  color: context.colors.text,
+                  fontSize: 15,
                 ),
               ),
-            ],
+            ),
+          ],
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Single amber star followed by the numeric score, matching the reference's
 /// compact "★ 5.0" treatment rather than a five-star row.
@@ -26,13 +26,16 @@ class MbRatingStars extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star_rounded,
-            size: fontSize + 4, color: AppConstants.starColor),
+        Icon(
+          Icons.star_rounded,
+          size: fontSize + 4,
+          color: context.colors.star,
+        ),
         const SizedBox(width: 3),
         Text(
           r.toStringAsFixed(outOf > 10 ? 0 : 1),
           style: AppTypography.sans(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: fontSize,
             fontWeight: FontWeight.w600,
           ),

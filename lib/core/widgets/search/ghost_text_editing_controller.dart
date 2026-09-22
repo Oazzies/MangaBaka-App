@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A [TextEditingController] that paints an inline completion after the text
 /// the user has typed.
@@ -12,9 +13,8 @@ class GhostTextEditingController extends TextEditingController {
   /// The completion drawn after [text]. Empty means no ghost.
   String ghostSuffix = '';
 
-  /// Colour of the ghost span. Null falls back to the field's own style, which
-  /// would make the completion indistinguishable from typed text — callers set
-  /// this to a muted colour.
+  /// Colour of the ghost span. Null uses the theme's muted text at half
+  /// strength, so the completion reads as a suggestion, not typed text.
   Color? ghostColor;
 
   void clearGhost() {
@@ -39,7 +39,13 @@ class GhostTextEditingController extends TextEditingController {
       style: style,
       children: [
         TextSpan(text: text),
-        TextSpan(text: ghostSuffix, style: style?.copyWith(color: ghostColor)),
+        TextSpan(
+          text: ghostSuffix,
+          style: style?.copyWith(
+            color: ghostColor ??
+                context.colors.textMuted.withValues(alpha: 0.5),
+          ),
+        ),
       ],
     );
   }

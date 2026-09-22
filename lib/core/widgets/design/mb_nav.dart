@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// One destination in [MbBottomNav] / [MbNavRail].
 @immutable
@@ -42,15 +42,13 @@ class _MbNavItem extends StatelessWidget {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: selected ? AppConstants.accentColor : Colors.transparent,
+        color: selected ? context.colors.accent : Colors.transparent,
         shape: BoxShape.circle,
       ),
       child: Icon(
         selected ? destination.selectedIcon : destination.icon,
         size: 23,
-        color: selected
-            ? AppConstants.onAccent
-            : AppConstants.textMutedColor,
+        color: selected ? context.colors.onAccent : context.colors.textMuted,
       ),
     );
 
@@ -63,7 +61,9 @@ class _MbNavItem extends StatelessWidget {
       selected: selected,
       label: destination.label,
       child: Padding(
-        padding: expand ? const EdgeInsets.symmetric(horizontal: 1.0) : EdgeInsets.zero,
+        padding: expand
+            ? const EdgeInsets.symmetric(horizontal: 1.0)
+            : EdgeInsets.zero,
         child: Tooltip(
           message: destination.label,
           child: InkResponse(
@@ -99,7 +99,7 @@ class MbBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppConstants.primaryBackground,
+      color: context.colors.background,
       child: SafeArea(
         top: false,
         child: SizedBox(
@@ -147,7 +147,7 @@ class MbNavRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppConstants.primaryBackground,
+      color: context.colors.background,
       child: Column(
         children: [
           if (leading != null) leading!,
