@@ -31,7 +31,7 @@ void main() {
       expect(series.id, '123');
       expect(series.title, 'Test Manga');
       expect(series.nativeTitle, 'テスト漫画');
-      expect(series.description, 'Description with \n and HTML');
+      expect(series.description, 'Description with \n and **HTML**');
       expect(series.genres, contains('Action'));
       expect(series.authors, contains('Author 1'));
     });

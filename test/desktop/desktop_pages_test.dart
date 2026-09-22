@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/theme/presets/theme_presets.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/screens/settings/desktop_settings_screen.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_sidebar.dart';
@@ -186,9 +187,9 @@ void main() {
         ),
       );
       final decoration = container.decoration! as BoxDecoration;
-      expect(decoration.color, DesktopPillButton.dangerColor);
+      expect(decoration.color, DesktopPillButton.dangerColor(inkPalette));
       // A soft tint of the app's error red, not a solid fill.
-      expect(DesktopPillButton.dangerColor.a, lessThan(0.3));
+      expect(DesktopPillButton.dangerColor(inkPalette).a, lessThan(0.3));
     });
   });
 
