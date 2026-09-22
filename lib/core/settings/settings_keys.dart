@@ -1,36 +1,75 @@
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 class SettingsKeys {
-  static const String hideLibrarySeriesInBrowse = '${AppConstants.prefixStorageKey}hide_library_series';
-  static const String contentPreferences = '${AppConstants.prefixStorageKey}content_prefs';
-  static const String onboardingCompleted = '${AppConstants.prefixStorageKey}onboarding_completed';
-  static const String defaultStartPage = '${AppConstants.prefixStorageKey}default_start_page';
-  static const String ratingSliderStep = '${AppConstants.prefixStorageKey}rating_slider_step';
-  static const String addLibraryDefaultTab = '${AppConstants.prefixStorageKey}add_library_default_tab';
-  static const String defaultTitleLanguage = '${AppConstants.prefixStorageKey}default_title_language';
-  static const String separateListStyles = '${AppConstants.prefixStorageKey}separate_list_styles';
-  static const String libraryListStyle = '${AppConstants.prefixStorageKey}library_list_style';
-  static const String browseListStyle = '${AppConstants.prefixStorageKey}browse_list_style';
-  static const String pushNotifications = '${AppConstants.prefixStorageKey}push_notifications';
-  static const String autoSuggestBrowse = '${AppConstants.prefixStorageKey}auto_suggest_browse';
-  static const String autoSuggestLibrary = '${AppConstants.prefixStorageKey}auto_suggest_library';
-  static const String listStylePref = '${AppConstants.prefixStorageKey}list_style_pref';
-  static const String newsListColumns = '${AppConstants.prefixStorageKey}news_list_columns';
-  static const String showTooltips = '${AppConstants.prefixStorageKey}show_tooltips';
-  static const String blurredContentRatings = '${AppConstants.prefixStorageKey}blurred_content_ratings';
-  static const String separateGridColumnCounts = '${AppConstants.prefixStorageKey}separate_grid_column_counts';
-  static const String gridColumnCount = '${AppConstants.prefixStorageKey}grid_column_count';
-  static const String libraryGridColumnCount = '${AppConstants.prefixStorageKey}library_grid_column_count';
-  static const String browseGridColumnCount = '${AppConstants.prefixStorageKey}browse_grid_column_count';
-  static const String compactGridTitleRows = '${AppConstants.prefixStorageKey}compact_grid_title_rows';
-  static const String collectionsGridColumns = '${AppConstants.prefixStorageKey}collections_grid_columns';
-  static const String worksListStyle = '${AppConstants.prefixStorageKey}works_list_style';
-  static const String similarListStyle = '${AppConstants.prefixStorageKey}similar_list_style';
-  static const String showQuickProgress = '${AppConstants.prefixStorageKey}show_quick_progress';
-  static const String showLibraryProgress = '${AppConstants.prefixStorageKey}show_library_progress';
-  static const String libraryProgressType = '${AppConstants.prefixStorageKey}library_progress_type';
-  static const String showRemainingProgress = '${AppConstants.prefixStorageKey}show_remaining_progress';
-  static const String showLibraryTabCounts = '${AppConstants.prefixStorageKey}show_library_tab_counts';
-  static const String landscapeAppBarPosition = '${AppConstants.prefixStorageKey}landscape_appbar_position';
+  static const String hideLibrarySeriesInBrowse =
+      '${AppConstants.prefixStorageKey}hide_library_series';
+  static const String contentPreferences =
+      '${AppConstants.prefixStorageKey}content_prefs';
+  static const String onboardingCompleted =
+      '${AppConstants.prefixStorageKey}onboarding_completed';
+  static const String defaultStartPage =
+      '${AppConstants.prefixStorageKey}default_start_page';
+  static const String ratingSliderStep =
+      '${AppConstants.prefixStorageKey}rating_slider_step';
+  static const String addLibraryDefaultTab =
+      '${AppConstants.prefixStorageKey}add_library_default_tab';
+  static const String defaultTitleLanguage =
+      '${AppConstants.prefixStorageKey}default_title_language';
+  static const String separateListStyles =
+      '${AppConstants.prefixStorageKey}separate_list_styles';
+  static const String libraryListStyle =
+      '${AppConstants.prefixStorageKey}library_list_style';
+  static const String browseListStyle =
+      '${AppConstants.prefixStorageKey}browse_list_style';
+  static const String pushNotifications =
+      '${AppConstants.prefixStorageKey}push_notifications';
+  static const String autoSuggestBrowse =
+      '${AppConstants.prefixStorageKey}auto_suggest_browse';
+  static const String autoSuggestLibrary =
+      '${AppConstants.prefixStorageKey}auto_suggest_library';
+  static const String listStylePref =
+      '${AppConstants.prefixStorageKey}list_style_pref';
+  static const String newsListColumns =
+      '${AppConstants.prefixStorageKey}news_list_columns';
+  static const String showTooltips =
+      '${AppConstants.prefixStorageKey}show_tooltips';
+  static const String blurredContentRatings =
+      '${AppConstants.prefixStorageKey}blurred_content_ratings';
+  static const String separateGridColumnCounts =
+      '${AppConstants.prefixStorageKey}separate_grid_column_counts';
+  static const String gridColumnCount =
+      '${AppConstants.prefixStorageKey}grid_column_count';
+  static const String libraryGridColumnCount =
+      '${AppConstants.prefixStorageKey}library_grid_column_count';
+  static const String browseGridColumnCount =
+      '${AppConstants.prefixStorageKey}browse_grid_column_count';
+  static const String compactGridTitleRows =
+      '${AppConstants.prefixStorageKey}compact_grid_title_rows';
+  static const String collectionsGridColumns =
+      '${AppConstants.prefixStorageKey}collections_grid_columns';
+  static const String worksListStyle =
+      '${AppConstants.prefixStorageKey}works_list_style';
+  static const String similarListStyle =
+      '${AppConstants.prefixStorageKey}similar_list_style';
+  static const String showQuickProgress =
+      '${AppConstants.prefixStorageKey}show_quick_progress';
+  static const String showLibraryProgress =
+      '${AppConstants.prefixStorageKey}show_library_progress';
+  static const String libraryProgressType =
+      '${AppConstants.prefixStorageKey}library_progress_type';
+  static const String showRemainingProgress =
+      '${AppConstants.prefixStorageKey}show_remaining_progress';
+  static const String showLibraryTabCounts =
+      '${AppConstants.prefixStorageKey}show_library_tab_counts';
+  static const String landscapeAppBarPosition =
+      '${AppConstants.prefixStorageKey}landscape_appbar_position';
+  static const String themeMode = '${AppConstants.prefixStorageKey}theme_mode';
+  static const String darkThemeId =
+      '${AppConstants.prefixStorageKey}dark_theme_id';
+  static const String lightThemeId =
+      '${AppConstants.prefixStorageKey}light_theme_id';
+  static const String accentOverride =
+      '${AppConstants.prefixStorageKey}accent_override';
+  static const String customThemes =
+      '${AppConstants.prefixStorageKey}custom_themes';
 }
-

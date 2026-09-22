@@ -52,3 +52,6 @@ enum TitleLanguage { defaultLang, native, romanized }
 enum LibraryProgressType { chapters, volumes }
 
 enum LandscapeAppBarPosition { top, bottom, left, right }
+
+/// Which palette slot the app shows: follow the OS, or pin light or dark.
+enum AppThemeMode { system, light, dark }

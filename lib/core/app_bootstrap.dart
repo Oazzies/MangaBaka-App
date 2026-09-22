@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_theme.dart';
+import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:window_manager/window_manager.dart';
@@ -52,7 +53,8 @@ class AppBootstrap {
       LocalizationService().init(),
     ]);
 
-    AppTheme.applySystemOverlay();
+    ThemeController().init();
+    AppTheme.applySystemOverlay(ThemeController().current);
   }
 
   static Future<void> _configureDesktopWindow() async {

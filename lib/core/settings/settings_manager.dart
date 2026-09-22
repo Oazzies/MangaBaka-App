@@ -75,6 +75,22 @@ class SettingsManager extends ChangeNotifier {
     LandscapeAppBarPosition.values,
   );
 
+  // Existing users were on the single dark theme, so dark stays the default
+  // rather than "system" — nobody's app changes colour on update.
+  final _themeMode = EnumSetting(
+    SettingsKeys.themeMode,
+    AppThemeMode.dark,
+    AppThemeMode.values,
+  );
+  final _darkThemeId = StringSetting(SettingsKeys.darkThemeId, 'default');
+  final _lightThemeId = StringSetting(SettingsKeys.lightThemeId, 'default');
+
+  /// ARGB of the accent override; 0 means "use the theme's own accent".
+  final _accentOverride = IntSetting(SettingsKeys.accentOverride, 0);
+
+  /// JSON-encoded `MbThemeSpec`s.
+  final _customThemes = StringListSetting(SettingsKeys.customThemes, const []);
+
   final _separateListStyles = BoolSetting(SettingsKeys.separateListStyles, false);
   final _separateGridColumnCounts =
       BoolSetting(SettingsKeys.separateGridColumnCounts, false);
@@ -129,6 +145,11 @@ class SettingsManager extends ChangeNotifier {
     _defaultTitleLanguage,
     _libraryProgressType,
     _landscapeAppBarPosition,
+    _themeMode,
+    _darkThemeId,
+    _lightThemeId,
+    _accentOverride,
+    _customThemes,
     _separateListStyles,
     _separateGridColumnCounts,
     _hideLibrarySeriesInBrowse,
@@ -331,4 +352,23 @@ class SettingsManager extends ChangeNotifier {
 
   bool get showTooltips => _showTooltips.value;
   Future<void> setShowTooltips(bool value) => _apply(_showTooltips, value);
+
+  // ─── Appearance ──────────────────────────────────────────────────────────
+  // Raw storage only; `ThemeController` resolves these into palettes.
+
+  AppThemeMode get themeMode => _themeMode.value;
+  Future<void> setThemeMode(AppThemeMode mode) => _apply(_themeMode, mode);
+
+  String get darkThemeId => _darkThemeId.value;
+  Future<void> setDarkThemeId(String id) => _apply(_darkThemeId, id);
+
+  String get lightThemeId => _lightThemeId.value;
+  Future<void> setLightThemeId(String id) => _apply(_lightThemeId, id);
+
+  int get accentOverride => _accentOverride.value;
+  Future<void> setAccentOverride(int argb) => _apply(_accentOverride, argb);
+
+  List<String> get customThemes => _customThemes.value;
+  Future<void> setCustomThemes(List<String> encoded) =>
+      _apply(_customThemes, encoded);
 }
