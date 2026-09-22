@@ -7,6 +7,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/navigation/widgets/top_nav_search_field.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The horizontal navigation bar used on wide landscape windows: brand, tabs,
 /// the current tab's search field, and settings.
@@ -43,8 +44,9 @@ class MainTopNavBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchField =
-        showSearchField ? TopNavSearchField.build(selectedIndex) : null;
+    final searchField = showSearchField
+        ? TopNavSearchField.build(selectedIndex)
+        : null;
 
     final rightPadding = DesktopLayout.isDesktopPlatform
         ? DesktopTokens.windowControlsClearance
@@ -53,9 +55,9 @@ class MainTopNavBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       height: _height,
       decoration: BoxDecoration(
-        color: AppConstants.primaryBackground,
+        color: context.colors.background,
         border: Border(
-          bottom: BorderSide(color: AppConstants.borderColor, width: 1),
+          bottom: BorderSide(color: context.colors.border, width: 1),
         ),
       ),
       child: SafeArea(
@@ -105,7 +107,7 @@ class MainTopNavBar extends StatelessWidget implements PreferredSizeWidget {
                       icon: const Icon(Icons.settings_outlined),
                       iconSize: 20,
                       onPressed: () => SettingsScreen.show(context),
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                     ),
                   ),
                 ],
@@ -131,21 +133,17 @@ class _Brand extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: AppConstants.accentColor.withValues(alpha: 0.1),
+            color: context.colors.accent.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppConstants.denseRadius),
           ),
-          child: Image.asset(
-            'assets/mangabaka512.png',
-            width: 28,
-            height: 28,
-          ),
+          child: Image.asset('assets/mangabaka512.png', width: 28, height: 28),
         ),
         if (!compact) ...[
           const SizedBox(width: 10),
           Text(
             'MANGABAKA',
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 17,
             ),
           ),
@@ -173,8 +171,7 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isSelected ? AppConstants.textColor : AppConstants.textMutedColor;
+    final color = isSelected ? context.colors.text : context.colors.textMuted;
 
     final tabContent = InkWell(
       onTap: onTap,
@@ -188,9 +185,7 @@ class _NavTab extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: isSelected
-                  ? AppConstants.accentColor
-                  : Colors.transparent,
+              color: isSelected ? context.colors.accent : Colors.transparent,
               width: 2,
             ),
           ),

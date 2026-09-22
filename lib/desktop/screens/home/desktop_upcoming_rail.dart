@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -14,6 +13,7 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class DesktopUpcomingRail extends StatefulWidget {
   const DesktopUpcomingRail({super.key});
@@ -72,13 +72,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     final groups = _groupByDate(works);
     final rows = <Widget>[];
     for (final group in groups) {
-      rows.add(
-        _DateHeader(
-          date: group.date,
-            first: rows.isEmpty,
-          l10n: l10n,
-        ),
-      );
+      rows.add(_DateHeader(date: group.date, first: rows.isEmpty, l10n: l10n));
       for (final work in group.works) {
         rows.add(
           Padding(
@@ -148,7 +142,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
               Text(
                 'UPCOMING RELEASES',
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 18,
                 ),
               ),
@@ -164,7 +158,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
             ],
           ),
         ),
-        Divider(height: 1, color: AppConstants.borderColor),
+        Divider(height: 1, color: context.colors.border),
         Expanded(
           child: _loading
               ? const Center(child: CircularProgressIndicator())
@@ -178,7 +172,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
                           : l10n.translate('no_results'),
                       textAlign: TextAlign.center,
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                       ),
                     ),
@@ -235,9 +229,7 @@ class _DateHeader extends StatelessWidget {
                 ? l10n.translate('upcoming_date_tba').toUpperCase()
                 : DateFormat('d MMM').format(d).toUpperCase(),
             style: AppTypography.display(
-              color: isToday
-                  ? AppConstants.accentColor
-                  : AppConstants.textColor,
+              color: isToday ? context.colors.accent : context.colors.text,
               fontSize: d == null ? 14 : 22,
               height: 1,
             ),
@@ -250,7 +242,7 @@ class _DateHeader extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.monoLabel(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 11.5,
                 ),
               ),
@@ -324,7 +316,7 @@ class _UpcomingWorkCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.display(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                     ),
@@ -336,7 +328,7 @@ class _UpcomingWorkCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 12,
                       ),
                     ),
@@ -349,13 +341,13 @@ class _UpcomingWorkCard extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AppConstants.accentColor.withValues(alpha: 0.16),
+                        color: context.colors.accent.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         'IN LIBRARY',
                         style: AppTypography.monoLabel(
-                          color: AppConstants.accentColor,
+                          color: context.colors.accent,
                           fontSize: 9.5,
                         ),
                       ),
@@ -477,11 +469,11 @@ class _UpcomingWorkCoverState extends State<_UpcomingWorkCover> {
       return WidgetUtils.networkImage(url: _resolvedUrl!, fit: BoxFit.cover);
     }
     return Container(
-      color: AppConstants.tertiaryBackground,
+      color: context.colors.surfaceRaised,
       child: Icon(
         Icons.book_outlined,
         size: 20,
-        color: AppConstants.textMutedColor,
+        color: context.colors.textMuted,
       ),
     );
   }

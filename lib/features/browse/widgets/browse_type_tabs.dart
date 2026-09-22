@@ -1,8 +1,8 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class BrowseTypeTabs extends StatelessWidget {
   final BrowseType selectedType;
@@ -40,12 +40,9 @@ class BrowseTypeTabs extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 6),
           height: 38,
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: AppConstants.tertiaryBackground,
-              width: 1.5,
-            ),
+            border: Border.all(color: context.colors.surfaceRaised, width: 1.5),
           ),
           child: Stack(
             children: [
@@ -57,7 +54,7 @@ class BrowseTypeTabs extends StatelessWidget {
                   width: tabWidth,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppConstants.accentColor,
+                    color: context.colors.accent,
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
@@ -76,8 +73,8 @@ class BrowseTypeTabs extends StatelessWidget {
                           curve: Curves.easeInOut,
                           style: AppTypography.sans(
                             color: isSelected
-                                ? AppConstants.primaryBackground
-                                : AppConstants.textColor,
+                                ? context.colors.background
+                                : context.colors.text,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),

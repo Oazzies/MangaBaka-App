@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A labelled -/+ counter for a bounded integer setting.
 ///
@@ -46,7 +46,7 @@ class SettingsStepperRow extends StatelessWidget {
             child: Text(
               label,
               style: AppTypography.sans(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -67,7 +67,7 @@ class SettingsStepperRow extends StatelessWidget {
                 child: Text(
                   display,
                   style: AppTypography.sans(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -96,8 +96,8 @@ class _StepButton extends StatelessWidget {
     return IconButton(
       icon: Icon(icon),
       onPressed: onPressed,
-      color: AppConstants.accentColor,
-      disabledColor: AppConstants.textMutedColor.withValues(alpha: 0.3),
+      color: context.colors.accent,
+      disabledColor: context.colors.textMuted.withValues(alpha: 0.3),
     );
   }
 }

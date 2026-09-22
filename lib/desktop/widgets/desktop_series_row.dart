@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -8,6 +7,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A column of the desktop series table.
 enum DesktopSeriesColumn {
@@ -159,9 +159,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: _hovered
-                  ? AppConstants.secondaryBackground
-                  : Colors.transparent,
+              color: _hovered ? context.colors.surface : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -176,10 +174,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
                 const SizedBox(width: DesktopSeriesTable.coverGap),
                 Expanded(child: _titleCell(l10n)),
                 for (final column in columns)
-                  SizedBox(
-                    width: column.width,
-                    child: _cell(column, l10n),
-                  ),
+                  SizedBox(width: column.width, child: _cell(column, l10n)),
                 if (reserveAction)
                   SizedBox(
                     width: DesktopSeriesTable.actionWidth,
@@ -200,7 +195,8 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
     final subtitle = _series.authors.isNotEmpty
         ? _series.authors.take(3).join(', ')
         : '';
-    final showSubtitle = _style != AppListStyle.minimalList && subtitle.isNotEmpty;
+    final showSubtitle =
+        _style != AppListStyle.minimalList && subtitle.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(right: 16),
@@ -213,7 +209,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.sans(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: _style == AppListStyle.comfortable ? 15.5 : 14.5,
               fontWeight: FontWeight.w600,
             ),
@@ -225,7 +221,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 12.5,
               ),
             ),
@@ -258,9 +254,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
         return _text(year.isEmpty || year == '0' ? '—' : year);
       case DesktopSeriesColumn.chapters:
         final chapters = _series.totalChapters;
-        return _text(
-          chapters.isEmpty || chapters == '0' ? '—' : chapters,
-        );
+        return _text(chapters.isEmpty || chapters == '0' ? '—' : chapters);
     }
   }
 
@@ -280,7 +274,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTypography.sans(
-        color: AppConstants.textMutedColor,
+        color: context.colors.textMuted,
         fontSize: 13,
         fontWeight: FontWeight.w500,
       ),
@@ -319,7 +313,7 @@ class DesktopSeriesListHeader extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: AppConstants.borderColor),
+                  bottom: BorderSide(color: context.colors.border),
                 ),
               ),
               child: Row(
@@ -329,11 +323,13 @@ class DesktopSeriesListHeader extends StatelessWidget {
                         DesktopSeriesTable.coverWidth(style) +
                         DesktopSeriesTable.coverGap,
                   ),
-                  Expanded(child: _label(l10n.translate('column_title'))),
+                  Expanded(
+                    child: _label(context, l10n.translate('column_title')),
+                  ),
                   for (final column in columns)
                     SizedBox(
                       width: column.width,
-                      child: _label(l10n.translate(column.labelKey)),
+                      child: _label(context, l10n.translate(column.labelKey)),
                     ),
                   if (reserveAction)
                     const SizedBox(width: DesktopSeriesTable.actionWidth),
@@ -346,14 +342,14 @@ class DesktopSeriesListHeader extends StatelessWidget {
     );
   }
 
-  Widget _label(String text) => Align(
+  Widget _label(BuildContext context, String text) => Align(
     alignment: Alignment.centerLeft,
     child: Text(
       text.toUpperCase(),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTypography.monoLabel(
-        color: AppConstants.textMutedColor,
+        color: context.colors.textMuted,
         fontSize: 11,
       ),
     ),

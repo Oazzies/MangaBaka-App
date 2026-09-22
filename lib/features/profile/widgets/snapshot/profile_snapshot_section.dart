@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/snapshot/snapshot_list.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ProfileSnapshotSection extends StatelessWidget {
   final List<LibraryEntry> recentlyChanged;
@@ -32,14 +32,14 @@ class ProfileSnapshotSection extends StatelessWidget {
         Text(
           l10n.translate('library_snapshot').toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 20,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           l10n.translate('snapshot_desc'),
-          style: AppTypography.sans(color: AppConstants.textMutedColor),
+          style: AppTypography.sans(color: context.colors.textMuted),
         ),
         const SizedBox(height: 16),
         SnapshotList(

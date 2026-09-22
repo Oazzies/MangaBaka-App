@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Surface card from the MangaBaka design system: flat dark fill, soft radius,
 /// with an optional uppercase display label header and an optional trailing
@@ -25,7 +26,7 @@ class MbCard extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppConstants.cardRadius),
       ),
       child: Column(
@@ -38,7 +39,7 @@ class MbCard extends StatelessWidget {
                   child: Text(
                     label!.toUpperCase(),
                     style: AppTypography.monoLabel(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 11,
                     ),
                   ),

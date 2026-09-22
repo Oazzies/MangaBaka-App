@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -13,6 +12,7 @@ import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class LibraryGridList extends StatelessWidget {
   final List<LibraryEntry> items;
@@ -49,13 +49,13 @@ class LibraryGridList extends StatelessWidget {
                         Icon(
                           Icons.search_off_rounded,
                           size: 48,
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           l10n.translate('no_results'),
                           style: AppTypography.sans(
-                            color: AppConstants.textMutedColor,
+                            color: context.colors.textMuted,
                             fontSize: 16,
                           ),
                         ),
@@ -70,7 +70,11 @@ class LibraryGridList extends StatelessWidget {
   }
 
   /// Builds a single tappable library item with hover-prefetch for desktop.
-  Widget _buildEntryItem(LibraryEntry entry, SeriesService seriesService, AppListStyle activeStyle) {
+  Widget _buildEntryItem(
+    LibraryEntry entry,
+    SeriesService seriesService,
+    AppListStyle activeStyle,
+  ) {
     return MouseRegion(
       onEnter: (_) => seriesService.fetchSeries(entry.series.id),
       child: GestureDetector(
@@ -118,7 +122,11 @@ class LibraryGridList extends StatelessWidget {
                 itemCount: items.length,
                 itemBuilder: (context, index) => MbEntrance(
                   index: index,
-                  child: _buildEntryItem(items[index], seriesService, activeStyle),
+                  child: _buildEntryItem(
+                    items[index],
+                    seriesService,
+                    activeStyle,
+                  ),
                 ),
               );
             }
@@ -143,7 +151,11 @@ class LibraryGridList extends StatelessWidget {
               itemCount: items.length,
               itemBuilder: (context, index) => MbEntrance(
                 index: index,
-                child: _buildEntryItem(items[index], seriesService, activeStyle),
+                child: _buildEntryItem(
+                  items[index],
+                  seriesService,
+                  activeStyle,
+                ),
               ),
             );
           }
@@ -152,7 +164,10 @@ class LibraryGridList extends StatelessWidget {
             return LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
-                final calculatedColumns = ((width + 10) / 170).ceil().clamp(1, 12);
+                final calculatedColumns = ((width + 10) / 170).ceil().clamp(
+                  1,
+                  12,
+                );
                 return buildGridContent(context, calculatedColumns);
               },
             );

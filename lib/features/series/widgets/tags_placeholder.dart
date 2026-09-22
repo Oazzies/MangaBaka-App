@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Cheap stand-in shown for the one frame before the real tags are built — a
 /// couple of rows of pill outlines so the card doesn't pop in from nothing.
@@ -26,10 +27,10 @@ class TagsPlaceholder extends StatelessWidget {
                   width: width,
                   height: 26,
                   decoration: BoxDecoration(
-                    color:
-                        AppConstants.tertiaryBackground.withValues(alpha: 0.5),
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.pillRadius),
+                    color: context.colors.surfaceRaised.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.pillRadius,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

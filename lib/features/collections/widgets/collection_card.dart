@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// One collection: its title, who published it as which edition, and the
 /// format/medium/status badges. Tapping opens the collection's works.
@@ -36,7 +37,7 @@ class CollectionCard extends StatelessWidget {
     final card = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppConstants.largeRadius),
       ),
       child: Column(
@@ -52,7 +53,7 @@ class CollectionCard extends StatelessWidget {
                     Text(
                       col.title,
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -62,7 +63,7 @@ class CollectionCard extends StatelessWidget {
                       Text(
                         byline,
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 13,
                         ),
                       ),
@@ -75,7 +76,7 @@ class CollectionCard extends StatelessWidget {
                 Text(
                   '${col.countMain} VOLS',
                   style: AppTypography.monoLabel(
-                    color: AppConstants.accentColor,
+                    color: context.colors.accent,
                     fontSize: 11.5,
                   ),
                 ),
@@ -112,13 +113,13 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppConstants.tertiaryBackground,
+        color: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         text.toUpperCase(),
         style: AppTypography.sans(
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
           fontSize: 10,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,

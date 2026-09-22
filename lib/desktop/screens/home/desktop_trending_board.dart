@@ -12,6 +12,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Trending as a chart: the #1 series featured large, the next places ranked
 /// beside it, with the type and time-window controls in the header.
@@ -154,8 +155,8 @@ class _FeaturedCard extends StatelessWidget {
 
     return DesktopHoverSurface(
       onTap: () => openSeriesDetail(context, series, heroTag: 'trending_1'),
-      idleColor: AppConstants.secondaryBackground,
-      hoverColor: AppConstants.tertiaryBackground,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
@@ -178,8 +179,8 @@ class _FeaturedCard extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    AppConstants.primaryBackground.withValues(alpha: 0.3),
-                    AppConstants.primaryBackground.withValues(alpha: 0.85),
+                    context.colors.background.withValues(alpha: 0.3),
+                    context.colors.background.withValues(alpha: 0.85),
                   ],
                 ),
               ),
@@ -195,7 +196,9 @@ class _FeaturedCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: WidgetUtils.networkImage(
                         url: series.coverUrl,
-                        blurred: WidgetUtils.isRatingBlurred(series.contentRating),
+                        blurred: WidgetUtils.isRatingBlurred(
+                          series.contentRating,
+                        ),
                         memCacheWidth: 500,
                       ),
                     ),
@@ -211,7 +214,7 @@ class _FeaturedCard extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: AppConstants.accentColor,
+                            color: context.colors.accent,
                             borderRadius: BorderRadius.circular(
                               AppConstants.pillRadius,
                             ),
@@ -219,7 +222,7 @@ class _FeaturedCard extends StatelessWidget {
                           child: Text(
                             '#1 ${l10n.translate('trending')}'.toUpperCase(),
                             style: AppTypography.display(
-                              color: AppConstants.onAccent,
+                              color: context.colors.onAccent,
                               fontSize: 12,
                             ),
                           ),
@@ -230,7 +233,7 @@ class _FeaturedCard extends StatelessWidget {
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.display(
-                            color: AppConstants.textColor,
+                            color: context.colors.text,
                             fontSize: 28,
                             height: 1.1,
                           ),
@@ -240,7 +243,7 @@ class _FeaturedCard extends StatelessWidget {
                           Text(
                             meta,
                             style: AppTypography.sans(
-                              color: AppConstants.textMutedColor,
+                              color: context.colors.textMuted,
                               fontSize: 13.5,
                               fontWeight: FontWeight.w500,
                             ),
@@ -267,7 +270,7 @@ class _FeaturedCard extends StatelessWidget {
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppConstants.tertiaryBackground
+                                    color: context.colors.surfaceRaised
                                         .withValues(alpha: 0.8),
                                     borderRadius: BorderRadius.circular(
                                       AppConstants.pillRadius,
@@ -276,7 +279,7 @@ class _FeaturedCard extends StatelessWidget {
                                   child: Text(
                                     metadata.getGenreLabel(g),
                                     style: AppTypography.sans(
-                                      color: AppConstants.textColor,
+                                      color: context.colors.text,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -292,7 +295,7 @@ class _FeaturedCard extends StatelessWidget {
                               series.description,
                               overflow: TextOverflow.fade,
                               style: AppTypography.sans(
-                                color: AppConstants.textColor.withValues(
+                                color: context.colors.text.withValues(
                                   alpha: 0.75,
                                 ),
                                 fontSize: 13.5,
@@ -338,8 +341,8 @@ class _RankedRow extends StatelessWidget {
       child: DesktopHoverSurface(
         onTap: () =>
             openSeriesDetail(context, series, heroTag: 'trending_$rank'),
-        idleColor: AppConstants.secondaryBackground,
-        hoverColor: AppConstants.tertiaryBackground,
+        idleColor: context.colors.surface,
+        hoverColor: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(12),
         padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
         child: Row(
@@ -350,8 +353,8 @@ class _RankedRow extends StatelessWidget {
                 '$rank',
                 style: AppTypography.display(
                   color: rank <= 3
-                      ? AppConstants.accentColor
-                      : AppConstants.textMutedColor,
+                      ? context.colors.accent
+                      : context.colors.textMuted,
                   fontSize: 22,
                 ),
               ),
@@ -378,7 +381,7 @@ class _RankedRow extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       height: 1.25,
@@ -390,7 +393,7 @@ class _RankedRow extends StatelessWidget {
                       meta,
                       maxLines: 1,
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 12,
                       ),
                     ),
@@ -416,13 +419,13 @@ class _BoardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget block() => Container(
       decoration: BoxDecoration(
-        color: AppConstants.tertiaryBackground,
+        color: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(12),
       ),
     );
     return Shimmer.fromColors(
-      baseColor: AppConstants.tertiaryBackground,
-      highlightColor: AppConstants.secondaryBackground,
+      baseColor: context.colors.surfaceRaised,
+      highlightColor: context.colors.surface,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

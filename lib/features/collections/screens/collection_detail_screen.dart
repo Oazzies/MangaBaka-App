@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -13,6 +12,7 @@ import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A collection opened into its works: the collection's summary, then every
 /// release in it (volumes, boxed sets, extras) as a cover grid.
@@ -114,7 +114,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
     final col = widget.collection;
 
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       appBar: mbScreenAppBar(title: l10n.translate('tab_collections')),
       body: WidgetUtils.responsiveConstraint(
         maxWidth: 1100,
@@ -150,9 +150,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 child: Center(
                   child: Text(
                     l10n.translate('no_works_available'),
-                    style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
-                    ),
+                    style: AppTypography.sans(color: context.colors.textMuted),
                   ),
                 ),
               )
@@ -220,10 +218,10 @@ class _WorkTile extends StatelessWidget {
                     memCacheWidth: 300,
                   )
                 : Container(
-                    color: AppConstants.tertiaryBackground,
+                    color: context.colors.surfaceRaised,
                     child: Icon(
                       Icons.book_outlined,
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                     ),
                   ),
           ),
@@ -234,7 +232,7 @@ class _WorkTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 13,
           ),
         ),
@@ -244,7 +242,7 @@ class _WorkTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.sans(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 12,
             ),
           ),
@@ -254,7 +252,7 @@ class _WorkTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.sans(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 12,
             ),
           ),

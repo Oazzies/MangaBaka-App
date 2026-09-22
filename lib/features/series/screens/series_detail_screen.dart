@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -21,6 +20,7 @@ import 'package:mangabaka_app/features/series/widgets/series_detail_body.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
 import 'package:mangabaka_app/features/series/widgets/series_filter_drawer.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/core/widgets/dotted_border_painter.dart';
 
@@ -283,7 +283,7 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
               final isWide =
                   constraints.maxWidth > SeriesDetailBody.wideBreakpoint;
               return Scaffold(
-                backgroundColor: AppConstants.primaryBackground,
+                backgroundColor: context.colors.background,
                 body: Stack(
                   children: [
                     Positioned.fill(

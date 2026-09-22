@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -14,6 +13,7 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The Home feed: a rotating spotlight of what's hot, then progressively broader
 /// discovery — personalised, then trending, then the long tail. Mirrors the
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final l10n = LocalizationService();
 
         return Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           appBar: mbScreenAppBar(
             title: l10n.translate('home'),
             isRoot: true,
@@ -171,8 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           body: RefreshIndicator(
-            color: AppConstants.accentColor,
-            backgroundColor: AppConstants.secondaryBackground,
+            color: context.colors.accent,
+            backgroundColor: context.colors.surface,
             onRefresh: _loadRails,
             child: WidgetUtils.responsiveConstraint(
               ListView(

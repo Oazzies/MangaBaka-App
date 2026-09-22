@@ -10,6 +10,7 @@ import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_dialog.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_root_groups.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Settings, full-screen.
 ///
@@ -57,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
         final auth = getIt<ProfileAuthService>();
 
         return Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
@@ -66,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
             title: Text(
               l10n.translate('settings').toUpperCase(),
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 20,
               ),
             ),
@@ -110,7 +111,7 @@ class _BrandHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppConstants.accentColor.withValues(alpha: 0.12),
+                color: context.colors.accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppConstants.cardRadius),
               ),
               child: Image.asset(
@@ -127,7 +128,7 @@ class _BrandHeader extends StatelessWidget {
                 Text(
                   AppConstants.appName.toUpperCase(),
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 22,
                   ),
                 ),
@@ -135,7 +136,7 @@ class _BrandHeader extends StatelessWidget {
                 Text(
                   'v${AppConstants.appVersion}',
                   style: AppTypography.sans(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontSize: 13,
                   ),
                 ),

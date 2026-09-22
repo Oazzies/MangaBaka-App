@@ -9,6 +9,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The desktop app's permanent left sidebar: brand, a search shortcut, the
 /// five destinations with their labels, and settings and the account pinned
@@ -47,8 +48,8 @@ class DesktopSidebar extends StatelessWidget {
       curve: AppMotion.emphasized,
       width: width,
       decoration: BoxDecoration(
-        color: const Color(0xFF080808),
-        border: Border(right: BorderSide(color: AppConstants.borderColor)),
+        color: context.colors.backgroundDeep,
+        border: Border(right: BorderSide(color: context.colors.border)),
       ),
       child: ClipRect(
         child: OverflowBox(
@@ -93,7 +94,7 @@ class DesktopSidebar extends StatelessWidget {
                       onTap: () => onSelected(settingsIndex),
                     ),
                     const SizedBox(height: 10),
-                    Divider(height: 1, color: AppConstants.borderColor),
+                    Divider(height: 1, color: context.colors.border),
                     const SizedBox(height: 10),
                     _AccountChip(
                       collapsed: collapsed,
@@ -158,7 +159,7 @@ class _Brand extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.clip,
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 17,
             ),
           ),
@@ -166,7 +167,7 @@ class _Brand extends StatelessWidget {
         DesktopIconButton(
           icon: Icons.keyboard_double_arrow_left_rounded,
           size: 18,
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
           tooltip: l10n.translate('collapse_sidebar'),
           onPressed: onToggle,
         ),
@@ -194,12 +195,12 @@ class _SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? AppConstants.onAccent : AppConstants.textMutedColor;
+    final fg = selected ? context.colors.onAccent : context.colors.textMuted;
     return DesktopHoverSurface(
       onTap: onTap,
       selected: selected,
-      selectedColor: AppConstants.accentColor,
-      hoverColor: AppConstants.secondaryBackground,
+      selectedColor: context.colors.accent,
+      hoverColor: context.colors.surface,
       tooltip: collapsed ? '$label  ($shortcut)' : null,
       borderRadius: BorderRadius.circular(12),
       padding: EdgeInsets.symmetric(
@@ -211,7 +212,7 @@ class _SidebarItem extends StatelessWidget {
             ? MainAxisAlignment.center
             : MainAxisAlignment.start,
         children: [
-          Icon(icon, size: 21, color: selected ? fg : AppConstants.textColor),
+          Icon(icon, size: 21, color: selected ? fg : context.colors.text),
           if (!collapsed) ...[
             const SizedBox(width: 12),
             Expanded(
@@ -220,7 +221,7 @@ class _SidebarItem extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.display(
-                  color: selected ? fg : AppConstants.textColor,
+                  color: selected ? fg : context.colors.text,
                   fontSize: 13.5,
                 ),
               ),
@@ -261,8 +262,8 @@ class _AccountChip extends StatelessWidget {
           height: 34,
           decoration: BoxDecoration(
             color: profile == null
-                ? AppConstants.tertiaryBackground
-                : AppConstants.accentColor.withValues(alpha: 0.18),
+                ? context.colors.surfaceRaised
+                : context.colors.accent.withValues(alpha: 0.18),
             shape: BoxShape.circle,
           ),
           child: ClipOval(
@@ -276,7 +277,7 @@ class _AccountChip extends StatelessWidget {
                       child: Text(
                         initial ?? '?',
                         style: AppTypography.display(
-                          color: AppConstants.accentColor,
+                          color: context.colors.accent,
                           fontSize: 15,
                         ),
                       ),
@@ -287,12 +288,12 @@ class _AccountChip extends StatelessWidget {
                         ? Icon(
                             Icons.login_rounded,
                             size: 17,
-                            color: AppConstants.textMutedColor,
+                            color: context.colors.textMuted,
                           )
                         : Text(
                             initial,
                             style: AppTypography.display(
-                              color: AppConstants.accentColor,
+                              color: context.colors.accent,
                               fontSize: 15,
                             ),
                           ),
@@ -303,7 +304,7 @@ class _AccountChip extends StatelessWidget {
         return DesktopHoverSurface(
           onTap: onTap,
           tooltip: collapsed ? name : null,
-          hoverColor: AppConstants.secondaryBackground,
+          hoverColor: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
           padding: EdgeInsets.symmetric(
             horizontal: collapsed ? 0 : 8,
@@ -327,7 +328,7 @@ class _AccountChip extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.sans(
-                          color: AppConstants.textColor,
+                          color: context.colors.text,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -339,7 +340,7 @@ class _AccountChip extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 12,
                         ),
                       ),

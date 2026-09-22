@@ -2,6 +2,7 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ShortcutButton extends StatelessWidget {
   final String label;
@@ -20,7 +21,7 @@ class ShortcutButton extends StatelessWidget {
       pressedScale: 0.97,
       child: Container(
         decoration: BoxDecoration(
-          color: AppConstants.secondaryBackground,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         ),
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 18.0),
@@ -31,7 +32,7 @@ class ShortcutButton extends StatelessWidget {
               child: Text(
                 label.toUpperCase(),
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 13,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -40,7 +41,7 @@ class ShortcutButton extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               size: 20,
             ),
           ],

@@ -22,6 +22,7 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Search and discovery. Owns the [BrowseController] and the search-mode
 /// state; the results themselves live in [BrowseContent].
@@ -120,11 +121,7 @@ class BrowseScreenState extends State<BrowseScreen> {
         _controller.searchController.text,
       );
     }
-    AppSnackBar.show(
-      context,
-      message,
-      isError: true,
-    );
+    AppSnackBar.show(context, message, isError: true);
   }
 
   // ─── Navigation ──────────────────────────────────────────────────────────
@@ -215,7 +212,7 @@ class BrowseScreenState extends State<BrowseScreen> {
               _exitSearch();
             },
             child: Scaffold(
-              backgroundColor: AppConstants.primaryBackground,
+              backgroundColor: context.colors.background,
               appBar: searchInNavBar
                   ? null
                   : BrowseAppBar(
@@ -274,8 +271,9 @@ class BrowseScreenState extends State<BrowseScreen> {
             BrowseResultCount(
               total: _controller.totalResults,
               isCapped: _controller.isTotalCapped,
-              typeLabel: LocalizationService()
-                  .translate(_controller.currentType.name),
+              typeLabel: LocalizationService().translate(
+                _controller.currentType.name,
+              ),
             ),
           BrowseContent(
             searchResults: _controller.searchResults,
@@ -301,11 +299,8 @@ class BrowseScreenState extends State<BrowseScreen> {
       message: LocalizationService().translate('back_to_top'),
       child: FloatingActionButton(
         onPressed: _controller.scrollToTop,
-        backgroundColor: AppConstants.accentColor,
-        child: Icon(
-          Icons.arrow_upward,
-          color: AppConstants.primaryBackground,
-        ),
+        backgroundColor: context.colors.accent,
+        child: Icon(Icons.arrow_upward, color: context.colors.background),
       ),
     );
   }

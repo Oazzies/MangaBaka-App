@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ListStylePreviewThumbnails extends StatelessWidget {
   final AppListStyle style;
@@ -11,19 +11,19 @@ class ListStylePreviewThumbnails extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (style) {
       case AppListStyle.comfortable:
-        return _buildComfortable();
+        return _buildComfortable(context);
       case AppListStyle.compact:
-        return _buildCompact();
+        return _buildCompact(context);
       case AppListStyle.minimalList:
-        return _buildMinimal();
+        return _buildMinimal(context);
       case AppListStyle.coverOnlyGrid:
-        return _buildCoverOnlyGrid();
+        return _buildCoverOnlyGrid(context);
       case AppListStyle.compactGrid:
-        return _buildCompactGrid();
+        return _buildCompactGrid(context);
     }
   }
 
-  Widget _buildComfortable() {
+  Widget _buildComfortable(BuildContext context) {
     return ListView(
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
@@ -33,10 +33,10 @@ class ListStylePreviewThumbnails extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 5),
           height: 25,
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(3),
             border: Border.all(
-              color: AppConstants.borderColor.withValues(alpha: 0.1),
+              color: context.colors.border.withValues(alpha: 0.1),
               width: 0.5,
             ),
           ),
@@ -46,7 +46,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                 width: 18,
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppConstants.tertiaryBackground,
+                  color: context.colors.surfaceRaised,
                   borderRadius: const BorderRadius.horizontal(
                     left: Radius.circular(3),
                   ),
@@ -62,9 +62,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                       width: 30,
                       height: 3,
                       decoration: BoxDecoration(
-                        color: AppConstants.textMutedColor.withValues(
-                          alpha: 0.4,
-                        ),
+                        color: context.colors.textMuted.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(1.5),
                       ),
                     ),
@@ -73,7 +71,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                       width: 22,
                       height: 2,
                       decoration: BoxDecoration(
-                        color: AppConstants.accentColor.withValues(alpha: 0.3),
+                        color: context.colors.accent.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(1),
                       ),
                     ),
@@ -83,7 +81,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                         Icon(
                           Icons.star_rounded,
                           size: 6,
-                          color: AppConstants.textMutedColor.withValues(
+                          color: context.colors.textMuted.withValues(
                             alpha: 0.2,
                           ),
                         ),
@@ -92,7 +90,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                           width: 8,
                           height: 2,
                           decoration: BoxDecoration(
-                            color: AppConstants.textMutedColor.withValues(
+                            color: context.colors.textMuted.withValues(
                               alpha: 0.2,
                             ),
                             borderRadius: BorderRadius.circular(1),
@@ -110,7 +108,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
     );
   }
 
-  Widget _buildCompact() {
+  Widget _buildCompact(BuildContext context) {
     return ListView(
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
@@ -120,10 +118,10 @@ class ListStylePreviewThumbnails extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 4),
           height: 20,
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(3),
             border: Border.all(
-              color: AppConstants.borderColor.withValues(alpha: 0.1),
+              color: context.colors.border.withValues(alpha: 0.1),
               width: 0.5,
             ),
           ),
@@ -133,7 +131,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                 width: 15,
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppConstants.tertiaryBackground,
+                  color: context.colors.surfaceRaised,
                   borderRadius: const BorderRadius.horizontal(
                     left: Radius.circular(3),
                   ),
@@ -149,9 +147,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                       width: 28,
                       height: 3,
                       decoration: BoxDecoration(
-                        color: AppConstants.textMutedColor.withValues(
-                          alpha: 0.4,
-                        ),
+                        color: context.colors.textMuted.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(1.5),
                       ),
                     ),
@@ -160,9 +156,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                       width: 32,
                       height: 2,
                       decoration: BoxDecoration(
-                        color: AppConstants.textMutedColor.withValues(
-                          alpha: 0.2,
-                        ),
+                        color: context.colors.textMuted.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(1),
                       ),
                     ),
@@ -176,7 +170,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
     );
   }
 
-  Widget _buildMinimal() {
+  Widget _buildMinimal(BuildContext context) {
     return ListView(
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
@@ -186,10 +180,10 @@ class ListStylePreviewThumbnails extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 3),
           height: 16,
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(2),
             border: Border.all(
-              color: AppConstants.borderColor.withValues(alpha: 0.1),
+              color: context.colors.border.withValues(alpha: 0.1),
               width: 0.5,
             ),
           ),
@@ -199,7 +193,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                 width: 12,
                 height: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppConstants.tertiaryBackground,
+                  color: context.colors.surfaceRaised,
                   borderRadius: const BorderRadius.horizontal(
                     left: Radius.circular(2),
                   ),
@@ -210,7 +204,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                 width: 34,
                 height: 3,
                 decoration: BoxDecoration(
-                  color: AppConstants.textMutedColor.withValues(alpha: 0.4),
+                  color: context.colors.textMuted.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(1.5),
                 ),
               ),
@@ -221,7 +215,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
     );
   }
 
-  Widget _buildCoverOnlyGrid() {
+  Widget _buildCoverOnlyGrid(BuildContext context) {
     return GridView.count(
       crossAxisCount: 3,
       mainAxisSpacing: 4,
@@ -233,23 +227,23 @@ class ListStylePreviewThumbnails extends StatelessWidget {
         12,
         (index) => Container(
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(3),
             border: Border.all(
-              color: AppConstants.borderColor.withValues(alpha: 0.1),
+              color: context.colors.border.withValues(alpha: 0.1),
               width: 0.5,
             ),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(3),
-            child: Container(color: AppConstants.tertiaryBackground),
+            child: Container(color: context.colors.surfaceRaised),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCompactGrid() {
+  Widget _buildCompactGrid(BuildContext context) {
     return GridView.count(
       crossAxisCount: 3,
       mainAxisSpacing: 4,
@@ -265,16 +259,16 @@ class ListStylePreviewThumbnails extends StatelessWidget {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppConstants.secondaryBackground,
+                  color: context.colors.surface,
                   borderRadius: BorderRadius.circular(3),
                   border: Border.all(
-                    color: AppConstants.borderColor.withValues(alpha: 0.1),
+                    color: context.colors.border.withValues(alpha: 0.1),
                     width: 0.5,
                   ),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(3),
-                  child: Container(color: AppConstants.tertiaryBackground),
+                  child: Container(color: context.colors.surfaceRaised),
                 ),
               ),
             ),
@@ -284,7 +278,7 @@ class ListStylePreviewThumbnails extends StatelessWidget {
                 width: 16,
                 height: 2,
                 decoration: BoxDecoration(
-                  color: AppConstants.textMutedColor.withValues(alpha: 0.4),
+                  color: context.colors.textMuted.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(1),
                 ),
               ),

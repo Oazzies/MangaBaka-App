@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/browse_shortcuts.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -20,6 +19,7 @@ import 'package:mangabaka_app/features/publisher/widgets/publisher_list_item.dar
 import 'package:mangabaka_app/features/collections/screens/collections_browse_screen.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class BrowseContent extends StatelessWidget {
   final List<dynamic> searchResults;
@@ -30,7 +30,14 @@ class BrowseContent extends StatelessWidget {
   final ScrollController scrollController;
   final VoidCallback onRetry;
   final Function(Series) onNavigateToDetail;
-  final Function(String, String, {String? type, String? staff, String? publisher}) onNavigateToResults;
+  final Function(
+    String,
+    String, {
+    String? type,
+    String? staff,
+    String? publisher,
+  })
+  onNavigateToResults;
   final VoidCallback onNavigateToMix;
   final VoidCallback onNavigateToDiscoveryQueue;
 
@@ -49,33 +56,35 @@ class BrowseContent extends StatelessWidget {
     required this.onNavigateToDiscoveryQueue,
   });
 
-
   Widget _buildLoadingState() {
     if (browseType == BrowseType.series) {
       final settings = SettingsManager();
       final activeStyle = settings.resolvedBrowseListStyle;
       final isGrid = activeStyle.isGrid;
-      
+
       return SeriesListSkeleton(isGrid: isGrid);
     }
-    
+
     return const Center(child: CircularProgressIndicator());
   }
 
-  Widget _buildErrorState(LocalizationService l10n) {
+  Widget _buildErrorState(BuildContext context, LocalizationService l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, color: AppConstants.errorColor, size: 48),
+          Icon(Icons.error_outline, color: context.colors.error, size: 48),
           const SizedBox(height: 16),
           Text(
             error ?? 'An unexpected error occurred.',
-            style: AppTypography.sans(color: AppConstants.errorColor),
+            style: AppTypography.sans(color: context.colors.error),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: onRetry, child: Text(l10n.translate('retry'))),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: Text(l10n.translate('retry')),
+          ),
         ],
       ),
     );
@@ -134,7 +143,10 @@ class BrowseContent extends StatelessWidget {
                     }
                     return const SizedBox.shrink();
                   }
-                  return _buildSeriesItem(searchResults[index] as Series, activeStyle: activeStyle);
+                  return _buildSeriesItem(
+                    searchResults[index] as Series,
+                    activeStyle: activeStyle,
+                  );
                 },
               );
             }
@@ -156,7 +168,10 @@ class BrowseContent extends StatelessWidget {
                   }
                   return const SizedBox.shrink();
                 }
-                return _buildSeriesItem(searchResults[index] as Series, activeStyle: activeStyle);
+                return _buildSeriesItem(
+                  searchResults[index] as Series,
+                  activeStyle: activeStyle,
+                );
               },
             );
           }
@@ -164,7 +179,10 @@ class BrowseContent extends StatelessWidget {
           return LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
-              final calculatedColumns = ((width + 10) / 170).ceil().clamp(1, 12);
+              final calculatedColumns = ((width + 10) / 170).ceil().clamp(
+                1,
+                12,
+              );
               return buildGridContent(context, calculatedColumns);
             },
           );
@@ -183,7 +201,10 @@ class BrowseContent extends StatelessWidget {
               }
               return const SizedBox.shrink();
             }
-            return _buildSeriesItem(searchResults[index] as Series, activeStyle: activeStyle);
+            return _buildSeriesItem(
+              searchResults[index] as Series,
+              activeStyle: activeStyle,
+            );
           },
         );
 
@@ -207,10 +228,8 @@ class BrowseContent extends StatelessWidget {
         return PublisherListItem(
           publisher: publisher,
           margin: margin,
-          onTap: () => CollectionsBrowseScreen.open(
-            context,
-            publisher: publisher,
-          ),
+          onTap: () =>
+              CollectionsBrowseScreen.open(context, publisher: publisher),
         );
       },
     );
@@ -239,7 +258,8 @@ class BrowseContent extends StatelessWidget {
   /// empty space between the name and the chevron.
   Widget _buildPeopleResults({
     required double cellHeight,
-    required Widget Function(BuildContext, int, EdgeInsetsGeometry?) itemBuilder,
+    required Widget Function(BuildContext, int, EdgeInsetsGeometry?)
+    itemBuilder,
   }) {
     return Builder(
       builder: (context) {
@@ -281,10 +301,10 @@ class BrowseContent extends StatelessWidget {
 
   /// Returns an appropriate icon for the empty / prompt state of each browse type.
   IconData _emptyStateIconFor(BrowseType type) => switch (type) {
-        BrowseType.publishers => Icons.business,
-        BrowseType.staff => Icons.people,
-        _ => Icons.search,
-      };
+    BrowseType.publishers => Icons.business,
+    BrowseType.staff => Icons.people,
+    _ => Icons.search,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +312,7 @@ class BrowseContent extends StatelessWidget {
       listenable: LocalizationService(),
       builder: (context, _) {
         final l10n = LocalizationService();
-        
+
         Widget content;
         if (searchResults.isEmpty && !isLoading && error == null) {
           if (browseType == BrowseType.series) {
@@ -302,7 +322,6 @@ class BrowseContent extends StatelessWidget {
               onMix: onNavigateToMix,
               onDiscoveryQueue: onNavigateToDiscoveryQueue,
             );
-
           } else if (browseType == BrowseType.publishers) {
             content = Center(
               key: const ValueKey('publishers_prompt'),
@@ -312,23 +331,26 @@ class BrowseContent extends StatelessWidget {
                   Icon(
                     Icons.business_rounded,
                     size: 64,
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.translate('search_publishers_hint'),
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.collections_bookmark_rounded, size: 18),
+                    icon: const Icon(
+                      Icons.collections_bookmark_rounded,
+                      size: 18,
+                    ),
                     label: Text(l10n.translate('collections_and_editions')),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppConstants.accentColor,
-                      side: BorderSide(color: AppConstants.borderColor),
+                      foregroundColor: context.colors.accent,
+                      side: BorderSide(color: context.colors.border),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 10,
@@ -351,13 +373,13 @@ class BrowseContent extends StatelessWidget {
                   Icon(
                     _emptyStateIconFor(browseType),
                     size: 64,
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.translate('no_results'),
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 16,
                     ),
                   ),
@@ -368,7 +390,7 @@ class BrowseContent extends StatelessWidget {
         } else if (isLoading && searchResults.isEmpty) {
           content = _buildLoadingState();
         } else if (error != null && searchResults.isEmpty) {
-          content = _buildErrorState(l10n);
+          content = _buildErrorState(context, l10n);
         } else if (searchResults.isNotEmpty) {
           content = _buildResultsList(l10n);
         } else {
@@ -390,10 +412,7 @@ class BrowseContent extends StatelessWidget {
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
+              return FadeTransition(opacity: animation, child: child);
             },
             child: content,
           ),

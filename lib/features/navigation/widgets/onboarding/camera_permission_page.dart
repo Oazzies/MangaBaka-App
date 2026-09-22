@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/onboarding_hero_layout.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class CameraPermissionPage extends StatelessWidget {
   final VoidCallback onRequestPermission;
@@ -27,10 +27,12 @@ class CameraPermissionPage extends StatelessWidget {
                 child: FilledButton.icon(
                   onPressed: onRequestPermission,
                   icon: const Icon(Icons.camera_alt_rounded),
-                  label: Text(localization.translate('onboarding_camera_button')),
+                  label: Text(
+                    localization.translate('onboarding_camera_button'),
+                  ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppConstants.accentColor,
-                    foregroundColor: AppConstants.primaryBackground,
+                    backgroundColor: context.colors.accent,
+                    foregroundColor: context.colors.background,
                     padding: EdgeInsets.symmetric(vertical: isShort ? 12 : 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),

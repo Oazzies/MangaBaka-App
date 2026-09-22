@@ -1,6 +1,6 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ChipBase extends StatelessWidget {
   final Widget label;
@@ -28,21 +28,22 @@ class ChipBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chip = Container(
-      padding: padding ??
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppConstants.secondaryBackground,
+        color: backgroundColor ?? context.colors.surface,
         borderRadius: BorderRadius.circular(borderRadius),
         border: borderColor != null
             ? Border.all(color: borderColor!, width: 1)
             : null,
       ),
       child: DefaultTextStyle(
-        style: labelStyle ??
+        style:
+            labelStyle ??
             AppTypography.sans(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AppConstants.textColor,
+              color: context.colors.text,
               height: 1.2,
             ),
         child: label,

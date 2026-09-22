@@ -16,6 +16,7 @@ import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// News on desktop: a multi-column feed filterable by source, with a side
 /// column ranking the series the loaded stories mention most.
@@ -156,7 +157,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
                     width: _asideWidth,
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: AppConstants.borderColor),
+                        left: BorderSide(color: context.colors.border),
                       ),
                     ),
                     child: _aside(l10n),
@@ -288,7 +289,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
           Text(
             l10n.translate('no_results'),
             style: AppTypography.sans(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 13,
             ),
           ),
@@ -322,8 +323,8 @@ class _NewsCard extends StatelessWidget {
 
     return DesktopHoverSurface(
       onTap: () => launchUrl(Uri.parse(news.url)),
-      idleColor: AppConstants.secondaryBackground,
-      hoverColor: AppConstants.tertiaryBackground,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.all(20),
       child: Stack(
@@ -343,7 +344,9 @@ class _NewsCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppConstants.accentColor.withValues(alpha: 0.14),
+                            color: context.colors.accent.withValues(
+                              alpha: 0.14,
+                            ),
                             borderRadius: BorderRadius.circular(
                               AppConstants.pillRadius,
                             ),
@@ -353,7 +356,7 @@ class _NewsCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.monoLabel(
-                              color: AppConstants.accentColor,
+                              color: context.colors.accent,
                               fontSize: 10.5,
                             ),
                           ),
@@ -363,7 +366,7 @@ class _NewsCard extends StatelessWidget {
                     Text(
                       _formatDate(news.publishedAt),
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -372,138 +375,138 @@ class _NewsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-          Text(
-            news.title,
-            style: AppTypography.sans(
-              color: AppConstants.textColor,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              height: 1.3,
+              Text(
+                news.title,
+                style: AppTypography.sans(
+                  color: context.colors.text,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                ),
+              ),
+              if (news.author.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  '${l10n.translate('by_author')} ${news.author}',
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+              if (news.series.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final s in news.series.take(_maxCovers))
+                      DesktopCoverCard(
+                        series: s,
+                        width: 72,
+                        showTitle: false,
+                        heroTag: 'news_${news.id}',
+                      ),
+                    if (extra > 0)
+                      Container(
+                        width: 72,
+                        height: 108,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: context.colors.surfaceRaised,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '+$extra',
+                          style: AppTypography.display(
+                            color: context.colors.textMuted,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Icon(
+              Icons.open_in_new_rounded,
+              size: 16,
+              color: context.colors.textMuted,
             ),
           ),
-          if (news.author.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              '${l10n.translate('by_author')} ${news.author}',
-              style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
-                fontSize: 13,
-              ),
-            ),
-          ],
-          if (news.series.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final s in news.series.take(_maxCovers))
-                  DesktopCoverCard(
-                    series: s,
-                    width: 72,
-                    showTitle: false,
-                    heroTag: 'news_${news.id}',
-                  ),
-                if (extra > 0)
-                  Container(
-                    width: 72,
-                    height: 108,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppConstants.tertiaryBackground,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '+$extra',
-                      style: AppTypography.display(
-                        color: AppConstants.textMutedColor,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
         ],
       ),
-      Positioned(
-          top: 0,
-          right: 0,
-          child: Icon(
-            Icons.open_in_new_rounded,
-            size: 16,
-            color: AppConstants.textMutedColor,
-          ),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 }
 
 class _MentionRow extends StatelessWidget {
-final Series series;
-final int count;
+  final Series series;
+  final int count;
 
-const _MentionRow({required this.series, required this.count});
+  const _MentionRow({required this.series, required this.count});
 
-@override
-Widget build(BuildContext context) {
-  final l10n = LocalizationService();
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: SeriesHoverPreview(
-      series: series,
-      child: DesktopHoverSurface(
-        onTap: () => openSeriesDetail(context, series, heroTag: 'news_aside'),
-        borderRadius: BorderRadius.circular(10),
-        padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: WidgetUtils.networkImage(
-                url: series.coverUrl,
-                blurred: WidgetUtils.isRatingBlurred(series.contentRating),
-                width: 40,
-                height: 60,
-                memCacheWidth: 100,
+  @override
+  Widget build(BuildContext context) {
+    final l10n = LocalizationService();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: SeriesHoverPreview(
+        series: series,
+        child: DesktopHoverSurface(
+          onTap: () => openSeriesDetail(context, series, heroTag: 'news_aside'),
+          borderRadius: BorderRadius.circular(10),
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: WidgetUtils.networkImage(
+                  url: series.coverUrl,
+                  blurred: WidgetUtils.isRatingBlurred(series.contentRating),
+                  width: 40,
+                  height: 60,
+                  memCacheWidth: 100,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    series.getDisplayTitle(
-                      SettingsManager().defaultTitleLanguage,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      series.getDisplayTitle(
+                        SettingsManager().defaultTitleLanguage,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.sans(
+                        color: context.colors.text,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.sans(
-                      color: AppConstants.textColor,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n
+                          .translate('mention_count')
+                          .replaceAll('{count}', '$count'),
+                      style: AppTypography.sans(
+                        color: context.colors.textMuted,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n
-                        .translate('mention_count')
-                        .replaceAll('{count}', '$count'),
-                    style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/number_utils.dart';
 import 'package:mangabaka_app/features/library/constants/library_screen_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The library's status tabs, with the selected pill taking on that status's
 /// colour and interpolating between them as the user swipes.
@@ -49,28 +50,30 @@ class LibraryTabBar extends StatelessWidget implements PreferredSizeWidget {
         final upper = position.ceil().clamp(0, maxIndex);
         final t = (position - lower).clamp(0.0, 1.0);
 
-        final indicatorColor = Color.lerp(
-              AppConstants.getColorForState(tabs[lower].key),
-              AppConstants.getColorForState(tabs[upper].key),
+        final indicatorColor =
+            Color.lerp(
+              context.colors.forState(tabs[lower].key),
+              context.colors.forState(tabs[upper].key),
               t,
             ) ??
-            AppConstants.getColorForState(tabs[lower].key);
+            context.colors.forState(tabs[lower].key);
 
         return TabBar(
           controller: controller,
           isScrollable: true,
           // Centred in landscape, where the tabs do not fill the width and a
           // left-aligned row leaves a conspicuous gap.
-          tabAlignment:
-              isLandscape ? TabAlignment.center : TabAlignment.start,
+          tabAlignment: isLandscape ? TabAlignment.center : TabAlignment.start,
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
           indicator: BoxDecoration(
             color: indicatorColor,
             borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           ),
-          indicatorPadding:
-              const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+          indicatorPadding: const EdgeInsets.symmetric(
+            horizontal: 5,
+            vertical: 6,
+          ),
           labelPadding: EdgeInsets.zero,
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           splashFactory: NoSplash.splashFactory,
@@ -114,10 +117,10 @@ class _LibraryTab extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     // The label sits on the coloured pill once selected, so it crosses to that
     // status's ink as the pill arrives under it.
-    final onColor = AppConstants.getOnColorForState(stateKey);
+    final onColor = context.colors.onForState(stateKey);
     final labelColor =
-        Color.lerp(AppConstants.textColor, onColor, selectionWeight) ??
-            AppConstants.textColor;
+        Color.lerp(context.colors.text, onColor, selectionWeight) ??
+        context.colors.text;
 
     return Tab(
       height: 48,
@@ -138,12 +141,13 @@ class _LibraryTab extends StatelessWidget implements PreferredSizeWidget {
                   fontSize: 12,
                   // Dimmer than the label: a count is secondary information,
                   // and at full strength it competes with the tab name.
-                  color: Color.lerp(
-                        AppConstants.textMutedColor,
+                  color:
+                      Color.lerp(
+                        context.colors.textMuted,
                         onColor.withValues(alpha: 0.6),
                         selectionWeight,
                       ) ??
-                      AppConstants.textMutedColor,
+                      context.colors.textMuted,
                 ),
               ),
             ],

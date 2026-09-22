@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Kicker (mono) + serif title + alternate titles + byline. Sits beside the
 /// cover in the banner hero.
@@ -74,8 +74,9 @@ class SeriesTitleBlock extends StatelessWidget {
     addTitle(series.nativeTitle);
     addTitle(series.romanizedTitle);
 
-    final textAlign =
-        crossAxisAlignment == CrossAxisAlignment.center ? TextAlign.center : TextAlign.start;
+    final textAlign = crossAxisAlignment == CrossAxisAlignment.center
+        ? TextAlign.center
+        : TextAlign.start;
 
     return Column(
       crossAxisAlignment: crossAxisAlignment,
@@ -86,7 +87,7 @@ class SeriesTitleBlock extends StatelessWidget {
             kicker,
             textAlign: textAlign,
             style: AppTypography.monoLabel(
-              color: AppConstants.accentColor,
+              color: context.colors.accent,
               fontSize: isWide ? 12 : 10.5,
             ),
           ),
@@ -98,7 +99,7 @@ class SeriesTitleBlock extends StatelessWidget {
             title.toUpperCase(),
             textAlign: textAlign,
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: isWide ? 38 : 25,
               height: 1.08,
             ),
@@ -112,7 +113,7 @@ class SeriesTitleBlock extends StatelessWidget {
             otherTitles.first,
             textAlign: textAlign,
             style: AppTypography.sans(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: isWide ? 16 : 13.5,
             ),
             maxLines: 1,
@@ -125,7 +126,7 @@ class SeriesTitleBlock extends StatelessWidget {
             byline,
             textAlign: textAlign,
             style: AppTypography.sans(
-              color: AppConstants.textColor.withValues(alpha: 0.78),
+              color: context.colors.text.withValues(alpha: 0.78),
               fontSize: isWide ? 14.5 : 13,
               fontWeight: FontWeight.w500,
             ),

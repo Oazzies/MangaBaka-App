@@ -1,4 +1,5 @@
 import 'package:mangabaka_app/core/utils/json_utils.dart';
+import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 
 
@@ -245,9 +246,9 @@ class Series {
       rawCoverUrl: JsonUtils.getRawCover(json),
       authors: (json['authors'] as List?)?.cast<String>() ?? [],
       artists: (json['artists'] as List?)?.cast<String>() ?? [],
-      description: (json['description'] ?? '')
-          .replaceAll('<br>', '\n')
-          .replaceAll(RegExp(r'<.*?>'), ''),
+      description: MarkdownUtils.normalizeDescription(
+        json['description']?.toString() ?? '',
+      ),
       year: json['year']?.toString() ?? '',
       published: (json['published'] as Map?)?.cast<String, dynamic>(),
       status: json['status'] ?? '',

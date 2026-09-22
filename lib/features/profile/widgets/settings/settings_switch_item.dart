@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SettingsSwitchItem extends StatelessWidget {
   final IconData icon;
@@ -27,7 +28,7 @@ class SettingsSwitchItem extends StatelessWidget {
     return InkWell(
       onTap: () => onChanged(!value),
       splashColor: Colors.transparent,
-      highlightColor: AppConstants.tertiaryBackground.withValues(alpha: 0.5),
+      highlightColor: context.colors.surfaceRaised.withValues(alpha: 0.5),
       borderRadius: BorderRadius.vertical(
         top: isFirst ? Radius.circular(AppConstants.cardRadius) : Radius.zero,
         bottom: isLast ? Radius.circular(AppConstants.cardRadius) : Radius.zero,
@@ -38,7 +39,7 @@ class SettingsSwitchItem extends StatelessWidget {
           children: [
             SizedBox(
               width: 24,
-              child: Icon(icon, color: AppConstants.textMutedColor, size: 20),
+              child: Icon(icon, color: context.colors.textMuted, size: 20),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -48,7 +49,7 @@ class SettingsSwitchItem extends StatelessWidget {
                   Text(
                     title,
                     style: AppTypography.sans(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 16,
                     ),
                   ),
@@ -57,7 +58,7 @@ class SettingsSwitchItem extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 14,
                       ),
                     ),
@@ -68,7 +69,7 @@ class SettingsSwitchItem extends StatelessWidget {
             Switch(
               value: value,
               onChanged: onChanged,
-              activeTrackColor: AppConstants.accentColor,
+              activeTrackColor: context.colors.accent,
             ),
           ],
         ),

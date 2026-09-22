@@ -24,6 +24,7 @@ import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The profile on desktop: an identity card beside a statistics dashboard.
 ///
@@ -368,8 +369,12 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < items.length; i++) ...[
-          if (i > 0) Divider(height: 1, color: AppConstants.borderColor),
-          _OverviewRow(icon: items[i].$1, label: items[i].$2, value: items[i].$3),
+          if (i > 0) Divider(height: 1, color: context.colors.border),
+          _OverviewRow(
+            icon: items[i].$1,
+            label: items[i].$2,
+            value: items[i].$3,
+          ),
         ],
       ],
     );
@@ -487,7 +492,7 @@ class _IdentityCard extends StatelessWidget {
             width: 88,
             height: 88,
             decoration: BoxDecoration(
-              color: AppConstants.accentColor,
+              color: context.colors.accent,
               shape: BoxShape.circle,
             ),
             child: ClipOval(
@@ -501,7 +506,7 @@ class _IdentityCard extends StatelessWidget {
                         child: Text(
                           name.isEmpty ? '?' : name[0].toUpperCase(),
                           style: AppTypography.display(
-                            color: AppConstants.onAccent,
+                            color: context.colors.onAccent,
                             fontSize: 40,
                           ),
                         ),
@@ -511,7 +516,7 @@ class _IdentityCard extends StatelessWidget {
                       child: Text(
                         name.isEmpty ? '?' : name[0].toUpperCase(),
                         style: AppTypography.display(
-                          color: AppConstants.onAccent,
+                          color: context.colors.onAccent,
                           fontSize: 40,
                         ),
                       ),
@@ -528,7 +533,7 @@ class _IdentityCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 32,
                   ),
                 ),
@@ -539,7 +544,7 @@ class _IdentityCard extends StatelessWidget {
                       Text(
                         '@$username',
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 14.5,
                         ),
                       ),
@@ -552,7 +557,7 @@ class _IdentityCard extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: AppConstants.tertiaryBackground,
+                          color: context.colors.surfaceRaised,
                           borderRadius: BorderRadius.circular(
                             AppConstants.pillRadius,
                           ),
@@ -560,7 +565,7 @@ class _IdentityCard extends StatelessWidget {
                         child: Text(
                           role.toUpperCase(),
                           style: AppTypography.monoLabel(
-                            color: AppConstants.textMutedColor,
+                            color: context.colors.textMuted,
                             fontSize: 10.5,
                           ),
                         ),
@@ -582,7 +587,7 @@ class _IdentityCard extends StatelessWidget {
           DesktopIconButton(
             icon: Icons.logout_rounded,
             filled: true,
-            color: AppConstants.errorColor,
+            color: context.colors.error,
             tooltip: l10n.translate('logout'),
             onPressed: onLogout,
           ),
@@ -609,7 +614,7 @@ class _OverviewRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppConstants.textMutedColor),
+          Icon(icon, size: 18, color: context.colors.textMuted),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
@@ -617,7 +622,7 @@ class _OverviewRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.monoLabel(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 11.5,
               ),
             ),
@@ -627,7 +632,7 @@ class _OverviewRow extends StatelessWidget {
             value,
             maxLines: 1,
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 22,
             ),
           ),
@@ -655,8 +660,8 @@ class _StandoutCard extends StatelessWidget {
     final series = DbToApiMapper.seriesFromDb(entry.series);
     return DesktopHoverSurface(
       onTap: () => openSeriesDetail(context, series, heroTag: 'standout'),
-      idleColor: AppConstants.secondaryBackground,
-      hoverColor: AppConstants.tertiaryBackground,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.all(18),
       child: Row(
@@ -678,12 +683,12 @@ class _StandoutCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(icon, size: 16, color: AppConstants.starColor),
+                    Icon(icon, size: 16, color: context.colors.star),
                     const SizedBox(width: 6),
                     Text(
                       label.toUpperCase(),
                       style: AppTypography.monoLabel(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 11,
                       ),
                     ),
@@ -697,7 +702,7 @@ class _StandoutCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 18,
                   ),
                 ),
@@ -705,7 +710,7 @@ class _StandoutCard extends StatelessWidget {
                 Text(
                   value,
                   style: AppTypography.sans(
-                    color: AppConstants.accentColor,
+                    color: context.colors.accent,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),

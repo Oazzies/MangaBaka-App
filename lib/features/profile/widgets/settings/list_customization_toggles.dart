@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
@@ -9,6 +8,7 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_divider
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_group.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_item.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_switch_item.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The two switches that decide whether Library and Browse are configured
 /// together or apart.
@@ -160,9 +160,7 @@ class CopyToOtherListButton extends StatelessWidget {
         scope.copyToOtherTab();
         AppSnackBar.show(
           context,
-          l10n.translate(
-            toBrowse ? 'copied_to_browse' : 'copied_to_library',
-          ),
+          l10n.translate(toBrowse ? 'copied_to_browse' : 'copied_to_library'),
         );
       },
       icon: const Icon(Icons.copy_all_outlined),
@@ -170,10 +168,8 @@ class CopyToOtherListButton extends StatelessWidget {
         l10n.translate(toBrowse ? 'copy_to_browse' : 'copy_to_library'),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppConstants.accentColor,
-        side: BorderSide(
-          color: AppConstants.accentColor.withValues(alpha: 0.5),
-        ),
+        foregroundColor: context.colors.accent,
+        side: BorderSide(color: context.colors.accent.withValues(alpha: 0.5)),
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),

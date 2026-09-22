@@ -4,7 +4,6 @@ import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -12,6 +11,7 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The Similar tab: titles alike by tags and creators, then — as a second
 /// section — titles that readers of this series also keep in their libraries.
@@ -91,7 +91,7 @@ class SeriesSimilarTab extends StatelessWidget {
                   heroTagPrefix: 'similar',
                   // One layout switch for the whole tab, on the first header.
                   toggle: IconButton(
-                    icon: Icon(style.next.icon, color: AppConstants.textColor),
+                    icon: Icon(style.next.icon, color: context.colors.text),
                     onPressed: () => settings.setSimilarListStyle(style.next),
                   ),
                 ),
@@ -107,7 +107,7 @@ class SeriesSimilarTab extends StatelessWidget {
                       ? IconButton(
                           icon: Icon(
                             style.next.icon,
-                            color: AppConstants.textColor,
+                            color: context.colors.text,
                           ),
                           onPressed: () =>
                               settings.setSimilarListStyle(style.next),
@@ -159,8 +159,12 @@ class SeriesSimilarTab extends StatelessWidget {
     );
   }
 
-  Widget _buildList(BuildContext context, List<Series> series,
-      AppListStyle style, String heroTagPrefix) {
+  Widget _buildList(
+    BuildContext context,
+    List<Series> series,
+    AppListStyle style,
+    String heroTagPrefix,
+  ) {
     // Lay out items directly in a Column rather than a nested non-scrolling
     // ListView: inside the detail screen's AnimatedSwitcher transition the
     // ListView's overscroll viewport can be painted before layout completes,
@@ -175,10 +179,9 @@ class SeriesSimilarTab extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
-                  AppTransitions.slideUp(SeriesDetailScreen(
-                    series: s,
-                    heroTagPrefix: heroTagPrefix,
-                  )),
+                  AppTransitions.slideUp(
+                    SeriesDetailScreen(series: s, heroTagPrefix: heroTagPrefix),
+                  ),
                 );
               },
               child: EntryListItem(
@@ -192,8 +195,12 @@ class SeriesSimilarTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGrid(BuildContext context, List<Series> series,
-      AppListStyle style, String heroTagPrefix) {
+  Widget _buildGrid(
+    BuildContext context,
+    List<Series> series,
+    AppListStyle style,
+    String heroTagPrefix,
+  ) {
     final seriesService = getIt<SeriesService>();
     final isCompactGrid = style == AppListStyle.compactGrid;
 
@@ -214,10 +221,12 @@ class SeriesSimilarTab extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).push(
-                    AppTransitions.slideUp(SeriesDetailScreen(
-                      series: s,
-                      heroTagPrefix: heroTagPrefix,
-                    )),
+                    AppTransitions.slideUp(
+                      SeriesDetailScreen(
+                        series: s,
+                        heroTagPrefix: heroTagPrefix,
+                      ),
+                    ),
                   );
                 },
                 child: EntryListItem(
@@ -249,10 +258,9 @@ class SeriesSimilarTab extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
-                  AppTransitions.slideUp(SeriesDetailScreen(
-                    series: s,
-                    heroTagPrefix: heroTagPrefix,
-                  )),
+                  AppTransitions.slideUp(
+                    SeriesDetailScreen(series: s, heroTagPrefix: heroTagPrefix),
+                  ),
                 );
               },
               child: EntryListItem(

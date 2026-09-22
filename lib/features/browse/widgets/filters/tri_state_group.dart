@@ -1,7 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/tri_state_chip.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class TriStateGroup extends StatelessWidget {
   final String title;
@@ -46,7 +46,7 @@ class TriStateGroup extends StatelessWidget {
             child: Text(
               title,
               style: AppTypography.sans(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),

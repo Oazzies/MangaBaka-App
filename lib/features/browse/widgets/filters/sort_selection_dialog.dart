@@ -1,8 +1,8 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SortSelectionDialog {
   static void show({
@@ -22,7 +22,7 @@ class SortSelectionDialog {
             maxHeight: MediaQuery.of(dialogContext).size.height * 0.7,
           ),
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: dialogContext.colors.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -30,14 +30,14 @@ class SortSelectionDialog {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
-              _buildHeader(),
+              _buildHeader(dialogContext),
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(
                   l10n.translate('sort_by').toUpperCase(),
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: dialogContext.colors.text,
                     fontSize: 18,
                   ),
                 ),
@@ -60,7 +60,8 @@ class SortSelectionDialog {
                       ),
                       ...sortOptions.entries.map((e) {
                         final isSelected = currentFilters.sortBy == e.key;
-                        final isEntryLast = e.key == sortOptions.entries.last.key;
+                        final isEntryLast =
+                            e.key == sortOptions.entries.last.key;
                         return _SelectionTile(
                           label: e.value,
                           isSelected: isSelected,
@@ -83,13 +84,13 @@ class SortSelectionDialog {
     );
   }
 
-  static Widget _buildHeader() {
+  static Widget _buildHeader(BuildContext context) {
     return Center(
       child: Container(
         width: 32,
         height: 4,
         decoration: BoxDecoration(
-          color: AppConstants.tertiaryBackground,
+          color: context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -122,7 +123,7 @@ class _SelectionTile extends StatelessWidget {
               ? null
               : Border(
                   bottom: BorderSide(
-                    color: AppConstants.tertiaryBackground,
+                    color: context.colors.surfaceRaised,
                     width: 1,
                   ),
                 ),
@@ -132,7 +133,9 @@ class _SelectionTile extends StatelessWidget {
             Text(
               label,
               style: AppTypography.sans(
-                color: isSelected ? AppConstants.textColor : AppConstants.textMutedColor,
+                color: isSelected
+                    ? context.colors.text
+                    : context.colors.textMuted,
                 fontSize: 16,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -140,7 +143,9 @@ class _SelectionTile extends StatelessWidget {
             const Spacer(),
             Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? AppConstants.accentColor : AppConstants.borderColor.withValues(alpha: 0.3),
+              color: isSelected
+                  ? context.colors.accent
+                  : context.colors.border.withValues(alpha: 0.3),
               size: 24,
             ),
           ],

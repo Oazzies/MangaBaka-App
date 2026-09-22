@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The badges laid over a grid cover: how far the reader has got, and how much
 /// is left.
@@ -47,15 +48,17 @@ class EntryProgressOverlay extends StatelessWidget {
   /// Solid dark pill with a subtle drop shadow. Const, so it is not
   /// reallocated on every rebuild of every cell in a grid.
   static const BoxDecoration _badge = BoxDecoration(
-    color: Color(0xFF121214),
+    color: FixedColors.imageBadge,
     borderRadius: BorderRadius.all(Radius.circular(20)),
     boxShadow: [
-      BoxShadow(color: Color(0x4D000000), blurRadius: 4, offset: Offset(0, 2)),
+      BoxShadow(color: FixedColors.imageBadgeShadow, blurRadius: 4, offset: Offset(0, 2)),
     ],
   );
 
-  static const EdgeInsets _badgePadding =
-      EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+  static const EdgeInsets _badgePadding = EdgeInsets.symmetric(
+    horizontal: 8,
+    vertical: 4,
+  );
 
   static final BorderRadius _badgeRadius = BorderRadius.circular(20);
 
@@ -69,8 +72,7 @@ class EntryProgressOverlay extends StatelessWidget {
 
   int get _progress {
     if (progressOverride != null) return progressOverride!;
-    final value =
-        _isChapter ? entry?.progressChapter : entry?.progressVolume;
+    final value = _isChapter ? entry?.progressChapter : entry?.progressVolume;
     return value ?? 0;
   }
 
@@ -123,13 +125,13 @@ class EntryProgressOverlay extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _remainingText(remaining),
+                _remainingText(context, remaining),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Container(
                     width: 1,
                     height: 10,
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: FixedColors.onImage.withValues(alpha: 0.3),
                   ),
                 ),
                 _progressText(total),
@@ -158,7 +160,7 @@ class EntryProgressOverlay extends StatelessWidget {
             child: Container(
               padding: _badgePadding,
               decoration: _badge,
-              child: _remainingText(remaining),
+              child: _remainingText(context, remaining),
             ),
           ),
         if (showProgress)
@@ -194,18 +196,18 @@ class EntryProgressOverlay extends StatelessWidget {
     return Text(
       '$prefix$_progress${total > 0 ? '/$total' : ''}',
       style: AppTypography.sans(
-        color: Colors.white,
+        color: FixedColors.onImage,
         fontWeight: FontWeight.bold,
         fontSize: 11,
       ),
     );
   }
 
-  Widget _remainingText(int remaining) {
+  Widget _remainingText(BuildContext context, int remaining) {
     return Text(
       '$remaining',
       style: AppTypography.sans(
-        color: AppConstants.warningColor,
+        color: context.colors.warning,
         fontWeight: FontWeight.bold,
         fontSize: 11,
       ),

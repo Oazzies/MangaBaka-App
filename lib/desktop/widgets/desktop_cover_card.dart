@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -11,6 +10,7 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Opens [series]' detail page from anywhere on desktop.
 void openSeriesDetail(BuildContext context, Series series, {String? heroTag}) {
@@ -97,17 +97,19 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _hovered
-                            ? AppConstants.accentColor
+                            ? context.colors.accent
                             : Colors.transparent,
                         width: 2,
                       ),
-                      boxShadow: _hovered ? AppConstants.softShadow : null,
+                      boxShadow: _hovered ? context.colors.softShadow : null,
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: WidgetUtils.networkImage(
                         url: series.coverUrl,
-                        blurred: WidgetUtils.isRatingBlurred(series.contentRating),
+                        blurred: WidgetUtils.isRatingBlurred(
+                          series.contentRating,
+                        ),
                         width: widget.width,
                         height: widget.width * 1.5,
                         memCacheWidth: (widget.width * 2).round(),
@@ -123,8 +125,8 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
                       color: _hovered
-                          ? AppConstants.accentColor
-                          : AppConstants.textColor,
+                          ? context.colors.accent
+                          : context.colors.text,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       height: 1.25,
@@ -137,7 +139,7 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 12,
                       ),
                     ),

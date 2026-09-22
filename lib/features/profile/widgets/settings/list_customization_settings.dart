@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -14,6 +13,7 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_group.d
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_section_header.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_stepper_row.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_switch_item.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
 
@@ -170,7 +170,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
           child: Text(
             scope.styleLabel(l10n),
             style: AppTypography.sans(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),

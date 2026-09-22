@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class StatisticCard extends StatelessWidget {
   final IconData icon;
@@ -19,7 +20,7 @@ class StatisticCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppConstants.largeRadius),
       ),
       child: Column(
@@ -36,7 +37,7 @@ class StatisticCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 28,
                   ),
                 ),
@@ -44,7 +45,7 @@ class StatisticCard extends StatelessWidget {
               const SizedBox(width: 8),
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Icon(icon, color: AppConstants.textMutedColor, size: 18),
+                child: Icon(icon, color: context.colors.textMuted, size: 18),
               ),
             ],
           ),
@@ -52,7 +53,7 @@ class StatisticCard extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 11,
             ),
           ),

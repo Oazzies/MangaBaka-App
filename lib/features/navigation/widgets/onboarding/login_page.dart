@@ -1,8 +1,8 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/onboarding_hero_layout.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class LoginPage extends StatelessWidget {
   final bool isLoggingIn;
@@ -16,25 +16,32 @@ class LoginPage extends StatelessWidget {
     required this.onLogin,
   });
 
-  Widget _buildConnectedBadge(LocalizationService localization) {
+  Widget _buildConnectedBadge(
+    BuildContext context,
+    LocalizationService localization,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: AppConstants.successColor.withValues(alpha: 0.1),
+        color: context.colors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppConstants.successColor.withValues(alpha: 0.3),
+          color: context.colors.success.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.check_circle_rounded, color: AppConstants.successColor, size: 20),
+          Icon(
+            Icons.check_circle_rounded,
+            color: context.colors.success,
+            size: 20,
+          ),
           const SizedBox(width: 12),
           Text(
             localization.translate('onboarding_connected'),
             style: AppTypography.sans(
-              color: AppConstants.successColor,
+              color: context.colors.success,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -43,14 +50,18 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLoginButton(LocalizationService localization, bool isShort) {
+  Widget _buildLoginButton(
+    BuildContext context,
+    LocalizationService localization,
+    bool isShort,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
         onPressed: isLoggingIn ? null : onLogin,
         style: FilledButton.styleFrom(
-          backgroundColor: AppConstants.accentColor,
-          foregroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.accent,
+          foregroundColor: context.colors.background,
           padding: EdgeInsets.symmetric(vertical: isShort ? 12 : 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -62,7 +73,9 @@ class LoginPage extends StatelessWidget {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppConstants.primaryBackground),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.colors.background,
+                  ),
                 ),
               )
             : Text(localization.translate('onboarding_login_button')),
@@ -85,8 +98,8 @@ class LoginPage extends StatelessWidget {
               subtitle: localization.translate('onboarding_login_subtitle'),
               isShort: isShort,
               action: isLoggedIn
-                  ? _buildConnectedBadge(localization)
-                  : _buildLoginButton(localization, isShort),
+                  ? _buildConnectedBadge(context, localization)
+                  : _buildLoginButton(context, localization, isShort),
             );
           },
         );

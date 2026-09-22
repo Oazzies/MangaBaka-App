@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/autocomplete_ranking.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
@@ -137,7 +136,6 @@ class SearchBarController extends ChangeNotifier {
     _ghostSuffix =
         blocked ? '' : AutocompleteRanking.ghostSuffix(results, query);
     text.ghostSuffix = _ghostSuffix;
-    text.ghostColor = AppConstants.textMutedColor.withValues(alpha: 0.5);
   }
 
   void _clearGhost() {

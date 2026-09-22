@@ -4,6 +4,7 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ContentPreferencesDialogs {
   static String getContentPreferencesText(List<String> prefs) {
@@ -50,7 +51,7 @@ class ContentPreferencesDialogs {
 
             return Container(
               decoration: BoxDecoration(
-                color: AppConstants.secondaryBackground,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.vertical(
                   top: Radius.circular(AppConstants.largeRadius),
                 ),
@@ -65,7 +66,7 @@ class ContentPreferencesDialogs {
                       width: 32,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppConstants.tertiaryBackground,
+                        color: context.colors.surfaceRaised,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -74,7 +75,7 @@ class ContentPreferencesDialogs {
                   Text(
                     l10n.translate('content_preferences').toUpperCase(),
                     style: AppTypography.display(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 18,
                     ),
                   ),
@@ -82,7 +83,7 @@ class ContentPreferencesDialogs {
                   Text(
                     l10n.translate('content_preferences_subtitle'),
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 13,
                     ),
                   ),
@@ -98,7 +99,7 @@ class ContentPreferencesDialogs {
                       decoration: BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: AppConstants.tertiaryBackground,
+                            color: context.colors.surfaceRaised,
                             width: 1,
                           ),
                         ),
@@ -119,8 +120,8 @@ class ContentPreferencesDialogs {
                                     label,
                                     style: AppTypography.sans(
                                       color: isSelected
-                                          ? AppConstants.textColor
-                                          : AppConstants.textMutedColor,
+                                          ? context.colors.text
+                                          : context.colors.textMuted,
                                       fontSize: 16,
                                       fontWeight: isSelected
                                           ? FontWeight.w600
@@ -134,13 +135,13 @@ class ContentPreferencesDialogs {
                                         ? Icon(
                                             Icons.check_circle,
                                             key: const ValueKey('checked'),
-                                            color: AppConstants.accentColor,
+                                            color: context.colors.accent,
                                             size: 24,
                                           )
                                         : Icon(
                                             Icons.circle_outlined,
                                             key: const ValueKey('unchecked'),
-                                            color: AppConstants.borderColor
+                                            color: context.colors.border
                                                 .withValues(alpha: 0.3),
                                             size: 24,
                                           ),
@@ -154,7 +155,7 @@ class ContentPreferencesDialogs {
                             Container(
                               width: 1,
                               height: 24,
-                              color: AppConstants.borderColor,
+                              color: context.colors.border,
                             ),
                             const SizedBox(width: 16),
                             WidgetUtils.tooltip(
@@ -166,8 +167,8 @@ class ContentPreferencesDialogs {
                                     isBlurred ? Icons.blur_on : Icons.blur_off,
                                     size: 18,
                                     color: isBlurred
-                                        ? AppConstants.accentColor
-                                        : AppConstants.textMutedColor,
+                                        ? context.colors.accent
+                                        : context.colors.textMuted,
                                   ),
                                   const SizedBox(width: 4),
                                   Transform.scale(
@@ -189,9 +190,8 @@ class ContentPreferencesDialogs {
                                               newBlurred,
                                             );
                                       },
-                                      activeThumbColor:
-                                          AppConstants.accentColor,
-                                      activeTrackColor: AppConstants.accentColor
+                                      activeThumbColor: context.colors.accent,
+                                      activeTrackColor: context.colors.accent
                                           .withValues(alpha: 0.3),
                                     ),
                                   ),

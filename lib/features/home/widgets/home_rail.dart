@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// One horizontally scrolling discovery rail on the Home feed: a display-caps
 /// section header over a row of cover cards.
@@ -104,7 +105,7 @@ class _RailCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.sans(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 height: 1.25,
@@ -129,8 +130,8 @@ class _RailSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppConstants.tertiaryBackground,
-      highlightColor: AppConstants.secondaryBackground,
+      baseColor: context.colors.surfaceRaised,
+      highlightColor: context.colors.surface,
       period: const Duration(milliseconds: 1400),
       child: SizedBox(
         width: width,
@@ -141,7 +142,7 @@ class _RailSkeleton extends StatelessWidget {
               width: width,
               height: width * 1.5,
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
@@ -150,7 +151,7 @@ class _RailSkeleton extends StatelessWidget {
               width: width * 0.8,
               height: 12,
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

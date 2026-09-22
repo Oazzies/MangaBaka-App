@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Add-to-library for the wide (desktop) layout: a full-width button that sits
 /// in the sidebar under the information card, instead of floating over the
@@ -36,7 +37,7 @@ class SeriesAddToLibraryButton extends StatelessWidget {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppConstants.onAccent.withValues(alpha: 0.5),
+                  color: context.colors.onAccent.withValues(alpha: 0.5),
                 ),
               )
             : const Icon(Icons.add_rounded, size: 18),
@@ -64,7 +65,7 @@ class SeriesDetailFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
     if (!isLoggedIn) return const SizedBox.shrink();
-    
+
     return StreamBuilder<LibraryEntry?>(
       stream: entryStream,
       builder: (context, snapshot) {
@@ -75,11 +76,11 @@ class SeriesDetailFAB extends StatelessWidget {
               key: const Key('add_to_library_fab'),
               onPressed: isAdding ? null : onAdd,
               backgroundColor: isAdding
-                  ? AppConstants.accentColor.withValues(alpha: 0.35)
-                  : AppConstants.accentColor,
+                  ? context.colors.accent.withValues(alpha: 0.35)
+                  : context.colors.accent,
               foregroundColor: isAdding
-                  ? AppConstants.onAccent.withValues(alpha: 0.35)
-                  : AppConstants.onAccent,
+                  ? context.colors.onAccent.withValues(alpha: 0.35)
+                  : context.colors.onAccent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppConstants.pillRadius),
               ),
@@ -87,8 +88,8 @@ class SeriesDetailFAB extends StatelessWidget {
                 LocalizationService().translate('add_to_library').toUpperCase(),
                 style: AppTypography.display(
                   color: isAdding
-                      ? AppConstants.onAccent.withValues(alpha: 0.35)
-                      : AppConstants.onAccent,
+                      ? context.colors.onAccent.withValues(alpha: 0.35)
+                      : context.colors.onAccent,
                   fontSize: 15,
                 ),
               ),
@@ -99,7 +100,7 @@ class SeriesDetailFAB extends StatelessWidget {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation(
-                          AppConstants.onAccent.withValues(alpha: 0.35),
+                          context.colors.onAccent.withValues(alpha: 0.35),
                         ),
                       ),
                     )

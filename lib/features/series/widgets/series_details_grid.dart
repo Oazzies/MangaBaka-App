@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/widgets/series_grouped_tags.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesDetailsGrid extends StatelessWidget {
   final Series series;
@@ -43,7 +43,7 @@ class SeriesDetailsGrid extends StatelessWidget {
               Text(
                 l10n.translate('anime_start').toUpperCase(),
                 style: AppTypography.monoLabel(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 10,
                 ),
               ),
@@ -51,7 +51,7 @@ class SeriesDetailsGrid extends StatelessWidget {
               Text(
                 animeStart,
                 style: AppTypography.sans(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   height: 1.4,
@@ -62,7 +62,7 @@ class SeriesDetailsGrid extends StatelessWidget {
         ),
       ],
       if (hasStart && hasStop)
-        Divider(height: 1, thickness: 1, color: AppConstants.borderColor),
+        Divider(height: 1, thickness: 1, color: context.colors.border),
       if (hasStop) ...[
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 11),
@@ -72,7 +72,7 @@ class SeriesDetailsGrid extends StatelessWidget {
               Text(
                 l10n.translate('anime_stop').toUpperCase(),
                 style: AppTypography.monoLabel(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 10,
                 ),
               ),
@@ -80,7 +80,7 @@ class SeriesDetailsGrid extends StatelessWidget {
               Text(
                 animeStop,
                 style: AppTypography.sans(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   height: 1.4,

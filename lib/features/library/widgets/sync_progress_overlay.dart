@@ -8,6 +8,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SyncProgressOverlay extends StatelessWidget {
   const SyncProgressOverlay({super.key});
@@ -66,20 +67,20 @@ class SyncProgressOverlay extends StatelessWidget {
       width: isDesktop ? null : double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(
           isDesktop ? 10 : AppConstants.largeRadius,
         ),
-        border: Border.all(color: AppConstants.borderColor),
+        border: Border.all(color: context.colors.border),
         boxShadow: isDesktop
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: context.colors.shadowAt(0.5),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
               ]
-            : AppConstants.softShadow,
+            : context.colors.softShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -99,17 +100,15 @@ class SyncProgressOverlay extends StatelessWidget {
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: AppConstants.accentColor.withValues(
-                            alpha: 0.15,
-                          ),
+                          color: context.colors.accent.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Icon(
                             hasError ? Icons.warning_amber_rounded : Icons.sync,
                             color: hasError
-                                ? AppConstants.errorColor
-                                : AppConstants.accentColor,
+                                ? context.colors.error
+                                : context.colors.accent,
                             size: 20,
                           ),
                         ),
@@ -121,7 +120,7 @@ class SyncProgressOverlay extends StatelessWidget {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              AppConstants.accentColor,
+                              context.colors.accent,
                             ),
                           ),
                         ),
@@ -146,8 +145,8 @@ class SyncProgressOverlay extends StatelessWidget {
                                     ),
                           style: AppTypography.sans(
                             color: hasError
-                                ? AppConstants.errorColor
-                                : AppConstants.textColor,
+                                ? context.colors.error
+                                : context.colors.text,
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
                           ),
@@ -160,10 +159,8 @@ class SyncProgressOverlay extends StatelessWidget {
                               : l10n.translate('keep_app_open'),
                           style: AppTypography.sans(
                             color: hasError
-                                ? AppConstants.errorColor.withValues(
-                                    alpha: 0.85,
-                                  )
-                                : AppConstants.textMutedColor,
+                                ? context.colors.error.withValues(alpha: 0.85)
+                                : context.colors.textMuted,
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                           ),
@@ -190,7 +187,7 @@ class SyncProgressOverlay extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppConstants.errorColor.withValues(alpha: 0.12),
+                    color: context.colors.error.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(
                       AppConstants.pillRadius,
                     ),
@@ -201,17 +198,13 @@ class SyncProgressOverlay extends StatelessWidget {
                       Text(
                         l10n.translate('stop'),
                         style: AppTypography.sans(
-                          color: AppConstants.errorColor,
+                          color: context.colors.error,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(
-                        Icons.close,
-                        color: AppConstants.errorColor,
-                        size: 14,
-                      ),
+                      Icon(Icons.close, color: context.colors.error, size: 14),
                     ],
                   ),
                 ),
@@ -220,7 +213,7 @@ class SyncProgressOverlay extends StatelessWidget {
           else
             Icon(
               Icons.chevron_right,
-              color: AppConstants.textMutedColor.withValues(alpha: 0.5),
+              color: context.colors.textMuted.withValues(alpha: 0.5),
               size: 20,
             ),
         ],

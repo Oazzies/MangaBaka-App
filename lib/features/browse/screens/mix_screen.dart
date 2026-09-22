@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -16,6 +15,7 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// "Mix": pick a few series as seeds, get recommendations drawn from what they
 /// have in common.
@@ -149,11 +149,11 @@ class _MixScreenState extends State<MixScreen> {
 
   Widget _buildPortrait(LocalizationService l10n) {
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: AppConstants.primaryBackground,
+            backgroundColor: context.colors.background,
             surfaceTintColor: Colors.transparent,
             leading: _backButton(),
             title: _title(l10n),
@@ -178,13 +178,15 @@ class _MixScreenState extends State<MixScreen> {
   Widget _buildLandscape(LocalizationService l10n) {
     // The control panel is proportional but bounded: below ~280px the seed
     // chips wrap badly, above ~360px it steals width the results need.
-    final leftWidth =
-        (MediaQuery.sizeOf(context).width * 0.38).clamp(280.0, 360.0);
+    final leftWidth = (MediaQuery.sizeOf(context).width * 0.38).clamp(
+      280.0,
+      360.0,
+    );
 
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
-        backgroundColor: AppConstants.primaryBackground,
+        backgroundColor: context.colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: _backButton(),
@@ -209,11 +211,7 @@ class _MixScreenState extends State<MixScreen> {
               ),
             ),
           ),
-          VerticalDivider(
-            width: 1,
-            thickness: 1,
-            color: AppConstants.borderColor,
-          ),
+          VerticalDivider(width: 1, thickness: 1, color: context.colors.border),
           Expanded(
             child: CustomScrollView(
               slivers: [
@@ -230,45 +228,48 @@ class _MixScreenState extends State<MixScreen> {
   }
 
   Widget _backButton() => IconButton(
-        icon: Icon(Icons.arrow_back, color: AppConstants.textColor, size: 22),
-        onPressed: () => Navigator.pop(context),
-      );
+    icon: Icon(Icons.arrow_back, color: context.colors.text, size: 22),
+    onPressed: () => Navigator.pop(context),
+  );
 
   Widget _title(LocalizationService l10n) => Text(
-        l10n.translate('mix').toUpperCase(),
-        style: AppTypography.display(
-          color: AppConstants.textColor,
-          fontWeight: FontWeight.w500,
-          fontSize: 22,
-        ),
-      );
+    l10n.translate('mix').toUpperCase(),
+    style: AppTypography.display(
+      color: context.colors.text,
+      fontWeight: FontWeight.w500,
+      fontSize: 22,
+    ),
+  );
 
   List<Widget> _actions() => [
-        if (_controller.hasSeeds)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              icon: Icon(Icons.refresh_rounded,
-                  color: AppConstants.textMutedColor, size: 22),
-              onPressed: _controller.clearSeeds,
-              tooltip: 'Clear seeds',
-            ),
+    if (_controller.hasSeeds)
+      Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: IconButton(
+          icon: Icon(
+            Icons.refresh_rounded,
+            color: context.colors.textMuted,
+            size: 22,
           ),
-      ];
+          onPressed: _controller.clearSeeds,
+          tooltip: 'Clear seeds',
+        ),
+      ),
+  ];
 
   Widget _seedSection(LocalizationService l10n) => MixSeedSection(
-        controller: _controller,
-        l10n: l10n,
-        searchController: _searchCtrl,
-        searchFocus: _searchFocus,
-        suggestions: _suggestions,
-        showSuggestions: _showSuggestions,
-        onSeedTap: _navigateToDetail,
-        onSeedRemove: _controller.removeSeed,
-        onSuggestionSelected: _selectSuggestion,
-        onSuggestedSeedAdded: _addSuggestionSeed,
-        onClearSearch: _clearSearchField,
-      );
+    controller: _controller,
+    l10n: l10n,
+    searchController: _searchCtrl,
+    searchFocus: _searchFocus,
+    suggestions: _suggestions,
+    showSuggestions: _showSuggestions,
+    onSeedTap: _navigateToDetail,
+    onSeedRemove: _controller.removeSeed,
+    onSuggestionSelected: _selectSuggestion,
+    onSuggestedSeedAdded: _addSuggestionSeed,
+    onClearSearch: _clearSearchField,
+  );
 
   Widget _optionsSection(LocalizationService l10n) =>
       MixOptionsSection(controller: _controller, l10n: l10n);
@@ -301,8 +302,8 @@ class _MixScreenState extends State<MixScreen> {
   }
 
   Widget _resultsSliver(LocalizationService l10n) => MixResultsSliver(
-        controller: _controller,
-        l10n: l10n,
-        onSeriesTap: _navigateToDetail,
-      );
+    controller: _controller,
+    l10n: l10n,
+    onSeriesTap: _navigateToDetail,
+  );
 }

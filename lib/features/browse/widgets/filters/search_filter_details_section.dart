@@ -1,10 +1,10 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_dialogs.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SearchFilterDetailsSection extends StatelessWidget {
   final SearchFilters filters;
@@ -35,14 +35,15 @@ class SearchFilterDetailsSection extends StatelessWidget {
               subtitle: filters.isLicensed == null
                   ? l10n.translate('any')
                   : (filters.isLicensed == true
-                      ? l10n.translate('yes')
-                      : l10n.translate('no')),
+                        ? l10n.translate('yes')
+                        : l10n.translate('no')),
               isFirst: true,
               onTap: () => SearchFilterDialogs.showLicensedStatusDialog(
                 context: context,
                 l10n: l10n,
                 currentFilters: filters,
-                onStatusSelected: (val) => onFiltersChanged(filters.copyWithIsLicensed(val)),
+                onStatusSelected: (val) =>
+                    onFiltersChanged(filters.copyWithIsLicensed(val)),
               ),
             ),
             const SettingsDivider(),
@@ -52,8 +53,8 @@ class SearchFilterDetailsSection extends StatelessWidget {
               subtitle: filters.hasAnime == null
                   ? l10n.translate('any')
                   : (filters.hasAnime == true
-                      ? l10n.translate('yes')
-                      : l10n.translate('no')),
+                        ? l10n.translate('yes')
+                        : l10n.translate('no')),
               onTap: () => SearchFilterDialogs.showHasAnimeDialog(
                 context: context,
                 l10n: l10n,
@@ -74,14 +75,14 @@ class SearchFilterDetailsSection extends StatelessWidget {
                       Text(
                         l10n.translate('rating_range').toUpperCase(),
                         style: AppTypography.display(
-                          color: AppConstants.textColor,
+                          color: context.colors.text,
                           fontSize: 14,
                         ),
                       ),
                       Text(
                         '${filters.ratingLower.toInt()} - ${filters.ratingUpper.toInt()}',
                         style: AppTypography.display(
-                          color: AppConstants.accentColor,
+                          color: context.colors.accent,
                           fontSize: 14,
                         ),
                       ),
@@ -95,12 +96,14 @@ class SearchFilterDetailsSection extends StatelessWidget {
                     min: 0,
                     max: 100,
                     divisions: 20,
-                    activeColor: AppConstants.accentColor,
-                    inactiveColor: AppConstants.borderColor.withValues(alpha: 0.2),
-                    onChanged: (values) => onFiltersChanged(filters.copyWith(
-                      ratingLower: values.start,
-                      ratingUpper: values.end,
-                    )),
+                    activeColor: context.colors.accent,
+                    inactiveColor: context.colors.border.withValues(alpha: 0.2),
+                    onChanged: (values) => onFiltersChanged(
+                      filters.copyWith(
+                        ratingLower: values.start,
+                        ratingUpper: values.end,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -117,14 +120,14 @@ class SearchFilterDetailsSection extends StatelessWidget {
                       Text(
                         l10n.translate('publication_year').toUpperCase(),
                         style: AppTypography.display(
-                          color: AppConstants.textColor,
+                          color: context.colors.text,
                           fontSize: 14,
                         ),
                       ),
                       Text(
                         '${filters.publishedYearLower ?? l10n.translate('any')} - ${filters.publishedYearUpper ?? l10n.translate('any')}',
                         style: AppTypography.display(
-                          color: AppConstants.accentColor,
+                          color: context.colors.accent,
                           fontSize: 14,
                         ),
                       ),
@@ -138,12 +141,18 @@ class SearchFilterDetailsSection extends StatelessWidget {
                     min: minYear.toDouble(),
                     max: maxYear.toDouble(),
                     divisions: maxYear - minYear,
-                    activeColor: AppConstants.accentColor,
-                    inactiveColor: AppConstants.borderColor.withValues(alpha: 0.2),
-                    onChanged: (values) => onFiltersChanged(filters.copyWith(
-                      publishedYearLower: values.start.toInt() == minYear ? null : values.start.toInt(),
-                      publishedYearUpper: values.end.toInt() == maxYear ? null : values.end.toInt(),
-                    )),
+                    activeColor: context.colors.accent,
+                    inactiveColor: context.colors.border.withValues(alpha: 0.2),
+                    onChanged: (values) => onFiltersChanged(
+                      filters.copyWith(
+                        publishedYearLower: values.start.toInt() == minYear
+                            ? null
+                            : values.start.toInt(),
+                        publishedYearUpper: values.end.toInt() == maxYear
+                            ? null
+                            : values.end.toInt(),
+                      ),
+                    ),
                   ),
                 ],
               ),

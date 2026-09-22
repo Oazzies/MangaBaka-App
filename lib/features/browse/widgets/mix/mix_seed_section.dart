@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/browse/widgets/mix/mix_seed_suggestions.d
 import 'package:mangabaka_app/features/browse/widgets/search/search_suggestions_panel.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The seed picker: current seeds, the search field that adds more, and the
 /// two kinds of suggestion below it (typed autocomplete, and the API's own
@@ -131,29 +132,37 @@ class _SeedSearchField extends StatelessWidget {
     return TextField(
       controller: controller,
       focusNode: focusNode,
-      style: AppTypography.sans(color: AppConstants.textColor, fontSize: 16),
+      style: AppTypography.sans(color: context.colors.text, fontSize: 16),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle:
-            AppTypography.sans(color: AppConstants.textMutedColor, fontSize: 16),
-        prefixIcon:
-            Icon(Icons.search, color: AppConstants.textColor, size: 22),
-        prefixIconConstraints:
-            const BoxConstraints(minWidth: 48, minHeight: 48),
+        hintStyle: AppTypography.sans(
+          color: context.colors.textMuted,
+          fontSize: 16,
+        ),
+        prefixIcon: Icon(Icons.search, color: context.colors.text, size: 22),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
+        ),
         suffixIcon: controller.text.isEmpty
             ? null
             : IconButton(
-                icon: Icon(Icons.close,
-                    color: AppConstants.textMutedColor, size: 18),
+                icon: Icon(
+                  Icons.close,
+                  color: context.colors.textMuted,
+                  size: 18,
+                ),
                 onPressed: onClear,
               ),
         filled: true,
-        fillColor: AppConstants.tertiaryBackground,
+        fillColor: context.colors.surfaceRaised,
         border: _border,
         enabledBorder: _border,
         focusedBorder: _border,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 20,
+        ),
       ),
     );
   }

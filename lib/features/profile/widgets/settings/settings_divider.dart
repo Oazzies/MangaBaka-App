@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SettingsDivider extends StatelessWidget {
   const SettingsDivider({super.key});
@@ -9,7 +9,7 @@ class SettingsDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: AppConstants.borderColor,
+      color: context.colors.border,
       indent: 48,
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -12,6 +11,7 @@ import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
 import 'package:mangabaka_app/features/series/widgets/series_tag_group.dart';
 import 'package:mangabaka_app/features/series/widgets/tags_placeholder.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The tags card on the series detail page.
 ///
@@ -167,8 +167,9 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
           onTagLongPress: _handleTagLongPress,
           // Expanding a subgroup changes the height, so the overflow check has
           // to run again.
-          onToggle: () => WidgetsBinding.instance
-              .addPostFrameCallback((_) => _measureContent()),
+          onToggle: () => WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _measureContent(),
+          ),
         ),
     ];
   }
@@ -205,9 +206,9 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
   }
 
   Widget _card(Widget child) => Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: MbCard(label: widget.l10n.translate('tags'), child: child),
-      );
+    padding: const EdgeInsets.only(bottom: 24),
+    child: MbCard(label: widget.l10n.translate('tags'), child: child),
+  );
 
   Widget _clippedContent() {
     final isClipped = _needsShowMore && !_tagsExpanded;
@@ -257,7 +258,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                 _tagsExpanded ? 'show_less' : 'show_all_tags',
               ),
               style: AppTypography.sans(
-                color: AppConstants.accentColor,
+                color: context.colors.accent,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
                 letterSpacing: 0.5,
@@ -268,7 +269,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
               _tagsExpanded
                   ? Icons.keyboard_arrow_up
                   : Icons.keyboard_arrow_down,
-              color: AppConstants.accentColor,
+              color: context.colors.accent,
               size: 20,
             ),
           ],
@@ -294,8 +295,8 @@ class _FadeOut extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppConstants.secondaryBackground.withValues(alpha: 0),
-              AppConstants.secondaryBackground,
+              context.colors.surface.withValues(alpha: 0),
+              context.colors.surface,
             ],
           ),
         ),

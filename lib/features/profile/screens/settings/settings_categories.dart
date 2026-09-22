@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/features/appearance/screens/appearance_settings.dart';
 import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/logs_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_navigation.dart';
@@ -125,6 +126,16 @@ class SettingsCategories {
     );
   }
 
+  /// Themes, mode and accent. The page listens to the theme controller
+  /// itself, so no listenable is threaded through here.
+  static void appearance(BuildContext context, LocalizationService l10n) {
+    showOrNavigate(
+      context,
+      title: l10n.translate('appearance'),
+      buildChildren: (_) => const [AppearanceSettings()],
+    );
+  }
+
   static void listCustomization(
     BuildContext context,
     LocalizationService l10n,
@@ -218,7 +229,7 @@ class SettingsCategories {
               ),
               trailing: Icon(
                 Icons.open_in_new,
-                color: AppConstants.textMutedColor,
+                color: ctx.colors.textMuted,
                 size: 20,
               ),
               isFirst: true,

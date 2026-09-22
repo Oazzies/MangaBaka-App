@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/library/models/library_sync_status.dart';
 import 'package:mangabaka_app/features/library/widgets/library_status_banner.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The banners that sit above the library list when something needs saying:
 /// the server is unreachable, the last sync failed, or the local copy is
@@ -42,10 +42,10 @@ class LibraryStatusBanners extends StatelessWidget {
           LibraryStatusBanner(
             message: l10n.translate('server_unreachable_warning'),
             icon: Icons.cloud_off_rounded,
-            color: AppConstants.errorColor,
+            color: context.colors.error,
             action: _action(
               label: l10n.translate('retry'),
-              color: AppConstants.errorColor,
+              color: context.colors.error,
               onPressed: onRetrySync,
             ),
           ),
@@ -58,17 +58,17 @@ class LibraryStatusBanners extends StatelessWidget {
                 .translate('sync_failed')
                 .replaceAll('{message}', status.error!),
             icon: Icons.error_outline_rounded,
-            color: AppConstants.errorColor,
+            color: context.colors.error,
             onClose: onDismissError,
           ),
         if (isIncomplete)
           LibraryStatusBanner(
             message: l10n.translate('library_limit_warning'),
             icon: Icons.warning_amber_rounded,
-            color: AppConstants.warningColor,
+            color: context.colors.warning,
             action: _action(
               label: l10n.translate('update'),
-              color: AppConstants.warningColor,
+              color: context.colors.warning,
               onPressed: onImportFullLibrary,
             ),
           ),

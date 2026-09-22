@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -195,7 +196,7 @@ class LibraryScreenState extends State<LibraryScreen>
             _exitSearch();
           },
           child: Scaffold(
-            backgroundColor: LibraryScreenConstants.backgroundColor,
+            backgroundColor: context.colors.background,
             appBar: _buildAppBar(context),
             body: ValueListenableBuilder<LibrarySyncStatus>(
               valueListenable: _libraryService.syncStatus,

@@ -4,7 +4,7 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
-
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class RatingSelectionDialog extends StatefulWidget {
   final int initialRating;
@@ -34,7 +34,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
     final l10n = LocalizationService();
     return Container(
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppConstants.largeRadius),
         ),
@@ -54,7 +54,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               width: 32,
               height: 4,
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -65,12 +65,12 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppConstants.starColor.withValues(alpha: 0.1),
+                  color: context.colors.star.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.star_rounded,
-                  color: AppConstants.starColor,
+                  color: context.colors.star,
                   size: 24,
                 ),
               ),
@@ -79,7 +79,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
                 child: Text(
                   l10n.translate('rating_dialog_title').toUpperCase(),
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 18,
                   ),
                 ),
@@ -91,16 +91,22 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: AppConstants.primaryBackground,
+                color: context.colors.background,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppConstants.borderColor.withValues(alpha: 0.15)),
+                border: Border.all(
+                  color: context.colors.border.withValues(alpha: 0.15),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    _currentRating.toInt() == 0 ? Icons.star_outline : Icons.star,
-                    color: _currentRating.toInt() == 0 ? AppConstants.textMutedColor : AppConstants.starColor,
+                    _currentRating.toInt() == 0
+                        ? Icons.star_outline
+                        : Icons.star,
+                    color: _currentRating.toInt() == 0
+                        ? context.colors.textMuted
+                        : context.colors.star,
                     size: 28,
                   ),
                   const SizedBox(width: 12),
@@ -109,7 +115,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
                         ? l10n.translate('rating_unrated')
                         : _currentRating.toInt().toString(),
                     style: AppTypography.display(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 26,
                       letterSpacing: -0.5,
                     ),
@@ -118,7 +124,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
                     Text(
                       ' / 100',
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -130,10 +136,10 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
           const SizedBox(height: 24),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppConstants.accentColor,
-              inactiveTrackColor: AppConstants.borderColor.withValues(alpha: 0.3),
-              thumbColor: AppConstants.textColor,
-              overlayColor: AppConstants.accentColor.withValues(alpha: 0.2),
+              activeTrackColor: context.colors.accent,
+              inactiveTrackColor: context.colors.border.withValues(alpha: 0.3),
+              thumbColor: context.colors.text,
+              overlayColor: context.colors.accent.withValues(alpha: 0.2),
               trackHeight: 6,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
               tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 2),
@@ -155,9 +161,27 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('0', style: AppTypography.sans(color: AppConstants.textMutedColor, fontSize: 12)),
-                Text('50', style: AppTypography.sans(color: AppConstants.textMutedColor, fontSize: 12)),
-                Text('100', style: AppTypography.sans(color: AppConstants.textMutedColor, fontSize: 12)),
+                Text(
+                  '0',
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  '50',
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  '100',
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -168,11 +192,17 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 child: Text(
                   l10n.translate('cancel'),
-                  style: AppTypography.sans(color: AppConstants.textMutedColor, fontWeight: FontWeight.w600),
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -185,11 +215,16 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
                   Navigator.of(context).pop();
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppConstants.accentColor,
-                  foregroundColor: AppConstants.onAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  backgroundColor: context.colors.accent,
+                  foregroundColor: context.colors.onAccent,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.pillRadius,
+                    ),
                   ),
                   elevation: 0,
                 ),
@@ -208,11 +243,16 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
   int _getDivisions() {
     final step = SettingsManager().ratingSliderStep;
     switch (step) {
-      case RatingSliderStep.step5: return 20;
-      case RatingSliderStep.step10: return 10;
-      case RatingSliderStep.step20: return 5;
-      case RatingSliderStep.step25: return 4;
-      case RatingSliderStep.step1: return 100;
+      case RatingSliderStep.step5:
+        return 20;
+      case RatingSliderStep.step10:
+        return 10;
+      case RatingSliderStep.step20:
+        return 5;
+      case RatingSliderStep.step25:
+        return 4;
+      case RatingSliderStep.step1:
+        return 100;
     }
   }
 }

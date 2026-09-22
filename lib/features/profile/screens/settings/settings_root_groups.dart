@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_categories.dart';
@@ -22,6 +22,13 @@ List<Widget> buildSettingsGroups(
   final isSmallDevice = MediaQuery.sizeOf(context).width < 600;
 
   return [
+    _category(
+      icon: Icons.palette_outlined,
+      title: l10n.translate('appearance'),
+      subtitle: l10n.translate('appearance_subtitle'),
+      onTap: () => SettingsCategories.appearance(context, l10n),
+    ),
+    const SizedBox(height: 16),
     _category(
       icon: Icons.settings_outlined,
       title: l10n.translate('general'),
@@ -126,10 +133,12 @@ Widget _externalLink({
     title: title,
     onTap: () =>
         launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
-    trailing: Icon(
-      Icons.open_in_new,
-      color: AppConstants.textMutedColor,
-      size: 18,
+    trailing: Builder(
+      builder: (context) => Icon(
+        Icons.open_in_new,
+        color: context.colors.textMuted,
+        size: 18,
+      ),
     ),
     isFirst: isFirst,
   );

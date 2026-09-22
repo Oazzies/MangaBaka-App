@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/browse/models/sort_options.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/tri_state_chip.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Every search filter laid out inline, applied the moment it changes.
 ///
@@ -146,7 +147,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
             Text(
               l10n.translate('filters').toUpperCase(),
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 17,
               ),
             ),
@@ -169,7 +170,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
             child: Text(
               widget.disabledMessage ?? '',
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 13,
               ),
             ),
@@ -318,10 +319,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
 
   Widget _rangeLabel(RangeValues v, String Function(double) fmt) => Text(
     '${fmt(v.start)} – ${fmt(v.end)}',
-    style: AppTypography.display(
-      color: AppConstants.accentColor,
-      fontSize: 12.5,
-    ),
+    style: AppTypography.display(color: context.colors.accent, fontSize: 12.5),
   );
 
   Widget _chipWrap(List<Widget> chips) =>
@@ -450,7 +448,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
                   .translate('tag_search_hint')
                   .replaceAll('{count}', '${_tags.length}'),
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 12,
               ),
             ),
@@ -463,7 +461,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
               child: Text(
                 l10n.translate('no_results'),
                 style: AppTypography.sans(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 13,
                 ),
               ),
@@ -527,7 +525,7 @@ class _SectionState extends State<_Section> {
                       child: Text(
                         widget.title.toUpperCase(),
                         style: AppTypography.monoLabel(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 11.5,
                         ),
                       ),
@@ -540,7 +538,7 @@ class _SectionState extends State<_Section> {
                       child: Icon(
                         Icons.expand_more_rounded,
                         size: 18,
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                       ),
                     ),
                   ],
@@ -582,18 +580,18 @@ class DesktopTriChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (Color bg, Color fg, IconData? icon) = switch (state) {
       TriState.include => (
-        AppConstants.accentColor.withValues(alpha: 0.18),
-        AppConstants.accentColor,
+        context.colors.accent.withValues(alpha: 0.18),
+        context.colors.accent,
         Icons.check_rounded,
       ),
       TriState.exclude => (
-        AppConstants.errorColor.withValues(alpha: 0.16),
-        AppConstants.errorColor,
+        context.colors.error.withValues(alpha: 0.16),
+        context.colors.error,
         Icons.remove_rounded,
       ),
       TriState.off => (
-        AppConstants.secondaryBackground,
-        AppConstants.textColor.withValues(alpha: 0.82),
+        context.colors.surface,
+        context.colors.text.withValues(alpha: 0.82),
         null,
       ),
     };
@@ -610,7 +608,7 @@ class DesktopTriChip extends StatelessWidget {
       tooltip: LocalizationService().translate('tri_chip_hint'),
       idleColor: bg,
       hoverColor: state == TriState.off
-          ? AppConstants.tertiaryBackground
+          ? context.colors.surfaceRaised
           : bg.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(AppConstants.pillRadius),
       padding: EdgeInsets.fromLTRB(icon == null ? 12 : 8, 6, 12, 6),
@@ -676,10 +674,10 @@ class _TagRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.sans(
                     color: state == TriState.off
-                        ? AppConstants.textColor
+                        ? context.colors.text
                         : (state == TriState.include
-                              ? AppConstants.accentColor
-                              : AppConstants.errorColor),
+                              ? context.colors.accent
+                              : context.colors.error),
                     fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -690,7 +688,7 @@ class _TagRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 11,
                     ),
                   ),
@@ -700,7 +698,7 @@ class _TagRow extends StatelessWidget {
           _MiniToggle(
             icon: Icons.add_rounded,
             active: state == TriState.include,
-            color: AppConstants.accentColor,
+            color: context.colors.accent,
             onTap: () => onChanged(
               state == TriState.include ? TriState.off : TriState.include,
             ),
@@ -708,7 +706,7 @@ class _TagRow extends StatelessWidget {
           _MiniToggle(
             icon: Icons.remove_rounded,
             active: state == TriState.exclude,
-            color: AppConstants.errorColor,
+            color: context.colors.error,
             onTap: () => onChanged(
               state == TriState.exclude ? TriState.off : TriState.exclude,
             ),
@@ -743,7 +741,7 @@ class _MiniToggle extends StatelessWidget {
       child: Icon(
         icon,
         size: 17,
-        color: active ? color : AppConstants.textMutedColor,
+        color: active ? color : context.colors.textMuted,
       ),
     );
   }
@@ -759,8 +757,8 @@ class _RemovableChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DesktopHoverSurface(
       onTap: onRemove,
-      idleColor: AppConstants.accentColor.withValues(alpha: 0.18),
-      hoverColor: AppConstants.errorColor.withValues(alpha: 0.18),
+      idleColor: context.colors.accent.withValues(alpha: 0.18),
+      hoverColor: context.colors.error.withValues(alpha: 0.18),
       borderRadius: BorderRadius.circular(AppConstants.pillRadius),
       padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
       child: Row(
@@ -769,13 +767,13 @@ class _RemovableChip extends StatelessWidget {
           Text(
             label,
             style: AppTypography.sans(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(width: 4),
-          Icon(Icons.close_rounded, size: 14, color: AppConstants.textColor),
+          Icon(Icons.close_rounded, size: 14, color: context.colors.text),
         ],
       ),
     );
@@ -797,7 +795,7 @@ class _TextAction extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: AppTypography.display(
-          color: AppConstants.accentColor,
+          color: context.colors.accent,
           fontSize: 11.5,
         ),
       ),
@@ -822,18 +820,18 @@ class _SearchBox extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      style: AppTypography.sans(color: AppConstants.textColor, fontSize: 13.5),
+      style: AppTypography.sans(color: context.colors.text, fontSize: 13.5),
       decoration: InputDecoration(
         isDense: true,
         hintText: hint,
         hintStyle: AppTypography.sans(
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
           fontSize: 13.5,
         ),
         prefixIcon: Icon(
           Icons.search_rounded,
           size: 18,
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
         ),
         prefixIconConstraints: const BoxConstraints(minWidth: 38),
         suffixIcon: controller.text.isEmpty
@@ -842,7 +840,7 @@ class _SearchBox extends StatelessWidget {
                 icon: Icon(
                   Icons.close_rounded,
                   size: 16,
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                 ),
                 onPressed: () {
                   controller.clear();
@@ -850,7 +848,7 @@ class _SearchBox extends StatelessWidget {
                 },
               ),
         filled: true,
-        fillColor: AppConstants.secondaryBackground,
+        fillColor: context.colors.surface,
         contentPadding: const EdgeInsets.symmetric(vertical: 10),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -862,7 +860,7 @@ class _SearchBox extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: AppConstants.accentColor, width: 1.2),
+          borderSide: BorderSide(color: context.colors.accent, width: 1.2),
         ),
       ),
     );

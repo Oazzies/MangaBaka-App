@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A titled horizontal row with previous/next buttons.
 ///
@@ -162,8 +162,8 @@ class _CoverSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppConstants.tertiaryBackground,
-      highlightColor: AppConstants.secondaryBackground,
+      baseColor: context.colors.surfaceRaised,
+      highlightColor: context.colors.surface,
       period: const Duration(milliseconds: 1400),
       child: SizedBox(
         width: width,
@@ -174,7 +174,7 @@ class _CoverSkeleton extends StatelessWidget {
               width: width,
               height: width * 1.5,
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -183,7 +183,7 @@ class _CoverSkeleton extends StatelessWidget {
               width: width * 0.8,
               height: 12,
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

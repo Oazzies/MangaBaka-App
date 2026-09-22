@@ -2,6 +2,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ProgressUpdateDialog extends StatefulWidget {
   final int initialValue;
@@ -49,10 +50,10 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    
+
     return Container(
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppConstants.largeRadius),
         ),
@@ -72,7 +73,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
               width: 32,
               height: 4,
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -83,12 +84,12 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppConstants.accentColor.withValues(alpha: 0.1),
+                  color: context.colors.accent.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.menu_book_rounded,
-                  color: AppConstants.accentColor,
+                  color: context.colors.accent,
                   size: 24,
                 ),
               ),
@@ -100,16 +101,17 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                     Text(
                       widget.title.toUpperCase(),
                       style: AppTypography.display(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 18,
                       ),
                     ),
-                    if (widget.maxValue != 'null' && widget.maxValue.isNotEmpty) ...[
+                    if (widget.maxValue != 'null' &&
+                        widget.maxValue.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         '${l10n.translate('total')}: ${widget.maxValue}',
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
@@ -124,10 +126,10 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: AppConstants.primaryBackground,
+              color: context.colors.background,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 width: 1.5,
               ),
             ),
@@ -144,7 +146,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     style: AppTypography.display(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 22,
                     ),
                     decoration: const InputDecoration(
@@ -173,12 +175,15 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
                 child: Text(
                   l10n.translate('cancel'),
                   style: AppTypography.sans(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -190,11 +195,16 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                   Navigator.pop(context);
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppConstants.accentColor,
-                  foregroundColor: AppConstants.onAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  backgroundColor: context.colors.accent,
+                  foregroundColor: context.colors.onAccent,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.pillRadius,
+                    ),
                   ),
                   elevation: 0,
                 ),
@@ -220,14 +230,14 @@ class _IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppConstants.tertiaryBackground,
+      color: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Icon(icon, color: AppConstants.textColor, size: 20),
+          child: Icon(icon, color: context.colors.text, size: 20),
         ),
       ),
     );

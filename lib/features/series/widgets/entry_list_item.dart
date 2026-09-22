@@ -6,7 +6,6 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -15,6 +14,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class EntryListItem extends StatefulWidget {
   final Series series;
@@ -93,14 +93,21 @@ class _EntryListItemState extends State<EntryListItem> {
     final displayTitle = widget.series.getDisplayTitle(
       settings.defaultTitleLanguage,
     );
-    final style = widget.listStyle ??
+    final style =
+        widget.listStyle ??
         (widget.isLibrary
             ? settings.resolvedLibraryListStyle
             : settings.resolvedBrowseListStyle);
 
     if (widget.previewEntry != null) {
       return _buildStack(
-        context, style, l10n, displayTitle, settings, widget.previewEntry);
+        context,
+        style,
+        l10n,
+        displayTitle,
+        settings,
+        widget.previewEntry,
+      );
     }
 
     return StreamBuilder<LibraryEntry?>(
@@ -173,7 +180,9 @@ class _EntryListItemState extends State<EntryListItem> {
         children: [
           _buildContent(context, style, l10n, displayTitle, entry),
 
-          if (!style.isGrid && isInLibrary && (settings.showLibraryProgress || settings.showRemainingProgress))
+          if (!style.isGrid &&
+              isInLibrary &&
+              (settings.showLibraryProgress || settings.showRemainingProgress))
             Positioned(
               bottom: style == AppListStyle.comfortable ? 6 : 4,
               left:
@@ -212,7 +221,7 @@ class _EntryListItemState extends State<EntryListItem> {
       left: 0,
       child: Container(
         decoration: BoxDecoration(
-          color: AppConstants.accentColor,
+          color: context.colors.accent,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(12),
             bottomRight: Radius.circular(12),
@@ -222,7 +231,7 @@ class _EntryListItemState extends State<EntryListItem> {
         child: Text(
           '${widget.ranking}',
           style: AppTypography.display(
-            color: AppConstants.onAccent,
+            color: context.colors.onAccent,
             fontSize: 15,
           ),
         ),
@@ -245,8 +254,8 @@ class _EntryListItemState extends State<EntryListItem> {
       borderRadius: BorderRadius.circular(10),
       child: LinearProgressIndicator(
         value: percentage,
-        backgroundColor: AppConstants.tertiaryBackground,
-        valueColor: AlwaysStoppedAnimation<Color>(AppConstants.accentColor),
+        backgroundColor: context.colors.surfaceRaised,
+        valueColor: AlwaysStoppedAnimation<Color>(context.colors.accent),
         minHeight: 3,
       ),
     );

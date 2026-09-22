@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/mock_series_data.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_banner.dart';
@@ -20,6 +19,7 @@ import 'package:mangabaka_app/features/navigation/widgets/main_nav_rail.dart';
 import 'package:mangabaka_app/features/navigation/widgets/main_top_nav_bar.dart';
 import 'package:mangabaka_app/features/news/screens/news_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/profile_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The app shell: the five top-level tabs and whichever navigation chrome the
 /// window shape and the user's preference call for.
@@ -111,8 +111,10 @@ class MainScreenState extends State<MainScreen> {
     // The list-style preview in settings shows a bundled sample cover. Decoding
     // it on first paint is what made the preview pop in, so decode it now and
     // let the preview hit the image cache synchronously.
-    precacheImage(AssetImage(mockSeries222.coverUrl), context)
-        .catchError((_) {});
+    precacheImage(
+      AssetImage(mockSeries222.coverUrl),
+      context,
+    ).catchError((_) {});
   }
 
   @override
@@ -181,7 +183,7 @@ class MainScreenState extends State<MainScreen> {
 
   Widget _phoneLayout(LocalizationService l10n) {
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       body: _withHealthBanner(_flatContent()),
       bottomNavigationBar: _bottomNav(l10n),
     );
@@ -195,7 +197,7 @@ class MainScreenState extends State<MainScreen> {
     switch (position) {
       case LandscapeAppBarPosition.top:
         return Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           appBar: MainTopNavBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: _onItemTapped,
@@ -210,7 +212,7 @@ class MainScreenState extends State<MainScreen> {
         // it already sits out of the way, so a nested navigator would only
         // cost the pushed route its full height.
         return Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           body: _withHealthBanner(_flatContent()),
           bottomNavigationBar: _bottomNav(l10n),
         );
@@ -233,7 +235,7 @@ class MainScreenState extends State<MainScreen> {
     final content = Expanded(child: _withHealthBanner(_nestedContent()));
 
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       body: Row(
         children: side == NavRailSide.left
             ? [rail, const NavRailDivider(), content]
@@ -243,10 +245,10 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget _bottomNav(LocalizationService l10n) => MbBottomNav(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        destinations: navDestinations(l10n),
-      );
+    selectedIndex: _selectedIndex,
+    onDestinationSelected: _onItemTapped,
+    destinations: navDestinations(l10n),
+  );
 
   // ─── Content ─────────────────────────────────────────────────────────────
 

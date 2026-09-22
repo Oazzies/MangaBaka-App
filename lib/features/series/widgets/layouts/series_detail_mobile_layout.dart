@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -11,6 +10,7 @@ import 'package:mangabaka_app/features/series/widgets/series_detail_skeleton.dar
 import 'package:mangabaka_app/features/series/widgets/series_my_list_card.dart';
 import 'package:mangabaka_app/features/series/widgets/series_information_card.dart';
 import 'package:mangabaka_app/features/series/widgets/external_ratings_section.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesDetailMobileLayout extends StatelessWidget {
   final Series series;
@@ -69,7 +69,7 @@ class SeriesDetailMobileLayout extends StatelessWidget {
                   onTabChanged: onTabChanged,
                   horizontalPadding: hPadding,
                 ),
-                Divider(height: 1, thickness: 1, color: AppConstants.borderColor),
+                Divider(height: 1, thickness: 1, color: context.colors.border),
                 if (selectedTab == 'Info') ...[
                   const SizedBox(height: 22),
                   Padding(
@@ -91,7 +91,9 @@ class SeriesDetailMobileLayout extends StatelessWidget {
                         ],
                         ExternalRatingsSection(series: series),
                         if (series.description.isNotEmpty) ...[
-                          SeriesSectionHeader(title: l10n.translate('description')),
+                          SeriesSectionHeader(
+                            title: l10n.translate('description'),
+                          ),
                           DescriptionSection(description: series.description),
                           const SizedBox(height: 28),
                         ],

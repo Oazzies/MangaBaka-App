@@ -1,8 +1,8 @@
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/profile/widgets/snapshot/snapshot_list_item.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SnapshotList extends StatefulWidget {
   final String title;
@@ -53,7 +53,7 @@ class _SnapshotListState extends State<SnapshotList> {
         Text(
           widget.title.toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 15,
           ),
         ),

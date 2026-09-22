@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Laid over the whole app while a desktop sign-in waits on the browser.
 ///
@@ -43,7 +45,9 @@ class _Card extends StatelessWidget {
     final l10n = LocalizationService();
     return Positioned.fill(
       child: Material(
-        color: Colors.black.withValues(alpha: 0.72),
+        color: FixedColors.dim.withValues(
+          alpha: context.colors.isDark ? 0.72 : 0.45,
+        ),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
@@ -51,7 +55,7 @@ class _Card extends StatelessWidget {
               margin: const EdgeInsets.all(24),
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: AppConstants.secondaryBackground,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.circular(AppConstants.largeRadius),
               ),
               child: Column(
@@ -63,14 +67,14 @@ class _Card extends StatelessWidget {
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: AppConstants.accentColor,
+                      color: context.colors.accent,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
                     l10n.translate('auth_waiting_title').toUpperCase(),
                     style: AppTypography.display(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 20,
                     ),
                   ),
@@ -78,7 +82,7 @@ class _Card extends StatelessWidget {
                   Text(
                     l10n.translate('auth_waiting_body'),
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 14.5,
                       height: 1.5,
                     ),
@@ -90,7 +94,7 @@ class _Card extends StatelessWidget {
                       TextButton(
                         onPressed: auth.cancelLogin,
                         style: TextButton.styleFrom(
-                          foregroundColor: AppConstants.textMutedColor,
+                          foregroundColor: context.colors.textMuted,
                         ),
                         child: Text(l10n.translate('cancel')),
                       ),

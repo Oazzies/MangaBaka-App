@@ -6,6 +6,7 @@ import 'package:mangabaka_app/features/series/widgets/state_selection_section.da
 import 'package:mangabaka_app/features/series/widgets/rating_icon_button.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesActionBar extends StatelessWidget {
   final Series series;
@@ -31,9 +32,12 @@ class SeriesActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (entry == null) return const SizedBox.shrink();
 
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    final hasChapters = series.totalChapters.isNotEmpty && series.totalChapters != 'null';
-    final hasVolumes = series.finalVolume.isNotEmpty && series.finalVolume != 'null';
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    final hasChapters =
+        series.totalChapters.isNotEmpty && series.totalChapters != 'null';
+    final hasVolumes =
+        series.finalVolume.isNotEmpty && series.finalVolume != 'null';
 
     return Column(
       children: [
@@ -85,7 +89,6 @@ class SeriesActionBar extends StatelessWidget {
       ],
     );
   }
-
 }
 
 class _ProgressButton extends StatelessWidget {
@@ -105,10 +108,12 @@ class _ProgressButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTotal = (total == null || total == 'null' || total!.isEmpty) ? '?' : total;
+    final displayTotal = (total == null || total == 'null' || total!.isEmpty)
+        ? '?'
+        : total;
 
     return Material(
-      color: AppConstants.secondaryBackground,
+      color: context.colors.surface,
       borderRadius: BorderRadius.circular(AppConstants.cardRadius),
       child: InkWell(
         onTap: onTap,
@@ -118,24 +123,20 @@ class _ProgressButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: AppConstants.accentColor),
+              Icon(icon, size: 20, color: context.colors.accent),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   '$value / $displayTotal',
                   style: AppTypography.sans(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(
-                Icons.add,
-                size: 20,
-                color: AppConstants.textMutedColor,
-              ),
+              Icon(Icons.add, size: 20, color: context.colors.textMuted),
             ],
           ),
         ),
@@ -143,5 +144,3 @@ class _ProgressButton extends StatelessWidget {
     );
   }
 }
-
-

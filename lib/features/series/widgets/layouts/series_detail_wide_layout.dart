@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -14,6 +13,7 @@ import 'package:mangabaka_app/features/series/widgets/series_detail_skeleton.dar
 import 'package:mangabaka_app/features/series/widgets/series_my_list_card.dart';
 import 'package:mangabaka_app/features/series/widgets/series_information_card.dart';
 import 'package:mangabaka_app/features/series/widgets/external_ratings_section.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesDetailWideLayout extends StatelessWidget {
   final Series series;
@@ -32,7 +32,12 @@ class SeriesDetailWideLayout extends StatelessWidget {
   final VoidCallback onUpdateRating;
   final Function(String)? onAuthorTap;
   final Function(String)? onPublisherTap;
-  final Widget Function(double hPadding, {bool isWide, bool wideRightPaddingOnly}) buildTabContent;
+  final Widget Function(
+    double hPadding, {
+    bool isWide,
+    bool wideRightPaddingOnly,
+  })
+  buildTabContent;
 
   const SeriesDetailWideLayout({
     super.key,
@@ -69,7 +74,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
         return FadeTransition(opacity: animation, child: child);
       },
       child: isDataLoaded
-          ? _buildContent()
+          ? _buildContent(context)
           : Padding(
               key: const ValueKey('wide_skeleton'),
               padding: const EdgeInsets.symmetric(horizontal: _hPadding),
@@ -78,7 +83,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     return Padding(
       key: const ValueKey('wide_full_layout'),
       padding: const EdgeInsets.fromLTRB(_hPadding, 0, _hPadding, 8),
@@ -111,7 +116,8 @@ class SeriesDetailWideLayout extends StatelessWidget {
                 ),
                 // Only a signed-in user can add, and only what is not yet in
                 // their library — the same gate the phone's FAB applies.
-                if (entry == null && getIt<ProfileAuthService>().isLoggedIn) ...[
+                if (entry == null &&
+                    getIt<ProfileAuthService>().isLoggedIn) ...[
                   const SizedBox(height: 18),
                   SeriesAddToLibraryButton(isAdding: isAdding, onAdd: onAdd),
                 ],
@@ -129,7 +135,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
                   onTabChanged: onTabChanged,
                   horizontalPadding: 0,
                 ),
-                Divider(height: 1, thickness: 1, color: AppConstants.borderColor),
+                Divider(height: 1, thickness: 1, color: context.colors.border),
                 if (selectedTab == 'Info') _buildInfoPanel(),
                 const SizedBox(height: 32),
                 buildTabContent(0, isWide: true, wideRightPaddingOnly: false),

@@ -2,6 +2,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
@@ -101,22 +102,22 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
     return PopScope(
       canPop: !_isMacOS, // Disable system back gesture on macOS to prevent interference with cover swiping
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: FixedColors.imageScrim,
         extendBodyBehindAppBar: true,
         appBar: _showControls
             ? AppBar(
-                backgroundColor: Colors.black.withValues(alpha: 0.7),
+                backgroundColor: FixedColors.imageScrim.withValues(alpha: 0.7),
                 elevation: 0,
                 scrolledUnderElevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: const Icon(Icons.arrow_back, color: FixedColors.onImage),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: title != null
                     ? Text(
                         title,
                         style: AppTypography.sans(
-                          color: Colors.white,
+                          color: FixedColors.onImage,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -129,7 +130,7 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                         padding: const EdgeInsets.only(right: 16),
                         child: Text(
                           '${_currentIndex + 1} / ${widget.imageUrls.length}',
-                          style: AppTypography.sans(color: Colors.white70, fontSize: 14),
+                          style: AppTypography.sans(color: FixedColors.onImage.withValues(alpha: 0.7), fontSize: 14),
                         ),
                       ),
                     ),
@@ -224,10 +225,10 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                         icon: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: FixedColors.imageScrim.withValues(alpha: 0.4),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
+                          child: const Icon(Icons.arrow_back_ios_new, color: FixedColors.onImage, size: 24),
                         ),
                         onPressed: _previousPage,
                       ),
@@ -244,10 +245,10 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                         icon: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: FixedColors.imageScrim.withValues(alpha: 0.4),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 24),
+                          child: const Icon(Icons.arrow_forward_ios, color: FixedColors.onImage, size: 24),
                         ),
                         onPressed: _nextPage,
                       ),
@@ -263,11 +264,11 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.7),
+                        color: FixedColors.imageScrim.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
+                            color: FixedColors.imageScrim.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -276,7 +277,7 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                       child: Text(
                         note,
                         style: AppTypography.sans(
-                          color: Colors.white,
+                          color: FixedColors.onImage,
                           fontSize: 14,
                           height: 1.4,
                         ),

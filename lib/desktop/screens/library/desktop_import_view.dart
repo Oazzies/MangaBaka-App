@@ -8,6 +8,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/library/import/bulk_import_controller.dart';
 import 'package:mangabaka_app/features/library/import/import_parser.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The bulk importer on desktop.
 ///
@@ -98,9 +99,11 @@ class DesktopImportView extends StatelessWidget {
             onPressed: onBack,
             filled: true,
           ),
-          actions: review ? _reviewActions(l10n) : const [],
+          actions: review ? _reviewActions(context, l10n) : const [],
         ),
-        Expanded(child: review ? _review(l10n) : _input(context, l10n)),
+        Expanded(
+          child: review ? _review(context, l10n) : _input(context, l10n),
+        ),
       ],
     );
   }
@@ -121,14 +124,12 @@ class DesktopImportView extends StatelessWidget {
     final summary = titleCount == 0
         ? l10n.translate('import_no_titles')
         : [
-            l10n.translate('import_titles_found').replaceAll(
-              '{count}',
-              '$titleCount',
-            ),
-            l10n.translate('import_detected').replaceAll(
-              '{format}',
-              l10n.translate(formatKey(detected)),
-            ),
+            l10n
+                .translate('import_titles_found')
+                .replaceAll('{count}', '$titleCount'),
+            l10n
+                .translate('import_detected')
+                .replaceAll('{format}', l10n.translate(formatKey(detected))),
           ].join(' · ');
 
     return Padding(
@@ -178,7 +179,7 @@ class DesktopImportView extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.sans(
-                              color: AppConstants.textMutedColor,
+                              color: context.colors.textMuted,
                               fontSize: 13,
                             ),
                           ),
@@ -200,14 +201,14 @@ class DesktopImportView extends StatelessWidget {
                       minLines: null,
                       textAlignVertical: TextAlignVertical.top,
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 14.5,
                         height: 1.5,
                       ),
                       decoration: InputDecoration(
                         hintText: l10n.translate('import_paste_hint'),
                         filled: true,
-                        fillColor: AppConstants.tertiaryBackground,
+                        fillColor: context.colors.surfaceRaised,
                         contentPadding: const EdgeInsets.all(18),
                         border: _fieldBorder,
                         enabledBorder: _fieldBorder,
@@ -219,7 +220,7 @@ class DesktopImportView extends StatelessWidget {
                   Text(
                     summary,
                     style: AppTypography.monoLabel(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 11.5,
                     ),
                   ),
@@ -228,7 +229,7 @@ class DesktopImportView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 20),
-          SizedBox(width: 320, child: _options(l10n, titleCount)),
+          SizedBox(width: 320, child: _options(context, l10n, titleCount)),
         ],
       ),
     );
@@ -239,7 +240,11 @@ class DesktopImportView extends StatelessWidget {
     borderSide: BorderSide.none,
   );
 
-  Widget _options(LocalizationService l10n, int titleCount) {
+  Widget _options(
+    BuildContext context,
+    LocalizationService l10n,
+    int titleCount,
+  ) {
     final canUseStates = ImportParser.carriesStates(
       format == ImportFormat.auto
           ? ImportParser.detect(text.text, fileName: fileName)
@@ -255,7 +260,7 @@ class DesktopImportView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _optionLabel(l10n.translate('import_format')),
+              _optionLabel(context, l10n.translate('import_format')),
               DesktopDropdown<ImportFormat>(
                 valueLabel: l10n.translate(formatKey(format)),
                 icon: Icons.description_outlined,
@@ -271,8 +276,8 @@ class DesktopImportView extends StatelessWidget {
                 onSelected: onFormatChanged,
               ),
               const SizedBox(height: 18),
-              _optionLabel(l10n.translate('import_add_as')),
-              _stateDropdown(l10n),
+              _optionLabel(context, l10n.translate('import_add_as')),
+              _stateDropdown(context, l10n),
               if (canUseStates) ...[
                 const SizedBox(height: 18),
                 Row(
@@ -284,7 +289,7 @@ class DesktopImportView extends StatelessWidget {
                           Text(
                             l10n.translate('import_use_statuses'),
                             style: AppTypography.sans(
-                              color: AppConstants.textColor,
+                              color: context.colors.text,
                               fontSize: 13.5,
                               fontWeight: FontWeight.w600,
                             ),
@@ -293,7 +298,7 @@ class DesktopImportView extends StatelessWidget {
                           Text(
                             l10n.translate('import_use_statuses_subtitle'),
                             style: AppTypography.sans(
-                              color: AppConstants.textMutedColor,
+                              color: context.colors.textMuted,
                               fontSize: 12,
                               height: 1.35,
                             ),
@@ -311,6 +316,7 @@ class DesktopImportView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _wideButton(
+          context,
           label: l10n.translate('import_match'),
           icon: Icons.manage_search_rounded,
           onPressed: titleCount == 0 ? null : onMatch,
@@ -319,18 +325,18 @@ class DesktopImportView extends StatelessWidget {
     );
   }
 
-  Widget _optionLabel(String label) => Padding(
+  Widget _optionLabel(BuildContext context, String label) => Padding(
     padding: const EdgeInsets.only(bottom: 8, left: 2),
     child: Text(
       label.toUpperCase(),
       style: AppTypography.monoLabel(
-        color: AppConstants.textMutedColor,
+        color: context.colors.textMuted,
         fontSize: 11.5,
       ),
     ),
   );
 
-  Widget _stateDropdown(LocalizationService l10n) {
+  Widget _stateDropdown(BuildContext context, LocalizationService l10n) {
     return DesktopDropdown<String>(
       valueLabel: l10n.translate(controller.state),
       icon: Icons.bookmark_border_rounded,
@@ -340,7 +346,7 @@ class DesktopImportView extends StatelessWidget {
           DesktopDropdownItem(
             value: s,
             label: l10n.translate(s),
-            leading: _stateDot(s),
+            leading: _stateDot(context, s),
           ),
       ],
       selected: controller.state,
@@ -348,45 +354,40 @@ class DesktopImportView extends StatelessWidget {
     );
   }
 
-  Widget _stateDot(String state) => Container(
+  Widget _stateDot(BuildContext context, String state) => Container(
     width: 9,
     height: 9,
     decoration: BoxDecoration(
-      color: AppConstants.getColorForState(state),
+      color: context.colors.forState(state),
       shape: BoxShape.circle,
     ),
   );
 
-  Widget _wideButton({
+  Widget _wideButton(
+    BuildContext context, {
     required String label,
     required IconData icon,
     required VoidCallback? onPressed,
   }) {
     final enabled = onPressed != null;
-    final fg = AppConstants.onAccent;
+    final fg = context.colors.onAccent;
     return DesktopHoverSurface(
       onTap: onPressed,
-      idleColor: enabled
-          ? AppConstants.accentColor
-          : AppConstants.tertiaryBackground,
+      idleColor: enabled ? context.colors.accent : context.colors.surfaceRaised,
       hoverColor: enabled
-          ? Color.lerp(AppConstants.accentColor, Colors.white, 0.15)
-          : AppConstants.tertiaryBackground,
+          ? context.colors.hoverOf(context.colors.accent)
+          : context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(AppConstants.pillRadius),
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 19,
-            color: enabled ? fg : AppConstants.textMutedColor,
-          ),
+          Icon(icon, size: 19, color: enabled ? fg : context.colors.textMuted),
           const SizedBox(width: 10),
           Text(
             label.toUpperCase(),
             style: AppTypography.display(
-              color: enabled ? fg : AppConstants.textMutedColor,
+              color: enabled ? fg : context.colors.textMuted,
               fontSize: 13.5,
             ),
           ),
@@ -397,7 +398,7 @@ class DesktopImportView extends StatelessWidget {
 
   // ─── Review ──────────────────────────────────────────────────────────────
 
-  List<Widget> _reviewActions(LocalizationService l10n) {
+  List<Widget> _reviewActions(BuildContext context, LocalizationService l10n) {
     final c = controller;
     final canAdd = c.selectedCount > 0 && !c.isAdding && !c.isMatching;
     return [
@@ -421,7 +422,7 @@ class DesktopImportView extends StatelessWidget {
                 height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: AppConstants.onAccent,
+                  color: context.colors.onAccent,
                 ),
               )
             : null,
@@ -429,7 +430,7 @@ class DesktopImportView extends StatelessWidget {
     ];
   }
 
-  Widget _review(LocalizationService l10n) {
+  Widget _review(BuildContext context, LocalizationService l10n) {
     final c = controller;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -447,8 +448,8 @@ class DesktopImportView extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: c.progress,
                 minHeight: 4,
-                color: AppConstants.accentColor,
-                backgroundColor: AppConstants.tertiaryBackground,
+                color: context.colors.accent,
+                backgroundColor: context.colors.surfaceRaised,
               ),
             ),
           ),
@@ -506,8 +507,8 @@ class _ReviewRow extends StatelessWidget {
 
     return DesktopHoverSurface(
       onTap: row.canSelect ? onToggle : null,
-      idleColor: AppConstants.secondaryBackground,
-      hoverColor: AppConstants.tertiaryBackground,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(12),
       padding: const EdgeInsets.fromLTRB(12, 8, 14, 8),
       child: Row(
@@ -530,7 +531,7 @@ class _ReviewRow extends StatelessWidget {
                       fit: BoxFit.cover,
                       memCacheWidth: 120,
                     )
-                  : Container(color: AppConstants.tertiaryBackground),
+                  : Container(color: context.colors.surfaceRaised),
             ),
           ),
           const SizedBox(width: 16),
@@ -544,8 +545,8 @@ class _ReviewRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.sans(
                     color: muted
-                        ? AppConstants.textMutedColor
-                        : AppConstants.textColor,
+                        ? context.colors.textMuted
+                        : context.colors.text,
                     fontWeight: FontWeight.w600,
                     fontSize: 14.5,
                   ),
@@ -556,7 +557,7 @@ class _ReviewRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 12,
                     ),
                   ),
@@ -567,7 +568,7 @@ class _ReviewRow extends StatelessWidget {
             const SizedBox(width: 12),
             _chip(
               l10n.translate(row.sourceState!),
-              AppConstants.getColorForState(row.sourceState!),
+              context.colors.forState(row.sourceState!),
             ),
           ],
           if (_status.isNotEmpty) ...[
@@ -575,8 +576,8 @@ class _ReviewRow extends StatelessWidget {
             _chip(
               _status,
               row.status == ImportRowStatus.inLibrary
-                  ? AppConstants.accentColor
-                  : AppConstants.textMutedColor,
+                  ? context.colors.accent
+                  : context.colors.textMuted,
             ),
           ],
           if (row.candidates.length > 1) ...[

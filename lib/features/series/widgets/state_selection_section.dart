@@ -3,6 +3,7 @@ import 'package:mangabaka_app/features/library/constants/library_screen_constant
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class StateSelectionSection extends StatefulWidget {
   final String? currentState;
@@ -46,8 +47,8 @@ class _StateSelectionSectionState extends State<StateSelectionSection> {
       listenable: LocalizationService(),
       builder: (context, _) {
         final l10n = LocalizationService();
-        final stateColor = AppConstants.getColorForState(activeState);
-        final onStateColor = AppConstants.getOnColorForState(activeState);
+        final stateColor = context.colors.forState(activeState);
+        final onStateColor = context.colors.onForState(activeState);
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -56,7 +57,7 @@ class _StateSelectionSectionState extends State<StateSelectionSection> {
               width: constraints.maxWidth,
               valueLabel: l10n.translate(activeState),
               backgroundColor: stateColor,
-              menuBackgroundColor: AppConstants.secondaryBackground,
+              menuBackgroundColor: context.colors.surface,
               foregroundColor: onStateColor,
               radius: AppConstants.pillRadius,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -79,7 +80,7 @@ class _StateSelectionSectionState extends State<StateSelectionSection> {
                   value: tab.key,
                   label: l10n.translate(tab.key).toUpperCase(),
                   icon: _getIconForState(tab.key),
-                  iconColor: AppConstants.getColorForState(tab.key),
+                  iconColor: context.colors.forState(tab.key),
                 );
               }).toList(),
             );
@@ -108,4 +109,5 @@ class _StateSelectionSectionState extends State<StateSelectionSection> {
       default:
         return Icons.help_outline;
     }
-  }}
+  }
+}

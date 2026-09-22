@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class RatingIconButton extends StatelessWidget {
   final int? currentRating;
@@ -21,13 +22,13 @@ class RatingIconButton extends StatelessWidget {
       height: 44,
       width: 54,
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppConstants.cardRadius),
       ),
       child: IconButton(
         icon: Icon(
           hasRating ? Icons.star : Icons.star_border,
-          color: hasRating ? AppConstants.starColor : AppConstants.textColor,
+          color: hasRating ? context.colors.star : context.colors.text,
           size: 24,
         ),
         onPressed: () {

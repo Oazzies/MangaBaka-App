@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -8,6 +7,8 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 
 /// Central controller managing the series hover preview overlay.
 /// Tracks cursor coordinates so the preview smoothly follows the mouse.
@@ -21,7 +22,9 @@ class SeriesHoverPreviewController {
   String? _activeSeriesId;
 
   /// Global pointer position updated as the cursor moves over a previewable element.
-  final ValueNotifier<Offset> mousePosition = ValueNotifier<Offset>(Offset.zero);
+  final ValueNotifier<Offset> mousePosition = ValueNotifier<Offset>(
+    Offset.zero,
+  );
 
   void onPointerMove(Offset globalPos) {
     mousePosition.value = globalPos;
@@ -73,10 +76,8 @@ class SeriesHoverPreviewController {
     if (overlay == null) return;
 
     _entry = OverlayEntry(
-      builder: (ctx) => _SeriesPreviewOverlay(
-        initialSeries: series,
-        seriesId: seriesId,
-      ),
+      builder: (ctx) =>
+          _SeriesPreviewOverlay(initialSeries: series, seriesId: seriesId),
     );
 
     overlay.insert(_entry!);
@@ -216,8 +217,7 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
 
   String _cleanSynopsis(String text) {
     if (text.isEmpty) return '';
-    return text
-        .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), ' ')
+    return MarkdownUtils.toPlainText(text)
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
   }
@@ -225,15 +225,15 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
   Color _statusColor(String status) {
     final s = status.toLowerCase();
     if (s.contains('ongoing')) {
-      return const Color(0xFF22C55E);
+      return context.colors.success;
     } else if (s.contains('completed')) {
-      return const Color(0xFF3B82F6);
+      return context.colors.info;
     } else if (s.contains('hiatus')) {
-      return const Color(0xFFF59E0B);
+      return context.colors.warning;
     } else if (s.contains('cancelled') || s.contains('canceled')) {
-      return const Color(0xFFEF4444);
+      return context.colors.error;
     } else {
-      return AppConstants.textMutedColor;
+      return context.colors.textMuted;
     }
   }
 
@@ -315,9 +315,13 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
           // Ensure preview never spawns or overflows offscreen at the bottom or top
           final double effectiveHeight = _measuredHeight;
           const double bottomMargin = 16.0;
-          final double maxTop = screenSize.height - effectiveHeight - bottomMargin;
+          final double maxTop =
+              screenSize.height - effectiveHeight - bottomMargin;
           final double desiredTop = y - 100.0;
-          final double top = desiredTop.clamp(12.0, maxTop < 12.0 ? 12.0 : maxTop);
+          final double top = desiredTop.clamp(
+            12.0,
+            maxTop < 12.0 ? 12.0 : maxTop,
+          );
 
           return Stack(
             children: [
@@ -327,13 +331,16 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                 width: previewWidth,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: (screenSize.height - 24.0).clamp(200.0, double.infinity),
+                    maxHeight: (screenSize.height - 24.0).clamp(
+                      200.0,
+                      double.infinity,
+                    ),
                   ),
                   child: Material(
                     type: MaterialType.transparency,
                     child: DefaultTextStyle(
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                       ).copyWith(decoration: TextDecoration.none),
                       child: FadeTransition(
                         opacity: _fade,
@@ -352,18 +359,18 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                     borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.65),
+                                        color: context.colors.shadowAt(0.65),
                                         blurRadius: 22,
                                         offset: const Offset(0, 10),
                                       ),
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.35),
+                                        color: context.colors.shadowAt(0.35),
                                         blurRadius: 6,
                                         offset: const Offset(0, 3),
                                       ),
                                     ],
                                     border: Border.all(
-                                      color: AppConstants.borderColor.withValues(
+                                      color: context.colors.border.withValues(
                                         alpha: 0.5,
                                       ),
                                       width: 1,
@@ -376,17 +383,20 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                       child: series.coverUrl.isNotEmpty
                                           ? WidgetUtils.networkImage(
                                               url: series.coverUrl,
-                                              blurred: WidgetUtils.isRatingBlurred(series.contentRating),
+                                              blurred:
+                                                  WidgetUtils.isRatingBlurred(
+                                                    series.contentRating,
+                                                  ),
                                               fit: BoxFit.cover,
                                               memCacheWidth: 460,
                                             )
                                           : Container(
                                               color:
-                                                  AppConstants.tertiaryBackground,
+                                                  context.colors.surfaceRaised,
                                               child: Icon(
                                                 Icons.menu_book_rounded,
                                                 size: 40,
-                                                color: AppConstants.textMutedColor,
+                                                color: context.colors.textMuted,
                                               ),
                                             ),
                                     ),
@@ -397,15 +407,15 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: AppConstants.secondaryBackground,
+                                    color: context.colors.surface,
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: AppConstants.borderColor,
+                                      color: context.colors.border,
                                       width: 1,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.5),
+                                        color: context.colors.shadowAt(0.5),
                                         blurRadius: 18,
                                         offset: const Offset(0, 6),
                                       ),
@@ -413,17 +423,21 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       // Title
                                       Text(
                                         displayTitle,
-                                        style: AppTypography.display(
-                                          color: AppConstants.textColor,
-                                          fontSize: 13.5,
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.25,
-                                        ).copyWith(decoration: TextDecoration.none),
+                                        style:
+                                            AppTypography.display(
+                                              color: context.colors.text,
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.w700,
+                                              height: 1.25,
+                                            ).copyWith(
+                                              decoration: TextDecoration.none,
+                                            ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -433,25 +447,30 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                         children: [
                                           if (series.type.isNotEmpty) ...[
                                             Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color: AppConstants.accentColor
+                                                color: context.colors.accent
                                                     .withValues(alpha: 0.15),
                                                 borderRadius:
                                                     BorderRadius.circular(4),
                                               ),
                                               child: Text(
                                                 series.type.toUpperCase(),
-                                                style: AppTypography.monoLabel(
-                                                  color: AppConstants.accentColor,
-                                                  fontSize: 9.5,
-                                                  fontWeight: FontWeight.w700,
-                                                ).copyWith(
-                                                  decoration: TextDecoration.none,
-                                                ),
+                                                style:
+                                                    AppTypography.monoLabel(
+                                                      color:
+                                                          context.colors.accent,
+                                                      fontSize: 9.5,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ).copyWith(
+                                                      decoration:
+                                                          TextDecoration.none,
+                                                    ),
                                               ),
                                             ),
                                             const SizedBox(width: 7),
@@ -462,25 +481,34 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                                 final statusColor =
                                                     _statusColor(series.status);
                                                 return Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 2,
-                                                  ),
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 2,
+                                                      ),
                                                   decoration: BoxDecoration(
                                                     color: statusColor
-                                                        .withValues(alpha: 0.15),
+                                                        .withValues(
+                                                          alpha: 0.15,
+                                                        ),
                                                     borderRadius:
-                                                        BorderRadius.circular(4),
+                                                        BorderRadius.circular(
+                                                          4,
+                                                        ),
                                                   ),
                                                   child: Text(
                                                     series.status.toUpperCase(),
-                                                    style: AppTypography.monoLabel(
-                                                      color: statusColor,
-                                                      fontSize: 9.5,
-                                                      fontWeight: FontWeight.w700,
-                                                    ).copyWith(
-                                                      decoration: TextDecoration.none,
-                                                    ),
+                                                    style:
+                                                        AppTypography.monoLabel(
+                                                          color: statusColor,
+                                                          fontSize: 9.5,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ).copyWith(
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .none,
+                                                        ),
                                                   ),
                                                 );
                                               },
@@ -491,18 +519,20 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                             Icon(
                                               Icons.star_rounded,
                                               size: 14,
-                                              color: AppConstants.starColor,
+                                              color: context.colors.star,
                                             ),
                                             const SizedBox(width: 2.5),
                                             Text(
                                               ratingDisplay,
-                                              style: AppTypography.sans(
-                                                color: AppConstants.starColor,
-                                                fontSize: 11.5,
-                                                fontWeight: FontWeight.w700,
-                                              ).copyWith(
-                                                decoration: TextDecoration.none,
-                                              ),
+                                              style:
+                                                  AppTypography.sans(
+                                                    color: context.colors.star,
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.w700,
+                                                  ).copyWith(
+                                                    decoration:
+                                                        TextDecoration.none,
+                                                  ),
                                             ),
                                           ],
                                         ],
@@ -512,14 +542,20 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                         const SizedBox(height: 5),
                                         Row(
                                           children: [
-                                            for (int i = 0; i < subMetaParts.length; i++) ...[
+                                            for (
+                                              int i = 0;
+                                              i < subMetaParts.length;
+                                              i++
+                                            ) ...[
                                               if (i > 0) ...[
                                                 const SizedBox(width: 7),
                                                 Container(
                                                   width: 3,
                                                   height: 3,
                                                   decoration: BoxDecoration(
-                                                    color: AppConstants.textMutedColor
+                                                    color: context
+                                                        .colors
+                                                        .textMuted
                                                         .withValues(alpha: 0.6),
                                                     shape: BoxShape.circle,
                                                   ),
@@ -528,13 +564,18 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                               ],
                                               Text(
                                                 subMetaParts[i],
-                                                style: AppTypography.sans(
-                                                  color: AppConstants.textMutedColor,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w500,
-                                                ).copyWith(
-                                                  decoration: TextDecoration.none,
-                                                ),
+                                                style:
+                                                    AppTypography.sans(
+                                                      color: context
+                                                          .colors
+                                                          .textMuted,
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ).copyWith(
+                                                      decoration:
+                                                          TextDecoration.none,
+                                                    ),
                                               ),
                                             ],
                                           ],
@@ -549,31 +590,35 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                           children: [
                                             for (final g in genres.take(3))
                                               Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 2,
-                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
                                                 decoration: BoxDecoration(
-                                                  color: AppConstants
-                                                      .tertiaryBackground,
+                                                  color: context.colors.surfaceRaised,
                                                   borderRadius:
                                                       BorderRadius.circular(4),
                                                   border: Border.all(
-                                                    color: AppConstants.borderColor
+                                                    color: context.colors.border
                                                         .withValues(alpha: 0.5),
                                                     width: 0.5,
                                                   ),
                                                 ),
                                                 child: Text(
                                                   _capitalizeGenre(g),
-                                                  style: AppTypography.sans(
-                                                    color:
-                                                        AppConstants.textMutedColor,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w500,
-                                                  ).copyWith(
-                                                    decoration: TextDecoration.none,
-                                                  ),
+                                                  style:
+                                                      AppTypography.sans(
+                                                        color: context
+                                                            .colors
+                                                            .textMuted,
+                                                        fontSize: 10,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ).copyWith(
+                                                        decoration:
+                                                            TextDecoration.none,
+                                                      ),
                                                 ),
                                               ),
                                           ],
@@ -584,13 +629,14 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                         const SizedBox(height: 7),
                                         Text(
                                           synopsis,
-                                          style: AppTypography.sans(
-                                            color: AppConstants.textMutedColor,
-                                            fontSize: 11,
-                                            height: 1.35,
-                                          ).copyWith(
-                                            decoration: TextDecoration.none,
-                                          ),
+                                          style:
+                                              AppTypography.sans(
+                                                color: context.colors.textMuted,
+                                                fontSize: 11,
+                                                height: 1.35,
+                                              ).copyWith(
+                                                decoration: TextDecoration.none,
+                                              ),
                                           maxLines: 3,
                                           overflow: TextOverflow.ellipsis,
                                         ),

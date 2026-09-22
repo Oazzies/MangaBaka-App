@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/widgets/mini_badge.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ContentRatingChip extends StatelessWidget {
   final String rating;
@@ -14,20 +14,20 @@ class ContentRatingChip extends StatelessWidget {
     IconData icon;
     switch (rating.toLowerCase()) {
       case 'suggestive':
-        color = AppConstants.warningColor;
+        color = context.colors.warning;
         icon = Icons.whatshot_outlined;
         break;
       case 'erotica':
       case 'pornographic':
-        color = AppConstants.errorColor;
+        color = context.colors.error;
         icon = Icons.whatshot_outlined;
         break;
       case 'safe':
-        color = AppConstants.successColor;
+        color = context.colors.success;
         icon = Icons.verified_outlined;
         break;
       default:
-        color = AppConstants.textMutedColor;
+        color = context.colors.textMuted;
         icon = Icons.info_outline;
     }
 

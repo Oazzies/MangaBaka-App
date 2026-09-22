@@ -1,8 +1,10 @@
-import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 
@@ -16,9 +18,25 @@ class DescriptionSection extends StatefulWidget {
 
 class _DescriptionSectionState extends State<DescriptionSection> {
   bool expanded = false;
+  final List<GestureRecognizer> _recognizers = [];
+
+  void _clearRecognizers() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    _clearRecognizers();
+
     final isLong =
         widget.description
                 .trim()
@@ -27,6 +45,13 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                 .length >
             40 ||
         widget.description.length > 400;
+
+    final spans = MarkdownUtils.buildTextSpans(
+      text: widget.description,
+      context: context,
+      registerRecognizer: (r) => _recognizers.add(r),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -37,15 +62,12 @@ class _DescriptionSectionState extends State<DescriptionSection> {
           child: Stack(
             children: [
               SelectionArea(
-                child: Text(
-                  widget.description,
+                child: Text.rich(
+                  TextSpan(children: spans),
                   maxLines: expanded ? null : 6,
-                  overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.72,
-                        color: AppConstants.textColor.withValues(alpha: 0.88),
-                        fontSize: 15.5,
-                      ),
+                  overflow: expanded
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
                 ),
               ),
               if (isLong && !expanded)
@@ -60,9 +82,9 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppConstants.primaryBackground.withValues(alpha: 0),
-                          AppConstants.primaryBackground.withValues(alpha: 0.8),
-                          AppConstants.primaryBackground,
+                          context.colors.background.withValues(alpha: 0),
+                          context.colors.background.withValues(alpha: 0.8),
+                          context.colors.background,
                         ],
                       ),
                     ),
@@ -83,14 +105,23 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                         onTap: () => setState(() => expanded = !expanded),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10.0,
+                            horizontal: 16.0,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                expanded ? LocalizationService().translate('show_less') : LocalizationService().translate('show_more'),
+                                expanded
+                                    ? LocalizationService().translate(
+                                        'show_less',
+                                      )
+                                    : LocalizationService().translate(
+                                        'show_more',
+                                      ),
                                 style: AppTypography.sans(
-                                  color: AppConstants.accentColor,
+                                  color: context.colors.accent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                   letterSpacing: 0.5,
@@ -98,9 +129,11 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                               ),
                               const SizedBox(width: 4),
                               Icon(
-                                expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                expanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
                                 size: 20,
-                                color: AppConstants.accentColor,
+                                color: context.colors.accent,
                               ),
                             ],
                           ),
@@ -113,9 +146,15 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                   child: IconButton(
                     icon: const Icon(Icons.copy_all, size: 20),
                     padding: const EdgeInsets.all(8),
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     onPressed: () {
-                      Clipboard.setData(ClipboardData(text: widget.description));
+                      Clipboard.setData(
+                        ClipboardData(
+                          text: MarkdownUtils.normalizeDescription(
+                            widget.description,
+                          ),
+                        ),
+                      );
                       AppSnackBar.show(
                         context,
                         LocalizationService().translate('description_copied'),

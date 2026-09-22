@@ -1,4 +1,4 @@
-﻿import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -12,9 +12,9 @@ import 'package:mangabaka_app/features/series/widgets/chips/has_anime_chip.dart'
 import 'package:mangabaka_app/features/series/widgets/chips/rating_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/chips/content_rating_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/id_chip.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesDetailHeader extends StatelessWidget {
   final Series series;
@@ -33,20 +33,22 @@ class SeriesDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = SettingsManager();
-    final preferredTitle = series.getDisplayTitle(settings.defaultTitleLanguage);
-    
+    final preferredTitle = series.getDisplayTitle(
+      settings.defaultTitleLanguage,
+    );
+
     // Determine which other titles to show
     final otherTitles = <String>[];
     if (series.title.isNotEmpty && series.title != preferredTitle) {
       otherTitles.add(series.title);
     }
-    if (series.nativeTitle.isNotEmpty && 
-        series.nativeTitle != preferredTitle && 
+    if (series.nativeTitle.isNotEmpty &&
+        series.nativeTitle != preferredTitle &&
         !otherTitles.contains(series.nativeTitle)) {
       otherTitles.add(series.nativeTitle);
     }
-    if (series.romanizedTitle.isNotEmpty && 
-        series.romanizedTitle != preferredTitle && 
+    if (series.romanizedTitle.isNotEmpty &&
+        series.romanizedTitle != preferredTitle &&
         !otherTitles.contains(series.romanizedTitle)) {
       otherTitles.add(series.romanizedTitle);
     }
@@ -79,23 +81,27 @@ class SeriesDetailHeader extends StatelessWidget {
                       text: preferredTitle,
                       style: Theme.of(context).textTheme.headlineSmall,
                       overflow: TextOverflow.ellipsis,
-                      onTap: () => Clipboard.setData(ClipboardData(text: preferredTitle)),
+                      onTap: () => Clipboard.setData(
+                        ClipboardData(text: preferredTitle),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IdChip(id: series.id),
                 ],
               ),
-              ...otherTitles.map((t) => Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: _HoverableTitleText(
-                  text: t,
-                  style: t == otherTitles.first 
-                    ? Theme.of(context).textTheme.bodyMedium
-                    : Theme.of(context).textTheme.bodySmall,
-                  onTap: () => Clipboard.setData(ClipboardData(text: t)),
+              ...otherTitles.map(
+                (t) => Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: _HoverableTitleText(
+                    text: t,
+                    style: t == otherTitles.first
+                        ? Theme.of(context).textTheme.bodyMedium
+                        : Theme.of(context).textTheme.bodySmall,
+                    onTap: () => Clipboard.setData(ClipboardData(text: t)),
+                  ),
                 ),
-              )),
+              ),
 
               const SizedBox(height: 8),
               Wrap(
@@ -181,8 +187,11 @@ class _HoverableTitleTextState extends State<_HoverableTitleText> {
           child: Text(
             widget.text,
             style: baseStyle.copyWith(
-              decoration: _hovered ? TextDecoration.underline : TextDecoration.none,
-              decorationColor: (baseStyle.color ?? AppConstants.textColor).withValues(alpha: 0.6),
+              decoration: _hovered
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+              decorationColor: (baseStyle.color ?? context.colors.text)
+                  .withValues(alpha: 0.6),
             ),
             overflow: widget.overflow,
           ),

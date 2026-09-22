@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The Trending block on Home: the "Rising the fastest" rail plus the content
 /// -type and time-window controls the web `/discover` page carries.
@@ -71,7 +72,7 @@ class HomeTrendingSection extends StatelessWidget {
                 width: 1,
                 height: 18,
                 margin: const EdgeInsets.fromLTRB(2, 8, 10, 8),
-                color: AppConstants.borderColor,
+                color: context.colors.border,
               ),
               _Pill(
                 label: '7d',
@@ -120,17 +121,15 @@ class _Pill extends StatelessWidget {
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
-          color: selected
-              ? AppConstants.accentColor
-              : AppConstants.secondaryBackground,
+          color: selected ? context.colors.accent : context.colors.surface,
           borderRadius: BorderRadius.circular(AppConstants.pillRadius),
         ),
         child: Text(
           label,
           style: AppTypography.sans(
             color: selected
-                ? AppConstants.onAccent
-                : AppConstants.textMutedColor,
+                ? context.colors.onAccent
+                : context.colors.textMuted,
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
           ),

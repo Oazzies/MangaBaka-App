@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The accent icon + uppercase display title that heads each Mix section, with
 /// an optional muted trailing note.
@@ -31,12 +31,12 @@ class MixSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: AppConstants.accentColor, size: 20),
+        Icon(icon, color: context.colors.accent, size: 20),
         const SizedBox(width: 8),
         Text(
           title.toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 16,
             letterSpacing: -0.3,
           ),
@@ -46,10 +46,11 @@ class MixSectionHeader extends StatelessWidget {
           Text(
             trailing!,
             style: AppTypography.sans(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: trailingFontSize,
-              fontWeight:
-                  trailingFontSize > 12 ? FontWeight.w600 : FontWeight.normal,
+              fontWeight: trailingFontSize > 12
+                  ? FontWeight.w600
+                  : FontWeight.normal,
             ),
           ),
         ],

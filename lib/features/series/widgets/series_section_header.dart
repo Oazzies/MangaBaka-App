@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesSectionHeader extends StatelessWidget {
   final String title;
@@ -20,7 +20,7 @@ class SeriesSectionHeader extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: AppTypography.monoLabel(
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
           fontSize: 11.5,
         ),
       ),

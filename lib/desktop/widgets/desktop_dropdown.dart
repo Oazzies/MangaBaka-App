@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class DesktopDropdownItem<T> {
   final T value;
@@ -35,13 +36,13 @@ class DesktopDropdown<T> extends StatefulWidget {
   final T? selected;
   final ValueChanged<T> onSelected;
 
-  /// Custom background color for the button. Defaults to [AppConstants.tertiaryBackground].
+  /// Custom background color for the button. Defaults to [context.colors.surfaceRaised].
   final Color? backgroundColor;
 
-  /// Custom text & icon color for the button. Defaults to [AppConstants.textColor].
+  /// Custom text & icon color for the button. Defaults to [context.colors.text].
   final Color? foregroundColor;
 
-  /// Custom background color for the dropdown menu. Defaults to [AppConstants.secondaryBackground].
+  /// Custom background color for the dropdown menu. Defaults to [context.colors.surface].
   final Color? menuBackgroundColor;
 
   /// Optional border for the button itself. Defaults to null.
@@ -127,7 +128,7 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
         openUpward: openUpward,
         items: widget.items,
         selected: widget.selected,
-        backgroundColor: widget.menuBackgroundColor ?? AppConstants.secondaryBackground,
+        backgroundColor: widget.menuBackgroundColor ?? context.colors.surface,
         minWidth: widget.minWidth,
         onSelected: (val) {
           _closeMenu();
@@ -153,9 +154,10 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = widget.backgroundColor ?? AppConstants.tertiaryBackground;
-    final fg = widget.foregroundColor ?? AppConstants.textColor;
-    final hoverBg = Color.lerp(bg, AppConstants.borderColor, 0.45) ?? AppConstants.borderColor;
+    final bg = widget.backgroundColor ?? context.colors.surfaceRaised;
+    final fg = widget.foregroundColor ?? context.colors.text;
+    final hoverBg =
+        Color.lerp(bg, context.colors.border, 0.45) ?? context.colors.border;
 
     final displayText = (widget.label != null && widget.label!.isNotEmpty)
         ? '${widget.label} · ${widget.valueLabel}'
@@ -175,13 +177,17 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
             padding: widget.padding,
             decoration: BoxDecoration(
               color: _isOpen
-                  ? (widget.backgroundColor != null ? bg : AppConstants.borderColor)
+                  ? (widget.backgroundColor != null
+                        ? bg
+                        : context.colors.border)
                   : (_isHovered ? hoverBg : bg),
               borderRadius: BorderRadius.circular(widget.radius),
               border: widget.border,
             ),
             child: Row(
-              mainAxisSize: widget.width != null ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisSize: widget.width != null
+                  ? MainAxisSize.max
+                  : MainAxisSize.min,
               children: [
                 if (widget.leading != null) ...[
                   widget.leading!,
@@ -196,10 +202,7 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
                       displayText.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.display(
-                        color: fg,
-                        fontSize: 12.5,
-                      ),
+                      style: AppTypography.display(color: fg, fontSize: 12.5),
                     ),
                   )
                 else
@@ -207,10 +210,7 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
                     displayText.toUpperCase(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.display(
-                      color: fg,
-                      fontSize: 12.5,
-                    ),
+                    style: AppTypography.display(color: fg, fontSize: 12.5),
                   ),
                 const SizedBox(width: 8),
                 AnimatedRotation(
@@ -330,13 +330,10 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
                   decoration: BoxDecoration(
                     color: widget.backgroundColor,
                     borderRadius: menuRadius,
-                    border: Border.all(
-                      color: AppConstants.borderColor,
-                      width: 1,
-                    ),
+                    border: Border.all(color: context.colors.border, width: 1),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.5),
+                        color: context.colors.shadowAt(0.5),
                         blurRadius: 18,
                         offset: Offset(0, widget.openUpward ? -8 : 8),
                       ),
@@ -394,7 +391,7 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
   Widget build(BuildContext context) {
     final isSelected = widget.isSelected;
     final item = widget.item;
-    final activeColor = item.iconColor ?? AppConstants.accentColor;
+    final activeColor = item.iconColor ?? context.colors.accent;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -409,8 +406,8 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
             color: isSelected
                 ? activeColor.withValues(alpha: 0.14)
                 : (_hovered
-                    ? AppConstants.tertiaryBackground
-                    : Colors.transparent),
+                      ? context.colors.surfaceRaised
+                      : Colors.transparent),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -422,10 +419,9 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
                 Icon(
                   item.icon,
                   size: 17,
-                  color: item.iconColor ??
-                      (isSelected
-                          ? activeColor
-                          : AppConstants.textMutedColor),
+                  color:
+                      item.iconColor ??
+                      (isSelected ? activeColor : context.colors.textMuted),
                 ),
                 const SizedBox(width: 10),
               ],
@@ -435,9 +431,7 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.sans(
-                    color: isSelected
-                        ? activeColor
-                        : AppConstants.textColor,
+                    color: isSelected ? activeColor : context.colors.text,
                     fontSize: 13.5,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
@@ -448,11 +442,7 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
                 item.trailing!,
               ] else if (isSelected) ...[
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.check_rounded,
-                  size: 16,
-                  color: activeColor,
-                ),
+                Icon(Icons.check_rounded, size: 16, color: activeColor),
               ],
             ],
           ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A top-level settings category.
 ///
@@ -32,7 +32,7 @@ class SettingsCategoryRow extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 18, 16, 18),
         child: Row(
           children: [
-            Icon(icon, color: AppConstants.textMutedColor, size: 22),
+            Icon(icon, color: context.colors.textMuted, size: 22),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -41,7 +41,7 @@ class SettingsCategoryRow extends StatelessWidget {
                   Text(
                     title.toUpperCase(),
                     style: AppTypography.display(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 16,
                     ),
                   ),
@@ -49,7 +49,7 @@ class SettingsCategoryRow extends StatelessWidget {
                   Text(
                     subtitle,
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 13,
                       height: 1.35,
                     ),
@@ -60,7 +60,7 @@ class SettingsCategoryRow extends StatelessWidget {
             const SizedBox(width: 10),
             Icon(
               Icons.arrow_forward_rounded,
-              color: AppConstants.accentColor,
+              color: context.colors.accent,
               size: 20,
             ),
           ],

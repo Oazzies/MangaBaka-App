@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 class SelectionBottomSheet {
@@ -24,7 +25,7 @@ class SelectionBottomSheet {
             maxHeight: MediaQuery.of(context).size.height * 0.8,
           ),
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: dialogContext.colors.surface,
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(AppConstants.largeRadius),
             ),
@@ -39,7 +40,7 @@ class SelectionBottomSheet {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppConstants.tertiaryBackground,
+                    color: dialogContext.colors.surfaceRaised,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -48,7 +49,7 @@ class SelectionBottomSheet {
               Text(
                 title.toUpperCase(),
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: dialogContext.colors.text,
                   fontSize: 19,
                 ),
               ),
@@ -56,7 +57,7 @@ class SelectionBottomSheet {
               Text(
                 subtitle,
                 style: AppTypography.sans(
-                  color: AppConstants.textMutedColor,
+                  color: dialogContext.colors.textMuted,
                   fontSize: 13,
                 ),
               ),
@@ -121,8 +122,8 @@ class SelectionBottomSheet {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppConstants.accentColor.withValues(alpha: 0.14)
-              : AppConstants.tertiaryBackground,
+              ? context.colors.accent.withValues(alpha: 0.14)
+              : context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppConstants.denseRadius),
         ),
         child: Row(
@@ -132,8 +133,8 @@ class SelectionBottomSheet {
                 getLabel(option),
                 style: AppTypography.sans(
                   color: isSelected
-                      ? AppConstants.accentColor
-                      : AppConstants.textColor,
+                      ? context.colors.accent
+                      : context.colors.text,
                   fontSize: 15,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
@@ -149,7 +150,7 @@ class SelectionBottomSheet {
                   ? Icon(
                       Icons.check_circle_rounded,
                       key: const ValueKey('checked'),
-                      color: AppConstants.accentColor,
+                      color: context.colors.accent,
                       size: 22,
                     )
                   : const SizedBox(

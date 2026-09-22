@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A frosted-glass control floating on the series banner: a labelled pill for
 /// "Back", or a circular icon button for share and delete.
@@ -60,7 +60,7 @@ class GlassControl extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: label == null ? 0 : 14),
       decoration: BoxDecoration(
         color: showBg
-            ? AppConstants.secondaryBackground.withValues(alpha: 0.55)
+            ? context.colors.surface.withValues(alpha: 0.55)
             : Colors.transparent,
         borderRadius: _radius,
       ),
@@ -68,7 +68,7 @@ class GlassControl extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: iconSize, color: AppConstants.textColor),
+          Icon(icon, size: iconSize, color: context.colors.text),
           if (label != null) ...[
             const SizedBox(width: 6),
             Flexible(
@@ -76,7 +76,7 @@ class GlassControl extends StatelessWidget {
                 label!,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.sans(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),

@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 enum TriState { off, include, exclude }
 
@@ -19,23 +20,23 @@ class TriStateChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color? backgroundColor;
-    Color textColor = AppConstants.textColor;
+    Color textColor = context.colors.text;
     IconData? icon;
 
     switch (state) {
       case TriState.include:
-        backgroundColor = AppConstants.accentColor.withValues(alpha: 0.2);
-        textColor = AppConstants.accentColor;
+        backgroundColor = context.colors.accent.withValues(alpha: 0.2);
+        textColor = context.colors.accent;
         icon = Icons.check;
         break;
       case TriState.exclude:
-        backgroundColor = AppConstants.errorColor.withValues(alpha: 0.2);
-        textColor = AppConstants.errorColor;
+        backgroundColor = context.colors.error.withValues(alpha: 0.2);
+        textColor = context.colors.error;
         icon = Icons.close;
         break;
       case TriState.off:
-        backgroundColor = AppConstants.borderColor.withValues(alpha: 0.25);
-        textColor = AppConstants.textMutedColor;
+        backgroundColor = context.colors.border.withValues(alpha: 0.25);
+        textColor = context.colors.textMuted;
         icon = null;
         break;
     }

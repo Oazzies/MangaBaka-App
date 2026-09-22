@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class MBSearchBarSuffix extends StatelessWidget {
   final String controllerText;
   final VoidCallback onClear;
   final VoidCallback? onScanTap;
+
   /// Null hides the filter button.
   final VoidCallback? onFilterTap;
   final SearchFilters currentFilters;
@@ -33,7 +34,7 @@ class MBSearchBarSuffix extends StatelessWidget {
             WidgetUtils.tooltip(
               message: LocalizationService().translate('reset'),
               child: IconButton(
-                icon: Icon(Icons.clear, color: AppConstants.textColor),
+                icon: Icon(Icons.clear, color: context.colors.text),
                 onPressed: onClear,
                 constraints: const BoxConstraints(),
               ),
@@ -44,10 +45,7 @@ class MBSearchBarSuffix extends StatelessWidget {
             WidgetUtils.tooltip(
               message: LocalizationService().translate('scan_isbn_barcode'),
               child: IconButton(
-                icon: Icon(
-                  Icons.qr_code_scanner,
-                  color: AppConstants.textColor,
-                ),
+                icon: Icon(Icons.qr_code_scanner, color: context.colors.text),
                 onPressed: onScanTap,
                 constraints: const BoxConstraints(),
               ),
@@ -55,19 +53,19 @@ class MBSearchBarSuffix extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           if (onFilterTap != null)
-          WidgetUtils.tooltip(
-            message: LocalizationService().translate('filters'),
-            child: IconButton(
-              icon: Icon(
-                Icons.filter_list,
-                color: currentFilters.toMap().isNotEmpty
-                    ? AppConstants.accentColor
-                    : AppConstants.textColor,
+            WidgetUtils.tooltip(
+              message: LocalizationService().translate('filters'),
+              child: IconButton(
+                icon: Icon(
+                  Icons.filter_list,
+                  color: currentFilters.toMap().isNotEmpty
+                      ? context.colors.accent
+                      : context.colors.text,
+                ),
+                onPressed: onFilterTap,
+                constraints: const BoxConstraints(),
               ),
-              onPressed: onFilterTap,
-              constraints: const BoxConstraints(),
             ),
-          ),
         ],
       ),
     );

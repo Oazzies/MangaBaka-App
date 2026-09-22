@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -23,6 +22,7 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Browse on desktop: filters in a permanent left panel, the search field and
 /// result controls across the top, and results filling the rest.
@@ -103,8 +103,9 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
   void _openMix() =>
       Navigator.of(context).push(AppTransitions.slideRight(const MixScreen()));
 
-  void _openDiscoveryQueue() => Navigator.of(context)
-      .push(AppTransitions.slideRight(const DiscoveryQueueScreen()));
+  void _openDiscoveryQueue() => Navigator.of(
+    context,
+  ).push(AppTransitions.slideRight(const DiscoveryQueueScreen()));
 
   void _onResultSelected(AutocompleteSeriesResult result) =>
       _openDetail(BrowseHelpers.convertAutocompleteToSeries(result));
@@ -157,11 +158,11 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                         child: FloatingActionButton.small(
                           heroTag: 'desktop_browse_top',
                           tooltip: l10n.translate('back_to_top'),
-                          backgroundColor: AppConstants.accentColor,
+                          backgroundColor: context.colors.accent,
                           onPressed: _controller.scrollToTop,
                           child: Icon(
                             Icons.arrow_upward_rounded,
-                            color: AppConstants.onAccent,
+                            color: context.colors.onAccent,
                           ),
                         ),
                       ),
@@ -218,7 +219,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
               final titleText = Text(
                 l10n.translate('browse').toUpperCase(),
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 30,
                 ),
               );
@@ -277,7 +278,11 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                       value: c.currentType,
                       segments: [
                         (BrowseType.series, l10n.translate('series'), null),
-                        (BrowseType.publishers, l10n.translate('publishers'), null),
+                        (
+                          BrowseType.publishers,
+                          l10n.translate('publishers'),
+                          null,
+                        ),
                         (BrowseType.staff, l10n.translate('staff'), null),
                       ],
                       onChanged: c.setType,
@@ -288,7 +293,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                       '${c.totalResults}${c.isTotalCapped ? '+' : ''} '
                       '${l10n.translate(c.currentType.name)}',
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -306,7 +311,9 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                           onChanged: c.updateFilters,
                         ),
                         const SizedBox(width: 10),
-                        const DesktopListStyleToggle(scope: DesktopListScope.browse),
+                        const DesktopListStyleToggle(
+                          scope: DesktopListScope.browse,
+                        ),
                       ],
                     )
                   : null;

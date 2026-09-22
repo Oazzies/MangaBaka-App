@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// What Browse shows before anything is searched: Mix as a feature card, then
 /// one card per content type with its three ready-made lists.
@@ -58,11 +58,7 @@ class DesktopBrowseLanding extends StatelessWidget {
               );
             }
             return Column(
-              children: [
-                queueCard,
-                const SizedBox(height: 12),
-                mixCard,
-              ],
+              children: [queueCard, const SizedBox(height: 12), mixCard],
             );
           },
         ),
@@ -119,8 +115,8 @@ class _DiscoveryQueueCard extends StatelessWidget {
     final l10n = LocalizationService();
     return DesktopHoverSurface(
       onTap: onTap,
-      idleColor: AppConstants.secondaryBackground,
-      hoverColor: AppConstants.tertiaryBackground,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.fromLTRB(30, 26, 26, 26),
       child: Row(
@@ -131,16 +127,16 @@ class _DiscoveryQueueCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.auto_awesome_rounded,
                       size: 20,
-                      color: AppConstants.accentColor,
+                      color: context.colors.accent,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       l10n.translate('discovery_queue').toUpperCase(),
                       style: AppTypography.display(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 24,
                       ),
                     ),
@@ -150,7 +146,7 @@ class _DiscoveryQueueCard extends StatelessWidget {
                 Text(
                   l10n.translate('discovery_queue_subtitle'),
                   style: AppTypography.sans(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontSize: 14.5,
                   ),
                 ),
@@ -178,8 +174,8 @@ class _MixCard extends StatelessWidget {
     final l10n = LocalizationService();
     return DesktopHoverSurface(
       onTap: onTap,
-      idleColor: AppConstants.secondaryBackground,
-      hoverColor: AppConstants.tertiaryBackground,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.fromLTRB(30, 26, 26, 26),
       child: Row(
@@ -191,7 +187,7 @@ class _MixCard extends StatelessWidget {
                 Text(
                   l10n.translate('mix').toUpperCase(),
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 24,
                   ),
                 ),
@@ -199,7 +195,7 @@ class _MixCard extends StatelessWidget {
                 Text(
                   l10n.translate('mix_subtitle'),
                   style: AppTypography.sans(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontSize: 14.5,
                   ),
                 ),
@@ -246,24 +242,15 @@ class _TypeCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 18,
               ),
             ),
           ),
           const SizedBox(height: 10),
-          _Link(
-            label: l10n.translate('most_popular'),
-            onTap: onPopular,
-          ),
-          _Link(
-            label: l10n.translate('top_rated'),
-            onTap: onTopRated,
-          ),
-          _Link(
-            label: l10n.translate('random'),
-            onTap: onRandom,
-          ),
+          _Link(label: l10n.translate('most_popular'), onTap: onPopular),
+          _Link(label: l10n.translate('top_rated'), onTap: onTopRated),
+          _Link(label: l10n.translate('random'), onTap: onRandom),
         ],
       ),
     );
@@ -274,10 +261,7 @@ class _Link extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _Link({
-    required this.label,
-    required this.onTap,
-  });
+  const _Link({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +277,7 @@ class _Link extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.sans(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -302,7 +286,7 @@ class _Link extends StatelessWidget {
           Icon(
             Icons.chevron_right_rounded,
             size: 18,
-            color: AppConstants.textMutedColor,
+            color: context.colors.textMuted,
           ),
         ],
       ),

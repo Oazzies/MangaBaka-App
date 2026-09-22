@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
@@ -7,6 +6,7 @@ import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The Browse screen's app bar, in its two states: the title with its actions,
 /// and the search field that replaces them.
@@ -71,15 +71,12 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: true,
       leading: IconButton(
-        icon: Icon(Icons.search, color: AppConstants.textColor),
+        icon: Icon(Icons.search, color: context.colors.text),
         onPressed: onEnterSearch,
       ),
       title: Text(
         LocalizationService().translate('browse').toUpperCase(),
-        style: AppTypography.display(
-          color: AppConstants.textColor,
-          fontSize: 20,
-        ),
+        style: AppTypography.display(color: context.colors.text, fontSize: 20),
       ),
       actions: [
         IconButton(
@@ -119,13 +116,13 @@ class BrowseResultCount extends StatelessWidget {
           Icon(
             Icons.article_outlined,
             size: 14,
-            color: AppConstants.textMutedColor,
+            color: context.colors.textMuted,
           ),
           const SizedBox(width: 6),
           Text(
             '$total${isCapped ? '+' : ''} $typeLabel',
             style: AppTypography.sans(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.0,

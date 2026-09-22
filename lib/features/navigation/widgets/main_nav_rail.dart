@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_nav.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The vertical navigation rail used on tablet-width landscape windows,
 /// complete with its logo and settings button.
@@ -36,7 +37,7 @@ class MainNavRail extends StatelessWidget {
 
     return Container(
       width: _width,
-      color: AppConstants.primaryBackground,
+      color: context.colors.background,
       child: SafeArea(
         // Only the outward edge needs the inset; the inward one meets the
         // content divider, not the screen edge.
@@ -62,7 +63,7 @@ class NavRailDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, color: AppConstants.borderColor);
+    return Container(width: 1, color: context.colors.border);
   }
 }
 
@@ -77,7 +78,7 @@ class _RailLogo extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppConstants.accentColor.withValues(alpha: 0.12),
+            color: context.colors.accent.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(AppConstants.denseRadius),
           ),
           child: Image.asset('assets/mangabaka512.png', width: 36, height: 36),
@@ -100,7 +101,7 @@ class _SettingsButton extends StatelessWidget {
       child: IconButton(
         icon: const Icon(Icons.settings_outlined),
         onPressed: () => SettingsScreen.show(context),
-        color: AppConstants.textMutedColor,
+        color: context.colors.textMuted,
       ),
     );
   }

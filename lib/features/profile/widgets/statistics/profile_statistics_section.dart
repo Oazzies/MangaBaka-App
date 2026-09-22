@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/statistics/statistic_card.dart';
 import 'package:mangabaka_app/features/profile/screens/statistics_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ProfileStatisticsSection extends StatelessWidget {
   final int totalSeries;
@@ -31,7 +31,7 @@ class ProfileStatisticsSection extends StatelessWidget {
             Text(
               l10n.translate('at_a_glance').toUpperCase(),
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 20,
               ),
             ),
@@ -47,7 +47,7 @@ class ProfileStatisticsSection extends StatelessWidget {
               child: Text(
                 l10n.translate('see_more_stats'),
                 style: AppTypography.sans(
-                  color: AppConstants.accentColor,
+                  color: context.colors.accent,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -57,7 +57,7 @@ class ProfileStatisticsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           l10n.translate('overview_desc'),
-          style: AppTypography.sans(color: AppConstants.textMutedColor),
+          style: AppTypography.sans(color: context.colors.textMuted),
         ),
         const SizedBox(height: 16),
         Row(

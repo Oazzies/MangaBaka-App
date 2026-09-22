@@ -1,10 +1,11 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
@@ -16,7 +17,10 @@ class BarcodeScannerScreen extends StatefulWidget {
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   static final _logger = LoggingService.logger;
   final MobileScannerController _scannerController = MobileScannerController(
-    formats: const [BarcodeFormat.ean13, BarcodeFormat.ean8], // ISBNs are usually EAN-13
+    formats: const [
+      BarcodeFormat.ean13,
+      BarcodeFormat.ean8,
+    ], // ISBNs are usually EAN-13
   );
 
   bool _isScanned = false;
@@ -50,7 +54,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       builder: (context, _) {
         final l10n = LocalizationService();
         return Scaffold(
-          backgroundColor: Colors.black,
+          backgroundColor: FixedColors.imageScrim,
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
@@ -59,9 +63,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             title: Text(l10n.translate('scan_isbn_barcode').toUpperCase()),
             backgroundColor: Colors.transparent,
             elevation: 0,
-            iconTheme: IconThemeData(color: AppConstants.textColor),
+            iconTheme: IconThemeData(color: context.colors.text),
             titleTextStyle: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 18,
             ),
           ),
@@ -77,7 +81,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                   width: 300,
                   height: 150, // Typical proportion for 1D barcodes like ISBN
                   decoration: BoxDecoration(
-                    border: Border.all(color: AppConstants.accentColor, width: 2),
+                    border: Border.all(color: context.colors.accent, width: 2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -88,14 +92,20 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 right: 0,
                 child: Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.black54,
+                      color: FixedColors.imageScrim.withValues(alpha: 0.54),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       l10n.translate('align_barcode'),
-                      style: AppTypography.sans(color: Colors.white, fontSize: 16),
+                      style: AppTypography.sans(
+                        color: FixedColors.onImage,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),

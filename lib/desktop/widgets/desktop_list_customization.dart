@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -10,6 +9,7 @@ import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_
 import 'package:mangabaka_app/features/profile/widgets/dialogs/list_style_dialogs.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_scope.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The "List customization" settings page, laid out for a wide pane.
 ///
@@ -95,8 +95,16 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
               child: DesktopSegmented<ListScopeTab>(
                 value: _tab,
                 segments: [
-                  (ListScopeTab.library, _l10n.translate('start_page_library'), null),
-                  (ListScopeTab.browse, _l10n.translate('start_page_browse'), null),
+                  (
+                    ListScopeTab.library,
+                    _l10n.translate('start_page_library'),
+                    null,
+                  ),
+                  (
+                    ListScopeTab.browse,
+                    _l10n.translate('start_page_browse'),
+                    null,
+                  ),
                 ],
                 onChanged: (tab) => setState(() => _tab = tab),
               ),
@@ -248,7 +256,9 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
                   alignment: Alignment.centerLeft,
                   child: DesktopPillButton(
                     label: _l10n.translate(
-                      scope.tab.isLibrary ? 'copy_to_browse' : 'copy_to_library',
+                      scope.tab.isLibrary
+                          ? 'copy_to_browse'
+                          : 'copy_to_library',
                     ),
                     icon: Icons.copy_all_outlined,
                     onPressed: () {
@@ -367,7 +377,7 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
 
   Widget _cardTitle(String title) => Text(
     title.toUpperCase(),
-    style: AppTypography.display(color: AppConstants.textColor, fontSize: 15),
+    style: AppTypography.display(color: context.colors.text, fontSize: 15),
   );
 }
 
@@ -390,9 +400,9 @@ class _StyleTile extends StatelessWidget {
     return DesktopHoverSurface(
       onTap: onTap,
       selected: selected,
-      selectedColor: AppConstants.accentColor.withValues(alpha: 0.14),
-      idleColor: AppConstants.tertiaryBackground,
-      hoverColor: AppConstants.borderColor,
+      selectedColor: context.colors.accent.withValues(alpha: 0.14),
+      idleColor: context.colors.surfaceRaised,
+      hoverColor: context.colors.border,
       borderRadius: BorderRadius.circular(14),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 16),
       child: Column(
@@ -400,9 +410,7 @@ class _StyleTile extends StatelessWidget {
           Icon(
             style.icon,
             size: 26,
-            color: selected
-                ? AppConstants.accentColor
-                : AppConstants.textMutedColor,
+            color: selected ? context.colors.accent : context.colors.textMuted,
           ),
           const SizedBox(height: 10),
           Text(
@@ -411,9 +419,7 @@ class _StyleTile extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.sans(
-              color: selected
-                  ? AppConstants.textColor
-                  : AppConstants.textMutedColor,
+              color: selected ? context.colors.text : context.colors.textMuted,
               fontSize: 12,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             ),
@@ -457,14 +463,14 @@ class _StepperRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 24,
-          child: Icon(icon, color: AppConstants.textMutedColor, size: 20),
+          child: Icon(icon, color: context.colors.textMuted, size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: Text(
             label.toUpperCase(),
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 14,
             ),
           ),
@@ -481,7 +487,7 @@ class _StepperRow extends StatelessWidget {
           child: Text(
             display,
             style: AppTypography.sans(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),

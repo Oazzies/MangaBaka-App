@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_scope.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The Library / Browse switch at the top of the list customization panel.
 ///
@@ -32,12 +32,9 @@ class ListScopeTabSelector extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 16),
           height: 38,
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              color: AppConstants.tertiaryBackground,
-              width: 1.5,
-            ),
+            border: Border.all(color: context.colors.surfaceRaised, width: 1.5),
           ),
           child: Stack(
             children: [
@@ -51,7 +48,7 @@ class ListScopeTabSelector extends StatelessWidget {
                   width: constraints.maxWidth / 2,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: AppConstants.accentColor,
+                    color: context.colors.accent,
                     borderRadius: BorderRadius.circular(25),
                   ),
                 ),
@@ -103,9 +100,7 @@ class _Tab extends StatelessWidget {
             style: AppTypography.sans(
               // The active label sits on the accent pill, so it inverts to the
               // page background colour to stay readable.
-              color: isActive
-                  ? AppConstants.primaryBackground
-                  : AppConstants.textColor,
+              color: isActive ? context.colors.background : context.colors.text,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),

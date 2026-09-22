@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_root_groups.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// One page on the dialog's internal stack.
 class SettingsDialogPage {
@@ -83,7 +84,7 @@ class SettingsDialogState extends State<SettingsDialog> {
             popCategory();
           },
           child: Dialog(
-            backgroundColor: AppConstants.primaryBackground,
+            backgroundColor: context.colors.background,
             insetPadding: const EdgeInsets.symmetric(
               horizontal: 48,
               vertical: 32,
@@ -200,7 +201,7 @@ class _Shell extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: onBack,
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
@@ -211,7 +212,7 @@ class _Shell extends StatelessWidget {
                   title.toUpperCase(),
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.display(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: titleFontSize,
                     letterSpacing: onBack == null ? -0.5 : null,
                   ),
@@ -220,14 +221,14 @@ class _Shell extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: onClose,
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 padding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
               ),
             ],
           ),
         ),
-        Divider(height: 1, color: AppConstants.borderColor),
+        Divider(height: 1, color: context.colors.border),
         Flexible(
           child: SingleChildScrollView(
             padding: EdgeInsets.only(

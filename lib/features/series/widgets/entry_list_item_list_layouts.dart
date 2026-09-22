@@ -1,10 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class MinimalListItem extends StatelessWidget {
   final Series series;
@@ -26,14 +26,18 @@ class MinimalListItem extends StatelessWidget {
         height: 64,
         child: Row(
           children: [
-            EntryListLayoutHelper.buildCoverImage(series: series, heroTagPrefix: heroTagPrefix, width: 48),
+            EntryListLayoutHelper.buildCoverImage(
+              series: series,
+              heroTagPrefix: heroTagPrefix,
+              width: 48,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(left: 12, right: 110),
                 child: Text(
                   displayTitle,
                   style: AppTypography.sans(
-                    color: AppConstants.textColor,
+                    color: context.colors.text,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -71,10 +75,19 @@ class CompactListItem extends StatelessWidget {
         height: 84,
         child: Row(
           children: [
-            EntryListLayoutHelper.buildCoverImage(series: series, heroTagPrefix: heroTagPrefix, width: 60),
+            EntryListLayoutHelper.buildCoverImage(
+              series: series,
+              heroTagPrefix: heroTagPrefix,
+              width: 60,
+            ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 12, right: 110, top: 10, bottom: 10),
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  right: 110,
+                  top: 10,
+                  bottom: 10,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -82,7 +95,7 @@ class CompactListItem extends StatelessWidget {
                     Text(
                       displayTitle,
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -93,7 +106,7 @@ class CompactListItem extends StatelessWidget {
                     Text(
                       '${l10n.translate('type_${series.type.toLowerCase()}')} · ${l10n.translate('status_${series.status.toLowerCase()}')} · ${series.year}',
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                       ),
                       maxLines: 1,
@@ -134,10 +147,19 @@ class ComfortableListItem extends StatelessWidget {
         height: 100,
         child: Row(
           children: [
-            EntryListLayoutHelper.buildCoverImage(series: series, heroTagPrefix: heroTagPrefix, width: 72),
+            EntryListLayoutHelper.buildCoverImage(
+              series: series,
+              heroTagPrefix: heroTagPrefix,
+              width: 72,
+            ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 12, right: 115, top: 10, bottom: 10),
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  right: 115,
+                  top: 10,
+                  bottom: 10,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +167,7 @@ class ComfortableListItem extends StatelessWidget {
                     Text(
                       displayTitle,
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -156,7 +178,7 @@ class ComfortableListItem extends StatelessWidget {
                     Text(
                       '${l10n.translate('type_${series.type.toLowerCase()}')} · ${l10n.translate('status_${series.status.toLowerCase()}')} · ${series.year}',
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                       ),
                       maxLines: 1,

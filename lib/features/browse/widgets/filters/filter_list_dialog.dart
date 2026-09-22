@@ -1,8 +1,8 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/tri_state_chip.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_item.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class FilterListDialog extends StatefulWidget {
   final String title;
@@ -69,13 +69,13 @@ class _FilterListDialogState extends State<FilterListDialog> {
     filteredItems.sort((a, b) {
       final idA = a[widget.idKey]?.toString() ?? '';
       final idB = b[widget.idKey]?.toString() ?? '';
-      
+
       final stateA = _getTriState(idA);
       final stateB = _getTriState(idB);
-      
+
       final isSelectedA = stateA != TriState.off;
       final isSelectedB = stateB != TriState.off;
-      
+
       if (isSelectedA && !isSelectedB) {
         return -1;
       } else if (!isSelectedA && isSelectedB) {
@@ -85,12 +85,14 @@ class _FilterListDialogState extends State<FilterListDialog> {
     });
 
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final double? containerHeight = widget.showSearch ? MediaQuery.of(context).size.height * 0.8 : null;
+    final double? containerHeight = widget.showSearch
+        ? MediaQuery.of(context).size.height * 0.8
+        : null;
 
     return Container(
       height: containerHeight,
       decoration: BoxDecoration(
-        color: AppConstants.primaryBackground,
+        color: context.colors.background,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(bottom: bottomPadding),
@@ -103,7 +105,9 @@ class _FilterListDialogState extends State<FilterListDialog> {
           Flexible(
             child: ListView.separated(
               shrinkWrap: !widget.showSearch,
-              physics: widget.showSearch ? null : const NeverScrollableScrollPhysics(),
+              physics: widget.showSearch
+                  ? null
+                  : const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               itemCount: filteredItems.length,
               separatorBuilder: (context, index) => _buildDivider(),
@@ -116,8 +120,14 @@ class _FilterListDialogState extends State<FilterListDialog> {
                 return FilterListItem(
                   name: name,
                   state: state,
-                  onToggleInclude: () => _updateTriState(id, state == TriState.include ? TriState.off : TriState.include),
-                  onToggleExclude: () => _updateTriState(id, state == TriState.exclude ? TriState.off : TriState.exclude),
+                  onToggleInclude: () => _updateTriState(
+                    id,
+                    state == TriState.include ? TriState.off : TriState.include,
+                  ),
+                  onToggleExclude: () => _updateTriState(
+                    id,
+                    state == TriState.exclude ? TriState.off : TriState.exclude,
+                  ),
                 );
               },
             ),
@@ -133,7 +143,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
         width: 32,
         height: 4,
         decoration: BoxDecoration(
-          color: AppConstants.tertiaryBackground,
+          color: context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -142,7 +152,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: widget.showSearch 
+      padding: widget.showSearch
           ? const EdgeInsets.fromLTRB(24, 20, 24, 16)
           : const EdgeInsets.fromLTRB(24, 20, 24, 8),
       child: Column(
@@ -151,26 +161,42 @@ class _FilterListDialogState extends State<FilterListDialog> {
           Text(
             widget.title,
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 18,
             ),
           ),
           if (widget.showSearch) ...[
             const SizedBox(height: 16),
             TextField(
-              style: AppTypography.sans(color: AppConstants.textColor),
+              style: AppTypography.sans(color: context.colors.text),
               decoration: InputDecoration(
                 hintText: 'Search ${widget.title.toLowerCase()}...',
-                hintStyle: AppTypography.sans(color: AppConstants.textMutedColor, fontSize: 15),
-                prefixIcon: Icon(Icons.search, color: AppConstants.textMutedColor, size: 20),
+                hintStyle: AppTypography.sans(
+                  color: context.colors.textMuted,
+                  fontSize: 15,
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: context.colors.textMuted,
+                  size: 20,
+                ),
                 filled: true,
-                fillColor: AppConstants.secondaryBackground,
+                fillColor: context.colors.surface,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: AppConstants.accentColor.withValues(alpha: 0.3), width: 1),
+                  borderSide: BorderSide(
+                    color: context.colors.accent.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
                 ),
               ),
               onChanged: (val) => setState(() => _searchQuery = val),
@@ -184,10 +210,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Divider(
-        color: AppConstants.tertiaryBackground,
-        height: 1,
-      ),
+      child: Divider(color: context.colors.surfaceRaised, height: 1),
     );
   }
 }

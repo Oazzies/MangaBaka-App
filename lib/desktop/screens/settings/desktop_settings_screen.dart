@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -12,6 +13,7 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/widgets/design/github_logo.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_list_customization.dart';
+import 'package:mangabaka_app/desktop/screens/settings/desktop_appearance_page.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -20,6 +22,7 @@ import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dar
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Settings as a real page on desktop: categories down the left,
 /// inline desktop-native controls (dropdowns, switches, chips) on the right.
@@ -36,6 +39,7 @@ class DesktopSettingsScreen extends StatefulWidget {
 /// In the order the pages sit "down the page": switching to a later one
 /// scrolls down to it, to an earlier one scrolls up.
 enum _Category {
+  appearance,
   general,
   lists,
   content,
@@ -93,45 +97,51 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       _selected == _Category.logs ? _Category.advanced : _selected;
 
   (IconData, Color, String, String) _describe(_Category c) => switch (c) {
+    _Category.appearance => (
+      Icons.palette_outlined,
+      context.colors.accent,
+      'appearance',
+      'appearance_subtitle',
+    ),
     _Category.general => (
       Icons.tune_rounded,
-      AppConstants.textColor,
+      context.colors.text,
       'general',
       'general_settings_subtitle',
     ),
     _Category.lists => (
       Icons.grid_view_rounded,
-      AppConstants.infoColor,
+      context.colors.info,
       'list_customization',
       'list_customization_subtitle',
     ),
     _Category.content => (
       Icons.library_books_outlined,
-      AppConstants.starColor,
+      context.colors.star,
       'content',
       'library_settings_subtitle',
     ),
     _Category.account => (
       Icons.person_outline_rounded,
-      AppConstants.accentColor,
+      context.colors.accent,
       'account',
       'account_settings_subtitle',
     ),
     _Category.advanced => (
       Icons.code_rounded,
-      AppConstants.errorColor,
+      context.colors.error,
       'advanced_settings',
       'advanced_settings_subtitle',
     ),
     _Category.translationCredits => (
       Icons.translate_rounded,
-      AppConstants.textColor,
+      context.colors.text,
       'translation_credits',
       'language_subtitle',
     ),
     _Category.logs => (
       Icons.list_alt,
-      AppConstants.errorColor,
+      context.colors.error,
       'logs',
       'view_logs_subtitle',
     ),
@@ -156,6 +166,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
 
   Widget _nav(LocalizationService l10n) {
     final categories = [
+      _Category.appearance,
       _Category.general,
       _Category.lists,
       _Category.content,
@@ -171,7 +182,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           child: Text(
             l10n.translate('settings').toUpperCase(),
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 30,
             ),
           ),
@@ -183,7 +194,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           child: Text(
             l10n.translate('information').toUpperCase(),
             style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 11.5,
             ),
           ),
@@ -192,7 +203,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           leading: const Icon(
             Icons.discord,
             size: 18,
-            color: Color(0xFF5865F2),
+            color: FixedColors.discord,
           ),
           label: l10n.translate('discord'),
           external: true,
@@ -202,7 +213,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           ),
         ),
         _link(
-          leading: GithubLogo(size: 18, color: AppConstants.textColor),
+          leading: GithubLogo(size: 18, color: context.colors.text),
           label: l10n.translate('github'),
           external: true,
           onTap: () => launchUrl(
@@ -214,7 +225,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           leading: Icon(
             Icons.translate_rounded,
             size: 18,
-            color: AppConstants.textColor,
+            color: context.colors.text,
           ),
           label: l10n.translate('translation_credits'),
           selected: _selected == _Category.translationCredits,
@@ -230,7 +241,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
               Text(
                 '${AppConstants.appName} v${AppConstants.appVersion}',
                 style: AppTypography.sans(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 12.5,
                 ),
               ),
@@ -249,8 +260,8 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       child: DesktopHoverSurface(
         onTap: () => _select(c),
         selected: selected,
-        selectedColor: AppConstants.tertiaryBackground,
-        hoverColor: AppConstants.secondaryBackground,
+        selectedColor: context.colors.surfaceRaised,
+        hoverColor: context.colors.surface,
         borderRadius: BorderRadius.circular(12),
         padding: const EdgeInsets.all(10),
         child: Row(
@@ -261,8 +272,8 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                 icon,
                 size: 20,
                 color: selected
-                    ? AppConstants.accentColor
-                    : AppConstants.textMutedColor,
+                    ? context.colors.accent
+                    : context.colors.textMuted,
               ),
             ),
             const SizedBox(width: 12),
@@ -275,7 +286,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontSize: 14.5,
                       fontWeight: FontWeight.w600,
                     ),
@@ -285,7 +296,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 12,
                     ),
                   ),
@@ -308,8 +319,8 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
     return DesktopHoverSurface(
       onTap: onTap,
       selected: selected,
-      selectedColor: AppConstants.tertiaryBackground,
-      hoverColor: AppConstants.secondaryBackground,
+      selectedColor: context.colors.surfaceRaised,
+      hoverColor: context.colors.surface,
       borderRadius: BorderRadius.circular(10),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       child: Row(
@@ -322,7 +333,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.sans(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
               ),
@@ -332,7 +343,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
             Icon(
               Icons.open_in_new_rounded,
               size: 15,
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
             ),
         ],
       ),
@@ -409,7 +420,8 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
 
     // The list page splits into two columns, which wants more than the reading
     // width the text-and-toggle pages are held to.
-    final maxWidth = category == _Category.lists
+    final maxWidth =
+        category == _Category.lists || category == _Category.appearance
         ? DesktopTokens.maxPageWidth * 0.75
         : DesktopTokens.readableWidth;
 
@@ -444,7 +456,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
         Text(
           l10n.translate(titleKey).toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 26,
           ),
         ),
@@ -452,7 +464,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
         Text(
           l10n.translate(subtitleKey),
           style: AppTypography.sans(
-            color: AppConstants.textMutedColor,
+            color: context.colors.textMuted,
             fontSize: 14,
           ),
         ),
@@ -471,6 +483,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
 
   Widget _buildCategoryContent(_Category category, LocalizationService l10n) {
     return switch (category) {
+      _Category.appearance => const DesktopAppearancePage(),
       _Category.general => _buildGeneral(l10n),
       _Category.lists => DesktopListCustomization(l10n: l10n),
       _Category.content => _buildContent(l10n),
@@ -649,7 +662,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                 width: 24,
                 child: Icon(
                   Icons.filter_alt_outlined,
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   size: 20,
                 ),
               ),
@@ -661,7 +674,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                     Text(
                       l10n.translate('content_preferences').toUpperCase(),
                       style: AppTypography.display(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 14,
                       ),
                     ),
@@ -669,7 +682,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                     Text(
                       l10n.translate('content_preferences_subtitle'),
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 12.5,
                       ),
                     ),
@@ -730,7 +743,11 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                   await _auth.logout();
                 } catch (e) {
                   if (mounted) {
-                    AppSnackBar.show(context, 'Logout failed: $e', isError: true);
+                    AppSnackBar.show(
+                      context,
+                      'Logout failed: $e',
+                      isError: true,
+                    );
                   }
                 }
               },
@@ -796,7 +813,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                     Text(
                       lang['name'] as String,
                       style: AppTypography.display(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 16,
                       ),
                     ),
@@ -804,7 +821,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                     Text(
                       '(${lang['code']})',
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                       ),
                     ),
@@ -822,7 +839,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppConstants.tertiaryBackground,
+                          color: context.colors.surfaceRaised,
                           borderRadius: BorderRadius.circular(
                             AppConstants.pillRadius,
                           ),
@@ -830,7 +847,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                         child: Text(
                           t,
                           style: AppTypography.sans(
-                            color: AppConstants.textColor,
+                            color: context.colors.text,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -905,8 +922,8 @@ class _ContentRatingRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: DesktopHoverSurface(
         onTap: () => _toggleShown(settings, selected),
-        idleColor: AppConstants.tertiaryBackground,
-        hoverColor: AppConstants.borderColor,
+        idleColor: context.colors.surfaceRaised,
+        hoverColor: context.colors.border,
         borderRadius: BorderRadius.circular(12),
         padding: const EdgeInsets.fromLTRB(14, 8, 10, 8),
         child: Row(
@@ -918,8 +935,8 @@ class _ContentRatingRow extends StatelessWidget {
                 key: ValueKey(selected),
                 size: 22,
                 color: selected
-                    ? AppConstants.accentColor
-                    : AppConstants.textMutedColor.withValues(alpha: 0.6),
+                    ? context.colors.accent
+                    : context.colors.textMuted.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(width: 12),
@@ -928,8 +945,8 @@ class _ContentRatingRow extends StatelessWidget {
                 l10n.translate(rating).toUpperCase(),
                 style: AppTypography.display(
                   color: selected
-                      ? AppConstants.textColor
-                      : AppConstants.textMutedColor,
+                      ? context.colors.text
+                      : context.colors.textMuted,
                   fontSize: 13,
                 ),
               ),
@@ -939,14 +956,14 @@ class _ContentRatingRow extends StatelessWidget {
                 blurred ? Icons.blur_on : Icons.blur_off,
                 size: 18,
                 color: blurred
-                    ? AppConstants.accentColor
-                    : AppConstants.textMutedColor,
+                    ? context.colors.accent
+                    : context.colors.textMuted,
               ),
               const SizedBox(width: 8),
               Text(
                 l10n.translate('blur_covers'),
                 style: AppTypography.sans(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1088,7 +1105,7 @@ class _DesktopLogsViewState extends State<_DesktopLogsView> {
                       child: Text(
                         'No logs recorded yet',
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                         ),
                       ),
                     )
@@ -1103,9 +1120,9 @@ class _DesktopLogsViewState extends State<_DesktopLogsView> {
                             padding: const EdgeInsets.symmetric(vertical: 2),
                             child: SelectableText(
                               _logs[index],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'monospace',
-                                color: AppConstants.textColor,
+                                color: context.colors.text,
                                 fontSize: 12,
                               ),
                             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_bottom_sheet.dart';
@@ -49,7 +50,7 @@ class SearchFilterSheetLauncher {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: AppConstants.secondaryBackground,
+      backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppConstants.largeRadius),

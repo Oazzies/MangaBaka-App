@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_dialog.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SearchFilterTypeStatusSection extends StatelessWidget {
   final SearchFilters filters;
@@ -39,7 +39,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
       builder: (context) {
         return Container(
           decoration: BoxDecoration(
-            color: AppConstants.primaryBackground,
+            color: context.colors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: FilterListDialog(
@@ -74,14 +74,17 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
               onTap: () => _showFilterDialog(
                 context,
                 title: l10n.translate('type'),
-                items: types.map((t) => {'value': t, 'label': l10n.translate('type_$t')}).toList(),
+                items: types
+                    .map(
+                      (t) => {'value': t, 'label': l10n.translate('type_$t')},
+                    )
+                    .toList(),
                 idKey: 'value',
                 nameKey: 'label',
                 includes: filters.type,
                 excludes: filters.typeNot,
-                onApply: (inc, exc) => onFiltersChanged(
-                  filters.copyWith(type: inc, typeNot: exc),
-                ),
+                onApply: (inc, exc) =>
+                    onFiltersChanged(filters.copyWith(type: inc, typeNot: exc)),
                 showSearch: false,
               ),
             ),
@@ -96,7 +99,11 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
               onTap: () => _showFilterDialog(
                 context,
                 title: l10n.translate('status'),
-                items: statuses.map((s) => {'value': s, 'label': l10n.translate('status_$s')}).toList(),
+                items: statuses
+                    .map(
+                      (s) => {'value': s, 'label': l10n.translate('status_$s')},
+                    )
+                    .toList(),
                 idKey: 'value',
                 nameKey: 'label',
                 includes: filters.status,

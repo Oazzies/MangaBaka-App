@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The three switches that shape a mix.
 ///
@@ -29,7 +30,7 @@ class MixOptionsSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
       child: Container(
         decoration: BoxDecoration(
-          color: AppConstants.secondaryBackground,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppConstants.largeRadius),
         ),
         child: Column(
@@ -76,7 +77,7 @@ class _OptionDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: AppConstants.borderColor,
+      color: context.colors.border,
       indent: 16,
       endIndent: 16,
     );
@@ -115,11 +116,11 @@ class MixToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor = requiresLogin
-        ? AppConstants.textMutedColor.withValues(alpha: 0.5)
-        : AppConstants.textColor;
+        ? context.colors.textMuted.withValues(alpha: 0.5)
+        : context.colors.text;
     final iconColor = requiresLogin
-        ? AppConstants.textMutedColor.withValues(alpha: 0.4)
-        : AppConstants.accentColor;
+        ? context.colors.textMuted.withValues(alpha: 0.4)
+        : context.colors.accent;
 
     return Padding(
       padding: EdgeInsets.only(top: isFirst ? 4 : 0, bottom: isLast ? 4 : 0),
@@ -136,7 +137,7 @@ class MixToggleRow extends StatelessWidget {
         subtitle: Text(
           requiresLogin ? 'Requires login' : subtitle,
           style: AppTypography.sans(
-            color: AppConstants.textMutedColor.withValues(
+            color: context.colors.textMuted.withValues(
               alpha: requiresLogin ? 0.5 : 1.0,
             ),
             fontSize: 12,
@@ -145,8 +146,8 @@ class MixToggleRow extends StatelessWidget {
         trailing: Switch.adaptive(
           value: value,
           onChanged: onChanged,
-          activeThumbColor: AppConstants.accentColor,
-          activeTrackColor: AppConstants.accentColor.withValues(alpha: 0.4),
+          activeThumbColor: context.colors.accent,
+          activeTrackColor: context.colors.accent.withValues(alpha: 0.4),
         ),
         dense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -15,6 +14,7 @@ import 'package:mangabaka_app/features/home/services/home_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Home on desktop: Trending as a ranked board — a featured #1 beside the
 /// rest of the top ten — then the discovery rails as paged carousels.
@@ -216,7 +216,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                     width: _railWidth,
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: AppConstants.borderColor),
+                        left: BorderSide(color: context.colors.border),
                       ),
                     ),
                     child: const DesktopUpcomingRail(),

@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/shortcut_button.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Describes a custom button entry for [ShortcutSection.customButtons].
 class ShortcutButtonEntry {
   final String label;
   final VoidCallback onPressed;
 
-  const ShortcutButtonEntry({
-    required this.label,
-    required this.onPressed,
-  });
+  const ShortcutButtonEntry({required this.label, required this.onPressed});
 }
 
 class ShortcutSection extends StatelessWidget {
@@ -35,9 +32,9 @@ class ShortcutSection extends StatelessWidget {
     this.customButtons,
     super.key,
   }) : assert(
-          customButtons != null || onMostPopular != null,
-          'Either customButtons or onMostPopular must be provided',
-        );
+         customButtons != null || onMostPopular != null,
+         'Either customButtons or onMostPopular must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +47,9 @@ class ShortcutSection extends StatelessWidget {
         final List<ShortcutButton> buttons;
         if (customButtons != null) {
           buttons = customButtons!
-              .map((e) => ShortcutButton(
-                    label: e.label,
-                    onPressed: e.onPressed,
-                  ))
+              .map(
+                (e) => ShortcutButton(label: e.label, onPressed: e.onPressed),
+              )
               .toList();
         } else {
           buttons = [
@@ -63,14 +59,14 @@ class ShortcutSection extends StatelessWidget {
             ),
             if (onTopRated != null)
               ShortcutButton(
-                  label: l10n.translate('top_rated'),
+                label: l10n.translate('top_rated'),
                 onPressed: onTopRated!,
-                ),
+              ),
             if (onRandom != null)
               ShortcutButton(
-                  label: l10n.translate('random'),
+                label: l10n.translate('random'),
                 onPressed: onRandom!,
-                ),
+              ),
           ];
         }
 
@@ -82,7 +78,7 @@ class ShortcutSection extends StatelessWidget {
               Text(
                 header.toUpperCase(),
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 22,
                   height: 1.1,
                 ),
@@ -120,4 +116,3 @@ class ShortcutSection extends StatelessWidget {
     );
   }
 }
-

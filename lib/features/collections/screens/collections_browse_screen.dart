@@ -20,6 +20,7 @@ import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Browse collections and editions.
 ///
@@ -33,9 +34,12 @@ class CollectionsBrowseScreen extends StatefulWidget {
   const CollectionsBrowseScreen({super.key, this.initialPublisher});
 
   /// Opens the browser over the current screen.
-  static void open(BuildContext context, {Publisher? publisher}) => Navigator.of(
-    context,
-  ).push(AppTransitions.slideRight(CollectionsBrowseScreen(initialPublisher: publisher)));
+  static void open(BuildContext context, {Publisher? publisher}) =>
+      Navigator.of(context).push(
+        AppTransitions.slideRight(
+          CollectionsBrowseScreen(initialPublisher: publisher),
+        ),
+      );
 
   @override
   State<CollectionsBrowseScreen> createState() =>
@@ -243,7 +247,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
 
   Widget _buildDesktop(LocalizationService l10n) {
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -258,7 +262,11 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
               DesktopSegmented<int>(
                 value: _tabs.index,
                 segments: [
-                  (0, l10n.translate('tab_collections'), Icons.collections_bookmark_rounded),
+                  (
+                    0,
+                    l10n.translate('tab_collections'),
+                    Icons.collections_bookmark_rounded,
+                  ),
                   (1, l10n.translate('editions'), Icons.auto_stories_rounded),
                 ],
                 onChanged: (index) {
@@ -297,7 +305,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
 
   Widget _buildMobile(LocalizationService l10n) {
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       appBar: mbScreenAppBar(
         title: l10n.translate('collections_and_editions'),
         bottom: PreferredSize(
@@ -306,7 +314,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Container(
               decoration: BoxDecoration(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(AppConstants.pillRadius),
               ),
               child: TabBar(
@@ -314,12 +322,12 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicator: BoxDecoration(
-                  color: AppConstants.accentColor,
+                  color: context.colors.accent,
                   borderRadius: BorderRadius.circular(AppConstants.pillRadius),
                 ),
                 indicatorPadding: EdgeInsets.zero,
-                labelColor: AppConstants.onAccent,
-                unselectedLabelColor: AppConstants.textMutedColor,
+                labelColor: context.colors.onAccent,
+                unselectedLabelColor: context.colors.textMuted,
                 labelStyle: AppTypography.display(fontSize: 12),
                 unselectedLabelStyle: AppTypography.display(fontSize: 12),
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -330,7 +338,10 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.collections_bookmark_rounded, size: 16),
+                        const Icon(
+                          Icons.collections_bookmark_rounded,
+                          size: 16,
+                        ),
                         const SizedBox(width: 8),
                         Text(l10n.translate('tab_collections').toUpperCase()),
                       ],
@@ -375,7 +386,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
           controller: _query,
           onChanged: _onQueryChanged,
           textInputAction: TextInputAction.search,
-          style: AppTypography.sans(color: AppConstants.textColor),
+          style: AppTypography.sans(color: context.colors.text),
           decoration: InputDecoration(
             hintText: l10n.translate('search_publishers_hint'),
             suffixIcon: _searching
@@ -422,9 +433,9 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
           padding: const EdgeInsets.all(16),
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: context.colors.surface,
             borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-            border: Border.all(color: AppConstants.borderColor),
+            border: Border.all(color: context.colors.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -439,7 +450,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                         Text(
                           publisher.name,
                           style: AppTypography.display(
-                            color: AppConstants.textColor,
+                            color: context.colors.text,
                             fontSize: 18,
                           ),
                         ),
@@ -456,14 +467,15 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppConstants.accentColor
-                                      .withValues(alpha: 0.15),
+                                  color: context.colors.accent.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   publisher.subType.toUpperCase(),
                                   style: AppTypography.monoLabel(
-                                    color: AppConstants.accentColor,
+                                    color: context.colors.accent,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -473,7 +485,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               Text(
                                 'Est. ${publisher.founded}',
                                 style: AppTypography.sans(
-                                  color: AppConstants.textMutedColor,
+                                  color: context.colors.textMuted,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -482,8 +494,9 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               Text(
                                 'Closed ${publisher.closed}',
                                 style: AppTypography.sans(
-                                  color: AppConstants.errorColor
-                                      .withValues(alpha: 0.8),
+                                  color: context.colors.error.withValues(
+                                    alpha: 0.8,
+                                  ),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -492,7 +505,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               Text(
                                 '${publisher.imprints.length} Imprints',
                                 style: AppTypography.sans(
-                                  color: AppConstants.textMutedColor,
+                                  color: context.colors.textMuted,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -515,7 +528,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                 Text(
                   publisher.description!,
                   style: AppTypography.sans(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontSize: 13,
                     height: 1.4,
                   ),
@@ -526,8 +539,8 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                 icon: const Icon(Icons.menu_book_rounded, size: 16),
                 label: Text(l10n.translate('series')),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppConstants.textColor,
-                  side: BorderSide(color: AppConstants.borderColor),
+                  foregroundColor: context.colors.text,
+                  side: BorderSide(color: context.colors.border),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 8,
@@ -617,7 +630,9 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
         ),
       );
     }
-    if (empty && !_hasNext) return _hint(l10n.translate('no_collections_available'));
+    if (empty && !_hasNext) {
+      return _hint(l10n.translate('no_collections_available'));
+    }
     return const SizedBox.shrink();
   }
 
@@ -643,7 +658,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
             child: Text(
               l10n.translate('editions_pick_publisher'),
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 13.5,
                 height: 1.4,
               ),
@@ -665,7 +680,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: AppTypography.sans(color: AppConstants.textMutedColor),
+        style: AppTypography.sans(color: context.colors.textMuted),
       ),
     ),
   );
@@ -682,7 +697,7 @@ class _PublisherRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         child: InkWell(
           onTap: onTap,
@@ -697,7 +712,7 @@ class _PublisherRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
-                      color: AppConstants.textColor,
+                      color: context.colors.text,
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),
@@ -705,7 +720,7 @@ class _PublisherRow extends StatelessWidget {
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                 ),
               ],
             ),
@@ -732,7 +747,7 @@ class _EditionRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         child: InkWell(
           onTap: onTap,
@@ -746,8 +761,8 @@ class _EditionRow extends StatelessWidget {
                   edition.name.toUpperCase(),
                   style: AppTypography.display(
                     color: selected
-                        ? AppConstants.accentColor
-                        : AppConstants.textColor,
+                        ? context.colors.accent
+                        : context.colors.text,
                     fontSize: 14,
                   ),
                 ),
@@ -756,7 +771,7 @@ class _EditionRow extends StatelessWidget {
                   Text(
                     edition.description,
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 13,
                       height: 1.35,
                     ),

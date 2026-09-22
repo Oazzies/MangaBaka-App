@@ -1,7 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesDetailErrorBanner extends StatelessWidget {
   final VoidCallback onRetry;
@@ -19,23 +19,39 @@ class SeriesDetailErrorBanner extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: AppConstants.errorColor.withValues(alpha: 0.15),
+                color: context.colors.error.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppConstants.errorColor.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: context.colors.error.withValues(alpha: 0.4),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: AppConstants.errorColor, size: 18),
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: context.colors.error,
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       LocalizationService().translate('failed_to_load'),
-                      style: AppTypography.sans(color: AppConstants.errorColor, fontSize: 13),
+                      style: AppTypography.sans(
+                        color: context.colors.error,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   TextButton(
                     onPressed: onRetry,
-                    child: Text(LocalizationService().translate('retry'), style: AppTypography.sans(color: AppConstants.errorColor, fontWeight: FontWeight.bold, fontSize: 13)),
+                    child: Text(
+                      LocalizationService().translate('retry'),
+                      style: AppTypography.sans(
+                        color: context.colors.error,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ],
               ),

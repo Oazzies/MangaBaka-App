@@ -3,7 +3,6 @@ import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -16,6 +15,7 @@ import 'package:mangabaka_app/features/profile/widgets/snapshot/profile_snapshot
 import 'package:mangabaka_app/features/profile/mixins/profile_data_mixin.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -205,13 +205,13 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
             : profile?.preferredUsername;
 
         return Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           appBar: AppBar(
             centerTitle: true,
             title: Text(
               _buildProfileTitle(username, l10n).toUpperCase(),
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 20,
               ),
             ),

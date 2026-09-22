@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 
 /// Route transitions for the Ink & Amber system.
@@ -33,7 +34,7 @@ abstract final class AppTransitions {
               Positioned.fill(
                 child: IgnorePointer(
                   child: ColoredBox(
-                    color: Colors.black.withValues(alpha: t * 0.35),
+                    color: FixedColors.dim.withValues(alpha: t * 0.35),
                   ),
                 ),
               ),

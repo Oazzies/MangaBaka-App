@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesSegmentedControl extends StatefulWidget {
   final String selectedTab;
@@ -91,7 +92,7 @@ class _SeriesSegmentedControlState extends State<SeriesSegmentedControl>
         dividerColor: Colors.transparent,
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: AppConstants.accentColor,
+          color: context.colors.accent,
           borderRadius: BorderRadius.circular(AppConstants.pillRadius),
         ),
         indicatorPadding: const EdgeInsets.symmetric(
@@ -99,20 +100,22 @@ class _SeriesSegmentedControlState extends State<SeriesSegmentedControl>
           vertical: 6,
         ),
         labelPadding: EdgeInsets.zero,
-        labelColor: AppConstants.onAccent,
-        unselectedLabelColor: AppConstants.textColor,
+        labelColor: context.colors.onAccent,
+        unselectedLabelColor: context.colors.text,
         labelStyle: AppTypography.display(fontSize: 13),
         unselectedLabelStyle: AppTypography.display(fontSize: 13),
         overlayColor: WidgetStateProperty.all(Colors.transparent),
         splashFactory: NoSplash.splashFactory,
         tabs: SeriesSegmentedControl.tabs
-            .map((t) => Tab(
-                  height: 48,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                    child: Text(t.toUpperCase()),
-                  ),
-                ))
+            .map(
+              (t) => Tab(
+                height: 48,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Text(t.toUpperCase()),
+                ),
+              ),
+            )
             .toList(),
       ),
     );

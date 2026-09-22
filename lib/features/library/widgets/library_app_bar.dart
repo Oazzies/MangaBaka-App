@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/import/bulk_import_screen.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -11,6 +10,7 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/widgets/library_search_bar.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The library's app bar, in its two states: the title with its actions, and
 /// the search field that replaces them.
@@ -54,9 +54,8 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(
-        kToolbarHeight + bottom.preferredSize.height,
-      );
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + bottom.preferredSize.height);
 
   @override
   Widget build(BuildContext context) {
@@ -93,15 +92,12 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: true,
       leading: IconButton(
-        icon: Icon(Icons.search, color: AppConstants.textColor),
+        icon: Icon(Icons.search, color: context.colors.text),
         onPressed: onEnterSearch,
       ),
       title: Text(
         l10n.translate('library').toUpperCase(),
-        style: AppTypography.display(
-          color: AppConstants.textColor,
-          fontSize: 20,
-        ),
+        style: AppTypography.display(color: context.colors.text, fontSize: 20),
       ),
       actions: [
         // Landscape has the width for a layout toggle; in portrait the same
@@ -110,7 +106,7 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
           WidgetUtils.tooltip(
             message: l10n.translate('toggle_layout'),
             child: IconButton(
-              icon: Icon(style.icon, color: AppConstants.textColor),
+              icon: Icon(style.icon, color: context.colors.text),
               onPressed: () => _cycleStyle(settings, style),
             ),
           ),

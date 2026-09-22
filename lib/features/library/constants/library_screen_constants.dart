@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 class LibraryScreenConstants {
-  static Color get backgroundColor => AppConstants.primaryBackground;
-
   static const List<LibraryTabDefinition> tabs = [
     LibraryTabDefinition(key: 'reading', label: 'Reading'),
     LibraryTabDefinition(key: 'paused', label: 'Paused'),

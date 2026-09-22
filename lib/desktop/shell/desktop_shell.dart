@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_banner.dart';
@@ -14,6 +13,7 @@ import 'package:mangabaka_app/desktop/shell/desktop_sidebar.dart';
 import 'package:mangabaka_app/features/library/widgets/sync_progress_overlay.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Implemented by desktop pages that can reload their content, so Ctrl+R
 /// works wherever keyboard focus happens to be.
@@ -162,7 +162,7 @@ class DesktopShellState extends State<DesktopShell> {
           ),
         },
         child: Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           // The content is laid out once, at its final position, while the
           // sidebar animates across the top of it. Animating the sidebar in a
           // Row instead resized the content area on every frame of the

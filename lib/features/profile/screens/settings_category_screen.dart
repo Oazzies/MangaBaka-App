@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SettingsCategoryScreen extends StatelessWidget {
   final String title;
@@ -30,7 +31,7 @@ class SettingsCategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -39,7 +40,7 @@ class SettingsCategoryScreen extends StatelessWidget {
         title: Text(
           title.toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 20,
           ),
         ),
@@ -75,7 +76,7 @@ class _CategoryDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final maxHeight = MediaQuery.of(context).size.height - 64;
     return Dialog(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       insetPadding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
@@ -98,7 +99,7 @@ class _CategoryDialog extends StatelessWidget {
                         Navigator.pop(context);
                         onBack!();
                       },
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     )
@@ -109,7 +110,7 @@ class _CategoryDialog extends StatelessWidget {
                     child: Text(
                       title,
                       style: AppTypography.display(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 18,
                         letterSpacing: -0.5,
                       ),
@@ -119,14 +120,14 @@ class _CategoryDialog extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     padding: EdgeInsets.zero,
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
             ),
-            Divider(height: 1, color: AppConstants.borderColor),
+            Divider(height: 1, color: context.colors.border),
             Flexible(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(

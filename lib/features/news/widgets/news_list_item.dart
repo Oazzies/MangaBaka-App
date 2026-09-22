@@ -8,6 +8,7 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Parses an ISO-8601 date string into a human-readable "MMM d, yyyy" label.
 /// Returns the raw string on parse failure, or empty string for empty input.
@@ -36,7 +37,7 @@ class NewsListItem extends StatelessWidget {
     final publishedDate = _formatDate(news.publishedAt);
 
     return Card(
-      color: AppConstants.secondaryBackground,
+      color: context.colors.surface,
       elevation: 0,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       shape: RoundedRectangleBorder(
@@ -54,15 +55,20 @@ class NewsListItem extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: AppConstants.tertiaryBackground,
-                      borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+                      color: context.colors.surfaceRaised,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.pillRadius,
+                      ),
                     ),
                     child: Text(
                       news.source.toUpperCase(),
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.0,
@@ -73,7 +79,7 @@ class NewsListItem extends StatelessWidget {
                   Text(
                     publishedDate,
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -82,7 +88,7 @@ class NewsListItem extends StatelessWidget {
                   Icon(
                     Icons.open_in_new_rounded,
                     size: 14,
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                   ),
                 ],
               ),
@@ -92,7 +98,7 @@ class NewsListItem extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.sans(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   height: 1.2,
@@ -103,7 +109,7 @@ class NewsListItem extends StatelessWidget {
                 Text(
                   '${l10n.translate('by_author')} ${news.author}',
                   style: AppTypography.sans(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontSize: 14,
                     height: 1.6,
                   ),
@@ -117,7 +123,7 @@ class NewsListItem extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -131,7 +137,8 @@ class NewsListItem extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.only(right: 10.0),
                           child: MouseRegion(
-                            onEnter: (_) => getIt<SeriesService>().fetchSeries(s.id),
+                            onEnter: (_) =>
+                                getIt<SeriesService>().fetchSeries(s.id),
                             child: ReferencedListItem(
                               key: ValueKey('ref_${news.id}_${s.id}'),
                               series: s,

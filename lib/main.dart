@@ -7,6 +7,8 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_theme.dart';
+import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
+import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_window_frame.dart';
 import 'package:mangabaka_app/features/navigation/screens/animated_splash_screen.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
@@ -16,6 +18,7 @@ import 'package:mangabaka_app/features/profile/widgets/login/browser_sign_in_pro
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
 import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
+import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
   await AppBootstrap.run();
@@ -32,20 +35,55 @@ class MangaBakaApp extends StatefulWidget {
 }
 
 class _MangaBakaAppState extends State<MangaBakaApp> {
-  /// The theme is rebuilt only when [SettingsManager.showTooltips] changes —
-  /// it is baked into the tooltip theme — rather than on every notification
-  /// from the merged listenable, which fires for every setting there is.
-  ThemeData? _cachedTheme;
-  bool? _lastShowTooltips;
+  final ThemeController _themes = ThemeController();
+
+  /// Themes are rebuilt only when their inputs change — the palette and
+  /// [SettingsManager.showTooltips], which is baked into the tooltip theme —
+  /// rather than on every notification from the merged listenable, which
+  /// fires for every setting there is.
+  final Map<Brightness, (MbPalette, bool, ThemeData)> _cache = {};
 
   bool _showSplash = true;
 
-  ThemeData _themeFor(bool showTooltips) {
-    if (_cachedTheme != null && _lastShowTooltips == showTooltips) {
-      return _cachedTheme!;
+  ThemeData _themeFor(MbPalette palette, bool showTooltips) {
+    final cached = _cache[palette.brightness];
+    if (cached != null && cached.$1 == palette && cached.$2 == showTooltips) {
+      return cached.$3;
     }
-    _lastShowTooltips = showTooltips;
-    return _cachedTheme = AppTheme.build(showTooltips: showTooltips);
+    final theme = AppTheme.build(palette, showTooltips: showTooltips);
+    _cache[palette.brightness] = (palette, showTooltips, theme);
+    return theme;
+  }
+
+  MbPalette? _lastPalette;
+
+  @override
+  void initState() {
+    super.initState();
+    _themes.addListener(_onThemeChanged);
+    _lastPalette = _themes.current;
+    _syncWindowBackground(_themes.current);
+  }
+
+  @override
+  void dispose() {
+    _themes.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    final palette = _themes.current;
+    if (palette == _lastPalette) return;
+    _lastPalette = palette;
+    AppTheme.applySystemOverlay(palette);
+    _syncWindowBackground(palette);
+  }
+
+  /// Keeps the native desktop window's own background in step, so a resize
+  /// never flashes the previous theme's colour behind the first frame.
+  void _syncWindowBackground(MbPalette palette) {
+    if (!(Platform.isWindows || Platform.isMacOS || Platform.isLinux)) return;
+    windowManager.setBackgroundColor(palette.background).ignore();
   }
 
   /// Checks GitHub for a newer release and, if found, shows the update dialog.
@@ -73,13 +111,15 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
     return ListenableBuilder(
       listenable: Listenable.merge([
         SettingsManager(),
+        _themes,
         getIt<ProfileAuthService>(),
       ]),
       builder: (context, _) {
         final settings = SettingsManager();
         // Signing in implies onboarding is done, so a returning user who
         // cleared their settings does not get sent back through it.
-        final isPastOnboarding = settings.hasCompletedOnboarding ||
+        final isPastOnboarding =
+            settings.hasCompletedOnboarding ||
             getIt<ProfileAuthService>().isLoggedIn;
 
         return ExcludeSemantics(
@@ -90,12 +130,14 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
             navigatorKey: AppConstants.navigatorKey,
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
-            theme: _themeFor(settings.showTooltips),
+            theme: _themeFor(_themes.lightPalette, settings.showTooltips),
+            darkTheme: _themeFor(_themes.darkPalette, settings.showTooltips),
+            themeMode: _themes.materialThemeMode,
             builder: (context, child) => DesktopWindowFrame(
               child: BrowserSignInPrompt(child: AppShortcuts(child: child!)),
             ),
             home: AnnotatedRegion<SystemUiOverlayStyle>(
-              value: AppTheme.systemOverlay,
+              value: AppTheme.overlayFor(_themes.current),
               child: Stack(
                 children: [
                   if (isPastOnboarding)
@@ -104,9 +146,8 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
                     const OnboardingScreen(),
                   if (_showSplash)
                     AnimatedSplashOverlay(
-                      onComplete: () => _onSplashComplete(
-                        isPastOnboarding: isPastOnboarding,
-                      ),
+                      onComplete: () =>
+                          _onSplashComplete(isPastOnboarding: isPastOnboarding),
                     ),
                 ],
               ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/utils/date_utils.dart' as mb_date;
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class DateDialog extends StatelessWidget {
   final String start;
@@ -16,13 +17,10 @@ class DateDialog extends StatelessWidget {
     final l10n = LocalizationService();
 
     return AlertDialog(
-      backgroundColor: AppConstants.secondaryBackground,
+      backgroundColor: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.largeRadius),
-        side: BorderSide(
-          color: AppConstants.tertiaryBackground,
-          width: 1.5,
-        ),
+        side: BorderSide(color: context.colors.surfaceRaised, width: 1.5),
       ),
       titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
       contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -32,12 +30,12 @@ class DateDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppConstants.accentColor.withValues(alpha: 0.1),
+              color: context.colors.accent.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.calendar_today_rounded,
-              color: AppConstants.accentColor,
+              color: context.colors.accent,
               size: 24,
             ),
           ),
@@ -46,7 +44,7 @@ class DateDialog extends StatelessWidget {
             child: Text(
               l10n.translate('publication_dates').toUpperCase(),
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 18,
               ),
             ),
@@ -62,10 +60,10 @@ class DateDialog extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppConstants.primaryBackground,
+              color: context.colors.background,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppConstants.tertiaryBackground,
+                color: context.colors.surfaceRaised,
                 width: 1.5,
               ),
             ),
@@ -80,7 +78,7 @@ class DateDialog extends StatelessWidget {
                         child: Text(
                           '${l10n.translate('start')}:',
                           style: AppTypography.sans(
-                            color: AppConstants.textMutedColor,
+                            color: context.colors.textMuted,
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
                           ),
@@ -90,7 +88,7 @@ class DateDialog extends StatelessWidget {
                         child: Text(
                           startFormatted,
                           style: AppTypography.sans(
-                            color: AppConstants.textColor,
+                            color: context.colors.text,
                             fontWeight: FontWeight.w500,
                             fontSize: 15,
                           ),
@@ -104,7 +102,7 @@ class DateDialog extends StatelessWidget {
                     child: Divider(
                       height: 1,
                       thickness: 1,
-                      color: AppConstants.borderColor,
+                      color: context.colors.border,
                     ),
                   ),
                 if (endFormatted.isNotEmpty)
@@ -116,7 +114,7 @@ class DateDialog extends StatelessWidget {
                         child: Text(
                           '${l10n.translate('end')}:',
                           style: AppTypography.sans(
-                            color: AppConstants.textMutedColor,
+                            color: context.colors.textMuted,
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
                           ),
@@ -126,7 +124,7 @@ class DateDialog extends StatelessWidget {
                         child: Text(
                           endFormatted,
                           style: AppTypography.sans(
-                            color: AppConstants.textColor,
+                            color: context.colors.text,
                             fontWeight: FontWeight.w500,
                             fontSize: 15,
                           ),
@@ -145,8 +143,8 @@ class DateDialog extends StatelessWidget {
           child: FilledButton(
             onPressed: () => Navigator.of(context).pop(),
             style: FilledButton.styleFrom(
-              backgroundColor: AppConstants.accentColor,
-              foregroundColor: AppConstants.onAccent,
+              backgroundColor: context.colors.accent,
+              foregroundColor: context.colors.onAccent,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppConstants.pillRadius),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_style_preview_thumbnails.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ListStylePreviewItem extends StatelessWidget {
   final AppListStyle style;
@@ -31,12 +32,12 @@ class ListStylePreviewItem extends StatelessWidget {
               width: 100,
               height: 160,
               decoration: BoxDecoration(
-                color: AppConstants.primaryBackground,
+                color: context.colors.background,
                 borderRadius: BorderRadius.circular(AppConstants.denseRadius),
                 border: Border.all(
                   color: isSelected
-                      ? AppConstants.accentColor
-                      : AppConstants.borderColor.withValues(alpha: 0.5),
+                      ? context.colors.accent
+                      : context.colors.border.withValues(alpha: 0.5),
                   width: isSelected ? 3 : 1,
                 ),
               ),
@@ -57,8 +58,8 @@ class ListStylePreviewItem extends StatelessWidget {
               label,
               style: AppTypography.sans(
                 color: isSelected
-                    ? AppConstants.textColor
-                    : AppConstants.textMutedColor,
+                    ? context.colors.text
+                    : context.colors.textMuted,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),

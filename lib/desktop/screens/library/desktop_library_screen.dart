@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/import/bulk_import_screen.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -32,6 +31,7 @@ import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The library on desktop.
 ///
@@ -301,7 +301,9 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
                         library: true,
                       ),
                       const SizedBox(width: 10),
-                      const DesktopListStyleToggle(scope: DesktopListScope.library),
+                      const DesktopListStyleToggle(
+                        scope: DesktopListScope.library,
+                      ),
                     ],
                   );
 
@@ -404,14 +406,14 @@ class _StatusList extends StatelessWidget {
           child: Text(
             l10n.translate('status').toUpperCase(),
             style: AppTypography.display(
-              color: AppConstants.textColor,
+              color: context.colors.text,
               fontSize: 17,
             ),
           ),
         ),
         _StatusRow(
           label: l10n.translate('all'),
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
           count: total,
           selected: selected == DesktopLibraryScreenState.allKey,
           onTap: () => onSelected(DesktopLibraryScreenState.allKey),
@@ -419,7 +421,7 @@ class _StatusList extends StatelessWidget {
         for (final tab in LibraryScreenConstants.tabs)
           _StatusRow(
             label: l10n.translate(tab.key),
-            color: AppConstants.getColorForState(tab.key),
+            color: context.colors.forState(tab.key),
             count: counts[tab.key] ?? 0,
             selected: selected == tab.key,
             onTap: () => onSelected(tab.key),
@@ -451,8 +453,8 @@ class _StatusRow extends StatelessWidget {
       child: DesktopHoverSurface(
         onTap: onTap,
         selected: selected,
-        selectedColor: AppConstants.tertiaryBackground,
-        hoverColor: AppConstants.secondaryBackground,
+        selectedColor: context.colors.surfaceRaised,
+        hoverColor: context.colors.surface,
         borderRadius: BorderRadius.circular(10),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         child: Row(
@@ -470,8 +472,8 @@ class _StatusRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.sans(
                   color: selected
-                      ? AppConstants.textColor
-                      : AppConstants.textColor.withValues(alpha: 0.85),
+                      ? context.colors.text
+                      : context.colors.text.withValues(alpha: 0.85),
                   fontSize: 14,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                 ),
@@ -480,7 +482,7 @@ class _StatusRow extends StatelessWidget {
             Text(
               NumberUtils.formatCount(count),
               style: AppTypography.sans(
-                color: selected ? color : AppConstants.textMutedColor,
+                color: selected ? color : context.colors.textMuted,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
               ),

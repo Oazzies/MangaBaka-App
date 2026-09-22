@@ -1,7 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class PublisherListItem extends StatelessWidget {
   final Publisher publisher;
@@ -23,12 +23,12 @@ class PublisherListItem extends StatelessWidget {
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: AppConstants.secondaryBackground,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
         onTap: onTap,
-        hoverColor: AppConstants.tertiaryBackground,
+        hoverColor: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -42,7 +42,7 @@ class PublisherListItem extends StatelessWidget {
                     Text(
                       publisher.name,
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -57,27 +57,35 @@ class PublisherListItem extends StatelessWidget {
                       runSpacing: 4,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        _buildBadge(publisher.subType.toUpperCase()),
+                        _buildBadge(context, publisher.subType.toUpperCase()),
                         if (publisher.founded != null)
-                          _buildInfoText('Est. ${publisher.founded}'),
+                          _buildInfoText(context, 'Est. ${publisher.founded}'),
                         if (publisher.closed != null)
-                          _buildInfoText('Closed ${publisher.closed}', isError: true),
+                          _buildInfoText(
+                            context,
+                            'Closed ${publisher.closed}',
+                            isError: true,
+                          ),
                         if (publisher.imprints.isNotEmpty)
-                          _buildInfoText('${publisher.imprints.length} Imprints'),
+                          _buildInfoText(
+                            context,
+                            '${publisher.imprints.length} Imprints',
+                          ),
                         if (publisher.links.isNotEmpty)
                           Icon(
                             Icons.link_rounded,
                             size: 14,
-                            color: AppConstants.accentColor.withValues(alpha: 0.6),
+                            color: context.colors.accent.withValues(alpha: 0.6),
                           ),
                       ],
                     ),
-                    if (publisher.description != null && publisher.description!.isNotEmpty) ...[
+                    if (publisher.description != null &&
+                        publisher.description!.isNotEmpty) ...[
                       const SizedBox(height: 6),
                       Text(
                         publisher.description!,
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 13,
                         ),
                         maxLines: 2,
@@ -90,7 +98,7 @@ class PublisherListItem extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppConstants.textMutedColor.withValues(alpha: 0.5),
+                color: context.colors.textMuted.withValues(alpha: 0.5),
               ),
             ],
           ),
@@ -99,17 +107,17 @@ class PublisherListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String text) {
+  Widget _buildBadge(BuildContext context, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: AppConstants.accentColor.withValues(alpha: 0.1),
+        color: context.colors.accent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         text,
         style: AppTypography.sans(
-          color: AppConstants.accentColor,
+          color: context.colors.accent,
           fontSize: 10,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
@@ -118,11 +126,17 @@ class PublisherListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoText(String text, {bool isError = false}) {
+  Widget _buildInfoText(
+    BuildContext context,
+    String text, {
+    bool isError = false,
+  }) {
     return Text(
       text,
       style: AppTypography.sans(
-        color: isError ? AppConstants.errorColor.withValues(alpha: 0.8) : AppConstants.textMutedColor,
+        color: isError
+            ? context.colors.error.withValues(alpha: 0.8)
+            : context.colors.textMuted,
         fontSize: 12,
         fontWeight: FontWeight.w500,
       ),

@@ -8,12 +8,17 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesGenresSection extends StatelessWidget {
   final Series series;
   final LocalizationService l10n;
 
-  const SeriesGenresSection({super.key, required this.series, required this.l10n});
+  const SeriesGenresSection({
+    super.key,
+    required this.series,
+    required this.l10n,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,9 @@ class SeriesGenresSection extends StatelessWidget {
               Builder(
                 builder: (context) {
                   final genre = series.genres[i];
-                  final isSelected = detailState?.drawerFilters?.genre.contains(genre) ?? false;
+                  final isSelected =
+                      detailState?.drawerFilters?.genre.contains(genre) ??
+                      false;
                   return ChipBase(
                     label: Text(
                       metadataService.getGenreLabel(genre),
@@ -42,16 +49,18 @@ class SeriesGenresSection extends StatelessWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         height: 1.2,
-                        color: isSelected ? Colors.white : AppConstants.textColor,
+                        color: isSelected
+                            ? context.colors.onAccent
+                            : context.colors.text,
                       ),
                     ),
                     borderRadius: AppConstants.pillRadius,
                     backgroundColor: isSelected
-                        ? AppConstants.accentColor
-                        : AppConstants.secondaryBackground,
+                        ? context.colors.accent
+                        : context.colors.surface,
                     borderColor: isSelected
-                        ? AppConstants.accentColor
-                        : AppConstants.borderColor,
+                        ? context.colors.accent
+                        : context.colors.border,
                     onTap: () {
                       if (isSelecting) {
                         detailState?.handleGenreLongPress(genre);

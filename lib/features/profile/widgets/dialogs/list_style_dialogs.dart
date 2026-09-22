@@ -1,5 +1,6 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -88,7 +89,7 @@ class ListStyleDialogs {
 
             return Container(
               decoration: BoxDecoration(
-                color: AppConstants.secondaryBackground,
+                color: context.colors.surface,
                 borderRadius: BorderRadius.vertical(
                   top: Radius.circular(AppConstants.largeRadius),
                 ),
@@ -103,7 +104,7 @@ class ListStyleDialogs {
                       width: 32,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppConstants.tertiaryBackground,
+                        color: context.colors.surfaceRaised,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -114,7 +115,7 @@ class ListStyleDialogs {
                     child: Text(
                       title,
                       style: AppTypography.display(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 18,
                       ),
                     ),
@@ -125,7 +126,7 @@ class ListStyleDialogs {
                     child: Text(
                       subtitle,
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                       ),
                     ),

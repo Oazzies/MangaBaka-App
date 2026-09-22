@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The API's suggested additional seeds, shown once the user has picked two.
 ///
@@ -35,13 +36,16 @@ class MixSeedSuggestions extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.auto_awesome_rounded,
-                color: AppConstants.accentColor, size: 16),
+            Icon(
+              Icons.auto_awesome_rounded,
+              color: context.colors.accent,
+              size: 16,
+            ),
             const SizedBox(width: 6),
             Text(
               l10n.translate('mix_seed_suggestions'),
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
@@ -84,14 +88,14 @@ class _LoadingRow extends StatelessWidget {
           height: 14,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: AppConstants.accentColor,
+            color: context.colors.accent,
           ),
         ),
         const SizedBox(width: 10),
         Text(
           label,
           style: AppTypography.sans(
-            color: AppConstants.textMutedColor,
+            color: context.colors.textMuted,
             fontSize: 13,
           ),
         ),
@@ -113,7 +117,7 @@ class _SuggestionCard extends StatelessWidget {
       child: Container(
         width: 200,
         decoration: BoxDecoration(
-          color: AppConstants.secondaryBackground,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(AppConstants.denseRadius),
         ),
         child: Row(
@@ -127,7 +131,7 @@ class _SuggestionCard extends StatelessWidget {
                 width: 46,
                 height: double.infinity,
                 child: suggestion.thumbnailUrl.isEmpty
-                    ? Container(color: AppConstants.tertiaryBackground)
+                    ? Container(color: context.colors.surfaceRaised)
                     : WidgetUtils.networkImage(
                         url: suggestion.thumbnailUrl,
                         fit: BoxFit.cover,
@@ -140,7 +144,7 @@ class _SuggestionCard extends StatelessWidget {
               child: Text(
                 suggestion.title,
                 style: AppTypography.sans(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -154,11 +158,14 @@ class _SuggestionCard extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: AppConstants.tertiaryBackground,
+                  color: context.colors.surfaceRaised,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.add_rounded,
-                    color: AppConstants.accentColor, size: 14),
+                child: Icon(
+                  Icons.add_rounded,
+                  color: context.colors.accent,
+                  size: 14,
+                ),
               ),
             ),
           ],

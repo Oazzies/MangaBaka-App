@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_dialog.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SearchFilterCategoriesSection extends StatelessWidget {
   final SearchFilters filters;
@@ -38,7 +38,7 @@ class SearchFilterCategoriesSection extends StatelessWidget {
       builder: (context) {
         return Container(
           decoration: BoxDecoration(
-            color: AppConstants.primaryBackground,
+            color: context.colors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: FilterListDialog(
@@ -99,9 +99,8 @@ class SearchFilterCategoriesSection extends StatelessWidget {
                 nameKey: 'name',
                 includes: filters.tag,
                 excludes: filters.tagNot,
-                onApply: (inc, exc) => onFiltersChanged(
-                  filters.copyWith(tag: inc, tagNot: exc),
-                ),
+                onApply: (inc, exc) =>
+                    onFiltersChanged(filters.copyWith(tag: inc, tagNot: exc)),
               ),
             ),
           ],

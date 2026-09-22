@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/browse/widgets/search/search_bar_controll
 import 'package:mangabaka_app/features/browse/widgets/search/search_filter_sheet_launcher.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/search_suggestions_panel.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/features/browse/widgets/search/search_bar_controller.dart'
     show SuggestionRequest;
@@ -225,14 +226,15 @@ class _SearchBarShellState extends State<SearchBarShell> {
     // Kerning is disabled so the ghost span lines up exactly with the typed
     // text; with it on, the completion visibly shifts as it is accepted.
     const features = [FontFeature.disable('kern')];
-    final baseStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppConstants.textColor,
-              fontSize: 16,
-              letterSpacing: 0,
-              fontFeatures: features,
-            ) ??
+    final baseStyle =
+        Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: context.colors.text,
+          fontSize: 16,
+          letterSpacing: 0,
+          fontFeatures: features,
+        ) ??
         TextStyle(
-          color: AppConstants.textColor,
+          color: context.colors.text,
           fontSize: 16,
           letterSpacing: 0,
           fontFeatures: features,
@@ -258,21 +260,25 @@ class _SearchBarShellState extends State<SearchBarShell> {
       decoration: InputDecoration(
         hintText: l10n.translate('search_hint'),
         hintStyle: AppTypography.sans(
-          color: AppConstants.textMutedColor,
+          color: context.colors.textMuted,
           fontSize: 16,
         ),
         prefixIcon: widget.onBackTap == null
-            ? Icon(Icons.search, color: AppConstants.textColor)
+            ? Icon(Icons.search, color: context.colors.text)
             : IconButton(
-                icon: Icon(Icons.arrow_back_rounded,
-                    color: AppConstants.textColor),
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  color: context.colors.text,
+                ),
                 onPressed: () {
                   _controller.clear();
                   widget.onBackTap!();
                 },
               ),
-        prefixIconConstraints:
-            const BoxConstraints(minWidth: 48, minHeight: 48),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
+        ),
         suffixIcon: MBSearchBarSuffix(
           controllerText: _text.text,
           onClear: _controller.clear,
@@ -281,17 +287,19 @@ class _SearchBarShellState extends State<SearchBarShell> {
           currentFilters: _filters,
         ),
         filled: true,
-        fillColor: AppConstants.tertiaryBackground,
+        fillColor: context.colors.surfaceRaised,
         border: border,
         enabledBorder: border,
         // Amber ring on focus: the pill is otherwise identical focused and
         // unfocused, which leaves keyboard users with no cue at all.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-          borderSide: BorderSide(color: AppConstants.accentColor, width: 1.5),
+          borderSide: BorderSide(color: context.colors.accent, width: 1.5),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 20,
+        ),
       ),
     );
   }

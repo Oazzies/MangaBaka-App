@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesDetailSkeleton extends StatefulWidget {
   final bool isWide;
@@ -49,10 +49,7 @@ class _SeriesDetailSkeletonState extends State<SeriesDetailSkeleton>
       animation: _controller,
       builder: (context, child) {
         final opacity = 0.3 + (_controller.value * 0.4);
-        return Opacity(
-          opacity: opacity,
-          child: child,
-        );
+        return Opacity(opacity: opacity, child: child);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +83,10 @@ class _SeriesDetailSkeletonState extends State<SeriesDetailSkeleton>
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: List.generate(6, (_) => _skeletonBox(width: 90, height: 35)),
+            children: List.generate(
+              6,
+              (_) => _skeletonBox(width: 90, height: 35),
+            ),
           ),
         ],
       ),
@@ -98,7 +98,7 @@ class _SeriesDetailSkeletonState extends State<SeriesDetailSkeleton>
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppConstants.tertiaryBackground,
+        color: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(8),
       ),
     );

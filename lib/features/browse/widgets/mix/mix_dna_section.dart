@@ -4,6 +4,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/models/mix_result.dart';
 import 'package:mangabaka_app/features/browse/widgets/mix/mix_section_header.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The "DNA" readout: which traits the recommendations were actually drawn
 /// from, weighted.
@@ -51,7 +52,7 @@ class MixDnaSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppConstants.secondaryBackground,
+              color: context.colors.surface,
               borderRadius: BorderRadius.circular(AppConstants.cardRadius),
             ),
             child: Column(
@@ -67,13 +68,13 @@ class MixDnaSection extends StatelessWidget {
                   Divider(
                     height: 1,
                     thickness: 1,
-                    color: AppConstants.borderColor,
+                    color: context.colors.border,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Additional DNA elements:',
                     style: AppTypography.sans(
-                      color: AppConstants.textMutedColor,
+                      color: context.colors.textMuted,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -117,7 +118,7 @@ class _DnaBar extends StatelessWidget {
               Text(
                 tag.name,
                 style: AppTypography.sans(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -125,7 +126,7 @@ class _DnaBar extends StatelessWidget {
               Text(
                 '${(fraction * 100).round()}%',
                 style: AppTypography.sans(
-                  color: AppConstants.accentColor,
+                  color: context.colors.accent,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -138,7 +139,7 @@ class _DnaBar extends StatelessWidget {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: AppConstants.tertiaryBackground,
+                  color: context.colors.surfaceRaised,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -149,7 +150,7 @@ class _DnaBar extends StatelessWidget {
                 child: Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: AppConstants.accentColor,
+                    color: context.colors.accent,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -172,13 +173,13 @@ class _DnaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppConstants.tertiaryBackground,
+        color: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         name,
         style: AppTypography.sans(
-          color: AppConstants.textColor.withValues(alpha: 0.8),
+          color: context.colors.text.withValues(alpha: 0.8),
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),

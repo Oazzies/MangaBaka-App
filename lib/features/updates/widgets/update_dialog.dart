@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Dialog shown when a newer GitHub release is detected. Title is the release
 /// name, body is the release description, with "Later" and "Update now"
@@ -121,7 +122,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
       // Block back-dismissal while downloading/installing.
       canPop: !_busy,
       child: AlertDialog(
-        backgroundColor: AppConstants.secondaryBackground,
+        backgroundColor: context.colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.largeRadius),
         ),
@@ -133,12 +134,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppConstants.accentColor.withValues(alpha: 0.12),
+                color: context.colors.accent.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.system_update_rounded,
-                color: AppConstants.accentColor,
+                color: context.colors.accent,
                 size: 24,
               ),
             ),
@@ -147,7 +148,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               child: Text(
                 release.displayName,
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 18,
                 ),
               ),
@@ -164,7 +165,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 'A new version (${release.tagName}) is available. '
                 'You have ${AppConstants.appVersion}.',
                 style: AppTypography.sans(
-                  color: AppConstants.textMutedColor,
+                  color: context.colors.textMuted,
                   fontSize: 13,
                   height: 1.4,
                 ),
@@ -179,7 +180,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           ? 'No release notes provided.'
                           : release.body.trim(),
                       style: AppTypography.sans(
-                        color: AppConstants.textColor,
+                        color: context.colors.text,
                         fontSize: 14,
                         height: 1.5,
                       ),
@@ -194,8 +195,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   child: LinearProgressIndicator(
                     value: _progress == 0 ? null : _progress,
                     minHeight: 6,
-                    backgroundColor: AppConstants.tertiaryBackground,
-                    color: AppConstants.accentColor,
+                    backgroundColor: context.colors.surfaceRaised,
+                    color: context.colors.accent,
                   ),
                 ),
               ],
@@ -208,7 +209,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppConstants.accentColor,
+                        color: context.colors.accent,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -217,7 +218,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           ? 'Launching installer — the app will close.'
                           : 'Opening installer…',
                       style: AppTypography.sans(
-                        color: AppConstants.textMutedColor,
+                        color: context.colors.textMuted,
                         fontSize: 13,
                       ),
                     ),
@@ -229,11 +230,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppConstants.errorColor.withValues(alpha: 0.05),
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.denseRadius),
+                    color: context.colors.error.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.denseRadius,
+                    ),
                     border: Border.all(
-                      color: AppConstants.errorColor.withValues(alpha: 0.2),
+                      color: context.colors.error.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Row(
@@ -241,7 +243,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     children: [
                       Icon(
                         Icons.error_outline_rounded,
-                        color: AppConstants.errorColor,
+                        color: context.colors.error,
                         size: 18,
                       ),
                       const SizedBox(width: 10),
@@ -250,7 +252,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           'Update failed. You can retry or download it '
                           'manually from the release page.',
                           style: AppTypography.sans(
-                            color: AppConstants.errorColor.withValues(alpha: 0.9),
+                            color: context.colors.error.withValues(alpha: 0.9),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -272,7 +274,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
             child: Text(
               'Later',
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -281,11 +283,14 @@ class _UpdateDialogState extends State<UpdateDialog> {
           FilledButton(
             onPressed: _busy ? null : _onUpdateNow,
             style: FilledButton.styleFrom(
-              backgroundColor: AppConstants.accentColor,
-              foregroundColor: AppConstants.onAccent,
-              disabledBackgroundColor:
-                  AppConstants.accentColor.withValues(alpha: 0.5),
-              disabledForegroundColor: Colors.white70,
+              backgroundColor: context.colors.accent,
+              foregroundColor: context.colors.onAccent,
+              disabledBackgroundColor: context.colors.accent.withValues(
+                alpha: 0.5,
+              ),
+              disabledForegroundColor: context.colors.onAccent.withValues(
+                alpha: 0.7,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppConstants.pillRadius),

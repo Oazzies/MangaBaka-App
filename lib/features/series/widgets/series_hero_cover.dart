@@ -1,10 +1,10 @@
 import 'package:mangabaka_app/features/series/widgets/unblur_warning.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/screens/full_screen_image_screen.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesHeroCover extends StatefulWidget {
   final Series series;
@@ -68,14 +68,13 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
               borderRadius: BorderRadius.circular(16),
               border: _hovered
                   ? Border.all(
-                      color: AppConstants.accentColor.withValues(alpha: 0.6),
+                      color: context.colors.accent.withValues(alpha: 0.6),
                       width: 2,
                     )
                   : Border.all(color: Colors.transparent, width: 2),
               boxShadow: [
                 BoxShadow(
-                  color: AppConstants.primaryBackground.withValues(
-                      alpha: _hovered ? 0.4 : 0.6),
+                  color: context.colors.shadowAt(_hovered ? 0.4 : 0.6),
                   blurRadius: _hovered ? 28 : 20,
                   offset: const Offset(0, 10),
                 ),
@@ -86,7 +85,8 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
               child: ListenableBuilder(
                 listenable: SettingsManager(),
                 builder: (context, _) {
-                  final isBlurred = SettingsManager().blurredContentRatings.contains(widget.series.contentRating.toLowerCase());
+                  final isBlurred = SettingsManager().blurredContentRatings
+                      .contains(widget.series.contentRating.toLowerCase());
                   return WidgetUtils.networkImage(
                     url: widget.series.coverUrl,
                     height: widget.height,

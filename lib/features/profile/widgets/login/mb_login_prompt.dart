@@ -1,7 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/profile/widgets/login/mb_login_button.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class MBLoginPrompt extends StatelessWidget {
   final VoidCallback onLogin;
@@ -22,10 +22,7 @@ class MBLoginPrompt extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: AppTypography.sans(
-              fontSize: 18,
-              color: AppConstants.textColor,
-            ),
+            style: AppTypography.sans(fontSize: 18, color: context.colors.text),
           ),
           const SizedBox(height: 20),
           MBLoginButton(onPressed: onLogin),

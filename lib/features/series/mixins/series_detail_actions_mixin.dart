@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   LibraryService get libraryService;
@@ -58,14 +59,23 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: ProgressUpdateDialog(
-          initialValue: (isChapter ? entry.progressChapter : entry.progressVolume) ?? 0,
-          title: isChapter ? l10n.translate('update_chapters') : l10n.translate('update_volumes'),
+          initialValue:
+              (isChapter ? entry.progressChapter : entry.progressVolume) ?? 0,
+          title: isChapter
+              ? l10n.translate('update_chapters')
+              : l10n.translate('update_volumes'),
           maxValue: isChapter ? series.totalChapters : series.finalVolume,
           onUpdate: (value) {
             if (isChapter) {
-              libraryService.updateLibraryEntryProgress(series.id, progressChapter: value);
+              libraryService.updateLibraryEntryProgress(
+                series.id,
+                progressChapter: value,
+              );
             } else {
-              libraryService.updateLibraryEntryProgress(series.id, progressVolume: value);
+              libraryService.updateLibraryEntryProgress(
+                series.id,
+                progressVolume: value,
+              );
             }
           },
         ),
@@ -88,11 +98,11 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
         builder: (context) => Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            color: AppConstants.primaryBackground,
+            color: context.colors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
+                color: context.colors.shadowAt(0.5),
                 blurRadius: 20,
                 offset: const Offset(0, -5),
               ),
@@ -107,7 +117,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 20),
                   decoration: BoxDecoration(
-                    color: AppConstants.textMutedColor.withValues(alpha: 0.2),
+                    color: context.colors.textMuted.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -117,17 +127,23 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
                   onTap: () {
                     Navigator.pop(context);
                     final box = this.context.findRenderObject() as RenderBox?;
-                    SharePlus.instance.share(ShareParams(
-                      text: link,
-                      sharePositionOrigin: box != null
-                          ? box.localToGlobal(Offset.zero) & box.size
-                          : null,
-                    ));
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text: link,
+                        sharePositionOrigin: box != null
+                            ? box.localToGlobal(Offset.zero) & box.size
+                            : null,
+                      ),
+                    );
                   },
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Divider(height: 1, thickness: 0.5, color: AppConstants.textColor.withValues(alpha: 0.1)),
+                  child: Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: context.colors.text.withValues(alpha: 0.1),
+                  ),
                 ),
                 _buildShareOption(
                   icon: Icons.copy_rounded,
@@ -158,22 +174,22 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
       leading: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppConstants.accentColor.withValues(alpha: 0.1),
+          color: context.colors.accent.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: AppConstants.accentColor, size: 24),
+        child: Icon(icon, color: context.colors.accent, size: 24),
       ),
       title: Text(
         title,
         style: AppTypography.sans(
-          color: AppConstants.textColor,
+          color: context.colors.text,
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
       ),
       trailing: Icon(
         Icons.chevron_right_rounded,
-        color: AppConstants.textMutedColor.withValues(alpha: 0.5),
+        color: context.colors.textMuted.withValues(alpha: 0.5),
       ),
     );
   }
@@ -183,13 +199,10 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppConstants.secondaryBackground,
+        backgroundColor: context.colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.largeRadius),
-          side: BorderSide(
-            color: AppConstants.tertiaryBackground,
-            width: 1.5,
-          ),
+          side: BorderSide(color: context.colors.surfaceRaised, width: 1.5),
         ),
         titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
         contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -199,12 +212,12 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppConstants.errorColor.withValues(alpha: 0.1),
+                color: context.colors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.delete_sweep_rounded,
-                color: AppConstants.errorColor,
+                color: context.colors.error,
                 size: 24,
               ),
             ),
@@ -213,7 +226,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
               child: Text(
                 l10n.translate('delete_from_library').toUpperCase(),
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: context.colors.text,
                   fontSize: 18,
                 ),
               ),
@@ -222,7 +235,11 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
         ),
         content: Text(
           l10n.translate('delete_confirmation'),
-          style: AppTypography.sans(color: AppConstants.textMutedColor, fontSize: 15, height: 1.4),
+          style: AppTypography.sans(
+            color: context.colors.textMuted,
+            fontSize: 15,
+            height: 1.4,
+          ),
         ),
         actions: [
           TextButton(
@@ -233,7 +250,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
             child: Text(
               l10n.translate('cancel'),
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -256,8 +273,8 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
               }
             },
             style: FilledButton.styleFrom(
-              backgroundColor: AppConstants.errorColor,
-              foregroundColor: Colors.white,
+              backgroundColor: context.colors.error,
+              foregroundColor: context.colors.on(context.colors.error),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppConstants.pillRadius),
@@ -277,7 +294,9 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
     Clipboard.setData(ClipboardData(text: text));
     AppSnackBar.show(
       context,
-      LocalizationService().translate('copied_to_clipboard').replaceAll('{text}', text),
+      LocalizationService()
+          .translate('copied_to_clipboard')
+          .replaceAll('{text}', text),
       duration: const Duration(seconds: 2),
     );
   }
@@ -286,7 +305,10 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
     if (isAdding) return;
     setState(() => isAdding = true);
     try {
-      await libraryService.createLibraryEntry(series.id, SettingsManager().addLibraryDefaultTab);
+      await libraryService.createLibraryEntry(
+        series.id,
+        SettingsManager().addLibraryDefaultTab,
+      );
     } catch (e) {
       if (mounted) {
         AppSnackBar.show(

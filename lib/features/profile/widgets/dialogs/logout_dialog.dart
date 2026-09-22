@@ -2,6 +2,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class LogoutDialog {
   static Future<bool?> showLogoutConfirmationDialog(BuildContext context) {
@@ -9,7 +10,7 @@ class LogoutDialog {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppConstants.secondaryBackground,
+        backgroundColor: context.colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.largeRadius),
         ),
@@ -21,12 +22,12 @@ class LogoutDialog {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppConstants.errorColor.withValues(alpha: 0.1),
+                color: context.colors.error.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.logout_rounded,
-                color: AppConstants.errorColor,
+                color: context.colors.error,
                 size: 24,
               ),
             ),
@@ -34,7 +35,7 @@ class LogoutDialog {
             Text(
               l10n.translate('logout').toUpperCase(),
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 20,
               ),
             ),
@@ -47,7 +48,7 @@ class LogoutDialog {
             Text(
               'Are you sure you want to log out?',
               style: AppTypography.sans(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 16,
               ),
             ),
@@ -55,10 +56,10 @@ class LogoutDialog {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppConstants.errorColor.withValues(alpha: 0.05),
+                color: context.colors.error.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(AppConstants.denseRadius),
                 border: Border.all(
-                  color: AppConstants.errorColor.withValues(alpha: 0.1),
+                  color: context.colors.error.withValues(alpha: 0.1),
                 ),
               ),
               child: Row(
@@ -66,7 +67,7 @@ class LogoutDialog {
                 children: [
                   Icon(
                     Icons.warning_amber_rounded,
-                    color: AppConstants.errorColor,
+                    color: context.colors.error,
                     size: 18,
                   ),
                   const SizedBox(width: 10),
@@ -74,7 +75,7 @@ class LogoutDialog {
                     child: Text(
                       'Your local library data will be cleared and must be reimported when you log back in.',
                       style: AppTypography.sans(
-                        color: AppConstants.errorColor.withValues(alpha: 0.8),
+                        color: context.colors.error.withValues(alpha: 0.8),
                         fontSize: 13,
                         height: 1.4,
                       ),
@@ -94,7 +95,7 @@ class LogoutDialog {
             child: Text(
               l10n.translate('cancel'),
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -103,8 +104,8 @@ class LogoutDialog {
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
-              backgroundColor: AppConstants.errorColor,
-              foregroundColor: Colors.white,
+              backgroundColor: context.colors.error,
+              foregroundColor: context.colors.on(context.colors.error),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppConstants.pillRadius),

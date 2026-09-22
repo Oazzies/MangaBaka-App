@@ -17,6 +17,7 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Add many series to the library from a pasted list of titles.
 ///
@@ -165,11 +166,11 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppConstants.secondaryBackground,
+        backgroundColor: context.colors.surface,
         title: Text(
           title.toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 18,
           ),
         ),
@@ -177,7 +178,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
           controller: field,
           autofocus: true,
           onSubmitted: (v) => Navigator.pop(context, v),
-          style: AppTypography.sans(color: AppConstants.textColor),
+          style: AppTypography.sans(color: context.colors.text),
           decoration: InputDecoration(labelText: label),
         ),
         actions: [
@@ -221,11 +222,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
       Navigator.of(context).pop();
     } catch (_) {
       if (!mounted) return;
-      AppSnackBar.show(
-        context,
-        l10n.translate('failed_to_add'),
-        isError: true,
-      );
+      AppSnackBar.show(context, l10n.translate('failed_to_add'), isError: true);
     }
   }
 
@@ -235,7 +232,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
 
     if (DesktopLayout.isActive(context)) {
       return Scaffold(
-        backgroundColor: AppConstants.primaryBackground,
+        backgroundColor: context.colors.background,
         body: ListenableBuilder(
           listenable: _controller,
           builder: (context, _) => !getIt<ProfileAuthService>().isLoggedIn
@@ -261,7 +258,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       appBar: mbScreenAppBar(title: l10n.translate('import_list')),
       body: WidgetUtils.responsiveConstraint(
         maxWidth: 760,
@@ -281,7 +278,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: AppTypography.sans(color: AppConstants.textMutedColor),
+        style: AppTypography.sans(color: context.colors.textMuted),
       ),
     ),
   );
@@ -295,7 +292,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
         Text(
           l10n.translate('import_list_subtitle'),
           style: AppTypography.sans(
-            color: AppConstants.textMutedColor,
+            color: context.colors.textMuted,
             fontSize: 14,
             height: 1.45,
           ),
@@ -305,7 +302,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
           controller: _text,
           minLines: 10,
           maxLines: 16,
-          style: AppTypography.sans(color: AppConstants.textColor),
+          style: AppTypography.sans(color: context.colors.text),
           decoration: InputDecoration(
             hintText: l10n.translate('import_paste_hint'),
             contentPadding: const EdgeInsets.all(18),
@@ -351,12 +348,12 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
             onChanged: (v) => setState(() => _useStates = v),
             title: Text(
               l10n.translate('import_use_statuses'),
-              style: AppTypography.sans(color: AppConstants.textColor),
+              style: AppTypography.sans(color: context.colors.text),
             ),
             subtitle: Text(
               l10n.translate('import_use_statuses_subtitle'),
               style: AppTypography.sans(
-                color: AppConstants.textMutedColor,
+                color: context.colors.textMuted,
                 fontSize: 12,
               ),
             ),
@@ -377,16 +374,16 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
           child: Text(
             l10n.translate('import_format').toUpperCase(),
             style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 11.5,
             ),
           ),
         ),
         DropdownButton<ImportFormat>(
           value: _format,
-          dropdownColor: AppConstants.secondaryBackground,
+          dropdownColor: context.colors.surface,
           underline: const SizedBox.shrink(),
-          style: AppTypography.sans(color: AppConstants.textColor),
+          style: AppTypography.sans(color: context.colors.text),
           items: [
             for (final f in ImportFormat.values)
               DropdownMenuItem(
@@ -409,16 +406,16 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
           child: Text(
             l10n.translate('import_add_as').toUpperCase(),
             style: AppTypography.monoLabel(
-              color: AppConstants.textMutedColor,
+              color: context.colors.textMuted,
               fontSize: 11.5,
             ),
           ),
         ),
         DropdownButton<String>(
           value: _controller.state,
-          dropdownColor: AppConstants.secondaryBackground,
+          dropdownColor: context.colors.surface,
           underline: const SizedBox.shrink(),
-          style: AppTypography.sans(color: AppConstants.textColor),
+          style: AppTypography.sans(color: context.colors.text),
           items: [
             for (final s in _states)
               DropdownMenuItem(value: s, child: Text(l10n.translate(s))),
@@ -440,8 +437,8 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
         if (c.isMatching)
           LinearProgressIndicator(
             value: c.progress,
-            color: AppConstants.accentColor,
-            backgroundColor: AppConstants.tertiaryBackground,
+            color: context.colors.accent,
+            backgroundColor: context.colors.surfaceRaised,
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
@@ -454,7 +451,7 @@ class _BulkImportScreenState extends State<BulkImportScreen> {
                       .replaceAll('{selected}', '${c.selectedCount}')
                       .replaceAll('{total}', '${c.rows.length}'),
                   style: AppTypography.monoLabel(
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                     fontSize: 11.5,
                   ),
                 ),
@@ -544,7 +541,7 @@ class _RowTile extends StatelessWidget {
     );
 
     return Material(
-      color: AppConstants.secondaryBackground,
+      color: context.colors.surface,
       borderRadius: BorderRadius.circular(AppConstants.cardRadius),
       child: InkWell(
         onTap: row.canSelect ? onToggle : null,
@@ -564,7 +561,7 @@ class _RowTile extends StatelessWidget {
                           fit: BoxFit.cover,
                           memCacheWidth: 120,
                         )
-                      : Container(color: AppConstants.tertiaryBackground),
+                      : Container(color: context.colors.surfaceRaised),
                 ),
               ),
               const SizedBox(width: 12),
@@ -578,8 +575,8 @@ class _RowTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.sans(
                         color: muted
-                            ? AppConstants.textMutedColor
-                            : AppConstants.textColor,
+                            ? context.colors.textMuted
+                            : context.colors.text,
                         fontWeight: FontWeight.w600,
                         fontSize: 14.5,
                       ),
@@ -590,7 +587,7 @@ class _RowTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTypography.sans(
-                          color: AppConstants.textMutedColor,
+                          color: context.colors.textMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -599,8 +596,8 @@ class _RowTile extends StatelessWidget {
                         _status.toUpperCase(),
                         style: AppTypography.monoLabel(
                           color: row.status == ImportRowStatus.inLibrary
-                              ? AppConstants.accentColor
-                              : AppConstants.textMutedColor,
+                              ? context.colors.accent
+                              : context.colors.textMuted,
                           fontSize: 10.5,
                         ),
                       ),
@@ -612,7 +609,7 @@ class _RowTile extends StatelessWidget {
                   tooltip: l10n.translate('import_change_match'),
                   icon: Icon(
                     Icons.swap_horiz_rounded,
-                    color: AppConstants.textMutedColor,
+                    color: context.colors.textMuted,
                   ),
                   onSelected: onChange,
                   itemBuilder: (_) => [

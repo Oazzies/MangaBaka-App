@@ -16,6 +16,7 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_list_controls.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -64,7 +65,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   int _currentPage = 1;
   late double _currentRandomSeed;
 
-
   String? _error;
   bool _showBackToTop = false;
 
@@ -73,7 +73,8 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     super.initState();
     _searchService = getIt<SeriesSearchService>();
     _scrollController = ScrollController();
-    _currentRandomSeed = widget.randomSeed ?? BrowseController.generateRandomSeed();
+    _currentRandomSeed =
+        widget.randomSeed ?? BrowseController.generateRandomSeed();
     _scrollController.addListener(_onScroll);
     _fetchResults(initial: true);
   }
@@ -93,7 +94,9 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
             AppConstants.scrollThresholdPx;
 
     if (isNearEnd && _hasMore && !_isLoading) {
-      _logger.fine('Near end of scroll in results, loading page: ${_currentPage + 1}');
+      _logger.fine(
+        'Near end of scroll in results, loading page: ${_currentPage + 1}',
+      );
       _fetchResults(initial: false);
     }
 
@@ -108,7 +111,9 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   Future<void> _fetchResults({bool initial = false}) async {
     if (_isLoading) return;
 
-    _logger.info('Fetching results for "${widget.sortType}" (sortBy: ${widget.sortBy}), page: $_currentPage, initial: $initial');
+    _logger.info(
+      'Fetching results for "${widget.sortType}" (sortBy: ${widget.sortBy}), page: $_currentPage, initial: $initial',
+    );
     setState(() {
       _isLoading = true;
       _error = null;
@@ -138,7 +143,9 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       final newResults = result.series;
       final total = result.total;
 
-      _logger.info('Fetched ${newResults.length} results for page $_currentPage (Total: $total)');
+      _logger.info(
+        'Fetched ${newResults.length} results for page $_currentPage (Total: $total)',
+      );
 
       if (!mounted) return;
 
@@ -159,7 +166,9 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
         });
       }
     } catch (e) {
-      _logger.severe('Failed to fetch results for "${widget.sortType}" at page $_currentPage: $e');
+      _logger.severe(
+        'Failed to fetch results for "${widget.sortType}" at page $_currentPage: $e',
+      );
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -167,7 +176,11 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       });
     }
   }
-  Map<String, dynamic> _buildRequestParams(bool initial, String? excludeUserId) {
+
+  Map<String, dynamic> _buildRequestParams(
+    bool initial,
+    String? excludeUserId,
+  ) {
     final params = <String, dynamic>{
       'limit': AppConstants.defaultPageLimit,
       'page': _currentPage,
@@ -198,21 +211,19 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   }
 
   void _incrementPageIfNeeded() {
-    // We increment page for all sorts except random, 
+    // We increment page for all sorts except random,
     // as random usually handles its own shuffling/seed logic
     if (widget.sortBy != 'random') {
       _currentPage++;
     }
   }
 
-
   void _navigateToDetail(Series series) {
     Navigator.push(
       context,
-      AppTransitions.slideUp(SeriesDetailScreen(
-        series: series,
-        heroTagPrefix: widget.heroTagPrefix,
-      )),
+      AppTransitions.slideUp(
+        SeriesDetailScreen(series: series, heroTagPrefix: widget.heroTagPrefix),
+      ),
     );
   }
 
@@ -246,20 +257,20 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       listenable: LocalizationService(),
       builder: (context, _) {
         return Scaffold(
-          backgroundColor: AppConstants.primaryBackground,
+          backgroundColor: context.colors.background,
           appBar: AppBar(
-            backgroundColor: AppConstants.primaryBackground,
+            backgroundColor: context.colors.background,
             elevation: 0,
             centerTitle: true,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: AppConstants.textColor),
+              icon: Icon(Icons.arrow_back, color: context.colors.text),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
               _buildTitleText().toUpperCase(),
               overflow: TextOverflow.ellipsis,
               style: AppTypography.display(
-                color: AppConstants.textColor,
+                color: context.colors.text,
                 fontSize: 17,
               ),
             ),
@@ -286,7 +297,9 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
                 child: WidgetUtils.responsiveConstraint(
                   SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: AppConstants.horizontalPadding),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppConstants.horizontalPadding,
+                      ),
                       child: BrowseResultsBody(
                         error: _error,
                         isLoading: _isLoading,
@@ -307,8 +320,11 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           floatingActionButton: _showBackToTop
               ? FloatingActionButton(
                   onPressed: _scrollToTop,
-                  backgroundColor: AppConstants.accentColor,
-                  child: Icon(Icons.arrow_upward, color: AppConstants.primaryBackground),
+                  backgroundColor: context.colors.accent,
+                  child: Icon(
+                    Icons.arrow_upward,
+                    color: context.colors.background,
+                  ),
                 )
               : null,
         );

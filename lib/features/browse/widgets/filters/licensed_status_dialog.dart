@@ -1,8 +1,8 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class LicensedStatusDialog {
   static void show({
@@ -20,7 +20,7 @@ class LicensedStatusDialog {
       builder: (BuildContext dialogContext) {
         return Container(
           decoration: BoxDecoration(
-            color: AppConstants.secondaryBackground,
+            color: dialogContext.colors.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 60),
@@ -28,12 +28,12 @@ class LicensedStatusDialog {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              _buildHeader(dialogContext),
               const SizedBox(height: 24),
               Text(
                 l10n.translate(titleKey).toUpperCase(),
                 style: AppTypography.display(
-                  color: AppConstants.textColor,
+                  color: dialogContext.colors.text,
                   fontSize: 18,
                 ),
               ),
@@ -70,13 +70,13 @@ class LicensedStatusDialog {
     );
   }
 
-  static Widget _buildHeader() {
+  static Widget _buildHeader(BuildContext context) {
     return Center(
       child: Container(
         width: 32,
         height: 4,
         decoration: BoxDecoration(
-          color: AppConstants.tertiaryBackground,
+          color: context.colors.surfaceRaised,
           borderRadius: BorderRadius.circular(2),
         ),
       ),
@@ -109,7 +109,7 @@ class _SelectionTile extends StatelessWidget {
               ? null
               : Border(
                   bottom: BorderSide(
-                    color: AppConstants.tertiaryBackground,
+                    color: context.colors.surfaceRaised,
                     width: 1,
                   ),
                 ),
@@ -119,7 +119,9 @@ class _SelectionTile extends StatelessWidget {
             Text(
               label,
               style: AppTypography.sans(
-                color: isSelected ? AppConstants.textColor : AppConstants.textMutedColor,
+                color: isSelected
+                    ? context.colors.text
+                    : context.colors.textMuted,
                 fontSize: 16,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -127,7 +129,9 @@ class _SelectionTile extends StatelessWidget {
             const Spacer(),
             Icon(
               isSelected ? Icons.check_circle : Icons.circle_outlined,
-              color: isSelected ? AppConstants.accentColor : AppConstants.borderColor.withValues(alpha: 0.3),
+              color: isSelected
+                  ? context.colors.accent
+                  : context.colors.border.withValues(alpha: 0.3),
               size: 24,
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
@@ -6,6 +7,7 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/shared/widgets/window_repaint_guard.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// A sleek, custom Windows title overlay that integrates directly into the app
 /// header without pushing the app content down.
@@ -222,34 +224,28 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
       children: [
         _AppWindowButton(
           tooltip: 'Minimize',
-          buildIcon: (color, _) => Icon(
-            Icons.remove_rounded,
-            size: 18,
-            color: color,
-          ),
+          buildIcon: (color, _) =>
+              Icon(Icons.remove_rounded, size: 18, color: color),
           onPressed: _handleMinimize,
         ),
         const SizedBox(width: 8),
         _AppWindowButton(
           tooltip: _isExpanded ? 'Restore' : 'Expand',
           buildIcon: (color, bgColor) => _isExpanded
-              ? FloatingWindowRestoreIcon(color: color, fillColor: bgColor, size: 17)
-              : Icon(
-                  Icons.crop_square_rounded,
-                  size: 18,
+              ? FloatingWindowRestoreIcon(
                   color: color,
-                ),
+                  fillColor: bgColor,
+                  size: 17,
+                )
+              : Icon(Icons.crop_square_rounded, size: 18, color: color),
           enabled: _isMaximizable,
           onPressed: _handleMaximize,
         ),
         const SizedBox(width: 8),
         _AppWindowButton(
           tooltip: 'Close',
-          buildIcon: (color, _) => Icon(
-            Icons.close_rounded,
-            size: 18,
-            color: color,
-          ),
+          buildIcon: (color, _) =>
+              Icon(Icons.close_rounded, size: 18, color: color),
           isClose: true,
           onPressed: _handleClose,
         ),
@@ -294,31 +290,30 @@ class _AppWindowButtonState extends State<_AppWindowButton> {
         height: 38,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppConstants.tertiaryBackground,
+            color: context.colors.surfaceRaised,
             borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           ),
           child: Center(
             child: widget.buildIcon(
-              AppConstants.textMutedColor.withValues(alpha: 0.3),
-              AppConstants.tertiaryBackground,
+              context.colors.textMuted.withValues(alpha: 0.3),
+              context.colors.surfaceRaised,
             ),
           ),
         ),
       );
     }
 
-    Color bgColor = AppConstants.tertiaryBackground;
-    Color iconColor = AppConstants.textColor;
+    Color bgColor = context.colors.surfaceRaised;
+    Color iconColor = context.colors.text;
 
     if (widget.isClose) {
       if (_hovered) {
-        bgColor = const Color(0xFFC42B1C);
-        iconColor = Colors.white;
+        bgColor = FixedColors.windowsClose;
+        iconColor = context.colors.on(FixedColors.windowsClose);
       }
     } else {
       if (_hovered) {
-        bgColor = AppConstants.borderColor;
-        iconColor = Colors.white;
+        bgColor = context.colors.border;
       }
     }
 
@@ -338,9 +333,7 @@ class _AppWindowButtonState extends State<_AppWindowButton> {
             color: bgColor,
             borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           ),
-          child: Center(
-            child: widget.buildIcon(iconColor, bgColor),
-          ),
+          child: Center(child: widget.buildIcon(iconColor, bgColor)),
         ),
       ),
     );
@@ -353,11 +346,7 @@ class _AppWindowButtonState extends State<_AppWindowButton> {
       );
     }
 
-    return Semantics(
-      label: widget.tooltip,
-      button: true,
-      child: button,
-    );
+    return Semantics(label: widget.tooltip, button: true, child: button);
   }
 }
 
@@ -387,10 +376,7 @@ class _FloatingWindowPainter extends CustomPainter {
   final Color color;
   final Color fillColor;
 
-  const _FloatingWindowPainter({
-    required this.color,
-    required this.fillColor,
-  });
+  const _FloatingWindowPainter({required this.color, required this.fillColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -408,7 +394,10 @@ class _FloatingWindowPainter extends CustomPainter {
     final backPath = Path()
       ..moveTo(w * 0.40, h * 0.16)
       ..lineTo(w * 0.80, h * 0.16)
-      ..arcToPoint(Offset(w * 0.84, h * 0.20), radius: const Radius.circular(1.5))
+      ..arcToPoint(
+        Offset(w * 0.84, h * 0.20),
+        radius: const Radius.circular(1.5),
+      )
       ..lineTo(w * 0.84, h * 0.60);
     canvas.drawPath(backPath, strokePaint);
 

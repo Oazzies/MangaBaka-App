@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class LogsScreen extends StatefulWidget {
   const LogsScreen({super.key});
@@ -43,19 +44,13 @@ class _LogsScreenState extends State<LogsScreen> {
   void _clearLogs() {
     LoggingService.clearLogs();
     setState(() => _logs = []);
-    AppSnackBar.show(
-      context,
-      LocalizationService().translate('logs_cleared'),
-    );
+    AppSnackBar.show(context, LocalizationService().translate('logs_cleared'));
   }
 
   void _copyLogs() {
     if (_logs.isEmpty) return;
     Clipboard.setData(ClipboardData(text: _logsText));
-    AppSnackBar.show(
-      context,
-      LocalizationService().translate('logs_copied'),
-    );
+    AppSnackBar.show(context, LocalizationService().translate('logs_copied'));
   }
 
   Future<void> _saveLogs() async {
@@ -101,25 +96,25 @@ class _LogsScreenState extends State<LogsScreen> {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
     return Scaffold(
-      backgroundColor: AppConstants.primaryBackground,
+      backgroundColor: context.colors.background,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           l10n.translate('logs').toUpperCase(),
           style: AppTypography.display(
-            color: AppConstants.textColor,
+            color: context.colors.text,
             fontSize: 20,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.close, color: AppConstants.textColor),
+          icon: Icon(Icons.close, color: context.colors.text),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           WidgetUtils.tooltip(
             message: l10n.translate('clear_logs'),
             child: IconButton(
-              icon: Icon(Icons.delete_outline, color: AppConstants.textColor),
+              icon: Icon(Icons.delete_outline, color: context.colors.text),
               onPressed: _clearLogs,
             ),
           ),
@@ -133,7 +128,7 @@ class _LogsScreenState extends State<LogsScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppConstants.secondaryBackground,
+                  color: context.colors.surface,
                   borderRadius: BorderRadius.circular(AppConstants.largeRadius),
                 ),
                 child: _logs.isEmpty
@@ -141,7 +136,7 @@ class _LogsScreenState extends State<LogsScreen> {
                         child: Text(
                           'No logs recorded yet',
                           style: AppTypography.sans(
-                            color: AppConstants.textMutedColor,
+                            color: context.colors.textMuted,
                           ),
                         ),
                       )
@@ -154,7 +149,7 @@ class _LogsScreenState extends State<LogsScreen> {
                             child: Text(
                               _logs[index],
                               style: TextStyle(
-                                color: AppConstants.textColor.withValues(
+                                color: context.colors.text.withValues(
                                   alpha: 0.8,
                                 ),
                                 fontFamily: 'monospace',
@@ -175,8 +170,8 @@ class _LogsScreenState extends State<LogsScreen> {
                       label: l10n.translate('copy_logs'),
                       icon: Icons.copy,
                       onPressed: _logs.isEmpty ? null : _copyLogs,
-                      backgroundColor: AppConstants.tertiaryBackground,
-                      foregroundColor: AppConstants.textColor,
+                      backgroundColor: context.colors.surfaceRaised,
+                      foregroundColor: context.colors.text,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -185,8 +180,8 @@ class _LogsScreenState extends State<LogsScreen> {
                       label: l10n.translate('save_logs'),
                       icon: Icons.share,
                       onPressed: _logs.isEmpty ? null : _saveLogs,
-                      backgroundColor: AppConstants.accentColor,
-                      foregroundColor: AppConstants.primaryBackground,
+                      backgroundColor: context.colors.accent,
+                      foregroundColor: context.colors.background,
                     ),
                   ),
                 ],
