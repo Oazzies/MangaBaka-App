@@ -100,7 +100,9 @@ class WindowsAuthHandler {
 
     _logger.info('Opening browser for Windows OAuth: $authUri');
 
-    // 3. Listen for redirect before launching
+    // 3. Listen for redirect before launching. A sign-in already waiting is
+    // abandoned first, so its cleanup cannot clobber this one's state.
+    cancelPending();
     final completer = Completer<String?>();
     _pending = completer;
     _pendingAuthUri = authUri;
@@ -120,6 +122,20 @@ class WindowsAuthHandler {
             return;
           }
 
+          if (completer.isCompleted) return;
+          final error = uri.queryParameters['error'];
+          if (error != null) {
+            _logger.warning('OAuth redirect returned error: $error');
+            completer.completeError(
+              error == 'access_denied'
+                  ? AuthCancelledException()
+                  : AuthException(
+                      message: 'Authorization failed: $error',
+                      code: error,
+                    ),
+            );
+            return;
+          }
           if (code != null) {
             completer.complete(code);
           }
@@ -133,8 +149,9 @@ class WindowsAuthHandler {
 
     // 4. Launch browser
     if (!await launchUrl(authUri, mode: LaunchMode.externalApplication)) {
-      sub.cancel();
+      await sub.cancel();
       _pending = null;
+      _pendingAuthUri = null;
       throw Exception('Could not launch $authUri');
     }
     onBrowserOpened?.call();
@@ -159,7 +176,7 @@ class WindowsAuthHandler {
           'code': code,
           'code_verifier': codeVerifier,
         },
-      );
+      ).timeout(_tokenTimeout);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -169,7 +186,7 @@ class WindowsAuthHandler {
         return TokenResponse(
           data['access_token'],
           data['refresh_token'],
-          DateTime.now().add(Duration(seconds: data['expires_in'] ?? 3600)),
+          _expiryFrom(data['expires_in']),
           data['id_token'],
           'Bearer',
           scopes, // Correctly passing scopes here
@@ -181,15 +198,17 @@ class WindowsAuthHandler {
       }
     } on TimeoutException {
       await sub.cancel();
-      _pending = null;
       _logger.warning('OAuth login timed out');
       throw Exception('Login timed out');
     } catch (e) {
       await sub.cancel();
       rethrow;
     } finally {
-      _pending = null;
-      _pendingAuthUri = null;
+      // A newer sign-in may have replaced this one; leave its state alone.
+      if (identical(_pending, completer)) {
+        _pending = null;
+        _pendingAuthUri = null;
+      }
     }
   }
 
@@ -212,7 +231,7 @@ class WindowsAuthHandler {
         'refresh_token': refreshToken,
         'scope': scopes.join(' '),
       },
-    );
+    ).timeout(_tokenTimeout);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -222,7 +241,7 @@ class WindowsAuthHandler {
         data['access_token'],
         data['refresh_token'] ??
             refreshToken, // IdPs might not return a new refresh token
-        DateTime.now().add(Duration(seconds: data['expires_in'] ?? 3600)),
+        _expiryFrom(data['expires_in']),
         data['id_token'],
         'Bearer',
         scopes,
@@ -238,6 +257,22 @@ class WindowsAuthHandler {
         responseBody: response.body,
       );
     }
+  }
+
+  /// Bound on a token-endpoint round trip. Refreshes are single-flight in
+  /// ProfileAuthService, so one that never returned would stall every
+  /// authenticated request behind it.
+  static const _tokenTimeout = Duration(seconds: 30);
+
+  /// `expires_in` is specified as an integer, but some servers send a string
+  /// or a double; any of those would otherwise throw a TypeError here.
+  static DateTime _expiryFrom(Object? raw) {
+    final seconds = switch (raw) {
+      final num n => n.toInt(),
+      final String s => int.tryParse(s) ?? 3600,
+      _ => 3600,
+    };
+    return DateTime.now().add(Duration(seconds: seconds));
   }
 
   static String _generateRandomString(int length) {
