@@ -162,14 +162,25 @@ class ProfileAuthService extends ChangeNotifier {
   Future<void> _persistTokens(TokenResponse response) async {
     try {
       await _storage.write(AuthStorage.kAccessToken, response.accessToken);
-      await _storage.write(AuthStorage.kRefreshToken, response.refreshToken);
-      await _storage.write(AuthStorage.kIdToken, response.idToken);
+      // A refresh response may omit the refresh/id token when the provider
+      // does not rotate them. Writing null would delete the stored one and
+      // break the next refresh, so only overwrite with a real value.
+      if (response.refreshToken?.isNotEmpty ?? false) {
+        await _storage.write(AuthStorage.kRefreshToken, response.refreshToken);
+      }
+      if (response.idToken?.isNotEmpty ?? false) {
+        await _storage.write(AuthStorage.kIdToken, response.idToken);
+      }
       final exp = response.accessTokenExpirationDateTime
           ?.toUtc()
           .toIso8601String();
       if (exp != null) {
         _logger.fine('Token expiration set to: $exp');
         await _storage.write(AuthStorage.kAccessTokenExp, exp);
+      } else {
+        // An expiry left over from the previous token would be wrong for
+        // this one; without one, refresh is attempted only on demand.
+        await _storage.delete(AuthStorage.kAccessTokenExp);
       }
     } catch (e, st) {
       _logger.severe('Failed to persist tokens', e, st);

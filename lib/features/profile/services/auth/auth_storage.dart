@@ -59,21 +59,38 @@ class AuthStorage {
     }
   }
 
+  static const _allKeys = [
+    kAccessToken,
+    kRefreshToken,
+    kIdToken,
+    kAccessTokenExp,
+    kProfileCache,
+  ];
+
+  /// Deletes [key] from secure storage *and* from the SharedPreferences
+  /// fallback — [read] consults the fallback whenever secure storage has no
+  /// value, so a copy left there would resurrect a deleted token.
   Future<void> delete(String key) async {
     try {
       await _storage.delete(key: key);
-    } on PlatformException {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(key);
+    } on PlatformException catch (e) {
+      _logger.warning('Secure storage delete error for key $key: $e');
     }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
   }
 
+  /// Removes every auth value. Only this class's keys are touched in the
+  /// fallback store: SharedPreferences also holds every app setting.
   Future<void> deleteAll() async {
     try {
       await _storage.deleteAll();
-    } on PlatformException {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
+    } on PlatformException catch (e) {
+      _logger.warning('Secure storage deleteAll error: $e');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in _allKeys) {
+      await prefs.remove(key);
     }
   }
 
