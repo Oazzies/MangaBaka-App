@@ -61,33 +61,46 @@ class DiscoveryQueueController extends ChangeNotifier {
 
   bool get hasItems => _queue.isNotEmpty;
 
+  bool _disposed = false;
+
+  /// Bumped per [loadQueue]; a load that a newer one (restart) superseded
+  /// drops its result instead of replacing the newer queue.
+  int _loadGeneration = 0;
+
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
   /// Loads or reloads the discovery queue.
   Future<void> loadQueue({int limit = 20}) async {
+    final generation = ++_loadGeneration;
     _isLoading = true;
     _errorMessage = null;
     _isCompleted = false;
-    notifyListeners();
+    _notify();
 
     if (!_authService.isLoggedIn) {
       _isLoading = false;
       _isReady = false;
       _errorMessage = 'import_login_required';
-      notifyListeners();
+      _notify();
       return;
     }
 
     try {
       final readiness = await _homeService.fetchForYouReadiness();
+      if (_disposed || generation != _loadGeneration) return;
       if (readiness != null && !readiness.isReady) {
         _isReady = false;
         _isLoading = false;
         _queue = const [];
-        notifyListeners();
+        _notify();
         return;
       }
 
       _isReady = true;
       final items = await _homeService.fetchForYou(limit: limit);
+      if (_disposed || generation != _loadGeneration) return;
       _queue = items;
       _currentIndex = 0;
       _reviewedCount = 0;
@@ -96,12 +109,13 @@ class DiscoveryQueueController extends ChangeNotifier {
       _isLoading = false;
       _logger.info('DiscoveryQueue loaded ${items.length} series');
     } catch (e, st) {
+      if (_disposed || generation != _loadGeneration) return;
       _logger.severe('Failed to load discovery queue: $e', e, st);
       _errorMessage = e.toString();
       _isLoading = false;
     }
 
-    notifyListeners();
+    _notify();
   }
 
   /// Adds the current series to the library with [state], then moves to the next.
@@ -110,7 +124,7 @@ class DiscoveryQueueController extends ChangeNotifier {
     if (series == null || _isActionInProgress) return false;
 
     _isActionInProgress = true;
-    notifyListeners();
+    _notify();
 
     try {
       await _libraryService.createLibraryEntry(series.id, state);
@@ -126,7 +140,7 @@ class DiscoveryQueueController extends ChangeNotifier {
       rethrow;
     } finally {
       _isActionInProgress = false;
-      notifyListeners();
+      _notify();
     }
   }
 
@@ -148,6 +162,7 @@ class DiscoveryQueueController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _homeService.dispose();
     super.dispose();
   }

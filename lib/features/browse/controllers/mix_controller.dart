@@ -106,6 +106,10 @@ class MixController extends ChangeNotifier {
       if (_seeds.length >= 2) {
         _fetchSeedSuggestions();
       } else {
+        // Invalidate a suggestions request still in flight for the old seed
+        // set, or its response would repopulate the list just cleared.
+        _suggestionsGeneration++;
+        _isSuggestionsLoading = false;
         _seedSuggestions = [];
         notifyListeners();
       }
@@ -170,6 +174,14 @@ class MixController extends ChangeNotifier {
   }
 
   Future<void> refresh() => _fetchMix();
+
+  @override
+  void dispose() {
+    // Responses that land after the screen closed must not notify.
+    _mixGeneration++;
+    _suggestionsGeneration++;
+    super.dispose();
+  }
 
   // ─── Fetch Seed Suggestions ──────────────────────────────────────────────
 
