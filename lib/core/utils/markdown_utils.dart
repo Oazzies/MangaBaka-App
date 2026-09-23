@@ -66,12 +66,12 @@ class MarkdownUtils {
     // Numeric decimal entities: &#123;
     text = text.replaceAllMapped(RegExp(r'&#(\d+);'), (match) {
       final code = int.tryParse(match.group(1)!);
-      return code != null ? String.fromCharCode(code) : match.group(0)!;
+      return _isValidCodePoint(code) ? String.fromCharCode(code!) : match.group(0)!;
     });
     // Numeric hex entities: &#x1f;
     text = text.replaceAllMapped(RegExp(r'&#x([0-9a-fA-F]+);'), (match) {
       final code = int.tryParse(match.group(1)!, radix: 16);
-      return code != null ? String.fromCharCode(code) : match.group(0)!;
+      return _isValidCodePoint(code) ? String.fromCharCode(code!) : match.group(0)!;
     });
 
     // 3. Normalize HTML break tags into newlines
@@ -129,6 +129,16 @@ class MarkdownUtils {
 
     return text.trim();
   }
+
+  /// `String.fromCharCode` throws a RangeError above U+10FFFF, and a lone
+  /// surrogate produces a string the text engine rejects. A description is
+  /// untrusted API text, so `&#99999999;` must be left as-is, not crash the
+  /// widget rendering it.
+  static bool _isValidCodePoint(int? code) =>
+      code != null &&
+      code >= 0 &&
+      code <= 0x10FFFF &&
+      (code < 0xD800 || code > 0xDFFF);
 
   /// Converts Markdown description into clean plain text for synopsis previews or clipboard.
   static String toPlainText(String raw) {

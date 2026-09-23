@@ -17,6 +17,13 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('MarkdownUtils.normalizeDescription', () {
+    test('leaves out-of-range numeric entities instead of throwing', () {
+      expect(
+        MarkdownUtils.normalizeDescription('a &#99999999; b &#xD800; c &#65;'),
+        'a &#99999999; b &#xD800; c A',
+      );
+    });
+
     test('handles bold markdown and bold html', () {
       final input = '**Original Webtoon:** <b>Official</b>';
       final output = MarkdownUtils.normalizeDescription(input);
