@@ -62,6 +62,10 @@ class LibrarySession extends ChangeNotifier {
 
   void _onAuthStateChanged() {
     if (_disposed) return;
+    // The auth service also notifies on every profile refresh. Only a real
+    // sign-in/sign-out should rebuild the stream and re-run the sync —
+    // otherwise each refresh resubscribes and re-emits the whole library.
+    if (_auth.isLoggedIn == _loggedIn) return;
     _logger.info(
       'Auth state changed in LibraryScreen. LoggedIn: ${_auth.isLoggedIn}',
     );
@@ -124,9 +128,12 @@ class LibrarySession extends ChangeNotifier {
 
     if (_disposed) return null;
     _logger.info('Login successful in library screen');
-    _loggedIn = true;
-    _open();
-    _safeNotify();
+    // The auth listener has normally opened the session already.
+    if (!_loggedIn) {
+      _loggedIn = true;
+      _open();
+      _safeNotify();
+    }
     return null;
   }
 
