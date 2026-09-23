@@ -35,13 +35,22 @@ class LibraryEntry {
       id: json['id']?.toString() ?? '',
       state: json['state']?.toString() ?? '',
       note: json['note']?.toString(),
-      progressChapter: (json['progress_chapter'] as num?)?.toInt(),
-      progressVolume: (json['progress_volume'] as num?)?.toInt(),
-      numberOfRereads: (json['number_of_rereads'] as num?)?.toInt(),
-      rating: (json['rating'] as num?)?.toInt(),
+      progressChapter: _asInt(json['progress_chapter']),
+      progressVolume: _asInt(json['progress_volume']),
+      numberOfRereads: _asInt(json['number_of_rereads']),
+      rating: _asInt(json['rating']),
       updatedAt: json['updated_at']?.toString(),
       createdAt: json['created_at']?.toString(),
       series: Series.fromJson(rawSeries),
     );
   }
+
+  /// Numbers that arrive as strings (`"12"`, `"12.5"`) are read rather than
+  /// thrown on: a throw drops the whole entry, and the full import then
+  /// prunes that entry from the local library as if it had been deleted.
+  static int? _asInt(Object? raw) => switch (raw) {
+        final num n => n.toInt(),
+        final String s => num.tryParse(s)?.toInt(),
+        _ => null,
+      };
 }

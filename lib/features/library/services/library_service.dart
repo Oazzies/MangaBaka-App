@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/database/database.dart' as db;
 import 'package:mangabaka_app/features/library/models/library_entry.dart' as api;
@@ -172,8 +173,24 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
       final result = await compute(_parseLibraryPage, response.body);
       _logger.info('Successfully parsed ${result.entries.length} entries for library page $page');
       return result;
+    } on AppException {
+      rethrow;
+    } on TimeoutException catch (e, st) {
+      // Mapped like every other library call, so callers that catch
+      // NetworkException (the initial sync, the retry banner) see it.
+      _logger.severe('Timed out fetching library page $page', e, st);
+      throw NetworkException(message: 'Request timed out.', code: 'TIMEOUT', originalError: e, stackTrace: st);
+    } on http.ClientException catch (e, st) {
+      _logger.severe('Network error fetching library page $page', e, st);
+      throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
+    } on SocketException catch (e, st) {
+      _logger.severe('Network error fetching library page $page', e, st);
+      throw NetworkException(message: 'Network error.', code: 'NETWORK_ERROR', originalError: e, stackTrace: st);
     } catch (e, st) {
       _logger.severe('Exception occurred while fetching library page $page: $e\n$st');
+      if (e is FormatException || e is TypeError) {
+        throw ParseException(message: 'Failed to parse library page $page', originalError: e, stackTrace: st);
+      }
       rethrow;
     }
   }
@@ -198,12 +215,27 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
 class FetchPageResult {
   final List<api.LibraryEntry> entries;
   final bool isError;
-  FetchPageResult({required this.entries, this.isError = false});
+
+  /// Entries on the page that could not be parsed and were left out. When
+  /// non-zero the page is not a complete picture of the server's library.
+  final int skipped;
+  FetchPageResult({required this.entries, this.isError = false, this.skipped = 0});
 }
 
 FetchPageResult _parseLibraryPage(String responseBody) {
-  final body = jsonDecode(responseBody) as Map<String, dynamic>;
-  final data = (body['data'] as List<dynamic>? ?? const []);
-  final entries = data.map((item) => api.LibraryEntry.fromJson(item as Map<String, dynamic>)).toList();
-  return FetchPageResult(entries: entries);
+  final body = jsonDecode(responseBody);
+  final data = body is Map ? body['data'] : null;
+  if (data is! List) return FetchPageResult(entries: []);
+  // One malformed entry must cost that entry, not the page: a throw here
+  // fails the whole sync, and it would fail identically on every retry.
+  final entries = <api.LibraryEntry>[];
+  var skipped = 0;
+  for (final item in data) {
+    try {
+      entries.add(api.LibraryEntry.fromJson(item as Map<String, dynamic>));
+    } catch (_) {
+      skipped++;
+    }
+  }
+  return FetchPageResult(entries: entries, skipped: skipped);
 }

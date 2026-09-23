@@ -49,7 +49,12 @@ List<T> parseDataList<T>(
 ) {
   final out = <T>[];
   for (final item in dataList(json)) {
-    final parsed = fromJson(item);
+    final T? parsed;
+    try {
+      parsed = fromJson(item);
+    } catch (_) {
+      continue;
+    }
     if (parsed != null) out.add(parsed);
   }
   return out;
