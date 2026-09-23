@@ -82,10 +82,16 @@ class ReleaseAsset {
   final String downloadUrl;
   final int size;
 
+  /// Lower-case hex SHA-256 of the file, from GitHub's `digest` field
+  /// (`sha256:<hex>`). Null for assets uploaded before GitHub started
+  /// publishing digests, or when the field is in another algorithm.
+  final String? sha256;
+
   const ReleaseAsset({
     required this.name,
     required this.downloadUrl,
     required this.size,
+    this.sha256,
   });
 
   factory ReleaseAsset.fromJson(Map<String, dynamic> json) {
@@ -93,7 +99,16 @@ class ReleaseAsset {
       name: (json['name'] ?? '') as String,
       downloadUrl: (json['browser_download_url'] ?? '') as String,
       size: (json['size'] ?? 0) as int,
+      sha256: _parseSha256(json['digest']),
     );
+  }
+
+  static String? _parseSha256(Object? digest) {
+    if (digest is! String) return null;
+    const prefix = 'sha256:';
+    if (!digest.toLowerCase().startsWith(prefix)) return null;
+    final hex = digest.substring(prefix.length).trim().toLowerCase();
+    return RegExp(r'^[0-9a-f]{64}$').hasMatch(hex) ? hex : null;
   }
 }
 

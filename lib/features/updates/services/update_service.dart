@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -27,6 +29,9 @@ class UpdateService {
   final http.Client _client;
 
   bool _promptedThisLaunch = false;
+
+  /// Longest silence tolerated between chunks of an update download.
+  static const _downloadStallTimeout = Duration(seconds: 30);
 
   /// Whether this platform can download and apply an update in-app. Other
   /// platforms fall back to opening the release page in a browser.
@@ -142,7 +147,13 @@ class UpdateService {
     void Function(double progress)? onProgress,
   }) async {
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}${Platform.pathSeparator}${asset.name}');
+    // The name comes from the release feed: only its last path segment is
+    // used, so it can never place the file outside the temp directory.
+    final safeName = p.basename(asset.name);
+    if (safeName.isEmpty || safeName == '.' || safeName == '..') {
+      throw NetworkException(message: 'Invalid update file name: ${asset.name}');
+    }
+    final file = File(p.join(dir.path, safeName));
     if (await file.exists()) {
       await file.delete();
     }
@@ -150,7 +161,9 @@ class UpdateService {
     final request = http.Request('GET', Uri.parse(asset.downloadUrl))
       ..headers['User-Agent'] = AppConstants.userAgent;
 
-    final response = await _client.send(request);
+    final response = await _client
+        .send(request)
+        .timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
     if (response.statusCode != 200) {
       throw NetworkException(
         message: 'Failed to download update (HTTP ${response.statusCode})',
@@ -160,17 +173,57 @@ class UpdateService {
     final total = response.contentLength ?? asset.size;
     var received = 0;
     final sink = file.openWrite();
+    // Hashed as it streams, so verifying costs no second read of the file.
+    final digestSink = _DigestSink();
+    final hasher = sha256.startChunkedConversion(digestSink);
+    var complete = false;
     try {
-      await for (final chunk in response.stream) {
+      // A connection that stalls mid-transfer would otherwise leave the
+      // progress dialog hanging forever.
+      await for (final chunk in response.stream.timeout(_downloadStallTimeout)) {
         received += chunk.length;
         sink.add(chunk);
+        hasher.add(chunk);
         if (onProgress != null && total > 0) {
           onProgress((received / total).clamp(0.0, 1.0));
         }
       }
       await sink.flush();
+      complete = true;
     } finally {
       await sink.close();
+      if (!complete && await file.exists()) await file.delete();
+    }
+
+    // A connection dropped cleanly mid-body ends the stream without an error.
+    // The caller runs this file as an installer, so a truncated one must
+    // never be returned.
+    if (total > 0 && received != total) {
+      await file.delete();
+      throw NetworkException(
+        message: 'Update download incomplete ($received of $total bytes)',
+      );
+    }
+
+    // The file is executed as an installer. A digest that does not match
+    // means corruption or tampering between GitHub and here, so it is deleted
+    // rather than run.
+    hasher.close();
+    final actual = digestSink.value.toString();
+    final expected = asset.sha256;
+    if (expected != null) {
+      if (actual != expected) {
+        await file.delete();
+        _logger.severe(
+          'Update checksum mismatch for ${asset.name}: expected $expected, got $actual',
+        );
+        throw UpdateIntegrityException();
+      }
+      _logger.info('Update checksum verified (sha256 $actual)');
+    } else {
+      _logger.warning(
+        'Release asset ${asset.name} has no published sha256; size-checked only',
+      );
     }
 
     _logger.info('Downloaded update to ${file.path} ($received bytes)');
@@ -220,6 +273,29 @@ class UpdateService {
 
   @visibleForTesting
   void dispose() => _client.close();
+}
+
+/// Thrown when a downloaded update does not match the checksum GitHub
+/// published for it. The file has already been deleted.
+class UpdateIntegrityException extends AppException {
+  UpdateIntegrityException()
+      : super(
+          message: 'The downloaded update failed its integrity check.',
+          code: 'CHECKSUM_MISMATCH',
+        );
+}
+
+/// Receives the single [Digest] a chunked hash conversion produces.
+class _DigestSink implements Sink<Digest> {
+  Digest? _value;
+
+  Digest get value => _value!;
+
+  @override
+  void add(Digest data) => _value = data;
+
+  @override
+  void close() {}
 }
 
 /// Thrown when the user denies the "install unknown apps" permission required
