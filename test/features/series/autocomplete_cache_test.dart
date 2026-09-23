@@ -43,6 +43,32 @@ void main() {
   });
 
   group('AutocompleteCache prefix matching', () {
+    test('keeps a result matching only an alternate title', () {
+      final cache = AutocompleteCache();
+      cache.put('so', [
+        const AutocompleteSeriesResult(
+          id: 1,
+          title: "Frieren: Beyond Journey's End",
+          thumbnailUrl: '',
+          allTitles: ["Frieren: Beyond Journey's End", 'Sousou no Frieren'],
+        ),
+      ]);
+
+      final hit = cache.findPrefixMatch('sousou');
+
+      expect(hit, isNotNull);
+      expect(hit!.results.single.id, 1);
+    });
+
+    test('matches words out of order within a title', () {
+      final cache = AutocompleteCache();
+      cache.put('fr', _results(['Sousou no Frieren']));
+
+      final hit = cache.findPrefixMatch('frieren sousou');
+
+      expect(hit!.results, hasLength(1));
+    });
+
     test('filters a longer cached query down for a backspace', () {
       final cache = AutocompleteCache(pageLimit: 6);
       cache.put('attack on titan', _results(['Attack on Titan']));

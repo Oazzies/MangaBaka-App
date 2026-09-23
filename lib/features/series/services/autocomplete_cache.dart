@@ -119,12 +119,27 @@ class AutocompleteCache {
     return null;
   }
 
+  /// Keeps the results the server could have returned for [query].
+  ///
+  /// The server matches on every title a series has (alternate, native,
+  /// romanized), not just the one displayed, and matches words rather than
+  /// one contiguous substring. Filtering on the display title alone dropped
+  /// results the server would have kept — and when that emptied the list,
+  /// the "exhausted" branch above declared the query provably empty and
+  /// skipped the network, so real matches never appeared.
   List<AutocompleteSeriesResult> _filter(
     List<AutocompleteSeriesResult> source,
     String query,
-  ) =>
-      source
-          .where((r) => r.title.toLowerCase().contains(query))
-          .take(pageLimit)
-          .toList();
+  ) {
+    final words = query.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    bool titleMatches(String title) {
+      final lower = title.toLowerCase();
+      return words.every(lower.contains);
+    }
+
+    return source
+        .where((r) => titleMatches(r.title) || r.allTitles.any(titleMatches))
+        .take(pageLimit)
+        .toList();
+  }
 }
