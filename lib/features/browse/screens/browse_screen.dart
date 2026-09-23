@@ -16,7 +16,6 @@ import 'package:mangabaka_app/features/browse/widgets/browse_app_bar.dart';
 import 'package:mangabaka_app/features/browse/widgets/browse_type_tabs.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_chips_row.dart';
 import 'package:mangabaka_app/features/browse/widgets/results/browse_content.dart';
-import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -43,7 +42,7 @@ class BrowseScreenState extends State<BrowseScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
 
-  // ─── Public surface, driven by MainScreen's shared top nav bar ───────────
+  // ─── Public surface ──────────────────────────────────────────────────────
 
   FocusNode get searchFocusNode => _searchFocusNode;
   BrowseController get controller => _controller;
@@ -70,12 +69,6 @@ class BrowseScreenState extends State<BrowseScreen> {
   void initState() {
     super.initState();
     _controller = BrowseController();
-    // The shared top nav bar hosts this screen's search field on wide
-    // layouts, and can only pick it up once this screen is mounted.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.findAncestorStateOfType<MainScreenState>()?.updateTopNavBar();
-    });
   }
 
   @override
@@ -186,10 +179,6 @@ class BrowseScreenState extends State<BrowseScreen> {
     return ListenableBuilder(
       listenable: Listenable.merge([LocalizationService(), _controller]),
       builder: (context, _) {
-        // On a wide layout the shared top nav bar owns the search field, so
-        // this screen neither draws its own nor treats back as "leave search".
-        final searchInNavBar = MainScreen.showSearchBarInTopNavBar(context);
-
         return Actions(
           actions: <Type, Action<Intent>>{
             SearchIntent: CallbackAction<SearchIntent>(
@@ -206,24 +195,22 @@ class BrowseScreenState extends State<BrowseScreen> {
             ),
           },
           child: PopScope(
-            canPop: !_isSearching && !searchInNavBar,
+            canPop: !_isSearching,
             onPopInvokedWithResult: (didPop, _) {
               if (didPop) return;
               _exitSearch();
             },
             child: Scaffold(
               backgroundColor: context.colors.background,
-              appBar: searchInNavBar
-                  ? null
-                  : BrowseAppBar(
-                      isSearching: _isSearching,
-                      controller: _controller,
-                      searchFocusNode: _searchFocusNode,
-                      onEnterSearch: enterSearchMode,
-                      onExitSearch: _exitSearch,
-                      onScanTap: handleBarcodeScan,
-                      onResultSelected: handleResultSelected,
-                    ),
+              appBar: BrowseAppBar(
+                isSearching: _isSearching,
+                controller: _controller,
+                searchFocusNode: _searchFocusNode,
+                onEnterSearch: enterSearchMode,
+                onExitSearch: _exitSearch,
+                onScanTap: handleBarcodeScan,
+                onResultSelected: handleResultSelected,
+              ),
               body: NotificationListener<ScrollMetricsNotification>(
                 // A change in scroll extent — results arriving, or the window
                 // resizing — can leave the list short enough that no scroll

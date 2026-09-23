@@ -169,8 +169,6 @@ class GeneralSettingsDialogs {
   ) {
     final l10n = LocalizationService();
     switch (position) {
-      case LandscapeAppBarPosition.top:
-        return l10n.translate('landscape_appbar_top');
       case LandscapeAppBarPosition.bottom:
         return l10n.translate('landscape_appbar_bottom');
       case LandscapeAppBarPosition.left:

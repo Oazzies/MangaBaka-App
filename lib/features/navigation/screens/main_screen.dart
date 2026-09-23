@@ -16,7 +16,6 @@ import 'package:mangabaka_app/features/library/screens/library_screen.dart';
 import 'package:mangabaka_app/features/library/widgets/sync_progress_overlay.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/navigation/widgets/main_nav_rail.dart';
-import 'package:mangabaka_app/features/navigation/widgets/main_top_nav_bar.dart';
 import 'package:mangabaka_app/features/news/screens/news_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/profile_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -43,24 +42,6 @@ class MainScreen extends StatefulWidget {
     mainScreenKey.currentState?._onItemTapped(index);
   }
 
-  /// Whether the top nav bar is hosting the current tab's search field, in
-  /// which case that screen must not draw its own.
-  ///
-  /// Only the top position has a horizontal run to put a field in, and only
-  /// past this width is there room for it beside the tabs.
-  static bool showSearchBarInTopNavBar(BuildContext context) {
-    if (MediaQuery.orientationOf(context) != Orientation.landscape) {
-      return false;
-    }
-    if (SettingsManager().landscapeAppBarPosition !=
-        LandscapeAppBarPosition.top) {
-      return false;
-    }
-    return MediaQuery.sizeOf(context).width >= _searchInNavBarWidth;
-  }
-
-  static const double _searchInNavBarWidth = 1050;
-
   @override
   State<MainScreen> createState() => MainScreenState();
 }
@@ -68,8 +49,8 @@ class MainScreen extends StatefulWidget {
 class MainScreenState extends State<MainScreen> {
   static final _logger = LoggingService.logger;
 
-  /// Above this width the tablet layouts apply, with the rail or top bar the
-  /// user has chosen; below it, the phone layout's bottom bar.
+  /// Above this width the tablet layouts apply, with the rail or bottom bar
+  /// the user has chosen; below it, the phone layout's bottom bar.
   static const double _tabletWidth = 600;
 
   late int _selectedIndex;
@@ -131,13 +112,6 @@ class MainScreenState extends State<MainScreen> {
     return ExcludeSemantics(child: browse);
   }
 
-  /// Rebuilds the chrome so the top nav bar can pick up a search field from a
-  /// screen that has only just mounted.
-  void updateTopNavBar() {
-    if (!mounted) return;
-    setState(() {});
-  }
-
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
     _logger.info('Tab switched to: $index');
@@ -195,18 +169,6 @@ class MainScreenState extends State<MainScreen> {
     LandscapeAppBarPosition position,
   ) {
     switch (position) {
-      case LandscapeAppBarPosition.top:
-        return Scaffold(
-          backgroundColor: context.colors.background,
-          appBar: MainTopNavBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: _onItemTapped,
-            l10n: l10n,
-            showSearchField: MainScreen.showSearchBarInTopNavBar(context),
-          ),
-          body: _withHealthBanner(_nestedContent()),
-        );
-
       case LandscapeAppBarPosition.bottom:
         // The bottom bar is the one position that keeps full-screen pushes:
         // it already sits out of the way, so a nested navigator would only

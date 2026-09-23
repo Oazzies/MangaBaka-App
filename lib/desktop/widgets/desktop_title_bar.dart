@@ -66,10 +66,13 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Draggable area across the top of the window
+          // Draggable area across the full height of the title strip, so the
+          // window can be grabbed anywhere beside the window controls rather
+          // than only in the few pixels at the very top. DragToMoveArea is
+          // hit-test transparent, so content beneath it still gets its taps.
           Expanded(
             child: SizedBox(
-              height: 8,
+              height: DesktopTitleBar.height,
               child: DragToMoveArea(
                 child: const SizedBox(
                   width: double.infinity,

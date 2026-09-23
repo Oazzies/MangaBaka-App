@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_title_bar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_window_frame.dart';
-import 'package:mangabaka_app/features/navigation/widgets/main_top_nav_bar.dart';
 import 'package:window_manager/window_manager.dart';
 
 Widget _host(Widget child) => MaterialApp(
@@ -247,32 +245,6 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('TRENDING'), findsOneWidget);
       expect(find.text('Lots of trailing controls'), findsOneWidget);
-    });
-
-    testWidgets('MainTopNavBar does not overflow at 720px width',
-        (tester) async {
-      DesktopLayout.debugOverride = true;
-
-      tester.view.physicalSize = const Size(720, 800);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      await tester.pumpWidget(
-        _host(
-          MainTopNavBar(
-            selectedIndex: 0,
-            onDestinationSelected: (_) {},
-            l10n: LocalizationService(),
-            showSearchField: true,
-          ),
-        ),
-      );
-
-      expect(tester.takeException(), isNull);
-      expect(find.byType(MainTopNavBar), findsOneWidget);
     });
 
     testWidgets(

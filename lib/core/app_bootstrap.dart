@@ -10,6 +10,7 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_theme.dart';
 import 'package:mangabaka_app/core/theme/theme_controller.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:window_manager/window_manager.dart';
@@ -23,9 +24,21 @@ import 'package:window_manager/window_manager.dart';
 class AppBootstrap {
   AppBootstrap._();
 
-  /// Smallest the desktop window may be dragged to. Below this the tablet
-  /// layouts break down and the rail crowds out the content.
-  static const Size _minWindowSize = Size(500, 700);
+  /// The OS window manager applies [WindowOptions.minimumSize] to the whole
+  /// window, including its native frame, while Flutter measures only the
+  /// client area inside that frame. This margin absorbs the frame so the
+  /// client width stays at or above [DesktopLayout.minWidth] even at the
+  /// smallest size and on scaled displays.
+  static const double _windowFrameMargin = 64;
+
+  /// Smallest the macOS and Linux window may be dragged to. Pinned to the
+  /// width the desktop (sidebar) layout needs, so the window can never shrink
+  /// into the mobile layouts — the desktop app is always the sidebar
+  /// presentation. Windows gets the same limit from its runner.
+  static const Size _minWindowSize = Size(
+    DesktopLayout.minWidth + _windowFrameMargin,
+    700,
+  );
 
   static Future<void> run() async {
     final binding = WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +77,9 @@ class AppBootstrap {
     // On Windows, hide the native title bar so the app can draw its own
     // custom styled title bar and window control buttons.
     final windowOptions = WindowOptions(
-      minimumSize: _minWindowSize,
+      // The Windows runner enforces its own, DPI-exact minimum (see
+      // windows/runner/flutter_window.cpp).
+      minimumSize: Platform.isWindows ? null : _minWindowSize,
       titleBarStyle:
           Platform.isWindows ? TitleBarStyle.hidden : TitleBarStyle.normal,
       windowButtonVisibility: !Platform.isWindows,

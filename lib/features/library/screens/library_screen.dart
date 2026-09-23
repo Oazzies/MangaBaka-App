@@ -20,7 +20,6 @@ import 'package:mangabaka_app/features/library/widgets/library_app_bar.dart';
 import 'package:mangabaka_app/features/library/widgets/library_body.dart';
 import 'package:mangabaka_app/features/library/widgets/library_status_banners.dart';
 import 'package:mangabaka_app/features/library/widgets/library_tab_bar.dart';
-import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -64,7 +63,7 @@ class LibraryScreenState extends State<LibraryScreen>
   SearchFilters _filters = SearchFilters();
   bool _isSearching = false;
 
-  // ─── Public surface, driven by MainScreen's shared top nav bar ───────────
+  // ─── Public surface ──────────────────────────────────────────────────────
 
   FocusNode get searchFocusNode => _searchFocusNode;
   Stream<List<LibraryEntry>>? get entriesStream => _session.entriesStream;
@@ -115,13 +114,6 @@ class LibraryScreenState extends State<LibraryScreen>
 
     _session = LibrarySession(onEntries: _onEntriesUpdate);
     _session.addListener(_onSessionChanged);
-
-    // The shared top nav bar hosts this screen's search field on wide
-    // layouts, and can only pick it up once this screen is mounted.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.findAncestorStateOfType<MainScreenState>()?.updateTopNavBar();
-    });
   }
 
   @override
@@ -262,11 +254,7 @@ class LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  /// Null when the shared top nav bar is hosting the search field instead —
-  /// two search fields on one screen would be a confusing duplicate.
   PreferredSizeWidget? _buildAppBar(BuildContext context) {
-    if (MainScreen.showSearchBarInTopNavBar(context)) return null;
-
     return LibraryAppBar(
       isSearching: _isSearching,
       isLandscape: MediaQuery.orientationOf(context) == Orientation.landscape,
