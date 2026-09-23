@@ -123,8 +123,24 @@ mixin LibraryCrudMixin on LibraryServiceBase {
   }
 
   /// Restores local progress to the values captured before an optimistic update.
-  Future<void> _rollbackProgress(String seriesId, db.LibraryEntryWithSeries? snapshot) async {
+  ///
+  /// Skipped when the row no longer holds what this update wrote: a later
+  /// update has landed since (rapid +1 taps), and rolling back to this
+  /// update's snapshot would overwrite that newer, possibly successful value.
+  Future<void> _rollbackProgress(
+    String seriesId,
+    db.LibraryEntryWithSeries? snapshot, {
+    int? wroteChapter,
+    int? wroteVolume,
+  }) async {
     if (snapshot == null) return;
+    final current = await database.libraryEntriesDao.getEntryBySeriesId(seriesId);
+    if (current == null) return;
+    if ((wroteChapter != null && current.libraryEntry.progressChapter != wroteChapter) ||
+        (wroteVolume != null && current.libraryEntry.progressVolume != wroteVolume)) {
+      logger.info('Skipping progress rollback for $seriesId: superseded by a newer update');
+      return;
+    }
     await database.libraryEntriesDao.updateEntryProgress(
       seriesId,
       progressChapter: snapshot.libraryEntry.progressChapter,
@@ -169,7 +185,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
       if (response.statusCode != 200) {
         logger.severe('Failed to update entry progress for $seriesId. Status: ${response.statusCode}');
-        await _rollbackProgress(seriesId, snapshot);
+        // Rolled back once, in the catch below.
         throw ApiException(
           message: 'Failed to update entry progress',
           statusCode: response.statusCode,
@@ -181,7 +197,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       logger.info('Successfully updated progress for $seriesId on server');
     } catch (e, st) {
       logger.severe('Error updating entry progress for $seriesId: $e');
-      await _rollbackProgress(seriesId, snapshot);
+      try {
+        await _rollbackProgress(
+          seriesId,
+          snapshot,
+          wroteChapter: progressChapter,
+          wroteVolume: progressVolume,
+        );
+      } catch (rollbackError) {
+        logger.severe('Progress rollback failed for $seriesId: $rollbackError');
+      }
       _rethrowAsAppException(e, st, seriesId, 'update entry progress');
     }
   }
@@ -201,7 +226,14 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       _assertAuthorized(response, seriesId);
       if (response.statusCode == 201) {
         logger.info('Successfully created library entry for $seriesId. Syncing local DB...');
-        await syncLibrary();
+        // The entry exists on the server now. A failed follow-up sync must
+        // not be reported as a failed create — the caller would retry and
+        // the UI would claim the series was not added when it was.
+        try {
+          await syncLibrary();
+        } catch (e) {
+          logger.warning('Sync after creating $seriesId failed: $e');
+        }
       } else {
         logger.severe('Failed to create library entry for $seriesId. Status: ${response.statusCode}');
         throw ApiException(
@@ -272,7 +304,15 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           );
         }
         anyAccepted = true;
-        final data = (jsonDecode(response.body) as Map)['data'];
+        // The chunk is already accepted; an unexpected body only costs the
+        // count, not the remaining chunks.
+        Object? data;
+        try {
+          final decoded = jsonDecode(response.body);
+          data = decoded is Map ? decoded['data'] : null;
+        } on FormatException catch (e) {
+          logger.warning('Batch add response was not JSON: $e');
+        }
         if (data is List) {
           created += data.where((e) => e is Map && e['action'] == 'created').length;
         }
@@ -328,6 +368,9 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     try {
       setIsSyncCancelled(true);
       resetInitialSyncTask();
+      // The invalidated sync loop exits without updating the status, so the
+      // syncing flag has to be dropped here or the next sync would be refused.
+      syncStatus.value = syncStatus.value.copyWith(isSyncing: false, clearError: true);
       await database.libraryEntriesDao.deleteAllEntries();
       logger.info('Local library database cleared');
 
