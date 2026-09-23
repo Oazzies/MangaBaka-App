@@ -68,6 +68,37 @@ void main() {
       expect(c.isMatching, isFalse);
     });
 
+    test('two titles matching the same series add it once', () async {
+      final c = build(matches: {
+        'Frieren': [_series('1', 'Frieren')],
+        'Sousou no Frieren': [_series('1', 'Frieren')],
+      });
+      await c.start('Frieren\nSousou no Frieren');
+      c.setTargetState('reading');
+
+      final created = await c.addSelected();
+
+      expect(created, 1);
+      expect(batches, [
+        ['1', 'reading'],
+      ]);
+    });
+
+    test('a restarted match leaves progress and flags to the new run',
+        () async {
+      final c = build(matches: {
+        'A': [_series('1', 'A')],
+        'B': [_series('2', 'B')],
+      });
+      final first = c.start('A\nB');
+      await c.start('A');
+      await first;
+
+      expect(c.rows, hasLength(1));
+      expect(c.progress, 1.0);
+      expect(c.isMatching, isFalse);
+    });
+
     test('adds only the selected rows, in the chosen state', () async {
       final c = build(matches: {
         'A': [_series('1', 'A')],

@@ -160,12 +160,18 @@ class BulkImportController extends ChangeNotifier {
     if (entries.isEmpty) return;
 
     final rows = _rows;
+    // A later start() or reset() replaces _rows. This run's workers then stop
+    // and leave the shared counters and flags to the run that replaced it;
+    // otherwise they keep bumping _matchedCount (progress past 100%) and
+    // clear _matching while the new run is still going.
+    bool superseded() => _disposed || !identical(_rows, rows);
     var next = 0;
     Future<void> worker() async {
-      while (!_disposed) {
+      while (!superseded()) {
         final i = next++;
         if (i >= rows.length) return;
         await _resolve(rows[i]);
+        if (superseded()) return;
         _matchedCount++;
         _notify();
       }
@@ -174,6 +180,7 @@ class BulkImportController extends ChangeNotifier {
     await Future.wait([
       for (var i = 0; i < min(_concurrency, rows.length); i++) worker(),
     ]);
+    if (superseded()) return;
     _matching = false;
     _notify();
   }
@@ -224,7 +231,22 @@ class BulkImportController extends ChangeNotifier {
   Future<void> choose(ImportRow row, int index) async {
     if (index < 0 || index >= row.candidates.length) return;
     row.chosen = index;
-    final inLibrary = await _isInLibrary(row.candidates[index].id);
+    final bool inLibrary;
+    try {
+      inLibrary = await _isInLibrary(row.candidates[index].id);
+    } catch (e) {
+      // Called from a tap handler, so a throw would surface as an unhandled
+      // error. Leave the row unselectable rather than risk overwriting an
+      // existing library entry's state.
+      _logger.warning('Library check failed for "${row.query}": $e');
+      if (row.chosen != index) return;
+      row.status = ImportRowStatus.failed;
+      row.selected = false;
+      _notify();
+      return;
+    }
+    // The user may have picked another candidate while this one was checked.
+    if (row.chosen != index) return;
     row.status = inLibrary
         ? ImportRowStatus.inLibrary
         : ImportRowStatus.matched;
@@ -238,9 +260,14 @@ class BulkImportController extends ChangeNotifier {
   /// so the user can retry.
   Future<int> addSelected() async {
     final byState = <String, List<String>>{};
+    // Two titles can resolve to the same series. Sending it twice makes the
+    // batch patch it (overwriting the first row's state with the second's),
+    // or fails the atomic chunk outright; the first row wins.
+    final seen = <String>{};
     for (final row in _rows) {
       final match = row.match;
       if (!row.selected || match == null) continue;
+      if (!seen.add(match.id)) continue;
       byState.putIfAbsent(row.sourceState ?? _state, () => []).add(match.id);
     }
     if (byState.isEmpty) return 0;
