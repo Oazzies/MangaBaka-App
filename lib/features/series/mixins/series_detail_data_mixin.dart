@@ -93,12 +93,25 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> fetchFullData() async {
+    // Started together, awaited separately. Links are an enrichment: when
+    // they fail the screen keeps the series' own links instead of showing
+    // the whole page as failed (Future.wait used to reject both on either
+    // error). Only a failed series fetch is a page error.
+    final linksFuture = seriesService
+        .fetchSeriesLinks(series.id)
+        .then<List<SeriesLink>?>((links) => links)
+        .catchError((Object e) {
+      seriesService.logger.warning('Error fetching series links: $e');
+      return null;
+    });
+    final seriesFuture = seriesService.fetchSeries(series.id);
+
     try {
-      final results = await Future.wait([
-        seriesService.fetchSeriesLinks(series.id),
-        seriesService.fetchSeries(series.id),
-      ]);
-      
+      // Series first: linksFuture cannot fail, but a series error arriving
+      // while nothing awaited it yet would be reported as unhandled.
+      final full = await seriesFuture;
+      final links = await linksFuture;
+
       if (selectedTab != 'Info') {
         fetchTabData(selectedTab);
       }
@@ -107,8 +120,8 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
 
       if (mounted) {
         setState(() {
-          enrichedLinks = results[0] as List<SeriesLink>?;
-          fullSeries = results[1] as Series?;
+          enrichedLinks = links;
+          fullSeries = full;
           isDataLoaded = true;
           fetchError = false;
         });
