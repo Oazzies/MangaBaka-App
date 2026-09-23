@@ -133,11 +133,15 @@ class _DiscoveryQueueCard extends StatelessWidget {
                       color: context.colors.accent,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.translate('discovery_queue').toUpperCase(),
-                      style: AppTypography.display(
-                        color: context.colors.text,
-                        fontSize: 24,
+                    Expanded(
+                      child: Text(
+                        l10n.translate('discovery_queue').toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.display(
+                          color: context.colors.text,
+                          fontSize: 24,
+                        ),
                       ),
                     ),
                   ],
