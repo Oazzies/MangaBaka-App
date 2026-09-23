@@ -9,6 +9,31 @@ void main() {
 
   Future<SharedPreferences> prefs() => SharedPreferences.getInstance();
 
+  group('type-mismatched stored values', () {
+    test('fall back to the default instead of throwing', () async {
+      SharedPreferences.setMockInitialValues({
+        'b': 'yes',
+        'i': 'three',
+        's': 7,
+        'l': true,
+        'e': 'green',
+      });
+      final p = await prefs();
+
+      final b = BoolSetting('b', true)..load(p);
+      final i = IntSetting('i', 3)..load(p);
+      final s = StringSetting('s', 'd')..load(p);
+      final l = StringListSetting('l', const ['x'])..load(p);
+      final e = EnumSetting('e', _Colour.blue, _Colour.values)..load(p);
+
+      expect(b.value, isTrue);
+      expect(i.value, 3);
+      expect(s.value, 'd');
+      expect(l.value, ['x']);
+      expect(e.value, _Colour.blue);
+    });
+  });
+
   group('BoolSetting', () {
     test('starts at its default and loads a stored value', () async {
       SharedPreferences.setMockInitialValues({'k': true});

@@ -29,6 +29,11 @@ abstract class SettingValue<T> {
 
   /// Reads the stored value, leaving the current one in place when the key is
   /// absent or holds something unusable.
+  ///
+  /// Implementations read through `prefs.get` and type-check the result: the
+  /// typed getters (`getInt`, `getBool`, …) throw a TypeError when the key
+  /// holds another type, which during `SettingsManager.init` aborts startup
+  /// before the first frame.
   void load(SharedPreferences prefs);
 
   Future<void> persist(SharedPreferences prefs);
@@ -39,7 +44,8 @@ class BoolSetting extends SettingValue<bool> {
 
   @override
   void load(SharedPreferences prefs) {
-    _value = prefs.getBool(key) ?? defaultValue;
+    final stored = prefs.get(key);
+    _value = stored is bool ? stored : defaultValue;
   }
 
   @override
@@ -59,8 +65,8 @@ class IntSetting extends SettingValue<int> {
 
   @override
   void load(SharedPreferences prefs) {
-    final stored = prefs.getInt(key);
-    _value = stored == null ? defaultValue : _clamp(stored);
+    final stored = prefs.get(key);
+    _value = stored is int ? _clamp(stored) : defaultValue;
   }
 
   @override
@@ -78,7 +84,8 @@ class StringSetting extends SettingValue<String> {
 
   @override
   void load(SharedPreferences prefs) {
-    _value = prefs.getString(key) ?? defaultValue;
+    final stored = prefs.get(key);
+    _value = stored is String ? stored : defaultValue;
   }
 
   @override
@@ -113,8 +120,9 @@ class StringListSetting extends SettingValue<List<String>> {
 
   @override
   void load(SharedPreferences prefs) {
-    final stored = prefs.getStringList(key);
-    _value = (stored == null || stored.isEmpty) ? defaultValue : stored;
+    final stored = prefs.get(key);
+    final list = stored is List ? stored.whereType<String>().toList() : null;
+    _value = (list == null || list.isEmpty) ? defaultValue : list;
   }
 
   @override
@@ -137,8 +145,8 @@ class EnumSetting<T extends Enum> extends SettingValue<T> {
 
   @override
   void load(SharedPreferences prefs) {
-    final index = prefs.getInt(key);
-    if (index == null || index < 0 || index >= values.length) return;
+    final index = prefs.get(key);
+    if (index is! int || index < 0 || index >= values.length) return;
     _value = values[index];
   }
 
