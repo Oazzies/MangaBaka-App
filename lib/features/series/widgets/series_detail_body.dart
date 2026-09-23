@@ -28,6 +28,14 @@ class SeriesDetailBody extends StatelessWidget {
   final SettingsManager settings;
   final LocalizationService l10n;
 
+  /// Rendered inside a host screen: the app bar drops its back control and the
+  /// page stops reserving space for a FAB it does not have.
+  final bool embedded;
+
+  /// Optional content for a right-hand rail in the wide layout, scrolling
+  /// alongside the page. Used by the Discovery Queue.
+  final Widget? rightRail;
+
   final VoidCallback onRetry;
   final ValueChanged<String> onTabChanged;
   final ValueChanged<String> onAuthorTap;
@@ -47,6 +55,8 @@ class SeriesDetailBody extends StatelessWidget {
     required this.entryStream,
     required this.settings,
     required this.l10n,
+    this.embedded = false,
+    this.rightRail,
     required this.onRetry,
     required this.onTabChanged,
     required this.onAuthorTap,
@@ -58,8 +68,7 @@ class SeriesDetailBody extends StatelessWidget {
     // The space this page actually has, not the window: on desktop it sits
     // beside the sidebar, and the window width overstated it by the sidebar.
     return LayoutBuilder(
-      builder: (context, constraints) =>
-          _build(context, constraints.maxWidth),
+      builder: (context, constraints) => _build(context, constraints.maxWidth),
     );
   }
 
@@ -103,6 +112,7 @@ class SeriesDetailBody extends StatelessWidget {
                   title: series.getDisplayTitle(settings.defaultTitleLanguage),
                   entry: snapshot.data,
                   isWide: isWide || isTablet,
+                  embedded: embedded,
                   horizontalPadding: isWide ? 40.0 : 16.0,
                   onBack: () => Navigator.pop(context),
                   onShare: state.shareLink,
@@ -110,13 +120,13 @@ class SeriesDetailBody extends StatelessWidget {
                   onCopy: state.copyToClipboard,
                   heroTagPrefix: state.widget.heroTagPrefix,
                 ),
-                if (state.fetchError)
-                  SeriesDetailErrorBanner(onRetry: onRetry),
+                if (state.fetchError) SeriesDetailErrorBanner(onRetry: onRetry),
                 SliverToBoxAdapter(
                   child: Center(
                     child: ConstrainedBox(
-                      constraints:
-                          const BoxConstraints(maxWidth: _maxContentWidth),
+                      constraints: const BoxConstraints(
+                        maxWidth: _maxContentWidth,
+                      ),
                       child: _layout(
                         series: series,
                         entry: snapshot.data,
@@ -164,24 +174,23 @@ class SeriesDetailBody extends StatelessWidget {
       required double hPadding,
       bool isWide = false,
       bool wideRightPaddingOnly = false,
-    }) =>
-        SeriesDetailTabContent(
-          series: series,
-          entry: entry,
-          l10n: l10n,
-          selectedTab: state.selectedTab,
-          covers: state.covers,
-          related: state.related,
-          similar: state.similar,
-          readersAlsoLike: state.readersAlsoLike,
-          news: state.news,
-          collections: state.collections,
-          works: state.works,
-          enrichedLinks: state.enrichedLinks,
-          isWide: isWide,
-          hPadding: hPadding,
-          wideRightPaddingOnly: wideRightPaddingOnly,
-        );
+    }) => SeriesDetailTabContent(
+      series: series,
+      entry: entry,
+      l10n: l10n,
+      selectedTab: state.selectedTab,
+      covers: state.covers,
+      related: state.related,
+      similar: state.similar,
+      readersAlsoLike: state.readersAlsoLike,
+      news: state.news,
+      collections: state.collections,
+      works: state.works,
+      enrichedLinks: state.enrichedLinks,
+      isWide: isWide,
+      hPadding: hPadding,
+      wideRightPaddingOnly: wideRightPaddingOnly,
+    );
 
     if (isWide) {
       return SeriesDetailWideLayout(
@@ -201,13 +210,14 @@ class SeriesDetailBody extends StatelessWidget {
         onUpdateChapter: updateChapter,
         onUpdateVolume: updateVolume,
         onUpdateRating: updateRating,
-        buildTabContent: (hPadding,
-                {isWide = false, wideRightPaddingOnly = false}) =>
-            tabContent(
-          hPadding: hPadding,
-          isWide: isWide,
-          wideRightPaddingOnly: wideRightPaddingOnly,
-        ),
+        rightRail: rightRail,
+        buildTabContent:
+            (hPadding, {isWide = false, wideRightPaddingOnly = false}) =>
+                tabContent(
+                  hPadding: hPadding,
+                  isWide: isWide,
+                  wideRightPaddingOnly: wideRightPaddingOnly,
+                ),
       );
     }
 

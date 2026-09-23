@@ -125,6 +125,13 @@ class SettingsManager extends ChangeNotifier {
   final _addLibraryDefaultTab =
       StringSetting(SettingsKeys.addLibraryDefaultTab, 'plan_to_read');
 
+  /// Series the user marked "not interested" in the Discovery Queue; filtered
+  /// out of future recommendation fetches.
+  final _dismissedRecommendations = StringListSetting(
+    SettingsKeys.dismissedRecommendations,
+    const [],
+  );
+
   final _contentPreferences = StringListSetting(
     SettingsKeys.contentPreferences,
     const ['safe', 'suggestive'],
@@ -171,6 +178,7 @@ class SettingsManager extends ChangeNotifier {
     _addLibraryDefaultTab,
     _contentPreferences,
     _blurredContentRatings,
+    _dismissedRecommendations,
   ];
 
   // ─── Lifecycle ───────────────────────────────────────────────────────────
@@ -318,6 +326,20 @@ class SettingsManager extends ChangeNotifier {
   String get addLibraryDefaultTab => _addLibraryDefaultTab.value;
   Future<void> setAddLibraryDefaultTab(String tabKey) =>
       _apply(_addLibraryDefaultTab, tabKey);
+
+  // ─── Recommendations ─────────────────────────────────────────────────────
+
+  List<String> get dismissedRecommendations =>
+      _dismissedRecommendations.value;
+
+  Future<void> dismissRecommendation(String seriesId) {
+    final current = _dismissedRecommendations.value;
+    if (current.contains(seriesId)) return Future.value();
+    return _apply(_dismissedRecommendations, [...current, seriesId]);
+  }
+
+  Future<void> restoreRecommendations() =>
+      _apply(_dismissedRecommendations, const []);
 
   // ─── App ─────────────────────────────────────────────────────────────────
 

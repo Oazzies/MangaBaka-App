@@ -32,6 +32,12 @@ class SeriesDetailWideLayout extends StatelessWidget {
   final VoidCallback onUpdateRating;
   final Function(String)? onAuthorTap;
   final Function(String)? onPublisherTap;
+
+  /// Optional content for a right-hand rail, sitting in the same scrolling row
+  /// as the left sidebar. Used by the Discovery Queue to put its controls
+  /// opposite the Information card.
+  final Widget? rightRail;
+
   final Widget Function(
     double hPadding, {
     bool isWide,
@@ -57,6 +63,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
     required this.onUpdateRating,
     this.onAuthorTap,
     this.onPublisherTap,
+    this.rightRail,
     required this.buildTabContent,
   });
 
@@ -142,6 +149,10 @@ class SeriesDetailWideLayout extends StatelessWidget {
               ],
             ),
           ),
+          if (rightRail != null) ...[
+            const SizedBox(width: _columnGap),
+            SizedBox(width: _sidebarWidth, child: rightRail),
+          ],
         ],
       ),
     );

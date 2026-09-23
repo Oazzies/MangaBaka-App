@@ -140,7 +140,11 @@ class HomeService {
             headers: headers,
           );
       _logger.info('HomeService for-you returned ${series.length} series');
-      return series;
+      final dismissed = SettingsManager().dismissedRecommendations.toSet();
+      if (dismissed.isEmpty) return series;
+      return series
+          .where((s) => !dismissed.contains(s.id))
+          .toList(growable: false);
     } catch (e) {
       _logger.warning('HomeService failed to fetch for-you: $e');
       return const [];

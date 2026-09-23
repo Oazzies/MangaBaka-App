@@ -72,4 +72,6 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}accent_override';
   static const String customThemes =
       '${AppConstants.prefixStorageKey}custom_themes';
+  static const String dismissedRecommendations =
+      '${AppConstants.prefixStorageKey}dismissed_recommendations';
 }

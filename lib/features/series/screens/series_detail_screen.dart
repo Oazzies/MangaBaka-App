@@ -34,10 +34,21 @@ class SeriesDetailScreen extends StatefulWidget {
   final Series series;
   final String? heroTagPrefix;
 
+  /// When true the page is rendered inside another screen (the Discovery
+  /// Queue) rather than pushed as its own route: no back button, no FAB, and
+  /// deleting the entry does not pop the host route.
+  final bool embedded;
+
+  /// Optional content for a right-hand rail in the wide layout, scrolling with
+  /// the page. Used by the Discovery Queue.
+  final Widget? rightRail;
+
   const SeriesDetailScreen({
     super.key,
     required this.series,
     this.heroTagPrefix,
+    this.embedded = false,
+    this.rightRail,
   });
 
   /// The nearest detail screen's state, so descendant chips can start a filter
@@ -97,6 +108,9 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
 
   @override
   set isAdding(bool value) => _isAdding = value;
+
+  @override
+  bool get popAfterDelete => !widget.embedded;
 
   @override
   String get selectedTab => _selectedTab;
@@ -292,6 +306,8 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
                         entryStream: _entryStream,
                         settings: SettingsManager(),
                         l10n: LocalizationService(),
+                        embedded: widget.embedded,
+                        rightRail: widget.rightRail,
                         onRetry: _retryFetch,
                         onTabChanged: _onTabChanged,
                         onAuthorTap: _navigateToAuthorSeries,
@@ -310,7 +326,7 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
                       ),
                   ],
                 ),
-                floatingActionButton: isWide
+                floatingActionButton: (isWide || widget.embedded)
                     ? null
                     : SeriesDetailFAB(
                         entryStream: _entryStream,

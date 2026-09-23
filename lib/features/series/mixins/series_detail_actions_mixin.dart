@@ -19,6 +19,10 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   bool get isAdding;
   set isAdding(bool value);
 
+  /// Whether deleting the entry should also pop the enclosing route. A detail
+  /// page embedded in another screen (the Discovery Queue) must not.
+  bool get popAfterDelete => true;
+
   void showUpdateRatingDialog(LibraryEntry entry) {
     showModalBottomSheet(
       context: context,
@@ -261,7 +265,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
               Navigator.pop(context);
               try {
                 await libraryService.deleteEntry(series.id);
-                if (mounted) Navigator.pop(this.context);
+                if (mounted && popAfterDelete) Navigator.pop(this.context);
               } catch (e) {
                 if (mounted) {
                   AppSnackBar.show(

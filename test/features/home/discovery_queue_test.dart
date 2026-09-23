@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/home/controllers/discovery_queue_controller.dart';
 import 'package:mangabaka_app/features/home/screens/discovery_queue_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
@@ -172,7 +173,14 @@ void main() {
   });
 
   group('DiscoveryQueueScreen', () {
-    testWidgets('renders series card and handles skip',
+    Widget buildScreen(DiscoveryQueueController controller) => MaterialApp(
+          home: DiscoveryQueueScreen(
+            controller: controller,
+            previewBuilder: (_, __) => const SizedBox.shrink(),
+          ),
+        );
+
+    testWidgets('shows queue controls and handles skip',
         (WidgetTester tester) async {
       final controller = DiscoveryQueueController(
         homeService: home,
@@ -181,21 +189,39 @@ void main() {
       );
       await controller.loadQueue();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: DiscoveryQueueScreen(controller: controller),
-        ),
-      );
+      await tester.pumpWidget(buildScreen(controller));
       await tester.pump();
 
-      expect(find.text('Series One'), findsOneWidget);
       expect(find.text('DISCOVERY_QUEUE_SKIP'), findsOneWidget);
+      expect(find.text('DISCOVERY_QUEUE_NOT_INTERESTED'), findsOneWidget);
 
       // Tap skip
       await tester.tap(find.text('DISCOVERY_QUEUE_SKIP'));
       await tester.pump();
 
-      expect(find.text('Series Two'), findsOneWidget);
+      expect(controller.currentIndex, 1);
+      expect(controller.currentSeries?.id, 's2');
+    });
+
+    testWidgets('not interested dismisses the series and advances',
+        (WidgetTester tester) async {
+      SettingsManager.resetForTesting();
+      final controller = DiscoveryQueueController(
+        homeService: home,
+        libraryService: library,
+        authService: auth,
+      );
+      await controller.loadQueue();
+
+      await tester.pumpWidget(buildScreen(controller));
+      await tester.pump();
+
+      await tester.tap(find.text('DISCOVERY_QUEUE_NOT_INTERESTED'));
+      await tester.pump();
+
+      expect(controller.currentIndex, 1);
+      expect(controller.currentSeries?.id, 's2');
+      expect(SettingsManager().dismissedRecommendations, contains('s1'));
     });
 
     testWidgets('shows completed screen when queue finishes',
@@ -207,11 +233,7 @@ void main() {
       );
       await controller.loadQueue();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: DiscoveryQueueScreen(controller: controller),
-        ),
-      );
+      await tester.pumpWidget(buildScreen(controller));
       await tester.pump();
 
       // Skip both items

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -153,6 +154,27 @@ class DiscoveryQueueController extends ChangeNotifier {
       _isCompleted = true;
     }
     notifyListeners();
+  }
+
+  /// Dismisses the current series from future recommendations, then moves on.
+  Future<void> markNotInterested() async {
+    final series = currentSeries;
+    if (series == null || _isActionInProgress) return;
+
+    _isActionInProgress = true;
+    _notify();
+
+    try {
+      await SettingsManager().dismissRecommendation(series.id);
+      _reviewedCount++;
+      _currentIndex++;
+      if (_currentIndex >= _queue.length) {
+        _isCompleted = true;
+      }
+    } finally {
+      _isActionInProgress = false;
+      _notify();
+    }
   }
 
   /// Restarts the queue with a fresh batch of recommendations.

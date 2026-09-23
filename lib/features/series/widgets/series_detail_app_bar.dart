@@ -23,6 +23,7 @@ class SeriesDetailAppBar extends StatefulWidget {
   final String title;
   final LibraryEntry? entry;
   final bool isWide;
+  final bool embedded;
   final bool showCover;
   final double horizontalPadding;
   final VoidCallback onBack;
@@ -37,6 +38,7 @@ class SeriesDetailAppBar extends StatefulWidget {
     required this.title,
     this.entry,
     required this.isWide,
+    this.embedded = false,
     this.showCover = true,
     this.horizontalPadding = 16.0,
     required this.onBack,
@@ -103,12 +105,13 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
         return SliverAppBar(
           expandedHeight: metrics.expandedHeight,
           pinned: true,
+          automaticallyImplyLeading: false,
           backgroundColor: context.colors.background,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          leadingWidth: metrics.leadingWidth,
-          leading: _buildBackButton(metrics),
+          leadingWidth: widget.embedded ? 0 : metrics.leadingWidth,
+          leading: widget.embedded ? null : _buildBackButton(metrics),
           actions: _buildActions(metrics),
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: EdgeInsetsDirectional.only(
@@ -161,6 +164,10 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
   }
 
   List<Widget> _buildActions(SeriesAppBarMetrics metrics) {
+    // Embedded in a host that floats its own controls over the banner, so the
+    // banner carries only the blurred background.
+    if (widget.embedded) return const [];
+
     // Wide portrait puts share and delete in the layout below instead, so the
     // banner carries only the trailing inset that keeps the title clear.
     if (!metrics.showsBannerActions) {

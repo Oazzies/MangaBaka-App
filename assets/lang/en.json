@@ -481,6 +481,7 @@
     "discovery_queue_complete_title": "Queue Complete",
     "discovery_queue_complete_message": "You reviewed {reviewed} series this round and added {added} to your library.",
     "discovery_queue_skip": "Skip",
+    "discovery_queue_not_interested": "Not interested",
     "discovery_queue_add": "Add to Library",
     "discovery_queue_not_ready": "Can't start a queue yet — your taste profile isn't ready. Add more series to your library first!",
     "discovery_queue_empty": "No recommendations available right now. Try again later or check your content filters.",

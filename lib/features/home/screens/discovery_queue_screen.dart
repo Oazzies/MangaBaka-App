@@ -2,29 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
-import 'package:mangabaka_app/core/utils/widget_utils.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/home/controllers/discovery_queue_controller.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
-import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
 
 /// Interactive Discovery Queue screen.
 ///
-/// Lets the user step through personalised series recommendations one-by-one,
-/// adding them to their library or skipping to the next.
+/// Steps through personalised series recommendations one-by-one, showing the
+/// full series detail page for each and a pinned control bar with quick add,
+/// skip and "not interested".
 class DiscoveryQueueScreen extends StatefulWidget {
   final DiscoveryQueueController? controller;
 
-  const DiscoveryQueueScreen({super.key, this.controller});
+  /// Overrides the embedded series preview. Defaults to the live series detail
+  /// page; tests inject a light placeholder so the queue can be exercised
+  /// without standing up the whole detail screen.
+  final Widget Function(BuildContext context, Series series)? previewBuilder;
+
+  const DiscoveryQueueScreen({super.key, this.controller, this.previewBuilder});
 
   @override
   State<DiscoveryQueueScreen> createState() => _DiscoveryQueueScreenState();
@@ -33,6 +38,11 @@ class DiscoveryQueueScreen extends StatefulWidget {
 class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
   late final DiscoveryQueueController _controller;
   bool _ownsController = false;
+
+  /// Library state the add button currently targets. Changed only via the
+  /// dropdown attached to the button — never applied until the button is
+  /// pressed.
+  late String _selectedState;
 
   static const List<String> _libraryStates = [
     'plan_to_read',
@@ -43,9 +53,14 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
     'dropped',
   ];
 
+  /// Above this width the controls are placed in the detail page's wide-layout
+  /// right rail (scrolling with the page) instead of the floating top card.
+  static const double _sidebarBreakpoint = 1200;
+
   @override
   void initState() {
     super.initState();
+    _selectedState = SettingsManager().addLibraryDefaultTab;
     if (widget.controller != null) {
       _controller = widget.controller!;
     } else {
@@ -61,12 +76,6 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
       _controller.dispose();
     }
     super.dispose();
-  }
-
-  void _openSeriesDetail(Series series) {
-    Navigator.of(
-      context,
-    ).push(AppTransitions.slideRight(SeriesDetailScreen(series: series)));
   }
 
   Future<void> _addWithState(String state) async {
@@ -154,9 +163,7 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
       return _buildEmptyState(l10n, isDesktop);
     }
 
-    return isDesktop
-        ? _buildDesktopView(context, series, l10n)
-        : _buildMobileView(context, series, l10n);
+    return _buildQueueView(context, series, isDesktop, l10n);
   }
 
   // ─── States ───────────────────────────────────────────────────────────────
@@ -349,343 +356,318 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
     );
   }
 
-  // ─── Desktop View ─────────────────────────────────────────────────────────
+  // ─── Queue View ───────────────────────────────────────────────────────────
 
-  Widget _buildDesktopView(
+  Widget _buildQueueView(
     BuildContext context,
     Series series,
+    bool isDesktop,
     LocalizationService l10n,
   ) {
-    final titleLang = SettingsManager().defaultTitleLanguage;
-    final displayTitle = series.getDisplayTitle(titleLang);
-    final secondaryTitle =
-        series.romanizedTitle.isNotEmpty &&
-            series.romanizedTitle != displayTitle
-        ? series.romanizedTitle
-        : (series.nativeTitle.isNotEmpty && series.nativeTitle != displayTitle
-              ? series.nativeTitle
-              : null);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final showRail = constraints.maxWidth >= _sidebarBreakpoint;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DesktopPageHeader(
-          title: l10n.translate('discovery_queue'),
-          subtitle: l10n
-              .translate('discovery_queue_progress')
-              .replaceAll('{current}', '${_controller.currentIndex + 1}')
-              .replaceAll('{total}', '${_controller.totalCount}')
-              .replaceAll('{remaining}', '${_controller.remainingCount}'),
-          leading: DesktopIconButton(
-            icon: Icons.arrow_back_rounded,
-            tooltip: l10n.translate('back'),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          actions: [
-            DesktopPillButton(
-              label: l10n.translate('discovery_queue_skip'),
-              icon: Icons.skip_next_rounded,
-              onPressed: _controller.skip,
-            ),
-          ],
-        ),
-        LinearProgressIndicator(
-          value: _controller.progress,
-          color: context.colors.accent,
-          backgroundColor: context.colors.surfaceRaised,
-          minHeight: 3,
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(DesktopTokens.pagePadding),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 860),
-                child: DesktopCard(
-                  padding: const EdgeInsets.all(28),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Cover
-                      GestureDetector(
-                        onTap: () => _openSeriesDetail(series),
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: MbCover(
-                            url: series.coverUrl,
-                            width: 200,
-                            radius: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 28),
-                      // Details & Actions
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: () => _openSeriesDetail(series),
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: Text(
-                                  displayTitle,
-                                  style: AppTypography.display(
-                                    color: context.colors.text,
-                                    fontSize: 24,
-                                    height: 1.2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            if (secondaryTitle != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                secondaryTitle,
-                                style: AppTypography.sans(
-                                  color: context.colors.textMuted,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 14),
-                            _buildMetadataChips(series),
-                            const SizedBox(height: 12),
-                            _buildGenreTags(series),
-                            const SizedBox(height: 16),
-                            if (series.description.isNotEmpty) ...[
-                              Text(
-                                series.description,
-                                maxLines: 6,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.sans(
-                                  color: context.colors.text.withValues(
-                                    alpha: 0.85,
-                                  ),
-                                  fontSize: 14,
-                                  height: 1.5,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                            ],
-                            _buildActionButtons(l10n),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+        final preview =
+            widget.previewBuilder?.call(context, series) ??
+            SeriesDetailScreen(
+              key: ValueKey(series.id),
+              series: series,
+              embedded: true,
+              heroTagPrefix: 'discovery_queue_${series.id}',
+              rightRail: showRail ? _buildControlCard(l10n) : null,
+            );
 
-  // ─── Mobile View ──────────────────────────────────────────────────────────
-
-  Widget _buildMobileView(
-    BuildContext context,
-    Series series,
-    LocalizationService l10n,
-  ) {
-    final titleLang = SettingsManager().defaultTitleLanguage;
-    final displayTitle = series.getDisplayTitle(titleLang);
-
-    return Column(
-      children: [
-        LinearProgressIndicator(
-          value: _controller.progress,
-          color: context.colors.accent,
-          backgroundColor: context.colors.surfaceRaised,
-          minHeight: 3,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            l10n
-                .translate('discovery_queue_progress')
-                .replaceAll('{current}', '${_controller.currentIndex + 1}')
-                .replaceAll('{total}', '${_controller.totalCount}')
-                .replaceAll('{remaining}', '${_controller.remainingCount}'),
-            style: AppTypography.monoLabel(
-              color: context.colors.textMuted,
-              fontSize: 11,
-            ),
-          ),
-        ),
-        Expanded(
-          child: WidgetUtils.responsiveConstraint(
-            maxWidth: 600,
-            ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Center(
-                  child: GestureDetector(
-                    onTap: () => _openSeriesDetail(series),
-                    child: MbCover(
-                      url: series.coverUrl,
-                      width: 160,
-                      radius: 12,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: GestureDetector(
-                    onTap: () => _openSeriesDetail(series),
-                    child: Text(
-                      displayTitle,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.display(
-                        color: context.colors.text,
-                        fontSize: 20,
-                        height: 1.25,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Center(child: _buildMetadataChips(series)),
-                const SizedBox(height: 10),
-                Center(child: _buildGenreTags(series)),
-                if (series.description.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    series.description,
-                    maxLines: 8,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.sans(
-                      color: context.colors.text.withValues(alpha: 0.85),
-                      fontSize: 13.5,
-                      height: 1.5,
+        // With the rail, the controls live inside the detail page's scrolling
+        // wide layout; otherwise they float over the preview — at the bottom on
+        // phones, at the top on narrow desktop windows.
+        final atBottom = !isDesktop;
+        final content = showRail
+            ? preview
+            : Stack(
+                children: [
+                  Positioned.fill(child: preview),
+                  Positioned(
+                    top: atBottom ? null : 0,
+                    bottom: atBottom ? 0 : null,
+                    left: 0,
+                    right: 0,
+                    child: _buildControlBar(
+                      l10n,
+                      isDesktop,
+                      atBottom: atBottom,
                     ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                _buildActionButtons(l10n),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+              );
 
-  // ─── Shared Components ────────────────────────────────────────────────────
+        if (!isDesktop) return content;
 
-  Widget _buildMetadataChips(Series series) {
-    final double? ratingScore = double.tryParse(series.rating);
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 6,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        if (series.type.isNotEmpty)
-          _chip(series.type.toUpperCase(), context.colors.accent),
-        if (series.status.isNotEmpty)
-          _chip(series.status.toUpperCase(), context.colors.textMuted),
-        if (ratingScore != null && ratingScore > 0)
-          MbRatingStars(rating: ratingScore, fontSize: 13),
-      ],
-    );
-  }
-
-  Widget _buildGenreTags(Series series) {
-    final tags = [...series.genres, ...series.tags].take(6).toList();
-    if (tags.isEmpty) return const SizedBox.shrink();
-
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        for (final tag in tags)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: context.colors.surface,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: context.colors.border),
-            ),
-            child: Text(
-              tag,
-              style: AppTypography.sans(
-                color: context.colors.textMuted,
-                fontSize: 11.5,
+        return Column(
+          children: [
+            DesktopPageHeader(
+              title: l10n.translate('discovery_queue'),
+              leading: DesktopIconButton(
+                icon: Icons.arrow_back_rounded,
+                tooltip: l10n.translate('back'),
+                onPressed: () => Navigator.of(context).maybePop(),
               ),
             ),
-          ),
-      ],
+            Expanded(child: content),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildActionButtons(LocalizationService l10n) {
-    final defaultTab = SettingsManager().addLibraryDefaultTab;
-    final inProgress = _controller.isActionInProgress;
+  Widget _buildControlCard(LocalizationService l10n) {
+    final counter =
+        '${_controller.currentIndex + 1} / ${_controller.totalCount}';
 
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: OutlinedButton.icon(
-            onPressed: inProgress ? null : _controller.skip,
-            icon: const Icon(Icons.skip_next_rounded, size: 18),
-            label: Text(l10n.translate('discovery_queue_skip').toUpperCase()),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          flex: 3,
-          child: FilledButton.icon(
-            onPressed: inProgress ? null : () => _addWithState(defaultTab),
-            icon: inProgress
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: context.colors.onAccent,
-                    ),
-                  )
-                : const Icon(Icons.bookmark_add_outlined, size: 18),
-            label: Text(
-              '+ ${l10n.translate(defaultTab)}'.toUpperCase(),
-              overflow: TextOverflow.ellipsis,
+    return MbCard(
+      label: l10n.translate('discovery_queue'),
+      trailing: _buildCounterPill(counter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: _controller.progress,
+              color: context.colors.accent,
+              backgroundColor: context.colors.surfaceRaised,
+              minHeight: 3,
             ),
           ),
+          const SizedBox(height: 18),
+          _buildAddButton(),
+          const SizedBox(height: 12),
+          _buildSkipButton(l10n, expand: true),
+          const SizedBox(height: 12),
+          _buildNotInterestedButton(l10n, expand: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCounterPill(String counter) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+        color: context.colors.surfaceRaised,
+        borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+      ),
+      child: Text(
+        counter,
+        style: AppTypography.monoLabel(
+          color: context.colors.textMuted,
+          fontSize: 12,
         ),
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.arrow_drop_down_rounded),
-          tooltip: l10n.translate('import_add_as'),
+      ),
+    );
+  }
+
+  Widget _buildControlBar(
+    LocalizationService l10n,
+    bool isDesktop, {
+    bool atBottom = false,
+  }) {
+    final horizontal = isDesktop ? DesktopTokens.pagePadding : 12.0;
+    final counter =
+        '${_controller.currentIndex + 1} / ${_controller.totalCount}';
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(horizontal, 10, horizontal, 10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        decoration: BoxDecoration(
           color: context.colors.surface,
-          onSelected: (state) => _addWithState(state),
-          itemBuilder: (context) => [
-            for (final s in _libraryStates)
-              PopupMenuItem(
-                value: s,
-                child: Text(
-                  l10n.translate(s),
-                  style: AppTypography.sans(color: context.colors.text),
-                ),
-              ),
+          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+          border: atBottom
+              ? Border.all(color: context.colors.border, width: 1)
+              : null,
+          boxShadow: [
+            BoxShadow(
+              color: context.colors.shadowAt(0.35),
+              blurRadius: 16,
+              offset: Offset(0, atBottom ? -6 : 6),
+            ),
           ],
         ),
-      ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  l10n.translate('discovery_queue').toUpperCase(),
+                  style: AppTypography.display(
+                    color: context.colors.text,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _buildCounterPill(counter),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: _controller.progress,
+                color: context.colors.accent,
+                backgroundColor: context.colors.surfaceRaised,
+                minHeight: 3,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildAddButton(),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: _buildSkipButton(l10n, expand: true)),
+                const SizedBox(width: 12),
+                Expanded(child: _buildNotInterestedButton(l10n, expand: true)),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _chip(String label, Color color) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.14),
+  Widget _buildAddButton({bool expand = true}) {
+    return _AddToLibraryButton(
+      selectedState: _selectedState,
+      states: _libraryStates,
+      expand: expand,
+      busy: _controller.isActionInProgress,
+      onAdd: _controller.isActionInProgress
+          ? null
+          : () => _addWithState(_selectedState),
+      onStateSelected: (state) => setState(() => _selectedState = state),
+    );
+  }
+
+  Widget _buildSkipButton(LocalizationService l10n, {bool expand = true}) {
+    return MbSecondaryButton(
+      label: l10n.translate('discovery_queue_skip'),
+      icon: Icons.skip_next_rounded,
+      onPressed: _controller.isActionInProgress ? null : _controller.skip,
+      expand: expand,
+    );
+  }
+
+  Widget _buildNotInterestedButton(
+    LocalizationService l10n, {
+    bool expand = true,
+  }) {
+    return MbSecondaryButton(
+      label: l10n.translate('discovery_queue_not_interested'),
+      icon: Icons.thumb_down_alt_outlined,
+      onPressed: _controller.isActionInProgress
+          ? null
+          : _controller.markNotInterested,
+      expand: expand,
+    );
+  }
+}
+
+/// Primary "add to library" pill with an attached dropdown for choosing the
+/// target state. The dropdown only changes the button's label; the state is
+/// applied when the main button is pressed.
+class _AddToLibraryButton extends StatelessWidget {
+  final String selectedState;
+  final List<String> states;
+  final ValueChanged<String> onStateSelected;
+  final VoidCallback? onAdd;
+  final bool busy;
+  final bool expand;
+
+  const _AddToLibraryButton({
+    required this.selectedState,
+    required this.states,
+    required this.onStateSelected,
+    required this.onAdd,
+    this.busy = false,
+    this.expand = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = LocalizationService();
+    final enabled = onAdd != null && !busy;
+    final bg = enabled
+        ? context.colors.accent
+        : context.colors.accent.withValues(alpha: 0.35);
+    final fg = context.colors.onAccent;
+
+    final addSection = MbTappable(
+      onTap: enabled ? onAdd : null,
+      pressedScale: 0.975,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (busy)
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(fg),
+                ),
+              ),
+            if (busy) const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                '+ ${l10n.translate(selectedState)}'.toUpperCase(),
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.display(color: fg, fontSize: 15),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final menuSection = PopupMenuButton<String>(
+      enabled: !busy,
+      tooltip: l10n.translate('import_add_as'),
+      color: context.colors.surface,
+      padding: EdgeInsets.zero,
+      onSelected: onStateSelected,
+      itemBuilder: (context) => [
+        for (final state in states)
+          PopupMenuItem(
+            value: state,
+            child: Text(
+              l10n.translate(state),
+              style: AppTypography.sans(color: context.colors.text),
+            ),
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+        child: Icon(Icons.arrow_drop_down_rounded, size: 22, color: fg),
+      ),
+    );
+
+    return ClipRRect(
       borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-    ),
-    child: Text(
-      label,
-      style: AppTypography.monoLabel(color: color, fontSize: 10.5),
-    ),
-  );
+      child: ColoredBox(
+        color: bg,
+        child: Row(
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            if (expand) Expanded(child: addSection) else addSection,
+            Container(width: 1, height: 24, color: fg.withValues(alpha: 0.3)),
+            menuSection,
+          ],
+        ),
+      ),
+    );
+  }
 }
