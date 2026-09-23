@@ -89,8 +89,14 @@ class BrowseController extends ChangeNotifier {
   bool get _hasSearchContext =>
       _currentSearchQuery.isNotEmpty || _currentFilters.toMap().isNotEmpty;
 
+  bool _disposed = false;
+
   @override
   void dispose() {
+    _disposed = true;
+    // Marks every in-flight page stale, so none of them touches state (or
+    // calls notifyListeners) after disposal.
+    _requestGeneration++;
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     searchController.dispose();
@@ -242,10 +248,10 @@ class BrowseController extends ChangeNotifier {
     notifyListeners();
 
     _results.advancePage();
-    await _fetchPage();
+    await _fetchPage(isLoadMore: true);
   }
 
-  Future<void> _fetchPage() async {
+  Future<void> _fetchPage({bool isLoadMore = false}) async {
     final generation = _requestGeneration;
     try {
       switch (_currentType) {
@@ -290,6 +296,10 @@ class BrowseController extends ChangeNotifier {
         'Failed to fetch search results for type $_currentType, query '
         '"$_currentSearchQuery" at page ${_results.page}: $e',
       );
+      // The page was advanced before the request; without stepping back, the
+      // next scroll-triggered retry would request the page after it and the
+      // failed page's results would be silently missing from the list.
+      if (isLoadMore) _results.retreatPage();
       _isLoading = false;
       _isLoadingMore = false;
       _error = e.toString();
@@ -310,7 +320,9 @@ class BrowseController extends ChangeNotifier {
     // A short page may not fill the viewport, leaving nothing to scroll and so
     // no way to ask for the next one; re-check once it has been laid out.
     if (!_results.hasMore) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) => checkScroll());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_disposed) checkScroll();
+    });
   }
 
   // ─── Barcode ─────────────────────────────────────────────────────────────

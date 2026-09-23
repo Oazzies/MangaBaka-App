@@ -68,6 +68,12 @@ class BrowseResults {
   /// matched against the page it was requested for.
   void advancePage() => _page++;
 
+  /// Undoes [advancePage] after the fetch for that page failed, so the retry
+  /// requests the same page instead of skipping past it.
+  void retreatPage() {
+    if (_page > 1) _page--;
+  }
+
   /// Marks the result set exhausted without adding anything — used for a
   /// browse type that has no endpoint behind it yet.
   void markExhausted() => _hasMore = false;
