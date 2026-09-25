@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
 import 'package:mangabaka_app/features/library/import/bulk_import_screen.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -278,63 +279,36 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
                 DesktopTokens.pagePadding,
                 12,
               ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final searchBar = ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 560),
-                    child: LibrarySearchBar(
-                      focusNode: _searchFocus,
-                      entriesStream: _session.entriesStream,
-                      onChanged: _setQuery,
-                      onResultSelected: _onResultSelected,
-                      initialFilters: _filters,
-                      showFilterButton: false,
+              // The sort and view controls beside the search while it keeps
+              // a usable width, beneath it (wrapping) when it wouldn't.
+              child: BesideOrBelow(
+                minBodyWidth: 280,
+                body: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: LibrarySearchBar(
+                    focusNode: _searchFocus,
+                    entriesStream: _session.entriesStream,
+                    onChanged: _setQuery,
+                    onResultSelected: _onResultSelected,
+                    initialFilters: _filters,
+                    showFilterButton: false,
+                  ),
+                ),
+                trailing: Wrap(
+                  spacing: 10,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    DesktopSortMenu(
+                      filters: _filters,
+                      onChanged: _setFilters,
+                      library: true,
                     ),
-                  );
-
-                  final rightControls = Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DesktopSortMenu(
-                        filters: _filters,
-                        onChanged: _setFilters,
-                        library: true,
-                      ),
-                      const SizedBox(width: 10),
-                      const DesktopListStyleToggle(
-                        scope: DesktopListScope.library,
-                      ),
-                    ],
-                  );
-
-                  if (constraints.maxWidth < 600) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        searchBar,
-                        const SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: rightControls,
-                        ),
-                      ],
-                    );
-                  }
-
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: searchBar,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      rightControls,
-                    ],
-                  );
-                },
+                    const DesktopListStyleToggle(
+                      scope: DesktopListScope.library,
+                    ),
+                  ],
+                ),
               ),
             ),
             Expanded(child: _grid(l10n, helper)),

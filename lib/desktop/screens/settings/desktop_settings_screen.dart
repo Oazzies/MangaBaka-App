@@ -83,6 +83,16 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
     }
   }
 
+  /// The settings pages, by name, for tests that visit each one.
+  @visibleForTesting
+  static List<String> get debugCategories => [
+    for (final c in _Category.values) c.name,
+  ];
+
+  @visibleForTesting
+  void debugSelectCategory(String name) =>
+      _select(_Category.values.byName(name));
+
   void _select(_Category category) {
     if (category == _selected) return;
     setState(() {
@@ -960,12 +970,17 @@ class _ContentRatingRow extends StatelessWidget {
                     : context.colors.textMuted,
               ),
               const SizedBox(width: 8),
-              Text(
-                l10n.translate('blur_covers'),
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
+              // Gives way to the rating's name in a narrow pane.
+              Flexible(
+                child: Text(
+                  l10n.translate('blur_covers'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               const SizedBox(width: 4),
@@ -1072,21 +1087,22 @@ class _DesktopLogsViewState extends State<_DesktopLogsView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        // Wraps rather than overflowing a narrow pane.
+        Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             DesktopPillButton(
               label: widget.l10n.translate('copy_logs'),
               icon: Icons.copy_rounded,
               onPressed: _logs.isEmpty ? null : _copyLogs,
             ),
-            const SizedBox(width: 8),
             DesktopPillButton(
               label: widget.l10n.translate('save_logs'),
               icon: Icons.download_rounded,
               onPressed: _logs.isEmpty ? null : _saveLogs,
             ),
-            const SizedBox(width: 8),
             DesktopPillButton(
               label: widget.l10n.translate('clear_logs'),
               icon: Icons.delete_outline_rounded,

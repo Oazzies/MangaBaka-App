@@ -277,7 +277,11 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
             actions: [
               if (DesktopLayout.isActive(context))
                 Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
+                  // The custom window buttons float over the top-right corner
+                  // of the window, which is where an app bar puts its actions.
+                  padding: const EdgeInsets.only(
+                    right: DesktopTokens.windowControlsClearance,
+                  ),
                   child: DesktopListStyleToggle(scope: DesktopListScope.browse),
                 ),
             ],

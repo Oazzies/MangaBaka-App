@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -192,8 +193,9 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                 : DesktopTokens.pagePadding,
             0,
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
+          child: DerivedLayoutBuilder<bool>(
+            derive: (constraints) => constraints.maxWidth < 620,
+            builder: (context, narrow) {
               final searchBar = ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 720),
                 child: MBSearchBar(
@@ -218,21 +220,22 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
 
               final titleText = Text(
                 l10n.translate('browse').toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTypography.display(
                   color: context.colors.text,
                   fontSize: 30,
                 ),
               );
 
-              if (constraints.maxWidth < 620) {
+              if (narrow) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
-                        titleText,
-                        const Spacer(),
+                        Expanded(child: titleText),
                         if (clearButton != null) clearButton,
                       ],
                     ),
@@ -268,8 +271,8 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
             DesktopTokens.pagePadding,
             10,
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
+          child: Builder(
+            builder: (context) {
               final leftControls = Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

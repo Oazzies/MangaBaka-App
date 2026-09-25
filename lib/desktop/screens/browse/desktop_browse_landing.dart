@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -43,9 +45,9 @@ class DesktopBrowseLanding extends StatelessWidget {
         40,
       ),
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 720;
+        DerivedLayoutBuilder<bool>(
+          derive: (constraints) => constraints.maxWidth >= 720,
+          builder: (context, isWide) {
             final queueCard = _DiscoveryQueueCard(onTap: onDiscoveryQueue);
             final mixCard = _MixCard(onTap: onMix);
             if (isWide) {
@@ -64,38 +66,52 @@ class DesktopBrowseLanding extends StatelessWidget {
         ),
         const SizedBox(height: DesktopTokens.sectionGap),
         DesktopSectionTitle(title: l10n.translate('discover')),
-        LayoutBuilder(
-          builder: (context, constraints) {
+        // Columns are a whole number decided per breakpoint; their width
+        // comes from the Row at layout, so a resize never rebuilds a card.
+        DerivedLayoutBuilder<int>(
+          derive: (constraints) =>
+              (constraints.maxWidth / 250).floor().clamp(2, 5),
+          builder: (context, columns) {
             const gap = 16.0;
-            final columns = (constraints.maxWidth / 250).floor().clamp(2, 5);
-            final width =
-                (constraints.maxWidth - gap * (columns - 1)) / columns;
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                for (final (type, key) in _types)
-                  SizedBox(
-                    width: width,
-                    child: _TypeCard(
-                      title: l10n.translate(key),
-                      onPopular: () => onNavigate(
-                        l10n.translate('most_popular'),
-                        'popularity_asc',
-                        type: type,
-                      ),
-                      onTopRated: () => onNavigate(
-                        l10n.translate('top_rated'),
-                        'score_desc',
-                        type: type,
-                      ),
-                      onRandom: () => onNavigate(
-                        l10n.translate('random'),
-                        'random',
-                        type: type,
-                      ),
-                    ),
+            final cards = [
+              for (final (type, key) in _types)
+                _TypeCard(
+                  title: l10n.translate(key),
+                  onPopular: () => onNavigate(
+                    l10n.translate('most_popular'),
+                    'popularity_asc',
+                    type: type,
                   ),
+                  onTopRated: () => onNavigate(
+                    l10n.translate('top_rated'),
+                    'score_desc',
+                    type: type,
+                  ),
+                  onRandom: () => onNavigate(
+                    l10n.translate('random'),
+                    'random',
+                    type: type,
+                  ),
+                ),
+            ];
+            return Column(
+              children: [
+                for (var r = 0; r < cards.length; r += columns) ...[
+                  if (r > 0) const SizedBox(height: gap),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var c = 0; c < columns; c++) ...[
+                        if (c > 0) const SizedBox(width: gap),
+                        Expanded(
+                          child: r + c < cards.length
+                              ? cards[r + c]
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ],
             );
           },
@@ -119,50 +135,49 @@ class _DiscoveryQueueCard extends StatelessWidget {
       hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.fromLTRB(30, 26, 26, 26),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      // The button beside the text while the text keeps its room, beneath
+      // it in a narrow card or at a large text size.
+      child: BesideOrBelow(
+        minBodyWidth: 180,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 20,
-                      color: context.colors.accent,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.translate('discovery_queue').toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.display(
-                          color: context.colors.text,
-                          fontSize: 24,
-                        ),
-                      ),
-                    ),
-                  ],
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 20,
+                  color: context.colors.accent,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.translate('discovery_queue_subtitle'),
-                  style: AppTypography.sans(
-                    color: context.colors.textMuted,
-                    fontSize: 14.5,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.translate('discovery_queue').toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.display(
+                      color: context.colors.text,
+                      fontSize: 24,
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          DesktopPillButton(
-            label: l10n.translate('discovery_queue_start'),
-            primary: true,
-            onPressed: onTap,
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              l10n.translate('discovery_queue_subtitle'),
+              style: AppTypography.sans(
+                color: context.colors.textMuted,
+                fontSize: 14.5,
+              ),
+            ),
+          ],
+        ),
+        trailing: DesktopPillButton(
+          label: l10n.translate('discovery_queue_start'),
+          primary: true,
+          onPressed: onTap,
+        ),
       ),
     );
   }
@@ -182,36 +197,35 @@ class _MixCard extends StatelessWidget {
       hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.fromLTRB(30, 26, 26, 26),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.translate('mix').toUpperCase(),
-                  style: AppTypography.display(
-                    color: context.colors.text,
-                    fontSize: 24,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.translate('mix_subtitle'),
-                  style: AppTypography.sans(
-                    color: context.colors.textMuted,
-                    fontSize: 14.5,
-                  ),
-                ),
-              ],
+      // The button beside the text while the text keeps its room, beneath
+      // it in a narrow card or at a large text size.
+      child: BesideOrBelow(
+        minBodyWidth: 180,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.translate('mix').toUpperCase(),
+              style: AppTypography.display(
+                color: context.colors.text,
+                fontSize: 24,
+              ),
             ),
-          ),
-          DesktopPillButton(
-            label: l10n.translate('mix_empty_title'),
-            primary: true,
-            onPressed: onTap,
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              l10n.translate('mix_subtitle'),
+              style: AppTypography.sans(
+                color: context.colors.textMuted,
+                fontSize: 14.5,
+              ),
+            ),
+          ],
+        ),
+        trailing: DesktopPillButton(
+          label: l10n.translate('mix_empty_title'),
+          primary: true,
+          onPressed: onTap,
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -145,9 +146,9 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
       listenable: Listenable.merge([LocalizationService(), SettingsManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final showAside = constraints.maxWidth >= _asideMinWidth;
+        return DerivedLayoutBuilder<bool>(
+          derive: (constraints) => constraints.maxWidth >= _asideMinWidth,
+          builder: (context, showAside) {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -234,12 +235,16 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
             padding: const EdgeInsets.symmetric(
               horizontal: DesktopTokens.pagePadding,
             ),
-            sliver: SliverLayoutBuilder(
-              builder: (context, constraints) {
+            // Rebuilt only when the column count changes; between those a
+            // resize just re-lays the cards out.
+            sliver: DerivedSliverLayoutBuilder<int>(
+              derive: (constraints) =>
+                  (constraints.crossAxisExtent / _minColumnWidth).floor().clamp(
+                    1,
+                    3,
+                  ),
+              builder: (context, columns) {
                 const gap = 16.0;
-                final columns = (constraints.crossAxisExtent / _minColumnWidth)
-                    .floor()
-                    .clamp(1, 3);
                 return SliverToBoxAdapter(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -30,14 +31,19 @@ class DesktopAppearancePage extends StatelessWidget {
     final controller = ThemeController();
     return ListenableBuilder(
       listenable: controller,
-      builder: (context, _) => LayoutBuilder(
-        builder: (context, box) {
+      builder: (context, _) => DerivedLayoutBuilder<bool>(
+        derive: (box) => box.maxWidth < _splitWidth,
+        builder: (context, narrow) {
           final controls = _controls(context, l10n, controller);
           final preview = _preview(context, l10n);
-          if (box.maxWidth < _splitWidth) {
+          if (narrow) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [preview, const SizedBox(height: _gap), controls],
+              children: [
+                preview,
+                const SizedBox(height: _gap),
+                controls,
+              ],
             );
           }
           return Row(
@@ -72,8 +78,7 @@ class DesktopAppearancePage extends StatelessWidget {
                 : l10n.translate('appearance_subtitle'),
             control: DesktopSegmented<AppThemeMode>(
               segments: [
-                for (final m in AppThemeMode.values)
-                  (m, m.label(l10n), m.icon),
+                for (final m in AppThemeMode.values) (m, m.label(l10n), m.icon),
               ],
               value: mode,
               onChanged: controller.setMode,
@@ -135,7 +140,10 @@ class DesktopAppearancePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DesktopSectionTitle(title: l10n.translate('theme_preview'), fontSize: 14),
+        DesktopSectionTitle(
+          title: l10n.translate('theme_preview'),
+          fontSize: 14,
+        ),
         ThemeLivePreview(palette: context.colors),
       ],
     );

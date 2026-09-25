@@ -74,8 +74,6 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
   Widget build(BuildContext context) {
     if (!DesktopWindowFrame.isSupported) return widget.child;
 
-    return Overlay(
-      initialEntries: [_entry],
-    );
+    return Overlay(initialEntries: [_entry]);
   }
 }

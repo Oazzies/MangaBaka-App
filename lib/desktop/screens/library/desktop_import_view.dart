@@ -149,42 +149,52 @@ class DesktopImportView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // The sources wrap onto a second line in a narrow window
+                  // rather than overflowing into the preview beside them;
+                  // Clear keeps the right edge.
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DesktopPillButton(
-                        label: l10n.translate('import_paste_clipboard'),
-                        icon: Icons.content_paste_rounded,
-                        onPressed: onPaste,
-                      ),
-                      const SizedBox(width: 10),
-                      DesktopPillButton(
-                        label: l10n.translate('import_open_file'),
-                        icon: Icons.folder_open_rounded,
-                        onPressed: onOpenFile,
-                      ),
-                      const SizedBox(width: 10),
-                      DesktopPillButton(
-                        label: l10n.translate('import_anilist'),
-                        icon: Icons.cloud_download_outlined,
-                        onPressed: onAniList,
-                      ),
-                      // Takes the slack between the source buttons and Clear,
-                      // so Clear stays on the right edge with or without a
-                      // file name to show.
                       Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            fileName ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.sans(
-                              color: context.colors.textMuted,
-                              fontSize: 13,
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            DesktopPillButton(
+                              label: l10n.translate('import_paste_clipboard'),
+                              icon: Icons.content_paste_rounded,
+                              onPressed: onPaste,
                             ),
-                          ),
+                            DesktopPillButton(
+                              label: l10n.translate('import_open_file'),
+                              icon: Icons.folder_open_rounded,
+                              onPressed: onOpenFile,
+                            ),
+                            DesktopPillButton(
+                              label: l10n.translate('import_anilist'),
+                              icon: Icons.cloud_download_outlined,
+                              onPressed: onAniList,
+                            ),
+                            if (fileName != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 2,
+                                ),
+                                child: Text(
+                                  fileName!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.sans(
+                                    color: context.colors.textMuted,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
+                      const SizedBox(width: 12),
                       DesktopPillButton(
                         label: l10n.translate('clear'),
                         icon: Icons.close_rounded,

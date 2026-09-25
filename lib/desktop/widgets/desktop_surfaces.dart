@@ -3,6 +3,8 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
+import 'package:mangabaka_app/core/widgets/fit_or_else.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -23,6 +25,13 @@ class DesktopPageHeader extends StatelessWidget {
 
   final EdgeInsetsGeometry padding;
 
+  /// False when something at least [DesktopTokens.windowControlsClearance]
+  /// wide (e.g. a trailing sidebar) already sits to this header's right, up
+  /// to the window's real right edge — the custom window controls then
+  /// float over that, not over the header, so it doesn't need its own
+  /// clearance padding pushing its actions away from its own right edge.
+  final bool reserveWindowControls;
+
   const DesktopPageHeader({
     super.key,
     required this.title,
@@ -35,12 +44,14 @@ class DesktopPageHeader extends StatelessWidget {
       DesktopTokens.pagePadding,
       16,
     ),
+    this.reserveWindowControls = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final resolvedPadding = padding.resolve(Directionality.of(context));
-    final double additionalRight = DesktopLayout.isDesktopPlatform
+    final double additionalRight =
+        DesktopLayout.isDesktopPlatform && reserveWindowControls
         ? (DesktopTokens.windowControlsClearance - resolvedPadding.right).clamp(
             0.0,
             double.infinity,
@@ -79,63 +90,34 @@ class DesktopPageHeader extends StatelessWidget {
       ],
     );
 
+    final heading = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (leading != null) ...[leading!, const SizedBox(width: 12)],
+        Expanded(child: titleWidget),
+      ],
+    );
+
     return Padding(
       padding: effectivePadding,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (actions.isEmpty) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (leading != null) ...[leading!, const SizedBox(width: 12)],
-                Expanded(child: titleWidget),
-              ],
-            );
-          }
-
-          if (constraints.maxWidth < 540) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (leading != null) ...[
-                      leading!,
-                      const SizedBox(width: 12),
-                    ],
-                    Expanded(child: titleWidget),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: actions,
-                ),
-              ],
-            );
-          }
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (leading != null) ...[leading!, const SizedBox(width: 12)],
-              Expanded(child: titleWidget),
-              const SizedBox(width: 16),
-              Wrap(
+      child: actions.isEmpty
+          ? heading
+          // The actions beside the title while it keeps its room, beneath
+          // it — wrapping as needed — when a narrow window, a long
+          // translation or a large text size wouldn't leave it any.
+          : BesideOrBelow(
+              minBodyWidth: 220,
+              // Top-aligned: the actions line up with the window buttons.
+              alignTop: true,
+              body: heading,
+              trailing: Wrap(
                 spacing: 10,
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 alignment: WrapAlignment.end,
                 children: actions,
               ),
-            ],
-          );
-        },
-      ),
+            ),
     );
   }
 }
@@ -390,9 +372,16 @@ class DesktopPillButton extends StatelessWidget {
             Icon(icon, size: 17, color: fg),
             const SizedBox(width: 8),
           ],
-          Text(
-            label.toUpperCase(),
-            style: AppTypography.display(color: fg, fontSize: 12.5),
+          // Flexible: its natural width wherever there's room, but a pill
+          // squeezed narrower than its (translated, text-scaled) label
+          // ellipsises instead of overflowing.
+          Flexible(
+            child: Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.display(color: fg, fontSize: 12.5),
+            ),
           ),
           if (trailing != null) ...[const SizedBox(width: 6), trailing!],
         ],
@@ -420,7 +409,7 @@ class DesktopSegmented<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final bar = Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: context.colors.surfaceRaised,
@@ -439,6 +428,22 @@ class DesktopSegmented<T> extends StatelessWidget {
             ),
         ],
       ),
+    );
+
+    // The segments' width depends on their labels — translated, sometimes
+    // data (news sources) — so no breakpoint fits every language. When they
+    // don't fit, the same choice becomes a dropdown instead of overflowing.
+    // Icon-only bars are narrow and have no labels to list; they stay.
+    if (segments.any((s) => s.$2 == null)) return bar;
+    final selected = segments.where((s) => s.$1 == value).firstOrNull;
+    return FitOrElse(
+      fallback: DesktopMenuButton<T>(
+        valueLabel: (selected?.$2 ?? segments.first.$2!).toUpperCase(),
+        items: [for (final (segment, label, _) in segments) (segment, label!)],
+        selected: value,
+        onSelected: onChanged,
+      ),
+      child: bar,
     );
   }
 }
@@ -612,38 +617,35 @@ class DesktopSettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 24,
-          child: Icon(icon, color: context.colors.textMuted, size: 20),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title.toUpperCase(),
-                style: AppTypography.display(
-                  color: context.colors.text,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 12.5,
-                ),
-              ),
-            ],
+    return BesideOrBelow(
+      leading: SizedBox(
+        width: 24,
+        child: Icon(icon, color: context.colors.textMuted, size: 20),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: AppTypography.display(
+              color: context.colors.text,
+              fontSize: 14,
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
-        control,
-      ],
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: AppTypography.sans(
+              color: context.colors.textMuted,
+              fontSize: 12.5,
+            ),
+          ),
+        ],
+      ),
+      // Beside the text while it keeps a readable width, beneath it when a
+      // wide control (a long translated dropdown value) wouldn't leave one.
+      trailing: control,
     );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -229,11 +231,11 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
             constraints: const BoxConstraints(
               maxWidth: DesktopTokens.maxPageWidth,
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // The overview needs a column of its own only if the main
-                // column keeps a useful width beside it.
-                final sidebar = constraints.maxWidth >= _sidebarMinWidth;
+            // The overview needs a column of its own only if the main column
+            // keeps a useful width beside it.
+            child: DerivedLayoutBuilder<bool>(
+              derive: (constraints) => constraints.maxWidth >= _sidebarMinWidth,
+              builder: (context, sidebar) {
                 return sidebar
                     ? Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -454,44 +456,23 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
     required bool loading,
   }) {
     if (!loading && entries.isEmpty) return const SizedBox.shrink();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Stretch the covers so a whole number of them, plus the spacing
-        // between them, exactly fills the row — the leftmost cover's left
-        // edge and the rightmost cover's right edge then line up with the
-        // identity card above instead of leaving a gap where a fixed cover
-        // width didn't divide the available space evenly.
-        final width = _activityCoverWidth(constraints.maxWidth);
-        return DesktopCarousel(
-          title: title,
-          loading: loading,
-          itemCount: entries.length,
-          itemWidth: width,
-          height: width * 1.5 + DesktopCoverCard.textAreaHeight(context),
-          onNearEnd: onNearEnd,
-          itemBuilder: (context, i) => DesktopCoverCard(
-            series: entries[i].series,
-            width: width,
-            heroTag: 'profile_${title}_$i',
-            caption: LocalizationService().translate(entries[i].state),
-          ),
-        );
-      },
+    final textArea = DesktopCoverCard.textAreaHeight(context);
+    return DesktopCarousel(
+      title: title,
+      loading: loading,
+      itemCount: entries.length,
+      // Stretched so a whole number of covers exactly fills the row, lining
+      // up with the identity card above.
+      itemWidth: 130,
+      stretch: true,
+      itemHeight: (width) => width * 1.5 + textArea,
+      onNearEnd: onNearEnd,
+      itemBuilder: (context, i) => DesktopCoverCard(
+        series: entries[i].series,
+        heroTag: 'profile_${title}_$i',
+        caption: LocalizationService().translate(entries[i].state),
+      ),
     );
-  }
-
-  /// Covers around 130px wide, stretched just enough that a whole number of
-  /// them exactly fills [availableWidth]. Must track [DesktopCarousel]'s
-  /// default spacing, since it isn't overridden here.
-  double _activityCoverWidth(double availableWidth) {
-    const targetWidth = 130.0;
-    const spacing = 18.0;
-    final step = targetWidth + spacing;
-    final count = ((availableWidth + spacing) / step).floor().clamp(
-      1,
-      1 << 30,
-    );
-    return (availableWidth - (count - 1) * spacing) / count;
   }
 }
 
@@ -516,33 +497,26 @@ class _IdentityCard extends StatelessWidget {
     return DesktopCard(
       showBorder: false,
       padding: const EdgeInsets.all(28),
-      child: Row(
-        children: [
-          Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              color: context.colors.accent,
-              shape: BoxShape.circle,
-            ),
-            child: ClipOval(
-              child: avatarUrl != null && avatarUrl!.isNotEmpty
-                  ? WidgetUtils.networkImage(
-                      url: avatarUrl!,
-                      fit: BoxFit.cover,
-                      width: 88,
-                      height: 88,
-                      errorWidget: Center(
-                        child: Text(
-                          name.isEmpty ? '?' : name[0].toUpperCase(),
-                          style: AppTypography.display(
-                            color: context.colors.onAccent,
-                            fontSize: 40,
-                          ),
-                        ),
-                      ),
-                    )
-                  : Center(
+      // The account buttons beside the name while it keeps its room,
+      // beneath it in a narrow window or at a large text size.
+      child: BesideOrBelow(
+        gap: 24,
+        minBodyWidth: 220,
+        leading: Container(
+          width: 88,
+          height: 88,
+          decoration: BoxDecoration(
+            color: context.colors.accent,
+            shape: BoxShape.circle,
+          ),
+          child: ClipOval(
+            child: avatarUrl != null && avatarUrl!.isNotEmpty
+                ? WidgetUtils.networkImage(
+                    url: avatarUrl!,
+                    fit: BoxFit.cover,
+                    width: 88,
+                    height: 88,
+                    errorWidget: Center(
                       child: Text(
                         name.isEmpty ? '?' : name[0].toUpperCase(),
                         style: AppTypography.display(
@@ -551,77 +525,95 @@ class _IdentityCard extends StatelessWidget {
                         ),
                       ),
                     ),
-            ),
-          ),
-          const SizedBox(width: 26),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.display(
-                    color: context.colors.text,
-                    fontSize: 32,
+                  )
+                : Center(
+                    child: Text(
+                      name.isEmpty ? '?' : name[0].toUpperCase(),
+                      style: AppTypography.display(
+                        color: context.colors.onAccent,
+                        fontSize: 40,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    if (username != null && username != name) ...[
-                      Text(
-                        '@$username',
-                        style: AppTypography.sans(
-                          color: context.colors.textMuted,
-                          fontSize: 14.5,
-                        ),
+          ),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              name.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.display(
+                color: context.colors.text,
+                fontSize: 32,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                if (username != null && username != name) ...[
+                  // Usernames have no length limit; the role pill keeps
+                  // its place and the name gives way.
+                  Flexible(
+                    child: Text(
+                      '@$username',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.sans(
+                        color: context.colors.textMuted,
+                        fontSize: 14.5,
                       ),
-                      const SizedBox(width: 12),
-                    ],
-                    if (role.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.colors.surfaceRaised,
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.pillRadius,
-                          ),
-                        ),
-                        child: Text(
-                          role.toUpperCase(),
-                          style: AppTypography.monoLabel(
-                            color: context.colors.textMuted,
-                            fontSize: 10.5,
-                          ),
-                        ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                if (role.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: context.colors.surfaceRaised,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.pillRadius,
                       ),
-                  ],
-                ),
+                    ),
+                    child: Text(
+                      role.toUpperCase(),
+                      style: AppTypography.monoLabel(
+                        color: context.colors.textMuted,
+                        fontSize: 10.5,
+                      ),
+                    ),
+                  ),
               ],
             ),
-          ),
-          DesktopPillButton(
-            label: l10n.translate('account_settings'),
-            icon: Icons.open_in_new_rounded,
-            onPressed: () => launchUrl(
-              Uri.parse('https://mangabaka.org/my/settings/profile'),
-              mode: LaunchMode.externalApplication,
+          ],
+        ),
+        trailing: Wrap(
+          spacing: 10,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            DesktopPillButton(
+              label: l10n.translate('account_settings'),
+              icon: Icons.open_in_new_rounded,
+              onPressed: () => launchUrl(
+                Uri.parse('https://mangabaka.org/my/settings/profile'),
+                mode: LaunchMode.externalApplication,
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          DesktopIconButton(
-            icon: Icons.logout_rounded,
-            filled: true,
-            color: context.colors.error,
-            tooltip: l10n.translate('logout'),
-            onPressed: onLogout,
-          ),
-        ],
+            DesktopIconButton(
+              icon: Icons.logout_rounded,
+              filled: true,
+              color: context.colors.error,
+              tooltip: l10n.translate('logout'),
+              onPressed: onLogout,
+            ),
+          ],
+        ),
       ),
     );
   }

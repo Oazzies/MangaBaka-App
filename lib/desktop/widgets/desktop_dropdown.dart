@@ -206,11 +206,15 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
                     ),
                   )
                 else
-                  Text(
-                    displayText.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.display(color: fg, fontSize: 12.5),
+                  // Its natural width where there's room; ellipsised rather
+                  // than overflowing when the button is squeezed.
+                  Flexible(
+                    child: Text(
+                      displayText.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.display(color: fg, fontSize: 12.5),
+                    ),
                   ),
                 const SizedBox(width: 8),
                 AnimatedRotation(

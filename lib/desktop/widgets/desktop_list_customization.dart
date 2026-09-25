@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -49,12 +50,13 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
   Widget build(BuildContext context) {
     final scope = _scope;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
+    return DerivedLayoutBuilder<bool>(
+      derive: (constraints) => constraints.maxWidth < _splitWidth,
+      builder: (context, narrow) {
         final appearance = _appearance(scope);
         final behaviour = _behaviour(scope);
 
-        if (constraints.maxWidth < _splitWidth) {
+        if (narrow) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
