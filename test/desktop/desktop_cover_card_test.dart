@@ -48,12 +48,11 @@ void main() {
                           title: 'Recently Changed',
                           itemCount: 5,
                           itemWidth: width,
-                          height:
-                              width * 1.5 +
+                          itemHeight: (w) =>
+                              w * 1.5 +
                               DesktopCoverCard.textAreaHeight(context),
                           itemBuilder: (context, i) => DesktopCoverCard(
                             series: _series(_longTitle),
-                            width: width,
                             caption: 'Reading',
                           ),
                         ),

@@ -76,21 +76,23 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
       final dateKey = _dateGroupKey(group.date);
       final isCollapsed = _collapsedDateGroups.contains(dateKey);
 
-      rows.add(_DateHeader(
-        date: group.date,
-        first: rows.isEmpty,
-        l10n: l10n,
-        isCollapsed: isCollapsed,
-        onToggle: () {
-          setState(() {
-            if (isCollapsed) {
-              _collapsedDateGroups.remove(dateKey);
-            } else {
-              _collapsedDateGroups.add(dateKey);
-            }
-          });
-        },
-      ));
+      rows.add(
+        _DateHeader(
+          date: group.date,
+          first: rows.isEmpty,
+          l10n: l10n,
+          isCollapsed: isCollapsed,
+          onToggle: () {
+            setState(() {
+              if (isCollapsed) {
+                _collapsedDateGroups.remove(dateKey);
+              } else {
+                _collapsedDateGroups.add(dateKey);
+              }
+            });
+          },
+        ),
+      );
 
       if (!isCollapsed) {
         for (final work in group.works) {
@@ -271,20 +273,24 @@ class _DateHeader extends StatelessWidget {
                       ? l10n.translate('upcoming_date_tba').toUpperCase()
                       : DateFormat('d MMM').format(d).toUpperCase(),
                   style: AppTypography.display(
-                    color: isToday ? context.colors.accent : context.colors.text,
+                    color: isToday
+                        ? context.colors.accent
+                        : context.colors.text,
                     fontSize: d == null ? 14 : 22,
                     height: 1,
                   ),
                 ),
                 if (d != null) ...[
                   const SizedBox(width: 12),
-                  Text(
-                    _relative(d).toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.monoLabel(
-                      color: context.colors.textMuted,
-                      fontSize: 11.5,
+                  Flexible(
+                    child: Text(
+                      _relative(d).toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.monoLabel(
+                        color: context.colors.textMuted,
+                        fontSize: 11.5,
+                      ),
                     ),
                   ),
                 ],

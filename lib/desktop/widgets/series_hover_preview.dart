@@ -217,9 +217,9 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
 
   String _cleanSynopsis(String text) {
     if (text.isEmpty) return '';
-    return MarkdownUtils.toPlainText(text)
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
+    return MarkdownUtils.toPlainText(
+      text,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
   Color _statusColor(String status) {
@@ -596,7 +596,9 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                                       vertical: 2,
                                                     ),
                                                 decoration: BoxDecoration(
-                                                  color: context.colors.surfaceRaised,
+                                                  color: context
+                                                      .colors
+                                                      .surfaceRaised,
                                                   borderRadius:
                                                       BorderRadius.circular(4),
                                                   border: Border.all(

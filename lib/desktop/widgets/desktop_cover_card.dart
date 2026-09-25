@@ -28,7 +28,12 @@ void openSeriesDetail(BuildContext context, Series series, {String? heroTag}) {
 /// prefetched — by the time the click lands it usually has its data.
 class DesktopCoverCard extends StatefulWidget {
   final Series series;
-  final double width;
+
+  /// A fixed width, or null to fill the width the parent gives it (a
+  /// carousel slot) — the cover is 2:3 at whatever width that is, with the
+  /// fixed text area of [textAreaHeight] below.
+  final double? width;
+
   final String? caption;
   final String heroTag;
   final VoidCallback? onTap;
@@ -36,14 +41,19 @@ class DesktopCoverCard extends StatefulWidget {
   /// False shows the cover alone, for dense strips of thumbnails.
   final bool showTitle;
 
+  /// False hides the rating-stars fallback shown under the title when no
+  /// [caption] is given — the hover preview already surfaces the rating.
+  final bool showRating;
+
   const DesktopCoverCard({
     super.key,
     required this.series,
-    this.width = 150,
+    this.width,
     this.caption,
     this.heroTag = 'desktop',
     this.onTap,
     this.showTitle = true,
+    this.showRating = true,
   });
 
   /// Height reserved for the title (up to 2 lines), below the 9px gap
@@ -56,6 +66,17 @@ class DesktopCoverCard extends StatefulWidget {
   /// Gap before the title, and before the caption/rating row beneath it.
   static const double _titleGap = 9;
   static const double _metaGap = 4;
+
+  /// How far a hovered cover lifts, in pixels. A fixed amount rather than a
+  /// fraction of the cover's height, so a row's clip-room reserve above its
+  /// covers (see [DesktopCarousel.liftRoom]) can stay a small constant no
+  /// matter how wide the covers are stretched to fill the row.
+  static const double hoverLift = 3.0;
+
+  /// Logical width covers without a fixed [width] decode at. Fixed, so a
+  /// cover whose slot follows the window never re-decodes as it resizes;
+  /// wide enough for the widest a stretched carousel slot gets.
+  static const double fillDecodeWidth = 256;
 
   /// Room to reserve below the cover image for the title and the
   /// caption/rating row beneath it, for a caller computing a fixed row
@@ -110,101 +131,121 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
               openSeriesDetail(context, series, heroTag: widget.heroTag);
             }
           },
-          child: SizedBox(
-            width: widget.width,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AnimatedSlide(
-                  duration: AppMotion.fast,
-                  curve: AppMotion.emphasized,
-                  offset: _hovered ? const Offset(0, -0.02) : Offset.zero,
-                  child: AnimatedContainer(
-                    duration: AppMotion.fast,
-                    curve: AppMotion.emphasized,
-                    width: widget.width,
-                    height: widget.width * 1.5,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _hovered
-                            ? context.colors.accent
-                            : Colors.transparent,
-                        width: 2,
+          child: _sized(
+            // The column's children sum to exactly the height a caller
+            // budgets via textAreaHeight in ideal arithmetic, but device-pixel
+            // rounding at fractional display scales can still leave it a
+            // fraction of a pixel taller than what it's given — ClipRect
+            // absorbs that silently instead of throwing a debug-mode
+            // overflow error over less than a pixel.
+            ClipRect(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // The cover takes its height from its width, at layout:
+                  // no build ever needs the width, so a slot that follows the
+                  // window resizes without rebuilding the card. Only the
+                  // hover styling animates — animating the size made every
+                  // cover tween on each frame of a resize, overflowing its
+                  // slot while it caught up.
+                  AspectRatio(
+                    aspectRatio: 2 / 3,
+                    child: AnimatedContainer(
+                      duration: AppMotion.fast,
+                      curve: AppMotion.emphasized,
+                      transform: Matrix4.translationValues(
+                        0,
+                        _hovered ? -DesktopCoverCard.hoverLift : 0,
+                        0,
                       ),
-                      boxShadow: _hovered ? context.colors.softShadow : null,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: WidgetUtils.networkImage(
-                        url: series.coverUrl,
-                        blurred: WidgetUtils.isRatingBlurred(
-                          series.contentRating,
-                        ),
-                        width: widget.width,
-                        height: widget.width * 1.5,
-                        memCacheWidth: (widget.width * 2).round(),
-                      ),
-                    ),
-                  ),
-                ),
-                if (widget.showTitle) ...[
-                  const SizedBox(height: DesktopCoverCard._titleGap),
-                  // Capped to a fixed, guaranteed size (see textAreaHeight)
-                  // rather than sized to the text's own natural height —
-                  // real font/DPI/text-scale metrics vary too much to
-                  // reliably predict, so a title that would need more room
-                  // clips instead of overflowing the card.
-                  SizedBox(
-                    height: DesktopCoverCard._titleAreaHeight(textScale),
-                    child: ClipRect(
-                      child: Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.sans(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
                           color: _hovered
                               ? context.colors.accent
-                              : context.colors.text,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w600,
-                          height: 1.25,
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                        boxShadow: _hovered ? context.colors.softShadow : null,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: WidgetUtils.networkImage(
+                          url: series.coverUrl,
+                          blurred: WidgetUtils.isRatingBlurred(
+                            series.contentRating,
+                          ),
+                          memCacheWidth: WidgetUtils.decodeWidth(
+                            context,
+                            widget.width ?? DesktopCoverCard.fillDecodeWidth,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: DesktopCoverCard._metaGap),
-                  SizedBox(
-                    height: DesktopCoverCard._metaAreaHeight(textScale),
-                    child: ClipRect(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: widget.caption != null
-                            ? Text(
-                                widget.caption!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.sans(
-                                  color: context.colors.textMuted,
-                                  fontSize: 12,
-                                ),
-                              )
-                            : rating > 0
-                            ? MbRatingStars(
-                                rating: rating,
-                                outOf: 100,
-                                fontSize: 11,
-                              )
-                            : const SizedBox.shrink(),
+                  if (widget.showTitle) ...[
+                    const SizedBox(height: DesktopCoverCard._titleGap),
+                    // Capped to a fixed, guaranteed size (see textAreaHeight)
+                    // rather than sized to the text's own natural height —
+                    // real font/DPI/text-scale metrics vary too much to
+                    // reliably predict, so a title that would need more room
+                    // clips instead of overflowing the card.
+                    SizedBox(
+                      height: DesktopCoverCard._titleAreaHeight(textScale),
+                      child: ClipRect(
+                        child: Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.sans(
+                            color: _hovered
+                                ? context.colors.accent
+                                : context.colors.text,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.25,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: DesktopCoverCard._metaGap),
+                    SizedBox(
+                      height: DesktopCoverCard._metaAreaHeight(textScale),
+                      child: ClipRect(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: widget.caption != null
+                              ? Text(
+                                  widget.caption!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.sans(
+                                    color: context.colors.textMuted,
+                                    fontSize: 12,
+                                  ),
+                                )
+                              : rating > 0 && widget.showRating
+                              ? MbRatingStars(
+                                  rating: rating,
+                                  outOf: 100,
+                                  fontSize: 11,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _sized(Widget child) {
+    final width = widget.width;
+    return width == null ? child : SizedBox(width: width, child: child);
   }
 }

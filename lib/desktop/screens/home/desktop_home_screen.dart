@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_trending_board.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_upcoming_rail.dart';
@@ -150,15 +151,22 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
       builder: (context, _) {
         final l10n = LocalizationService();
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final showRail = constraints.maxWidth >= _railMinWidth;
+        // Rebuilt only when the rail appears or disappears; between those
+        // a resize just re-lays the feed out.
+        return DerivedLayoutBuilder<bool>(
+          derive: (constraints) => constraints.maxWidth >= _railMinWidth,
+          builder: (context, showRail) {
             final feed = ListView(
               padding: const EdgeInsets.only(bottom: 48),
               children: [
                 DesktopPageHeader(
                   title: l10n.translate('home'),
                   subtitle: l10n.translate('home_subtitle'),
+                  // The upcoming rail, when shown, already sits between
+                  // this header and the window's real right edge — the
+                  // custom window controls float over the rail, not over
+                  // this header, so it doesn't need to dodge them.
+                  reserveWindowControls: !showRail,
                   actions: [
                     DesktopIconButton(
                       icon: Icons.refresh_rounded,
@@ -249,19 +257,23 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
     // A rail that resolved to nothing is dropped rather than shown empty.
     if (!isLoading && series.isEmpty) return const SizedBox.shrink();
 
-    const width = 156.0;
+    final textArea = DesktopCoverCard.textAreaHeight(context);
     return _padded(
       DesktopCarousel(
         title: title,
         loading: isLoading,
         onViewAll: onViewAll,
         itemCount: series.length,
-        itemWidth: width,
-        height: width * 1.5 + DesktopCoverCard.textAreaHeight(context),
+        // Stretched so a whole number of covers exactly fills the row: the
+        // leftmost cover's left edge and the rightmost's right edge line up
+        // with the trending board above.
+        itemWidth: 156,
+        stretch: true,
+        itemHeight: (width) => width * 1.5 + textArea,
         itemBuilder: (context, i) => DesktopCoverCard(
           series: series[i],
-          width: width,
           heroTag: 'home_${title}_$i',
+          showRating: false,
         ),
       ),
     );
