@@ -49,6 +49,9 @@ app.*.map.json
 # Miscellaneous
 *.class
 *.lock
+# An app's lockfile is committed so every build (CI included) resolves the
+# exact dependency versions that were tested.
+!pubspec.lock
 *.log
 *.pyc
 *.swp

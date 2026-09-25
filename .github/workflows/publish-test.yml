@@ -132,14 +132,16 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         shell: bash
         run: |
-          if [ -n "$ENV_FILE" ]; then
-            echo "$ENV_FILE" > .env
-          else
-            echo "" > .env
+          # A build without the OAuth client ID compiles fine but cannot sign
+          # anyone in, so a missing secret fails the job instead.
+          if [ -z "$ENV_FILE" ]; then
+            echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
+            exit 1
           fi
+          echo "$ENV_FILE" > .env
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -149,16 +151,18 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          # Pinned so a release is built with the SDK its tests ran on.
+          flutter-version: '3.44.3'
           cache: true
 
       - name: Install Dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Set up Android Keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
 
       - name: Download Changelog Artifact
         uses: actions/download-artifact@v4
@@ -230,22 +234,26 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         shell: bash
         run: |
-          if [ -n "$ENV_FILE" ]; then
-            echo "$ENV_FILE" > .env
-          else
-            echo "" > .env
+          # A build without the OAuth client ID compiles fine but cannot sign
+          # anyone in, so a missing secret fails the job instead.
+          if [ -z "$ENV_FILE" ]; then
+            echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
+            exit 1
           fi
+          echo "$ENV_FILE" > .env
 
       - name: Set up Flutter
         if: env.SKIP_PUBLISH != 'true'
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          # Pinned so a release is built with the SDK its tests ran on.
+          flutter-version: '3.44.3'
           cache: true
 
       - name: Install Dependencies
         if: env.SKIP_PUBLISH != 'true'
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Import iOS Certificates
         if: env.SKIP_PUBLISH != 'true'
