@@ -142,10 +142,23 @@ class UpdateService {
   }
 
   /// Downloads [asset] to a temporary file, reporting progress in `[0, 1]`.
+  ///
+  /// Throws [UpdateIntegrityException] before downloading anything when the
+  /// release publishes no sha256 for the asset: the file is run as an
+  /// installer, and without a digest there is nothing to verify it against.
+  /// Callers should send the user to the release page instead.
   Future<File> downloadAsset(
     ReleaseAsset asset, {
     void Function(double progress)? onProgress,
   }) async {
+    final expected = asset.sha256;
+    if (expected == null) {
+      _logger.warning(
+        'Release asset ${asset.name} has no published sha256; refusing to install it',
+      );
+      throw UpdateIntegrityException.unverifiable();
+    }
+
     final dir = await getTemporaryDirectory();
     // The name comes from the release feed: only its last path segment is
     // used, so it can never place the file outside the temp directory.
@@ -210,21 +223,14 @@ class UpdateService {
     // rather than run.
     hasher.close();
     final actual = digestSink.value.toString();
-    final expected = asset.sha256;
-    if (expected != null) {
-      if (actual != expected) {
-        await file.delete();
-        _logger.severe(
-          'Update checksum mismatch for ${asset.name}: expected $expected, got $actual',
-        );
-        throw UpdateIntegrityException();
-      }
-      _logger.info('Update checksum verified (sha256 $actual)');
-    } else {
-      _logger.warning(
-        'Release asset ${asset.name} has no published sha256; size-checked only',
+    if (actual != expected) {
+      await file.delete();
+      _logger.severe(
+        'Update checksum mismatch for ${asset.name}: expected $expected, got $actual',
       );
+      throw UpdateIntegrityException();
     }
+    _logger.info('Update checksum verified (sha256 $actual)');
 
     _logger.info('Downloaded update to ${file.path} ($received bytes)');
     return file;
@@ -276,12 +282,20 @@ class UpdateService {
 }
 
 /// Thrown when a downloaded update does not match the checksum GitHub
-/// published for it. The file has already been deleted.
+/// published for it (the file has already been deleted), or when no checksum
+/// was published at all and the update was not downloaded.
 class UpdateIntegrityException extends AppException {
   UpdateIntegrityException()
       : super(
           message: 'The downloaded update failed its integrity check.',
           code: 'CHECKSUM_MISMATCH',
+        );
+
+  UpdateIntegrityException.unverifiable()
+      : super(
+          message: 'This update has no published checksum, so it cannot be '
+              'installed from inside the app.',
+          code: 'CHECKSUM_MISSING',
         );
 }
 

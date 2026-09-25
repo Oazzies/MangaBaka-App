@@ -60,9 +60,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
     try {
       final asset = await _service.selectAssetForPlatform(widget.release);
-      if (asset == null) {
+      // Without a published checksum the installer cannot be verified, so
+      // it is not run from here; the release page lets the user decide.
+      if (asset == null || asset.sha256 == null) {
         _logger.warning(
-          'No matching update asset for platform; opening release page.',
+          asset == null
+              ? 'No matching update asset for platform; opening release page.'
+              : 'Update asset has no published checksum; opening release page.',
         );
         await _openReleasePage();
         if (mounted) Navigator.of(context).pop();
@@ -213,13 +217,15 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      Platform.isWindows
-                          ? 'Launching installer — the app will close.'
-                          : 'Opening installer…',
-                      style: AppTypography.sans(
-                        color: context.colors.textMuted,
-                        fontSize: 13,
+                    Flexible(
+                      child: Text(
+                        Platform.isWindows
+                            ? 'Launching installer — the app will close.'
+                            : 'Opening installer…',
+                        style: AppTypography.sans(
+                          color: context.colors.textMuted,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
