@@ -43,6 +43,10 @@ class DesktopSidebar extends StatelessWidget {
         ? DesktopTokens.sidebarCollapsedWidth
         : DesktopTokens.sidebarWidth;
 
+    // responsive-ok: the collapse animation itself. The width changes only
+    // on a toggle or when the window crosses the auto-collapse width, not
+    // with every frame of a resize, and the content beside it doesn't move
+    // while it plays (see DesktopShell).
     return AnimatedContainer(
       duration: AppMotion.base,
       curve: AppMotion.emphasized,

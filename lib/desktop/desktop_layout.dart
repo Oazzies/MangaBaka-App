@@ -31,11 +31,46 @@ class DesktopLayout {
     return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
   }
 
+  /// Whether [context] is in the desktop presentation.
+  ///
+  /// Under a [DesktopLayoutScope] (the app root has one) the caller only
+  /// rebuilds when the answer flips. Without one it falls back to reading the
+  /// window width — which rebuilds the caller on every frame of a resize, so
+  /// the scope matters: list rows ask this.
   static bool isActive(BuildContext context) {
     final override = debugOverride;
     if (override != null) return override;
-    return isDesktopPlatform && MediaQuery.sizeOf(context).width >= minWidth;
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_DesktopLayoutScope>();
+    if (scope != null) return scope.active;
+    return _activeAt(MediaQuery.sizeOf(context).width);
   }
+
+  static bool _activeAt(double width) => isDesktopPlatform && width >= minWidth;
+}
+
+/// Publishes [DesktopLayout.isActive] below it, notifying dependents only when
+/// the answer changes rather than on every change of window size.
+class DesktopLayoutScope extends StatelessWidget {
+  final Widget child;
+
+  const DesktopLayoutScope({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) => _DesktopLayoutScope(
+    active: DesktopLayout._activeAt(MediaQuery.sizeOf(context).width),
+    child: child,
+  );
+}
+
+class _DesktopLayoutScope extends InheritedWidget {
+  final bool active;
+
+  const _DesktopLayoutScope({required this.active, required super.child});
+
+  @override
+  bool updateShouldNotify(_DesktopLayoutScope oldWidget) =>
+      active != oldWidget.active;
 }
 
 /// Spacing and sizing shared by every desktop screen, so the pages line up

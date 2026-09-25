@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_banner.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/desktop/shell/active_page_stack.dart';
 import 'package:mangabaka_app/desktop/screens/browse/desktop_browse_screen.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_home_screen.dart';
 import 'package:mangabaka_app/desktop/screens/library/desktop_library_screen.dart';
@@ -26,8 +28,9 @@ abstract interface class DesktopRefreshable {
 ///
 /// Pushed routes — series detail, results lists, logs — open inside the
 /// content area, so the sidebar stays put and one click on it returns to a
-/// destination. Pages are built once and kept alive in an [IndexedStack], as
-/// on mobile, so each keeps its scroll position and loaded data.
+/// destination. Pages are built once and kept alive, as on mobile, so each
+/// keeps its scroll position and loaded data — in an [ActivePageStack], so
+/// only the one showing costs anything when the window is resized.
 class DesktopShell extends StatefulWidget {
   static final GlobalKey<DesktopShellState> shellKey =
       GlobalKey<DesktopShellState>();
@@ -107,6 +110,11 @@ class DesktopShellState extends State<DesktopShell> {
 
   void openSettings() => select(settingsIndex);
 
+  /// Pins the sidebar open or closed at every width (null: follow the width).
+  @visibleForTesting
+  set debugSidebarCollapsed(bool? value) =>
+      setState(() => _collapsedOverride = value);
+
   /// Jumps to search: the library's own field when the library is showing,
   /// Browse's otherwise.
   void focusSearch() {
@@ -134,13 +142,6 @@ class DesktopShellState extends State<DesktopShell> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final collapsed =
-        _collapsedOverride ?? width < DesktopTokens.sidebarAutoCollapseWidth;
-    final sidebarWidth = collapsed
-        ? DesktopTokens.sidebarCollapsedWidth
-        : DesktopTokens.sidebarWidth;
-
     return ListenableBuilder(
       listenable: LocalizationService(),
       builder: (context, _) => Actions(
@@ -168,40 +169,55 @@ class DesktopShellState extends State<DesktopShell> {
           // Row instead resized the content area on every frame of the
           // transition, re-laying out whole grids and carousels ~20 times per
           // toggle — that was the lag.
-          body: Stack(
-            children: [
-              Positioned.fill(
-                left: sidebarWidth,
-                child: Column(
-                  children: [
-                    const BackendHealthBanner(),
-                    Expanded(child: _content()),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: RepaintBoundary(
-                  child: DesktopSidebar(
-                    selectedIndex: _index.value,
-                    onSelected: select,
-                    onSearch: focusSearch,
-                    collapsed: collapsed,
-                    onToggleCollapsed: () =>
-                        setState(() => _collapsedOverride = !collapsed),
+          // Rebuilt only when the window crosses the auto-collapse width;
+          // any other resize just re-lays out what's already here.
+          body: DerivedLayoutBuilder<bool>(
+            derive: (constraints) =>
+                constraints.maxWidth < DesktopTokens.sidebarAutoCollapseWidth,
+            builder: (context, narrow) {
+              final collapsed = _collapsedOverride ?? narrow;
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    left: collapsed
+                        ? DesktopTokens.sidebarCollapsedWidth
+                        : DesktopTokens.sidebarWidth,
+                    child: Column(
+                      children: [
+                        const BackendHealthBanner(),
+                        Expanded(child: _content),
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: RepaintBoundary(
+                      child: DesktopSidebar(
+                        selectedIndex: _index.value,
+                        onSelected: select,
+                        onSearch: focusSearch,
+                        collapsed: collapsed,
+                        onToggleCollapsed: () =>
+                            setState(() => _collapsedOverride = !collapsed),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _content() {
+  /// Built once: the navigator and its pages never need rebuilding for a
+  /// change of the shell around them.
+  late final Widget _content = _buildContent();
+
+  Widget _buildContent() {
     return Stack(
       children: [
         Navigator(
@@ -212,7 +228,7 @@ class DesktopShellState extends State<DesktopShell> {
               pageBuilder: (_, __, ___) => ValueListenableBuilder<int>(
                 valueListenable: _index,
                 builder: (_, index, __) =>
-                    IndexedStack(index: index, children: _pages),
+                    ActivePageStack(index: index, children: _pages),
               ),
               transitionsBuilder: (_, __, ___, child) => child,
             ),
