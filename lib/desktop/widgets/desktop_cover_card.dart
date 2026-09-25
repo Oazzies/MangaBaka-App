@@ -46,6 +46,36 @@ class DesktopCoverCard extends StatefulWidget {
     this.showTitle = true,
   });
 
+  /// Height reserved for the title (up to 2 lines), below the 9px gap
+  /// after the cover.
+  static double _titleAreaHeight(double textScale) => 40 * textScale;
+
+  /// Height reserved for the caption/rating row, below its own gap.
+  static double _metaAreaHeight(double textScale) => 20 * textScale;
+
+  /// Gap before the title, and before the caption/rating row beneath it.
+  static const double _titleGap = 9;
+  static const double _metaGap = 4;
+
+  /// Room to reserve below the cover image for the title and the
+  /// caption/rating row beneath it, for a caller computing a fixed row
+  /// height (e.g. [DesktopCarousel]'s `height:`).
+  ///
+  /// This must stay in lockstep with the fixed-size boxes the title and
+  /// caption/rating are wrapped in below — real font/DPI/text-scale metrics
+  /// are too variable to predict from a formula (a guessed pixel budget
+  /// repeatedly proved too small in practice and overflowed the row), so
+  /// instead each text element is capped to a guaranteed size and clips
+  /// rather than grows. That makes this value exactly correct by
+  /// construction instead of an estimate.
+  static double textAreaHeight(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context).scale(1.0);
+    return _titleGap +
+        _titleAreaHeight(scale) +
+        _metaGap +
+        _metaAreaHeight(scale);
+  }
+
   @override
   State<DesktopCoverCard> createState() => _DesktopCoverCardState();
 }
@@ -60,6 +90,7 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
     final title = series.getDisplayTitle(
       SettingsManager().defaultTitleLanguage,
     );
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
 
     return SeriesHoverPreview(
       series: series,
@@ -118,35 +149,56 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
                   ),
                 ),
                 if (widget.showTitle) ...[
-                  const SizedBox(height: 9),
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.sans(
-                      color: _hovered
-                          ? context.colors.accent
-                          : context.colors.text,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      height: 1.25,
-                    ),
-                  ),
-                  if (widget.caption != null) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      widget.caption!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.sans(
-                        color: context.colors.textMuted,
-                        fontSize: 12,
+                  const SizedBox(height: DesktopCoverCard._titleGap),
+                  // Capped to a fixed, guaranteed size (see textAreaHeight)
+                  // rather than sized to the text's own natural height —
+                  // real font/DPI/text-scale metrics vary too much to
+                  // reliably predict, so a title that would need more room
+                  // clips instead of overflowing the card.
+                  SizedBox(
+                    height: DesktopCoverCard._titleAreaHeight(textScale),
+                    child: ClipRect(
+                      child: Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.sans(
+                          color: _hovered
+                              ? context.colors.accent
+                              : context.colors.text,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.25,
+                        ),
                       ),
                     ),
-                  ] else if (rating > 0) ...[
-                    const SizedBox(height: 4),
-                    MbRatingStars(rating: rating, outOf: 100, fontSize: 11),
-                  ],
+                  ),
+                  const SizedBox(height: DesktopCoverCard._metaGap),
+                  SizedBox(
+                    height: DesktopCoverCard._metaAreaHeight(textScale),
+                    child: ClipRect(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: widget.caption != null
+                            ? Text(
+                                widget.caption!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.sans(
+                                  color: context.colors.textMuted,
+                                  fontSize: 12,
+                                ),
+                              )
+                            : rating > 0
+                            ? MbRatingStars(
+                                rating: rating,
+                                outOf: 100,
+                                fontSize: 11,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),

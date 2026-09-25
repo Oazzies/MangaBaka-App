@@ -257,7 +257,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
         onViewAll: onViewAll,
         itemCount: series.length,
         itemWidth: width,
-        height: width * 1.5 + 70,
+        height: width * 1.5 + DesktopCoverCard.textAreaHeight(context),
         itemBuilder: (context, i) => DesktopCoverCard(
           series: series[i],
           width: width,

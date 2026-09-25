@@ -12,6 +12,7 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_carousel.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_title_bar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_sign_in_prompt.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
@@ -243,7 +244,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
                             child: ListView(
                               padding: const EdgeInsets.fromLTRB(
                                 0,
-                                32,
+                                _topClearance,
                                 DesktopTokens.pagePadding,
                                 48,
                               ),
@@ -266,13 +267,19 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
   static const double _sidebarWidth = 372;
   static const double _sidebarMinWidth = 1080;
 
+  /// Top gutter for the page's own content. Unlike other desktop tabs, the
+  /// profile page has no [DesktopPageHeader] to keep it clear of the custom
+  /// window control buttons floating over the top of the window — so it
+  /// needs enough clearance of its own to start below them.
+  static const double _topClearance = DesktopTitleBar.height + 16;
+
   /// Everything but the overview: identity, standout picks, recent activity.
   /// With [inline] the overview is included too, after the identity card.
   Widget _mainColumn(LocalizationService l10n, {required bool inline}) {
     return ListView(
       padding: EdgeInsets.fromLTRB(
         DesktopTokens.pagePadding,
-        32,
+        _topClearance,
         // Beside the sidebar the gutter between the two is the sidebar's; on
         // its own the column keeps the page's right gutter.
         inline ? DesktopTokens.pagePadding : DesktopTokens.pagePadding * 0.75,
@@ -446,22 +453,45 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
     required VoidCallback onNearEnd,
     required bool loading,
   }) {
-    const width = 140.0;
     if (!loading && entries.isEmpty) return const SizedBox.shrink();
-    return DesktopCarousel(
-      title: title,
-      loading: loading,
-      itemCount: entries.length,
-      itemWidth: width,
-      height: width * 1.5 + 70,
-      onNearEnd: onNearEnd,
-      itemBuilder: (context, i) => DesktopCoverCard(
-        series: entries[i].series,
-        width: width,
-        heroTag: 'profile_${title}_$i',
-        caption: LocalizationService().translate(entries[i].state),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Stretch the covers so a whole number of them, plus the spacing
+        // between them, exactly fills the row — the leftmost cover's left
+        // edge and the rightmost cover's right edge then line up with the
+        // identity card above instead of leaving a gap where a fixed cover
+        // width didn't divide the available space evenly.
+        final width = _activityCoverWidth(constraints.maxWidth);
+        return DesktopCarousel(
+          title: title,
+          loading: loading,
+          itemCount: entries.length,
+          itemWidth: width,
+          height: width * 1.5 + DesktopCoverCard.textAreaHeight(context),
+          onNearEnd: onNearEnd,
+          itemBuilder: (context, i) => DesktopCoverCard(
+            series: entries[i].series,
+            width: width,
+            heroTag: 'profile_${title}_$i',
+            caption: LocalizationService().translate(entries[i].state),
+          ),
+        );
+      },
     );
+  }
+
+  /// Covers around 130px wide, stretched just enough that a whole number of
+  /// them exactly fills [availableWidth]. Must track [DesktopCarousel]'s
+  /// default spacing, since it isn't overridden here.
+  double _activityCoverWidth(double availableWidth) {
+    const targetWidth = 130.0;
+    const spacing = 18.0;
+    final step = targetWidth + spacing;
+    final count = ((availableWidth + spacing) / step).floor().clamp(
+      1,
+      1 << 30,
+    );
+    return (availableWidth - (count - 1) * spacing) / count;
   }
 }
 
