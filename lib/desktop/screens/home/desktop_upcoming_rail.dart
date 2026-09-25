@@ -29,6 +29,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
   Map<String, String> _seriesCovers = const {};
   bool _loading = true;
   bool _onlyLibrary = false;
+  Set<String> _collapsedDateGroups = {};
 
   @override
   void initState() {
@@ -72,28 +73,53 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     final groups = _groupByDate(works);
     final rows = <Widget>[];
     for (final group in groups) {
-      rows.add(_DateHeader(date: group.date, first: rows.isEmpty, l10n: l10n));
-      for (final work in group.works) {
-        rows.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _UpcomingWorkCard(
-              work: work,
-              inLibrary:
-                  work.seriesId != null &&
-                  _librarySeriesIds.contains(work.seriesId.toString()),
-              fallbackCoverUrl: work.seriesId != null
-                  ? _seriesCovers[work.seriesId!.toString()]
-                  : null,
+      final dateKey = _dateGroupKey(group.date);
+      final isCollapsed = _collapsedDateGroups.contains(dateKey);
+
+      rows.add(_DateHeader(
+        date: group.date,
+        first: rows.isEmpty,
+        l10n: l10n,
+        isCollapsed: isCollapsed,
+        onToggle: () {
+          setState(() {
+            if (isCollapsed) {
+              _collapsedDateGroups.remove(dateKey);
+            } else {
+              _collapsedDateGroups.add(dateKey);
+            }
+          });
+        },
+      ));
+
+      if (!isCollapsed) {
+        for (final work in group.works) {
+          rows.add(
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _UpcomingWorkCard(
+                work: work,
+                inLibrary:
+                    work.seriesId != null &&
+                    _librarySeriesIds.contains(work.seriesId.toString()),
+                fallbackCoverUrl: work.seriesId != null
+                    ? _seriesCovers[work.seriesId!.toString()]
+                    : null,
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     }
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: rows,
     );
+  }
+
+  String _dateGroupKey(DateTime? date) {
+    if (date == null) return 'tba';
+    return '${date.year}-${date.month}-${date.day}';
   }
 
   /// Chronological groups; works with no parseable date collect at the end.
@@ -135,7 +161,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+          padding: const EdgeInsets.fromLTRB(20, 56, 28, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -197,11 +223,15 @@ class _DateHeader extends StatelessWidget {
   final DateTime? date;
   final bool first;
   final LocalizationService l10n;
+  final bool isCollapsed;
+  final VoidCallback onToggle;
 
   const _DateHeader({
     required this.date,
     required this.first,
     required this.l10n,
+    required this.isCollapsed,
+    required this.onToggle,
   });
 
   String _relative(DateTime d) {
@@ -218,37 +248,50 @@ class _DateHeader extends StatelessWidget {
     final d = date;
     final isToday =
         d != null && _relative(d) == l10n.translate('upcoming_today');
-    return Padding(
-      padding: EdgeInsets.fromLTRB(4, first ? 12 : 22, 4, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
-        children: [
-          Text(
-            d == null
-                ? l10n.translate('upcoming_date_tba').toUpperCase()
-                : DateFormat('d MMM').format(d).toUpperCase(),
-            style: AppTypography.display(
-              color: isToday ? context.colors.accent : context.colors.text,
-              fontSize: d == null ? 14 : 22,
-              height: 1,
+    return Transform.translate(
+      offset: const Offset(-8, 0),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(0, first ? 12 : 22, 4, 10),
+        child: InkWell(
+          onTap: onToggle,
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4, top: 2, bottom: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  isCollapsed ? Icons.chevron_right : Icons.expand_more,
+                  size: 20,
+                  color: context.colors.textMuted,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  d == null
+                      ? l10n.translate('upcoming_date_tba').toUpperCase()
+                      : DateFormat('d MMM').format(d).toUpperCase(),
+                  style: AppTypography.display(
+                    color: isToday ? context.colors.accent : context.colors.text,
+                    fontSize: d == null ? 14 : 22,
+                    height: 1,
+                  ),
+                ),
+                if (d != null) ...[
+                  const SizedBox(width: 12),
+                  Text(
+                    _relative(d).toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.monoLabel(
+                      color: context.colors.textMuted,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          if (d != null) ...[
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                _relative(d).toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.monoLabel(
-                  color: context.colors.textMuted,
-                  fontSize: 11.5,
-                ),
-              ),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
