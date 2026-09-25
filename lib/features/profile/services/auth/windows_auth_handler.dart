@@ -98,7 +98,9 @@ class WindowsAuthHandler {
       },
     );
 
-    _logger.info('Opening browser for Windows OAuth: $authUri');
+    // The URI itself carries the state and PKCE challenge; keep it out of
+    // the log.
+    _logger.info('Opening browser for Windows OAuth sign-in');
 
     // 3. Listen for redirect before launching. A sign-in already waiting is
     // abandoned first, so its cleanup cannot clobber this one's state.
@@ -110,15 +112,16 @@ class WindowsAuthHandler {
 
     sub = appLinks.uriLinkStream.listen(
       (uri) {
-        _logger.fine('Received App Link: $uri');
+        // The query holds the authorization code; log only where it went.
+        _logger.fine(
+          'Received App Link: ${uri.scheme}://${uri.host}${uri.path}',
+        );
         if (uri.toString().startsWith(redirectUri)) {
           final code = uri.queryParameters['code'];
           final receivedState = uri.queryParameters['state'];
 
           if (receivedState != state) {
-            _logger.warning(
-              'State mismatch: expected $state, got $receivedState',
-            );
+            _logger.warning('State mismatch on OAuth redirect; ignoring it');
             return;
           }
 
@@ -193,7 +196,9 @@ class WindowsAuthHandler {
           data, // Passing data as additional parameters
         );
       } else {
-        _logger.severe('Token exchange failed: ${response.body}');
+        _logger.severe(
+          'Token exchange failed: ${response.statusCode} ${_oauthError(response.body)}',
+        );
         throw Exception('Token exchange failed: ${response.statusCode}');
       }
     } on TimeoutException {
@@ -249,7 +254,7 @@ class WindowsAuthHandler {
       );
     } else {
       _logger.severe(
-        'Token refresh failed: ${response.statusCode} ${response.body}',
+        'Token refresh failed: ${response.statusCode} ${_oauthError(response.body)}',
       );
       throw ApiException(
         message: 'Token refresh failed',
@@ -273,6 +278,19 @@ class WindowsAuthHandler {
       _ => 3600,
     };
     return DateTime.now().add(Duration(seconds: seconds));
+  }
+
+  /// The OAuth `error` code from a token-endpoint error body, for the log.
+  /// Only the code is logged: the rest of the body is not needed to diagnose
+  /// a failure and should not end up in a shared log file.
+  static String _oauthError(String body) {
+    try {
+      final data = jsonDecode(body);
+      if (data is Map && data['error'] is String) return data['error'];
+    } catch (_) {
+      // Not JSON; fall through.
+    }
+    return '(no OAuth error code)';
   }
 
   static String _generateRandomString(int length) {
