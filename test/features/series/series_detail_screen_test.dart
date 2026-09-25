@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -127,6 +128,10 @@ class MockProfileAuthService extends ChangeNotifier implements ProfileAuthServic
   Future<MbProfile> fetchProfile({bool forceRefresh = false}) async => MbProfile(id: '1', role: 'user', scopes: []);
   @override
   Future<String> getValidAccessToken() async => 'token';
+  @override
+  Future<http.Response> sendAuthorized(
+    Future<http.Response> Function(String token) send,
+  ) => send('token');
 }
 
 void main() {

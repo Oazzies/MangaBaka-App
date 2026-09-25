@@ -1,10 +1,16 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class ProgressUpdateDialog extends StatefulWidget {
+  /// Largest value the field accepts. The series' own total is not used as
+  /// the bound: for a series still releasing it lags behind, and a reader
+  /// ahead of the database must still be able to record their progress.
+  static const int maxProgress = 99999;
+
   final int initialValue;
   final String title;
   final String maxValue;
@@ -40,7 +46,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
   }
 
   void _updateValue(int newValue) {
-    if (newValue < 0) return;
+    if (newValue < 0 || newValue > ProgressUpdateDialog.maxProgress) return;
     setState(() {
       _currentValue = newValue;
       _controller.text = _currentValue.toString();
@@ -144,6 +150,15 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                   child: TextField(
                     controller: _controller,
                     keyboardType: TextInputType.number,
+                    // keyboardType is only a hint, and none at all on
+                    // desktop: the formatters are what keep the value a
+                    // non-negative integer.
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(
+                        ProgressUpdateDialog.maxProgress.toString().length,
+                      ),
+                    ],
                     textAlign: TextAlign.center,
                     style: AppTypography.display(
                       color: context.colors.text,

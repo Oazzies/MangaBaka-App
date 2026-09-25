@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:mangabaka_app/core/database/database.dart' as db;
+import 'package:mangabaka_app/core/utils/json_utils.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart' as api;
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
 
@@ -57,8 +58,8 @@ class DbToApiMapper {
     String rating = dbSeries.rating ?? '';
     if (source != null && source.isNotEmpty) {
       final normalizedRatings = source.values
-          .where((v) => v is Map && v['rating_normalized'] != null)
-          .map((v) => (v['rating_normalized'] as num).toDouble())
+          .map(JsonUtils.normalizedRating)
+          .whereType<double>()
           .toList();
       if (normalizedRatings.isNotEmpty) {
         final avg = normalizedRatings.reduce((a, b) => a + b) / normalizedRatings.length;

@@ -62,4 +62,27 @@ void main() {
       expect(JsonUtils.getRawCover(map), '');
     });
   });
+
+  group('JsonUtils numbers', () {
+    test('toDouble accepts numbers and numeric strings', () {
+      expect(JsonUtils.toDouble(8), 8.0);
+      expect(JsonUtils.toDouble(8.5), 8.5);
+      expect(JsonUtils.toDouble(' 8.5 '), 8.5);
+    });
+
+    test('toDouble returns null for anything else', () {
+      expect(JsonUtils.toDouble(null), isNull);
+      expect(JsonUtils.toDouble('n/a'), isNull);
+      expect(JsonUtils.toDouble(true), isNull);
+      expect(JsonUtils.toDouble({'v': 1}), isNull);
+    });
+
+    test('normalizedRating reads a source entry and tolerates bad shapes', () {
+      expect(JsonUtils.normalizedRating({'rating_normalized': 86}), 86.0);
+      expect(JsonUtils.normalizedRating({'rating_normalized': '86'}), 86.0);
+      expect(JsonUtils.normalizedRating({'rating_normalized': null}), isNull);
+      expect(JsonUtils.normalizedRating('not a map'), isNull);
+      expect(JsonUtils.normalizedRating(null), isNull);
+    });
+  });
 }

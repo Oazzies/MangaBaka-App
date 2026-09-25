@@ -2,6 +2,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/utils/json_utils.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -18,13 +19,12 @@ class ExternalRatingsSection extends StatelessWidget {
 
     final ratingSources =
         sources.entries
-            .where((e) => e.value['rating_normalized'] != null)
+            .where((e) => JsonUtils.normalizedRating(e.value) != null)
             .toList()
-          ..sort((a, b) {
-            final rA = (a.value['rating_normalized'] as num).toDouble();
-            final rB = (b.value['rating_normalized'] as num).toDouble();
-            return rB.compareTo(rA);
-          });
+          ..sort(
+            (a, b) => JsonUtils.normalizedRating(b.value)!
+                .compareTo(JsonUtils.normalizedRating(a.value)!),
+          );
 
     if (ratingSources.isEmpty) return const SizedBox.shrink();
 

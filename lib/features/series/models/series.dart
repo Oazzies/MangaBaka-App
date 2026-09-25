@@ -146,8 +146,8 @@ class Series {
     String rating = json['rating']?.toString() ?? '';
     if (source != null && source.isNotEmpty) {
       final normalizedRatings = source.values
-          .where((v) => v is Map && v['rating_normalized'] != null)
-          .map((v) => (v['rating_normalized'] as num).toDouble())
+          .map(JsonUtils.normalizedRating)
+          .whereType<double>()
           .toList();
       if (normalizedRatings.isNotEmpty) {
         final avg = normalizedRatings.reduce((a, b) => a + b) / normalizedRatings.length;
@@ -278,8 +278,8 @@ class Series {
   double? get combinedAverage {
     if (source == null || source!.isEmpty) return null;
     final normalizedRatings = source!.values
-        .where((v) => v is Map && v['rating_normalized'] != null)
-        .map((v) => (v['rating_normalized'] as num).toDouble())
+        .map(JsonUtils.normalizedRating)
+        .whereType<double>()
         .toList();
     if (normalizedRatings.isEmpty) return null;
     return normalizedRatings.reduce((a, b) => a + b) / normalizedRatings.length;

@@ -25,6 +25,21 @@ void main() {
       'last_updated_at': '2021-01-01',
     };
 
+    test('an oddly-typed source rating does not fail the whole series', () {
+      final series = Series.fromJson({
+        ...mockJson,
+        'source': {
+          'anilist': {'rating_normalized': 80},
+          'kitsu': {'rating_normalized': '90'},
+          'mal': {'rating_normalized': 'n/a'},
+          'broken': 'not a map',
+        },
+      });
+
+      expect(series.rating, '85.0');
+      expect(series.combinedAverage, 85.0);
+    });
+
     test('Series.fromJson parses correctly', () {
       final series = Series.fromJson(mockJson);
 
