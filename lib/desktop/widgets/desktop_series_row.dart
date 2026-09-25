@@ -4,6 +4,7 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
@@ -38,11 +39,20 @@ abstract final class DesktopSeriesTable {
   /// The narrowest a title may get before columns start being dropped.
   static const double minTitleWidth = 220;
 
-  static double rowHeight(AppListStyle style) => switch (style) {
-    AppListStyle.comfortable => 88,
-    AppListStyle.compact => 64,
-    _ => 48,
-  };
+  /// A row's height for [style], grown with the OS text size so the title
+  /// and its subtitle still fit when text is scaled up.
+  static double rowHeight(
+    AppListStyle style, [
+    TextScaler textScaler = TextScaler.noScaling,
+  ]) {
+    final base = switch (style) {
+      AppListStyle.comfortable => 88.0,
+      AppListStyle.compact => 64.0,
+      _ => 48.0,
+    };
+    final scale = textScaler.scale(14) / 14;
+    return scale <= 1 ? base : base * scale;
+  }
 
   static double coverWidth(AppListStyle style) => switch (style) {
     AppListStyle.comfortable => 48,
@@ -63,21 +73,7 @@ abstract final class DesktopSeriesTable {
     double width, {
     required bool reserveAction,
   }) {
-    final wanted = switch (style) {
-      AppListStyle.comfortable => DesktopSeriesColumn.values,
-      AppListStyle.compact => const [
-        DesktopSeriesColumn.type,
-        DesktopSeriesColumn.status,
-        DesktopSeriesColumn.year,
-        DesktopSeriesColumn.rating,
-      ],
-      _ => const [
-        DesktopSeriesColumn.type,
-        DesktopSeriesColumn.status,
-        DesktopSeriesColumn.year,
-      ],
-    };
-
+    final wanted = _wanted(style);
     var room =
         width -
         titleLeft(style) -
@@ -91,6 +87,37 @@ abstract final class DesktopSeriesTable {
       room -= column.width;
     }
     return shown;
+  }
+
+  /// How many of [style]'s columns a table of [width] shows — the only thing
+  /// about the width a row or header needs to rebuild for.
+  static int columnCount(
+    AppListStyle style,
+    double width, {
+    required bool reserveAction,
+  }) => columns(style, width, reserveAction: reserveAction).length;
+
+  /// The first [count] of [style]'s columns.
+  static List<DesktopSeriesColumn> firstColumns(
+    AppListStyle style,
+    int count,
+  ) => _wanted(style).take(count).toList(growable: false);
+
+  static List<DesktopSeriesColumn> _wanted(AppListStyle style) {
+    return switch (style) {
+      AppListStyle.comfortable => DesktopSeriesColumn.values,
+      AppListStyle.compact => const [
+        DesktopSeriesColumn.type,
+        DesktopSeriesColumn.status,
+        DesktopSeriesColumn.year,
+        DesktopSeriesColumn.rating,
+      ],
+      _ => const [
+        DesktopSeriesColumn.type,
+        DesktopSeriesColumn.status,
+        DesktopSeriesColumn.year,
+      ],
+    };
   }
 }
 
@@ -137,53 +164,62 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
     final reserveAction = SettingsManager().showQuickProgress;
-    final height = DesktopSeriesTable.rowHeight(_style);
+    final height = DesktopSeriesTable.rowHeight(
+      _style,
+      MediaQuery.textScalerOf(context),
+    );
     final coverWidth = DesktopSeriesTable.coverWidth(_style);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final columns = DesktopSeriesTable.columns(
-            _style,
-            constraints.maxWidth,
-            reserveAction: reserveAction,
-          );
+      // Rebuilt only when a column appears or drops away; between those a
+      // resize just re-lays the row out.
+      child: DerivedLayoutBuilder<int>(
+        derive: (constraints) => DesktopSeriesTable.columnCount(
+          _style,
+          constraints.maxWidth,
+          reserveAction: reserveAction,
+        ),
+        builder: (context, count) {
+          final columns = DesktopSeriesTable.firstColumns(_style, count);
 
-          return AnimatedContainer(
-            duration: AppMotion.fast,
+          // Only the hover fill animates; the height is set outright.
+          return SizedBox(
             height: height,
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesktopSeriesTable.sidePadding,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: _hovered ? context.colors.surface : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                EntryListLayoutHelper.buildCoverImage(
-                  series: _series,
-                  heroTagPrefix: widget.heroTagPrefix,
-                  width: coverWidth,
-                  height: height - 12,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                const SizedBox(width: DesktopSeriesTable.coverGap),
-                Expanded(child: _titleCell(l10n)),
-                for (final column in columns)
-                  SizedBox(width: column.width, child: _cell(column, l10n)),
-                if (reserveAction)
-                  SizedBox(
-                    width: DesktopSeriesTable.actionWidth,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: widget.trailing,
-                    ),
+            child: AnimatedContainer(
+              duration: AppMotion.fast,
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesktopSeriesTable.sidePadding,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: _hovered ? context.colors.surface : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  EntryListLayoutHelper.buildCoverImage(
+                    series: _series,
+                    heroTagPrefix: widget.heroTagPrefix,
+                    width: coverWidth,
+                    height: height - 12,
+                    borderRadius: BorderRadius.circular(6),
                   ),
-              ],
+                  const SizedBox(width: DesktopSeriesTable.coverGap),
+                  Expanded(child: _titleCell(l10n)),
+                  for (final column in columns)
+                    SizedBox(width: column.width, child: _cell(column, l10n)),
+                  if (reserveAction)
+                    SizedBox(
+                      width: DesktopSeriesTable.actionWidth,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: widget.trailing,
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
         },
@@ -298,13 +334,14 @@ class DesktopSeriesListHeader extends StatelessWidget {
       listenable: SettingsManager(),
       builder: (context, _) {
         final reserveAction = SettingsManager().showQuickProgress;
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final columns = DesktopSeriesTable.columns(
-              style,
-              constraints.maxWidth,
-              reserveAction: reserveAction,
-            );
+        return DerivedLayoutBuilder<int>(
+          derive: (constraints) => DesktopSeriesTable.columnCount(
+            style,
+            constraints.maxWidth,
+            reserveAction: reserveAction,
+          ),
+          builder: (context, count) {
+            final columns = DesktopSeriesTable.firstColumns(style, count);
 
             return Container(
               height: 34,

@@ -21,9 +21,9 @@ class EntryProgressOverlay extends StatelessWidget {
   final Series series;
   final LibraryEntry? entry;
 
-  /// Width of the cell this sits on, which decides whether the two badges fit
-  /// side by side.
-  final double cardWidth;
+  /// Whether the cell is too narrow for the two badges side by side (under
+  /// [combineBelowWidth]), so they merge into one pill.
+  final bool combineBadges;
 
   /// Progress to display instead of the entry's own — used while an optimistic
   /// update is in flight.
@@ -32,14 +32,14 @@ class EntryProgressOverlay extends StatelessWidget {
   final SettingsManager settings;
   final LocalizationService l10n;
 
-  /// Below this the two badges would collide, so they merge into one pill.
-  static const double _combineBelowWidth = 145;
+  /// Below this cell width the two badges would collide.
+  static const double combineBelowWidth = 145;
 
   const EntryProgressOverlay({
     super.key,
     required this.series,
     required this.entry,
-    required this.cardWidth,
+    required this.combineBadges,
     required this.progressOverride,
     required this.settings,
     required this.l10n,
@@ -91,7 +91,7 @@ class EntryProgressOverlay extends StatelessWidget {
 
     if (!showProgress && !showRemaining) return const SizedBox.shrink();
 
-    if (showProgress && showRemaining && cardWidth < _combineBelowWidth) {
+    if (showProgress && showRemaining && combineBadges) {
       return _combined(context, remaining: remaining, total: total);
     }
     return _separate(

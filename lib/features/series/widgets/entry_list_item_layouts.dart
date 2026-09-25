@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
@@ -66,7 +67,7 @@ class EntryListLayoutHelper {
   /// the badges themselves are [EntryProgressOverlay].
   static Widget buildTopOverlays({
     required BuildContext context,
-    required double cardWidth,
+    required bool combineBadges,
     required Series series,
     required LibraryEntry? entry,
     required int? progressOverride,
@@ -76,7 +77,7 @@ class EntryListLayoutHelper {
     return EntryProgressOverlay(
       series: series,
       entry: entry,
-      cardWidth: cardWidth,
+      combineBadges: combineBadges,
       progressOverride: progressOverride,
       settings: settings,
       l10n: l10n,
@@ -104,8 +105,11 @@ class CoverOnlyGridItem extends StatelessWidget {
       color: context.colors.surface,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
+      // Rebuilt only when the card crosses the badge-merging width.
+      child: DerivedLayoutBuilder<bool>(
+        derive: (constraints) =>
+            constraints.maxWidth < EntryProgressOverlay.combineBelowWidth,
+        builder: (context, combineBadges) {
           final l10n = LocalizationService();
           final settings = SettingsManager();
 
@@ -120,7 +124,7 @@ class CoverOnlyGridItem extends StatelessWidget {
               ),
               EntryListLayoutHelper.buildTopOverlays(
                 context: context,
-                cardWidth: constraints.maxWidth,
+                combineBadges: combineBadges,
                 series: series,
                 entry: entry,
                 progressOverride: progressOverride,
@@ -167,8 +171,10 @@ class CompactGridItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             margin: EdgeInsets.zero,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
+            child: DerivedLayoutBuilder<bool>(
+              derive: (constraints) =>
+                  constraints.maxWidth < EntryProgressOverlay.combineBelowWidth,
+              builder: (context, combineBadges) {
                 final l10n = LocalizationService();
 
                 return Stack(
@@ -182,7 +188,7 @@ class CompactGridItem extends StatelessWidget {
                     ),
                     EntryListLayoutHelper.buildTopOverlays(
                       context: context,
-                      cardWidth: constraints.maxWidth,
+                      combineBadges: combineBadges,
                       series: series,
                       entry: entry,
                       progressOverride: progressOverride,

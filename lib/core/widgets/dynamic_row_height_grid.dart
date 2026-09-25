@@ -43,6 +43,8 @@ class DynamicRowHeightGrid extends StatelessWidget {
 
         return Padding(
           padding: EdgeInsets.only(bottom: rowIndex == rowCount - 1 ? 0 : mainAxisSpacing),
+          // responsive-ok: a row is as tall as its tallest cell; the extra
+          // pass covers one row of a few cells, only for rows on screen.
           child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,

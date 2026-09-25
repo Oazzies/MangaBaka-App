@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
@@ -131,12 +132,12 @@ class BrowseResultsList extends StatelessWidget {
           }
 
           if (columns == 0) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                final calculatedColumns = ((width + 10) / 170).ceil().clamp(1, 12);
-                return buildGridContent(context, calculatedColumns);
-              },
+            // Rebuilt only when the column count changes; between those a
+            // resize just re-lays the grid out.
+            return DerivedLayoutBuilder<int>(
+              derive: (constraints) =>
+                  ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
+              builder: buildGridContent,
             );
           } else {
             Widget grid = buildGridContent(context, columns);

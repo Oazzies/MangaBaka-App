@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
@@ -161,15 +162,12 @@ class LibraryGridList extends StatelessWidget {
           }
 
           if (columns == 0) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                final calculatedColumns = ((width + 10) / 170).ceil().clamp(
-                  1,
-                  12,
-                );
-                return buildGridContent(context, calculatedColumns);
-              },
+            // Rebuilt only when the column count changes; between those a
+            // resize just re-lays the grid out.
+            return DerivedLayoutBuilder<int>(
+              derive: (constraints) =>
+                  ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
+              builder: buildGridContent,
             );
           } else {
             Widget grid = buildGridContent(context, columns);

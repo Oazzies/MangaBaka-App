@@ -32,6 +32,19 @@ class WidgetUtils {
       .blurredContentRatings
       .contains(contentRating.toLowerCase());
 
+  /// The pixel width to decode an image at when it's drawn [logicalWidth]
+  /// wide and that width follows the window.
+  ///
+  /// Every distinct `memCacheWidth` is a separate decode and cache entry, so
+  /// passing a width that changes per pixel re-decodes every cover on every
+  /// frame of a resize. This rounds up to a 64px step at the display's
+  /// density: a resize re-decodes only when a cover grows past a step.
+  static int decodeWidth(BuildContext context, double logicalWidth) {
+    const step = 64;
+    final px = (logicalWidth * MediaQuery.devicePixelRatioOf(context)).ceil();
+    return ((px + step - 1) ~/ step) * step;
+  }
+
   static Widget networkImage({
     required String url,
     double? width,

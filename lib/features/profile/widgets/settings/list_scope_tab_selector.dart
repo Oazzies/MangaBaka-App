@@ -26,51 +26,50 @@ class ListScopeTabSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          height: 38,
-          decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: context.colors.surfaceRaised, width: 1.5),
-          ),
-          child: Stack(
-            children: [
-              AnimatedAlign(
-                alignment: active.isLibrary
-                    ? Alignment.centerLeft
-                    : Alignment.centerRight,
-                duration: _pillDuration,
-                curve: Curves.easeOutCubic,
-                child: Container(
-                  width: constraints.maxWidth / 2,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.colors.accent,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      height: 38,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: context.colors.surfaceRaised, width: 1.5),
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            alignment: active.isLibrary
+                ? Alignment.centerLeft
+                : Alignment.centerRight,
+            duration: _pillDuration,
+            curve: Curves.easeOutCubic,
+            // Half the bar, worked out at layout.
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              heightFactor: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.colors.accent,
+                  borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              Row(
-                children: [
-                  _Tab(
-                    label: libraryLabel,
-                    isActive: active.isLibrary,
-                    onTap: () => onChanged(ListScopeTab.library),
-                  ),
-                  _Tab(
-                    label: browseLabel,
-                    isActive: !active.isLibrary,
-                    onTap: () => onChanged(ListScopeTab.browse),
-                  ),
-                ],
+            ),
+          ),
+          Row(
+            children: [
+              _Tab(
+                label: libraryLabel,
+                isActive: active.isLibrary,
+                onTap: () => onChanged(ListScopeTab.library),
+              ),
+              _Tab(
+                label: browseLabel,
+                isActive: !active.isLibrary,
+                onTap: () => onChanged(ListScopeTab.browse),
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

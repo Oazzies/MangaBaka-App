@@ -50,12 +50,17 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          '$currentProgress${totalChapters > 0 ? ' / $totalChapters' : ''}',
-          style: AppTypography.sans(
-            color: context.colors.accent,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
+        // Gives way to the button in a narrow cell or at a large text size.
+        Flexible(
+          child: Text(
+            '$currentProgress${totalChapters > 0 ? ' / $totalChapters' : ''}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.sans(
+              color: context.colors.accent,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 10),

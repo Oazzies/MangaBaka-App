@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/constants/mock_series_data.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
@@ -61,14 +62,12 @@ class ListStyleLivePreview extends StatelessWidget {
     }
 
     if (gridColumnCount == 0) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final columns =
-              ((constraints.maxWidth + _cellSpacing) / _autoColumnExtent)
-                  .ceil()
-                  .clamp(1, 12);
-          return _grid(columns);
-        },
+      return DerivedLayoutBuilder<int>(
+        derive: (constraints) =>
+            ((constraints.maxWidth + _cellSpacing) / _autoColumnExtent)
+                .ceil()
+                .clamp(1, 12),
+        builder: (context, columns) => _grid(columns),
       );
     }
 
@@ -97,6 +96,7 @@ class ListStyleLivePreview extends StatelessWidget {
     // dynamic-height grid rather than a fixed aspect ratio.
     if (style == AppListStyle.compactGrid) {
       return DynamicRowHeightGrid(
+        // responsive-ok: a preview of at most a row of items.
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -109,6 +109,7 @@ class ListStyleLivePreview extends StatelessWidget {
     }
 
     return GridView.builder(
+      // responsive-ok: a preview of at most a row of items.
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(vertical: 8),
