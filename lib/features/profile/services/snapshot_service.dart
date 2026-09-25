@@ -50,7 +50,6 @@ class SnapshotService {
     }
 
     try {
-      final token = await _auth.getValidAccessToken();
       final contentPrefs = SettingsManager().contentPreferences;
       var urlStr =
           '${LibraryConstants.baseUrl}?page=$page&limit=$limit&sort_by=$sortBy';
@@ -59,18 +58,21 @@ class SnapshotService {
       }
       final uri = Uri.parse(urlStr);
 
-      final response = await http
-          .get(
-            uri,
-            headers: {
-              'Authorization': 'Bearer $token',
-              'User-Agent': LibraryConstants.userAgent,
-            },
-          )
-          .timeout(
-            Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Snapshot fetch timed out'),
-          );
+      final response = await _auth.sendAuthorized(
+        (token) => http
+            .get(
+              uri,
+              headers: {
+                'Authorization': 'Bearer $token',
+                'User-Agent': LibraryConstants.userAgent,
+              },
+            )
+            .timeout(
+              Duration(seconds: AppConstants.networkTimeoutSeconds),
+              onTimeout: () =>
+                  throw TimeoutException('Snapshot fetch timed out'),
+            ),
+      );
 
       _logger.fine('Snapshot fetch completed (sortBy: $sortBy, page: $page)');
 
@@ -82,7 +84,7 @@ class SnapshotService {
 
       if (response.statusCode != 200) {
         _logger.severe(
-          'Failed to fetch library snapshot: ${response.statusCode} ${response.body}',
+          'Failed to fetch library snapshot: ${response.statusCode}',
         );
         throw ApiException(
           message: 'Failed to fetch library snapshot',

@@ -23,12 +23,20 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         if (json) 'Content-Type': 'application/json',
       };
 
-  /// Throws [AuthException] when the server returns 401.
-  void _assertAuthorized(http.Response response, String seriesId) {
-    if (response.statusCode == 401) {
-      logger.severe('Unauthorized request for $seriesId');
-      throw AuthException(message: 'Authentication failed.', code: 'AUTH_FAILED');
-    }
+  /// Sends an authenticated library request with the standard timeout. A 401
+  /// never comes back from here: [ProfileAuthService.sendAuthorized] refreshes
+  /// the session and retries, or throws [SessionExpiredException].
+  Future<http.Response> _sendAuthorized(
+    String description,
+    Future<http.Response> Function(Map<String, String> headers) request, {
+    bool json = true,
+  }) {
+    return auth.sendAuthorized(
+      (token) => request(_buildAuthHeaders(token, json: json)).timeout(
+        const Duration(seconds: AppConstants.networkTimeoutSeconds),
+        onTimeout: () => throw TimeoutException('$description request timed out'),
+      ),
+    );
   }
 
   /// Re-throws [e] as an appropriate [AppException] subtype.
@@ -64,17 +72,13 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
   Future<void> updateLibraryEntryState(String seriesId, String state) async {
     logger.info('Updating library entry state for $seriesId to: $state');
-    final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
-      final response = await http
-          .put(url, headers: _buildAuthHeaders(token), body: jsonEncode({'state': state}))
-          .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Update state request timed out'),
-          );
+      final response = await _sendAuthorized(
+        'Update state',
+        (headers) => http.put(url, headers: headers, body: jsonEncode({'state': state})),
+      );
 
-      _assertAuthorized(response, seriesId);
       if (response.statusCode != 200) {
         logger.severe('Failed to update entry state for $seriesId. Status: ${response.statusCode}');
         throw ApiException(
@@ -94,17 +98,13 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
   Future<void> updateLibraryEntryRating(String seriesId, int rating) async {
     logger.info('Updating library entry rating for $seriesId to: $rating');
-    final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
-      final response = await http
-          .put(url, headers: _buildAuthHeaders(token), body: jsonEncode({'rating': rating}))
-          .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Update rating request timed out'),
-          );
+      final response = await _sendAuthorized(
+        'Update rating',
+        (headers) => http.put(url, headers: headers, body: jsonEncode({'rating': rating})),
+      );
 
-      _assertAuthorized(response, seriesId);
       if (response.statusCode != 200) {
         logger.severe('Failed to update entry rating for $seriesId. Status: ${response.statusCode}');
         throw ApiException(
@@ -166,7 +166,6 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     );
 
     try {
-      final token = await auth.getValidAccessToken();
       final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
 
       final body = <String, dynamic>{
@@ -174,14 +173,10 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         if (progressVolume != null) 'progress_volume': progressVolume,
       };
 
-      final response = await http
-          .put(url, headers: _buildAuthHeaders(token), body: jsonEncode(body))
-          .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Update progress request timed out'),
-          );
-
-      _assertAuthorized(response, seriesId);
+      final response = await _sendAuthorized(
+        'Update progress',
+        (headers) => http.put(url, headers: headers, body: jsonEncode(body)),
+      );
 
       if (response.statusCode != 200) {
         logger.severe('Failed to update entry progress for $seriesId. Status: ${response.statusCode}');
@@ -213,17 +208,13 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
   Future<void> createLibraryEntry(String seriesId, String state) async {
     logger.info('Creating library entry for $seriesId with state: $state');
-    final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
-      final response = await http
-          .post(url, headers: _buildAuthHeaders(token), body: jsonEncode({'state': state}))
-          .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Create entry request timed out'),
-          );
+      final response = await _sendAuthorized(
+        'Create entry',
+        (headers) => http.post(url, headers: headers, body: jsonEncode({'state': state})),
+      );
 
-      _assertAuthorized(response, seriesId);
       if (response.statusCode == 201) {
         logger.info('Successfully created library entry for $seriesId. Syncing local DB...');
         // The entry exists on the server now. A failed follow-up sync must
@@ -271,7 +262,6 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     if (ids.isEmpty) return 0;
 
     logger.info('Batch-adding ${ids.length} series with state: $state');
-    final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/batch');
     var created = 0;
     var anyAccepted = false;
@@ -279,21 +269,17 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     try {
       for (var i = 0; i < ids.length; i += batchLimit) {
         final chunk = ids.sublist(i, min(i + batchLimit, ids.length));
-        final response = await http
-            .post(
-              url,
-              headers: _buildAuthHeaders(token),
-              body: jsonEncode([
-                for (final id in chunk) {'series_id': id, 'state': state},
-              ]),
-            )
-            .timeout(
-              const Duration(seconds: AppConstants.networkTimeoutSeconds),
-              onTimeout: () =>
-                  throw TimeoutException('Batch add request timed out'),
-            );
+        final response = await _sendAuthorized(
+          'Batch add',
+          (headers) => http.post(
+            url,
+            headers: headers,
+            body: jsonEncode([
+              for (final id in chunk) {'series_id': id, 'state': state},
+            ]),
+          ),
+        );
 
-        _assertAuthorized(response, 'batch');
         if (response.statusCode != 200) {
           logger.severe('Batch add failed. Status: ${response.statusCode}');
           throw ApiException(
@@ -333,18 +319,15 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
   Future<void> deleteEntry(String seriesId) async {
     logger.info('Deleting library entry for $seriesId');
-    final token = await auth.getValidAccessToken();
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
       // Headers without Content-Type — DELETE has no body.
-      final response = await http
-          .delete(url, headers: _buildAuthHeaders(token, json: false))
-          .timeout(
-            const Duration(seconds: AppConstants.networkTimeoutSeconds),
-            onTimeout: () => throw TimeoutException('Delete entry request timed out'),
-          );
+      final response = await _sendAuthorized(
+        'Delete entry',
+        (headers) => http.delete(url, headers: headers),
+        json: false,
+      );
 
-      _assertAuthorized(response, seriesId);
       if (response.statusCode == 200 || response.statusCode == 404) {
         // 404 means already deleted on the server — still clean up locally.
         logger.info('Entry $seriesId deleted from server (or already gone). Updating DB...');

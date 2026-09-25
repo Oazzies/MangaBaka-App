@@ -28,7 +28,7 @@ abstract class LibraryServiceBase {
   void setIsSyncCancelled(bool val);
 
   Future<void> syncLibrary({String? state});
-  Future<FetchPageResult> fetchPage(String token, int page, {String? state, String? type, String? sortBy});
+  Future<FetchPageResult> fetchPage(int page, {String? state, String? type, String? sortBy});
   Future<void> saveEntries(List<api.LibraryEntry> entries);
   DateTime? parseAsUtc(String dateStr);
   
@@ -59,7 +59,7 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
   void setIsSyncCancelled(bool val) => _isSyncCancelled = val;
 
   @override
-  Future<FetchPageResult> fetchPage(String token, int page, {String? state, String? type, String? sortBy}) => _fetchPage(token, page, state: state, type: type, sortBy: sortBy);
+  Future<FetchPageResult> fetchPage(int page, {String? state, String? type, String? sortBy}) => _fetchPage(page, state: state, type: type, sortBy: sortBy);
 
   @override
   Future<void> saveEntries(List<api.LibraryEntry> entries) => _saveEntries(entries);
@@ -117,7 +117,6 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
   static const int _maxRateLimitRetries = 3;
 
   Future<FetchPageResult> _fetchPage(
-    String token,
     int page, {
     String? state,
     String? type,
@@ -136,10 +135,13 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
     _logger.info('Fetching library page $page. URL: $uri');
 
     try {
-      final response = await http.get(uri, headers: {
-        'Authorization': 'Bearer $token',
-        'User-Agent': LibraryConstants.userAgent,
-      }).timeout(Duration(seconds: AppConstants.networkTimeoutSeconds));
+      // A 401 is recovered from (or becomes SessionExpiredException) here.
+      final response = await _auth.sendAuthorized(
+        (token) => http.get(uri, headers: {
+          'Authorization': 'Bearer $token',
+          'User-Agent': LibraryConstants.userAgent,
+        }).timeout(Duration(seconds: AppConstants.networkTimeoutSeconds)),
+      );
 
       _logger.fine('Library page $page fetch completed with status ${response.statusCode}');
 
@@ -154,19 +156,15 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
         }
         _logger.warning('Rate limited while fetching library page $page. Retrying in ${AppConstants.rateLimitRetryDelaySeconds}s...');
         await Future.delayed(Duration(seconds: AppConstants.rateLimitRetryDelaySeconds));
-        return await _fetchPage(token, page, state: state, type: type, sortBy: sortBy, retryCount: retryCount + 1);
+        return await _fetchPage(page, state: state, type: type, sortBy: sortBy, retryCount: retryCount + 1);
       }
 
-      if (response.statusCode == 401) {
-        _logger.severe('Unauthorized fetch request for library page $page');
-        throw AuthException(message: 'Auth failed', code: 'AUTH_FAILED');
-      }
       if (response.statusCode == 400) {
-        _logger.warning('Bad request for library page $page: ${response.body}');
+        _logger.warning('Bad request for library page $page');
         return FetchPageResult(entries: [], isError: true);
       }
       if (response.statusCode != 200) {
-        _logger.severe('Failed to fetch library page $page. Status: ${response.statusCode}, Body: ${response.body}');
+        _logger.severe('Failed to fetch library page $page. Status: ${response.statusCode}');
         throw ApiException(message: 'Fetch failed', statusCode: response.statusCode);
       }
 

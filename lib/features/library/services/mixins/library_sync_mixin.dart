@@ -77,11 +77,11 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     syncStatus.value = LibrarySyncStatus(isSyncing: true);
 
     try {
-      final token = await auth.getValidAccessToken();
+      // Fails fast when signed out, before the progress UI shows any pages.
+      await auth.getValidAccessToken();
       var totalFetched = 0;
       final fetchedIds = <String>[];
       final result = await importSlice(
-        token,
         onProgress: (n, ids) {
           totalFetched += n;
           fetchedIds.addAll(ids);
@@ -113,8 +113,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     }
   }
 
-  Future<({bool hitCap, List<String> fetchedIds, String? newestWatermark})> importSlice(
-    String token, {
+  Future<({bool hitCap, List<String> fetchedIds, String? newestWatermark})> importSlice({
     required void Function(int fetched, List<String> fetchedIds) onProgress,
   }) async {
     final generation = _syncGeneration;
@@ -130,7 +129,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       // Reported as capped so the caller never prunes against a partial list.
       if (_isStale(generation)) return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
 
-      final result = await fetchPage(token, page, sortBy: 'updated_at_desc');
+      final result = await fetchPage(page, sortBy: 'updated_at_desc');
       if (_isStale(generation)) return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
       final entries = result.entries;
 
@@ -168,7 +167,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     syncStatus.value = LibrarySyncStatus(isSyncing: true);
 
     try {
-      final token = await auth.getValidAccessToken();
+      await auth.getValidAccessToken();
       final prefs = await SharedPreferences.getInstance();
       final lastSyncStr = prefs.getString(_lastSyncKey);
       final lastSync = lastSyncStr != null ? parseAsUtc(lastSyncStr) : null;
@@ -190,7 +189,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
           return;
         }
 
-        final result = await fetchPage(token, page, sortBy: 'updated_at_desc', state: state);
+        final result = await fetchPage(page, sortBy: 'updated_at_desc', state: state);
         if (_isStale(generation)) {
           logger.info('Incremental sync cancelled at page $page');
           return;
@@ -261,8 +260,9 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         // Stopped at the page cap before reaching known entries: anything
         // older than the pages walked but newer than the old watermark was
         // not saved. Advancing would skip it forever, so keep the watermark
-        // and flag the local copy as incomplete instead.
-        logger.warning('Incremental sync hit the $maxSyncPages-page cap before catching up. Watermark unchanged; library marked incomplete.');
+        // and flag the local copy as incomplete instead. A page the server
+        // refused (or could not fully parse) ends the walk the same way.
+        logger.warning('Incremental sync stopped before catching up (page cap, rejected page, or unparseable entries). Watermark unchanged; library marked incomplete.');
         await prefs.setBool(_isIncompleteKey, true);
       }
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false);

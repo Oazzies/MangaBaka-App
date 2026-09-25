@@ -17,6 +17,11 @@ class _FakeAuth extends Fake implements ProfileAuthService {
 
   @override
   Future<String> getValidAccessToken() async => token;
+
+  @override
+  Future<http.Response> sendAuthorized(
+    Future<http.Response> Function(String token) send,
+  ) => send(token);
 }
 
 Map<String, dynamic> _entryJson(String id, {String contentRating = 'safe'}) {

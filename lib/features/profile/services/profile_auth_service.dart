@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
@@ -20,8 +21,21 @@ class ProfileAuthService extends ChangeNotifier {
   static const _endSessionEndpoint = '${AppConstants.authBaseUrl}/end-session';
 
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
-  final AuthStorage _storage = AuthStorage();
-  final AuthNetworkClient _network = AuthNetworkClient();
+  final AuthStorage _storage;
+  final AuthNetworkClient _network;
+
+  /// Exchanges a refresh token for new tokens. Injected by tests; defaults to
+  /// the platform flow ([WindowsAuthHandler] on Windows, AppAuth elsewhere).
+  final Future<TokenResponse?> Function(String refreshToken)? _refresher;
+
+  ProfileAuthService({
+    AuthStorage? storage,
+    AuthNetworkClient? network,
+    @visibleForTesting
+    Future<TokenResponse?> Function(String refreshToken)? refresher,
+  })  : _storage = storage ?? AuthStorage(),
+        _network = network ?? AuthNetworkClient(),
+        _refresher = refresher;
 
   MbProfile? _cachedProfile;
   bool _hasSessionCache = false;
@@ -198,32 +212,39 @@ class ProfileAuthService extends ChangeNotifier {
   /// in-flight refresh instead.
   Future<void>? _refreshInFlight;
 
-  Future<void> _refreshIfNeeded() {
-    return _refreshInFlight ??= _runRefresh().whenComplete(
+  Future<void> _refreshIfNeeded({bool force = false}) {
+    return _refreshInFlight ??= _runRefresh(force: force).whenComplete(
       () => _refreshInFlight = null,
     );
   }
 
-  Future<void> _runRefresh() async {
-    final expRaw = await _storage.read(AuthStorage.kAccessTokenExp);
-    if (expRaw == null) {
-      _logger.fine('No token expiration found, assuming refresh not needed');
-      return;
-    }
+  /// Refreshes the tokens when the access token is near expiry, or
+  /// unconditionally when [force] is set (the server rejected a token that
+  /// had not expired locally).
+  Future<void> _runRefresh({bool force = false}) async {
+    if (!force) {
+      final expRaw = await _storage.read(AuthStorage.kAccessTokenExp);
+      if (expRaw == null) {
+        _logger.fine('No token expiration found, assuming refresh not needed');
+        return;
+      }
 
-    final exp = DateTime.tryParse(expRaw);
-    if (exp == null) return;
+      final exp = DateTime.tryParse(expRaw);
+      if (exp == null) return;
 
-    final now = DateTime.now().toUtc();
-    final threshold = exp.subtract(const Duration(minutes: 5));
+      final now = DateTime.now().toUtc();
+      final threshold = exp.subtract(const Duration(minutes: 5));
 
-    if (now.isBefore(threshold)) {
-      _logger.fine('Access token still valid. Expires at: $exp');
-      return;
+      if (now.isBefore(threshold)) {
+        _logger.fine('Access token still valid. Expires at: $exp');
+        return;
+      }
     }
 
     _logger.info(
-      'Access token expiring soon or already expired. Attempting refresh...',
+      force
+          ? 'Access token rejected by the server. Attempting refresh...'
+          : 'Access token expiring soon or already expired. Attempting refresh...',
     );
     final refreshToken = await _storage.read(AuthStorage.kRefreshToken);
     if (refreshToken == null || refreshToken.isEmpty) {
@@ -234,25 +255,7 @@ class ProfileAuthService extends ChangeNotifier {
 
     TokenResponse? response;
     try {
-      if (Platform.isWindows) {
-        response = await WindowsAuthHandler.refresh(
-          clientId: _clientId,
-          redirectUri: _redirectUri,
-          tokenEndpoint: _tokenEndpoint,
-          refreshToken: refreshToken,
-          scopes: AppConstants.oauthScopes,
-        );
-      } else {
-        response = await _appAuth.token(
-          TokenRequest(
-            _clientId,
-            _redirectUri,
-            serviceConfiguration: _serviceConfig,
-            refreshToken: refreshToken,
-            scopes: AppConstants.oauthScopes,
-          ),
-        );
-      }
+      response = await (_refresher ?? _platformRefresh)(refreshToken);
     } catch (e, st) {
       _logger.severe('Token refresh failed', e, st);
       // An invalid_grant (HTTP 400/401) means the refresh token is dead and no
@@ -277,6 +280,73 @@ class ProfileAuthService extends ChangeNotifier {
 
     _logger.info('Token refresh successful');
     await _persistTokens(response);
+  }
+
+  Future<TokenResponse?> _platformRefresh(String refreshToken) {
+    if (Platform.isWindows) {
+      return WindowsAuthHandler.refresh(
+        clientId: _clientId,
+        redirectUri: _redirectUri,
+        tokenEndpoint: _tokenEndpoint,
+        refreshToken: refreshToken,
+        scopes: AppConstants.oauthScopes,
+      );
+    }
+    return _appAuth.token(
+      TokenRequest(
+        _clientId,
+        _redirectUri,
+        serviceConfiguration: _serviceConfig,
+        refreshToken: refreshToken,
+        scopes: AppConstants.oauthScopes,
+      ),
+    );
+  }
+
+  /// Sends a request that needs the user's bearer token, recovering once
+  /// from an HTTP 401.
+  ///
+  /// The local expiry only says when a token *should* stop working; the
+  /// server can reject one earlier (revoked from the website, a password
+  /// change, clock skew). On a 401 the tokens are refreshed and the request
+  /// is sent again. If the refresh token is dead too, or the retry is also
+  /// rejected, the session is cleared and [SessionExpiredException] is thrown
+  /// so the UI can send the user back to sign-in. Never returns a 401.
+  Future<http.Response> sendAuthorized(
+    Future<http.Response> Function(String token) send,
+  ) async {
+    final token = await getValidAccessToken();
+    final response = await send(token);
+    if (response.statusCode != 401) return response;
+
+    _logger.warning('Request rejected with 401; refreshing the session');
+    final fresh = await _recoverFromUnauthorized(token);
+    final retried = await send(fresh);
+    if (retried.statusCode != 401) return retried;
+
+    _logger.severe('Request rejected with 401 after a token refresh');
+    await _clearSession();
+    throw SessionExpiredException();
+  }
+
+  /// Returns a token to retry with after [rejected] got a 401.
+  ///
+  /// Several requests can be rejected at once with the same token; they share
+  /// one refresh, and a caller arriving after another has already replaced
+  /// the token simply takes the new one. With rotating refresh tokens a
+  /// second refresh would consume the token the first one just issued.
+  Future<String> _recoverFromUnauthorized(String rejected) async {
+    final inFlight = _refreshInFlight;
+    if (inFlight != null) await inFlight;
+
+    var token = await _storage.read(AuthStorage.kAccessToken);
+    if (token == null || token.isEmpty) throw SessionExpiredException();
+    if (token != rejected) return token;
+
+    await _refreshIfNeeded(force: true);
+    token = await _storage.read(AuthStorage.kAccessToken);
+    if (token == null || token.isEmpty) throw SessionExpiredException();
+    return token;
   }
 
   /// Detects an unrecoverable `invalid_grant` from either the Windows handler
