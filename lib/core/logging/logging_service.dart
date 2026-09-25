@@ -39,7 +39,10 @@ class LoggingService {
   }
 
   static Future<void> setup() async {
-    Logger.root.level = Level.ALL;
+    // FINE and below trace request-level detail (URLs, watermarks, status
+    // codes of every call). Useful while developing; in a release build it
+    // only bloats a file users are asked to share.
+    Logger.root.level = kReleaseMode ? Level.INFO : Level.ALL;
 
     try {
       final directory = await getApplicationDocumentsDirectory();

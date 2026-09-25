@@ -101,4 +101,80 @@ void main() {
       expect(await storage.getCachedProfile(), isNull);
     });
   });
+
+  group('AuthStorage (release: no plaintext fallback)', () {
+    const channel = MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
+    late Map<String, String> secure;
+
+    void secureStorageWorks() {
+      secure = {};
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        final args = (call.arguments as Map).cast<String, Object?>();
+        final key = args['key'] as String?;
+        switch (call.method) {
+          case 'write':
+            secure[key!] = args['value'] as String;
+            return null;
+          case 'read':
+            return secure[key];
+          case 'delete':
+            secure.remove(key);
+            return null;
+          case 'deleteAll':
+            secure.clear();
+            return null;
+        }
+        return null;
+      });
+    }
+
+    test('a failed secure write is reported, never written in plaintext',
+        () async {
+      final release = AuthStorage(allowInsecureFallback: false);
+
+      await expectLater(
+        release.write(AuthStorage.kAccessToken, 'tok'),
+        throwsA(isA<PlatformException>()),
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(AuthStorage.kAccessToken), isNull);
+    });
+
+    test('a failed secure read returns nothing and drops a plaintext copy',
+        () async {
+      SharedPreferences.setMockInitialValues(
+        {AuthStorage.kRefreshToken: 'legacy'},
+      );
+      final release = AuthStorage(allowInsecureFallback: false);
+
+      expect(await release.read(AuthStorage.kRefreshToken), isNull);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(AuthStorage.kRefreshToken), isNull);
+    });
+
+    test('a plaintext token from an older build moves into secure storage',
+        () async {
+      secureStorageWorks();
+      SharedPreferences.setMockInitialValues(
+        {AuthStorage.kRefreshToken: 'legacy'},
+      );
+      final release = AuthStorage(allowInsecureFallback: false);
+
+      expect(await release.read(AuthStorage.kRefreshToken), 'legacy');
+      expect(secure[AuthStorage.kRefreshToken], 'legacy');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(AuthStorage.kRefreshToken), isNull);
+    });
+
+    test('a value in secure storage is read from there', () async {
+      secureStorageWorks();
+      final release = AuthStorage(allowInsecureFallback: false);
+
+      await release.write(AuthStorage.kAccessToken, 'tok');
+      expect(await release.read(AuthStorage.kAccessToken), 'tok');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(AuthStorage.kAccessToken), isNull);
+    });
+  });
 }

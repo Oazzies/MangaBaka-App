@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -11,6 +12,16 @@ class AuthStorage {
   static const kIdToken = 'mb_id_token';
   static const kAccessTokenExp = 'mb_access_token_exp';
   static const kProfileCache = 'mb_profile_cache';
+
+  /// Whether a secure-storage failure may fall back to plain
+  /// SharedPreferences. That file is readable by anything running as the
+  /// user, so the fallback exists only for development (e.g. an unsigned
+  /// macOS build, which has no keychain access). A release build refuses to
+  /// store the value instead, and sign-in reports the failure.
+  final bool allowInsecureFallback;
+
+  AuthStorage({bool? allowInsecureFallback})
+      : allowInsecureFallback = allowInsecureFallback ?? kDebugMode;
 
   final _logger = LoggingService.logger;
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
@@ -29,27 +40,59 @@ class AuthStorage {
     try {
       final value = await _storage.read(key: key);
       if (value != null) return value;
-
-      // Check fallback
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(key);
     } on PlatformException catch (e) {
+      if (!allowInsecureFallback) {
+        _logger.warning('Secure storage read error for key $key: $e');
+        // A plaintext copy left by an older build cannot be moved anywhere
+        // safe while secure storage is failing; it is not left on disk.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(key);
+        return null;
+      }
       _logger.warning(
         'Secure storage read error for key $key: $e. Checking fallback.',
       );
       final prefs = await SharedPreferences.getInstance();
       return prefs.getString(key);
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    final plain = prefs.getString(key);
+    if (plain == null || allowInsecureFallback) return plain;
+    return _migrateToSecure(prefs, key, plain);
+  }
+
+  /// Moves a value an older build left in plain SharedPreferences into
+  /// secure storage. The plaintext copy is removed either way; if secure
+  /// storage cannot take it, the value is dropped and the user signs in again.
+  Future<String?> _migrateToSecure(
+    SharedPreferences prefs,
+    String key,
+    String value,
+  ) async {
+    String? migrated;
+    try {
+      await _storage.write(key: key, value: value);
+      migrated = value;
+      _logger.info('Moved $key from plain storage into secure storage');
+    } on PlatformException catch (e) {
+      _logger.warning('Could not move $key into secure storage: $e');
+    }
+    await prefs.remove(key);
+    return migrated;
   }
 
   Future<void> write(String key, String? value) async {
     try {
       await _storage.write(key: key, value: value);
     } on PlatformException catch (e) {
+      if (!allowInsecureFallback) {
+        _logger.severe('Secure storage write error for key $key: $e');
+        rethrow;
+      }
       _logger.warning(
         'Secure storage write error for key $key: $e. Falling back to SharedPreferences.',
       );
-      // Fallback for macOS development without signing
       final prefs = await SharedPreferences.getInstance();
       if (value == null) {
         await prefs.remove(key);

@@ -142,10 +142,9 @@ class ApiClient {
       );
 
       if (!acceptedStatuses.contains(response.statusCode)) {
-        _logger.severe(
-          '$operation failed. Status: ${response.statusCode}, '
-          'Body: ${response.body}',
-        );
+        // The body stays out of the log: logs are exported and shared, and
+        // an error body can echo back user data. It is kept on the exception.
+        _logger.severe('$operation failed. Status: ${response.statusCode}');
         throw ApiException(
           message: 'Failed to $operation',
           statusCode: response.statusCode,
