@@ -11,6 +11,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_pill.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/screens/library/desktop_import_export_view.dart';
 import 'package:mangabaka_app/features/library/export/export_service.dart';
@@ -61,6 +62,15 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   ExportFormat _exportFormat = ExportFormat.mangaBaka;
   final Set<String> _exportStates = {...DesktopImportExportView.states};
   bool _exporting = false;
+
+  /// The theme's default input border is pill-shaped (radius 999), meant for
+  /// short single-line fields — on this tall paste box it renders as a
+  /// wildly exaggerated stadium shape, so it's overridden here to match the
+  /// desktop paste box's rectangular radius.
+  static final OutlineInputBorder _pasteFieldBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide.none,
+  );
 
   /// Extensions the generic file picker offers, one per [ImportFormat] that
   /// reads a file.
@@ -555,7 +565,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
           style: AppTypography.sans(color: context.colors.text),
           decoration: InputDecoration(
             hintText: l10n.translate('import_paste_hint'),
+            filled: true,
+            fillColor: context.colors.surfaceRaised,
             contentPadding: const EdgeInsets.all(18),
+            border: _pasteFieldBorder,
+            enabledBorder: _pasteFieldBorder,
+            focusedBorder: _pasteFieldBorder,
           ),
         ),
         const SizedBox(height: 16),
@@ -715,11 +730,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
                     ? null
                     : _add,
                 child: c.isAdding
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const MbSpinner(size: 18, strokeWidth: 2)
                     : Text(
                         l10n
                             .translate('import_add_n')
@@ -807,11 +818,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
               ? null
               : () => _doExport(entries),
           child: _exporting
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+              ? const MbSpinner(size: 18, strokeWidth: 2)
               : Text(l10n.translate('export_action').toUpperCase()),
         ),
       ],

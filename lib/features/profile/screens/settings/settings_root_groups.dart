@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:mangabaka_app/core/widgets/design/github_logo.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_categories.dart';
 import 'package:mangabaka_app/features/profile/screens/translation_credits_screen.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -23,13 +25,6 @@ List<Widget> buildSettingsGroups(
 
   return [
     _category(
-      icon: Icons.palette_outlined,
-      title: l10n.translate('appearance'),
-      subtitle: l10n.translate('appearance_subtitle'),
-      onTap: () => SettingsCategories.appearance(context, l10n),
-    ),
-    const SizedBox(height: 16),
-    _category(
       icon: Icons.settings_outlined,
       title: l10n.translate('general'),
       subtitle: l10n.translate(
@@ -38,6 +33,13 @@ List<Widget> buildSettingsGroups(
             : 'general_settings_subtitle',
       ),
       onTap: () => SettingsCategories.general(context, l10n),
+    ),
+    const SizedBox(height: 16),
+    _category(
+      icon: Icons.palette_outlined,
+      title: l10n.translate('appearance'),
+      subtitle: l10n.translate('appearance_subtitle'),
+      onTap: () => SettingsCategories.appearance(context, l10n),
     ),
     const SizedBox(height: 16),
     _category(
@@ -82,16 +84,22 @@ List<Widget> buildSettingsGroups(
     SettingsGroup(
       children: [
         _externalLink(
-          icon: Icons.discord,
+          leading: const Icon(
+            Icons.discord,
+            size: 20,
+            color: FixedColors.discord,
+          ),
           title: l10n.translate('discord'),
           url: 'https://discord.gg/mangabaka',
           isFirst: true,
         ),
         const SettingsDivider(),
-        _externalLink(
-          icon: Icons.code,
-          title: l10n.translate('github'),
-          url: 'https://github.com/oazzies/MangaBaka-App',
+        Builder(
+          builder: (context) => _externalLink(
+            leading: GithubLogo(size: 20, color: context.colors.text),
+            title: l10n.translate('github'),
+            url: 'https://github.com/oazzies/MangaBaka-App',
+          ),
         ),
         const SettingsDivider(),
         SettingsItem(
@@ -130,13 +138,13 @@ Widget _category({
 
 /// A row that leaves the app, marked with the standard external-link glyph.
 Widget _externalLink({
-  required IconData icon,
+  required Widget leading,
   required String title,
   required String url,
   bool isFirst = false,
 }) {
   return SettingsItem(
-    icon: icon,
+    leadingIcon: leading,
     title: title,
     onTap: () =>
         launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),

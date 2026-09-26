@@ -108,18 +108,7 @@ class _BrandHeader extends StatelessWidget {
         padding: const EdgeInsets.only(top: 8, bottom: 28),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colors.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-              ),
-              child: Image.asset(
-                'assets/mangabaka512.png',
-                width: 44,
-                height: 44,
-              ),
-            ),
+            Image.asset('assets/mangabaka512.png', width: 44, height: 44),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -15,6 +15,8 @@ import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_settings.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
+import 'package:mangabaka_app/features/updates/models/app_release.dart';
+import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// The contents of each settings category.
@@ -30,6 +32,20 @@ class SettingsCategories {
   /// Below this width the general category hides the tooltip toggle: tooltips
   /// are a pointer affordance and there is no hover on a phone.
   static const double _smallDeviceWidth = 600;
+
+  /// Fake release fed to [UpdateDialog] from the "trigger update widget" row —
+  /// styling/QA only, never a real check against GitHub.
+  static const AppRelease debugRelease = AppRelease(
+    tagName: 'v9.9.9',
+    name: 'MangaBaka 9.9.9',
+    body: 'This is placeholder release-note text used to preview the update '
+        'dialog. It exists only to check the dialog\'s styling and layout — '
+        'nothing was actually released.',
+    htmlUrl: '',
+    draft: false,
+    prerelease: false,
+    assets: [],
+  );
 
   static void general(BuildContext context, LocalizationService l10n) {
     showOrNavigate(
@@ -315,6 +331,13 @@ class SettingsCategories {
                 ctx,
                 MaterialPageRoute(builder: (_) => const LogsScreen()),
               ),
+            ),
+            const SettingsDivider(),
+            SettingsItem(
+              icon: Icons.system_update_rounded,
+              title: l10n.translate('trigger_update_widget'),
+              subtitle: l10n.translate('trigger_update_widget_subtitle'),
+              onTap: () => UpdateDialog.show(ctx, debugRelease),
               isLast: true,
             ),
           ],

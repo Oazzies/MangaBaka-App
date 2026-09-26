@@ -20,6 +20,8 @@ import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_dialogs.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
+import 'package:mangabaka_app/features/profile/screens/settings/settings_categories.dart';
+import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -795,6 +797,18 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
               label: l10n.translate('logs'),
               icon: Icons.arrow_forward_rounded,
               onPressed: () => _select(_Category.logs),
+            ),
+          ),
+          const Divider(height: 24),
+          DesktopSettingRow(
+            icon: Icons.system_update_rounded,
+            title: l10n.translate('trigger_update_widget'),
+            subtitle: l10n.translate('trigger_update_widget_subtitle'),
+            control: DesktopPillButton(
+              label: l10n.translate('trigger_update_widget'),
+              icon: Icons.system_update_rounded,
+              onPressed: () =>
+                  UpdateDialog.show(context, SettingsCategories.debugRelease),
             ),
           ),
         ],

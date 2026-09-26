@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/library/import/bulk_import_controller.dar
 import 'package:mangabaka_app/features/library/import/import_parser.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The hub's two halves: bringing a list in, or writing the library out.
 enum ImportExportTab { import, export }
@@ -498,13 +499,10 @@ class DesktopImportExportView extends StatelessWidget {
         primary: true,
         onPressed: canAdd ? onAdd : null,
         trailing: c.isAdding
-            ? SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: context.colors.onAccent,
-                ),
+            ? MbSpinner(
+                size: 14,
+                strokeWidth: 2,
+                color: context.colors.onAccent,
               )
             : null,
       ),
@@ -678,13 +676,10 @@ class DesktopImportExportView extends StatelessWidget {
           icon: Icons.ios_share_rounded,
           onPressed: filtered.isEmpty || isExporting ? null : onExport,
           trailing: isExporting
-              ? SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: context.colors.onAccent,
-                  ),
+              ? MbSpinner(
+                  size: 14,
+                  strokeWidth: 2,
+                  color: context.colors.onAccent,
                 )
               : null,
         ),

@@ -10,7 +10,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 /// the left edge, the title is set in display caps, and the value/summary sits
 /// beneath it in muted sans.
 class SettingsItem extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
   final String title;
   final String? subtitle;
   final VoidCallback? onTap;
@@ -18,16 +18,21 @@ class SettingsItem extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
+  /// Overrides the muted glyph built from [icon] — for brand marks (GitHub,
+  /// Discord) that need their own color or aren't in Material's icon set.
+  final Widget? leadingIcon;
+
   const SettingsItem({
     super.key,
-    required this.icon,
+    this.icon,
     required this.title,
     this.subtitle,
     this.onTap,
     this.trailing,
     this.isFirst = false,
     this.isLast = false,
-  });
+    this.leadingIcon,
+  }) : assert(icon != null || leadingIcon != null);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +47,11 @@ class SettingsItem extends StatelessWidget {
         children: [
           SizedBox(
             width: 24,
-            child: Icon(icon, color: context.colors.textMuted, size: 20),
+            child: Center(
+              child:
+                  leadingIcon ??
+                  Icon(icon, color: context.colors.textMuted, size: 20),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
