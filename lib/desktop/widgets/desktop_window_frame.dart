@@ -43,7 +43,12 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
         valueListenable: _childNotifier,
         builder: (context, child, _) => Stack(
           children: [
-            Positioned.fill(child: child),
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.only(top: DesktopTitleBar.height),
+                child: child,
+              ),
+            ),
             const Positioned(
               top: 0,
               left: 0,
