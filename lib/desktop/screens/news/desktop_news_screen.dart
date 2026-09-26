@@ -319,12 +319,12 @@ class _NewsCard extends StatelessWidget {
 
   const _NewsCard({super.key, required this.news});
 
-  static const int _maxCovers = 5;
+  static const double _coverWidth = 72;
+  static const double _coverSpacing = 10;
 
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    final extra = news.series.length - _maxCovers;
 
     return DesktopHoverSurface(
       onTap: () => launchUrl(Uri.parse(news.url)),
@@ -401,35 +401,51 @@ class _NewsCard extends StatelessWidget {
               ],
               if (news.series.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    for (final s in news.series.take(_maxCovers))
-                      DesktopCoverCard(
-                        series: s,
-                        width: 72,
-                        showTitle: false,
-                        heroTag: 'news_${news.id}',
-                      ),
-                    if (extra > 0)
-                      Container(
-                        width: 72,
-                        height: 108,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: context.colors.surfaceRaised,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '+$extra',
-                          style: AppTypography.display(
-                            color: context.colors.textMuted,
-                            fontSize: 16,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final total = news.series.length;
+                    // How many cover-sized slots actually fit on one row.
+                    final perRow =
+                        ((constraints.maxWidth + _coverSpacing) /
+                                (_coverWidth + _coverSpacing))
+                            .floor()
+                            .clamp(1, total);
+                    // If everything fits, no overflow tile is needed; otherwise
+                    // the last slot on the row becomes the "+x" tile instead of
+                    // wrapping it alone onto a second row.
+                    final showCount = total <= perRow ? total : perRow - 1;
+                    final extra = total - showCount;
+                    return Wrap(
+                      spacing: _coverSpacing,
+                      runSpacing: _coverSpacing,
+                      children: [
+                        for (final s in news.series.take(showCount))
+                          DesktopCoverCard(
+                            series: s,
+                            width: _coverWidth,
+                            showTitle: false,
+                            heroTag: 'news_${news.id}',
                           ),
-                        ),
-                      ),
-                  ],
+                        if (extra > 0)
+                          Container(
+                            width: _coverWidth,
+                            height: 108,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: context.colors.surfaceRaised,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '+$extra',
+                              style: AppTypography.display(
+                                color: context.colors.textMuted,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ],
