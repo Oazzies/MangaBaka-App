@@ -480,7 +480,9 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               ),
                             if (publisher.founded != null)
                               Text(
-                                'Est. ${publisher.founded}',
+                                l10n
+                                    .translate('publisher_established')
+                                    .replaceAll('{year}', publisher.founded.toString()),
                                 style: AppTypography.sans(
                                   color: context.colors.textMuted,
                                   fontSize: 12,
@@ -489,7 +491,9 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               ),
                             if (publisher.closed != null)
                               Text(
-                                'Closed ${publisher.closed}',
+                                l10n
+                                    .translate('publisher_closed')
+                                    .replaceAll('{year}', publisher.closed.toString()),
                                 style: AppTypography.sans(
                                   color: context.colors.error.withValues(
                                     alpha: 0.8,
@@ -500,7 +504,12 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               ),
                             if (publisher.imprints.isNotEmpty)
                               Text(
-                                '${publisher.imprints.length} Imprints',
+                                l10n
+                                    .translate('publisher_imprints')
+                                    .replaceAll(
+                                      '{count}',
+                                      publisher.imprints.length.toString(),
+                                    ),
                                 style: AppTypography.sans(
                                   color: context.colors.textMuted,
                                   fontSize: 12,

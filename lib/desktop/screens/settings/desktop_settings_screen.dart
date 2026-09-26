@@ -1130,7 +1130,7 @@ class _DesktopLogsViewState extends State<_DesktopLogsView> {
               child: _logs.isEmpty
                   ? Center(
                       child: Text(
-                        'No logs recorded yet',
+                        widget.l10n.translate('no_logs'),
                         style: AppTypography.sans(
                           color: context.colors.textMuted,
                         ),

@@ -169,7 +169,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'UPCOMING RELEASES',
+                l10n.translate('upcoming_releases').toUpperCase(),
                 style: AppTypography.display(
                   color: context.colors.text,
                   fontSize: 18,
@@ -395,7 +395,7 @@ class _UpcomingWorkCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        'IN LIBRARY',
+                        LocalizationService().translate('upcoming_in_library').toUpperCase(),
                         style: AppTypography.monoLabel(
                           color: context.colors.accent,
                           fontSize: 9.5,

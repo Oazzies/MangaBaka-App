@@ -280,7 +280,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'ONBOARDING',
+                            l10n.translate('onboarding').toUpperCase(),
                             style: AppTypography.monoLabel(
                               color: context.colors.textMuted,
                               fontSize: 11,
@@ -390,7 +390,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Preferences can be changed anytime in Settings.',
+                    l10n.translate('onboarding_settings_hint'),
                     style: AppTypography.sans(
                       color: context.colors.textMuted,
                       fontSize: 11.5,

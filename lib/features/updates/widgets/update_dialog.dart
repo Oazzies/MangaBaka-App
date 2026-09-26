@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
@@ -108,20 +109,27 @@ class _UpdateDialogState extends State<UpdateDialog> {
     }
   }
 
-  String get _updateButtonLabel {
+  String _getUpdateButtonLabel(LocalizationService l10n) {
     if (_phase == _Phase.installing) {
-      return Platform.isWindows ? 'Launching installer…' : 'Installing…';
+      return Platform.isWindows
+          ? l10n.translate('update_installing_windows')
+          : l10n.translate('update_installing');
     }
     if (_phase == _Phase.downloading) {
-      return 'Downloading ${(_progress * 100).toStringAsFixed(0)}%';
+      return l10n
+          .translate('update_downloading')
+          .replaceAll('{percent}', (_progress * 100).toStringAsFixed(0));
     }
-    if (_phase == _Phase.error) return 'Retry';
-    return _service.supportsInAppUpdate ? 'Update now' : 'Open download';
+    if (_phase == _Phase.error) return l10n.translate('retry');
+    return _service.supportsInAppUpdate
+        ? l10n.translate('update_now')
+        : l10n.translate('open_download');
   }
 
   @override
   Widget build(BuildContext context) {
     final release = widget.release;
+    final l10n = LocalizationService();
 
     return PopScope(
       // Block back-dismissal while downloading/installing.
@@ -167,8 +175,10 @@ class _UpdateDialogState extends State<UpdateDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'A new version (${release.tagName}) is available. '
-                'You have ${AppConstants.appVersion}.',
+                l10n
+                    .translate('update_new_version_available')
+                    .replaceAll('{version}', release.tagName)
+                    .replaceAll('{current}', AppConstants.appVersion),
                 style: AppTypography.sans(
                   color: context.colors.textMuted,
                   fontSize: 13,
@@ -182,7 +192,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   child: SingleChildScrollView(
                     child: Text(
                       release.body.trim().isEmpty
-                          ? 'No release notes provided.'
+                          ? l10n.translate('no_release_notes')
                           : release.body.trim(),
                       style: AppTypography.sans(
                         color: context.colors.text,
@@ -218,8 +228,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     Flexible(
                       child: Text(
                         Platform.isWindows
-                            ? 'Launching installer — the app will close.'
-                            : 'Opening installer…',
+                            ? l10n.translate('update_installing_windows')
+                            : l10n.translate('update_installing'),
                         style: AppTypography.sans(
                           color: context.colors.textMuted,
                           fontSize: 13,
@@ -253,8 +263,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Update failed. You can retry or download it '
-                          'manually from the release page.',
+                          l10n.translate('update_failed'),
                           style: AppTypography.sans(
                             color: context.colors.error.withValues(alpha: 0.9),
                             fontSize: 13,
@@ -276,7 +285,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: Text(
-              'Later',
+              l10n.translate('update_later'),
               style: AppTypography.sans(
                 color: context.colors.textMuted,
                 fontWeight: FontWeight.w600,
@@ -301,7 +310,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               ),
             ),
             child: Text(
-              _updateButtonLabel,
+              _getUpdateButtonLabel(l10n),
               style: AppTypography.sans(fontWeight: FontWeight.bold),
             ),
           ),

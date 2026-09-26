@@ -46,7 +46,7 @@ class LogoutDialog {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Are you sure you want to log out?',
+              l10n.translate('logout_confirmation'),
               style: AppTypography.sans(
                 color: context.colors.text,
                 fontSize: 16,
@@ -73,7 +73,7 @@ class LogoutDialog {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Your local library data will be cleared and must be reimported when you log back in.',
+                      l10n.translate('logout_warning'),
                       style: AppTypography.sans(
                         color: context.colors.error.withValues(alpha: 0.8),
                         fontSize: 13,

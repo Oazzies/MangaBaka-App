@@ -72,7 +72,7 @@ class MixDnaSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Additional DNA elements:',
+                    l10n.translate('mix_dna_additional'),
                     style: AppTypography.sans(
                       color: context.colors.textMuted,
                       fontSize: 11,

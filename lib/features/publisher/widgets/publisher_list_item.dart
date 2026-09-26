@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class PublisherListItem extends StatelessWidget {
@@ -20,6 +21,7 @@ class PublisherListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LocalizationService();
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
@@ -59,17 +61,29 @@ class PublisherListItem extends StatelessWidget {
                       children: [
                         _buildBadge(context, publisher.subType.toUpperCase()),
                         if (publisher.founded != null)
-                          _buildInfoText(context, 'Est. ${publisher.founded}'),
+                          _buildInfoText(
+                            context,
+                            l10n
+                                .translate('publisher_established')
+                                .replaceAll('{year}', publisher.founded.toString()),
+                          ),
                         if (publisher.closed != null)
                           _buildInfoText(
                             context,
-                            'Closed ${publisher.closed}',
+                            l10n
+                                .translate('publisher_closed')
+                                .replaceAll('{year}', publisher.closed.toString()),
                             isError: true,
                           ),
                         if (publisher.imprints.isNotEmpty)
                           _buildInfoText(
                             context,
-                            '${publisher.imprints.length} Imprints',
+                            l10n
+                                .translate('publisher_imprints')
+                                .replaceAll(
+                                  '{count}',
+                                  publisher.imprints.length.toString(),
+                                ),
                           ),
                         if (publisher.links.isNotEmpty)
                           Icon(

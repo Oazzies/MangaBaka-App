@@ -134,7 +134,7 @@ class _LogsScreenState extends State<LogsScreen> {
                 child: _logs.isEmpty
                     ? Center(
                         child: Text(
-                          'No logs recorded yet',
+                          l10n.translate('no_logs'),
                           style: AppTypography.sans(
                             color: context.colors.textMuted,
                           ),

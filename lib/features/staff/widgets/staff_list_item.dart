@@ -2,6 +2,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
@@ -87,7 +88,7 @@ class StaffListItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Series',
+                    LocalizationService().translate('series'),
                     style: AppTypography.sans(
                       color: context.colors.textMuted,
                       fontSize: 10,
