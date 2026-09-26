@@ -470,26 +470,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (_currentPage > 0)
-                DesktopPillButton(
-                  label: l10n.translate('onboarding_back'),
-                  icon: Icons.arrow_back_rounded,
-                  onPressed: _previousPage,
-                )
-              else
-                DesktopPillButton(
-                  label: l10n.translate('onboarding_skip'),
-                  onPressed: _finishOnboarding,
+              Flexible(
+                child: _currentPage > 0
+                    ? DesktopPillButton(
+                        label: l10n.translate('onboarding_back'),
+                        icon: Icons.arrow_back_rounded,
+                        onPressed: _previousPage,
+                      )
+                    : DesktopPillButton(
+                        label: l10n.translate('onboarding_skip'),
+                        onPressed: _finishOnboarding,
+                      ),
+              ),
+              const SizedBox(width: 16),
+              Flexible(
+                child: MbPrimaryButton(
+                  expand: false,
+                  label: isLastPage
+                      ? l10n.translate('onboarding_finish')
+                      : l10n.translate('onboarding_next'),
+                  trailingIcon: isLastPage
+                      ? Icons.check_rounded
+                      : Icons.arrow_forward_rounded,
+                  onPressed: _nextPage,
                 ),
-              MbPrimaryButton(
-                expand: false,
-                label: isLastPage
-                    ? l10n.translate('onboarding_finish')
-                    : l10n.translate('onboarding_next'),
-                trailingIcon: isLastPage
-                    ? Icons.check_rounded
-                    : Icons.arrow_forward_rounded,
-                onPressed: _nextPage,
               ),
             ],
           ),

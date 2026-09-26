@@ -414,8 +414,8 @@ class _NewsCard extends StatelessWidget {
               ],
               if (news.series.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                LayoutBuilder(
-                  builder: (context, constraints) {
+                DerivedLayoutBuilder<int>(
+                  derive: (constraints) {
                     final total = news.series.length;
                     // How many cover-sized slots actually fit on one row.
                     final perRow =
@@ -426,7 +426,10 @@ class _NewsCard extends StatelessWidget {
                     // If everything fits, no overflow tile is needed; otherwise
                     // the last slot on the row becomes the "+x" tile instead of
                     // wrapping it alone onto a second row.
-                    final showCount = total <= perRow ? total : perRow - 1;
+                    return total <= perRow ? total : perRow - 1;
+                  },
+                  builder: (context, showCount) {
+                    final total = news.series.length;
                     final extra = total - showCount;
                     return Wrap(
                       spacing: _coverSpacing,

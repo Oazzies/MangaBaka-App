@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/theme/app_theme.dart';
 import 'package:mangabaka_app/core/theme/presets/theme_presets.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
 import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeUpdateService extends UpdateService {
   _FakeUpdateService({required this.asset, this.downloadError});
@@ -62,6 +64,11 @@ ReleaseAsset _asset({String? sha}) => ReleaseAsset(
 void main() {
   late _FakeUpdateService service;
 
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    await LocalizationService().init();
+  });
+
   Future<void> openDialog(WidgetTester tester, _FakeUpdateService svc) async {
     service = svc;
     await resetServiceLocator();
@@ -84,7 +91,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  tearDown(() async => resetServiceLocator());
+  tearDown(() async {
+    LocalizationService.resetForTesting();
+    await resetServiceLocator();
+  });
 
   testWidgets('an asset without a checksum is never downloaded; the dialog '
       'hands off to the release page', (tester) async {

@@ -47,6 +47,7 @@ class MbPrimaryButton extends StatelessWidget {
           child: Text(
             label.toUpperCase(),
             overflow: TextOverflow.ellipsis,
+            maxLines: 1,
             style: AppTypography.display(
               color: context.colors.onAccent,
               fontSize: 15,
