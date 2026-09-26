@@ -13,6 +13,8 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
@@ -257,7 +259,7 @@ class _NewsScreenState extends State<NewsScreen> {
       );
     }
 
-    return RefreshIndicator(
+    return MbRefreshIndicator(
       onRefresh: _onRefresh,
       child: isGrid ? _buildGridView() : _buildListView(),
     );
@@ -303,7 +305,7 @@ class _NewsScreenState extends State<NewsScreen> {
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(24.0),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: MbSpinner()),
             ),
         ],
       ),
@@ -320,7 +322,7 @@ class _NewsScreenState extends State<NewsScreen> {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(),
+              child: MbSpinner(),
             ),
           );
         }

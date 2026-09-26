@@ -27,6 +27,7 @@ import 'package:mangabaka_app/features/profile/services/statistics_service.dart'
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The profile on desktop: an identity card beside a statistics dashboard.
 ///
@@ -197,7 +198,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
       builder: (context, _) {
         final l10n = LocalizationService();
 
-        if (loading) return const Center(child: CircularProgressIndicator());
+        if (loading) return const Center(child: MbSpinner());
         if (profile == null) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

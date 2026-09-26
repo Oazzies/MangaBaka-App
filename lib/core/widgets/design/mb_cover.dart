@@ -16,6 +16,7 @@ class MbCover extends StatelessWidget {
   final double radius;
   final BoxFit fit;
   final int? memCacheWidth;
+  final bool blurred;
 
   const MbCover({
     super.key,
@@ -25,6 +26,7 @@ class MbCover extends StatelessWidget {
     this.radius = 14,
     this.fit = BoxFit.cover,
     this.memCacheWidth,
+    this.blurred = false,
   });
 
   @override
@@ -42,6 +44,7 @@ class MbCover extends StatelessWidget {
           height: h,
           fit: fit,
           memCacheWidth: memCacheWidth,
+          blurred: blurred,
         ),
       ),
     );

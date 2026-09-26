@@ -13,6 +13,7 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// A collection opened into its works: the collection's summary, then every
 /// release in it (volumes, boxed sets, extras) as a cover grid.
@@ -175,7 +176,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: _loading
-                      ? const CircularProgressIndicator()
+                      ? const MbSpinner()
                       : _failed
                       ? TextButton(
                           onPressed: _loadMore,

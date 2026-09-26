@@ -12,6 +12,7 @@ import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The Similar tab: titles alike by tags and creators, then — as a second
 /// section — titles that readers of this series also keep in their libraries.
@@ -47,7 +48,7 @@ class SeriesSimilarTab extends StatelessWidget {
     if (similar == null) {
       return const Padding(
         padding: EdgeInsets.all(32.0),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: MbSpinner()),
       );
     }
 
@@ -60,7 +61,7 @@ class SeriesSimilarTab extends StatelessWidget {
       if (readersAlsoLike == null) {
         return const Padding(
           padding: EdgeInsets.all(32.0),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: MbSpinner()),
         );
       }
       return Padding(

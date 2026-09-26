@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The API's suggested additional seeds, shown once the user has picked two.
 ///
@@ -83,13 +84,10 @@ class _LoadingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          width: 14,
-          height: 14,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: context.colors.accent,
-          ),
+        MbSpinner(
+          size: 14,
+          strokeWidth: 2,
+          color: context.colors.accent,
         ),
         const SizedBox(width: 10),
         Text(

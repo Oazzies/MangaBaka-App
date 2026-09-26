@@ -7,6 +7,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SeriesWorksTab extends StatelessWidget {
   final List<SeriesWork>? works;
@@ -27,7 +28,7 @@ class SeriesWorksTab extends StatelessWidget {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: MbSpinner(),
         ),
       );
     }

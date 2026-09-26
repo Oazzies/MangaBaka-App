@@ -14,6 +14,7 @@ import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class DesktopUpcomingRail extends StatefulWidget {
   const DesktopUpcomingRail({super.key});
@@ -29,7 +30,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
   Map<String, String> _seriesCovers = const {};
   bool _loading = true;
   bool _onlyLibrary = false;
-  Set<String> _collapsedDateGroups = {};
+  final Set<String> _collapsedDateGroups = {};
 
   @override
   void initState() {
@@ -189,7 +190,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
         Divider(height: 1, color: context.colors.border),
         Expanded(
           child: _loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: MbSpinner())
               : displayedWorks.isEmpty
               ? Center(
                   child: Padding(

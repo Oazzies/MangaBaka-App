@@ -18,6 +18,7 @@ import 'package:mangabaka_app/features/news/services/news_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// News on desktop: a multi-column feed filterable by source, with a side
 /// column ranking the series the loaded stories mention most.
@@ -285,7 +286,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.all(28),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: MbSpinner()),
                   ),
                 ),
               const SliverToBoxAdapter(child: SizedBox(height: 40)),

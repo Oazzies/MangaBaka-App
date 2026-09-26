@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SeriesRelatedTab extends StatelessWidget {
   final List<Series>? related;
@@ -30,7 +31,7 @@ class SeriesRelatedTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (related == null) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
+      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()));
     }
     // Filter out the current series and any duplicate IDs to prevent Hero tag collisions
     final uniqueRelated = <String, Series>{};

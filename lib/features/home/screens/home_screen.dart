@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
 import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
@@ -170,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 4),
             ],
           ),
-          body: RefreshIndicator(
+          body: MbRefreshIndicator(
             color: context.colors.accent,
             backgroundColor: context.colors.surface,
             onRefresh: _loadRails,

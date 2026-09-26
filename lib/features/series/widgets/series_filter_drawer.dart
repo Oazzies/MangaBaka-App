@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_sort
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_type_status_section.dart';
 import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_controller.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The filter sheet that long-pressing a chip on the series detail screen
 /// raises, together with the marching-ants frame that marks the mode.
@@ -263,7 +264,7 @@ class _FilterSections extends StatelessWidget {
     if (controller.isLoadingMetadata) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: MbSpinner()),
       );
     }
 

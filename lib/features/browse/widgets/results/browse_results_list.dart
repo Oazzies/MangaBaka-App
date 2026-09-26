@@ -8,6 +8,7 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class BrowseResultsList extends StatelessWidget {
   final List<Series> results;
@@ -54,7 +55,7 @@ class BrowseResultsList extends StatelessWidget {
                 itemCount: itemCount,
                 itemBuilder: (context, index) {
                   if (index >= results.length) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: MbSpinner());
                   }
 
                   final series = results[index];
@@ -102,7 +103,7 @@ class BrowseResultsList extends StatelessWidget {
               itemCount: itemCount,
               itemBuilder: (context, index) {
                 if (index >= results.length) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: MbSpinner());
                 }
 
                 final series = results[index];
@@ -159,7 +160,7 @@ class BrowseResultsList extends StatelessWidget {
             if (index >= results.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(child: MbSpinner()),
               );
             }
 

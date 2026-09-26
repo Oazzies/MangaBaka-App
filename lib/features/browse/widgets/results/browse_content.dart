@@ -21,6 +21,7 @@ import 'package:mangabaka_app/features/collections/screens/collections_browse_sc
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class BrowseContent extends StatelessWidget {
   final List<dynamic> searchResults;
@@ -66,7 +67,7 @@ class BrowseContent extends StatelessWidget {
       return SeriesListSkeleton(isGrid: isGrid);
     }
 
-    return const Center(child: CircularProgressIndicator());
+    return const Center(child: MbSpinner());
   }
 
   Widget _buildErrorState(BuildContext context, LocalizationService l10n) {
@@ -140,7 +141,7 @@ class BrowseContent extends StatelessWidget {
                 itemBuilder: (context, index) {
                   if (index >= searchResults.length) {
                     if (isLoadingMore && index == searchResults.length) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: MbSpinner());
                     }
                     return const SizedBox.shrink();
                   }
@@ -165,7 +166,7 @@ class BrowseContent extends StatelessWidget {
               itemBuilder: (context, index) {
                 if (index >= searchResults.length) {
                   if (isLoadingMore && index == searchResults.length) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: MbSpinner());
                   }
                   return const SizedBox.shrink();
                 }
@@ -194,7 +195,7 @@ class BrowseContent extends StatelessWidget {
               if (isLoadingMore && index == searchResults.length) {
                 return const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: MbSpinner()),
                 );
               }
               return const SizedBox.shrink();
@@ -264,7 +265,7 @@ class BrowseContent extends StatelessWidget {
         final itemCount = searchResults.length + (isLoadingMore ? 1 : 0);
         Widget spinner() => const Padding(
           padding: EdgeInsets.all(16.0),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: MbSpinner()),
         );
 
         if (DesktopLayout.isActive(context)) {

@@ -16,6 +16,8 @@ import 'package:mangabaka_app/features/profile/mixins/profile_data_mixin.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -156,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
   }
 
   Widget _buildBody(LocalizationService l10n) {
-    if (loading) return const Center(child: CircularProgressIndicator());
+    if (loading) return const Center(child: MbSpinner());
     if (error != null) return Center(child: Text(error!));
     if (profile == null) {
       return MBLoginPrompt(
@@ -165,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
       );
     }
 
-    return RefreshIndicator(
+    return MbRefreshIndicator(
       onRefresh: bootstrap,
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),

@@ -7,6 +7,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// Add-to-library for the wide (desktop) layout: a full-width button that sits
 /// in the sidebar under the information card, instead of floating over the
@@ -32,13 +33,10 @@ class SeriesAddToLibraryButton extends StatelessWidget {
         key: const Key('add_to_library_button'),
         onPressed: isAdding ? null : onAdd,
         icon: isAdding
-            ? SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: context.colors.onAccent.withValues(alpha: 0.5),
-                ),
+            ? MbSpinner(
+                size: 16,
+                strokeWidth: 2,
+                color: context.colors.onAccent.withValues(alpha: 0.5),
               )
             : const Icon(Icons.add_rounded, size: 18),
         label: Text(
@@ -94,15 +92,10 @@ class SeriesDetailFAB extends StatelessWidget {
                 ),
               ),
               icon: isAdding
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(
-                          context.colors.onAccent.withValues(alpha: 0.35),
-                        ),
-                      ),
+                  ? MbSpinner(
+                      size: 18,
+                      strokeWidth: 2,
+                      color: context.colors.onAccent.withValues(alpha: 0.35),
                     )
                   : const Icon(Icons.add_rounded, size: 18),
             ),

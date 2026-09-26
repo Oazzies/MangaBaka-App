@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The placeholder views the Mix results area shows instead of a list.
 ///
@@ -62,13 +63,10 @@ class MixLoadingState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: context.colors.accent,
-            ),
+          MbSpinner(
+            size: 28,
+            strokeWidth: 2.5,
+            color: context.colors.accent,
           ),
           const SizedBox(height: 16),
           Text(

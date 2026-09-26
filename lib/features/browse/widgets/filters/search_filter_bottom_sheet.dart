@@ -14,6 +14,7 @@ import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_cate
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_type_status_section.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_sort_section.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SearchFilterBottomSheet extends StatefulWidget {
   final SearchFilters initialFilters;
@@ -182,7 +183,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                 child: _isLoadingMetadata
                     ? const Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(child: MbSpinner()),
                       )
                     : ListView(
                         shrinkWrap: widget.isDialog,

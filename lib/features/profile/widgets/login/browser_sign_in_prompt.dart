@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// Laid over the whole app while a desktop sign-in waits on the browser.
 ///
@@ -62,13 +63,10 @@ class _Card extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: context.colors.accent,
-                    ),
+                  MbSpinner(
+                    size: 22,
+                    strokeWidth: 2.5,
+                    color: context.colors.accent,
                   ),
                   const SizedBox(height: 20),
                   Text(

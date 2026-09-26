@@ -9,6 +9,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SyncProgressOverlay extends StatelessWidget {
   const SyncProgressOverlay({super.key});
@@ -114,15 +115,10 @@ class SyncProgressOverlay extends StatelessWidget {
                         ),
                       ),
                       if (!hasError && status.isSyncing)
-                        SizedBox(
-                          width: 42,
-                          height: 42,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              context.colors.accent,
-                            ),
-                          ),
+                        MbSpinner(
+                          size: 42,
+                          strokeWidth: 2,
+                          color: context.colors.accent,
                         ),
                     ],
                   ),

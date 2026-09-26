@@ -21,6 +21,7 @@ import 'package:mangabaka_app/features/publisher/services/publisher_search_servi
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// Browse collections and editions.
 ///
@@ -392,11 +393,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
             suffixIcon: _searching
                 ? const Padding(
                     padding: EdgeInsets.all(14),
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                    child: MbSpinner(size: 16, strokeWidth: 2),
                   )
                 : null,
           ),
@@ -619,7 +616,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
     if (_loadingList) {
       return const Padding(
         padding: EdgeInsets.all(24),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: MbSpinner()),
       );
     }
     if (_listFailed) {
@@ -647,7 +644,7 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
     }
     final editions = _editions;
     if (editions == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MbSpinner());
     }
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),

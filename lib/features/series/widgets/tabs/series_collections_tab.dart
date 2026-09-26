@@ -8,6 +8,7 @@ import 'package:mangabaka_app/features/collections/screens/collection_detail_scr
 import 'package:mangabaka_app/features/collections/widgets/collection_card.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SeriesCollectionsTab extends StatelessWidget {
   final List<SeriesCollection>? collections;
@@ -25,7 +26,7 @@ class SeriesCollectionsTab extends StatelessWidget {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
+          child: MbSpinner(),
         ),
       );
     }

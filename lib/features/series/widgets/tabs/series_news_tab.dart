@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/news/widgets/news_list_item.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SeriesNewsTab extends StatelessWidget {
   final List<News>? news;
@@ -17,7 +18,7 @@ class SeriesNewsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (news == null) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: CircularProgressIndicator()));
+      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()));
     }
     final l10n = LocalizationService();
     if (news!.isEmpty) {

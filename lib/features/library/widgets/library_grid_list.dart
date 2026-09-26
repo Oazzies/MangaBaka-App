@@ -14,6 +14,7 @@ import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 
 class LibraryGridList extends StatelessWidget {
   final List<LibraryEntry> items;
@@ -35,7 +36,7 @@ class LibraryGridList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
 
-    return RefreshIndicator(
+    return MbRefreshIndicator(
       onRefresh: onRefresh,
       child: items.isEmpty
           ? CustomScrollView(

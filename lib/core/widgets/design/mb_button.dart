@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// Solid amber pill CTA with ink-black uppercase caps — the reference's
 /// "CONTINUE READING" button. The app's single primary action shape.
@@ -38,14 +39,7 @@ class MbPrimaryButton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (busy)
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(context.colors.onAccent),
-            ),
-          )
+          MbSpinner(size: 16, strokeWidth: 2, color: context.colors.onAccent)
         else if (icon != null)
           Icon(icon, size: 18, color: context.colors.onAccent),
         if (busy || icon != null) const SizedBox(width: 10),

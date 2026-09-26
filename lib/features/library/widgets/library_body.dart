@@ -12,6 +12,8 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 
 class LibraryBody extends StatelessWidget {
   final bool loggedIn;
@@ -69,7 +71,7 @@ class LibraryBody extends StatelessWidget {
     BuildContext context,
     LocalizationService l10n,
   ) {
-    return RefreshIndicator(
+    return MbRefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -113,7 +115,7 @@ class LibraryBody extends StatelessWidget {
     }
 
     if (entriesStream == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: MbSpinner());
     }
 
     return StreamBuilder<List<LibraryEntry>>(

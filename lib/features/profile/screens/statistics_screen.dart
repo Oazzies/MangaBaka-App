@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/library/services/mappers/db_to_api_mapper
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -61,7 +62,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           ),
           body: WidgetUtils.responsiveConstraint(
             loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: MbSpinner())
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(

@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
@@ -138,8 +139,8 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
     final l10n = LocalizationService();
 
     if (_controller.isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: context.colors.accent),
+      return const Center(
+        child: MbSpinner(),
       );
     }
 
@@ -613,13 +614,10 @@ class _AddToLibraryButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (busy)
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(fg),
-                ),
+              MbSpinner(
+                size: 16,
+                strokeWidth: 2,
+                color: fg,
               ),
             if (busy) const SizedBox(width: 10),
             Flexible(
