@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_title_bar.dart';
 
 /// Wraps the application with custom window controls overlaid directly at the
@@ -43,17 +45,21 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
         valueListenable: _childNotifier,
         builder: (context, child, _) => Stack(
           children: [
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.only(top: DesktopTitleBar.height),
-                child: child,
+            Positioned.fill(child: child),
+            // Kept clear of the sidebar: it floats only over the main
+            // content area, never over the sidebar's own top (logo,
+            // collapse arrow), and slides in step with its collapse
+            // animation.
+            ValueListenableBuilder<double>(
+              valueListenable: DesktopShell.sidebarInset,
+              builder: (context, sidebarInset, _) => AnimatedPositioned(
+                duration: AppMotion.base,
+                curve: AppMotion.emphasized,
+                top: 0,
+                left: sidebarInset,
+                right: 0,
+                child: const DesktopTitleBar(),
               ),
-            ),
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: DesktopTitleBar(),
             ),
           ],
         ),

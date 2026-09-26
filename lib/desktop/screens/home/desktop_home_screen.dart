@@ -156,8 +156,8 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
         return DerivedLayoutBuilder<bool>(
           derive: (constraints) => constraints.maxWidth >= _railMinWidth,
           builder: (context, showRail) {
-            final feed = ListView(
-              padding: const EdgeInsets.only(bottom: 48),
+            final feed = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DesktopPageHeader(
                   title: l10n.translate('home'),
@@ -176,42 +176,49 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                     ),
                   ],
                 ),
-                _padded(
-                  DesktopTrendingBoard(
-                    series: _trending,
-                    loading: _loadingTrending,
-                    selectedType: _trendingType,
-                    window: _trendingWindow,
-                    onTypeChanged: (type) {
-                      if (type == _trendingType) return;
-                      setState(() => _trendingType = type);
-                      _reloadTrending();
-                    },
-                    onWindowChanged: (days) {
-                      if (days == _trendingWindow) return;
-                      setState(() => _trendingWindow = days);
-                      _reloadTrending();
-                    },
-                    onViewAll: _openTrendingAll,
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.only(bottom: 48),
+                    children: [
+                      _padded(
+                        DesktopTrendingBoard(
+                          series: _trending,
+                          loading: _loadingTrending,
+                          selectedType: _trendingType,
+                          window: _trendingWindow,
+                          onTypeChanged: (type) {
+                            if (type == _trendingType) return;
+                            setState(() => _trendingType = type);
+                            _reloadTrending();
+                          },
+                          onWindowChanged: (days) {
+                            if (days == _trendingWindow) return;
+                            setState(() => _trendingWindow = days);
+                            _reloadTrending();
+                          },
+                          onViewAll: _openTrendingAll,
+                        ),
+                      ),
+                      if (_showForYou || _loadingRails)
+                        _rail(
+                          l10n.translate('for_you'),
+                          _forYou,
+                          loading: _loadingRails && _showForYou,
+                        ),
+                      for (final rail in _genreRails)
+                        _rail(
+                          l10n
+                              .translate('top_in_genre')
+                              .replaceAll('{genre}', rail.genre.name),
+                          rail.series,
+                          onViewAll: () => _openGenreAll(rail.genre),
+                        ),
+                      _rail(l10n.translate('rising'), _rising),
+                      _rail(l10n.translate('hidden_gems'), _hiddenGems),
+                      _rail(l10n.translate('new_releases'), _newReleases),
+                    ],
                   ),
                 ),
-                if (_showForYou || _loadingRails)
-                  _rail(
-                    l10n.translate('for_you'),
-                    _forYou,
-                    loading: _loadingRails && _showForYou,
-                  ),
-                for (final rail in _genreRails)
-                  _rail(
-                    l10n
-                        .translate('top_in_genre')
-                        .replaceAll('{genre}', rail.genre.name),
-                    rail.series,
-                    onViewAll: () => _openGenreAll(rail.genre),
-                  ),
-                _rail(l10n.translate('rising'), _rising),
-                _rail(l10n.translate('hidden_gems'), _hiddenGems),
-                _rail(l10n.translate('new_releases'), _newReleases),
               ],
             );
 

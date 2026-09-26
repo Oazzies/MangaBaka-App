@@ -47,6 +47,11 @@ class DesktopShell extends StatefulWidget {
   /// The mounted shell, or null when the mobile layout is showing.
   static DesktopShellState? get current => shellKey.currentState;
 
+  /// Current width of the permanent sidebar, or 0 when no shell is mounted
+  /// (onboarding, sign-in). [DesktopWindowFrame] reads this so its floating
+  /// title bar never overlaps the sidebar.
+  static final ValueNotifier<double> sidebarInset = ValueNotifier<double>(0);
+
   @override
   State<DesktopShell> createState() => DesktopShellState();
 }
@@ -93,6 +98,7 @@ class DesktopShellState extends State<DesktopShell> {
   @override
   void dispose() {
     _index.dispose();
+    DesktopShell.sidebarInset.value = 0;
     super.dispose();
   }
 
@@ -176,6 +182,9 @@ class DesktopShellState extends State<DesktopShell> {
                 constraints.maxWidth < DesktopTokens.sidebarAutoCollapseWidth,
             builder: (context, narrow) {
               final collapsed = _collapsedOverride ?? narrow;
+              DesktopShell.sidebarInset.value = collapsed
+                  ? DesktopTokens.sidebarCollapsedWidth
+                  : DesktopTokens.sidebarWidth;
               return Stack(
                 children: [
                   Positioned.fill(

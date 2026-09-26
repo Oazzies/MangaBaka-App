@@ -14,7 +14,6 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_carousel.dart';
-import 'package:mangabaka_app/desktop/widgets/desktop_title_bar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_sign_in_prompt.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
@@ -225,40 +224,51 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
           );
         }
 
-        return Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: DesktopTokens.maxPageWidth,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DesktopPageHeader(title: l10n.translate('profile')),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: DesktopTokens.maxPageWidth,
+                  ),
+                  // The overview needs a column of its own only if the main
+                  // column keeps a useful width beside it.
+                  child: DerivedLayoutBuilder<bool>(
+                    derive: (constraints) =>
+                        constraints.maxWidth >= _sidebarMinWidth,
+                    builder: (context, sidebar) {
+                      return sidebar
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: _mainColumn(l10n, inline: false),
+                                ),
+                                SizedBox(
+                                  width: _sidebarWidth,
+                                  child: ListView(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      0,
+                                      0,
+                                      DesktopTokens.pagePadding,
+                                      48,
+                                    ),
+                                    children: [_overview(l10n)],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : _mainColumn(l10n, inline: true);
+                    },
+                  ),
+                ),
+              ),
             ),
-            // The overview needs a column of its own only if the main column
-            // keeps a useful width beside it.
-            child: DerivedLayoutBuilder<bool>(
-              derive: (constraints) => constraints.maxWidth >= _sidebarMinWidth,
-              builder: (context, sidebar) {
-                return sidebar
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(child: _mainColumn(l10n, inline: false)),
-                          SizedBox(
-                            width: _sidebarWidth,
-                            child: ListView(
-                              padding: const EdgeInsets.fromLTRB(
-                                0,
-                                _topClearance,
-                                DesktopTokens.pagePadding,
-                                48,
-                              ),
-                              children: [_overview(l10n)],
-                            ),
-                          ),
-                        ],
-                      )
-                    : _mainColumn(l10n, inline: true);
-              },
-            ),
-          ),
+          ],
         );
       },
     );
@@ -269,19 +279,13 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
   static const double _sidebarWidth = 372;
   static const double _sidebarMinWidth = 1080;
 
-  /// Top gutter for the page's own content. Unlike other desktop tabs, the
-  /// profile page has no [DesktopPageHeader] to keep it clear of the custom
-  /// window control buttons floating over the top of the window — so it
-  /// needs enough clearance of its own to start below them.
-  static const double _topClearance = DesktopTitleBar.height + 16;
-
   /// Everything but the overview: identity, standout picks, recent activity.
   /// With [inline] the overview is included too, after the identity card.
   Widget _mainColumn(LocalizationService l10n, {required bool inline}) {
     return ListView(
       padding: EdgeInsets.fromLTRB(
         DesktopTokens.pagePadding,
-        _topClearance,
+        0,
         // Beside the sidebar the gutter between the two is the sidebar's; on
         // its own the column keeps the page's right gutter.
         inline ? DesktopTokens.pagePadding : DesktopTokens.pagePadding * 0.75,

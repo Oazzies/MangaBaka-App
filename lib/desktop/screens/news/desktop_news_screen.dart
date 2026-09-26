@@ -176,110 +176,122 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
       ..removeWhere((s) => s.isEmpty);
     final visible = _visible;
 
-    return CustomScrollView(
-      controller: _scroll,
-      slivers: [
-        SliverToBoxAdapter(
-          child: DesktopPageHeader(
-            title: l10n.translate('news'),
-            subtitle: l10n.translate('news_subtitle'),
-            actions: [
-              DesktopIconButton(
-                icon: Icons.refresh_rounded,
-                filled: true,
-                tooltip: '${l10n.translate('retry')}  (Ctrl+R)',
-                onPressed: refresh,
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DesktopPageHeader(
+          title: l10n.translate('news'),
+          subtitle: l10n.translate('news_subtitle'),
+          actions: [
+            DesktopIconButton(
+              icon: Icons.refresh_rounded,
+              filled: true,
+              tooltip: '${l10n.translate('retry')}  (Ctrl+R)',
+              onPressed: refresh,
+            ),
+          ],
+        ),
+        Expanded(
+          child: CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              if (sources.length > 1)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      DesktopTokens.pagePadding,
+                      0,
+                      DesktopTokens.pagePadding,
+                      18,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: DesktopSegmented<String?>(
+                        value: _source,
+                        segments: [
+                          (null, l10n.translate('all_sources'), null),
+                          for (final s in sources) (s, s, null),
+                        ],
+                        onChanged: (s) => setState(() => _source = s),
+                      ),
+                    ),
+                  ),
+                ),
+              if (visible.isEmpty && !_loading)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: DesktopEmptyState(
+                    icon: Icons.newspaper_rounded,
+                    message: _error ?? l10n.translate('no_results'),
+                    action: _error == null
+                        ? null
+                        : DesktopPillButton(
+                            label: l10n.translate('retry'),
+                            icon: Icons.refresh_rounded,
+                            onPressed: refresh,
+                          ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: DesktopTokens.pagePadding,
+                  ),
+                  // Rebuilt only when the column count changes; between
+                  // those a resize just re-lays the cards out.
+                  sliver: DerivedSliverLayoutBuilder<int>(
+                    derive: (constraints) =>
+                        (constraints.crossAxisExtent / _minColumnWidth)
+                            .floor()
+                            .clamp(1, 3),
+                    builder: (context, columns) {
+                      const gap = 16.0;
+                      return SliverToBoxAdapter(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var c = 0; c < columns; c++) ...[
+                              if (c > 0) const SizedBox(width: gap),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    for (
+                                      var i = c;
+                                      i < visible.length;
+                                      i += columns
+                                    )
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: gap,
+                                        ),
+                                        child: _NewsCard(
+                                          key: ValueKey(
+                                            'news_${visible[i].id}',
+                                          ),
+                                          news: visible[i],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              if (_loading)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(28),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
           ),
         ),
-        if (sources.length > 1)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                DesktopTokens.pagePadding,
-                0,
-                DesktopTokens.pagePadding,
-                18,
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: DesktopSegmented<String?>(
-                  value: _source,
-                  segments: [
-                    (null, l10n.translate('all_sources'), null),
-                    for (final s in sources) (s, s, null),
-                  ],
-                  onChanged: (s) => setState(() => _source = s),
-                ),
-              ),
-            ),
-          ),
-        if (visible.isEmpty && !_loading)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: DesktopEmptyState(
-              icon: Icons.newspaper_rounded,
-              message: _error ?? l10n.translate('no_results'),
-              action: _error == null
-                  ? null
-                  : DesktopPillButton(
-                      label: l10n.translate('retry'),
-                      icon: Icons.refresh_rounded,
-                      onPressed: refresh,
-                    ),
-            ),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: DesktopTokens.pagePadding,
-            ),
-            // Rebuilt only when the column count changes; between those a
-            // resize just re-lays the cards out.
-            sliver: DerivedSliverLayoutBuilder<int>(
-              derive: (constraints) =>
-                  (constraints.crossAxisExtent / _minColumnWidth).floor().clamp(
-                    1,
-                    3,
-                  ),
-              builder: (context, columns) {
-                const gap = 16.0;
-                return SliverToBoxAdapter(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var c = 0; c < columns; c++) ...[
-                        if (c > 0) const SizedBox(width: gap),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              for (var i = c; i < visible.length; i += columns)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: gap),
-                                  child: _NewsCard(
-                                    key: ValueKey('news_${visible[i].id}'),
-                                    news: visible[i],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        if (_loading)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(28),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ),
-        const SliverToBoxAdapter(child: SizedBox(height: 40)),
       ],
     );
   }
