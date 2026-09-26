@@ -22,10 +22,10 @@ class ThemePage extends StatelessWidget {
         final mode = controller.mode;
         return LayoutBuilder(
           builder: (context, box) {
-            final grid = box.maxWidth >= 560;
-            final layout = grid
-                ? ThemeGalleryLayout.grid
-                : ThemeGalleryLayout.strip;
+            // Always a wrapping grid (2-3 columns on a phone) rather than a
+            // single horizontally scrolling strip — with a dozen-plus themes
+            // a strip hides most of them off-screen.
+            const layout = ThemeGalleryLayout.grid;
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
               child: Column(
@@ -55,6 +55,7 @@ class ThemePage extends StatelessWidget {
                     ThemeGallery(
                       brightness: Brightness.dark,
                       layout: layout,
+                      alignment: WrapAlignment.center,
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -63,6 +64,7 @@ class ThemePage extends StatelessWidget {
                     ThemeGallery(
                       brightness: Brightness.light,
                       layout: layout,
+                      alignment: WrapAlignment.center,
                     ),
                   ],
                 ],
@@ -81,9 +83,10 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(left: 4, bottom: 10),
+    padding: const EdgeInsets.only(bottom: 10),
     child: Text(
       text.toUpperCase(),
+      textAlign: TextAlign.center,
       style: AppTypography.monoLabel(
         color: context.colors.textMuted,
         fontSize: 11.5,

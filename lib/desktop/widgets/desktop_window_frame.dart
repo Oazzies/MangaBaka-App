@@ -19,6 +19,10 @@ class DesktopWindowFrame extends StatefulWidget {
   @visibleForTesting
   static bool? debugOverride;
 
+  /// Set to true by full-window modal screens (like desktop onboarding) that
+  /// provide their own dedicated sticky top bar with window controls.
+  static final ValueNotifier<bool> hideTitleBar = ValueNotifier<bool>(false);
+
   static bool get isSupported {
     final override = debugOverride;
     if (override != null) return override;
@@ -46,20 +50,26 @@ class _DesktopWindowFrameState extends State<DesktopWindowFrame> {
         builder: (context, child, _) => Stack(
           children: [
             Positioned.fill(child: child),
-            // Kept clear of the sidebar: it floats only over the main
-            // content area, never over the sidebar's own top (logo,
-            // collapse arrow), and slides in step with its collapse
-            // animation.
-            ValueListenableBuilder<double>(
-              valueListenable: DesktopShell.sidebarInset,
-              builder: (context, sidebarInset, _) => AnimatedPositioned(
-                duration: AppMotion.base,
-                curve: AppMotion.emphasized,
-                top: 0,
-                left: sidebarInset,
-                right: 0,
-                child: const DesktopTitleBar(),
-              ),
+            ValueListenableBuilder<bool>(
+              valueListenable: DesktopWindowFrame.hideTitleBar,
+              builder: (context, hide, _) {
+                if (hide) return const SizedBox.shrink();
+                // Kept clear of the sidebar: it floats only over the main
+                // content area, never over the sidebar's own top (logo,
+                // collapse arrow), and slides in step with its collapse
+                // animation.
+                return ValueListenableBuilder<double>(
+                  valueListenable: DesktopShell.sidebarInset,
+                  builder: (context, sidebarInset, _) => AnimatedPositioned(
+                    duration: AppMotion.base,
+                    curve: AppMotion.emphasized,
+                    top: 0,
+                    left: sidebarInset,
+                    right: 0,
+                    child: const DesktopTitleBar(),
+                  ),
+                );
+              },
             ),
           ],
         ),

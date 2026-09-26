@@ -27,6 +27,8 @@ class OnboardingWindow {
       _previousSize ??= await windowManager.getSize();
       await windowManager.setResizable(false);
       await windowManager.setMaximizable(false);
+      await windowManager.setMinimumSize(size);
+      await windowManager.setMaximumSize(size);
       await windowManager.setSize(size);
       await windowManager.center();
     } catch (_) {
@@ -36,6 +38,8 @@ class OnboardingWindow {
 
   static Future<void> exit() async {
     try {
+      await windowManager.setMinimumSize(Size.zero);
+      await windowManager.setMaximumSize(Size.zero);
       await windowManager.setResizable(true);
       await windowManager.setMaximizable(true);
       final previous = _previousSize;

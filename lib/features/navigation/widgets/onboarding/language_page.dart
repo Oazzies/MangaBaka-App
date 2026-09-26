@@ -54,25 +54,26 @@ class LanguagePage extends StatelessWidget {
                   final isSelected = lang['code'] == currentLang;
 
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: const EdgeInsets.only(bottom: 10.0),
                     child: InkWell(
                       onTap: () =>
                           localizationService.setLanguage(lang['code']),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(14),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
-                          vertical: 18,
+                          vertical: 16,
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? context.colors.accent.withValues(alpha: 0.1)
-                              : context.colors.surface,
-                          borderRadius: BorderRadius.circular(16),
+                              ? context.colors.accent
+                              : context.colors.surfaceRaised,
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: isSelected
                                 ? context.colors.accent
-                                : context.colors.border.withValues(alpha: 0.5),
+                                : context.colors.border,
+                            width: 1,
                           ),
                         ),
                         child: Row(
@@ -81,22 +82,16 @@ class LanguagePage extends StatelessWidget {
                               child: Text(
                                 lang['native_name'] ?? lang['name'],
                                 style: AppTypography.sans(
-                                  fontSize: 16,
+                                  fontSize: 15.5,
                                   fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
                                   color: isSelected
-                                      ? context.colors.accent
+                                      ? context.colors.onAccent
                                       : context.colors.text,
                                 ),
                               ),
                             ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: context.colors.accent,
-                                size: 20,
-                              ),
                           ],
                         ),
                       ),

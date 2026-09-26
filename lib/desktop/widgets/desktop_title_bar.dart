@@ -27,12 +27,14 @@ class DesktopTitleBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onMinimize;
   final VoidCallback? onMaximize;
   final VoidCallback? onClose;
+  final bool showMaximize;
 
   const DesktopTitleBar({
     super.key,
     this.onMinimize,
     this.onMaximize,
     this.onClose,
+    this.showMaximize = true,
   });
 
   @override
@@ -88,6 +90,7 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
               onMinimize: widget.onMinimize,
               onMaximize: widget.onMaximize,
               onClose: widget.onClose,
+              showMaximize: widget.showMaximize,
             ),
           ),
         ],
@@ -101,12 +104,14 @@ class DesktopWindowButtons extends StatefulWidget {
   final VoidCallback? onMinimize;
   final VoidCallback? onMaximize;
   final VoidCallback? onClose;
+  final bool showMaximize;
 
   const DesktopWindowButtons({
     super.key,
     this.onMinimize,
     this.onMaximize,
     this.onClose,
+    this.showMaximize = true,
   });
 
   @override
@@ -231,19 +236,21 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
               Icon(Icons.remove_rounded, size: 18, color: color),
           onPressed: _handleMinimize,
         ),
-        const SizedBox(width: 8),
-        _AppWindowButton(
-          tooltip: _isExpanded ? 'Restore' : 'Expand',
-          buildIcon: (color, bgColor) => _isExpanded
-              ? FloatingWindowRestoreIcon(
-                  color: color,
-                  fillColor: bgColor,
-                  size: 17,
-                )
-              : Icon(Icons.crop_square_rounded, size: 18, color: color),
-          enabled: _isMaximizable,
-          onPressed: _handleMaximize,
-        ),
+        if (widget.showMaximize) ...[
+          const SizedBox(width: 8),
+          _AppWindowButton(
+            tooltip: _isExpanded ? 'Restore' : 'Expand',
+            buildIcon: (color, bgColor) => _isExpanded
+                ? FloatingWindowRestoreIcon(
+                    color: color,
+                    fillColor: bgColor,
+                    size: 17,
+                  )
+                : Icon(Icons.crop_square_rounded, size: 18, color: color),
+            enabled: _isMaximizable,
+            onPressed: _handleMaximize,
+          ),
+        ],
         const SizedBox(width: 8),
         _AppWindowButton(
           tooltip: 'Close',

@@ -9,7 +9,8 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 /// action widget (e.g. a button) below the subtitle. Adapts sizing via
 /// [isShort] for screens with limited vertical space.
 class OnboardingHeroLayout extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? heroWidget;
   final String title;
   final String? subtitle;
   final bool isShort;
@@ -24,7 +25,8 @@ class OnboardingHeroLayout extends StatelessWidget {
 
   const OnboardingHeroLayout({
     super.key,
-    required this.icon,
+    this.icon,
+    this.heroWidget,
     required this.title,
     this.subtitle,
     required this.isShort,
@@ -32,7 +34,7 @@ class OnboardingHeroLayout extends StatelessWidget {
     this.titleFontWeight = FontWeight.bold,
     this.titleLetterSpacing,
     this.action,
-  });
+  }) : assert(icon != null || heroWidget != null, 'Either icon or heroWidget must be provided');
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +45,12 @@ class OnboardingHeroLayout extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             MbEntrance(
-              child: Icon(
-                icon,
-                size: isShort ? 56 : 72,
-                color: context.colors.accent,
-              ),
+              child: heroWidget ??
+                  Icon(
+                    icon,
+                    size: isShort ? 56 : 72,
+                    color: context.colors.accent,
+                  ),
             ),
             SizedBox(height: isShort ? 24 : 40),
             MbEntrance(

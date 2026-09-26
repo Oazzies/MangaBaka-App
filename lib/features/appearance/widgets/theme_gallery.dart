@@ -24,12 +24,14 @@ class ThemeGallery extends StatefulWidget {
   final Brightness brightness;
   final ThemeGalleryLayout layout;
   final double cardWidth;
+  final WrapAlignment alignment;
 
   const ThemeGallery({
     super.key,
     required this.brightness,
     this.layout = ThemeGalleryLayout.strip,
     this.cardWidth = 112,
+    this.alignment = WrapAlignment.start,
   });
 
   @override
@@ -122,7 +124,14 @@ class _ThemeGalleryState extends State<ThemeGallery> {
         ];
 
         if (widget.layout == ThemeGalleryLayout.grid) {
-          return Wrap(spacing: _gap, runSpacing: 16, children: cards);
+          return Center(
+            child: Wrap(
+              alignment: widget.alignment,
+              spacing: _gap,
+              runSpacing: 16,
+              children: cards,
+            ),
+          );
         }
 
         return SizedBox(

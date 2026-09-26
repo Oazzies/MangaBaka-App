@@ -182,9 +182,16 @@ class DesktopShellState extends State<DesktopShell> {
                 constraints.maxWidth < DesktopTokens.sidebarAutoCollapseWidth,
             builder: (context, narrow) {
               final collapsed = _collapsedOverride ?? narrow;
-              DesktopShell.sidebarInset.value = collapsed
+              final targetInset = collapsed
                   ? DesktopTokens.sidebarCollapsedWidth
                   : DesktopTokens.sidebarWidth;
+              if (DesktopShell.sidebarInset.value != targetInset) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (DesktopShell.sidebarInset.value != targetInset) {
+                    DesktopShell.sidebarInset.value = targetInset;
+                  }
+                });
+              }
               return Stack(
                 children: [
                   Positioned.fill(

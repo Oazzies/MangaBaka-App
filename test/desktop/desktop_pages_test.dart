@@ -266,6 +266,7 @@ void main() {
           ),
         ),
       );
+      DesktopSettingsScreen.stateKey.currentState?.debugSelectCategory('general');
       await tester.pumpAndSettle();
     }
 
@@ -288,22 +289,14 @@ void main() {
       expect(find.text('REDO_ONBOARDING'), findsWidgets);
     });
 
-    testWidgets('categories scroll past one another', (tester) async {
+    testWidgets('categories switch to selected category', (tester) async {
       await pumpSettings(tester);
 
+      expect(find.text('LANGUAGE'), findsOneWidget, reason: 'General selected');
       await tester.tap(find.text('content'));
-      // Mid-transition both pages are on screen, one leaving as one arrives.
-      await tester.pump(const Duration(milliseconds: 200));
-      expect(find.text('LANGUAGE'), findsOneWidget, reason: 'General leaving');
-      expect(find.text('RATING_STEP'), findsOneWidget, reason: 'Content arriving');
-      final leaving = tester.getTopLeft(find.text('LANGUAGE')).dy;
-      final arriving = tester.getTopLeft(find.text('RATING_STEP')).dy;
-      // Going down the page: the new one is below the old one.
-      expect(arriving, greaterThan(leaving));
-
       await tester.pumpAndSettle();
-      expect(find.text('LANGUAGE'), findsNothing);
-      expect(find.text('RATING_STEP'), findsOneWidget);
+      expect(find.text('LANGUAGE'), findsNothing, reason: 'General left');
+      expect(find.text('RATING_STEP'), findsOneWidget, reason: 'Content arrived');
     });
 
     testWidgets('a shown content rating can have its covers blurred',

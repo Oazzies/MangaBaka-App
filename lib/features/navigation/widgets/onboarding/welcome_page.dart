@@ -13,10 +13,15 @@ class WelcomePage extends StatelessWidget {
         final localization = LocalizationService();
         return LayoutBuilder(
           builder: (context, constraints) {
+            final isShort = constraints.maxHeight < 500;
             return OnboardingHeroLayout(
-              icon: Icons.auto_stories_rounded,
+              heroWidget: Image.asset(
+                'assets/mangabaka512.png',
+                width: isShort ? 64 : 88,
+                height: isShort ? 64 : 88,
+              ),
               title: localization.translate('app_name'),
-              isShort: constraints.maxHeight < 500,
+              isShort: isShort,
               titleFontSize: 32,
               titleFontWeight: FontWeight.w900,
               titleLetterSpacing: -0.5,

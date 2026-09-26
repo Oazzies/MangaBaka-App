@@ -18,11 +18,16 @@ import 'package:mangabaka_app/features/navigation/widgets/onboarding/language_pa
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/theme_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/camera_permission_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/content_preferences_page.dart';
+import 'package:mangabaka_app/features/navigation/widgets/onboarding/import_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/login_page.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/screens/onboarding/onboarding_window.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_title_bar.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_window_frame.dart';
+import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -53,37 +58,72 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ///
   /// Desktop has no barcode scanner to grant access to, so that step is
   /// dropped there.
-  List<({String titleKey, Widget page})> get _steps => [
-    (titleKey: 'onboarding_welcome_title', page: const WelcomePage()),
-    (titleKey: 'onboarding_language_title', page: const LanguagePage()),
-    (titleKey: 'onboarding_theme_title', page: const ThemePage()),
+  List<({String titleKey, IconData icon, Widget page})> get _steps => [
+    (
+      titleKey: 'onboarding_welcome_title',
+      icon: Icons.auto_awesome_rounded,
+      page: const WelcomePage(),
+    ),
+    (
+      titleKey: 'onboarding_language_title',
+      icon: Icons.translate_rounded,
+      page: const LanguagePage(),
+    ),
+    (
+      titleKey: 'onboarding_theme_title',
+      icon: Icons.palette_outlined,
+      page: const ThemePage(),
+    ),
     (
       titleKey: 'onboarding_content_title',
+      icon: Icons.tune_rounded,
       page: const ContentPreferencesPage(),
     ),
     if (!_isDesktop)
       (
         titleKey: 'onboarding_camera_title',
+        icon: Icons.camera_alt_outlined,
         page: CameraPermissionPage(
           onRequestPermission: _requestCameraPermission,
         ),
       ),
     (
       titleKey: 'onboarding_login_title',
+      icon: Icons.person_outline_rounded,
       page: LoginPage(
         isLoggingIn: _isLoggingIn,
         isLoggedIn: _isLoggedIn,
         onLogin: _login,
       ),
     ),
+    (
+      titleKey: 'onboarding_import_title',
+      icon: Icons.import_export_rounded,
+      page: const ImportPage(),
+    ),
   ];
 
   int get _totalPages => _steps.length;
 
+  void _goToPage(int page) {
+    if (page == _currentPage || page < 0 || page >= _totalPages) return;
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    if (_isDesktop) OnboardingWindow.enter();
+    if (_isDesktop) {
+      OnboardingWindow.enter();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        DesktopWindowFrame.hideTitleBar.value = true;
+        DesktopShell.sidebarInset.value = 0;
+      });
+    }
     _logger.info('Onboarding started (isRedoing: ${widget.isRedoing})');
     _authService = getIt<ProfileAuthService>();
     _isLoggedIn = _authService.isLoggedIn;
@@ -91,7 +131,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   void dispose() {
-    if (_isDesktop) OnboardingWindow.exit();
+    if (_isDesktop) {
+      OnboardingWindow.exit();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        DesktopWindowFrame.hideTitleBar.value = false;
+      });
+    }
     _pageController.dispose();
     super.dispose();
   }
@@ -175,6 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _pageView() => PageView(
     controller: _pageController,
+    scrollDirection: Axis.vertical,
     physics: const NeverScrollableScrollPhysics(),
     onPageChanged: (index) => setState(() => _currentPage = index),
     children: [for (final step in _steps) step.page],
@@ -206,21 +252,196 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // ─── Desktop ───────────────────────────────────────────────────────────────
 
   Widget _desktopBody() {
+    final l10n = LocalizationService();
     return Scaffold(
       backgroundColor: context.colors.background,
-      body: Row(
+      body: Column(
         children: [
-          DesktopSidePanel(width: 340, child: _brandPanel()),
-          Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
-                child: Column(
-                  children: [
-                    Expanded(child: _pageView()),
-                    _buildBottomControls(),
-                  ],
+          // ── Sticky Top Bar with Window Controls ──
+          Container(
+            height: DesktopTitleBar.height,
+            decoration: BoxDecoration(
+              color: context.colors.background,
+              border: Border(
+                bottom: BorderSide(
+                  color: context.colors.border,
+                  width: 1,
                 ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: DesktopTitleBar.height,
+                    child: DragToMoveArea(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'ONBOARDING',
+                            style: AppTypography.monoLabel(
+                              color: context.colors.textMuted,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, right: 12),
+                  child: DesktopWindowButtons(
+                    showMaximize: false,
+                    onClose: widget.isRedoing
+                        ? () => Navigator.of(context).pop()
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // ── Main Body (Sidebar + Content) ──
+          Expanded(
+            child: Row(
+              children: [
+                DesktopSidePanel(width: 280, child: _brandPanel()),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 620),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(36, 24, 36, 16),
+                              child: _pageView(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _buildDesktopBottomControls(l10n),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _brandPanel() {
+    final l10n = LocalizationService();
+    final steps = _steps;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 18, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: [
+                Image.asset('assets/mangabaka512.png', width: 32, height: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    AppConstants.appName.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.display(
+                      color: context.colors.text,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          Expanded(
+            child: ListView.separated(
+              itemCount: steps.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 4),
+              itemBuilder: (context, i) {
+                final step = steps[i];
+                return _stepItem(
+                  index: i,
+                  title: l10n.translate(step.titleKey),
+                  icon: step.icon,
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.tune_rounded,
+                  size: 15,
+                  color: context.colors.textMuted,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Preferences can be changed anytime in Settings.',
+                    style: AppTypography.sans(
+                      color: context.colors.textMuted,
+                      fontSize: 11.5,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepItem({
+    required int index,
+    required String title,
+    required IconData icon,
+  }) {
+    final isCurrent = index == _currentPage;
+    final isDone = index < _currentPage;
+
+    final fg = isCurrent ? context.colors.onAccent : context.colors.text;
+    final iconColor = isCurrent
+        ? context.colors.onAccent
+        : (isDone ? context.colors.accent : context.colors.textMuted);
+
+    return DesktopHoverSurface(
+      onTap: () => _goToPage(index),
+      selected: isCurrent,
+      selectedColor: context.colors.accent,
+      hoverColor: context.colors.surface,
+      borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      child: Row(
+        children: [
+          Icon(
+            isDone ? Icons.check_circle_rounded : icon,
+            size: 20,
+            color: iconColor,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.display(
+                color: fg,
+                fontSize: 13.5,
               ),
             ),
           ),
@@ -229,82 +450,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  /// Logo, and the whole flow laid out as a numbered list so the user can see
-  /// where they are and what is left — the thing a row of dots cannot say.
-  Widget _brandPanel() {
-    final l10n = LocalizationService();
-    final steps = _steps;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(36, 48, 36, 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset('assets/mangabaka512.png', width: 56, height: 56),
-          const SizedBox(height: 20),
-          Text(
-            AppConstants.appName.toUpperCase(),
-            style: AppTypography.display(
-              color: context.colors.text,
-              fontSize: 28,
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            l10n.translate('onboarding_welcome_subtitle'),
-            style: AppTypography.sans(
-              color: context.colors.textMuted,
-              fontSize: 14,
-              height: 1.5,
-            ),
-          ),
-          const Spacer(),
-          for (var i = 0; i < steps.length; i++)
-            _stepRow(i, l10n.translate(steps[i].titleKey)),
-        ],
-      ),
-    );
-  }
+  Widget _buildDesktopBottomControls(LocalizationService l10n) {
+    final isLastPage = _currentPage == _totalPages - 1;
 
-  Widget _stepRow(int index, String title) {
-    final isCurrent = index == _currentPage;
-    final isDone = index < _currentPage;
-    final color = isCurrent
-        ? context.colors.text
-        : (isDone ? context.colors.textMuted : context.colors.border);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          AnimatedContainer(
-            duration: AppMotion.base,
-            curve: AppMotion.emphasized,
-            width: isCurrent ? 22 : 8,
-            height: 2,
-            color: isCurrent
-                ? context.colors.accent
-                : context.colors.surfaceRaised,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+      decoration: BoxDecoration(
+        color: context.colors.background,
+        border: Border(
+          top: BorderSide(
+            color: context.colors.border,
+            width: 1,
           ),
-          const SizedBox(width: 14),
-          Text(
-            (index + 1).toString().padLeft(2, '0'),
-            style: AppTypography.monoLabel(
-              color: isCurrent ? context.colors.accent : color,
-              fontSize: 12,
-            ),
+        ),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 620),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (_currentPage > 0)
+                DesktopPillButton(
+                  label: l10n.translate('onboarding_back'),
+                  icon: Icons.arrow_back_rounded,
+                  onPressed: _previousPage,
+                )
+              else
+                DesktopPillButton(
+                  label: l10n.translate('onboarding_skip'),
+                  onPressed: _finishOnboarding,
+                ),
+              MbPrimaryButton(
+                expand: false,
+                label: isLastPage
+                    ? l10n.translate('onboarding_finish')
+                    : l10n.translate('onboarding_next'),
+                trailingIcon: isLastPage
+                    ? Icons.check_rounded
+                    : Icons.arrow_forward_rounded,
+                onPressed: _nextPage,
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.display(color: color, fontSize: 14),
-            ),
-          ),
-          if (isDone)
-            Icon(Icons.check_rounded, size: 16, color: context.colors.accent),
-        ],
+        ),
       ),
     );
   }

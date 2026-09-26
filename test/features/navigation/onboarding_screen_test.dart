@@ -88,4 +88,27 @@ void main() {
     expect(find.text('ONBOARDING_LOGIN_TITLE'), findsOneWidget);
     expect(find.text('ONBOARDING_CAMERA_TITLE'), findsNothing);
   });
+
+  testWidgets('desktop onboarding switches pages when clicking on sidebar steps',
+      (WidgetTester tester) async {
+    DesktopLayout.debugOverride = true;
+    tester.view.physicalSize = const Size(1040, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pump();
+
+    // Initially on Welcome page
+    expect(find.text('APP_NAME'), findsOneWidget);
+
+    // Tap on Language step in the sidebar
+    final languageStep = find.text('ONBOARDING_LANGUAGE_TITLE');
+    expect(languageStep, findsOneWidget);
+    await tester.tap(languageStep);
+    await tester.pumpAndSettle();
+
+    // Now Language title appears both in sidebar and in LanguagePage body
+    expect(find.text('ONBOARDING_LANGUAGE_TITLE'), findsNWidgets(2));
+  });
 }
