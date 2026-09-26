@@ -7,6 +7,7 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
+import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -497,18 +498,18 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Text(
-                  l10n.translate('discovery_queue').toUpperCase(),
-                  style: AppTypography.display(
-                    color: context.colors.text,
-                    fontSize: 14,
-                  ),
+            BesideOrBelow(
+              minBodyWidth: 140,
+              gap: 10,
+              stackGap: 8,
+              body: Text(
+                l10n.translate('discovery_queue').toUpperCase(),
+                style: AppTypography.display(
+                  color: context.colors.text,
+                  fontSize: 14,
                 ),
-                const SizedBox(width: 10),
-                _buildCounterPill(counter),
-              ],
+              ),
+              trailing: _buildCounterPill(counter),
             ),
             const SizedBox(height: 10),
             ClipRRect(
