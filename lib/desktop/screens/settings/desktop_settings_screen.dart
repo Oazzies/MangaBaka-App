@@ -435,22 +435,35 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
         ? DesktopTokens.maxPageWidth * 0.75
         : DesktopTokens.readableWidth;
 
-    return _ScrollPage(
-      padding: const EdgeInsets.fromLTRB(48, 10, 48, 48),
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _pageHeader(l10n, titleKey, subtitleKey),
-              const SizedBox(height: 24),
-              _buildCategoryContent(category, l10n),
-            ],
+    // The header sits outside the scrolling list so it stays put — like the
+    // other desktop tabs' page headers — while the category's own content
+    // scrolls beneath it.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(48, 10, 48, 0),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: _pageHeader(l10n, titleKey, subtitleKey),
+            ),
           ),
         ),
-      ),
+        Expanded(
+          child: _ScrollPage(
+            padding: const EdgeInsets.fromLTRB(48, 24, 48, 48),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: _buildCategoryContent(category, l10n),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
