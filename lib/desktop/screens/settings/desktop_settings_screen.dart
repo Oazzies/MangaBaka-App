@@ -52,14 +52,8 @@ enum _Category {
 class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
   static const double _navWidth = 300;
 
-  /// How long the pages take to scroll past each other.
-  static const Duration _scrollDuration = Duration(milliseconds: 460);
-
   late final ProfileAuthService _auth;
   _Category _selected = _Category.general;
-
-  /// +1 when the last switch moved down the page, -1 when it moved up.
-  int _direction = 1;
 
   @override
   void initState() {
@@ -96,7 +90,6 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
   void _select(_Category category) {
     if (category == _selected) return;
     setState(() {
-      _direction = category.index > _selected.index ? 1 : -1;
       _selected = category;
     });
   }
@@ -363,39 +356,12 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
   // ─── The page area ──────────────────────────────────────────────────────────
 
   /// Every category is a page of its own, stacked in a column: General on top,
-  /// then List customization, Content and so on down. Switching does not swap
-  /// the content in place — it scrolls to it, the page you leave sliding off
-  /// one edge as the next slides in from the other. The pages are not really
-  /// one scrollable, so this is purely the transition.
+  /// then List customization, Content and so on down. Switching swaps the pane
+  /// straight to the selected page.
   Widget _pane(LocalizationService l10n) {
-    return ClipRect(
-      child: AnimatedSwitcher(
-        duration: _scrollDuration,
-        switchInCurve: Curves.easeInOutCubic,
-        switchOutCurve: Curves.easeInOutCubic,
-        // Both pages fill the pane, so a slide of one page-height is a slide
-        // of exactly the pane.
-        layoutBuilder: (current, previous) => Stack(
-          fit: StackFit.expand,
-          children: [...previous, if (current != null) current],
-        ),
-        transitionBuilder: _scrollTransition,
-        child: KeyedSubtree(
-          key: ValueKey(_selected),
-          child: _page(_selected, l10n),
-        ),
-      ),
-    );
-  }
-
-  Widget _scrollTransition(Widget child, Animation<double> animation) {
-    final entering = child.key == ValueKey(_selected);
-    // Moving down the page: the new page comes up from below while the old one
-    // leaves through the top. Moving up is the mirror image.
-    final from = Offset(0, (entering ? _direction : -_direction).toDouble());
-    return SlideTransition(
-      position: Tween<Offset>(begin: from, end: Offset.zero).animate(animation),
-      child: child,
+    return KeyedSubtree(
+      key: ValueKey(_selected),
+      child: _page(_selected, l10n),
     );
   }
 
