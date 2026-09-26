@@ -117,23 +117,6 @@ class ThemeLivePreview extends StatelessWidget {
                               color: i < 4 ? p.star : p.textMuted,
                             ),
                           const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: p.forState('reading'),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              'CH. 42',
-                              style: AppTypography.display(
-                                color: p.onForState('reading'),
-                                fontSize: 9,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 8),

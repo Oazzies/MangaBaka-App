@@ -6,38 +6,69 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/features/library/export/export_service.dart';
 import 'package:mangabaka_app/features/library/import/bulk_import_controller.dart';
 import 'package:mangabaka_app/features/library/import/import_parser.dart';
+import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The bulk importer on desktop.
+/// The hub's two halves: bringing a list in, or writing the library out.
+enum ImportExportTab { import, export }
+
+/// One tracker or file the importer can read from, shown as its own card in
+/// the source picker rather than folded into a generic "open a file" button.
+class ImportSource {
+  final IconData icon;
+  final String labelKey;
+  final String hintKey;
+  final VoidCallback onTap;
+
+  const ImportSource({
+    required this.icon,
+    required this.labelKey,
+    required this.hintKey,
+    required this.onTap,
+  });
+}
+
+/// The import/export hub on desktop.
 ///
-/// The phone's importer is one narrow column: a paste box over a state
-/// dropdown over a button. On a wide window that is a lot of empty space and a
-/// stock Material dropdown, so here the source sits beside its options, and
-/// everything is built from the desktop's own controls.
+/// The phone's version is one narrow column: a tab toggle over a source grid
+/// or a paste box over a state dropdown over a button. On a wide window that
+/// is a lot of empty space and stock Material controls, so here the source
+/// sits beside its options, and everything is built from the desktop's own
+/// controls.
 ///
 /// Stateless on purpose: the screen that owns the controller and the text also
 /// serves the phone, so it keeps the state and hands this view what to show.
-class DesktopImportView extends StatelessWidget {
+class DesktopImportExportView extends StatelessWidget {
+  final ImportExportTab tab;
+  final ValueChanged<ImportExportTab> onTabChanged;
+
   final BulkImportController controller;
   final TextEditingController text;
+  final List<ImportSource> sources;
 
   final ImportFormat format;
   final ValueChanged<ImportFormat> onFormatChanged;
   final bool useStates;
   final ValueChanged<bool> onUseStatesChanged;
 
-  /// The file the text was loaded from, shown beside the file button.
-  final String? fileName;
+  /// The source the text was loaded from, shown beside the source grid.
+  final String? sourceLabel;
 
   final VoidCallback onBack;
-  final VoidCallback onPaste;
-  final VoidCallback onOpenFile;
-  final VoidCallback onAniList;
   final VoidCallback onClear;
   final VoidCallback onMatch;
   final VoidCallback onAdd;
+
+  final List<LibraryEntry> libraryEntries;
+  final Set<String> exportStates;
+  final ValueChanged<String> onToggleExportState;
+  final ExportFormat exportFormat;
+  final ValueChanged<ExportFormat> onExportFormatChanged;
+  final bool isExporting;
+  final VoidCallback onExport;
 
   static const List<String> states = [
     'plan_to_read',
@@ -49,22 +80,29 @@ class DesktopImportView extends StatelessWidget {
     'considering',
   ];
 
-  const DesktopImportView({
+  const DesktopImportExportView({
     super.key,
+    required this.tab,
+    required this.onTabChanged,
     required this.controller,
     required this.text,
+    required this.sources,
     required this.format,
     required this.onFormatChanged,
     required this.useStates,
     required this.onUseStatesChanged,
-    required this.fileName,
+    required this.sourceLabel,
     required this.onBack,
-    required this.onPaste,
-    required this.onOpenFile,
-    required this.onAniList,
     required this.onClear,
     required this.onMatch,
     required this.onAdd,
+    required this.libraryEntries,
+    required this.exportStates,
+    required this.onToggleExportState,
+    required this.exportFormat,
+    required this.onExportFormatChanged,
+    required this.isExporting,
+    required this.onExport,
   });
 
   static String formatKey(ImportFormat format) => switch (format) {
@@ -77,6 +115,18 @@ class DesktopImportView extends StatelessWidget {
     ImportFormat.mangaBaka => 'import_format_mb',
   };
 
+  static String exportFormatKey(ExportFormat format) => switch (format) {
+    ExportFormat.mangaBaka => 'export_format_mb',
+    ExportFormat.csv => 'export_format_csv',
+    ExportFormat.plain => 'export_format_plain',
+  };
+
+  static String exportFormatHintKey(ExportFormat format) => switch (format) {
+    ExportFormat.mangaBaka => 'export_format_mb_hint',
+    ExportFormat.csv => 'export_format_csv_hint',
+    ExportFormat.plain => 'export_format_plain_hint',
+  };
+
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
@@ -86,39 +136,66 @@ class DesktopImportView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DesktopPageHeader(
-          title: l10n.translate('import_list'),
+          title: l10n.translate('import_export_title'),
           subtitle: review
               ? l10n
                     .translate('import_summary')
                     .replaceAll('{selected}', '${controller.selectedCount}')
                     .replaceAll('{total}', '${controller.rows.length}')
-              : l10n.translate('import_list_subtitle'),
+              : l10n.translate(
+                  tab == ImportExportTab.import
+                      ? 'import_list_subtitle'
+                      : 'export_subtitle',
+                ),
           leading: DesktopIconButton(
             icon: Icons.arrow_back_rounded,
             tooltip: l10n.translate('back'),
             onPressed: onBack,
             filled: true,
           ),
-          actions: review ? _reviewActions(context, l10n) : const [],
+          actions: review
+              ? _reviewActions(context, l10n)
+              : [
+                  DesktopSegmented<ImportExportTab>(
+                    value: tab,
+                    onChanged: onTabChanged,
+                    segments: [
+                      (
+                        ImportExportTab.import,
+                        l10n.translate('import_tab'),
+                        Icons.file_download_outlined,
+                      ),
+                      (
+                        ImportExportTab.export,
+                        l10n.translate('export_tab'),
+                        Icons.file_upload_outlined,
+                      ),
+                    ],
+                  ),
+                ],
         ),
         Expanded(
-          child: review ? _review(context, l10n) : _input(context, l10n),
+          child: review
+              ? _review(context, l10n)
+              : tab == ImportExportTab.import
+              ? _import(context, l10n)
+              : _export(context, l10n),
         ),
       ],
     );
   }
 
-  // ─── Input ───────────────────────────────────────────────────────────────
+  // ─── Import ──────────────────────────────────────────────────────────────
 
-  Widget _input(BuildContext context, LocalizationService l10n) {
+  Widget _import(BuildContext context, LocalizationService l10n) {
     final detected = format == ImportFormat.auto
-        ? ImportParser.detect(text.text, fileName: fileName)
+        ? ImportParser.detect(text.text, fileName: sourceLabel)
         : format;
     final titleCount = ImportParser.parse(
       text.text,
       format: format,
       useStates: useStates,
-      fileName: fileName,
+      fileName: sourceLabel,
     ).length;
 
     final summary = titleCount == 0
@@ -149,59 +226,48 @@ class DesktopImportView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // The sources wrap onto a second line in a narrow window
-                  // rather than overflowing into the preview beside them;
-                  // Clear keeps the right edge.
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 8,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            DesktopPillButton(
-                              label: l10n.translate('import_paste_clipboard'),
-                              icon: Icons.content_paste_rounded,
-                              onPressed: onPaste,
-                            ),
-                            DesktopPillButton(
-                              label: l10n.translate('import_open_file'),
-                              icon: Icons.folder_open_rounded,
-                              onPressed: onOpenFile,
-                            ),
-                            DesktopPillButton(
-                              label: l10n.translate('import_anilist'),
-                              icon: Icons.cloud_download_outlined,
-                              onPressed: onAniList,
-                            ),
-                            if (fileName != null)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 2,
-                                ),
-                                child: Text(
-                                  fileName!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.sans(
-                                    color: context.colors.textMuted,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      DesktopPillButton(
-                        label: l10n.translate('clear'),
-                        icon: Icons.close_rounded,
-                        onPressed: text.text.isEmpty ? null : onClear,
-                      ),
-                    ],
+                  DesktopSectionTitle(
+                    title: l10n.translate('import_choose_source'),
+                    fontSize: 13,
+                    padding: const EdgeInsets.only(bottom: 10),
                   ),
+                  // A fixed-height scrolling strip rather than a wrapping
+                  // grid: this card also holds the paste box beneath it, and
+                  // a grid tall enough for eight two-line cards would push
+                  // that box past the window's bottom at the 700px minimum
+                  // height this screen supports.
+                  SizedBox(
+                    height: 40,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: sources.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      itemBuilder: (context, i) => _SourceCard(source: sources[i]),
+                    ),
+                  ),
+                  if (sourceLabel != null) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            sourceLabel!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.sans(
+                              color: context.colors.textMuted,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ),
+                        DesktopPillButton(
+                          label: l10n.translate('clear'),
+                          icon: Icons.close_rounded,
+                          onPressed: text.text.isEmpty ? null : onClear,
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   Expanded(
                     child: TextField(
@@ -239,7 +305,10 @@ class DesktopImportView extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 20),
-          SizedBox(width: 320, child: _options(context, l10n, titleCount)),
+          SizedBox(
+            width: 320,
+            child: _importOptions(context, l10n, titleCount),
+          ),
         ],
       ),
     );
@@ -250,14 +319,14 @@ class DesktopImportView extends StatelessWidget {
     borderSide: BorderSide.none,
   );
 
-  Widget _options(
+  Widget _importOptions(
     BuildContext context,
     LocalizationService l10n,
     int titleCount,
   ) {
     final canUseStates = ImportParser.carriesStates(
       format == ImportFormat.auto
-          ? ImportParser.detect(text.text, fileName: fileName)
+          ? ImportParser.detect(text.text, fileName: sourceLabel)
           : format,
     );
 
@@ -378,6 +447,7 @@ class DesktopImportView extends StatelessWidget {
     required String label,
     required IconData icon,
     required VoidCallback? onPressed,
+    Widget? trailing,
   }) {
     final enabled = onPressed != null;
     final fg = context.colors.onAccent;
@@ -401,6 +471,7 @@ class DesktopImportView extends StatelessWidget {
               fontSize: 13.5,
             ),
           ),
+          if (trailing != null) ...[const SizedBox(width: 10), trailing],
         ],
       ),
     );
@@ -482,6 +553,255 @@ class DesktopImportView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  // ─── Export ──────────────────────────────────────────────────────────────
+
+  Widget _export(BuildContext context, LocalizationService l10n) {
+    final filtered = libraryEntries
+        .where((e) => exportStates.contains(e.state))
+        .toList();
+    final preview = filtered.isEmpty
+        ? ''
+        : ExportService.build(filtered, exportFormat);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        DesktopTokens.pagePadding,
+        0,
+        DesktopTokens.pagePadding,
+        DesktopTokens.pagePadding,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: DesktopCard(
+              showBorder: false,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DesktopSectionTitle(
+                    title: l10n.translate('export_preview'),
+                    fontSize: 13,
+                    padding: const EdgeInsets.only(bottom: 10),
+                  ),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceRaised,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: filtered.isEmpty
+                          ? Center(
+                              child: Text(
+                                l10n.translate('export_nothing_to_export'),
+                                style: AppTypography.sans(
+                                  color: context.colors.textMuted,
+                                ),
+                              ),
+                            )
+                          : Scrollbar(
+                              child: SingleChildScrollView(
+                                child: SelectableText(
+                                  preview,
+                                  style: AppTypography.sans(
+                                    color: context.colors.text,
+                                    fontSize: 13,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n
+                        .translate('export_count')
+                        .replaceAll('{count}', '${filtered.length}'),
+                    style: AppTypography.monoLabel(
+                      color: context.colors.textMuted,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          SizedBox(width: 320, child: _exportOptions(context, l10n, filtered)),
+        ],
+      ),
+    );
+  }
+
+  Widget _exportOptions(
+    BuildContext context,
+    LocalizationService l10n,
+    List<LibraryEntry> filtered,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        DesktopCard(
+          showBorder: false,
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _optionLabel(context, l10n.translate('export_format')),
+              for (final f in ExportFormat.values) ...[
+                _formatOption(context, l10n, f),
+                if (f != ExportFormat.values.last) const SizedBox(height: 8),
+              ],
+              const SizedBox(height: 18),
+              _optionLabel(context, l10n.translate('export_scope')),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final s in states) _scopeChip(context, l10n, s),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _wideButton(
+          context,
+          label: l10n.translate('export_action'),
+          icon: Icons.ios_share_rounded,
+          onPressed: filtered.isEmpty || isExporting ? null : onExport,
+          trailing: isExporting
+              ? SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: context.colors.onAccent,
+                  ),
+                )
+              : null,
+        ),
+      ],
+    );
+  }
+
+  Widget _formatOption(
+    BuildContext context,
+    LocalizationService l10n,
+    ExportFormat f,
+  ) {
+    final selected = f == exportFormat;
+    return DesktopHoverSurface(
+      onTap: () => onExportFormatChanged(f),
+      selected: selected,
+      selectedColor: context.colors.surfaceRaised,
+      hoverColor: context.colors.border,
+      borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Icon(
+            selected ? Icons.radio_button_checked : Icons.radio_button_off,
+            size: 18,
+            color: selected ? context.colors.accent : context.colors.textMuted,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.translate(exportFormatKey(f)),
+                  style: AppTypography.sans(
+                    color: context.colors.text,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  l10n.translate(exportFormatHintKey(f)),
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 11.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scopeChip(BuildContext context, LocalizationService l10n, String s) {
+    final selected = exportStates.contains(s);
+    return DesktopHoverSurface(
+      onTap: () => onToggleExportState(s),
+      selected: selected,
+      selectedColor: context.colors.forState(s).withValues(alpha: 0.18),
+      hoverColor: context.colors.border,
+      borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _stateDot(context, s),
+          const SizedBox(width: 8),
+          Text(
+            l10n.translate(s).toUpperCase(),
+            style: AppTypography.display(
+              color: selected ? context.colors.text : context.colors.textMuted,
+              fontSize: 11.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A source pill in the fixed-height scrolling strip: its hint (the thing a
+/// two-line card would have shown beneath the label) lives in the tooltip
+/// instead, so the strip never needs more than one row of height.
+class _SourceCard extends StatelessWidget {
+  final ImportSource source;
+
+  const _SourceCard({required this.source});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = LocalizationService();
+    return DesktopHoverSurface(
+      onTap: source.onTap,
+      idleColor: context.colors.surfaceRaised,
+      hoverColor: context.colors.border,
+      borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      tooltip: l10n.translate(source.hintKey),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(source.icon, size: 16, color: context.colors.accent),
+          const SizedBox(width: 8),
+          Text(
+            l10n.translate(source.labelKey),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.sans(
+              color: context.colors.text,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

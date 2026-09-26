@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_home_screen.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
-import 'package:mangabaka_app/features/library/import/bulk_import_screen.dart';
+import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 
 import 'support/fixtures.dart';
@@ -27,7 +27,7 @@ void main() {
         SeriesDetailScreen(series: Fixtures.series(1)),
     'browse results': () =>
         const BrowseResultsScreen(sortType: 'Trending', sortBy: 'trending_7d'),
-    'bulk import': () => const BulkImportScreen(),
+    'bulk import': () => const ImportExportScreen(),
   };
 
   for (final env in const [Environment(), Environment(language: 'de')]) {

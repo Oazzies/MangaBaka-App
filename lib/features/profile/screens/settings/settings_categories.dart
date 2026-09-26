@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/appearance/screens/appearance_settings.dart';
 import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart';
+import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/logs_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_navigation.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -207,6 +208,11 @@ class SettingsCategories {
       },
     );
   }
+
+  /// Unlike the other categories, this isn't a list of settings — it's the
+  /// import/export hub screen itself, pushed straight away.
+  static void importExport(BuildContext context, LocalizationService l10n) =>
+      ImportExportScreen.open(context);
 
   static void account(
     BuildContext context,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
-import 'package:mangabaka_app/features/library/import/bulk_import_screen.dart';
+import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -251,9 +251,9 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
                   : '$statusLabel · ${l10n.translate('series_count').replaceAll('{count}', NumberUtils.formatCount(helper.getByTabOrAll(_status).length))}',
               actions: [
                 DesktopPillButton(
-                  label: l10n.translate('import_list'),
-                  icon: Icons.playlist_add_rounded,
-                  onPressed: () => BulkImportScreen.open(context),
+                  label: l10n.translate('import_export_title'),
+                  icon: Icons.import_export_rounded,
+                  onPressed: () => ImportExportScreen.open(context),
                 ),
                 DesktopPillButton(
                   label: l10n.translate(

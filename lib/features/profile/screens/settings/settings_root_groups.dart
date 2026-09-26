@@ -54,6 +54,13 @@ List<Widget> buildSettingsGroups(
       onTap: () => SettingsCategories.content(context, l10n),
     ),
     const SizedBox(height: 16),
+    _category(
+      icon: Icons.import_export_rounded,
+      title: l10n.translate('import_export_title'),
+      subtitle: l10n.translate('import_export_subtitle'),
+      onTap: () => SettingsCategories.importExport(context, l10n),
+    ),
+    const SizedBox(height: 16),
     // Account settings only exist for a signed-in user; there is nothing
     // behind this row when logged out.
     if (auth.isLoggedIn) ...[

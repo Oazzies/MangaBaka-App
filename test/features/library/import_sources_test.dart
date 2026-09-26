@@ -138,4 +138,83 @@ void main() {
       expect(await key(500), 'import_source_unreachable');
     });
   });
+
+  group('KitsuImporter', () {
+    const usersBody = '{"data":[{"id":"7","type":"users"}]}';
+    const entriesBody = '''
+{"data":[
+  {"id":"1","type":"libraryEntries","attributes":{"status":"current"},
+   "relationships":{"manga":{"data":{"type":"manga","id":"10"}}}},
+  {"id":"2","type":"libraryEntries","attributes":{"status":"planned"},
+   "relationships":{"manga":{"data":{"type":"manga","id":"11"}}}}
+],"included":[
+  {"id":"10","type":"manga","attributes":{"canonicalTitle":"Frieren","titles":{"en":"Frieren"}}},
+  {"id":"11","type":"manga","attributes":{"canonicalTitle":"Berserk","titles":{"en":"Berserk"}}}
+],"links":{}}''';
+
+    test('resolves the username then maps entries into importer JSON',
+        () async {
+      final client = MockClient((request) async {
+        if (request.url.path.contains('/users')) {
+          return http.Response(usersBody, 200);
+        }
+        return http.Response(entriesBody, 200);
+      });
+
+      final json = await KitsuImporter(client: client).fetch('someone');
+
+      expect(ImportParser.parse(json), const [
+        ImportEntry('Frieren', state: 'reading'),
+        ImportEntry('Berserk', state: 'plan_to_read'),
+      ]);
+    });
+
+    test('an empty username is rejected before any request', () async {
+      final importer = KitsuImporter(
+        client: MockClient((_) async => http.Response('', 500)),
+      );
+      expect(
+        () => importer.fetch('   '),
+        throwsA(
+          isA<ImportSourceException>().having(
+            (e) => e.key,
+            'key',
+            'import_user_empty',
+          ),
+        ),
+      );
+    });
+
+    test('an unknown user is reported as such', () async {
+      final importer = KitsuImporter(
+        client: MockClient((_) async => http.Response('{"data":[]}', 200)),
+      );
+      expect(
+        () => importer.fetch('ghost'),
+        throwsA(
+          isA<ImportSourceException>().having(
+            (e) => e.key,
+            'key',
+            'import_user_not_found',
+          ),
+        ),
+      );
+    });
+
+    test('a dead server is reported as unreachable', () async {
+      final importer = KitsuImporter(
+        client: MockClient((_) async => http.Response('', 500)),
+      );
+      expect(
+        () => importer.fetch('someone'),
+        throwsA(
+          isA<ImportSourceException>().having(
+            (e) => e.key,
+            'key',
+            'import_source_unreachable',
+          ),
+        ),
+      );
+    });
+  });
 }

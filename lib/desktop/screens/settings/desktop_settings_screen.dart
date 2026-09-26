@@ -15,6 +15,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_list_customization.dart';
 import 'package:mangabaka_app/desktop/screens/settings/desktop_appearance_page.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
 import 'package:mangabaka_app/features/navigation/screens/onboarding_screen.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_dialogs.dart';
@@ -43,6 +44,7 @@ enum _Category {
   general,
   lists,
   content,
+  importExport,
   account,
   advanced,
   logs,
@@ -77,10 +79,13 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
     }
   }
 
-  /// The settings pages, by name, for tests that visit each one.
+  /// The settings pages, by name, for tests that visit each one. Excludes
+  /// [_Category.importExport], which never actually renders as a pane — its
+  /// nav item navigates to [ImportExportScreen] instead.
   @visibleForTesting
   static List<String> get debugCategories => [
-    for (final c in _Category.values) c.name,
+    for (final c in _Category.values)
+      if (c != _Category.importExport) c.name,
   ];
 
   @visibleForTesting
@@ -123,6 +128,12 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       context.colors.star,
       'content',
       'library_settings_subtitle',
+    ),
+    _Category.importExport => (
+      Icons.import_export_rounded,
+      context.colors.info,
+      'import_export_title',
+      'import_export_subtitle',
     ),
     _Category.account => (
       Icons.person_outline_rounded,
@@ -173,6 +184,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       _Category.general,
       _Category.lists,
       _Category.content,
+      _Category.importExport,
       if (_auth.isLoggedIn) _Category.account,
       _Category.advanced,
     ];
@@ -261,7 +273,11 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: DesktopHoverSurface(
-        onTap: () => _select(c),
+        // Unlike the other categories, this one isn't a pane of this screen —
+        // it opens the import/export hub as its own screen.
+        onTap: c == _Category.importExport
+            ? () => ImportExportScreen.open(context)
+            : () => _select(c),
         selected: selected,
         selectedColor: context.colors.surfaceRaised,
         hoverColor: context.colors.surface,
@@ -476,6 +492,8 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       _Category.general => _buildGeneral(l10n),
       _Category.lists => DesktopListCustomization(l10n: l10n),
       _Category.content => _buildContent(l10n),
+      // Never actually selected — its nav item navigates away instead.
+      _Category.importExport => const SizedBox.shrink(),
       _Category.account => _buildAccount(l10n),
       _Category.advanced => _buildAdvanced(l10n),
       _Category.translationCredits => _buildTranslationCredits(l10n),
