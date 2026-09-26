@@ -2,11 +2,15 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
 
 class SnapshotListItem extends StatelessWidget {
   final Series series;
+
+  /// The cover's width — height follows the standard 2:3 cover ratio via
+  /// [MbCover], rather than being stretched to whatever height the row has.
+  static const double width = 120;
 
   const SnapshotListItem({super.key, required this.series});
 
@@ -28,23 +32,15 @@ class SnapshotListItem extends StatelessWidget {
             );
           },
           child: SizedBox(
-            width: 120,
+            width: width,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.denseRadius,
-                    ),
-                    child: WidgetUtils.networkImage(
-                      url: series.coverUrl,
-                      blurred: WidgetUtils.isRatingBlurred(series.contentRating),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      memCacheWidth: 240,
-                    ),
-                  ),
+                MbCover(
+                  url: series.coverUrl,
+                  width: width,
+                  blurred: WidgetUtils.isRatingBlurred(series.contentRating),
+                  memCacheWidth: 240,
                 ),
                 const SizedBox(height: 4),
                 SizedBox(

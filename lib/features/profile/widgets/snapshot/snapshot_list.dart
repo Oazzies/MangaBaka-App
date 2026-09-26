@@ -1,4 +1,5 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/profile/widgets/snapshot/snapshot_list_item.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +60,9 @@ class _SnapshotListState extends State<SnapshotList> {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 180,
+          // Cover width (120) at the standard 2:3 ratio (180) plus the
+          // caption row below it (4 spacing + 16 text).
+          height: SnapshotListItem.width * 1.5 + 20,
           child: ListView.separated(
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
@@ -69,7 +72,7 @@ class _SnapshotListState extends State<SnapshotList> {
             separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               if (index >= widget.entries.length) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: MbSpinner(color: context.colors.accent));
               }
               final entry = widget.entries[index];
               return SnapshotListItem(series: entry.series);

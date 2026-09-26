@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -51,7 +50,7 @@ class HomeRail extends StatelessWidget {
       children: [
         if (showHeader) MbSectionHeader(title: title, onAction: onViewAll),
         SizedBox(
-          height: coverWidth * 1.5 + 62,
+          height: coverWidth * 1.5 + 42,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(
@@ -84,8 +83,6 @@ class _RailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rating = double.tryParse(series.rating) ?? 0;
-
     return SizedBox(
       width: width,
       child: MbTappable(
@@ -111,10 +108,6 @@ class _RailCard extends StatelessWidget {
                 height: 1.25,
               ),
             ),
-            if (rating > 0) ...[
-              const SizedBox(height: 4),
-              MbRatingStars(rating: rating, outOf: 100, fontSize: 11),
-            ],
           ],
         ),
       ),
