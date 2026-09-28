@@ -15,6 +15,7 @@ import 'package:mangabaka_app/features/publisher/services/publisher_search_servi
 import 'package:mangabaka_app/features/browse/services/mix_service.dart';
 import 'package:mangabaka_app/features/browse/services/book_lookup_service.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
+import 'package:mangabaka_app/features/deeplinks/deep_link_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -50,6 +51,11 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<BookLookupService>(() => BookLookupService());
 
   getIt.registerLazySingleton<UpdateService>(() => UpdateService());
+
+  getIt.registerSingleton<DeepLinkService>(
+    DeepLinkService(),
+    dispose: (service) => service.dispose(),
+  );
 
 }
 
