@@ -137,7 +137,7 @@ class SettingsCategories {
               ),
               const SettingsDivider(),
               SettingsSwitchItem(
-                icon: Icons.open_in_app_rounded,
+                icon: Icons.link_rounded,
                 title: l10n.translate('open_links'),
                 subtitle: l10n.translate('open_links_subtext'),
                 value: settings.openLinksInApp,
