@@ -20,7 +20,7 @@ class OpenLinksPage extends StatelessWidget {
           builder: (context, constraints) {
             final isShort = constraints.maxHeight < 500;
             return OnboardingHeroLayout(
-              icon: Icons.open_in_app_rounded,
+              icon: Icons.link_rounded,
               title: l10n.translate('onboarding_links_title'),
               subtitle: l10n.translate('onboarding_links_subtitle'),
               isShort: isShort,
@@ -44,7 +44,6 @@ class OpenLinksPage extends StatelessWidget {
                   ),
                   value: settings.openLinksInApp,
                   onChanged: settings.setOpenLinksInApp,
-                  activeColor: context.colors.accent,
                 ),
               ),
             );
