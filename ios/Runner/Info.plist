@@ -25,9 +25,12 @@
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
+				<key>CFBundleURLName</key>
+				<string>dev.oazzies.mangabaka-app</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>dev.oazzies.mangabaka-app</string>
+					<string>mangabaka</string>
 				</array>
 			</dict>
 		</array>
