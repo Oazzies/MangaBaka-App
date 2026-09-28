@@ -612,6 +612,8 @@
     "mix_dna_additional": "অতিৰিক্ত DNA উপাদান:",
     "no_release_notes": "কোনো ৰিলিজ টোকা দিয়া হোৱা নাই।",
     "update_downloading": "ডাউনল'ড হৈ আছে {percent}%",
-    "open_download": "ডাউনল'ড খোলক"
+    "open_download": "ডাউনল'ড খোলক",
+    "onboarding_links_title": "Open Links",
+    "onboarding_links_subtitle": "Open series pages and other MangaBaka links directly in the app instead of your browser. You can change this anytime in Settings."
   }
 }
