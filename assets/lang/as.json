@@ -613,7 +613,7 @@
     "no_release_notes": "কোনো ৰিলিজ টোকা দিয়া হোৱা নাই।",
     "update_downloading": "ডাউনল'ড হৈ আছে {percent}%",
     "open_download": "ডাউনল'ড খোলক",
-    "onboarding_links_title": "Open Links",
-    "onboarding_links_subtitle": "Open series pages and other MangaBaka links directly in the app instead of your browser. You can change this anytime in Settings."
+    "onboarding_links_title": "লিংক খোলক",
+    "onboarding_links_subtitle": "ব্ৰাউজাৰৰ পৰিৱৰ্তে ছিৰিজৰ পৃষ্ঠা আৰু অন্যান্য MangaBaka লিংকসমূহ পোনপটীয়াকৈ এপত খোলক। আপুনি এইটো যিকোনো সময়তে ছেটিংছত সলনি কৰিব পাৰে।"
   }
 }
