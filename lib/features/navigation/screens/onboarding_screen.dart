@@ -91,7 +91,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (Platform.isAndroid || Platform.isIOS)
       (
         titleKey: 'onboarding_links_title',
-        icon: Icons.open_in_app_rounded,
+        icon: Icons.link_rounded,
         page: const OpenLinksPage(),
       ),
     (
