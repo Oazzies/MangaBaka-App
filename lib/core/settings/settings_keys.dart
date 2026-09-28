@@ -74,4 +74,6 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}custom_themes';
   static const String dismissedRecommendations =
       '${AppConstants.prefixStorageKey}dismissed_recommendations';
+  static const String openLinksInApp =
+      '${AppConstants.prefixStorageKey}open_links_in_app';
 }
