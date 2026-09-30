@@ -611,7 +611,7 @@
     "no_release_notes": "Keine Versionshinweise bereitgestellt.",
     "update_downloading": "Wird heruntergeladen {percent}%",
     "open_download": "Download öffnen",
-    "onboarding_links_title": "Open Links",
-    "onboarding_links_subtitle": "Open series pages and other MangaBaka links directly in the app instead of your browser. You can change this anytime in Settings."
+    "onboarding_links_title": "Links öffnen",
+    "onboarding_links_subtitle": "Öffne Serienseiten und andere MangaBaka-Links direkt in der App statt in deinem Browser. Du kannst dies jederzeit in den Einstellungen ändern."
   }
 }
