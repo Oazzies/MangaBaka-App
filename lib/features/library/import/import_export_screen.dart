@@ -124,24 +124,28 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   List<ImportSource> _sources(LocalizationService l10n) => [
     ImportSource(
       icon: Icons.cloud_download_outlined,
+      logoAsset: 'assets/import/anilist.png',
       labelKey: 'import_anilist',
       hintKey: 'import_anilist_hint',
       onTap: _fromAniList,
     ),
     ImportSource(
       icon: Icons.cloud_download_outlined,
+      logoAsset: 'assets/import/kitsu.png',
       labelKey: 'import_kitsu',
       hintKey: 'import_kitsu_hint',
       onTap: _fromKitsu,
     ),
     ImportSource(
       icon: Icons.description_outlined,
+      logoAsset: 'assets/import/myanimelist.png',
       labelKey: 'import_mal',
       hintKey: 'import_mal_hint',
       onTap: () => _openFileAs(extensions: const ['xml', 'gz'], labelKey: 'import_mal'),
     ),
     ImportSource(
       icon: Icons.description_outlined,
+      logoAsset: 'assets/import/mangaupdates.png',
       labelKey: 'import_mangaupdates',
       hintKey: 'import_mangaupdates_hint',
       onTap: () =>
@@ -149,6 +153,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     ),
     ImportSource(
       icon: Icons.description_outlined,
+      logoAsset: 'assets/import/mihon.png',
       labelKey: 'import_mihon',
       hintKey: 'import_mihon_hint',
       onTap: () => _openFileAs(
@@ -158,6 +163,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     ),
     ImportSource(
       icon: Icons.description_outlined,
+      logoAsset: 'assets/import/comick.webp',
       labelKey: 'import_comick',
       hintKey: 'import_comick_hint',
       onTap: () =>
@@ -521,8 +527,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   // ─── Import: paste ───────────────────────────────────────────────────────
 
   Widget _input(LocalizationService l10n) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+    final list = ListView(
+      // Bottom room so the floating Match button never covers the last row.
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
       children: [
         GridView.count(
           shrinkWrap: true,
@@ -597,10 +604,19 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
               ),
             ),
           ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _text.text.trim().isEmpty ? null : _match,
-          child: Text(l10n.translate('import_match').toUpperCase()),
+      ],
+    );
+    return Stack(
+      children: [
+        list,
+        Positioned(
+          left: 16,
+          right: 16,
+          bottom: 16,
+          child: ElevatedButton(
+            onPressed: _text.text.trim().isEmpty ? null : _match,
+            child: Text(l10n.translate('import_match').toUpperCase()),
+          ),
         ),
       ],
     );
@@ -844,7 +860,7 @@ class _MobileSourceCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             children: [
-              Icon(source.icon, size: 18, color: context.colors.accent),
+              ImportSourceIcon(source: source, size: 22),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
