@@ -586,6 +586,16 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           ),
           const Divider(height: 24),
           DesktopSettingRow(
+            icon: Icons.keyboard_alt_outlined,
+            title: l10n.translate('auto_focus_browse_search'),
+            subtitle: l10n.translate('auto_focus_browse_search_subtitle'),
+            control: Switch(
+              value: settings.autoFocusBrowseSearch,
+              onChanged: settings.setAutoFocusBrowseSearch,
+            ),
+          ),
+          const Divider(height: 24),
+          DesktopSettingRow(
             icon: Icons.local_library_outlined,
             title: l10n.translate('auto_suggest_library'),
             subtitle: l10n.translate('auto_suggest_library_subtitle'),

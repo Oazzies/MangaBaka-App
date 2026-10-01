@@ -73,6 +73,8 @@
     "trigger_update_widget_subtitle": "Aperçu de la boîte de dialogue de mise à jour disponible avec un contenu d'exemple",
     "auto_suggest_browse": "Auto-suggestion d'exploration",
     "auto_suggest_browse_subtitle": "Afficher des suggestions lors de la saisie dans la recherche",
+    "auto_focus_browse_search": "Ouvrir la recherche dans Explorer",
+    "auto_focus_browse_search_subtitle": "Active automatiquement la barre de recherche à l'ouverture d'Explorer",
     "auto_suggest_library": "Auto-suggestion de la bibliothèque",
     "auto_suggest_library_subtitle": "Afficher des suggestions lors de la saisie dans la bibliothèque",
     "general_settings_subtitle": "Langue, page de démarrage, mise en page",

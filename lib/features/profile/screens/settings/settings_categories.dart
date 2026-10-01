@@ -129,6 +129,14 @@ class SettingsCategories {
               ),
               const SettingsDivider(),
               SettingsSwitchItem(
+                icon: Icons.keyboard_alt_outlined,
+                title: l10n.translate('auto_focus_browse_search'),
+                subtitle: l10n.translate('auto_focus_browse_search_subtitle'),
+                value: settings.autoFocusBrowseSearch,
+                onChanged: settings.setAutoFocusBrowseSearch,
+              ),
+              const SettingsDivider(),
+              SettingsSwitchItem(
                 icon: Icons.local_library_outlined,
                 title: l10n.translate('auto_suggest_library'),
                 subtitle: l10n.translate('auto_suggest_library_subtitle'),

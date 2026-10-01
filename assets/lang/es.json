@@ -75,6 +75,8 @@
     "trigger_update_widget_subtitle": "Vista previa del cuadro de diálogo de actualización disponible con contenido de ejemplo",
     "auto_suggest_browse": "Sugerencias automáticas en Explorar",
     "auto_suggest_browse_subtitle": "Muestra sugerencias al escribir en el buscador de Explorar",
+    "auto_focus_browse_search": "Abrir búsqueda al explorar",
+    "auto_focus_browse_search_subtitle": "Enfoca automáticamente la barra de búsqueda al abrir Explorar",
     "auto_suggest_library": "Sugerencias automáticas en Biblioteca",
     "auto_suggest_library_subtitle": "Muestra sugerencias al escribir en el buscador de la Biblioteca",
     "general_settings_subtitle": "Idioma, página de inicio, diseño",

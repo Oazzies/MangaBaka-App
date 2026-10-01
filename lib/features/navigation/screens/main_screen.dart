@@ -80,6 +80,7 @@ class MainScreenState extends State<MainScreen> {
       const ProfileScreen(),
     ];
     _logger.info('MainScreen initialized with tab index: $_selectedIndex');
+    if (_selectedIndex == NavTabs.browse) _autoFocusBrowseSearch();
   }
 
   bool _precached = false;
@@ -120,6 +121,16 @@ class MainScreenState extends State<MainScreen> {
     // Pop series detail (or any nested route) so switching tabs always
     // returns to the tab root within the nested navigator.
     _contentNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    if (index == NavTabs.browse) _autoFocusBrowseSearch();
+  }
+
+  /// Opens Browse's search field when the user has asked for it, once the
+  /// tab is actually showing.
+  void _autoFocusBrowseSearch() {
+    if (!SettingsManager().autoFocusBrowseSearch) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      BrowseScreen.browseScreenKey.currentState?.enterSearchMode();
+    });
   }
 
   @override

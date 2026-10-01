@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_banner.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/shell/active_page_stack.dart';
@@ -112,6 +113,11 @@ class DesktopShellState extends State<DesktopShell> {
     _logger.info('Desktop destination switched to: $index');
     setState(() => _index.value = index);
     if (index < navItems.length) widget.onIndexChanged?.call(index);
+    if (index == NavTabs.browse && SettingsManager().autoFocusBrowseSearch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        DesktopBrowseScreen.stateKey.currentState?.focusSearch();
+      });
+    }
   }
 
   void openSettings() => select(settingsIndex);

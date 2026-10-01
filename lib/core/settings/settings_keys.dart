@@ -25,6 +25,8 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}push_notifications';
   static const String autoSuggestBrowse =
       '${AppConstants.prefixStorageKey}auto_suggest_browse';
+  static const String autoFocusBrowseSearch =
+      '${AppConstants.prefixStorageKey}auto_focus_browse_search';
   static const String autoSuggestLibrary =
       '${AppConstants.prefixStorageKey}auto_suggest_library';
   static const String listStylePref =

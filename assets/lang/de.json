@@ -73,6 +73,8 @@
     "trigger_update_widget_subtitle": "Vorschau des Update-Dialogs mit Beispieldaten anzeigen",
     "auto_suggest_browse": "Auto-Vorschläge beim Durchsuchen",
     "auto_suggest_browse_subtitle": "Vorschläge während der Eingabe in der Suche anzeigen",
+    "auto_focus_browse_search": "Suche beim Durchsuchen öffnen",
+    "auto_focus_browse_search_subtitle": "Suchleiste automatisch fokussieren, wenn Durchsuchen geöffnet wird",
     "auto_suggest_library": "Auto-Vorschläge in der Bibliothek",
     "auto_suggest_library_subtitle": "Vorschläge während der Eingabe in der Bibliothek anzeigen",
     "general_settings_subtitle": "App-Sprache, Startseite, Layout",

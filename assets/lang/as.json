@@ -75,6 +75,8 @@
     "trigger_update_widget_subtitle": "নমুনা বিষয়বস্তুৰে আপডেট-উপলব্ধ ডায়লগৰ পূৰ্বদৰ্শন চাওক",
     "auto_suggest_browse": "ব্ৰাউজত স্বয়ংক্ৰিয় পৰামৰ্শ",
     "auto_suggest_browse_subtitle": "ব্ৰাউজ সন্ধানত টাইপ কৰি থাকোঁতে পৰামৰ্শ দেখুৱাওক",
+    "auto_focus_browse_search": "ব্ৰাউজ কৰোঁতে সন্ধান খোলক",
+    "auto_focus_browse_search_subtitle": "ব্ৰাউজ খুলিলে সন্ধান বাৰ স্বয়ংক্ৰিয়ভাৱে ফোকাছ কৰক",
     "auto_suggest_library": "লাইব্ৰেৰীত স্বয়ংক্ৰিয় পৰামৰ্শ",
     "auto_suggest_library_subtitle": "লাইব্ৰেৰী সন্ধানত টাইপ কৰি থাকোঁতে পৰামৰ্শ দেখুৱাওক",
     "general_settings_subtitle": "এপৰ ভাষা, আৰম্ভণি পৃষ্ঠা, লেআউট",

@@ -75,6 +75,8 @@
     "trigger_update_widget_subtitle": "Preview the update-available dialog with sample content",
     "auto_suggest_browse": "Auto-Suggest in Browse",
     "auto_suggest_browse_subtitle": "Show suggestions while typing in browse search",
+    "auto_focus_browse_search": "Open Search When Browsing",
+    "auto_focus_browse_search_subtitle": "Automatically focus the search bar when you open Browse",
     "auto_suggest_library": "Auto-Suggest in Library",
     "auto_suggest_library_subtitle": "Show suggestions while typing in library search",
     "general_settings_subtitle": "App language, start page, layout",

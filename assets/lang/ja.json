@@ -73,6 +73,8 @@
     "trigger_update_widget_subtitle": "サンプルコンテンツでアップデート確認ダイアログをプレビュー",
     "auto_suggest_browse": "閲覧時のオートサジェスト",
     "auto_suggest_browse_subtitle": "検索入力中に候補を表示する",
+    "auto_focus_browse_search": "閲覧時に検索を自動で開く",
+    "auto_focus_browse_search_subtitle": "閲覧を開いたときに検索バーを自動的に選択する",
     "auto_suggest_library": "ライブラリでのオートサジェスト",
     "auto_suggest_library_subtitle": "ライブラリ検索入力中に候補を表示する",
     "general_settings_subtitle": "アプリの言語、開始ページ、レイアウト",

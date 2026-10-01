@@ -100,6 +100,8 @@ class SettingsManager extends ChangeNotifier {
       BoolSetting(SettingsKeys.onboardingCompleted, false);
   final _pushNotifications = BoolSetting(SettingsKeys.pushNotifications, false);
   final _autoSuggestBrowse = BoolSetting(SettingsKeys.autoSuggestBrowse, true);
+  final _autoFocusBrowseSearch =
+      BoolSetting(SettingsKeys.autoFocusBrowseSearch, false);
   final _autoSuggestLibrary = BoolSetting(SettingsKeys.autoSuggestLibrary, false);
   final _showTooltips = BoolSetting(SettingsKeys.showTooltips, true);
   final _showQuickProgress = BoolSetting(SettingsKeys.showQuickProgress, true);
@@ -163,6 +165,7 @@ class SettingsManager extends ChangeNotifier {
     _hasCompletedOnboarding,
     _pushNotifications,
     _autoSuggestBrowse,
+    _autoFocusBrowseSearch,
     _autoSuggestLibrary,
     _showTooltips,
     _showQuickProgress,
@@ -367,6 +370,10 @@ class SettingsManager extends ChangeNotifier {
   bool get autoSuggestBrowse => _autoSuggestBrowse.value;
   Future<void> setAutoSuggestBrowse(bool value) =>
       _apply(_autoSuggestBrowse, value);
+
+  bool get autoFocusBrowseSearch => _autoFocusBrowseSearch.value;
+  Future<void> setAutoFocusBrowseSearch(bool value) =>
+      _apply(_autoFocusBrowseSearch, value);
 
   bool get autoSuggestLibrary => _autoSuggestLibrary.value;
   Future<void> setAutoSuggestLibrary(bool value) =>
