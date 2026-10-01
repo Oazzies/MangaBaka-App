@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -24,6 +25,9 @@ class HomeRail extends StatelessWidget {
   /// When false the section header is omitted — for callers (like the Trending
   /// section) that render their own header and controls above the row.
   final bool showHeader;
+
+  /// Unique per rail, so a series in two rails never shares a Hero tag.
+  String get heroScope => 'home_${title.isEmpty ? 'trending' : title}';
 
   /// Placeholder count shown while [loading] is true.
   static const int _skeletonCount = 5;
@@ -64,7 +68,11 @@ class HomeRail extends StatelessWidget {
               }
               return MbEntrance(
                 index: i,
-                child: _RailCard(series: series[i], width: coverWidth),
+                child: _RailCard(
+                  series: series[i],
+                  width: coverWidth,
+                  heroScope: heroScope,
+                ),
               );
             },
           ),
@@ -78,8 +86,13 @@ class HomeRail extends StatelessWidget {
 class _RailCard extends StatelessWidget {
   final Series series;
   final double width;
+  final String heroScope;
 
-  const _RailCard({required this.series, required this.width});
+  const _RailCard({
+    required this.series,
+    required this.width,
+    required this.heroScope,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,13 +102,19 @@ class _RailCard extends StatelessWidget {
         pressedScale: 0.95,
         onTap: () => Navigator.of(context).push(
           AppTransitions.slideUp(
-            SeriesDetailScreen(series: series, heroTagPrefix: 'home_rail'),
+            SeriesDetailScreen(series: series, heroTagPrefix: heroScope),
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            MbCover(url: series.coverUrl, width: width, memCacheWidth: 300),
+            MbCover(
+              url: series.coverUrl,
+              width: width,
+              memCacheWidth: 300,
+              heroTag: '${heroScope}_${series.id}',
+              blurred: WidgetUtils.isRatingBlurred(series.contentRating),
+            ),
             const SizedBox(height: 8),
             Text(
               series.title,
