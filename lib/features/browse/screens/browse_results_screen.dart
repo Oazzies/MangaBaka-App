@@ -302,7 +302,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
                   SafeArea(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: AppConstants.horizontalPadding,
+                        horizontal: 12,
                       ),
                       child: BrowseResultsBody(
                         error: _error,

@@ -527,9 +527,11 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   // ─── Import: paste ───────────────────────────────────────────────────────
 
   Widget _input(LocalizationService l10n) {
+    // Keep the floating button above Android's system navigation area.
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
     final list = ListView(
       // Bottom room so the floating Match button never covers the last row.
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 96 + safeBottom),
       children: [
         GridView.count(
           shrinkWrap: true,
@@ -612,10 +614,18 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
         Positioned(
           left: 16,
           right: 16,
-          bottom: 16,
-          child: ElevatedButton(
-            onPressed: _text.text.trim().isEmpty ? null : _match,
-            child: Text(l10n.translate('import_match').toUpperCase()),
+          bottom: 16 + safeBottom,
+          // The disabled button is see-through; an opaque well behind it keeps
+          // the content scrolling underneath from showing through.
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.colors.background,
+              borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+            ),
+            child: ElevatedButton(
+              onPressed: _text.text.trim().isEmpty ? null : _match,
+              child: Text(l10n.translate('import_match').toUpperCase()),
+            ),
           ),
         ),
       ],
