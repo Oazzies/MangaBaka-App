@@ -32,9 +32,15 @@ Map<String, dynamic>? dataObject(dynamic json) {
 }
 
 /// The `total` count of a paginated response, defaulting to 0.
+///
+/// v1 puts it at the top level (`total`); v2 reports it as `pagination.count`.
 int totalCount(dynamic json) {
   if (json is! Map) return 0;
-  return (json['total'] as num?)?.toInt() ?? 0;
+  final top = (json['total'] as num?)?.toInt();
+  if (top != null) return top;
+  final pagination = json['pagination'];
+  if (pagination is Map) return (pagination['count'] as num?)?.toInt() ?? 0;
+  return 0;
 }
 
 /// Maps the `data` array through [fromJson], skipping any element that fails
