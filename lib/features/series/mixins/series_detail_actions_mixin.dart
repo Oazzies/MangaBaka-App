@@ -69,17 +69,24 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
               ? l10n.translate('update_chapters')
               : l10n.translate('update_volumes'),
           maxValue: isChapter ? series.totalChapters : series.finalVolume,
-          onUpdate: (value) {
-            if (isChapter) {
-              libraryService.updateLibraryEntryProgress(
+          onUpdate: (value) async {
+            // Not fire-and-forget: a failed request (already rolled back
+            // locally) would otherwise surface only as an unhandled async
+            // error, with the user told nothing.
+            try {
+              await libraryService.updateLibraryEntryProgress(
                 series.id,
-                progressChapter: value,
+                progressChapter: isChapter ? value : null,
+                progressVolume: isChapter ? null : value,
               );
-            } else {
-              libraryService.updateLibraryEntryProgress(
-                series.id,
-                progressVolume: value,
-              );
+            } catch (e) {
+              if (mounted) {
+                AppSnackBar.show(
+                  this.context,
+                  LocalizationService().translate('failed_to_update'),
+                  isError: true,
+                );
+              }
             }
           },
         ),
