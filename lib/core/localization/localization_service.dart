@@ -72,6 +72,9 @@ class LocalizationService extends ChangeNotifier {
     if (_manifest.containsKey(langCode)) {
       _currentLanguage = langCode;
       await _loadLanguageStrings(langCode);
+      // Another language was picked while this one loaded; applying these
+      // strings now would leave the text and the selected code disagreeing.
+      if (_currentLanguage != langCode) return;
       notifyListeners();
       
       final prefs = await SharedPreferences.getInstance();
@@ -95,7 +98,10 @@ class LocalizationService extends ChangeNotifier {
   }
 
   String translate(String key) {
-    return _currentStrings[key] ?? _englishStrings[key] ?? key;
+    final current = _currentStrings[key];
+    if (current is String) return current;
+    final fallback = _englishStrings[key];
+    return fallback is String ? fallback : key;
   }
 
   String formatPossessive(String name) {

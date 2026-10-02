@@ -52,7 +52,13 @@ class AppBootstrap {
     await LoggingService.setup();
     _installErrorHandlers();
 
-    await dotenv.load();
+    // Optional: a missing .env must leave the app running (sign-in then
+    // reports MISSING_CONFIG) rather than abort before the first frame.
+    try {
+      await dotenv.load(isOptional: true);
+    } catch (e, st) {
+      LoggingService.logger.severe('Could not load .env', e, st);
+    }
     setupServiceLocator();
 
     // Auth first: the metadata fetch and the initial library sync both read
@@ -61,9 +67,15 @@ class AppBootstrap {
     await getIt<MetadataService>().init();
 
     // Independent of each other, so they overlap.
+    // Each guarded: a failure here (unreadable preferences, a bad language
+    // pack) falls back to defaults instead of leaving a blank window.
     await Future.wait([
-      SettingsManager().init(),
-      LocalizationService().init(),
+      SettingsManager().init().catchError((Object e, StackTrace st) {
+        LoggingService.logger.severe('Settings failed to load', e, st);
+      }),
+      LocalizationService().init().catchError((Object e, StackTrace st) {
+        LoggingService.logger.severe('Localization failed to load', e, st);
+      }),
     ]);
 
     ThemeController().init();

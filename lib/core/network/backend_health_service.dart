@@ -61,6 +61,9 @@ class BackendHealthService {
   /// deliberate 4xx like "not found"). Clears the failure streak and, if the
   /// backend was considered down, brings it back up.
   void reportSuccess() {
+    // A probe or request can finish after disposal; touching the disposed
+    // notifier would throw.
+    if (_disposed) return;
     _consecutiveFailures = 0;
     _probeAttempt = 0;
     _stopProbe();
@@ -87,6 +90,7 @@ class BackendHealthService {
     int? statusCode,
     Object? error,
   }) {
+    if (_disposed) return;
     if (statusCode == 429) {
       _logger.fine('Backend health: rate-limited (HTTP 429) on $context — '
           'not counted against backend health');
