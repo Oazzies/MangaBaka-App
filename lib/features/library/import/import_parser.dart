@@ -166,8 +166,7 @@ abstract final class ImportParser {
   static const _stateColumns = {'status', 'state', 'my_status', 'list'};
 
   static List<ImportEntry> _parseCsv(String text) {
-    final lines = text
-        .split(RegExp(r'\r?\n'))
+    final lines = _splitCsvRecords(text)
         .where((l) => l.trim().isNotEmpty)
         .toList();
     if (lines.isEmpty) return const [];
@@ -196,6 +195,31 @@ abstract final class ImportParser {
       );
     }
     return entries;
+  }
+
+  /// Splits [text] into records at line breaks that are not inside a quoted
+  /// cell, so a note containing a newline (which the exporter quotes) stays
+  /// part of its own row instead of becoming bogus extra titles.
+  static List<String> _splitCsvRecords(String text) {
+    final records = <String>[];
+    final buffer = StringBuffer();
+    var quoted = false;
+    for (var i = 0; i < text.length; i++) {
+      final ch = text[i];
+      if (ch == '"') {
+        quoted = !quoted; // an escaped "" toggles twice and nets out
+        buffer.write(ch);
+      } else if (ch == '\n' && !quoted) {
+        records.add(buffer.toString());
+        buffer.clear();
+      } else if (ch == '\r' && !quoted) {
+        // Dropped: part of a CRLF break (or a stray bare CR).
+      } else {
+        buffer.write(ch);
+      }
+    }
+    records.add(buffer.toString());
+    return records;
   }
 
   /// Splits one CSV line, honouring double-quoted cells and `""` escapes.

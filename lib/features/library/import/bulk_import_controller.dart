@@ -259,6 +259,9 @@ class BulkImportController extends ChangeNotifier {
   /// newly created; throws whatever a batch call throws, leaving the rows intact
   /// so the user can retry.
   Future<int> addSelected() async {
+    // A double tap would send every batch twice: the second pass patches the
+    // entries the first just created, and the created count is wrong.
+    if (_adding) return 0;
     final byState = <String, List<String>>{};
     // Two titles can resolve to the same series. Sending it twice makes the
     // batch patch it (overwriting the first row's state with the second's),
