@@ -78,6 +78,9 @@ class SeriesAutocompleteService {
       // network could still improve on it.
       onResults(prefixHit.results);
       if (!prefixHit.couldHaveMore) {
+        // A request still in flight belongs to an older query; letting it
+        // land would overwrite these results with that query's.
+        _cancelActiveRequest();
         _logger.fine(
           'Autocomplete: skipping network (prefix cache covers "$trimmed")',
         );
@@ -137,6 +140,11 @@ class SeriesAutocompleteService {
     } catch (e, st) {
       if (_activeClient != client) return;
       _logger.warning('Unexpected autocomplete error: $e', e, st);
+    } finally {
+      // One client per request: left open, each keeps its socket and TLS
+      // session alive until the idle timeout.
+      client.close();
+      if (identical(_activeClient, client)) _activeClient = null;
     }
   }
 

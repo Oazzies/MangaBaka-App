@@ -91,14 +91,23 @@ class MixService {
     final dnaJson = (json is Map ? json['dna'] : null);
     final dna = (dnaJson is List ? dnaJson : const [])
         .whereType<Map>()
-        .map((d) => MixDnaTag.fromJson(d.cast<String, dynamic>()))
+        .map((d) {
+          try {
+            return MixDnaTag.fromJson(d.cast<String, dynamic>());
+          } catch (e) {
+            _logger.fine('MixService: skipping malformed DNA tag: $e');
+            return null;
+          }
+        })
+        .whereType<MixDnaTag>()
         .where((d) => d.name.isNotEmpty)
         .toList()
       // Heaviest traits first: the DNA strip is a summary, and the tail is
       // truncated on narrow screens.
       ..sort((a, b) => b.weight.compareTo(a.weight));
 
-    final seedCount = (json is Map ? json['seed_count'] as int? : null) ?? 0;
+    final rawSeedCount = json is Map ? json['seed_count'] : null;
+    final seedCount = rawSeedCount is num ? rawSeedCount.toInt() : 0;
     return MixResult(series: series, dna: dna, seedCount: seedCount);
   }
 

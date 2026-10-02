@@ -156,13 +156,20 @@ class WidgetUtils {
             String? language;
 
             if (l is String) {
-              if (Uri.tryParse(l)?.hasAbsolutePath == true) {
+              final parsed = Uri.tryParse(l);
+              // A relative path or a host-less string has no site to name (and
+              // indexing its empty "display name" would throw while building).
+              if (parsed != null &&
+                  parsed.hasAbsolutePath &&
+                  parsed.host.isNotEmpty) {
                 url = l;
-                final uri = Uri.parse(l);
+                final uri = parsed;
                 final domain = uri.host.replaceFirst('www.', '');
                 displayName = domain.split('.').first;
-                displayName =
-                    displayName[0].toUpperCase() + displayName.substring(1);
+                if (displayName.isNotEmpty) {
+                  displayName =
+                      displayName[0].toUpperCase() + displayName.substring(1);
+                }
 
                 final langMatch = RegExp(
                   r'\/([a-z]{2})\/',
@@ -182,7 +189,8 @@ class WidgetUtils {
             }
 
             if (url.isEmpty) return const SizedBox.shrink();
-            final uri = Uri.parse(url);
+            final uri = Uri.tryParse(url);
+            if (uri == null) return const SizedBox.shrink();
             final domain = uri.host.replaceFirst('www.', '');
             final faviconUrl =
                 'https://www.google.com/s2/favicons?domain=$domain&sz=64';
