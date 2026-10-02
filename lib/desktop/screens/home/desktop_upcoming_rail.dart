@@ -17,7 +17,11 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class DesktopUpcomingRail extends StatefulWidget {
-  const DesktopUpcomingRail({super.key});
+  /// Space above the title; the docked rail leaves room for the window
+  /// controls floating over it, the overlay version sits below the header.
+  final double topPadding;
+
+  const DesktopUpcomingRail({super.key, this.topPadding = 56});
 
   @override
   State<DesktopUpcomingRail> createState() => _DesktopUpcomingRailState();
@@ -30,6 +34,9 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
   Map<String, String> _seriesCovers = const {};
   bool _loading = true;
   bool _onlyLibrary = false;
+  int _page = 1;
+  bool _hasMore = false;
+  bool _loadingMore = false;
   final Set<String> _collapsedDateGroups = {};
 
   @override
@@ -62,9 +69,31 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     if (!mounted) return;
     setState(() {
       _works = works;
+      _page = 1;
+      _hasMore = works.length >= 25;
       _librarySeriesIds = libraryIds;
       _seriesCovers = seriesCovers;
       _loading = false;
+    });
+  }
+
+  /// Reaches one page further into the future. The API only lists releases
+  /// from today onward, so there is no way to page back into the past.
+  Future<void> _loadMore() async {
+    if (_loadingMore) return;
+    setState(() => _loadingMore = true);
+    final next = await _home.fetchUpcomingWorks(page: _page + 1);
+    if (!mounted) return;
+    final known = {for (final w in _works) w.id};
+    setState(() {
+      _works = [
+        ..._works,
+        for (final w in next)
+          if (!known.contains(w.id)) w,
+      ];
+      _page++;
+      _hasMore = next.length >= 25;
+      _loadingMore = false;
     });
   }
 
@@ -113,6 +142,20 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
           );
         }
       }
+    }
+    if (_hasMore && !_onlyLibrary) {
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: _loadingMore
+              ? const Center(child: MbSpinner())
+              : DesktopPillButton(
+                  label: l10n.translate('upcoming_load_more'),
+                  icon: Icons.expand_more_rounded,
+                  onPressed: _loadMore,
+                ),
+        ),
+      );
     }
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -164,7 +207,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 56, 28, 16),
+          padding: EdgeInsets.fromLTRB(20, widget.topPadding, 28, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

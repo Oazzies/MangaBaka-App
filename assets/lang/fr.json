@@ -594,6 +594,7 @@
     "failed_to_update": "Échec de la mise à jour",
     "upcoming_releases": "Prochaines sorties",
     "upcoming_in_library": "Dans la bibliothèque",
+    "upcoming_load_more": "Afficher les sorties suivantes",
     "logout_confirmation": "Voulez-vous vraiment vous déconnecter ?",
     "logout_warning": "Les données locales de votre bibliothèque seront effacées et devront être réimportées lors de votre prochaine connexion.",
     "update_new_version_available": "Une nouvelle version ({version}) est disponible. Vous avez la {current}.",

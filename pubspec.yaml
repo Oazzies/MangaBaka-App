@@ -70,6 +70,7 @@ flutter:
   assets:
     - .env
     - assets/lang/
+    - assets/import/
     - assets/mangabaka512.png
     - assets/series_222_cover.jpg
   uses-material-design: true

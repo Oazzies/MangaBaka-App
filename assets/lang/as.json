@@ -596,6 +596,7 @@
     "failed_to_update": "আপডেট কৰিবলৈ ব্যৰ্থ হ'ল",
     "upcoming_releases": "শীঘ্ৰে আহিবলগীয়া মুক্তি",
     "upcoming_in_library": "লাইব্ৰেৰীত আছে",
+    "upcoming_load_more": "পিছৰ মুক্তি দেখুৱাওক",
     "logout_confirmation": "আপুনি সঁচাকৈয়ে লগ আউট কৰিব বিচাৰেনে?",
     "logout_warning": "আপোনাৰ স্থানীয় লাইব্ৰেৰী ডাটা মচি যোৱা হ'ব আৰু পুনৰ লগ ইন কৰাৰ সময়ত পুনৰ আমদানি কৰিব লাগিব।",
     "update_new_version_available": "এটা নতুন সংস্কৰণ ({version}) উপলব্ধ। আপোনাৰ ওচৰত {current} আছে।",

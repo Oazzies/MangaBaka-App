@@ -596,6 +596,7 @@
     "failed_to_update": "Failed to update",
     "upcoming_releases": "Upcoming Releases",
     "upcoming_in_library": "In Library",
+    "upcoming_load_more": "Show later releases",
     "logout_confirmation": "Are you sure you want to log out?",
     "logout_warning": "Your local library data will be cleared and must be reimported when you log back in.",
     "update_new_version_available": "A new version ({version}) is available. You have {current}.",

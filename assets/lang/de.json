@@ -594,6 +594,7 @@
     "failed_to_update": "Aktualisierung fehlgeschlagen",
     "upcoming_releases": "Kommende Veröffentlichungen",
     "upcoming_in_library": "In Bibliothek",
+    "upcoming_load_more": "Spätere Veröffentlichungen anzeigen",
     "logout_confirmation": "Möchtest du dich wirklich abmelden?",
     "logout_warning": "Deine lokalen Bibliotheksdaten werden gelöscht und müssen bei der erneuten Anmeldung neu importiert werden.",
     "update_new_version_available": "Eine neue Version ({version}) ist verfügbar. Du hast {current}.",

@@ -594,6 +594,7 @@
     "failed_to_update": "更新に失敗しました",
     "upcoming_releases": "近日発売",
     "upcoming_in_library": "ライブラリ内",
+    "upcoming_load_more": "さらに先の発売予定を表示",
     "logout_confirmation": "ログアウトしてもよろしいですか？",
     "logout_warning": "ローカルのライブラリデータは消去され、再度ログインした際に再インポートする必要があります。",
     "update_new_version_available": "新しいバージョン（{version}）が利用可能です。現在のバージョン: {current}。",

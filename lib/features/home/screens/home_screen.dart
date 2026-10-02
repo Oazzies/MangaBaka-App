@@ -8,7 +8,9 @@ import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
+import 'package:mangabaka_app/features/home/services/upcoming_loader.dart';
 import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
+import 'package:mangabaka_app/features/home/widgets/home_upcoming_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_trending_section.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -38,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Series> _hiddenGems = const [];
   List<Series> _newReleases = const [];
   List<TopGenreRail> _genreRails = const [];
+  UpcomingData _upcoming = UpcomingData.empty;
 
   /// API `type` filter for the Trending rail; null means every type.
   String? _trendingType;
@@ -93,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _homeService.fetchHiddenGems(),
       _homeService.fetchNewReleases(),
       _homeService.fetchTopGenreRails(),
+      UpcomingData.load(_homeService),
     ]);
 
     if (!mounted) return;
@@ -103,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _hiddenGems = results[3] as List<Series>;
       _newReleases = results[4] as List<Series>;
       _genreRails = results[5] as List<TopGenreRail>;
+      _upcoming = results[6] as UpcomingData;
       _showForYou = wantsForYou;
       _loadingRails = false;
       _loadingTrending = false;
@@ -179,20 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ListView(
                 padding: const EdgeInsets.only(top: 8, bottom: 24),
                 children: [
-                  if (_showForYou || _loadingRails)
-                    HomeRail(
-                      title: l10n.translate('for_you'),
-                      series: _forYou,
-                      loading: _loadingRails && _showForYou,
-                    ),
-                  for (final rail in _genreRails)
-                    HomeRail(
-                      title: l10n
-                          .translate('top_in_genre')
-                          .replaceAll('{genre}', rail.genre.name),
-                      series: rail.series,
-                      onViewAll: () => _openGenreAll(rail.genre),
-                    ),
                   HomeTrendingSection(
                     series: _trending,
                     loading: _loadingTrending,
@@ -210,6 +201,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     onViewAll: _openTrendingAll,
                   ),
+                  HomeUpcomingRail(data: _upcoming),
+                  if (_showForYou || _loadingRails)
+                    HomeRail(
+                      title: l10n.translate('for_you'),
+                      series: _forYou,
+                      loading: _loadingRails && _showForYou,
+                    ),
+                  for (final rail in _genreRails)
+                    HomeRail(
+                      title: l10n
+                          .translate('top_in_genre')
+                          .replaceAll('{genre}', rail.genre.name),
+                      series: rail.series,
+                      onViewAll: () => _openGenreAll(rail.genre),
+                    ),
                   HomeRail(
                     title: l10n.translate('rising'),
                     series: _rising,

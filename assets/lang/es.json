@@ -596,6 +596,7 @@
     "failed_to_update": "Error al actualizar",
     "upcoming_releases": "Próximos lanzamientos",
     "upcoming_in_library": "En la biblioteca",
+    "upcoming_load_more": "Mostrar lanzamientos posteriores",
     "logout_confirmation": "¿Seguro que quieres cerrar sesión?",
     "logout_warning": "Tus datos locales de la biblioteca se borrarán y deberás volver a importarlos cuando inicies sesión de nuevo.",
     "update_new_version_available": "Hay una nueva versión ({version}) disponible. Tienes la {current}.",
