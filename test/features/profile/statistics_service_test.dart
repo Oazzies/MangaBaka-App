@@ -114,5 +114,51 @@ void main() {
       expect(await service.getChaptersRead(), 30);
       expect(await service.getChaptersRead(contentPreferences: ['safe']), 10);
     });
+
+    test('getTopPublishers counts library series per publisher', () async {
+      Future<void> add(String id, String publishers, String rating) async {
+        await db.into(db.seriesTable).insert(SeriesTableCompanion.insert(
+          id: id,
+          title: 'S$id',
+          coverUrl: '',
+          description: '',
+          status: const drift.Value(''),
+          isLicensed: const drift.Value(''),
+          hasAnime: const drift.Value(''),
+          contentRating: drift.Value(rating),
+          type: const drift.Value(''),
+          publishers: drift.Value(publishers),
+          lastUpdated: drift.Value(DateTime.now().toIso8601String()),
+        ));
+        await db.into(db.libraryEntriesTable).insert(
+          LibraryEntriesTableCompanion.insert(
+            id: 'e$id',
+            state: 'reading',
+            seriesId: id,
+          ),
+        );
+      }
+
+      await add('1', '["Shueisha","Viz Media"]', 'safe');
+      await add('2', '["Shueisha"]', 'safe');
+      // The same publisher twice on one series counts once.
+      await add('3', '["Viz Media","Viz Media"]', 'safe');
+      await add('4', '["Kodansha"]', 'erotica');
+      await add('5', 'not json', 'safe');
+      await add('6', '[]', 'safe');
+
+      final all = await service.getTopPublishers();
+      expect(all.map((p) => (p.name, p.count)).toList(), [
+        ('Shueisha', 2),
+        ('Viz Media', 2),
+        ('Kodansha', 1),
+      ]);
+
+      final filtered = await service.getTopPublishers(
+        contentPreferences: ['safe'],
+        limit: 1,
+      );
+      expect(filtered.map((p) => p.name).toList(), ['Shueisha']);
+    });
   });
 }

@@ -29,6 +29,7 @@ class MBSearchBar extends StatefulWidget {
   final ValueChanged<AutocompleteSeriesResult>? onResultSelected;
   final VoidCallback? onBackTap;
   final bool showFilterButton;
+  final VoidCallback? onFilterTapOverride;
 
   /// False while the field searches something autocomplete cannot suggest —
   /// staff and publishers. Suggestions here are series titles, so offering them
@@ -47,6 +48,7 @@ class MBSearchBar extends StatefulWidget {
     this.onResultSelected,
     this.onBackTap,
     this.showFilterButton = true,
+    this.onFilterTapOverride,
     this.suggestionsAllowed = true,
   });
 
@@ -112,6 +114,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
       initialFilters: widget.initialFilters,
       onFilterApplied: widget.onFilterApplied,
       showFilterButton: widget.showFilterButton,
+      onFilterTapOverride: widget.onFilterTapOverride,
       requestSuggestions: _requestSuggestions,
       suggestionsEnabled: () =>
           widget.suggestionsAllowed && SettingsManager().autoSuggestBrowse,

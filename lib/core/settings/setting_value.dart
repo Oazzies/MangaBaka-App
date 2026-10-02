@@ -114,7 +114,10 @@ class StringListSetting extends SettingValue<List<String>> {
       }
       if (same) return false;
     }
-    _value = next;
+    // A copy: holding the caller's list would let a later mutation of it
+    // change the setting without a notification or a write — and make the
+    // next identical `set` look like "no change".
+    _value = List<String>.of(next);
     return true;
   }
 

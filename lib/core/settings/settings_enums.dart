@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
+/// How a publisher page draws its catalog stats: a chart suited to each kind
+/// of data, or plain labelled rows.
+enum PublisherStatsStyle { charts, list }
+
 enum AppListStyle {
   comfortable,
   compact,

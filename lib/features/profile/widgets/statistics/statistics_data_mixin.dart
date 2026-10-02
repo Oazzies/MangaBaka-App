@@ -17,6 +17,7 @@ mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
   double finishRate = 0.0;
   LibraryEntryWithSeries? highestRated;
   LibraryEntryWithSeries? mostReread;
+  List<({String name, int count})> topPublishers = const [];
 
   void initStatistics() {
     statisticsService = StatisticsService(getIt<AppDatabase>());
@@ -35,6 +36,7 @@ mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
       statisticsService.getFinishRate(contentPreferences: contentPrefs),
       statisticsService.getHighestRatedSeries(contentPreferences: contentPrefs),
       statisticsService.getMostRereadSeries(contentPreferences: contentPrefs),
+      statisticsService.getTopPublishers(contentPreferences: contentPrefs),
     ]);
 
     if (!mounted) return;
@@ -49,6 +51,7 @@ mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
       finishRate = results[6] as double;
       highestRated = results[7] as LibraryEntryWithSeries?;
       mostReread = results[8] as LibraryEntryWithSeries?;
+      topPublishers = results[9] as List<({String name, int count})>;
       loading = false;
     });
   }

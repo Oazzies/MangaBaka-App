@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -140,11 +141,19 @@ class ProfileAuthService extends ChangeNotifier {
       _logger.info('OAuth2 authorization successful. Persisting tokens...');
       await _persistTokens(response);
       _hasSessionCache = true;
-      await fetchProfile(forceRefresh: true);
+      try {
+        // Not fetchProfile(): its notification would open the library (and
+        // start a sync) before a previous account's entries are cleared.
+        await _loadProfile();
+        await _reconcileLibraryOwner();
+      } finally {
+        // The tokens are persisted, so the session exists whether or not the
+        // profile could be read; listeners must hear about it either way.
+        notifyListeners();
+      }
       _logger.info(
         'Login complete for: ${_cachedProfile?.preferredUsername ?? _cachedProfile?.id}',
       );
-      notifyListeners();
     } catch (e, st) {
       if (e is AuthCancelledException) {
         _logger.info('Login cancelled by user');
@@ -170,6 +179,32 @@ class ProfileAuthService extends ChangeNotifier {
       );
     } finally {
       awaitingBrowser.value = false;
+    }
+  }
+
+  /// Pref key remembering whose entries the local library database holds.
+  static const _libraryOwnerKey =
+      '${AppConstants.prefixStorageKey}library_owner_id';
+
+  /// Clears the local library when a *different* account signs in.
+  ///
+  /// An expired session deliberately leaves the library in place (the same
+  /// user usually signs straight back in). But the sync watermark outlives it:
+  /// a second account would only receive an incremental catch-up, and its
+  /// library would be shown merged with the first account's entries.
+  Future<void> _reconcileLibraryOwner() async {
+    final id = _cachedProfile?.id ?? '';
+    if (id.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final previous = prefs.getString(_libraryOwnerKey);
+      if (previous != null && previous != id) {
+        _logger.info('Different account signed in; clearing local library');
+        await getIt<LibraryService>().clearLibrary();
+      }
+      await prefs.setString(_libraryOwnerKey, id);
+    } catch (e) {
+      _logger.warning('Could not reconcile library owner: $e');
     }
   }
 
@@ -388,17 +423,9 @@ class ProfileAuthService extends ChangeNotifier {
         return _cachedProfile!;
       }
 
-      await _refreshIfNeeded();
-      final accessToken = await _storage.read(AuthStorage.kAccessToken);
-
-      if (accessToken == null || accessToken.isEmpty) {
-        throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
-      }
-
-      _cachedProfile = await _network.fetchProfile(accessToken);
-      await _storage.cacheProfile(_cachedProfile!);
+      final profile = await _loadProfile();
       notifyListeners();
-      return _cachedProfile!;
+      return profile;
     } catch (e, st) {
       _logger.severe('Failed to fetch profile', e, st);
       if (e is AppException) rethrow;
@@ -408,6 +435,21 @@ class ProfileAuthService extends ChangeNotifier {
         stackTrace: st,
       );
     }
+  }
+
+  /// Fetches and caches the profile without notifying listeners.
+  Future<MbProfile> _loadProfile() async {
+    await _refreshIfNeeded();
+    final accessToken = await _storage.read(AuthStorage.kAccessToken);
+
+    if (accessToken == null || accessToken.isEmpty) {
+      throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
+    }
+
+    final profile = await _network.fetchProfile(accessToken);
+    _cachedProfile = profile;
+    await _storage.cacheProfile(profile);
+    return profile;
   }
 
   Future<String> getValidAccessToken() async {
@@ -431,12 +473,24 @@ class ProfileAuthService extends ChangeNotifier {
 
   Future<void> logout() async {
     try {
+      // A refresh still in flight would write fresh tokens back after the
+      // delete below and silently resurrect the session.
+      final inFlight = _refreshInFlight;
+      if (inFlight != null) {
+        try {
+          await inFlight;
+        } catch (_) {
+          // Its failure is irrelevant: the session is being dropped anyway.
+        }
+      }
       await _storage.deleteAll();
       _cachedProfile = null;
       _hasSessionCache = false;
 
       try {
         await getIt<LibraryService>().clearLibrary();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_libraryOwnerKey);
       } catch (e) {
         _logger.warning('Failed to clear library on logout: $e');
       }

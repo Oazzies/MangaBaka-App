@@ -220,7 +220,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _pageView() => PageView(
     controller: _pageController,
-    scrollDirection: Axis.vertical,
+    scrollDirection: _isDesktop ? Axis.vertical : Axis.horizontal,
     physics: const NeverScrollableScrollPhysics(),
     onPageChanged: (index) => setState(() => _currentPage = index),
     children: [for (final step in _steps) step.page],

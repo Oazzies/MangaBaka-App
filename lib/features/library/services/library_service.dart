@@ -195,8 +195,12 @@ class LibraryService extends LibraryServiceBase with LibraryCrudMixin, LibrarySy
 
   Future<void> _saveEntries(List<api.LibraryEntry> entries) async {
     if (entries.isEmpty) return;
-    await _db.seriesDao.upsertSeries(entries.map((e) => e.series).toList());
-    await _db.libraryEntriesDao.upsertLibraryEntries(entries);
+    // One transaction: a failure on the entries leaves no half-written page
+    // (series rows without their library entries) behind.
+    await _db.transaction(() async {
+      await _db.seriesDao.upsertSeries(entries.map((e) => e.series).toList());
+      await _db.libraryEntriesDao.upsertLibraryEntries(entries);
+    });
   }
 
   DateTime? _parseAsUtc(String dateStr) {

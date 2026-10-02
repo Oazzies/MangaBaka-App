@@ -99,4 +99,71 @@ void main() {
       expect(json['parent'], isNull);
     });
   });
+
+  group('Publisher (v2 fields)', () {
+    test('reads ISO-date founded/closed as years', () {
+      final p = Publisher.fromJson({
+        'id': 35,
+        'name': 'Shueisha',
+        'founded': '1926-08-08',
+        'closed': '2001-01-01',
+      });
+      expect(p.founded, 1926);
+      expect(p.closed, 2001);
+    });
+
+    test('parses list-item fields without sub_type or aliases', () {
+      final p = Publisher.fromJson({
+        'id': 35,
+        'name': 'Shueisha',
+        'type': 'publisher',
+        'canonical_url': 'https://mangabaka.org/publisher/35/Shueisha',
+        'languages': ['ja'],
+        'country_of_origin': 'JP',
+        'logo': {'raw': 'r', 'x150': 'a', 'x250': 'b'},
+        'series_count': 12380,
+        'top_media_type': 'manga',
+      });
+      expect(p.subType, '');
+      expect(p.canonicalUrl, contains('/publisher/35/'));
+      expect(p.languages, ['ja']);
+      expect(p.countryOfOrigin, 'JP');
+      expect(p.seriesCount, 12380);
+      expect(p.topMediaType, 'manga');
+      expect(p.logo?.forSize(48), 'a');
+      expect(p.logo?.forSize(100), 'b');
+      expect(p.logo?.forSize(300), 'r');
+    });
+
+    test('a null or empty logo is no logo', () {
+      expect(Publisher.fromJson({'id': 1, 'name': 'X', 'logo': null}).logo, isNull);
+      expect(Publisher.fromJson({'id': 1, 'name': 'X', 'logo': {'raw': ''}}).logo, isNull);
+    });
+
+    test('imprints parse from the lightweight v2 shape', () {
+      final p = Publisher.fromJson({
+        'id': 35,
+        'name': 'Shueisha',
+        'imprints': [
+          {'id': 36, 'name': 'MANGA Plus', 'canonical_url': 'https://x'},
+        ],
+      });
+      expect(p.imprints.single.id, '36');
+      expect(p.imprints.single.canonicalUrl, 'https://x');
+    });
+
+    test('toJson carries the v2 fields', () {
+      final p = Publisher.fromJson({
+        'id': 1,
+        'name': 'X',
+        'country_of_origin': 'JP',
+        'series_count': 3,
+        'logo': {'x150': 'a'},
+      });
+      final json = p.toJson();
+      expect(json['country_of_origin'], 'JP');
+      expect(json['series_count'], 3);
+      expect((json['logo'] as Map)['x150'], 'a');
+    });
+  });
 }

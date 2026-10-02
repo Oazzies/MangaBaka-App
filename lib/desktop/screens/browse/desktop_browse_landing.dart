@@ -3,6 +3,8 @@ import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/widgets/design/lucide_icon.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_icons.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -144,11 +146,8 @@ class _DiscoveryQueueCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.auto_awesome_rounded,
-                  size: 20,
-                  color: context.colors.accent,
-                ),
+                // The same compass as the Browse tab.
+                Icon(MbIcons.compass, size: 22, color: context.colors.accent),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -204,12 +203,26 @@ class _MixCard extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              l10n.translate('mix').toUpperCase(),
-              style: AppTypography.display(
-                color: context.colors.text,
-                fontSize: 24,
-              ),
+            Row(
+              children: [
+                MbLucideIcon(
+                  LucideGlyph.flaskConical,
+                  size: 22,
+                  color: context.colors.accent,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.translate('mix').toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.display(
+                      color: context.colors.text,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
@@ -266,9 +279,21 @@ class _TypeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          _Link(label: l10n.translate('most_popular'), onTap: onPopular),
-          _Link(label: l10n.translate('top_rated'), onTap: onTopRated),
-          _Link(label: l10n.translate('random'), onTap: onRandom),
+          _Link(
+            label: l10n.translate('most_popular'),
+            icon: LucideGlyph.star,
+            onTap: onPopular,
+          ),
+          _Link(
+            label: l10n.translate('top_rated'),
+            icon: LucideGlyph.heart,
+            onTap: onTopRated,
+          ),
+          _Link(
+            label: l10n.translate('random'),
+            icon: LucideGlyph.dices,
+            onTap: onRandom,
+          ),
         ],
       ),
     );
@@ -277,9 +302,10 @@ class _TypeCard extends StatelessWidget {
 
 class _Link extends StatelessWidget {
   final String label;
+  final LucideGlyph icon;
   final VoidCallback onTap;
 
-  const _Link({required this.label, required this.onTap});
+  const _Link({required this.label, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -289,6 +315,8 @@ class _Link extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
       child: Row(
         children: [
+          MbLucideIcon(icon, size: 17, color: context.colors.accent),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               label,

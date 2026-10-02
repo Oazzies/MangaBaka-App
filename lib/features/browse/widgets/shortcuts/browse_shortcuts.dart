@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/design/lucide_icon.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_icons.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/shortcut_section.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 
@@ -59,10 +61,13 @@ class BrowseShortcuts extends StatelessWidget {
                   ShortcutButtonEntry(
                     label: l10n.translate('mix'),
                     onPressed: onMix,
+                    icon: const MbLucideIcon(LucideGlyph.flaskConical),
                   ),
                   ShortcutButtonEntry(
                     label: l10n.translate('discovery_queue'),
                     onPressed: onDiscoveryQueue,
+                    // The same compass as the Browse tab.
+                    icon: const Icon(MbIcons.compass),
                   ),
                 ],
               ),

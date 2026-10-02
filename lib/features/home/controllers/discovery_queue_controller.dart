@@ -153,7 +153,7 @@ class DiscoveryQueueController extends ChangeNotifier {
     if (_currentIndex >= _queue.length) {
       _isCompleted = true;
     }
-    notifyListeners();
+    _notify();
   }
 
   /// Dismisses the current series from future recommendations, then moves on.

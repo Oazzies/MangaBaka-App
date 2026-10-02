@@ -96,9 +96,9 @@ class ReleaseAsset {
 
   factory ReleaseAsset.fromJson(Map<String, dynamic> json) {
     return ReleaseAsset(
-      name: (json['name'] ?? '') as String,
-      downloadUrl: (json['browser_download_url'] ?? '') as String,
-      size: (json['size'] ?? 0) as int,
+      name: json['name']?.toString() ?? '',
+      downloadUrl: json['browser_download_url']?.toString() ?? '',
+      size: (json['size'] as num?)?.toInt() ?? 0,
       sha256: _parseSha256(json['digest']),
     );
   }
@@ -135,12 +135,12 @@ class AppRelease {
   factory AppRelease.fromJson(Map<String, dynamic> json) {
     final rawAssets = (json['assets'] as List?) ?? const [];
     return AppRelease(
-      tagName: (json['tag_name'] ?? '') as String,
-      name: (json['name'] ?? '') as String,
-      body: (json['body'] ?? '') as String,
-      htmlUrl: (json['html_url'] ?? '') as String,
-      draft: (json['draft'] ?? false) as bool,
-      prerelease: (json['prerelease'] ?? false) as bool,
+      tagName: json['tag_name']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      body: json['body']?.toString() ?? '',
+      htmlUrl: json['html_url']?.toString() ?? '',
+      draft: json['draft'] == true,
+      prerelease: json['prerelease'] == true,
       assets: rawAssets
           .whereType<Map<String, dynamic>>()
           .map(ReleaseAsset.fromJson)

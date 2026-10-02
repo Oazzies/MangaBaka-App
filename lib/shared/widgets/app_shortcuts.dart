@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:mangabaka_app/shared/widgets/middle_click_autoscroll.dart';
+import 'package:mangabaka_app/shared/widgets/mouse_navigation_listener.dart';
 import 'package:mangabaka_app/shared/widgets/trackpad_navigation_listener.dart';
 import 'package:mangabaka_app/shared/widgets/window_repaint_guard.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
@@ -117,8 +119,12 @@ class AppShortcuts extends StatelessWidget {
           // or we can try to find a way to dispatch them.
         },
         child: WindowRepaintGuard(
-          child: TrackpadNavigationListener(
-            child: child,
+          child: MouseNavigationListener(
+            child: MiddleClickAutoScroll(
+              child: TrackpadNavigationListener(
+                child: child,
+              ),
+            ),
           ),
         ),
       ),

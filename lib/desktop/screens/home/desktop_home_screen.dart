@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_trending_board.dart';
@@ -12,6 +13,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
+import 'package:mangabaka_app/features/home/widgets/home_publishers_rail.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
@@ -49,6 +51,13 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
   bool _loadingRails = true;
   bool _loadingTrending = true;
   bool _showForYou = false;
+
+  /// Whether the upcoming sidebar is open over the feed. Only used when the
+  /// window is too narrow to dock it beside the feed.
+  bool _upcomingOpen = false;
+
+  /// Built the first time it opens, so a closed sidebar costs no request.
+  bool _upcomingBuilt = false;
 
   @override
   void initState() {
@@ -168,6 +177,16 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                   // this header, so it doesn't need to dodge them.
                   reserveWindowControls: !showRail,
                   actions: [
+                    if (!showRail)
+                      DesktopIconButton(
+                        icon: Icons.event_note_rounded,
+                        filled: _upcomingOpen,
+                        tooltip: l10n.translate('upcoming_releases'),
+                        onPressed: () => setState(() {
+                          _upcomingOpen = !_upcomingOpen;
+                          _upcomingBuilt = true;
+                        }),
+                      ),
                     DesktopIconButton(
                       icon: Icons.refresh_rounded,
                       filled: true,
@@ -213,6 +232,9 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                           rail.series,
                           onViewAll: () => _openGenreAll(rail.genre),
                         ),
+                      _padded(
+                        const HomePublishersRail(horizontalPadding: 0),
+                      ),
                       _rail(l10n.translate('rising'), _rising),
                       _rail(l10n.translate('hidden_gems'), _hiddenGems),
                       _rail(l10n.translate('new_releases'), _newReleases),
@@ -221,6 +243,8 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                 ),
               ],
             );
+
+            if (!showRail) return _withUpcomingOverlay(feed);
 
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -243,6 +267,45 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
       },
     );
   }
+
+  /// The feed with the upcoming sidebar sliding in over its right edge — the
+  /// narrow-window stand-in for the docked rail.
+  Widget _withUpcomingOverlay(Widget feed) {
+    return Stack(
+      children: [
+        Positioned.fill(child: feed),
+        Positioned(
+          top: _overlayTop,
+          bottom: 0,
+          right: 0,
+          width: _railWidth,
+          child: IgnorePointer(
+            ignoring: !_upcomingOpen,
+            child: AnimatedSlide(
+              offset: Offset(_upcomingOpen ? 0 : 1, 0),
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.colors.background,
+                  border: Border(left: BorderSide(color: context.colors.border)),
+                  boxShadow: [
+                    BoxShadow(color: FixedColors.dim.withValues(alpha: 0.3), blurRadius: 24),
+                  ],
+                ),
+                child: _upcomingBuilt
+                    ? const DesktopUpcomingRail(topPadding: 16)
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Below the page header, so its buttons stay reachable while open.
+  static const double _overlayTop = 84;
 
   Widget _padded(Widget child) => Padding(
     padding: const EdgeInsets.fromLTRB(

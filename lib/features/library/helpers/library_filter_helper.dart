@@ -113,9 +113,9 @@ class LibraryFilterHelper {
         filtered.sort((a, b) {
           switch (sortBy) {
             case 'name_asc':
-              return a.series.title.compareTo(b.series.title);
+              return _byTitle(a, b);
             case 'name_desc':
-              return b.series.title.compareTo(a.series.title);
+              return _byTitle(b, a);
             case 'popularity_desc':
             case 'rating_desc':
             case 'score_desc':
@@ -159,6 +159,15 @@ class LibraryFilterHelper {
 
     _cachedFiltered = filtered;
     return filtered;
+  }
+
+  /// Case-insensitive: a plain `compareTo` puts every capitalised title
+  /// before any lower-case one ("Zebra" ahead of "apple").
+  static int _byTitle(LibraryEntry a, LibraryEntry b) {
+    final byLower = a.series.title.toLowerCase().compareTo(
+      b.series.title.toLowerCase(),
+    );
+    return byLower != 0 ? byLower : a.series.title.compareTo(b.series.title);
   }
 
   List<LibraryEntry> getByTab(String tabKey) {

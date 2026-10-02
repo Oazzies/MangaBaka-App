@@ -3,6 +3,46 @@ import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 
 
+/// A publisher as embedded in a series: enough to link through to the
+/// publisher page by id and to tell regional editions apart.
+class SeriesPublisher {
+  final String id;
+  final String name;
+  final String? canonicalUrl;
+
+  /// Language of this publisher's edition (`en`, `ko`, ...).
+  final String? language;
+
+  /// Role on this series, e.g. `Original` or `English`.
+  final String? role;
+
+  const SeriesPublisher({
+    required this.id,
+    required this.name,
+    this.canonicalUrl,
+    this.language,
+    this.role,
+  });
+
+  static SeriesPublisher? tryParse(Object? json) {
+    if (json is! Map) return null;
+    final name = json['name']?.toString() ?? '';
+    if (name.isEmpty) return null;
+    String? read(String key) {
+      final v = json[key]?.toString();
+      return (v == null || v.isEmpty) ? null : v;
+    }
+
+    return SeriesPublisher(
+      id: json['id']?.toString() ?? '',
+      name: name,
+      canonicalUrl: read('canonical_url'),
+      language: read('language'),
+      role: read('type'),
+    );
+  }
+}
+
 class Series {
   final String id;
   final String state;
@@ -29,6 +69,10 @@ class Series {
   final String totalChapters;
   final List<dynamic> links;
   final List<String> publishers;
+
+  /// Publishers with ids, from the API. Not persisted in the local database,
+  /// so empty for series rebuilt from the library cache.
+  final List<SeriesPublisher> publisherRefs;
   final List<String> genres;
   final List<String> tags;
   final String lastUpdated;
@@ -61,6 +105,7 @@ class Series {
     required this.totalChapters,
     required this.links,
     required this.publishers,
+    this.publisherRefs = const [],
     required this.genres,
     required this.tags,
     required this.lastUpdated,
@@ -87,18 +132,12 @@ class Series {
 
     // Genres
     if (patched['genres_v2'] != null) {
-      patched['genres'] = (patched['genres_v2'] as List)
-          .map((g) => (g['name'] ?? '').toString())
-          .where((s) => s.isNotEmpty)
-          .toList();
+      patched['genres'] = _namesOf(patched['genres_v2']);
     }
 
     // Tags
     if (patched['tags_v2'] != null) {
-      patched['tags'] = (patched['tags_v2'] as List)
-          .map((t) => (t['name'] ?? '').toString())
-          .where((s) => s.isNotEmpty)
-          .toList();
+      patched['tags'] = _namesOf(patched['tags_v2']);
     }
 
     // Links
@@ -127,8 +166,8 @@ class Series {
     }
     if (patched['tags'] == null && patched['reason'] is Map) {
       final reason = patched['reason'] as Map;
-      final topTags = reason['top_tags'] as List?;
-      if (topTags != null) {
+      final topTags = reason['top_tags'];
+      if (topTags is List) {
         patched['tags'] = topTags
             .map((t) => t is Map ? (t['name'] ?? '').toString() : t.toString())
             .where((s) => s.isNotEmpty)
@@ -136,6 +175,18 @@ class Series {
       }
     }
     return Series.fromSimilarJson(patched);
+  }
+
+  /// The non-empty `name`s in a list of `{name: …}` objects (or bare strings),
+  /// skipping anything else instead of throwing on it.
+  static List<String> _namesOf(Object? raw) {
+    if (raw is! List) return <String>[];
+    return [
+      for (final item in raw)
+        if ((item is Map ? item['name']?.toString() : item?.toString())
+            case final String name when name.isNotEmpty)
+          name,
+    ];
   }
 
   //Thanks GPT4.1
@@ -155,9 +206,9 @@ class Series {
       }
     }
 
-    String title = json['title'] ?? '';
-    String nativeTitle = json['native_title'] ?? '';
-    String romanizedTitle = json['romanized_title'] ?? '';
+    String title = JsonUtils.stringOr(json['title']);
+    String nativeTitle = JsonUtils.stringOr(json['native_title']);
+    String romanizedTitle = JsonUtils.stringOr(json['romanized_title']);
     List<String> secondaryTitlesList = [];
 
     final secTitlesRaw = json['secondary_titles'];
@@ -175,7 +226,7 @@ class Series {
       bool isRomanized(dynamic t) {
         if (t is! Map) return false;
         final l = langOf(t);
-        final traits = (t['traits'] as List?)?.cast<String>() ?? [];
+        final traits = JsonUtils.stringList(t['traits']);
         return l.endsWith('-latn') ||
             l.endsWith('-ro') ||
             l.contains('hepburn') ||
@@ -205,7 +256,7 @@ class Series {
       // 2. Determine native title: prefer ja, ko, zh/zh-* without romanized trait
       final nativeChosen = pick((t) {
         final l = langOf(t);
-        final traits = (t['traits'] as List?)?.cast<String>() ?? [];
+        final traits = JsonUtils.stringList(t['traits']);
         return (l == 'ja' || l == 'ko' || l == 'zh' || l.startsWith('zh-')) &&
             !traits.contains('romanized');
       });
@@ -236,7 +287,7 @@ class Series {
 
     return Series(
       id: json['id']?.toString() ?? '',
-      state: json['state'] ?? '',
+      state: JsonUtils.stringOr(json['state']),
       mergedWith: json['merged_with']?.toString(),
       title: title,
       nativeTitle: nativeTitle,
@@ -244,32 +295,33 @@ class Series {
       secondaryTitles: secondaryTitlesList,
       coverUrl: JsonUtils.getCover(json),
       rawCoverUrl: JsonUtils.getRawCover(json),
-      authors: (json['authors'] as List?)?.cast<String>() ?? [],
-      artists: (json['artists'] as List?)?.cast<String>() ?? [],
+      authors: JsonUtils.stringList(json['authors']),
+      artists: JsonUtils.stringList(json['artists']),
       description: MarkdownUtils.normalizeDescription(
         json['description']?.toString() ?? '',
       ),
       year: json['year']?.toString() ?? '',
       published: (json['published'] as Map?)?.cast<String, dynamic>(),
-      status: json['status'] ?? '',
+      status: JsonUtils.stringOr(json['status']),
       isLicensed: json['is_licensed']?.toString() ?? '',
       hasAnime: json['has_anime']?.toString() ?? '',
       anime: (json['anime'] as Map?)?.cast<String, dynamic>(),
-      contentRating: json['content_rating'] ?? '',
-      type: json['type'] ?? '',
+      contentRating: JsonUtils.stringOr(json['content_rating']),
+      type: JsonUtils.stringOr(json['type']),
       rating: rating,
       finalVolume: json['final_volume']?.toString() ?? '',
       totalChapters: json['total_chapters']?.toString() ?? '',
       links: (json['links'] as List?) ?? [],
-      publishers:
-          (json['publishers'] as List?)
-              ?.map((p) => p['name']?.toString() ?? '')
-              .where((e) => e.isNotEmpty)
-              .toList() ??
-          [],
-      genres: (json['genres'] as List?)?.cast<String>() ?? [],
-      tags: (json['tags'] as List?)?.cast<String>() ?? [],
-      lastUpdated: json['last_updated_at'] ?? '',
+      publishers: _namesOf(json['publishers']),
+      publisherRefs: [
+        for (final p in (json['publishers'] is List
+            ? json['publishers'] as List
+            : const []))
+          if (SeriesPublisher.tryParse(p) case final ref?) ref,
+      ],
+      genres: JsonUtils.stringList(json['genres']),
+      tags: JsonUtils.stringList(json['tags']),
+      lastUpdated: JsonUtils.stringOr(json['last_updated_at']),
       relationships: (json['relationships'] as Map?)?.cast<String, dynamic>(),
       source: source,
     );

@@ -1,5 +1,6 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -69,6 +70,11 @@ class SeriesGenresSection extends StatelessWidget {
                       }
                     },
                     onLongPress: () => detailState?.handleGenreLongPress(genre),
+                    onSecondaryTap: () =>
+                        detailState?.handleGenreLongPress(genre),
+                    tooltip: DesktopLayout.isActive(context)
+                        ? LocalizationService().translate('filter_right_click_hint')
+                        : null,
                   );
                 },
               ),

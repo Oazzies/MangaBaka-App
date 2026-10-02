@@ -17,11 +17,13 @@ class MbProfile {
 
   // For /v1/my/profile or /v1/me response
   factory MbProfile.fromMeResponse(Map<String, dynamic> json) {
-    final data = (json['data'] as Map<String, dynamic>?) ?? json;
+    final data = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return MbProfile(
       id: data['id']?.toString() ?? data['sub']?.toString() ?? '',
       role: data['role']?.toString() ?? '',
-      scopes: (data['scopes'] as List<dynamic>? ?? [])
+      scopes: (data['scopes'] is List ? data['scopes'] as List : const [])
           .map((e) => e.toString())
           .toList(),
       nickname: data['nickname']?.toString() ?? data['name']?.toString(),
@@ -35,7 +37,9 @@ class MbProfile {
 
   // For OIDC userinfo response
   factory MbProfile.fromUserInfo(Map<String, dynamic> json) {
-    final data = (json['data'] as Map<String, dynamic>?) ?? json;
+    final data = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return MbProfile(
       id: data['sub']?.toString() ?? data['id']?.toString() ?? '',
       role: data['role']?.toString() ?? 'user',
@@ -145,9 +149,7 @@ class MbProfile {
           map['large'] ??
           map['original'] ??
           map['href'] ??
-          (map['image'] is Map
-              ? (map['image']['x250']?['x1'] ?? map['image']['raw']?['url'])
-              : null);
+          (map['image'] is Map ? _imageField(map['image'] as Map) : null);
       if (u is String && u.trim().isNotEmpty) return u.trim();
       if (u is Map) {
         final nestedUrl = u['url'] ?? u['x1'];
@@ -160,6 +162,15 @@ class MbProfile {
       return _extractImageUrl(val.first);
     }
     return null;
+  }
+
+  /// `image.x250.x1` or `image.raw.url`, tolerating either level being a
+  /// string (or anything else) instead of an object.
+  static Object? _imageField(Map image) {
+    final x250 = image['x250'];
+    final raw = image['raw'];
+    return (x250 is Map ? x250['x1'] : null) ??
+        (raw is Map ? raw['url'] : null);
   }
 
   static String? _normalizeUrl(String? url) {

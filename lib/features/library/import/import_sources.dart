@@ -21,11 +21,19 @@ class ImportSourceException implements Exception {
 /// `.proto.gz`) is a gzipped protobuf. Both are unwrapped here, so the text box
 /// always shows what will be imported — for a Mihon backup, its titles.
 abstract final class ImportFileReader {
+  /// Largest file read, and largest size a gzip file may expand to. Far above
+  /// any real list; below what a hostile or accidental file could use to
+  /// exhaust memory (a small .gz can inflate a thousand-fold).
+  static const int maxBytes = 50 * 1024 * 1024;
+
   static String readText(Uint8List bytes) {
+    if (bytes.length > maxBytes) {
+      throw const ImportSourceException('import_file_failed');
+    }
     var data = bytes;
     if (data.length > 2 && data[0] == 0x1f && data[1] == 0x8b) {
       try {
-        data = Uint8List.fromList(gzip.decode(data));
+        data = _gunzipBounded(data);
       } catch (_) {
         throw const ImportSourceException('import_file_failed');
       }
@@ -44,6 +52,34 @@ abstract final class ImportFileReader {
     if (titles.isEmpty) throw const ImportSourceException('import_file_failed');
     return titles.join('\n');
   }
+}
+
+Uint8List _gunzipBounded(Uint8List data) {
+  final out = BytesBuilder(copy: false);
+  final sink = _LimitedSink(out, ImportFileReader.maxBytes);
+  final conversion = gzip.decoder.startChunkedConversion(sink);
+  conversion.add(data);
+  conversion.close();
+  return out.takeBytes();
+}
+
+/// Collects decoded chunks, failing as soon as the total passes [limit].
+class _LimitedSink implements Sink<List<int>> {
+  final BytesBuilder _out;
+  final int _limit;
+
+  _LimitedSink(this._out, this._limit);
+
+  @override
+  void add(List<int> chunk) {
+    _out.add(chunk);
+    if (_out.length > _limit) {
+      throw const FormatException('decompressed file is too large');
+    }
+  }
+
+  @override
+  void close() {}
 }
 
 /// Reads the manga titles out of a Mihon (or Tachiyomi) backup.
@@ -226,6 +262,7 @@ class KitsuImporter {
   /// parser trims to `ImportParser.maxTitles` anyway; this just bounds how
   /// many pages a single import fetches.
   static const int _maxEntries = 300;
+  static const int _maxPages = 10;
 
   static const Map<String, String> _headers = {
     'Accept': 'application/vnd.api+json',
@@ -254,7 +291,11 @@ class KitsuImporter {
       },
     );
 
-    while (next != null && entries.length < _maxEntries) {
+    // Bounded on pages as well as entries: pages whose rows all lack a title
+    // add nothing to [entries], so a feed that keeps linking to a "next" page
+    // would otherwise loop forever.
+    var pages = 0;
+    while (next != null && entries.length < _maxEntries && pages++ < _maxPages) {
       final Map<String, dynamic> page = await _getJson(next);
 
       final included = page['included'];
@@ -285,7 +326,13 @@ class KitsuImporter {
 
       final links = page['links'];
       final nextUrl = links is Map ? links['next']?.toString() : null;
-      next = nextUrl != null ? Uri.parse(nextUrl) : null;
+      final parsed = nextUrl != null ? Uri.tryParse(nextUrl) : null;
+      // The link comes from the response: only follow it back to Kitsu.
+      next = parsed != null &&
+              parsed.scheme == 'https' &&
+              parsed.host == _entriesEndpoint.host
+          ? parsed
+          : null;
     }
 
     return jsonEncode(entries);

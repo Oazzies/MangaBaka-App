@@ -5,13 +5,23 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class SeriesListSkeleton extends StatelessWidget {
   final bool isGrid;
 
-  const SeriesListSkeleton({super.key, required this.isGrid});
+  /// Side inset; 0 when the parent already insets its content.
+  final double horizontalPadding;
+
+  const SeriesListSkeleton({
+    super.key,
+    required this.isGrid,
+    this.horizontalPadding = 12,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (isGrid) {
       return GridView.builder(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: 12,
+        ),
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 160,

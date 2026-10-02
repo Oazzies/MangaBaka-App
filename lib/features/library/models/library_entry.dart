@@ -27,12 +27,24 @@ class LibraryEntry {
 
   factory LibraryEntry.fromJson(Map<String, dynamic> json) {
     final rawSeries = json['Series'] ?? json['series'];
-    if (rawSeries is! Map<String, dynamic>) {
+    if (rawSeries is! Map) {
       throw FormatException('Library entry missing Series payload');
     }
 
+    // The id is the local primary key: entries without one would all collapse
+    // onto the same row. Throwing lets the sync count the entry as skipped
+    // (so it never prunes against an incomplete list) instead of saving it.
+    final id = json['id']?.toString() ?? '';
+    if (id.isEmpty) {
+      throw FormatException('Library entry has no id');
+    }
+    final series = Series.fromJson(rawSeries.cast<String, dynamic>());
+    if (series.id.isEmpty) {
+      throw FormatException('Library entry series has no id');
+    }
+
     return LibraryEntry(
-      id: json['id']?.toString() ?? '',
+      id: id,
       state: json['state']?.toString() ?? '',
       note: json['note']?.toString(),
       progressChapter: _asInt(json['progress_chapter']),
@@ -41,7 +53,7 @@ class LibraryEntry {
       rating: _asInt(json['rating']),
       updatedAt: json['updated_at']?.toString(),
       createdAt: json['created_at']?.toString(),
-      series: Series.fromJson(rawSeries),
+      series: series,
     );
   }
 
