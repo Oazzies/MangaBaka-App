@@ -107,10 +107,21 @@ class DesktopShellState extends State<DesktopShell> {
 
   /// Shows destination [index] (0–4 for the tabs, [settingsIndex] for
   /// settings), unwinding anything pushed over the current one.
-  void select(int index) {
+  void select(int index) => _switchTo(index, record: true);
+
+  /// Shows [index]. [record] is false when history navigation is doing the
+  /// switch, so Back and Forward do not rewrite the history they walk.
+  void _switchTo(int index, {required bool record}) {
+    _suppressHistory = true;
     _contentNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    _suppressHistory = false;
+    _routeForward.clear();
     if (_index.value == index) return;
     _logger.info('Desktop destination switched to: $index');
+    if (record) {
+      _tabBack.add(_index.value);
+      _tabForward.clear();
+    }
     setState(() => _index.value = index);
     if (index < navItems.length) widget.onIndexChanged?.call(index);
     if (index == NavTabs.browse && SettingsManager().autoFocusBrowseSearch) {
@@ -139,6 +150,72 @@ class DesktopShellState extends State<DesktopShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       DesktopBrowseScreen.stateKey.currentState?.focusSearch();
     });
+  }
+
+  // ─── Back / forward history ──────────────────────────────────────────────
+
+  /// Destinations visited before and after the current one.
+  final List<int> _tabBack = [];
+  final List<int> _tabForward = [];
+
+  /// Routes popped by Back, newest last, as ready-to-push copies.
+  final List<Route<dynamic>> _routeForward = [];
+
+  bool _suppressHistory = false;
+  bool _replaying = false;
+
+  late final NavigatorObserver _historyObserver = _HistoryObserver(this);
+
+  /// A fresh route showing what [route] showed, or null when it cannot be
+  /// rebuilt (dialogs and the like).
+  Route<dynamic>? _replica(Route<dynamic> route) {
+    if (route is PageRouteBuilder) {
+      return PageRouteBuilder<dynamic>(
+        settings: route.settings,
+        opaque: route.opaque,
+        pageBuilder: route.pageBuilder,
+        transitionsBuilder: route.transitionsBuilder,
+        transitionDuration: route.transitionDuration,
+        reverseTransitionDuration: route.reverseTransitionDuration,
+      );
+    }
+    if (route is MaterialPageRoute) {
+      return MaterialPageRoute<dynamic>(
+        settings: route.settings,
+        builder: route.builder,
+      );
+    }
+    return null;
+  }
+
+  /// Mouse Back button: closes the open page, or returns to the previous
+  /// destination when none is open. False when there is nowhere to go.
+  bool goBack() {
+    final navigator = _contentNavigatorKey.currentState;
+    if (navigator != null && navigator.canPop()) {
+      navigator.maybePop();
+      return true;
+    }
+    if (_tabBack.isEmpty) return false;
+    _tabForward.add(_index.value);
+    _switchTo(_tabBack.removeLast(), record: false);
+    return true;
+  }
+
+  /// Mouse Forward button: reopens the page Back just closed, or moves on to
+  /// the destination Back just left.
+  bool goForward() {
+    final navigator = _contentNavigatorKey.currentState;
+    if (navigator != null && _routeForward.isNotEmpty) {
+      _replaying = true;
+      navigator.push(_routeForward.removeLast());
+      _replaying = false;
+      return true;
+    }
+    if (_tabForward.isEmpty) return false;
+    _tabBack.add(_index.value);
+    _switchTo(_tabForward.removeLast(), record: false);
+    return true;
   }
 
   /// Pops the content area's top route. Returns false when it is already at
@@ -244,6 +321,7 @@ class DesktopShellState extends State<DesktopShell> {
       children: [
         Navigator(
           key: _contentNavigatorKey,
+          observers: [_historyObserver],
           onGenerateInitialRoutes: (_, __) => [
             PageRouteBuilder<void>(
               opaque: true,
@@ -259,5 +337,28 @@ class DesktopShellState extends State<DesktopShell> {
         const SyncProgressOverlay(),
       ],
     );
+  }
+}
+
+/// Feeds the shell's Back/Forward history: remembers what was popped so
+/// Forward can reopen it, and forgets that as soon as something new opens.
+class _HistoryObserver extends NavigatorObserver {
+  final DesktopShellState _shell;
+
+  _HistoryObserver(this._shell);
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (_shell._suppressHistory || previousRoute == null) return;
+    final copy = _shell._replica(route);
+    if (copy != null) _shell._routeForward.add(copy);
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (_shell._replaying || previousRoute == null || route is! PageRoute) {
+      return;
+    }
+    _shell._routeForward.clear();
   }
 }
