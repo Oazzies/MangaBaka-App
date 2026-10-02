@@ -143,7 +143,7 @@ class LibrarySession extends ChangeNotifier {
   Future<void> refresh() async {
     _logger.info('User triggered manual library refresh from screen');
     try {
-      await _library.syncLibrary();
+      await _library.syncLibrary(deep: true);
     } catch (e) {
       _logger.severe('Manual refresh failed: $e');
     }
