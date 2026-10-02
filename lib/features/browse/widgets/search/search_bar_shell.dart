@@ -66,6 +66,10 @@ class SearchBarShell extends StatefulWidget {
   /// panel beside the results instead.
   final bool showFilterButton;
 
+  /// Replaces the filter sheet the filter button opens — for result types with
+  /// their own options (publishers' sort), which the series filters don't fit.
+  final VoidCallback? onFilterTapOverride;
+
   final SuggestionRequest requestSuggestions;
 
   /// Null means suggestions are always enabled.
@@ -90,6 +94,7 @@ class SearchBarShell extends StatefulWidget {
     this.onFilterApplied,
     this.showLibrarySorts = false,
     this.showFilterButton = true,
+    this.onFilterTapOverride,
     this.suggestionsEnabled,
     this.rebuildOn,
   });
@@ -283,7 +288,9 @@ class _SearchBarShellState extends State<SearchBarShell> {
           controllerText: _text.text,
           onClear: _controller.clear,
           onScanTap: widget.onScanTap,
-          onFilterTap: widget.showFilterButton ? _openFilterSheet : null,
+          onFilterTap: widget.showFilterButton
+              ? (widget.onFilterTapOverride ?? _openFilterSheet)
+              : null,
           currentFilters: _filters,
         ),
         filled: true,

@@ -18,6 +18,7 @@ import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/publisher/widgets/publisher_list_item.dart';
 import 'package:mangabaka_app/features/collections/screens/collections_browse_screen.dart';
+import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -247,14 +248,17 @@ class BrowseContent extends StatelessWidget {
 
   Widget _buildPublisherResults() {
     return _buildPeopleResults(
-      cellHeight: 118,
+      cellHeight: 136,
       itemBuilder: (context, index, margin) {
         final publisher = searchResults[index] as Publisher;
         return PublisherListItem(
           publisher: publisher,
           margin: margin,
-          onTap: () =>
-              CollectionsBrowseScreen.open(context, publisher: publisher),
+          onTap: () => PublisherDetailScreen.open(
+            context,
+            id: publisher.id,
+            publisher: publisher,
+          ),
         );
       },
     );

@@ -112,14 +112,20 @@ class BrowseSearchGateway {
   Future<BrowsePage<Publisher>> fetchPublishers({
     required String query,
     required int page,
-    required SearchFilters filters,
     required int alreadyLoaded,
+    String? sortBy,
   }) async {
+    final trimmed = query.trim();
     final result = await _publishers.search({
-      'q': query,
+      if (trimmed.isNotEmpty) 'q': trimmed,
       'page': page,
       'limit': AppConstants.defaultPageLimit,
-      ...filters.toMap(),
+      // Browsing with no query lists the biggest publishers first; a search
+      // keeps the API's relevance order unless the user picked another.
+      if (sortBy != null)
+        'sort_by': sortBy
+      else if (trimmed.isEmpty)
+        'sort_by': PublisherSearchService.sortSeriesCountDesc,
     });
 
     final items = result.publishers;

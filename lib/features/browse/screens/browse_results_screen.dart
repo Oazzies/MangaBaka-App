@@ -25,6 +25,17 @@ class BrowseResultsScreen extends StatefulWidget {
   final String? staff;
   final String? publisher;
 
+  /// Restricts to one publisher by id — exact, unlike [publisher], which
+  /// matches by name. [publisher] is still what titles the screen.
+  final String? publisherId;
+
+  /// A genre name to restrict results to.
+  final String? genre;
+
+  /// What the publisher's results were narrowed to (a genre, an audience...),
+  /// named in the title: Kodansha Works of Seinen.
+  final String? refineLabel;
+
   /// A tag id to restrict results to (e.g. a "Top in {genre}" rail's genre).
   final String? tag;
   final double? randomSeed;
@@ -35,6 +46,9 @@ class BrowseResultsScreen extends StatefulWidget {
     this.type,
     this.staff,
     this.publisher,
+    this.publisherId,
+    this.genre,
+    this.refineLabel,
     this.tag,
     this.randomSeed,
     super.key,
@@ -189,8 +203,13 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     if (widget.staff != null) {
       params['staff'] = widget.staff;
     }
-    if (widget.publisher != null) {
+    if (widget.publisherId != null) {
+      params['publisher_id'] = widget.publisherId;
+    } else if (widget.publisher != null) {
       params['publisher'] = widget.publisher;
+    }
+    if (widget.genre != null) {
+      params['genre'] = widget.genre;
     }
     if (widget.tag != null) {
       params['tag'] = widget.tag;
@@ -244,9 +263,15 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           .replaceAll('{name}', l10n.formatPossessive(widget.staff!));
     }
     if (widget.publisher != null) {
-      return l10n
-          .translate('staff_works_title')
-          .replaceAll('{name}', l10n.formatPossessive(widget.publisher!));
+      final name = l10n.formatPossessive(widget.publisher!);
+      final refine = widget.refineLabel;
+      if (refine != null && refine.isNotEmpty) {
+        return l10n
+            .translate('publisher_works_of')
+            .replaceAll('{name}', name)
+            .replaceAll('{subject}', refine);
+      }
+      return l10n.translate('staff_works_title').replaceAll('{name}', name);
     }
     return widget.sortType;
   }
