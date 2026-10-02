@@ -138,6 +138,7 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
       await auth.login();
       await bootstrap();
     } catch (e) {
+      if (!mounted) return;
       if (e is AuthCancelledException) {
         setState(() => loading = false);
         return;

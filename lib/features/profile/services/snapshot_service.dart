@@ -33,6 +33,11 @@ class SnapshotService {
   // Lock to prevent concurrent requests to the same endpoint
   static Future<void>? _requestLock;
 
+  /// When the last request released the lock; the cool-down is measured from
+  /// here rather than paid in full by every caller.
+  static DateTime? _lastRelease;
+  static const _cooldown = Duration(milliseconds: 300);
+
   Future<List<LibraryEntry>> fetchSnapshot({
     required String sortBy,
     int page = 1,
@@ -45,8 +50,13 @@ class SnapshotService {
 
     if (previousLock != null) {
       await previousLock;
-      // Add a small cool-down delay between requests to be safe
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Small cool-down between requests, counted from the previous release:
+      // a request that long finished has nothing to wait for.
+      final released = _lastRelease;
+      if (released != null) {
+        final remaining = _cooldown - DateTime.now().difference(released);
+        if (remaining > Duration.zero) await Future.delayed(remaining);
+      }
     }
 
     try {
@@ -92,8 +102,21 @@ class SnapshotService {
         );
       }
 
-      final data = (jsonDecode(response.body)['data'] as List<dynamic>? ?? []);
-      final results = data.map((item) => LibraryEntry.fromJson(item)).toList();
+      final body = jsonDecode(response.body);
+      final data = body is Map && body['data'] is List
+          ? body['data'] as List
+          : const [];
+      // One malformed entry costs that entry, not the whole snapshot.
+      final results = <LibraryEntry>[];
+      for (final item in data) {
+        try {
+          if (item is Map) {
+            results.add(LibraryEntry.fromJson(item.cast<String, dynamic>()));
+          }
+        } catch (e) {
+          _logger.fine('Skipping malformed snapshot entry: $e');
+        }
+      }
 
       if (contentPrefs.isNotEmpty) {
         return results
@@ -115,6 +138,7 @@ class SnapshotService {
         stackTrace: st,
       );
     } finally {
+      _lastRelease = DateTime.now();
       completer.complete();
     }
   }
