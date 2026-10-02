@@ -1,8 +1,12 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/publisher/utils/format_count.dart';
+import 'package:mangabaka_app/features/publisher/widgets/publisher_logo.dart';
 
 class PublisherListItem extends StatelessWidget {
   final Publisher publisher;
@@ -22,20 +26,11 @@ class PublisherListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    return Container(
-      margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        hoverColor: context.colors.surfaceRaised,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
+    final desktop = DesktopLayout.isActive(context);
+    final row = Row(
             children: [
+              PublisherLogoView(publisher: publisher, size: 48),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +54,27 @@ class PublisherListItem extends StatelessWidget {
                       runSpacing: 4,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        _buildBadge(context, publisher.subType.toUpperCase()),
+                        if (publisher.subType.isNotEmpty)
+                          _buildBadge(context, publisher.subType.toUpperCase())
+                        else if (publisher.topMediaType != null &&
+                            publisher.topMediaType!.isNotEmpty)
+                          _buildBadge(
+                            context,
+                            publisher.topMediaType!.toUpperCase(),
+                          ),
+                        if (publisher.seriesCount != null)
+                          _buildInfoText(
+                            context,
+                            l10n
+                                .translate('publisher_series_count')
+                                .replaceAll(
+                                  '{count}',
+                                  formatCount(publisher.seriesCount!),
+                                ),
+                          ),
+                        if (publisher.countryOfOrigin != null &&
+                            publisher.countryOfOrigin!.isNotEmpty)
+                          _buildInfoText(context, publisher.countryOfOrigin!),
                         if (publisher.founded != null)
                           _buildInfoText(
                             context,
@@ -109,13 +124,40 @@ class PublisherListItem extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: context.colors.textMuted.withValues(alpha: 0.5),
-              ),
+              // A pointer needs no chevron: the hover fill says it is clickable.
+              if (!desktop) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: context.colors.textMuted.withValues(alpha: 0.5),
+                ),
+              ],
             ],
-          ),
+          );
+
+    if (desktop) {
+      return DesktopHoverSurface(
+        onTap: onTap,
+        idleColor: context.colors.surface,
+        borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
+        padding: const EdgeInsets.all(16),
+        child: row,
+      );
+    }
+
+    return Container(
+      margin: margin ?? const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: context.colors.surface,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        hoverColor: context.colors.surfaceRaised,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: row,
         ),
       ),
     );

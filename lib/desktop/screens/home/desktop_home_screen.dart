@@ -13,6 +13,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
+import 'package:mangabaka_app/features/home/widgets/home_publishers_rail.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
@@ -231,6 +232,9 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                           rail.series,
                           onViewAll: () => _openGenreAll(rail.genre),
                         ),
+                      _padded(
+                        const HomePublishersRail(horizontalPadding: 0),
+                      ),
                       _rail(l10n.translate('rising'), _rising),
                       _rail(l10n.translate('hidden_gems'), _hiddenGems),
                       _rail(l10n.translate('new_releases'), _newReleases),

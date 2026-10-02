@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
 import 'package:mangabaka_app/features/home/services/upcoming_loader.dart';
+import 'package:mangabaka_app/features/home/widgets/home_publishers_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_upcoming_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_trending_section.dart';
@@ -216,6 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       series: rail.series,
                       onViewAll: () => _openGenreAll(rail.genre),
                     ),
+                  const HomePublishersRail(),
                   HomeRail(
                     title: l10n.translate('rising'),
                     series: _rising,

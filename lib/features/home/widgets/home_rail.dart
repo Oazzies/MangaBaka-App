@@ -26,8 +26,13 @@ class HomeRail extends StatelessWidget {
   /// section) that render their own header and controls above the row.
   final bool showHeader;
 
+  /// Overrides the Hero scope for rails outside the Home feed, whose titles
+  /// would otherwise collide with the Home rails of the same name.
+  final String? heroScopeId;
+
   /// Unique per rail, so a series in two rails never shares a Hero tag.
-  String get heroScope => 'home_${title.isEmpty ? 'trending' : title}';
+  String get heroScope =>
+      heroScopeId ?? 'home_${title.isEmpty ? 'trending' : title}';
 
   /// Placeholder count shown while [loading] is true.
   static const int _skeletonCount = 5;
@@ -40,6 +45,7 @@ class HomeRail extends StatelessWidget {
     this.coverWidth = 118,
     this.onViewAll,
     this.showHeader = true,
+    this.heroScopeId,
   });
 
   @override
