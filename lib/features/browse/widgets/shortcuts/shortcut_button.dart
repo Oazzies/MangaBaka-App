@@ -8,9 +8,13 @@ class ShortcutButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
 
+  /// Drawn before the label, in the accent colour.
+  final Widget? icon;
+
   const ShortcutButton({
     required this.label,
     required this.onPressed,
+    this.icon,
     super.key,
   });
 
@@ -28,6 +32,13 @@ class ShortcutButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            if (icon != null) ...[
+              IconTheme(
+                data: IconThemeData(color: context.colors.accent, size: 20),
+                child: icon!,
+              ),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: Text(
                 label.toUpperCase(),
