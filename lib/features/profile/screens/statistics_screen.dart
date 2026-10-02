@@ -10,6 +10,7 @@ import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/features/publisher/utils/open_publisher.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -153,6 +154,28 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             onTap: () => _openSeriesDetail(mostReread!),
                           ),
                         ],
+                        if (topPublishers.isNotEmpty) ...[
+                          const SizedBox(height: 32),
+                          Text(
+                            l10n.translate('library_your_publishers').toUpperCase(),
+                            style: AppTypography.display(
+                              color: context.colors.text,
+                              fontSize: 20,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          for (final p in topPublishers)
+                            _PublisherStatRow(
+                              name: p.name,
+                              count: p.count,
+                              max: topPublishers.first.count,
+                              label: l10n
+                                  .translate('library_publishers_series')
+                                  .replaceAll('{count}', '${p.count}'),
+                              onTap: () => openPublisherByName(context, p.name),
+                            ),
+                        ],
                         const SizedBox(height: 32),
                       ],
                     ),
@@ -188,4 +211,71 @@ class _StatData {
   final String value;
 
   const _StatData(this.icon, this.label, this.value);
+}
+
+/// One publisher in "Your publishers": its name, how many library series it
+/// accounts for, and a bar scaled against the biggest publisher.
+class _PublisherStatRow extends StatelessWidget {
+  final String name;
+  final int count;
+  final int max;
+  final String label;
+  final VoidCallback onTap;
+
+  const _PublisherStatRow({
+    required this.name,
+    required this.count,
+    required this.max,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.sans(
+                      color: context.colors.text,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: max == 0 ? 0 : count / max,
+                minHeight: 6,
+                backgroundColor: context.colors.surfaceRaised,
+                valueColor: AlwaysStoppedAnimation(context.colors.accent),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
