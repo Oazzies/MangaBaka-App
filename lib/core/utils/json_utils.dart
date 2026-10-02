@@ -23,8 +23,27 @@ class JsonUtils {
 
   /// The `rating_normalized` of one entry of a series' `source` map, or null
   /// when the entry is not a map or carries no usable rating.
-  static double? normalizedRating(Object? sourceEntry) =>
-      sourceEntry is Map ? toDouble(sourceEntry['rating_normalized']) : null;
+  static double? normalizedRating(Object? sourceEntry) {
+    if (sourceEntry is! Map) return null;
+    final value = toDouble(sourceEntry['rating_normalized']);
+    // "NaN" and "Infinity" parse as doubles and would poison an average.
+    return value != null && value.isFinite ? value : null;
+  }
+
+  /// The string elements of [value] when it is a list, else an empty list.
+  ///
+  /// Replaces `(x as List?)?.cast<String>()`: `cast` is lazy, so one null or
+  /// numeric element passes parsing and only throws later, when the list is
+  /// encoded for the database or iterated by a widget — long after the
+  /// `try`/`catch` that was meant to contain a malformed payload.
+  static List<String> stringList(Object? value) =>
+      value is List ? value.whereType<String>().toList() : <String>[];
+
+  /// [value] as a string, or [fallback] when it is null. Unlike an implicit
+  /// `String x = json['k'] ?? ''`, a number or bool is stringified rather than
+  /// throwing a TypeError.
+  static String stringOr(Object? value, [String fallback = '']) =>
+      value?.toString() ?? fallback;
 
   /// v1 nests each cover size as `{x1, x2}` or `{url, ...}` and the original
   /// as `raw: {url, ...}`; the v2 endpoints flatten both to plain URL strings.

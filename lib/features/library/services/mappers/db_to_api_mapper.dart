@@ -11,7 +11,7 @@ class DbToApiMapper {
     if (jsonStr == null || jsonStr.isEmpty) return [];
     try {
       final decoded = jsonDecode(jsonStr);
-      if (decoded is List) return decoded.cast<String>();
+      if (decoded is List) return decoded.whereType<String>().toList();
     } catch (_) {}
     return [];
   }
