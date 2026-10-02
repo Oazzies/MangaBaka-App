@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
 
 /// Route transitions for the Ink & Amber system.
 ///
@@ -52,6 +53,9 @@ abstract final class AppTransitions {
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved =
             CurvedAnimation(parent: animation, curve: AppMotion.enter);
+        if (DesktopLayout.isActive(context)) {
+          return FadeTransition(opacity: curved, child: child);
+        }
         return FadeTransition(
           opacity: curved,
           child: ScaleTransition(
@@ -75,6 +79,11 @@ abstract final class AppTransitions {
           curve: AppMotion.enter,
           reverseCurve: AppMotion.exit,
         );
+        // Moving up or sideways means nothing to a mouse-driven window, so on
+        // desktop the page just fades in over the one beneath.
+        if (DesktopLayout.isActive(context)) {
+          return FadeTransition(opacity: curved, child: child);
+        }
         return SlideTransition(
           position: Tween<Offset>(
             // A short rise rather than a full-height slide: the page is
@@ -102,6 +111,9 @@ abstract final class AppTransitions {
           curve: AppMotion.enter,
           reverseCurve: AppMotion.exit,
         );
+        if (DesktopLayout.isActive(context)) {
+          return FadeTransition(opacity: curved, child: child);
+        }
         return SlideTransition(
           position: Tween<Offset>(
             begin: const Offset(0.18, 0),

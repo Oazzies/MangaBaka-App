@@ -39,6 +39,11 @@ class SettingsManager extends ChangeNotifier {
     AppListStyle.compactGrid,
     AppListStyle.values,
   );
+  final _publisherStatsStyle = EnumSetting(
+    SettingsKeys.publisherStatsStyle,
+    PublisherStatsStyle.charts,
+    PublisherStatsStyle.values,
+  );
   final _worksListStyle = EnumSetting(
     SettingsKeys.worksListStyle,
     AppListStyle.comfortable,
@@ -100,6 +105,7 @@ class SettingsManager extends ChangeNotifier {
       BoolSetting(SettingsKeys.onboardingCompleted, false);
   final _pushNotifications = BoolSetting(SettingsKeys.pushNotifications, false);
   final _autoSuggestBrowse = BoolSetting(SettingsKeys.autoSuggestBrowse, true);
+  final _developerMode = BoolSetting(SettingsKeys.developerMode, false);
   final _autoFocusBrowseSearch =
       BoolSetting(SettingsKeys.autoFocusBrowseSearch, false);
   final _autoSuggestLibrary = BoolSetting(SettingsKeys.autoSuggestLibrary, false);
@@ -148,6 +154,7 @@ class SettingsManager extends ChangeNotifier {
     _libraryListStyle,
     _browseListStyle,
     _worksListStyle,
+    _publisherStatsStyle,
     _similarListStyle,
     _defaultStartPage,
     _ratingSliderStep,
@@ -165,6 +172,7 @@ class SettingsManager extends ChangeNotifier {
     _hasCompletedOnboarding,
     _pushNotifications,
     _autoSuggestBrowse,
+    _developerMode,
     _autoFocusBrowseSearch,
     _autoSuggestLibrary,
     _showTooltips,
@@ -227,6 +235,10 @@ class SettingsManager extends ChangeNotifier {
   AppListStyle get browseListStyle => _browseListStyle.value;
   Future<void> setBrowseListStyle(AppListStyle style) =>
       _apply(_browseListStyle, style);
+
+  PublisherStatsStyle get publisherStatsStyle => _publisherStatsStyle.value;
+  Future<void> setPublisherStatsStyle(PublisherStatsStyle style) =>
+      _apply(_publisherStatsStyle, style);
 
   AppListStyle get worksListStyle => _worksListStyle.value;
   Future<void> setWorksListStyle(AppListStyle style) =>
@@ -366,6 +378,11 @@ class SettingsManager extends ChangeNotifier {
   bool get pushNotifications => _pushNotifications.value;
   Future<void> setPushNotifications(bool value) =>
       _apply(_pushNotifications, value);
+
+  /// Reveals the Developer Tools category in Settings. Off by default; toggled
+  /// by tapping the app logo on the Settings screen ten times quickly.
+  bool get developerMode => _developerMode.value;
+  Future<void> setDeveloperMode(bool value) => _apply(_developerMode, value);
 
   bool get autoSuggestBrowse => _autoSuggestBrowse.value;
   Future<void> setAutoSuggestBrowse(bool value) =>

@@ -7,7 +7,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_pill.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_dropdown.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
@@ -572,22 +572,18 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
         ),
         if (editionNames.length > 1) ...[
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              MbPill(
-                label: l10n.translate('all_editions'),
-                selected: filter == null,
-                onTap: () => setState(() => _editionFilter = null),
-              ),
-              for (final name in editionNames)
-                MbPill(
-                  label: name,
-                  selected: filter == name,
-                  onTap: () => setState(() => _editionFilter = name),
-                ),
-            ],
+          Align(
+            alignment: Alignment.centerLeft,
+            child: MbDropdown<String>(
+              label: l10n.translate('editions'),
+              value: filter ?? '',
+              options: [
+                ('', l10n.translate('all_editions')),
+                for (final name in editionNames) (name, name),
+              ],
+              onChanged: (key) =>
+                  setState(() => _editionFilter = key.isEmpty ? null : key),
+            ),
           ),
         ],
         const SizedBox(height: 16),

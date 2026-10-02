@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/profile/developer/developer_tools.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -169,6 +170,14 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       listenable: Listenable.merge([LocalizationService(), SettingsManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
+        // Switching developer mode off while on its pages would strand the
+        // user on a category the nav no longer lists.
+        if (!SettingsManager().developerMode &&
+            (_selected == _Category.advanced || _selected == _Category.logs)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _select(_Category.general);
+          });
+        }
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -188,7 +197,8 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       _Category.content,
       _Category.importExport,
       if (_auth.isLoggedIn) _Category.account,
-      _Category.advanced,
+      // Developer Tools stay hidden until developer mode is switched on.
+      if (SettingsManager().developerMode) _Category.advanced,
     ];
 
     return ListView(
@@ -253,13 +263,24 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           padding: const EdgeInsets.only(left: 8),
           child: Row(
             children: [
-              Image.asset('assets/mangabaka512.png', width: 22, height: 22),
-              const SizedBox(width: 10),
-              Text(
-                '${AppConstants.appName} v${AppConstants.appVersion}',
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 12.5,
+              DeveloperModeTapTarget(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      'assets/mangabaka512.png',
+                      width: 22,
+                      height: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '${AppConstants.appName} v${AppConstants.appVersion}',
+                      style: AppTypography.sans(
+                        color: context.colors.textMuted,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -819,6 +840,28 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
               icon: Icons.system_update_rounded,
               onPressed: () =>
                   UpdateDialog.show(context, SettingsCategories.debugRelease),
+            ),
+          ),
+          const Divider(height: 24),
+          DesktopSettingRow(
+            icon: Icons.notifications_active_outlined,
+            title: l10n.translate('preview_toasts'),
+            subtitle: l10n.translate('preview_toasts_subtitle'),
+            control: DesktopPillButton(
+              label: l10n.translate('preview_toasts'),
+              icon: Icons.notifications_active_outlined,
+              onPressed: () => showToastPreviewPicker(context),
+            ),
+          ),
+          const Divider(height: 24),
+          DesktopSettingRow(
+            icon: Icons.web_asset_rounded,
+            title: l10n.translate('preview_dialogs'),
+            subtitle: l10n.translate('preview_dialogs_subtitle'),
+            control: DesktopPillButton(
+              label: l10n.translate('preview_dialogs'),
+              icon: Icons.web_asset_rounded,
+              onPressed: () => showDialogPreviewPicker(context),
             ),
           ),
         ],

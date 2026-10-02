@@ -299,20 +299,39 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
 
   Widget _aside(LocalizationService l10n) {
     final mentioned = _mentioned();
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+    // Laid out like the Upcoming Releases rail: a header that starts below the
+    // window controls, a hairline, then the scrolling list.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DesktopSectionTitle(title: l10n.translate('in_the_news'), fontSize: 17),
-        if (mentioned.isEmpty)
-          Text(
-            l10n.translate('no_results'),
-            style: AppTypography.sans(
-              color: context.colors.textMuted,
-              fontSize: 13,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 56, 28, 16),
+          child: Text(
+            l10n.translate('in_the_news').toUpperCase(),
+            style: AppTypography.display(
+              color: context.colors.text,
+              fontSize: 18,
             ),
           ),
-        for (final (series, count) in mentioned)
-          _MentionRow(series: series, count: count),
+        ),
+        Divider(height: 1, color: context.colors.border),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              if (mentioned.isEmpty)
+                Text(
+                  l10n.translate('no_results'),
+                  style: AppTypography.sans(
+                    color: context.colors.textMuted,
+                    fontSize: 13,
+                  ),
+                ),
+              for (final (series, count) in mentioned)
+                _MentionRow(series: series, count: count),
+            ],
+          ),
+        ),
       ],
     );
   }

@@ -1,5 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/models/tag_chip_data.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
@@ -77,52 +79,67 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
                   ),
                 ],
               ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                alignment: Alignment.topCenter,
-                child: _isCollapsed
-                    ? const SizedBox(width: double.infinity)
-                    : Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 12),
-                            ...widget.subGroups.entries.map((subEntry) {
-                              final subheader = subEntry.key;
-                              final tags = subEntry.value;
+              // The height animates with the content pinned to the top and
+              // clipped, so expanding reveals the tags downward from the header
+              // and collapsing draws them up from the bottom. Both states are
+              // full width: a width that changed with the content made the tags
+              // sweep in from the right.
+              ClipRect(
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeInOutCubic,
+                  alignment: Alignment.topLeft,
+                  child: _isCollapsed
+                      ? const SizedBox(width: double.infinity, height: 0)
+                      : SizedBox(
+                          width: double.infinity,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 12),
+                                ...widget.subGroups.entries.map((subEntry) {
+                                  final subheader = subEntry.key;
+                                  final tags = subEntry.value;
 
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (subheader.isNotEmpty) ...[
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: Text(
-                                        subheader,
-                                        style: AppTypography.sans(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: context.colors.textMuted,
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (subheader.isNotEmpty) ...[
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 8,
+                                          ),
+                                          child: Text(
+                                            subheader,
+                                            style: AppTypography.sans(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: context.colors.textMuted,
+                                            ),
+                                          ),
                                         ),
+                                      ],
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: tags
+                                            .map(_buildTagChip)
+                                            .toList(),
                                       ),
-                                    ),
-                                  ],
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: tags.map(_buildTagChip).toList(),
-                                  ),
-                                  if (subEntry.key !=
-                                      widget.subGroups.keys.last)
-                                    const SizedBox(height: 16),
-                                ],
-                              );
-                            }),
-                          ],
+                                      if (subEntry.key !=
+                                          widget.subGroups.keys.last)
+                                        const SizedBox(height: 16),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                ),
               ),
             ],
           ),
@@ -144,6 +161,10 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       onTap: () => widget.onTagTap(data.tag),
       onLongPress: () => widget.onTagLongPress(data.tag),
+      onSecondaryTap: () => widget.onTagLongPress(data.tag),
+      tooltip: DesktopLayout.isActive(context)
+          ? LocalizationService().translate('filter_right_click_hint')
+          : null,
       label: Text.rich(
         TextSpan(
           children: [
@@ -164,7 +185,9 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
             TextSpan(
               text: tagParts.last,
               style: AppTypography.sans(
-                color: isSelected ? context.colors.onAccent : context.colors.text,
+                color: isSelected
+                    ? context.colors.onAccent
+                    : context.colors.text,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 height: 1.2,

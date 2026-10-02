@@ -270,8 +270,20 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    testWidgets('Developer Tools are hidden until developer mode is on',
+        (tester) async {
+      await pumpSettings(tester);
+      expect(find.text('advanced_settings'), findsNothing);
+
+      await SettingsManager().setDeveloperMode(true);
+      await tester.pumpAndSettle();
+      expect(find.text('advanced_settings'), findsOneWidget);
+    });
+
     testWidgets('logs open from Advanced and go back to it', (tester) async {
       await pumpSettings(tester);
+      await SettingsManager().setDeveloperMode(true);
+      await tester.pumpAndSettle();
 
       await tester.tap(find.text('advanced_settings'));
       await tester.pumpAndSettle();

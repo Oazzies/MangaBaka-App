@@ -23,6 +23,8 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}browse_list_style';
   static const String pushNotifications =
       '${AppConstants.prefixStorageKey}push_notifications';
+  static const String developerMode =
+      '${AppConstants.prefixStorageKey}developer_mode';
   static const String autoSuggestBrowse =
       '${AppConstants.prefixStorageKey}auto_suggest_browse';
   static const String autoFocusBrowseSearch =
@@ -49,6 +51,8 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}compact_grid_title_rows';
   static const String collectionsGridColumns =
       '${AppConstants.prefixStorageKey}collections_grid_columns';
+  static const String publisherStatsStyle =
+      '${AppConstants.prefixStorageKey}publisher_stats_style';
   static const String worksListStyle =
       '${AppConstants.prefixStorageKey}works_list_style';
   static const String similarListStyle =

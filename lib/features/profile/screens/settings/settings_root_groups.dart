@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/design/github_logo.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_categories.dart';
 import 'package:mangabaka_app/features/profile/screens/translation_credits_screen.dart';
@@ -74,12 +75,16 @@ List<Widget> buildSettingsGroups(
       ),
       const SizedBox(height: 16),
     ],
-    _category(
-      icon: Icons.code,
-      title: l10n.translate('advanced_settings'),
-      subtitle: l10n.translate('advanced_settings_subtitle'),
-      onTap: () => SettingsCategories.advanced(context, l10n),
-    ),
+    // Developer Tools only exist once developer mode has been switched on
+    // (ten quick taps on the logo).
+    if (SettingsManager().developerMode) ...[
+      _category(
+        icon: Icons.code,
+        title: l10n.translate('advanced_settings'),
+        subtitle: l10n.translate('advanced_settings_subtitle'),
+        onTap: () => SettingsCategories.advanced(context, l10n),
+      ),
+    ],
     const SizedBox(height: 32),
     SettingsGroup(
       children: [

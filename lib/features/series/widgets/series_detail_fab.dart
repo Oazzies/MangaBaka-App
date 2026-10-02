@@ -32,13 +32,23 @@ class SeriesAddToLibraryButton extends StatelessWidget {
       child: ElevatedButton.icon(
         key: const Key('add_to_library_button'),
         onPressed: isAdding ? null : onAdd,
+        // Sized and shaped like the phone's extended FAB — a tall pill with
+        // the display face — so the two read as the same action.
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size.fromHeight(56),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+          ),
+          textStyle: AppTypography.display(fontSize: 15),
+        ),
         icon: isAdding
             ? MbSpinner(
-                size: 16,
+                size: 18,
                 strokeWidth: 2,
                 color: context.colors.onAccent.withValues(alpha: 0.5),
               )
-            : const Icon(Icons.add_rounded, size: 18),
+            : const Icon(Icons.add_rounded, size: 20),
         label: Text(
           LocalizationService().translate('add_to_library').toUpperCase(),
         ),

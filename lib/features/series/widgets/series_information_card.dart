@@ -6,6 +6,7 @@ import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
 
 /// The "Information" metadata card: a vertical list of label / value rows with
 /// hairline dividers, matching the design's metadata sidebar.
@@ -156,7 +157,27 @@ class SeriesInformationCard extends StatelessWidget {
             }
           },
         ),
-      if (series.publishers.isNotEmpty)
+      if (series.publisherRefs.isNotEmpty)
+        _PublisherRefsRow(
+          label: l10n.translate('publishers'),
+          publishers: series.publisherRefs,
+          isSelected: (name) =>
+              detailState?.drawerFilters?.publisher.contains(name) ?? false,
+          onTap: (publisher) {
+            if (isSelecting) {
+              detailState?.handlePublisherToggle(publisher.name);
+            } else if (publisher.id.isNotEmpty) {
+              PublisherDetailScreen.open(
+                context,
+                id: publisher.id,
+                name: publisher.name,
+              );
+            } else {
+              onPublisherTap?.call(publisher.name);
+            }
+          },
+        )
+      else if (series.publishers.isNotEmpty)
         _LinkedRow(
           label: l10n.translate('publishers'),
           items: series.publishers,
@@ -324,5 +345,85 @@ class _LinkedRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Publishers as one tappable line each — name, then the edition's language
+/// and role (e.g. "EN · English") so regional editions of the same series can
+/// be told apart.
+class _PublisherRefsRow extends StatelessWidget {
+  final String label;
+  final List<SeriesPublisher> publishers;
+  final void Function(SeriesPublisher) onTap;
+  final bool Function(String) isSelected;
+
+  const _PublisherRefsRow({
+    required this.label,
+    required this.publishers,
+    required this.onTap,
+    required this.isSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: AppTypography.monoLabel(
+              color: context.colors.textMuted,
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: 4),
+          for (final p in publishers)
+            GestureDetector(
+              onTap: () => onTap(p),
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  children: [
+                    Text(
+                      p.name,
+                      style: AppTypography.sans(
+                        color: isSelected(p.name)
+                            ? context.colors.accent
+                            : context.colors.text,
+                        fontSize: 14,
+                        fontWeight: isSelected(p.name)
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                        height: 1.4,
+                      ),
+                    ),
+                    if (_detail(p) != null)
+                      Text(
+                        _detail(p)!,
+                        style: AppTypography.monoLabel(
+                          color: context.colors.textMuted,
+                          fontSize: 10,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String? _detail(SeriesPublisher p) {
+    final parts = [
+      if (p.language != null) p.language!.toUpperCase(),
+      if (p.role != null) p.role!,
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
   }
 }

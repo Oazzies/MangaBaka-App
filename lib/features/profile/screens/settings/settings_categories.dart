@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/profile/developer/developer_tools.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -346,6 +347,20 @@ class SettingsCategories {
               title: l10n.translate('trigger_update_widget'),
               subtitle: l10n.translate('trigger_update_widget_subtitle'),
               onTap: () => UpdateDialog.show(ctx, debugRelease),
+            ),
+            const SettingsDivider(),
+            SettingsItem(
+              icon: Icons.notifications_active_outlined,
+              title: l10n.translate('preview_toasts'),
+              subtitle: l10n.translate('preview_toasts_subtitle'),
+              onTap: () => showToastPreviewPicker(ctx),
+            ),
+            const SettingsDivider(),
+            SettingsItem(
+              icon: Icons.web_asset_rounded,
+              title: l10n.translate('preview_dialogs'),
+              subtitle: l10n.translate('preview_dialogs_subtitle'),
+              onTap: () => showDialogPreviewPicker(ctx),
               isLast: true,
             ),
           ],
