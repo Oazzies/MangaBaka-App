@@ -25,6 +25,7 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
+import 'package:mangabaka_app/features/publisher/utils/open_publisher.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
@@ -62,6 +63,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
   double _finishRate = 0;
   LibraryEntryWithSeries? _highestRated;
   LibraryEntryWithSeries? _mostReread;
+  List<({String name, int count})> _topPublishers = const [];
 
   @override
   ProfileAuthService get auth => _auth;
@@ -138,6 +140,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
       _stats.getFinishRate(contentPreferences: prefs),
       _stats.getHighestRatedSeries(contentPreferences: prefs),
       _stats.getMostRereadSeries(contentPreferences: prefs),
+      _stats.getTopPublishers(contentPreferences: prefs),
     ]);
     if (!mounted) return;
     setState(() {
@@ -146,6 +149,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
       _finishRate = results[2] as double;
       _highestRated = results[3] as LibraryEntryWithSeries?;
       _mostReread = results[4] as LibraryEntryWithSeries?;
+      _topPublishers = results[5] as List<({String name, int count})>;
     });
   }
 
@@ -170,6 +174,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
         recentlyAdded.clear();
         _highestRated = null;
         _mostReread = null;
+        _topPublishers = const [];
         loading = false;
         error = null;
       } else if (profile == null) {
@@ -258,7 +263,13 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
                                       DesktopTokens.pagePadding,
                                       48,
                                     ),
-                                    children: [_overview(l10n)],
+                                    children: [
+                                      _overview(l10n),
+                                      if (_topPublishers.isNotEmpty) ...[
+                                        const SizedBox(height: 20),
+                                        _publishersCard(l10n),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               ],
@@ -303,6 +314,10 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
         if (inline) ...[
           const SizedBox(height: DesktopTokens.sectionGap),
           _overview(l10n, twoColumns: true),
+          if (_topPublishers.isNotEmpty) ...[
+            const SizedBox(height: DesktopTokens.sectionGap),
+            _publishersCard(l10n),
+          ],
         ],
         if (_highestRated != null || _mostReread != null) ...[
           const SizedBox(height: DesktopTokens.sectionGap),
@@ -418,6 +433,72 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
             )
           else
             column(rows),
+        ],
+      ),
+    );
+  }
+
+  /// The publishers behind most of the library, as hover rows with a bar
+  /// scaled to the biggest. Tapping one opens its publisher page.
+  Widget _publishersCard(LocalizationService l10n) {
+    final max = _topPublishers.first.count;
+    return DesktopCard(
+      showBorder: false,
+      padding: const EdgeInsets.fromLTRB(14, 20, 14, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DesktopSectionTitle(
+            title: l10n.translate('library_your_publishers'),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+          ),
+          for (final p in _topPublishers)
+            DesktopHoverSurface(
+              onTap: () => openPublisherByName(context, p.name),
+              borderRadius: BorderRadius.circular(10),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          p.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.sans(
+                            color: context.colors.text,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        l10n
+                            .translate('library_publishers_series')
+                            .replaceAll('{count}', '${p.count}'),
+                        style: AppTypography.monoLabel(
+                          color: context.colors.textMuted,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: max == 0 ? 0 : p.count / max,
+                      minHeight: 5,
+                      backgroundColor: context.colors.surfaceRaised,
+                      valueColor: AlwaysStoppedAnimation(context.colors.accent),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

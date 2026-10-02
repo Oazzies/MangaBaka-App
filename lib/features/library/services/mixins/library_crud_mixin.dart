@@ -153,6 +153,11 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     int? progressChapter,
     int? progressVolume,
   }) async {
+    // Progress is a count; a negative value from a stepper or a typed field
+    // would be written locally and sent to the server as-is.
+    if (progressChapter != null && progressChapter < 0) progressChapter = 0;
+    if (progressVolume != null && progressVolume < 0) progressVolume = 0;
+
     logger.info(
       'Updating library entry progress for $seriesId — Ch: $progressChapter, Vol: $progressVolume (optimistic)',
     );

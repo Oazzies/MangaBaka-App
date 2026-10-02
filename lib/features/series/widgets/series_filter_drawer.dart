@@ -157,7 +157,7 @@ class _Sheet extends StatelessWidget {
                   horizontal: 16.0,
                   vertical: 8.0,
                 ),
-                child: _FilterSections(controller: controller),
+                child: SeriesFilterSections(controller: controller),
               ),
             ],
           ),
@@ -251,10 +251,10 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _FilterSections extends StatelessWidget {
+class SeriesFilterSections extends StatelessWidget {
   final SeriesFilterDrawerController controller;
 
-  const _FilterSections({required this.controller});
+  const SeriesFilterSections({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

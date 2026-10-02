@@ -150,16 +150,15 @@ class WindowsAuthHandler {
       },
     );
 
-    // 4. Launch browser
-    if (!await launchUrl(authUri, mode: LaunchMode.externalApplication)) {
-      await sub.cancel();
-      _pending = null;
-      _pendingAuthUri = null;
-      throw Exception('Could not launch $authUri');
-    }
-    onBrowserOpened?.call();
-
     try {
+      // 4. Launch browser. Inside the try so a launcher that throws (rather
+      // than returning false) still cancels the subscription and clears the
+      // pending state.
+      if (!await launchUrl(authUri, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch the browser for sign-in');
+      }
+      onBrowserOpened?.call();
+
       // 5. Wait for code (with timeout)
       final code = await completer.future.timeout(const Duration(minutes: 5));
       await sub.cancel();
@@ -182,15 +181,15 @@ class WindowsAuthHandler {
       ).timeout(_tokenTimeout);
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = _tokenBody(response.body);
         _logger.info('Token exchange successful on Windows');
 
         // Map to TokenResponse for compatibility with ProfileAuthService
         return TokenResponse(
-          data['access_token'],
-          data['refresh_token'],
+          data['access_token'] as String,
+          data['refresh_token'] as String?,
           _expiryFrom(data['expires_in']),
-          data['id_token'],
+          data['id_token'] as String?,
           'Bearer',
           scopes, // Correctly passing scopes here
           data, // Passing data as additional parameters
@@ -239,15 +238,15 @@ class WindowsAuthHandler {
     ).timeout(_tokenTimeout);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = _tokenBody(response.body);
       _logger.info('Token refresh successful on Windows');
 
       return TokenResponse(
-        data['access_token'],
-        data['refresh_token'] ??
+        data['access_token'] as String,
+        (data['refresh_token'] as String?) ??
             refreshToken, // IdPs might not return a new refresh token
         _expiryFrom(data['expires_in']),
-        data['id_token'],
+        data['id_token'] as String?,
         'Bearer',
         scopes,
         data,
@@ -268,6 +267,27 @@ class WindowsAuthHandler {
   /// ProfileAuthService, so one that never returned would stall every
   /// authenticated request behind it.
   static const _tokenTimeout = Duration(seconds: 30);
+
+  /// Decodes a 200 token-endpoint body and checks it really carries tokens.
+  ///
+  /// A 200 without a usable `access_token` would otherwise be persisted as
+  /// "signed in" with nothing to sign requests with.
+  static Map<String, dynamic> _tokenBody(String body) {
+    final decoded = jsonDecode(body);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('token response is not a JSON object');
+    }
+    final access = decoded['access_token'];
+    if (access is! String || access.isEmpty) {
+      throw const FormatException('token response has no access_token');
+    }
+    for (final key in const ['refresh_token', 'id_token']) {
+      if (decoded[key] != null && decoded[key] is! String) {
+        throw FormatException('token response has a non-string $key');
+      }
+    }
+    return decoded;
+  }
 
   /// `expires_in` is specified as an integer, but some servers send a string
   /// or a double; any of those would otherwise throw a TypeError here.

@@ -18,6 +18,8 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_body.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_series_filter_panel.dart';
 import 'package:mangabaka_app/features/series/widgets/series_filter_drawer.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -319,10 +321,17 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
                     // incoming constraints, collapsing the page.
                     if (_filterDrawer.isOpen)
                       Positioned.fill(
-                        child: SeriesFilterDrawer(
-                          controller: _filterDrawer,
-                          onSearch: executeSearchWithFilters,
-                        ),
+                        // A pointer gets a panel docked beside the page; a
+                        // thumb gets the bottom sheet.
+                        child: DesktopLayout.isActive(context)
+                            ? DesktopSeriesFilterPanel(
+                                controller: _filterDrawer,
+                                onSearch: executeSearchWithFilters,
+                              )
+                            : SeriesFilterDrawer(
+                                controller: _filterDrawer,
+                                onSearch: executeSearchWithFilters,
+                              ),
                       ),
                   ],
                 ),

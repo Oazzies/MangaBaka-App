@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/profile/developer/developer_tools.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -106,32 +107,34 @@ class _BrandHeader extends StatelessWidget {
     return MbEntrance(
       child: Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 28),
-        child: Row(
-          children: [
-            Image.asset('assets/mangabaka512.png', width: 44, height: 44),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  AppConstants.appName.toUpperCase(),
-                  style: AppTypography.display(
-                    color: context.colors.text,
-                    fontSize: 22,
+        child: DeveloperModeTapTarget(
+          child: Row(
+            children: [
+              Image.asset('assets/mangabaka512.png', width: 44, height: 44),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppConstants.appName.toUpperCase(),
+                    style: AppTypography.display(
+                      color: context.colors.text,
+                      fontSize: 22,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'v${AppConstants.appVersion}',
-                  style: AppTypography.sans(
-                    color: context.colors.textMuted,
-                    fontSize: 13,
+                  const SizedBox(height: 2),
+                  Text(
+                    'v${AppConstants.appVersion}',
+                    style: AppTypography.sans(
+                      color: context.colors.textMuted,
+                      fontSize: 13,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

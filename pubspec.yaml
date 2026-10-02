@@ -1,7 +1,7 @@
 name: mangabaka_app
 description: "Official MangaBaka mobile app"
 publish_to: 'none'
-version: 0.4.0+15
+version: 0.4.1+16
 
 
 environment:
@@ -70,6 +70,7 @@ flutter:
   assets:
     - .env
     - assets/lang/
+    - assets/import/
     - assets/mangabaka512.png
     - assets/series_222_cover.jpg
   uses-material-design: true

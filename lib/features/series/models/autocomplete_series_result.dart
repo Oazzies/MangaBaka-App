@@ -1,3 +1,5 @@
+import 'package:mangabaka_app/core/utils/json_utils.dart';
+
 /// Lightweight model for autocomplete search results.
 /// Only parses the fields needed for the dropdown display (thumbnail + title),
 /// keeping it separate from the full [Series] model to avoid unnecessary parsing.
@@ -39,7 +41,7 @@ class AutocompleteSeriesResult {
       bool isRomanized(dynamic t) {
         if (t is! Map) return false;
         final l = langOf(t);
-        final traits = (t['traits'] as List?)?.cast<String>() ?? [];
+        final traits = JsonUtils.stringList(t['traits']);
         return l.endsWith('-latn') ||
             l.endsWith('-ro') ||
             l.contains('hepburn') ||

@@ -348,9 +348,30 @@ class AppTheme {
     builders: {
       TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+      // A pointer-driven window has no "up" or "sideways" to move in, so
+      // desktop pages simply cross-fade.
+      TargetPlatform.windows: FadeOnlyPageTransitionsBuilder(),
+      TargetPlatform.macOS: FadeOnlyPageTransitionsBuilder(),
+      TargetPlatform.linux: FadeOnlyPageTransitionsBuilder(),
     },
   );
+}
+
+/// A page transition that only fades — no slide, no scale.
+class FadeOnlyPageTransitionsBuilder extends PageTransitionsBuilder {
+  const FadeOnlyPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: child,
+    );
+  }
 }

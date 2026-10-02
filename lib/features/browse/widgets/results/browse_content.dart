@@ -18,6 +18,7 @@ import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/publisher/widgets/publisher_list_item.dart';
 import 'package:mangabaka_app/features/collections/screens/collections_browse_screen.dart';
+import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -43,6 +44,10 @@ class BrowseContent extends StatelessWidget {
   final VoidCallback onNavigateToMix;
   final VoidCallback onNavigateToDiscoveryQueue;
 
+  /// Side inset of the grid layouts: 12 to match the Library when the parent
+  /// adds none, 0 when the parent already insets its content.
+  final double horizontalInset;
+
   const BrowseContent({
     super.key,
     required this.searchResults,
@@ -56,7 +61,11 @@ class BrowseContent extends StatelessWidget {
     required this.onNavigateToResults,
     required this.onNavigateToMix,
     required this.onNavigateToDiscoveryQueue,
+    this.horizontalInset = 12,
   });
+
+  EdgeInsets get _gridPadding =>
+      EdgeInsets.symmetric(horizontal: horizontalInset, vertical: 12);
 
   Widget _buildLoadingState() {
     if (browseType == BrowseType.series) {
@@ -64,7 +73,7 @@ class BrowseContent extends StatelessWidget {
       final activeStyle = settings.resolvedBrowseListStyle;
       final isGrid = activeStyle.isGrid;
 
-      return SeriesListSkeleton(isGrid: isGrid);
+      return SeriesListSkeleton(isGrid: isGrid, horizontalPadding: horizontalInset);
     }
 
     return const Center(child: MbSpinner());
@@ -127,13 +136,14 @@ class BrowseContent extends StatelessWidget {
         final itemCount = searchResults.length + (isLoadingMore ? 1 : 0);
 
         if (isGrid) {
+          final columns = settings.resolvedBrowseGridColumnCount;
           final isCompactGrid = activeStyle == AppListStyle.compactGrid;
 
           Widget buildGridContent(BuildContext context, int calculatedColumns) {
             if (isCompactGrid) {
               return DynamicRowHeightGrid(
                 controller: scrollController,
-                padding: const EdgeInsets.all(12),
+                padding: _gridPadding,
                 crossAxisCount: calculatedColumns,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
@@ -155,13 +165,20 @@ class BrowseContent extends StatelessWidget {
 
             return GridView.builder(
               controller: scrollController,
-              padding: const EdgeInsets.all(12),
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 160,
-                childAspectRatio: activeStyle.childAspectRatio,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
+              padding: _gridPadding,
+              gridDelegate: columns > 0
+                  ? SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columns,
+                      childAspectRatio: activeStyle.childAspectRatio,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    )
+                  : SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 160,
+                      childAspectRatio: activeStyle.childAspectRatio,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
               itemCount: itemCount,
               itemBuilder: (context, index) {
                 if (index >= searchResults.length) {
@@ -178,12 +195,22 @@ class BrowseContent extends StatelessWidget {
             );
           }
 
-          // Rebuilt only when the column count changes; between those a
-          // resize just re-lays the grid out.
-          return DerivedLayoutBuilder<int>(
-            derive: (constraints) =>
-                ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
-            builder: buildGridContent,
+          if (columns == 0) {
+            // Rebuilt only when the column count changes; between those a
+            // resize just re-lays the grid out.
+            return DerivedLayoutBuilder<int>(
+              derive: (constraints) =>
+                  ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
+              builder: buildGridContent,
+            );
+          }
+          final expectedWidth = columns * 160.0 + (columns - 1) * 10.0 + horizontalInset * 2;
+          return Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: expectedWidth),
+              child: buildGridContent(context, columns),
+            ),
           );
         }
 
@@ -221,14 +248,17 @@ class BrowseContent extends StatelessWidget {
 
   Widget _buildPublisherResults() {
     return _buildPeopleResults(
-      cellHeight: 118,
+      cellHeight: 136,
       itemBuilder: (context, index, margin) {
         final publisher = searchResults[index] as Publisher;
         return PublisherListItem(
           publisher: publisher,
           margin: margin,
-          onTap: () =>
-              CollectionsBrowseScreen.open(context, publisher: publisher),
+          onTap: () => PublisherDetailScreen.open(
+            context,
+            id: publisher.id,
+            publisher: publisher,
+          ),
         );
       },
     );

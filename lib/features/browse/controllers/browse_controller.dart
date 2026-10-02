@@ -86,8 +86,25 @@ class BrowseController extends ChangeNotifier {
   bool _showBackToTop = false;
   bool get showBackToTop => _showBackToTop;
 
+  /// Publishers are browsable without a query (most-published first), so the
+  /// tab always counts as having a search context.
   bool get _hasSearchContext =>
-      _currentSearchQuery.isNotEmpty || _currentFilters.toMap().isNotEmpty;
+      _currentType == BrowseType.publishers ||
+      _currentSearchQuery.isNotEmpty ||
+      _currentFilters.toMap().isNotEmpty;
+
+  /// The Publishers tab's chosen order, one of the `PublisherSearchService`
+  /// sort constants; null means "relevance when searching, most series when
+  /// browsing".
+  String? _publisherSort;
+  String? get publisherSort => _publisherSort;
+
+  void setPublisherSort(String? sort) {
+    if (_publisherSort == sort) return;
+    _publisherSort = sort;
+    if (_currentType == BrowseType.publishers) searchSeries();
+    notifyListeners();
+  }
 
   bool _disposed = false;
 
@@ -168,7 +185,10 @@ class BrowseController extends ChangeNotifier {
 
   void updateSearchQuery(String text) {
     _currentSearchQuery = text;
-    if (text.isEmpty && _currentFilters.toMap().isEmpty) resetSearchState();
+    if (text.isEmpty && _currentFilters.toMap().isEmpty) {
+      // Clearing the box on the Publishers tab goes back to browsing them.
+      _currentType == BrowseType.publishers ? searchSeries() : resetSearchState();
+    }
   }
 
   void updateFilters(SearchFilters filters) {
@@ -214,7 +234,8 @@ class BrowseController extends ChangeNotifier {
 
   Future<void> searchSeries() async {
     if (_currentSearchQuery.trim().isEmpty &&
-        _currentFilters.toMap().isEmpty) {
+        _currentFilters.toMap().isEmpty &&
+        _currentType != BrowseType.publishers) {
       _logger.fine('Search query and filters are empty, skipping search');
       resetSearchState();
       return;
@@ -269,7 +290,7 @@ class BrowseController extends ChangeNotifier {
           final page = await _gateway.fetchPublishers(
             query: _currentSearchQuery,
             page: _results.page,
-            filters: _currentFilters,
+            sortBy: _publisherSort,
             alreadyLoaded: _results.loadedCount(BrowseType.publishers),
           );
           if (_isStale(generation, 'publisher')) return;

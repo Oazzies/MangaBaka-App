@@ -1,9 +1,13 @@
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/browse/models/browse_type.dart';
+import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 
+/// Series / publishers / staff switcher, styled like the library's status
+/// tabs: display-caps labels on a row of pills, the selected one filled with
+/// the accent.
 class BrowseTypeTabs extends StatelessWidget {
   final BrowseType selectedType;
   final Function(BrowseType) onTypeChanged;
@@ -21,74 +25,66 @@ class BrowseTypeTabs extends StatelessWidget {
     // BrowseType.characters,
   ];
 
-  Alignment _indicatorAlignment() {
-    final index = _tabs.indexOf(selectedType).clamp(0, _tabs.length - 1);
-    // Map index 0..n-1 to alignment x -1..1
-    final x = _tabs.length > 1 ? (index / (_tabs.length - 1)) * 2 - 1 : 0.0;
-    return Alignment(x, 0);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final tabWidth = constraints.maxWidth / _tabs.length;
+    return SizedBox(
+      height: 48,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final type in _tabs)
+              _Pill(
+                label: l10n.translate(type.name),
+                selected: selectedType == type,
+                onTap: () => onTypeChanged(type),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          height: 38,
+class _Pill extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _Pill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 22),
           decoration: BoxDecoration(
-            color: context.colors.surface,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: context.colors.surfaceRaised, width: 1.5),
+            color: selected ? context.colors.accent : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppConstants.pillRadius),
           ),
-          child: Stack(
-            children: [
-              AnimatedAlign(
-                alignment: _indicatorAlignment(),
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutCubic,
-                child: Container(
-                  width: tabWidth,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: context.colors.accent,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-              ),
-              Row(
-                children: _tabs.map((type) {
-                  final isSelected = selectedType == type;
-                  final label = l10n.translate(type.name);
-                  return Expanded(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => onTypeChanged(type),
-                      child: Center(
-                        child: AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 150),
-                          curve: Curves.easeInOut,
-                          style: AppTypography.sans(
-                            color: isSelected
-                                ? context.colors.background
-                                : context.colors.text,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          child: Text(label),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 150),
+            style: AppTypography.display(
+              fontSize: 13,
+              color: selected ? context.colors.onAccent : context.colors.text,
+            ),
+            child: Text(label.toUpperCase()),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

@@ -28,9 +28,7 @@ mixin SeriesFetchMixin {
 
   Map<String, Series> get cache => _cache;
 
-  void precacheSeries(Series series) {
-    _cache[series.id] = series;
-  }
+  void precacheSeries(Series series) => _store(series.id, series);
 
   Future<Series> fetchSeries(String id) async {
     final cached = _cache[id];
@@ -89,7 +87,11 @@ mixin SeriesFetchMixin {
   }
 
   void _store(String id, Series series) {
-    if (_cache.length >= _maxCacheSize) {
+    // Re-inserting refreshes recency, and replacing an existing id must not
+    // evict an unrelated entry. Search results are precached by the page, so
+    // this is also what keeps the cache bounded while browsing.
+    _cache.remove(id);
+    while (_cache.length >= _maxCacheSize) {
       _cache.remove(_cache.keys.first);
     }
     _cache[id] = series;

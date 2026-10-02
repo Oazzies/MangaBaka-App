@@ -132,10 +132,18 @@ class HomeService {
             parse: (json) {
               final list = (json is Map) ? (json['results'] ?? json['data']) : null;
               if (list is! List) return const <Series>[];
-              return list
-                  .whereType<Map>()
-                  .map((m) => Series.fromRecommendationJson(m.cast<String, dynamic>()))
-                  .toList();
+              // One malformed recommendation must not empty the whole rail.
+              final parsed = <Series>[];
+              for (final m in list.whereType<Map>()) {
+                try {
+                  parsed.add(
+                    Series.fromRecommendationJson(m.cast<String, dynamic>()),
+                  );
+                } catch (e) {
+                  _logger.fine('Skipping malformed recommendation: $e');
+                }
+              }
+              return parsed;
             },
             headers: headers,
           );

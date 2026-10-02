@@ -33,41 +33,6 @@ Go to the [releases](https://github.com/Oazzies/MangaBaka-App/releases) page.
   </p>
 -->
 
-## Features
-
-<div align="left">
-
-</details>
-
-<details open="">
-    <summary><h3>Upcoming</h3></summary>
-
-Home
-* Discover (API needed)
-
-Browse
-* More browse shortcuts(Recommendations, etc) (API needed)
-* Seeing other profiles (API needed)
-* Better Barcode Scanner (API needed)
-
-Extra
-* Optional Notifications for various things (API needed)
-
-</details>
-
-<details open="">
-    <summary><h3>Not Planned</h3></summary>
-
-* Data Moderation, Submissions, etc in App
-* API/Any Documentation in App
-* Import/Export in App
-* Bookmarklet
-* Quick Nav
-
-</details>
-
-</div>
-
 ## Contributing
 
 [Code of conduct](https://github.com/Oazzies/MangaBaka-App/blob/main/CODE_OF_CONDUCT.md) · [Contributing guide](https://github.com/Oazzies/MangaBaka-App/blob/main/CONTRIBUTING.md)

@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
+import 'package:mangabaka_app/features/browse/widgets/filters/publisher_sort_sheet.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
@@ -40,10 +41,10 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isSearching ? _buildSearching() : _buildTitle(context);
+    return isSearching ? _buildSearching(context) : _buildTitle(context);
   }
 
-  Widget _buildSearching() {
+  Widget _buildSearching(BuildContext context) {
     return AppBar(
       // The search bar carries its own back button, which also clears the
       // query — an implied leading arrow would do neither.
@@ -57,6 +58,16 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
           initialFilters: controller.currentFilters,
           suggestionsAllowed: controller.currentType == BrowseType.series,
           onScanTap: onScanTap,
+          // The series filters only apply to series: publishers get their own
+          // sort sheet and staff have no filter button at all.
+          showFilterButton: controller.currentType != BrowseType.staff,
+          onFilterTapOverride: controller.currentType == BrowseType.publishers
+              ? () => showPublisherSortSheet(
+                    context,
+                    current: controller.publisherSort,
+                    onSelected: controller.setPublisherSort,
+                  )
+              : null,
           onResultSelected: onResultSelected,
           onChanged: controller.updateSearchQuery,
           onSubmitted: (_) => controller.searchSeries(),

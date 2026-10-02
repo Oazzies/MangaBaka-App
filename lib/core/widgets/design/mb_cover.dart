@@ -18,6 +18,10 @@ class MbCover extends StatelessWidget {
   final int? memCacheWidth;
   final bool blurred;
 
+  /// When set, the cover is a [Hero] with this tag, so it can fly into a
+  /// detail page whose cover uses the same tag.
+  final String? heroTag;
+
   const MbCover({
     super.key,
     required this.url,
@@ -27,12 +31,13 @@ class MbCover extends StatelessWidget {
     this.fit = BoxFit.cover,
     this.memCacheWidth,
     this.blurred = false,
+    this.heroTag,
   });
 
   @override
   Widget build(BuildContext context) {
     final h = height ?? width * 1.5;
-    return ClipRRect(
+    final cover = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: Container(
         width: width,
@@ -48,5 +53,7 @@ class MbCover extends StatelessWidget {
         ),
       ),
     );
+    final tag = heroTag;
+    return tag == null ? cover : Hero(tag: tag, child: cover);
   }
 }

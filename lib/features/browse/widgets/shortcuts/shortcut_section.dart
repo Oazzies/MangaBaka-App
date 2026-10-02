@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:mangabaka_app/core/widgets/design/lucide_icon.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/shortcut_button.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 
@@ -10,8 +11,13 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class ShortcutButtonEntry {
   final String label;
   final VoidCallback onPressed;
+  final Widget? icon;
 
-  const ShortcutButtonEntry({required this.label, required this.onPressed});
+  const ShortcutButtonEntry({
+    required this.label,
+    required this.onPressed,
+    this.icon,
+  });
 }
 
 class ShortcutSection extends StatelessWidget {
@@ -48,7 +54,11 @@ class ShortcutSection extends StatelessWidget {
         if (customButtons != null) {
           buttons = customButtons!
               .map(
-                (e) => ShortcutButton(label: e.label, onPressed: e.onPressed),
+                (e) => ShortcutButton(
+                  label: e.label,
+                  onPressed: e.onPressed,
+                  icon: e.icon,
+                ),
               )
               .toList();
         } else {
@@ -56,16 +66,19 @@ class ShortcutSection extends StatelessWidget {
             ShortcutButton(
               label: l10n.translate('most_popular'),
               onPressed: onMostPopular!,
+              icon: const MbLucideIcon(LucideGlyph.star),
             ),
             if (onTopRated != null)
               ShortcutButton(
                 label: l10n.translate('top_rated'),
                 onPressed: onTopRated!,
+                icon: const MbLucideIcon(LucideGlyph.heart),
               ),
             if (onRandom != null)
               ShortcutButton(
                 label: l10n.translate('random'),
                 onPressed: onRandom!,
+                icon: const MbLucideIcon(LucideGlyph.dices),
               ),
           ];
         }

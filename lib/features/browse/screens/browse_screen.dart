@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
@@ -232,8 +231,9 @@ class BrowseScreenState extends State<BrowseScreen> {
   Widget _buildBody() {
     return Padding(
       padding: EdgeInsets.only(
-        left: AppConstants.horizontalPadding,
-        right: AppConstants.horizontalPadding,
+        // Same side inset as the Library, so grid covers are the same size.
+        left: 12,
+        right: 12,
         top: 8.0,
         bottom: 8.0,
       ),
@@ -274,6 +274,8 @@ class BrowseScreenState extends State<BrowseScreen> {
             onNavigateToResults: _navigateToBrowseResults,
             onNavigateToMix: _navigateToMix,
             onNavigateToDiscoveryQueue: _navigateToDiscoveryQueue,
+            // The body above already insets by 12, as the Library does.
+            horizontalInset: 0,
           ),
         ],
       ),

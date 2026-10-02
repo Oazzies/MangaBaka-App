@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/publisher/utils/publisher_sort.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -135,14 +136,15 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            DesktopSidePanel(
-              child: DesktopFilterPanel(
-                filters: _controller.currentFilters,
-                onChanged: _controller.updateFilters,
-                enabled: isSeries,
-                disabledMessage: l10n.translate('filters_series_only'),
+            // The panel holds series filters, so it is shown for series only;
+            // publishers sort from the menu above the results instead.
+            if (isSeries)
+              DesktopSidePanel(
+                child: DesktopFilterPanel(
+                  filters: _controller.currentFilters,
+                  onChanged: _controller.updateFilters,
+                ),
               ),
-            ),
             Expanded(
               child: NotificationListener<ScrollMetricsNotification>(
                 onNotification: (_) {
@@ -319,7 +321,23 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                         ),
                       ],
                     )
-                  : null;
+                  : c.currentType == BrowseType.publishers
+                      ? DesktopMenuButton<String>(
+                          label: l10n.translate('sort_by'),
+                          valueLabel: publisherSortOptions(l10n)
+                              .firstWhere((o) => o.$1 == c.publisherSort)
+                              .$2,
+                          icon: Icons.sort_rounded,
+                          selected: c.publisherSort ?? '',
+                          items: [
+                            for (final (value, label)
+                                in publisherSortOptions(l10n))
+                              (value ?? '', label),
+                          ],
+                          onSelected: (key) =>
+                              c.setPublisherSort(key.isEmpty ? null : key),
+                        )
+                      : null;
 
               if (rightControls == null) {
                 return SingleChildScrollView(

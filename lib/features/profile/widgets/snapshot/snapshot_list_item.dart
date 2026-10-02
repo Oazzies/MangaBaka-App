@@ -8,11 +8,18 @@ import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
 class SnapshotListItem extends StatelessWidget {
   final Series series;
 
+  /// Distinguishes this list's cover Hero tags from other lists on the page.
+  final String heroScope;
+
   /// The cover's width — height follows the standard 2:3 cover ratio via
   /// [MbCover], rather than being stretched to whatever height the row has.
   static const double width = 120;
 
-  const SnapshotListItem({super.key, required this.series});
+  const SnapshotListItem({
+    super.key,
+    required this.series,
+    this.heroScope = 'snapshot',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +34,10 @@ class SnapshotListItem extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SeriesDetailScreen(series: series),
+                builder: (context) => SeriesDetailScreen(
+                  series: series,
+                  heroTagPrefix: heroScope,
+                ),
               ),
             );
           },
@@ -41,6 +51,7 @@ class SnapshotListItem extends StatelessWidget {
                   width: width,
                   blurred: WidgetUtils.isRatingBlurred(series.contentRating),
                   memCacheWidth: 240,
+                  heroTag: '${heroScope}_${series.id}',
                 ),
                 const SizedBox(height: 4),
                 SizedBox(

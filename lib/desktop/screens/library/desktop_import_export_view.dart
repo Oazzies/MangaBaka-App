@@ -20,16 +20,47 @@ enum ImportExportTab { import, export }
 /// the source picker rather than folded into a generic "open a file" button.
 class ImportSource {
   final IconData icon;
+
+  /// Bundled brand logo; shown instead of [icon] when set.
+  final String? logoAsset;
   final String labelKey;
   final String hintKey;
   final VoidCallback onTap;
 
   const ImportSource({
     required this.icon,
+    this.logoAsset,
     required this.labelKey,
     required this.hintKey,
     required this.onTap,
   });
+}
+
+/// A source's brand logo, or its generic icon when it has none.
+class ImportSourceIcon extends StatelessWidget {
+  final ImportSource source;
+  final double size;
+
+  const ImportSourceIcon({super.key, required this.source, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    final logo = source.logoAsset;
+    if (logo == null) {
+      return Icon(source.icon, size: size, color: context.colors.accent);
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.22),
+      child: Image.asset(
+        logo,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        cacheWidth: (size * 3).round(),
+        filterQuality: FilterQuality.medium,
+      ),
+    );
+  }
 }
 
 /// The import/export hub on desktop.
@@ -783,7 +814,7 @@ class _SourceCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(source.icon, size: 16, color: context.colors.accent),
+          ImportSourceIcon(source: source, size: 18),
           const SizedBox(width: 8),
           Text(
             l10n.translate(source.labelKey),

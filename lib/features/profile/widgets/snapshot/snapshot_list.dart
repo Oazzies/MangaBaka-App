@@ -75,7 +75,10 @@ class _SnapshotListState extends State<SnapshotList> {
                 return Center(child: MbSpinner(color: context.colors.accent));
               }
               final entry = widget.entries[index];
-              return SnapshotListItem(series: entry.series);
+              return SnapshotListItem(
+                series: entry.series,
+                heroScope: 'snapshot_${widget.title}',
+              );
             },
           ),
         ),

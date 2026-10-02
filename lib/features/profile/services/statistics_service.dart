@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
@@ -305,6 +307,65 @@ class StatisticsService {
       _logger.severe('Failed to get highest rated series from DB: $e\n$st');
       throw DatabaseException(
         message: 'Failed to get highest rated series',
+        originalError: e,
+        stackTrace: st,
+      );
+    }
+  }
+
+  /// The publishers behind the most series in the library, biggest first.
+  ///
+  /// Counted by name: the local database stores publisher names only, not ids.
+  Future<List<({String name, int count})>> getTopPublishers({
+    List<String>? contentPreferences,
+    int limit = 8,
+  }) async {
+    try {
+      final query = _db.selectOnly(_db.libraryEntriesTable).join([
+        drift.innerJoin(
+          _db.seriesTable,
+          _db.seriesTable.id.equalsExp(_db.libraryEntriesTable.seriesId),
+        ),
+      ])..addColumns([_db.seriesTable.publishers]);
+
+      if (contentPreferences != null && contentPreferences.isNotEmpty) {
+        query.where(
+          _db.seriesTable.contentRating.isIn(
+            contentPreferences.map((e) => e.toLowerCase()).toList(),
+          ),
+        );
+      }
+
+      final counts = <String, int>{};
+      for (final row in await query.get()) {
+        final raw = row.read(_db.seriesTable.publishers);
+        if (raw == null || raw.isEmpty) continue;
+        final Object? decoded;
+        try {
+          decoded = json.decode(raw);
+        } on FormatException {
+          continue;
+        }
+        if (decoded is! List) continue;
+        // A series listing the same publisher twice (two regional editions)
+        // still counts once toward that publisher.
+        for (final name in {for (final p in decoded) p.toString()}) {
+          if (name.isNotEmpty) counts[name] = (counts[name] ?? 0) + 1;
+        }
+      }
+
+      final sorted = counts.entries.toList()
+        ..sort((a, b) {
+          final byCount = b.value.compareTo(a.value);
+          return byCount != 0 ? byCount : a.key.compareTo(b.key);
+        });
+      return [
+        for (final e in sorted.take(limit)) (name: e.key, count: e.value),
+      ];
+    } catch (e, st) {
+      _logger.severe('Failed to get top publishers from DB: $e\n$st');
+      throw DatabaseException(
+        message: 'Failed to get top publishers',
         originalError: e,
         stackTrace: st,
       );
