@@ -12,10 +12,14 @@ class ReferencedListItem extends StatelessWidget {
   final Series series;
   final bool compact;
 
+  /// Keeps Hero tags unique between the news items on screen.
+  final String heroScope;
+
   const ReferencedListItem({
     super.key,
     required this.series,
     this.compact = false,
+    this.heroScope = 'news_ref',
   });
 
   @override
@@ -31,7 +35,10 @@ class ReferencedListItem extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => SeriesDetailScreen(series: series),
+              builder: (context) => SeriesDetailScreen(
+                series: series,
+                heroTagPrefix: heroScope,
+              ),
             ),
           );
         },
@@ -41,14 +48,21 @@ class ReferencedListItem extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 2 / 3,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppConstants.denseRadius),
-                  child: WidgetUtils.networkImage(
-                    url: series.coverUrl,
-                    blurred: WidgetUtils.isRatingBlurred(series.contentRating),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    memCacheWidth: 240,
+                child: Hero(
+                  tag: '${heroScope}_${series.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.denseRadius,
+                    ),
+                    child: WidgetUtils.networkImage(
+                      url: series.coverUrl,
+                      blurred: WidgetUtils.isRatingBlurred(
+                        series.contentRating,
+                      ),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      memCacheWidth: 240,
+                    ),
                   ),
                 ),
               ),

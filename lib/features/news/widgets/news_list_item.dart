@@ -143,6 +143,7 @@ class NewsListItem extends StatelessWidget {
                               key: ValueKey('ref_${news.id}_${s.id}'),
                               series: s,
                               compact: true,
+                              heroScope: 'news_ref_${news.id}',
                             ),
                           ),
                         );
