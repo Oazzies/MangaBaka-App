@@ -674,6 +674,8 @@
     "mix_dna_additional": "Elementos adicionales de ADN:",
     "no_release_notes": "No se proporcionaron notas de la versión.",
     "update_downloading": "Descargando {percent}%",
-    "open_download": "Abrir descarga"
+    "open_download": "Abrir descarga",
+    "onboarding_links_title": "Abrir enlaces",
+    "onboarding_links_subtitle": "Abre las páginas de las series y otros enlaces de MangaBaka directamente en la aplicación en lugar de tu navegador. Puedes cambiar esto en cualquier momento desde Ajustes."
   }
 }

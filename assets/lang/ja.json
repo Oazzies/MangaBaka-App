@@ -672,6 +672,8 @@
     "mix_dna_additional": "追加のDNA要素:",
     "no_release_notes": "リリースノートはありません。",
     "update_downloading": "ダウンロード中 {percent}%",
-    "open_download": "ダウンロードを開く"
+    "open_download": "ダウンロードを開く",
+    "onboarding_links_title": "リンクを開く",
+    "onboarding_links_subtitle": "シリーズページやその他のMangaBakaリンクを、ブラウザではなくアプリで直接開きます。この設定はいつでも設定から変更できます。"
   }
 }
