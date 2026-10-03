@@ -630,3 +630,133 @@ jobs:
             --title "MangaBaka App v${VERSION_CLEAN}" \
             --draft \
             --notes "Draft release for version v${VERSION_CLEAN}."
+
+  publish-aur:
+    name: Publish AUR Package
+    needs: create-draft-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check AUR Credentials
+        id: check-aur
+        env:
+          AUR_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$AUR_KEY" ]; then
+            echo "::warning::AUR_SSH_PRIVATE_KEY secret is not configured. AUR package deployment will be skipped."
+            echo "configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download Linux Artifact
+        if: steps.check-aur.outputs.configured == 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-artifact
+          path: .
+
+      - name: Generate PKGBUILD
+        if: steps.check-aur.outputs.configured == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+          PKGVER="${VERSION_CLEAN//-/_}"
+          echo "VERSION_CLEAN=$VERSION_CLEAN" >> $GITHUB_ENV
+
+          APPIMAGE_FILE=$(find . -name "*.AppImage" | head -n 1)
+
+          # If artifact wasn't downloaded, try downloading from the draft / published release
+          if [ -z "$APPIMAGE_FILE" ] || [ ! -f "$APPIMAGE_FILE" ]; then
+            echo "Searching release assets for AppImage..."
+            gh release download "v${VERSION_CLEAN}" --pattern "*.AppImage" --dir . 2>/dev/null || true
+            APPIMAGE_FILE=$(find . -name "*.AppImage" | head -n 1)
+          fi
+
+          if [ -z "$APPIMAGE_FILE" ] || [ ! -f "$APPIMAGE_FILE" ]; then
+            echo "::warning::No Linux AppImage artifact or release asset found. Skipping AUR deployment."
+            echo "SKIP_AUR=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          APPIMAGE_BASENAME=$(basename "$APPIMAGE_FILE")
+          HASH=$(sha256sum "$APPIMAGE_FILE" | awk '{print $1}')
+          echo "Found AppImage: $APPIMAGE_BASENAME with SHA256: $HASH"
+
+          cat > PKGBUILD << EOF
+          # Maintainer: ${{ secrets.AUR_USERNAME || github.repository_owner }} <${{ secrets.AUR_EMAIL || format('{0}@users.noreply.github.com', github.repository_owner) }}>
+          _pkgname=mangabaka
+          _PkgName=MangaBaka
+          pkgname=\${_pkgname}-bin
+          pkgver=${PKGVER}
+          pkgrel=1
+          arch=(x86_64)
+          pkgdesc='Official MangaBaka desktop app for manga reading and tracking'
+          url="https://github.com/${{ github.repository }}"
+          license=('Apache-2.0')
+          provides=(\${_pkgname}=\${pkgver})
+          depends=('gtk3' 'glib2' 'glibc' 'gcc-libs' 'hicolor-icon-theme' 'mpv' 'webkit2gtk-4.1' 'libepoxy' 'pango' 'cairo' 'at-spi2-core')
+          conflicts=(mangabaka)
+          options=('!strip')
+          _appimage="${APPIMAGE_BASENAME}"
+          source=("\${_appimage}::\${url}/releases/download/v${VERSION_CLEAN}/\${_appimage}"
+                  "LICENSE::https://raw.githubusercontent.com/${{ github.repository }}/main/LICENSE")
+          noextract=(\${_appimage})
+          sha256sums=('${HASH}' 'SKIP')
+
+          prepare() {
+              chmod +x "\${_appimage}"
+              ./"\${_appimage}" --appimage-extract >/dev/null
+          }
+
+          build() {
+              chmod -R a-x+rX squashfs-root/usr
+              if [ -f squashfs-root/usr/bin/mangabaka_app ]; then
+                  chmod +x squashfs-root/usr/bin/mangabaka_app
+              fi
+          }
+
+          package() {
+              install -dm755 "\${pkgdir}/usr/"
+              mv "\${srcdir}"/squashfs-root/usr/* "\${pkgdir}/usr/"
+              if [ -f "\${srcdir}/LICENSE" ]; then
+                  install -Dm644 "\${srcdir}/LICENSE" "\${pkgdir}/usr/share/licenses/\${pkgname}/LICENSE"
+              fi
+              install -Dm644 /dev/stdin "\${pkgdir}/usr/share/applications/\${_pkgname}.desktop" <<DESKTOP
+          [Desktop Entry]
+          Version=\${pkgver}
+          Type=Application
+          Name=\${_PkgName}
+          GenericName=\${_PkgName}
+          Comment=\${pkgdesc}
+          Exec=mangabaka_app
+          Icon=mangabaka
+          Terminal=false
+          Categories=Utility;Application;
+          Keywords=\${_pkgname};manga;reader
+          StartupNotify=true
+          DESKTOP
+          }
+          EOF
+          cat PKGBUILD
+
+      - name: Publish AUR package
+        if: steps.check-aur.outputs.configured == 'true' && env.SKIP_AUR != 'true'
+        continue-on-error: true
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: mangabaka-bin
+          pkgbuild: ./PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME || github.repository_owner }}
+          commit_email: ${{ secrets.AUR_EMAIL || format('{0}@users.noreply.github.com', github.repository_owner) }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to v${{ env.VERSION_CLEAN }}"
+          ssh_keyscan_types: rsa,ecdsa,ed25519
