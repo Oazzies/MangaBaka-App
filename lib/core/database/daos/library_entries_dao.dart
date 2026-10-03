@@ -27,6 +27,24 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
+  /// The stored entry rows for [seriesIds], keyed by series id. Series rows
+  /// are not joined: callers compare the entry fields only.
+  Future<Map<String, LibraryEntriesTableData>> getEntriesBySeriesIds(
+    Iterable<String> seriesIds,
+  ) async {
+    final ids = seriesIds.toList();
+    if (ids.isEmpty) return {};
+    try {
+      final rows = await (select(libraryEntriesTable)
+            ..where((t) => t.seriesId.isIn(ids)))
+          .get();
+      return {for (final r in rows) r.seriesId: r};
+    } catch (e) {
+      _logger.severe('Failed to get entries by series IDs: $e');
+      throw exc.DatabaseException(message: 'Failed to get entries by series IDs', originalError: e);
+    }
+  }
+
   Stream<LibraryEntryWithSeries?> watchEntryWithSeries(String seriesId) {
     try {
       final query = select(libraryEntriesTable).join([

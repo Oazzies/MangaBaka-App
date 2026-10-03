@@ -71,7 +71,7 @@ class FakeLibrary extends Fake implements LibraryService {
   Future<bool> isLibraryIncomplete() async => false;
 
   @override
-  Future<void> syncLibrary({String? state}) async {}
+  Future<void> syncLibrary({String? state, bool deep = false}) async {}
 
   @override
   Future<void> importFullLibrary() async {}
