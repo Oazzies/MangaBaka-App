@@ -154,14 +154,64 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
   }
 
+  /// The running [_runSync], so a [deep] request can wait for it instead of
+  /// being dropped.
+  Future<void>? _activeSync;
+
+  /// Catches the local library up with the server.
+  ///
+  /// The default walk stops at the first entry whose `updated_at` is not newer
+  /// than the stored watermark. That trusts the server to bump `updated_at` on
+  /// every change and to sort by it, so a change that does not (or one that
+  /// lands with an older timestamp) is never fetched again. A [deep] sync does
+  /// not trust timestamps: it walks the whole library and saves every entry
+  /// that differs from the local copy. Use it for an explicit user refresh.
   @override
-  Future<void> syncLibrary({String? state}) async {
+  Future<void> syncLibrary({String? state, bool deep = false}) async {
+    final running = _activeSync;
+    if (running != null) {
+      if (!deep) {
+        logger.info('Sync already in progress, skipping incremental sync request.');
+        return;
+      }
+      // A manual refresh must not be swallowed by the startup catch-up that
+      // happens to be running: that one may have fetched its pages before the
+      // change was made.
+      logger.info('Sync already in progress, deep refresh waits for it.');
+      try {
+        await running;
+      } catch (_) {
+        // Its failure was reported through syncStatus; the deep run goes on.
+      }
+      if (_activeSync != null) return;
+    }
+
+    final run = _runSync(state: state, deep: deep);
+    _activeSync = run;
+    try {
+      await run;
+    } finally {
+      if (identical(_activeSync, run)) _activeSync = null;
+    }
+  }
+
+  static bool _entryDiffers(api.LibraryEntry remote, dynamic local) =>
+      local == null ||
+      local.id != remote.id ||
+      local.state != remote.state ||
+      local.note != remote.note ||
+      local.progressChapter != remote.progressChapter ||
+      local.progressVolume != remote.progressVolume ||
+      local.numberOfRereads != remote.numberOfRereads ||
+      local.rating != remote.rating;
+
+  Future<void> _runSync({String? state, required bool deep}) async {
     if (syncStatus.value.isSyncing) {
       logger.info('Sync already in progress, skipping incremental sync request.');
       return;
     }
 
-    logger.info('Starting incremental library sync${state != null ? ' for state $state' : ''}');
+    logger.info('Starting ${deep ? 'deep' : 'incremental'} library sync${state != null ? ' for state $state' : ''}');
     setIsSyncCancelled(false);
     final generation = ++_syncGeneration;
     syncStatus.value = LibrarySyncStatus(isSyncing: true);
@@ -177,7 +227,9 @@ mixin LibrarySyncMixin on LibraryServiceBase {
 
       var page = 1;
       var totalFetched = 0;
-      const maxSyncPages = 10;
+      final maxSyncPages = deep ? AppConstants.libraryMaxPages : 10;
+      final deepFetchedIds = <String>[];
+      var deepPartial = false;
       // True once the walk reached entries the last sync already saw (or ran
       // out of entries). Only then is everything newer than the old
       // watermark known to be saved, and only then may it move forward.
@@ -205,6 +257,18 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         bool reachedKnown = false;
         final newEntries = <api.LibraryEntry>[];
 
+        if (deep) {
+          if (result.skipped > 0) deepPartial = true;
+          deepFetchedIds.addAll(entries.map((e) => e.id));
+          final local = await database.libraryEntriesDao
+              .getEntriesBySeriesIds(entries.map((e) => e.series.id));
+          if (_isStale(generation)) return;
+          for (final e in entries) {
+            final dateStr = e.updatedAt ?? e.createdAt;
+            newestEntryTimestamp ??= dateStr ?? '${e.id}|${e.state}|${e.progressChapter ?? 0}';
+            if (_entryDiffers(e, local[e.series.id])) newEntries.add(e);
+          }
+        } else {
         for (final e in entries) {
           final dateStr = e.updatedAt ?? e.createdAt;
           newestEntryTimestamp ??= dateStr ?? '${e.id}|${e.state}|${e.progressChapter ?? 0}';
@@ -222,6 +286,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
             break;
           }
           newEntries.add(e);
+        }
         }
 
         if (newEntries.isNotEmpty) {
@@ -256,6 +321,14 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         final newWatermark = newestEntryTimestamp ?? DateTime.now().toUtc().toIso8601String();
         logger.info('Incremental sync completed. Total fetched: $totalFetched. New watermark: $newWatermark');
         await prefs.setString(_lastSyncKey, newWatermark);
+        if (deep && !deepPartial) {
+          // The whole library was seen, so this is as complete as a full
+          // import: drop entries removed on the server and clear the flag.
+          if (deepFetchedIds.isNotEmpty) {
+            await database.libraryEntriesDao.deleteEntriesNotIn(deepFetchedIds);
+          }
+          await prefs.setBool(_isIncompleteKey, false);
+        }
       } else {
         // Stopped at the page cap before reaching known entries: anything
         // older than the pages walked but newer than the old watermark was

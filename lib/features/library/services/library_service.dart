@@ -27,7 +27,7 @@ abstract class LibraryServiceBase {
   bool get isSyncCancelled;
   void setIsSyncCancelled(bool val);
 
-  Future<void> syncLibrary({String? state});
+  Future<void> syncLibrary({String? state, bool deep = false});
   Future<FetchPageResult> fetchPage(int page, {String? state, String? type, String? sortBy});
   Future<void> saveEntries(List<api.LibraryEntry> entries);
   DateTime? parseAsUtc(String dateStr);

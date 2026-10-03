@@ -300,6 +300,43 @@ void main() {
       expect(service.syncStatus.value.isSyncing, isFalse);
     });
 
+    group('a changed rating whose updated_at did not move', () {
+      http.Response page() => http.Response(
+            jsonEncode({
+              'data': [
+                {
+                  'id': 'entry-42',
+                  'state': 'reading',
+                  'rating': 9,
+                  'updated_at': '2025-01-01T00:00:00Z',
+                  'series': {'id': 42, 'title': 'Series 42'},
+                },
+              ],
+            }),
+            200,
+          );
+
+      setUp(() async {
+        SharedPreferences.setMockInitialValues({
+          AppConstants.lastSyncKey: '2026-01-01T00:00:00Z',
+        });
+        await seedEntry('42');
+      });
+
+      test('is missed by the incremental sync', () async {
+        await withServer((_) async => page(), () => service.syncLibrary());
+        expect((await entryFor('42'))!.rating, isNull);
+      });
+
+      test('is picked up by a deep sync', () async {
+        await withServer(
+          (_) async => page(),
+          () => service.syncLibrary(deep: true),
+        );
+        expect((await entryFor('42'))!.rating, 9);
+      });
+    });
+
     test('a page fetch recovers from a revoked token', () async {
       await withServer(
         (r) async => bearerIsNew(r)
