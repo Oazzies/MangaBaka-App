@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/features/deeplinks/deep_link_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -36,7 +37,7 @@ class OpenLinksPage extends StatelessWidget {
                     ),
                   ),
                   subtitle: Text(
-                    l10n.translate('open_links_subtext'),
+                    l10n.translate(DeepLinkService.subtextKey),
                     style: TextStyle(
                       color: context.colors.textMuted,
                       fontSize: 14,

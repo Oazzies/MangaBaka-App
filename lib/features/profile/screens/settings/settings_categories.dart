@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/features/deeplinks/deep_link_service.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/profile/developer/developer_tools.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -148,7 +149,7 @@ class SettingsCategories {
               SettingsSwitchItem(
                 icon: Icons.link_rounded,
                 title: l10n.translate('open_links'),
-                subtitle: l10n.translate('open_links_subtext'),
+                subtitle: l10n.translate(DeepLinkService.subtextKey),
                 value: settings.openLinksInApp,
                 onChanged: settings.setOpenLinksInApp,
                 isLast: true,

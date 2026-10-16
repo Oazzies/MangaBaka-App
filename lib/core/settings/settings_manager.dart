@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/settings/setting_value.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -120,7 +122,8 @@ class SettingsManager extends ChangeNotifier {
 
   /// Whether https://mangabaka.org links should open inside the app
   /// rather than in a browser. Defaults to true on Android, false elsewhere.
-  final _openLinksInApp = BoolSetting(SettingsKeys.openLinksInApp, true);
+  final _openLinksInApp =
+      BoolSetting(SettingsKeys.openLinksInApp, Platform.isAndroid);
 
   /// 0 means "auto": fit as many columns as the available width allows.
   final _gridColumnCount = IntSetting(SettingsKeys.gridColumnCount, 0);
