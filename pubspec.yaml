@@ -41,7 +41,6 @@ dependencies:
   device_info_plus: ^13.1.0
   open_filex: ^4.7.0
   file_picker: ^13.1.0
-  marquee: ^2.3.0
   flutter_markdown: ^0.7.6
 dev_dependencies:
   flutter_test:
