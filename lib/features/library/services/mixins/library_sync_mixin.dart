@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mangabaka_app/features/library/constants/library_constants.dart';
 import 'package:mangabaka_app/features/library/models/library_sync_status.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
-import 'package:mangabaka_app/features/library/models/library_entry.dart' as api;
 
 const String _lastSyncKey = AppConstants.lastSyncKey;
-const String _isIncompleteKey = '${AppConstants.prefixStorageKey}library_is_incomplete';
+const String _cursorKey = AppConstants.libraryCursorKey;
+const String _isIncompleteKey =
+    '${AppConstants.prefixStorageKey}library_is_incomplete';
 
 mixin LibrarySyncMixin on LibraryServiceBase {
   bool _hasPerformedInitialSync = false;
@@ -44,12 +44,16 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       final prefs = await SharedPreferences.getInstance();
       final lastSync = prefs.getString(_lastSyncKey);
 
-      if (lastSync != null) {
-        logger.info('Library already imported. Performing incremental catch-up.');
+      if (lastSync != null || prefs.getString(_cursorKey) != null) {
+        logger.info(
+          'Library already imported. Performing incremental catch-up.',
+        );
         _hasPerformedInitialSync = true;
-        unawaited(syncLibrary().catchError((Object e) {
-          logger.warning('Background catch-up sync failed: $e');
-        }));
+        unawaited(
+          syncLibrary().catchError((Object e) {
+            logger.warning('Background catch-up sync failed: $e');
+          }),
+        );
         return;
       }
 
@@ -69,114 +73,35 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     }
   }
 
+  /// A full scan: the feed read from the start, then anything the server no
+  /// longer lists is dropped locally.
   Future<void> importFullLibrary() async {
     if (syncStatus.value.isSyncing) return;
-
-    setIsSyncCancelled(false);
-    final generation = ++_syncGeneration;
-    syncStatus.value = LibrarySyncStatus(isSyncing: true);
-
-    try {
-      // Fails fast when signed out, before the progress UI shows any pages.
-      await auth.getValidAccessToken();
-      var totalFetched = 0;
-      final fetchedIds = <String>[];
-      final result = await importSlice(
-        onProgress: (n, ids) {
-          totalFetched += n;
-          fetchedIds.addAll(ids);
-          syncStatus.value = syncStatus.value.copyWith(
-            currentEntries: totalFetched, error: null);
-        },
-      );
-
-      if (_isStale(generation)) {
-        logger.info('Full import superseded or cancelled; discarding result');
-        return;
-      }
-
-      if (!result.hitCap && fetchedIds.isNotEmpty) {
-        await database.libraryEntriesDao.deleteEntriesNotIn(fetchedIds);
-      }
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(_isIncompleteKey, result.hitCap);
-      final watermark = result.newestWatermark ?? DateTime.now().toUtc().toIso8601String();
-      await prefs.setString(_lastSyncKey, watermark);
-
-      syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
-    } catch (e) {
-      if (generation == _syncGeneration) {
-        syncStatus.value = syncStatus.value.copyWith(isSyncing: false, error: e.toString());
-      }
-      rethrow;
-    }
-  }
-
-  Future<({bool hitCap, List<String> fetchedIds, String? newestWatermark})> importSlice({
-    required void Function(int fetched, List<String> fetchedIds) onProgress,
-  }) async {
-    final generation = _syncGeneration;
-    var page = 1;
-    final int apiPageCap = AppConstants.libraryMaxPages;
-    final allFetchedIds = <String>[];
-    String? newestWatermark;
-    // Set when a page had unparseable entries. Those ids are missing from
-    // allFetchedIds, so the result must not be used to prune local entries.
-    var partial = false;
-
-    while (page <= apiPageCap) {
-      // Reported as capped so the caller never prunes against a partial list.
-      if (_isStale(generation)) return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
-
-      final result = await fetchPage(page, sortBy: 'updated_at_desc');
-      if (_isStale(generation)) return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
-      final entries = result.entries;
-
-      if (result.isError) return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
-      if (result.skipped > 0) partial = true;
-
-      if (page == 1 && entries.isNotEmpty) {
-        final e = entries.first;
-        newestWatermark = e.updatedAt ?? e.createdAt ?? '${e.id}|${e.state}|${e.progressChapter ?? 0}';
-      }
-
-      await saveEntries(entries);
-      final ids = entries.map((e) => e.id).toList();
-      allFetchedIds.addAll(ids);
-      onProgress(entries.length, ids);
-
-      if (entries.length + result.skipped < LibraryConstants.pageLimit) {
-        return (hitCap: partial, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
-      }
-      page++;
-    }
-    return (hitCap: true, fetchedIds: allFetchedIds, newestWatermark: newestWatermark);
+    await _runSync(deep: true);
   }
 
   /// The running [_runSync], so a [deep] request can wait for it instead of
   /// being dropped.
   Future<void>? _activeSync;
 
-  /// Catches the local library up with the server.
+  /// Catches the local library up with the server through the dedicated
+  /// change feed (`GET /v2/my/library/changes`).
   ///
-  /// The default walk stops at the first entry whose `updated_at` is not newer
-  /// than the stored watermark. That trusts the server to bump `updated_at` on
-  /// every change and to sort by it, so a change that does not (or one that
-  /// lands with an older timestamp) is never fetched again. A [deep] sync does
-  /// not trust timestamps: it walks the whole library and saves every entry
-  /// that differs from the local copy. Use it for an explicit user refresh.
+  /// The first run (no stored cursor) scans the whole library; later runs
+  /// send the stored cursor and receive only what changed, deletions
+  /// included. A [deep] sync discards the cursor and scans everything again,
+  /// for an explicit user refresh. The feed has no state filter, so [state]
+  /// is accepted for compatibility and ignored.
   @override
   Future<void> syncLibrary({String? state, bool deep = false}) async {
     final running = _activeSync;
     if (running != null) {
       if (!deep) {
-        logger.info('Sync already in progress, skipping incremental sync request.');
+        logger.info(
+          'Sync already in progress, skipping incremental sync request.',
+        );
         return;
       }
-      // A manual refresh must not be swallowed by the startup catch-up that
-      // happens to be running: that one may have fetched its pages before the
-      // change was made.
       logger.info('Sync already in progress, deep refresh waits for it.');
       try {
         await running;
@@ -186,7 +111,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       if (_activeSync != null) return;
     }
 
-    final run = _runSync(state: state, deep: deep);
+    final run = _runSync(deep: deep);
     _activeSync = run;
     try {
       await run;
@@ -195,23 +120,14 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     }
   }
 
-  static bool _entryDiffers(api.LibraryEntry remote, dynamic local) =>
-      local == null ||
-      local.id != remote.id ||
-      local.state != remote.state ||
-      local.note != remote.note ||
-      local.progressChapter != remote.progressChapter ||
-      local.progressVolume != remote.progressVolume ||
-      local.numberOfRereads != remote.numberOfRereads ||
-      local.rating != remote.rating;
-
-  Future<void> _runSync({String? state, required bool deep}) async {
+  Future<void> _runSync({required bool deep}) async {
     if (syncStatus.value.isSyncing) {
-      logger.info('Sync already in progress, skipping incremental sync request.');
+      logger.info(
+        'Sync already in progress, skipping incremental sync request.',
+      );
       return;
     }
 
-    logger.info('Starting ${deep ? 'deep' : 'incremental'} library sync${state != null ? ' for state $state' : ''}');
     setIsSyncCancelled(false);
     final generation = ++_syncGeneration;
     syncStatus.value = LibrarySyncStatus(isSyncing: true);
@@ -219,133 +135,158 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     try {
       await auth.getValidAccessToken();
       final prefs = await SharedPreferences.getInstance();
-      final lastSyncStr = prefs.getString(_lastSyncKey);
-      final lastSync = lastSyncStr != null ? parseAsUtc(lastSyncStr) : null;
-
-      logger.fine('Last sync watermark: $lastSyncStr');
-      String? newestEntryTimestamp;
-
-      var page = 1;
+      var cursor = deep ? null : prefs.getString(_cursorKey);
+      var restarted = false;
       var totalFetched = 0;
-      final maxSyncPages = deep ? AppConstants.libraryMaxPages : 10;
-      final deepFetchedIds = <String>[];
-      var deepPartial = false;
-      // True once the walk reached entries the last sync already saw (or ran
-      // out of entries). Only then is everything newer than the old
-      // watermark known to be saved, and only then may it move forward.
-      var caughtUp = false;
+      // Entry ids seen by a scan that began at the start of the feed. Only
+      // such a scan can prune: a resumed one has not seen the earlier pages.
+      Set<String>? seen = cursor == null ? <String>{} : null;
+      logger.info(
+        'Starting library sync (${cursor == null ? 'full scan' : 'from cursor'})',
+      );
+      if (seen != null) await prefs.setBool(_isIncompleteKey, true);
 
-      while (page <= maxSyncPages) {
-        if (_isStale(generation)) {
-          logger.info('Incremental sync cancelled at page $page');
+      while (true) {
+        if (_isStale(generation)) return;
+        final page = await fetchChanges(cursor);
+        if (_isStale(generation)) return;
+
+        if (page.invalidCursor) {
+          if (cursor != null && !restarted) {
+            logger.warning('Library cursor rejected; scanning from the start.');
+            restarted = true;
+            cursor = null;
+            seen = <String>{};
+            await prefs.remove(_cursorKey);
+            await prefs.setBool(_isIncompleteKey, true);
+            continue;
+          }
+          logger.warning('Library change feed rejected the request.');
+          await prefs.setBool(_isIncompleteKey, true);
+          syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
           return;
         }
 
-        final result = await fetchPage(page, sortBy: 'updated_at_desc', state: state);
-        if (_isStale(generation)) {
-          logger.info('Incremental sync cancelled at page $page');
-          return;
-        }
-        final entries = result.entries;
+        final applied = await _applyChanges(page.items, seen, generation);
+        if (applied == null || _isStale(generation)) return;
+        totalFetched += applied;
+        syncStatus.value = syncStatus.value.copyWith(
+          // Distinct entries on a full scan (the feed may repeat one);
+          // otherwise just what this run wrote.
+          currentEntries: seen?.length ?? totalFetched,
+          error: null,
+        );
 
-        if (entries.isEmpty) {
-          logger.fine('No entries returned for page $page, stopping sync');
-          caughtUp = !result.isError && result.skipped == 0;
+        // Saved only once the page is durably applied.
+        final previous = cursor;
+        if (page.cursor != null) {
+          cursor = page.cursor;
+          await prefs.setString(_cursorKey, page.cursor!);
+        }
+        if (!page.more) break;
+        // A feed that says "more" but gives nothing new would loop forever.
+        if (page.cursor == null || (page.cursor == previous && applied == 0)) {
+          logger.warning('Library feed made no progress; stopping the scan.');
           break;
         }
-
-        bool reachedKnown = false;
-        final newEntries = <api.LibraryEntry>[];
-
-        if (deep) {
-          if (result.skipped > 0) deepPartial = true;
-          deepFetchedIds.addAll(entries.map((e) => e.id));
-          final local = await database.libraryEntriesDao
-              .getEntriesBySeriesIds(entries.map((e) => e.series.id));
-          if (_isStale(generation)) return;
-          for (final e in entries) {
-            final dateStr = e.updatedAt ?? e.createdAt;
-            newestEntryTimestamp ??= dateStr ?? '${e.id}|${e.state}|${e.progressChapter ?? 0}';
-            if (_entryDiffers(e, local[e.series.id])) newEntries.add(e);
-          }
-        } else {
-        for (final e in entries) {
-          final dateStr = e.updatedAt ?? e.createdAt;
-          newestEntryTimestamp ??= dateStr ?? '${e.id}|${e.state}|${e.progressChapter ?? 0}';
-
-          bool isNew = true;
-          if (dateStr != null) {
-            final entryDate = parseAsUtc(dateStr);
-            if (lastSync != null && entryDate != null && !entryDate.isAfter(lastSync)) isNew = false;
-          } else if (lastSyncStr != null) {
-            if ('${e.id}|${e.state}|${e.progressChapter ?? 0}' == lastSyncStr) isNew = false;
-          }
-
-          if (!isNew) {
-            reachedKnown = true;
-            break;
-          }
-          newEntries.add(e);
-        }
-        }
-
-        if (newEntries.isNotEmpty) {
-          logger.info('Saving ${newEntries.length} new/updated entries from page $page');
-          await saveEntries(newEntries);
-          totalFetched += newEntries.length;
-          syncStatus.value = syncStatus.value.copyWith(currentEntries: totalFetched, error: null);
-        }
-
-        if (reachedKnown) {
-          logger.info('Reached known entries at page $page. Sync catch-up complete.');
-          caughtUp = true;
-          break;
-        }
-
-        if (entries.length + result.skipped < LibraryConstants.pageLimit) {
-          logger.fine('Page $page was the last page of results');
-          caughtUp = true;
-          break;
-        }
-        page++;
+        // Let the UI breathe between pages of a very large library.
+        await Future<void>.delayed(const Duration(milliseconds: 20));
       }
 
       if (_isStale(generation)) return;
-
-      // The watermark is global. A sync filtered to one state only proves
-      // that state is caught up, so moving it would hide updates made to
-      // entries in the other states.
-      if (state != null) {
-        logger.info('State-filtered sync completed. Total fetched: $totalFetched. Watermark unchanged.');
-      } else if (caughtUp) {
-        final newWatermark = newestEntryTimestamp ?? DateTime.now().toUtc().toIso8601String();
-        logger.info('Incremental sync completed. Total fetched: $totalFetched. New watermark: $newWatermark');
-        await prefs.setString(_lastSyncKey, newWatermark);
-        if (deep && !deepPartial) {
-          // The whole library was seen, so this is as complete as a full
-          // import: drop entries removed on the server and clear the flag.
-          if (deepFetchedIds.isNotEmpty) {
-            await database.libraryEntriesDao.deleteEntriesNotIn(deepFetchedIds);
-          }
-          await prefs.setBool(_isIncompleteKey, false);
-        }
-      } else {
-        // Stopped at the page cap before reaching known entries: anything
-        // older than the pages walked but newer than the old watermark was
-        // not saved. Advancing would skip it forever, so keep the watermark
-        // and flag the local copy as incomplete instead. A page the server
-        // refused (or could not fully parse) ends the walk the same way.
-        logger.warning('Incremental sync stopped before catching up (page cap, rejected page, or unparseable entries). Watermark unchanged; library marked incomplete.');
-        await prefs.setBool(_isIncompleteKey, true);
+      if (seen != null && seen.isNotEmpty) {
+        await database.libraryEntriesDao.deleteEntriesNotIn(seen.toList());
       }
+      await prefs.setBool(_isIncompleteKey, false);
+      await prefs.setString(
+        _lastSyncKey,
+        DateTime.now().toUtc().toIso8601String(),
+      );
+      logger.info('Library sync completed. Applied $totalFetched entries.');
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
     } catch (e, st) {
-      logger.severe('Incremental sync failed: $e\n$st');
+      logger.severe('Library sync failed: $e\n$st');
       if (generation == _syncGeneration) {
-        syncStatus.value = syncStatus.value.copyWith(isSyncing: false, error: e.toString());
+        syncStatus.value = syncStatus.value.copyWith(
+          isSyncing: false,
+          error: e.toString(),
+        );
       }
       rethrow;
     }
+  }
+
+  /// Applies one feed page. Returns how many entries were written, or null
+  /// when the sync was invalidated part way through.
+  Future<int?> _applyChanges(
+    List<Map<String, dynamic>> items,
+    Set<String>? seen,
+    int generation,
+  ) async {
+    // Later items win: the feed can repeat a series.
+    final bySeries = <String, Map<String, dynamic>?>{};
+    for (final item in items) {
+      if (item['type'] != 'entry') continue; // lists are not mirrored locally
+      final current = item['current'];
+      if (current is! Map) continue;
+      final seriesId = current['series_id']?.toString();
+      if (seriesId == null || seriesId.isEmpty) continue;
+      switch (item['action']) {
+        case 'upsert':
+          bySeries[seriesId] = current.cast<String, dynamic>();
+        case 'delete':
+          bySeries[seriesId] = null;
+      }
+    }
+
+    final upserts = [
+      for (final e in bySeries.values)
+        if (e != null) e,
+    ];
+    final deletes = [
+      for (final e in bySeries.entries)
+        if (e.value == null) e.key,
+    ];
+
+    // A full scan only needs series it has not stored; an incremental one
+    // refreshes the series of every entry that changed.
+    final ids = [for (final e in upserts) e['series_id'].toString()];
+    final stored = seen != null
+        ? await database.seriesDao.existingIds(ids)
+        : <String>{};
+    final series = await fetchSeriesBatch([
+      for (final id in ids)
+        if (!stored.contains(id)) id,
+    ]);
+    if (_isStale(generation)) return null;
+
+    var written = 0;
+    await database.transaction(() async {
+      await database.seriesDao.upsertSeries(series);
+      // An entry needs its series row (foreign key). A series the catalog no
+      // longer returns (deleted or merged away) would fail the whole page, so
+      // its entry is skipped instead.
+      final have = await database.seriesDao.existingIds(ids);
+      final writable = [
+        for (final e in upserts)
+          if (have.contains(e['series_id'].toString())) e,
+      ];
+      if (writable.length != upserts.length) {
+        logger.warning(
+          'Skipped ${upserts.length - writable.length} entries whose series '
+          'is not in the catalog.',
+        );
+      }
+      await database.libraryEntriesDao.applyFeedChanges(
+        upserts: writable,
+        deletedSeriesIds: deletes,
+      );
+      written = writable.length;
+      if (seen != null) {
+        seen.addAll(writable.map((e) => e['id'].toString()));
+      }
+    });
+    return written;
   }
 
   /// Also invalidates any sync in flight (see [_syncGeneration]). The

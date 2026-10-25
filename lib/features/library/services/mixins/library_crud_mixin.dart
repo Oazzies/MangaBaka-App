@@ -10,18 +10,18 @@ import 'package:mangabaka_app/core/database/database.dart' as db;
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String _isIncompleteKey = '${AppConstants.prefixStorageKey}library_is_incomplete';
+const String _isIncompleteKey =
+    '${AppConstants.prefixStorageKey}library_is_incomplete';
 
 mixin LibraryCrudMixin on LibraryServiceBase {
-
   // ── Shared HTTP helpers ───────────────────────────────────────────────────
 
   /// Standard headers for every library API request.
   Map<String, String> _buildAuthHeaders(String token, {bool json = true}) => {
-        'Authorization': 'Bearer $token',
-        'User-Agent': LibraryConstants.userAgent,
-        if (json) 'Content-Type': 'application/json',
-      };
+    'Authorization': 'Bearer $token',
+    'User-Agent': LibraryConstants.userAgent,
+    if (json) 'Content-Type': 'application/json',
+  };
 
   /// Sends an authenticated library request with the standard timeout. A 401
   /// never comes back from here: [ProfileAuthService.sendAuthorized] refreshes
@@ -34,7 +34,8 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     return auth.sendAuthorized(
       (token) => request(_buildAuthHeaders(token, json: json)).timeout(
         const Duration(seconds: AppConstants.networkTimeoutSeconds),
-        onTimeout: () => throw TimeoutException('$description request timed out'),
+        onTimeout: () =>
+            throw TimeoutException('$description request timed out'),
       ),
     );
   }
@@ -65,7 +66,11 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         stackTrace: st,
       );
     }
-    throw AppError(message: 'Failed to $operation', originalError: e, stackTrace: st);
+    throw AppError(
+      message: 'Failed to $operation',
+      originalError: e,
+      stackTrace: st,
+    );
   }
 
   // ── CRUD operations ───────────────────────────────────────────────────────
@@ -76,11 +81,14 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     try {
       final response = await _sendAuthorized(
         'Update state',
-        (headers) => http.put(url, headers: headers, body: jsonEncode({'state': state})),
+        (headers) =>
+            http.put(url, headers: headers, body: jsonEncode({'state': state})),
       );
 
       if (response.statusCode != 200) {
-        logger.severe('Failed to update entry state for $seriesId. Status: ${response.statusCode}');
+        logger.severe(
+          'Failed to update entry state for $seriesId. Status: ${response.statusCode}',
+        );
         throw ApiException(
           message: 'Failed to update entry state',
           statusCode: response.statusCode,
@@ -102,11 +110,17 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     try {
       final response = await _sendAuthorized(
         'Update rating',
-        (headers) => http.put(url, headers: headers, body: jsonEncode({'rating': rating})),
+        (headers) => http.put(
+          url,
+          headers: headers,
+          body: jsonEncode({'rating': rating}),
+        ),
       );
 
       if (response.statusCode != 200) {
-        logger.severe('Failed to update entry rating for $seriesId. Status: ${response.statusCode}');
+        logger.severe(
+          'Failed to update entry rating for $seriesId. Status: ${response.statusCode}',
+        );
         throw ApiException(
           message: 'Failed to update entry rating',
           statusCode: response.statusCode,
@@ -134,11 +148,17 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     int? wroteVolume,
   }) async {
     if (snapshot == null) return;
-    final current = await database.libraryEntriesDao.getEntryBySeriesId(seriesId);
+    final current = await database.libraryEntriesDao.getEntryBySeriesId(
+      seriesId,
+    );
     if (current == null) return;
-    if ((wroteChapter != null && current.libraryEntry.progressChapter != wroteChapter) ||
-        (wroteVolume != null && current.libraryEntry.progressVolume != wroteVolume)) {
-      logger.info('Skipping progress rollback for $seriesId: superseded by a newer update');
+    if ((wroteChapter != null &&
+            current.libraryEntry.progressChapter != wroteChapter) ||
+        (wroteVolume != null &&
+            current.libraryEntry.progressVolume != wroteVolume)) {
+      logger.info(
+        'Skipping progress rollback for $seriesId: superseded by a newer update',
+      );
       return;
     }
     await database.libraryEntriesDao.updateEntryProgress(
@@ -163,7 +183,9 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     );
 
     // Capture state for rollback, then apply optimistic local update.
-    final snapshot = await database.libraryEntriesDao.getEntryBySeriesId(seriesId);
+    final snapshot = await database.libraryEntriesDao.getEntryBySeriesId(
+      seriesId,
+    );
     await database.libraryEntriesDao.updateEntryProgress(
       seriesId,
       progressChapter: progressChapter,
@@ -184,7 +206,9 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       );
 
       if (response.statusCode != 200) {
-        logger.severe('Failed to update entry progress for $seriesId. Status: ${response.statusCode}');
+        logger.severe(
+          'Failed to update entry progress for $seriesId. Status: ${response.statusCode}',
+        );
         // Rolled back once, in the catch below.
         throw ApiException(
           message: 'Failed to update entry progress',
@@ -217,11 +241,17 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     try {
       final response = await _sendAuthorized(
         'Create entry',
-        (headers) => http.post(url, headers: headers, body: jsonEncode({'state': state})),
+        (headers) => http.post(
+          url,
+          headers: headers,
+          body: jsonEncode({'state': state}),
+        ),
       );
 
       if (response.statusCode == 201) {
-        logger.info('Successfully created library entry for $seriesId. Syncing local DB...');
+        logger.info(
+          'Successfully created library entry for $seriesId. Syncing local DB...',
+        );
         // The entry exists on the server now. A failed follow-up sync must
         // not be reported as a failed create — the caller would retry and
         // the UI would claim the series was not added when it was.
@@ -231,7 +261,9 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           logger.warning('Sync after creating $seriesId failed: $e');
         }
       } else {
-        logger.severe('Failed to create library entry for $seriesId. Status: ${response.statusCode}');
+        logger.severe(
+          'Failed to create library entry for $seriesId. Status: ${response.statusCode}',
+        );
         throw ApiException(
           message: 'Failed to create library entry',
           statusCode: response.statusCode,
@@ -305,7 +337,9 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           logger.warning('Batch add response was not JSON: $e');
         }
         if (data is List) {
-          created += data.where((e) => e is Map && e['action'] == 'created').length;
+          created += data
+              .where((e) => e is Map && e['action'] == 'created')
+              .length;
         }
       }
     } catch (e, st) {
@@ -335,10 +369,14 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
       if (response.statusCode == 200 || response.statusCode == 404) {
         // 404 means already deleted on the server — still clean up locally.
-        logger.info('Entry $seriesId deleted from server (or already gone). Updating DB...');
+        logger.info(
+          'Entry $seriesId deleted from server (or already gone). Updating DB...',
+        );
         await database.libraryEntriesDao.deleteEntry(seriesId);
       } else {
-        logger.severe('Failed to delete entry for $seriesId. Status: ${response.statusCode}');
+        logger.severe(
+          'Failed to delete entry for $seriesId. Status: ${response.statusCode}',
+        );
         throw ApiException(
           message: 'Failed to delete library entry',
           statusCode: response.statusCode,
@@ -358,12 +396,16 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       resetInitialSyncTask();
       // The invalidated sync loop exits without updating the status, so the
       // syncing flag has to be dropped here or the next sync would be refused.
-      syncStatus.value = syncStatus.value.copyWith(isSyncing: false, clearError: true);
+      syncStatus.value = syncStatus.value.copyWith(
+        isSyncing: false,
+        clearError: true,
+      );
       await database.libraryEntriesDao.deleteAllEntries();
       logger.info('Local library database cleared');
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(AppConstants.lastSyncKey);
+      await prefs.remove(AppConstants.libraryCursorKey);
       await prefs.remove(_isIncompleteKey);
       logger.info('Library sync preferences reset');
     } catch (e, st) {

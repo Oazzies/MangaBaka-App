@@ -18,8 +18,30 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           .getSingleOrNull();
     } catch (e) {
       _logger.severe('Failed to get latest updated series: $e');
-      throw exc.DatabaseException(message: 'Failed to get latest updated series', originalError: e);
+      throw exc.DatabaseException(
+        message: 'Failed to get latest updated series',
+        originalError: e,
+      );
     }
+  }
+
+  /// Which of [ids] already have a stored series row.
+  Future<Set<String>> existingIds(Iterable<String> ids) async {
+    final list = ids.toList();
+    if (list.isEmpty) return {};
+    final found = <String>{};
+    // Chunked to stay under SQLite's variable limit.
+    for (var i = 0; i < list.length; i += 500) {
+      final chunk = list.sublist(
+        i,
+        i + 500 > list.length ? list.length : i + 500,
+      );
+      final query = selectOnly(seriesTable)
+        ..addColumns([seriesTable.id])
+        ..where(seriesTable.id.isIn(chunk));
+      found.addAll(await query.map((r) => r.read(seriesTable.id)!).get());
+    }
+    return found;
   }
 
   Future<void> upsertSeries(List<api.Series> series) async {
@@ -123,7 +145,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       });
     } catch (e) {
       _logger.severe('Failed to upsert series: $e');
-      throw exc.DatabaseException(message: 'Failed to upsert series', originalError: e);
+      throw exc.DatabaseException(
+        message: 'Failed to upsert series',
+        originalError: e,
+      );
     }
   }
 
@@ -142,7 +167,10 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
     } catch (e) {
       _logger.severe('Failed to insert library entry: $e');
-      throw exc.DatabaseException(message: 'Failed to insert library entry', originalError: e);
+      throw exc.DatabaseException(
+        message: 'Failed to insert library entry',
+        originalError: e,
+      );
     }
   }
 
@@ -164,23 +192,33 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       );
     } catch (e) {
       _logger.severe('Failed to get entry with series: $e');
-      throw exc.DatabaseException(message: 'Failed to get entry with series', originalError: e);
+      throw exc.DatabaseException(
+        message: 'Failed to get entry with series',
+        originalError: e,
+      );
     }
   }
 
   Future<void> deleteStaleSeries() async {
     try {
-      final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
-      
+      final sevenDaysAgo = DateTime.now()
+          .subtract(const Duration(days: 7))
+          .toIso8601String();
+
       // Select series that are NOT in the library and were last updated > 7 days ago
-      final librarySeriesIds = selectOnly(db.libraryEntriesTable)..addColumns([db.libraryEntriesTable.seriesId]);
-      
-      final query = delete(seriesTable)..where((t) {
-        return t.id.isInQuery(librarySeriesIds).not() & t.lastUpdated.isSmallerThanValue(sevenDaysAgo);
-      });
+      final librarySeriesIds = selectOnly(db.libraryEntriesTable)
+        ..addColumns([db.libraryEntriesTable.seriesId]);
+
+      final query = delete(seriesTable)
+        ..where((t) {
+          return t.id.isInQuery(librarySeriesIds).not() &
+              t.lastUpdated.isSmallerThanValue(sevenDaysAgo);
+        });
 
       final deletedCount = await query.go();
-      _logger.info('Database Maintenance: Cleaned up $deletedCount stale series entries.');
+      _logger.info(
+        'Database Maintenance: Cleaned up $deletedCount stale series entries.',
+      );
     } catch (e) {
       _logger.warning('Failed to clean up stale series: $e');
     }
