@@ -28,7 +28,9 @@ class SeriesDetailAppBar extends StatefulWidget {
   final bool showCover;
   final double horizontalPadding;
   final VoidCallback onBack;
-  final VoidCallback onShare;
+
+  /// Called with the share button's rect, so landscape can drop a menu from it.
+  final ValueChanged<Rect?> onShare;
   final VoidCallback onDelete;
   final Function(String) onCopy;
   final String? heroTagPrefix;
@@ -182,13 +184,22 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
     return [
       AppTooltip(
         message: l10n.translate('share_series'),
-        child: _actionIcon(
-          icon: Icons.share_outlined,
-          onTap: widget.onShare,
-          metrics: metrics,
-          // Staggered behind the back pill so the controls arrive in reading
-          // order rather than all at once.
-          delay: 80.ms,
+        child: Builder(
+          builder: (buttonContext) => _actionIcon(
+            icon: Icons.share_outlined,
+            onTap: () {
+              final box = buttonContext.findRenderObject() as RenderBox?;
+              widget.onShare(
+                box != null && box.hasSize
+                    ? box.localToGlobal(Offset.zero) & box.size
+                    : null,
+              );
+            },
+            metrics: metrics,
+            // Staggered behind the back pill so the controls arrive in reading
+            // order rather than all at once.
+            delay: 80.ms,
+          ),
         ),
       ),
       // Nothing to delete unless the series is in the library.

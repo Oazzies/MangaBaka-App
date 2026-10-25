@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -52,7 +53,8 @@ class _DeveloperModeTapTargetState extends State<DeveloperModeTapTarget> {
   Future<void> _onTap() async {
     final now = widget.clock();
     final last = _last;
-    _taps = (last != null && now.difference(last) <= DeveloperModeTapTarget.maxGap)
+    _taps =
+        (last != null && now.difference(last) <= DeveloperModeTapTarget.maxGap)
         ? _taps + 1
         : 1;
     _last = now;
@@ -275,21 +277,42 @@ void _showSyncPreview(BuildContext context, LibrarySyncStatus status) {
   timer = Timer(const Duration(seconds: 5), dismiss);
 }
 
-
 /// Every dialog or sheet Developer Tools can open.
-enum DialogPreview { update, logout, deleteFromLibrary, unblurCover, rating, progress }
+enum DialogPreview {
+  update,
+  logout,
+  deleteFromLibrary,
+  unblurCover,
+  rating,
+  progress,
+}
 
 /// Lets the developer pick a [DialogPreview] and opens it with sample content.
 /// Purely visual: confirming or changing anything has no effect.
 Future<void> showDialogPreviewPicker(BuildContext context) async {
   final l10n = LocalizationService();
   final entries = <DialogPreview, (IconData, String)>{
-    DialogPreview.update: (Icons.system_update_rounded, l10n.translate('dialog_update')),
-    DialogPreview.logout: (Icons.logout_rounded, l10n.translate('dialog_logout')),
-    DialogPreview.deleteFromLibrary: (Icons.delete_sweep_rounded, l10n.translate('dialog_delete')),
-    DialogPreview.unblurCover: (Icons.blur_off_rounded, l10n.translate('dialog_unblur')),
+    DialogPreview.update: (
+      Icons.system_update_rounded,
+      l10n.translate('dialog_update'),
+    ),
+    DialogPreview.logout: (
+      Icons.logout_rounded,
+      l10n.translate('dialog_logout'),
+    ),
+    DialogPreview.deleteFromLibrary: (
+      Icons.delete_sweep_rounded,
+      l10n.translate('dialog_delete'),
+    ),
+    DialogPreview.unblurCover: (
+      Icons.blur_off_rounded,
+      l10n.translate('dialog_unblur'),
+    ),
     DialogPreview.rating: (Icons.star_rounded, l10n.translate('dialog_rating')),
-    DialogPreview.progress: (Icons.format_list_numbered_rounded, l10n.translate('dialog_progress')),
+    DialogPreview.progress: (
+      Icons.format_list_numbered_rounded,
+      l10n.translate('dialog_progress'),
+    ),
   };
 
   final picked = await showDialog<DialogPreview>(
@@ -309,7 +332,11 @@ Future<void> showDialogPreviewPicker(BuildContext context) async {
             onPressed: () => Navigator.of(dialogContext).pop(e.key),
             child: Row(
               children: [
-                Icon(e.value.$1, size: 20, color: dialogContext.colors.textMuted),
+                Icon(
+                  e.value.$1,
+                  size: 20,
+                  color: dialogContext.colors.textMuted,
+                ),
                 const SizedBox(width: 14),
                 Text(
                   e.value.$2,
@@ -329,7 +356,10 @@ Future<void> showDialogPreviewPicker(BuildContext context) async {
 }
 
 /// Opens [preview] the way the app would, with nothing wired to real data.
-Future<void> showDialogPreview(BuildContext context, DialogPreview preview) async {
+Future<void> showDialogPreview(
+  BuildContext context,
+  DialogPreview preview,
+) async {
   final l10n = LocalizationService();
   switch (preview) {
     case DialogPreview.update:
@@ -341,22 +371,29 @@ Future<void> showDialogPreview(BuildContext context, DialogPreview preview) asyn
     case DialogPreview.unblurCover:
       await confirmUnblur(context);
     case DialogPreview.rating:
-      await showModalBottomSheet<void>(
+      await showAdaptiveSheet<void>(
         context: context,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (_) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: RatingSelectionDialog(initialRating: 80, onRatingChanged: (_) {}),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: RatingSelectionDialog(
+            initialRating: 80,
+            onRatingChanged: (_) {},
+          ),
         ),
       );
     case DialogPreview.progress:
-      await showModalBottomSheet<void>(
+      await showAdaptiveSheet<void>(
         context: context,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         builder: (_) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: ProgressUpdateDialog(
             initialValue: 42,
             title: l10n.translate('update_chapters'),

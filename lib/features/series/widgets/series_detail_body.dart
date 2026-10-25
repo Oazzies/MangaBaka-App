@@ -115,7 +115,7 @@ class SeriesDetailBody extends StatelessWidget {
                   embedded: embedded,
                   horizontalPadding: isWide ? 40.0 : 16.0,
                   onBack: () => Navigator.pop(context),
-                  onShare: state.shareLink,
+                  onShare: (anchor) => state.shareLink(anchor: anchor),
                   onDelete: state.showDeleteConfirmationDialog,
                   onCopy: state.copyToClipboard,
                   heroTagPrefix: state.widget.heroTagPrefix,

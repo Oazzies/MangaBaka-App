@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:mangabaka_app/features/series/widgets/delete_from_library_dialog
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
 
 mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   LibraryService get libraryService;
@@ -24,7 +26,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   bool get popAfterDelete => true;
 
   void showUpdateRatingDialog(LibraryEntry entry) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -54,7 +56,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
 
   void showUpdateProgressDialog(LibraryEntry entry, {bool isChapter = true}) {
     final l10n = LocalizationService();
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -94,15 +96,61 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
-  void shareLink() {
+  void _shareText(String link) {
+    final box = context.findRenderObject() as RenderBox?;
+    SharePlus.instance.share(
+      ShareParams(
+        text: link,
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
+            : null,
+      ),
+    );
+  }
+
+  /// Share / copy-link choices as a dropdown hanging off the button at
+  /// [anchor], used in landscape where a bottom sheet is a long way from it.
+  void _showShareMenu(String link, Rect anchor) {
+    final l10n = LocalizationService();
+    showDropdownMenuAt<String>(
+      context,
+      anchor: anchor,
+      items: [
+        DesktopDropdownItem(
+          value: 'share',
+          label: l10n.translate('share_series'),
+          icon: Icons.share_rounded,
+        ),
+        DesktopDropdownItem(
+          value: 'copy',
+          label: l10n.translate('copy_link'),
+          icon: Icons.copy_rounded,
+        ),
+      ],
+      onSelected: (choice) {
+        if (!mounted) return;
+        if (choice == 'share') {
+          _shareText(link);
+        } else {
+          copyToClipboard(link);
+        }
+      },
+    );
+  }
+
+  void shareLink({Rect? anchor}) {
     final l10n = LocalizationService();
     final String? link = series.links
         .whereType<String>()
         .where((l) => l.contains('mangabaka'))
         .firstOrNull;
 
-    if (link != null) {
-      showModalBottomSheet(
+    if (link != null &&
+        anchor != null &&
+        MediaQuery.orientationOf(context) == Orientation.landscape) {
+      _showShareMenu(link, anchor);
+    } else if (link != null) {
+      showAdaptiveSheet(
         context: context,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -137,15 +185,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
                   title: l10n.translate('share_series'),
                   onTap: () {
                     Navigator.pop(context);
-                    final box = this.context.findRenderObject() as RenderBox?;
-                    SharePlus.instance.share(
-                      ShareParams(
-                        text: link,
-                        sharePositionOrigin: box != null
-                            ? box.localToGlobal(Offset.zero) & box.size
-                            : null,
-                      ),
-                    );
+                    _shareText(link);
                   },
                 ),
                 Padding(
