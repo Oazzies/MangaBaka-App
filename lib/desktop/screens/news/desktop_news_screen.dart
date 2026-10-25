@@ -153,7 +153,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: _feed(l10n)),
+                Expanded(child: _feed(l10n, showAside: showAside)),
                 if (showAside)
                   Container(
                     width: _asideWidth,
@@ -172,7 +172,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
     );
   }
 
-  Widget _feed(LocalizationService l10n) {
+  Widget _feed(LocalizationService l10n, {required bool showAside}) {
     final sources = <String>{for (final n in _news) n.source}
       ..removeWhere((s) => s.isEmpty);
     final visible = _visible;
@@ -183,6 +183,10 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
         DesktopPageHeader(
           title: l10n.translate('news'),
           subtitle: l10n.translate('news_subtitle'),
+          // With the aside beside it, the window controls float over the
+          // aside, so the header's own actions need not dodge them (as on
+          // Home).
+          reserveWindowControls: !showAside,
           actions: [
             DesktopIconButton(
               icon: Icons.refresh_rounded,

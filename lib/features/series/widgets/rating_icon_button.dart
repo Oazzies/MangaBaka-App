@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -32,7 +33,7 @@ class RatingIconButton extends StatelessWidget {
           size: 24,
         ),
         onPressed: () {
-          showModalBottomSheet(
+          showAdaptiveSheet(
             context: context,
             backgroundColor: Colors.transparent,
             isScrollControlled: true,

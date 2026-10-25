@@ -40,6 +40,7 @@ class EntryListItem extends StatefulWidget {
 
 class _EntryListItemState extends State<EntryListItem> {
   int? _optimisticProgress;
+  bool _hovered = false;
 
   // The DB watch stream is created once and cached. Creating it inline in
   // build() would tear down and re-register a drift watch query on every
@@ -135,7 +136,45 @@ class _EntryListItemState extends State<EntryListItem> {
     SettingsManager settings,
     LibraryEntry? entry,
   ) {
+    final item = _buildItem(
+      context,
+      style,
+      l10n,
+      displayTitle,
+      settings,
+      entry,
+    );
+    if (widget.ranking == null || style.isGrid) return item;
+    // Lists carry their rank as a number in front of the row.
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 34,
+          child: Text(
+            '${widget.ranking}',
+            textAlign: TextAlign.center,
+            style: AppTypography.display(
+              color: context.colors.accent,
+              fontSize: 17,
+            ),
+          ),
+        ),
+        Expanded(child: item),
+      ],
+    );
+  }
+
+  Widget _buildItem(
+    BuildContext context,
+    AppListStyle style,
+    LocalizationService l10n,
+    String displayTitle,
+    SettingsManager settings,
+    LibraryEntry? entry,
+  ) {
     final isInLibrary = entry != null;
+    final showBadge = widget.ranking != null && style.isGrid;
 
     // On desktop the list styles are table rows, not the phone's cards: the
     // row lays out its own progress bar and quick-progress control in columns
@@ -168,7 +207,6 @@ class _EntryListItemState extends State<EntryListItem> {
                     )
                   : null,
             ),
-            if (widget.ranking != null) _rankingBadge(),
           ],
         ),
       );
@@ -176,41 +214,46 @@ class _EntryListItemState extends State<EntryListItem> {
 
     return SeriesHoverPreview(
       series: widget.series,
-      child: Stack(
-        children: [
-          _buildContent(context, style, l10n, displayTitle, entry),
+      child: MouseRegion(
+        onEnter: style.isGrid ? (_) => setState(() => _hovered = true) : null,
+        onExit: style.isGrid ? (_) => setState(() => _hovered = false) : null,
+        child: Stack(
+          children: [
+            _buildContent(context, style, l10n, displayTitle, entry),
 
-          if (!style.isGrid &&
-              isInLibrary &&
-              (settings.showLibraryProgress || settings.showRemainingProgress))
-            Positioned(
-              bottom: style == AppListStyle.comfortable ? 6 : 4,
-              left:
-                  (style == AppListStyle.minimalList
-                      ? 48.0
-                      : (style == AppListStyle.compact ? 60.0 : 72.0)) +
-                  12,
-              right: 12,
-              child: _buildProgressBar(context, entry, style),
-            ),
-
-          if (!style.isGrid && settings.showQuickProgress)
-            Positioned(
-              bottom: style == AppListStyle.comfortable ? 12 : 8,
-              right: style == AppListStyle.comfortable ? 12 : 10,
-              child: SeriesQuickActionButton(
-                series: widget.series,
-                entry: entry,
-                onOptimisticProgressChanged: (val) {
-                  setState(() {
-                    _optimisticProgress = val;
-                  });
-                },
+            if (!style.isGrid &&
+                isInLibrary &&
+                (settings.showLibraryProgress ||
+                    settings.showRemainingProgress))
+              Positioned(
+                bottom: style == AppListStyle.comfortable ? 6 : 4,
+                left:
+                    (style == AppListStyle.minimalList
+                        ? 48.0
+                        : (style == AppListStyle.compact ? 60.0 : 72.0)) +
+                    12,
+                right: 12,
+                child: _buildProgressBar(context, entry, style),
               ),
-            ),
 
-          if (widget.ranking != null) _rankingBadge(),
-        ],
+            if (!style.isGrid && settings.showQuickProgress)
+              Positioned(
+                bottom: style == AppListStyle.comfortable ? 12 : 8,
+                right: style == AppListStyle.comfortable ? 12 : 10,
+                child: SeriesQuickActionButton(
+                  series: widget.series,
+                  entry: entry,
+                  onOptimisticProgressChanged: (val) {
+                    setState(() {
+                      _optimisticProgress = val;
+                    });
+                  },
+                ),
+              ),
+
+            if (showBadge) _rankingBadge(),
+          ],
+        ),
       ),
     );
   }
@@ -222,12 +265,13 @@ class _EntryListItemState extends State<EntryListItem> {
       child: Container(
         decoration: BoxDecoration(
           color: context.colors.accent,
+          // Matches the 8px grid card it sits in the corner of.
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(12),
-            bottomRight: Radius.circular(12),
+            topLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
         child: Text(
           '${widget.ranking}',
           style: AppTypography.display(
@@ -275,12 +319,14 @@ class _EntryListItemState extends State<EntryListItem> {
           heroTagPrefix: widget.heroTagPrefix,
           entry: entry,
           progressOverride: _optimisticProgress,
+          hovered: _hovered,
         );
       case AppListStyle.compactGrid:
         return CompactGridItem(
           series: widget.series,
           heroTagPrefix: widget.heroTagPrefix,
           displayTitle: displayTitle,
+          hovered: _hovered,
           entry: entry,
           progressOverride: _optimisticProgress,
         );

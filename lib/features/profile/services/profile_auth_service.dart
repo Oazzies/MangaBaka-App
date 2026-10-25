@@ -34,12 +34,16 @@ class ProfileAuthService extends ChangeNotifier {
     AuthNetworkClient? network,
     @visibleForTesting
     Future<TokenResponse?> Function(String refreshToken)? refresher,
-  })  : _storage = storage ?? AuthStorage(),
-        _network = network ?? AuthNetworkClient(),
-        _refresher = refresher;
+  }) : _storage = storage ?? AuthStorage(),
+       _network = network ?? AuthNetworkClient(),
+       _refresher = refresher;
 
   MbProfile? _cachedProfile;
   bool _hasSessionCache = false;
+
+  /// Scopes the stored session was granted, or null for a session from
+  /// before they were recorded (which never asked for Stacks).
+  List<String>? _grantedScopes;
 
   /// True while a desktop sign-in is waiting on the user in their browser.
   ///
@@ -54,6 +58,21 @@ class ProfileAuthService extends ChangeNotifier {
 
   bool get isLoggedIn => _hasSessionCache;
   MbProfile? get cachedProfile => _cachedProfile;
+
+  /// Whether the session may read and write Stacks. A session signed in
+  /// before Stacks existed lacks the scopes; the user has to sign in again.
+  bool get hasStackScopes {
+    if (!_hasSessionCache) return false;
+    bool covers(List<String>? scopes) =>
+        scopes != null && AppConstants.stackOauthScopes.every(scopes.contains);
+    return covers(_grantedScopes) || covers(_cachedProfile?.scopes);
+  }
+
+  /// What a refresh asks for. Asking for more than the original grant is an
+  /// `invalid_scope` error, which would end the session, so a session from
+  /// before Stacks keeps refreshing with the scopes it was granted.
+  List<String> get _refreshScopes =>
+      _grantedScopes ?? AppConstants.baseOauthScopes;
 
   String get _clientId => dotenv.env['MANGABAKA_APP_CLIENT_ID'] ?? '';
   String get _redirectUri => dotenv.env['MANGABAKA_APP_REDIRECT_URI'] ?? '';
@@ -71,6 +90,9 @@ class ProfileAuthService extends ChangeNotifier {
       _hasSessionCache = await hasSession();
       if (_hasSessionCache) {
         _logger.info('Found active session in storage');
+        _grantedScopes = _parseScopes(
+          await _storage.read(AuthStorage.kGrantedScopes),
+        );
         _cachedProfile = await _storage.getCachedProfile();
         if (_cachedProfile != null) {
           _logger.fine(
@@ -140,6 +162,7 @@ class ProfileAuthService extends ChangeNotifier {
 
       _logger.info('OAuth2 authorization successful. Persisting tokens...');
       await _persistTokens(response);
+      await _persistGrantedScopes(response);
       _hasSessionCache = true;
       try {
         // Not fetchProfile(): its notification would open the library (and
@@ -208,6 +231,25 @@ class ProfileAuthService extends ChangeNotifier {
     }
   }
 
+  static List<String>? _parseScopes(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    return raw.split(' ').where((s) => s.isNotEmpty).toList();
+  }
+
+  /// Records what a fresh sign-in was granted: the token response's scopes
+  /// when the server lists them, otherwise everything that was asked for.
+  Future<void> _persistGrantedScopes(TokenResponse response) async {
+    final granted = (response.scopes?.isNotEmpty ?? false)
+        ? response.scopes!
+        : AppConstants.oauthScopes;
+    _grantedScopes = List.unmodifiable(granted);
+    try {
+      await _storage.write(AuthStorage.kGrantedScopes, granted.join(' '));
+    } catch (e) {
+      _logger.warning('Could not record granted scopes: $e');
+    }
+  }
+
   Future<void> _persistTokens(TokenResponse response) async {
     try {
       await _storage.write(AuthStorage.kAccessToken, response.accessToken);
@@ -248,9 +290,9 @@ class ProfileAuthService extends ChangeNotifier {
   Future<void>? _refreshInFlight;
 
   Future<void> _refreshIfNeeded({bool force = false}) {
-    return _refreshInFlight ??= _runRefresh(force: force).whenComplete(
-      () => _refreshInFlight = null,
-    );
+    return _refreshInFlight ??= _runRefresh(
+      force: force,
+    ).whenComplete(() => _refreshInFlight = null);
   }
 
   /// Refreshes the tokens when the access token is near expiry, or
@@ -324,7 +366,7 @@ class ProfileAuthService extends ChangeNotifier {
         redirectUri: _redirectUri,
         tokenEndpoint: _tokenEndpoint,
         refreshToken: refreshToken,
-        scopes: AppConstants.oauthScopes,
+        scopes: _refreshScopes,
       );
     }
     return _appAuth.token(
@@ -333,7 +375,7 @@ class ProfileAuthService extends ChangeNotifier {
         _redirectUri,
         serviceConfiguration: _serviceConfig,
         refreshToken: refreshToken,
-        scopes: AppConstants.oauthScopes,
+        scopes: _refreshScopes,
       ),
     );
   }
@@ -413,6 +455,7 @@ class ProfileAuthService extends ChangeNotifier {
       _logger.warning('Failed to clear storage during session expiry: $e');
     }
     _cachedProfile = null;
+    _grantedScopes = null;
     _hasSessionCache = false;
     notifyListeners();
   }
@@ -485,6 +528,7 @@ class ProfileAuthService extends ChangeNotifier {
       }
       await _storage.deleteAll();
       _cachedProfile = null;
+      _grantedScopes = null;
       _hasSessionCache = false;
 
       try {

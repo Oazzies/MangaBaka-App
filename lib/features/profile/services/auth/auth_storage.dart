@@ -13,6 +13,10 @@ class AuthStorage {
   static const kAccessTokenExp = 'mb_access_token_exp';
   static const kProfileCache = 'mb_profile_cache';
 
+  /// Space-separated scopes the current session was granted at sign-in.
+  /// Absent for sessions from before it was recorded.
+  static const kGrantedScopes = 'mb_granted_scopes';
+
   /// Whether a secure-storage failure may fall back to plain
   /// SharedPreferences. That file is readable by anything running as the
   /// user, so the fallback exists only for development (e.g. an unsigned
@@ -21,7 +25,7 @@ class AuthStorage {
   final bool allowInsecureFallback;
 
   AuthStorage({bool? allowInsecureFallback})
-      : allowInsecureFallback = allowInsecureFallback ?? kDebugMode;
+    : allowInsecureFallback = allowInsecureFallback ?? kDebugMode;
 
   final _logger = LoggingService.logger;
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
@@ -108,6 +112,7 @@ class AuthStorage {
     kIdToken,
     kAccessTokenExp,
     kProfileCache,
+    kGrantedScopes,
   ];
 
   /// Deletes [key] from secure storage *and* from the SharedPreferences

@@ -24,8 +24,7 @@ class SeriesSearchService {
   final ApiClient _api;
 
   SeriesSearchService({http.Client? client, ApiClient? api})
-      : _api =
-            api ?? ApiClient(healthContext: 'series-search', client: client);
+    : _api = api ?? ApiClient(healthContext: 'series-search', client: client);
 
   Future<List<Map<String, dynamic>>> getGenres() async {
     if (!_metadataService.isInitialized) {
@@ -82,7 +81,10 @@ class SeriesSearchService {
       ApiClient.uri(_baseUrl, params),
       operation: 'search series',
       parse: (json) => SeriesSearchResult(
-        series: parseDataList(json, Series.fromJson).where(filter.allows).toList(),
+        series: parseDataList(
+          json,
+          Series.fromJson,
+        ).where(filter.allows).toList(),
         total: totalCount(json),
       ),
     );
@@ -118,6 +120,17 @@ class SeriesSearchService {
       'content_rating': contentPrefs,
       ...?extraParams,
     };
+    // A content-rating filter narrows what the user's preference allows; it
+    // must never widen it, so the two are intersected.
+    final picked = extraParams?['content_rating'];
+    if (picked is List && picked.isNotEmpty) {
+      final allowed = contentPrefs.toSet();
+      final both = [
+        for (final r in picked)
+          if (allowed.isEmpty || allowed.contains(r)) r,
+      ];
+      params['content_rating'] = both.isEmpty ? contentPrefs : both;
+    }
     if (hasQuery) params.remove('sort_by');
     return params;
   }

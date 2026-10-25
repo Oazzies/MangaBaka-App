@@ -175,6 +175,18 @@ class _HoverableTitleTextState extends State<_HoverableTitleText> {
   @override
   Widget build(BuildContext context) {
     final baseStyle = widget.style ?? AppTypography.sans();
+    // In landscape there is a pointer to select with: the title is
+    // selectable, and a plain click still copies it.
+    if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2.0),
+        child: SelectableText(
+          widget.text,
+          style: baseStyle,
+          onTap: widget.onTap,
+        ),
+      );
+    }
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),

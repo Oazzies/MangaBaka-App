@@ -4,7 +4,6 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_title_bar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_window_frame.dart';
-import 'package:window_manager/window_manager.dart';
 
 Widget _host(Widget child) => MaterialApp(
       home: Scaffold(
@@ -29,7 +28,7 @@ void main() {
       expect(size.height, DesktopTitleBar.height);
 
       // Verify DragToMoveArea exists for window dragging and double-click maximize
-      expect(find.byType(DragToMoveArea), findsOneWidget);
+      expect(find.byType(TitleDragArea), findsOneWidget);
 
       // Verify there is no redundant app name text on the title bar
       expect(find.text('MangaBaka'), findsNothing);

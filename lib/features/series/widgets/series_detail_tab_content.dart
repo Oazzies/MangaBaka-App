@@ -14,6 +14,7 @@ import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
+import 'package:mangabaka_app/features/stacks/widgets/series_stacks_tab.dart';
 
 class SeriesDetailTabContent extends StatelessWidget {
   final Series series;
@@ -54,7 +55,7 @@ class SeriesDetailTabContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tabPadding = selectedTab == 'News' ? 0.0 : hPadding;
-    
+
     switch (selectedTab) {
       case 'Covers':
         return SeriesCoversTab(
@@ -78,10 +79,15 @@ class SeriesDetailTabContent extends StatelessWidget {
           horizontalPadding: tabPadding,
           currentSeriesId: series.id,
         );
+      case 'Stacks':
+        return SeriesStacksTab(series: series, horizontalPadding: tabPadding);
       case 'News':
         return SeriesNewsTab(news: news, horizontalPadding: hPadding);
       case 'Collections':
-        return SeriesCollectionsTab(collections: collections, horizontalPadding: tabPadding);
+        return SeriesCollectionsTab(
+          collections: collections,
+          horizontalPadding: tabPadding,
+        );
       case 'Works':
         return SeriesWorksTab(
           works: works,
@@ -91,10 +97,10 @@ class SeriesDetailTabContent extends StatelessWidget {
       case 'Info':
       default:
         return SeriesDetailsGrid(
-          series: series, 
-          enrichedLinks: enrichedLinks, 
-          l10n: l10n, 
-          isWide: isWide, 
+          series: series,
+          enrichedLinks: enrichedLinks,
+          l10n: l10n,
+          isWide: isWide,
           horizontalPadding: tabPadding,
         );
     }

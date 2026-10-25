@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -23,7 +24,8 @@ Future<Color?> showMbColorPicker(
 }) {
   final l10n = LocalizationService();
   final size = MediaQuery.sizeOf(context);
-  final useSheet = !DesktopLayout.isDesktopPlatform &&
+  final useSheet =
+      !DesktopLayout.isDesktopPlatform &&
       size.width < 600 &&
       size.height > size.width;
 
@@ -34,7 +36,7 @@ Future<Color?> showMbColorPicker(
   );
 
   if (useSheet) {
-    return showModalBottomSheet<Color>(
+    return showAdaptiveSheet<Color>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -147,8 +149,9 @@ class _MbColorPickerState extends State<MbColorPicker> {
   /// to HSV loses its hue, which would snap the hue slider to red while the
   /// user drags value toward black.
   late HSVColor _hsv = HSVColor.fromColor(widget.color);
-  late final TextEditingController _hex =
-      TextEditingController(text: _hexOf(widget.color));
+  late final TextEditingController _hex = TextEditingController(
+    text: _hexOf(widget.color),
+  );
 
   static String _hexOf(Color c) => ColorMath.toHex(c).substring(1);
 
@@ -189,7 +192,10 @@ class _MbColorPickerState extends State<MbColorPicker> {
           child: _SvSquare(hsv: _hsv, onChanged: _set),
         ),
         const SizedBox(height: 14),
-        SizedBox(height: 28, child: _HueSlider(hsv: _hsv, onChanged: _set)),
+        SizedBox(
+          height: 28,
+          child: _HueSlider(hsv: _hsv, onChanged: _set),
+        ),
         const SizedBox(height: 14),
         Row(
           children: [
