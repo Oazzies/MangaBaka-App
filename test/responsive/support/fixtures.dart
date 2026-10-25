@@ -122,6 +122,68 @@ abstract final class Fixtures {
 
   static Series series(int i) => Series.fromSimilarJson(seriesJson(i));
 
+  /// A stack, cycling through long titles, every visibility, spoilers and
+  /// staff picks, and from zero to four preview covers.
+  static Map<String, dynamic> stackJson(int i) => {
+    'id': 500 + i,
+    'title': _titles[(i + 2) % _titles.length],
+    'canonical_url': 'https://mangabaka.org/stacks/${500 + i}-x',
+    'kind': i % 5 == 0 ? 'official' : 'personal',
+    'visibility': const ['public', 'unlisted', 'draft'][i % 3],
+    'content_rating': _ratings[i % _ratings.length],
+    'is_spoiler': i % 4 == 1,
+    'is_featured': i % 3 == 0,
+    'owner': {
+      'username': i % 6 == 5 ? null : 'curator$i',
+      'name': i.isEven ? 'A Curator With An Unreasonably Long Display Name' : 'k',
+    },
+    'entry_count': i * 13 % 100,
+    'vote_count': i * 1237,
+    'save_count': i * 31,
+    'first_published_at': '2026-10-0${1 + i % 9}T10:00:00Z',
+    'updated_at': '2026-10-1${i % 6}T10:00:00Z',
+    'covers': [
+      for (var c = 0; c < i % 5; c++)
+        {
+          'series_id': 1000 + c,
+          'cover': {'x250': null},
+        },
+    ],
+  };
+
+  static List<Map<String, dynamic>> stackList(int count) => [
+    for (var i = 0; i < count; i++) stackJson(i),
+  ];
+
+  /// A stack with [count] entries: long notes, no notes, and placeholders.
+  static Map<String, dynamic> stackDetailJson(int i, {int count = 14}) => {
+    ...stackJson(i),
+    'description': _longDescription,
+    'is_comments_enabled': true,
+    'token': 'tok',
+    'is_hidden': false,
+    'is_delisted': false,
+    'min_content_rating': null,
+    'is_spoiler_locked': false,
+    'entries': [
+      for (var e = 0; e < count; e++)
+        if (e % 7 == 6)
+          {'kind': e.isEven ? 'merged' : 'deleted', 'rank': e + 1}
+        else
+          {
+            'kind': 'series',
+            'rank': e + 1,
+            'series_id': 1000 + e,
+            'note': switch (e % 3) {
+              0 => _longDescription,
+              1 => null,
+              _ => 'Short note.',
+            },
+            'series': seriesJson(e),
+          },
+    ],
+  };
+
   /// An upcoming work, several sharing a release date so grouping is hit.
   static Map<String, dynamic> workJson(int i) {
     final date = DateTime(2026, 9, 25).add(Duration(days: i ~/ 3));

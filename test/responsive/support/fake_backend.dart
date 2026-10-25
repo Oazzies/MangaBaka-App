@@ -73,12 +73,68 @@ class FakeBackend extends HttpOverrides {
         {'data': page == 1 ? Fixtures.newsList(10) : [], 'total': 10},
       );
     }
+    if (path.contains('/stacks')) return _stacks(uri);
     final single = RegExp(r'/series/(\d+)$').firstMatch(path);
     if (single != null) {
       final i = int.parse(single.group(1)!) - 1000;
       return (200, {'data': Fixtures.seriesJson(i < 0 ? 0 : i)});
     }
     return (200, {'data': [], 'total': 0, 'results': []});
+  }
+
+  (int, Object?) _stacks(Uri uri) {
+    final path = uri.path;
+    if (path.endsWith('/my/stacks/status')) {
+      return (
+        200,
+        {
+          'data': [
+            for (final id in uri.queryParametersAll['id'] ?? const <String>[])
+              {
+                'id': int.parse(id),
+                'has_voted': int.parse(id).isEven,
+                'has_saved': false,
+                'has_followed': false,
+                'library_count': 3,
+                'vote_count': 12345,
+                'save_count': 678,
+                'follow_count': 9,
+              },
+          ],
+        },
+      );
+    }
+    if (RegExp(r'/my/series/\d+/stacks$').hasMatch(path)) {
+      return (
+        200,
+        {
+          'data': [
+            for (var i = 0; i < 6; i++)
+              {
+                'id': 500 + i,
+                'title': Fixtures.stackJson(i)['title'],
+                'visibility': Fixtures.stackJson(i)['visibility'],
+                'entry_count': i * 9,
+                'rank': i.isEven ? i + 1 : null,
+                'can_add': i != 3,
+              },
+          ],
+        },
+      );
+    }
+    final single = RegExp(r'/stacks/(\d+)$').firstMatch(path);
+    if (single != null) {
+      final i = int.parse(single.group(1)!) - 500;
+      return (200, {'data': Fixtures.stackDetailJson(i < 0 ? 0 : i)});
+    }
+    final page = int.tryParse(uri.queryParameters['page'] ?? '1') ?? 1;
+    return (
+      200,
+      {
+        'data': page == 1 ? Fixtures.stackList(14) : [],
+        'pagination': {'count': 14, 'page': page, 'next': null},
+      },
+    );
   }
 }
 

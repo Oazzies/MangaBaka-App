@@ -14,6 +14,7 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_carousel.dart';
+import 'package:mangabaka_app/features/stacks/widgets/my_stacks_entry_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_sign_in_prompt.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
@@ -311,6 +312,8 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
           avatarUrl: profile!.avatarUrl,
           onLogout: _logout,
         ),
+        const SizedBox(height: 16),
+        const MyStacksEntryCard(),
         if (inline) ...[
           const SizedBox(height: DesktopTokens.sectionGap),
           _overview(l10n, twoColumns: true),

@@ -16,6 +16,8 @@ import 'package:mangabaka_app/features/browse/services/mix_service.dart';
 import 'package:mangabaka_app/features/browse/services/book_lookup_service.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
 import 'package:mangabaka_app/features/deeplinks/deep_link_service.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 
 final getIt = GetIt.instance;
 
@@ -45,10 +47,17 @@ void setupServiceLocator() {
   );
 
   getIt.registerLazySingleton<NewsService>(() => NewsService());
-  getIt.registerLazySingleton<PublisherSearchService>(() => PublisherSearchService());
+  getIt.registerLazySingleton<PublisherSearchService>(
+    () => PublisherSearchService(),
+  );
   getIt.registerLazySingleton<CollectionService>(() => CollectionService());
   getIt.registerLazySingleton<MixService>(() => MixService());
   getIt.registerLazySingleton<BookLookupService>(() => BookLookupService());
+  getIt.registerLazySingleton<StackService>(() => StackService());
+  getIt.registerLazySingleton<StackStatusController>(
+    () => StackStatusController(),
+    dispose: (c) => c.dispose(),
+  );
 
   getIt.registerLazySingleton<UpdateService>(() => UpdateService());
 
@@ -56,7 +65,6 @@ void setupServiceLocator() {
     DeepLinkService(),
     dispose: (service) => service.dispose(),
   );
-
 }
 
 Future<void> resetServiceLocator() async {
