@@ -8,7 +8,7 @@ import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/models/sort_options.dart';
 
 /// Which list a [DesktopListStyleToggle] controls.
-enum DesktopListScope { library, browse }
+enum DesktopListScope { library, browse, stacks }
 
 /// Every list style as a row of icons, written to whichever setting the list
 /// reads from — the phone hides this in settings or cycles it one step per
@@ -38,10 +38,15 @@ class _DesktopListStyleToggleState extends State<DesktopListStyleToggle> {
     final settings = SettingsManager();
     if (!settings.separateListStyles) {
       settings.setListStyle(style);
-    } else if (widget.scope == DesktopListScope.library) {
-      settings.setLibraryListStyle(style);
     } else {
-      settings.setBrowseListStyle(style);
+      switch (widget.scope) {
+        case DesktopListScope.library:
+          settings.setLibraryListStyle(style);
+        case DesktopListScope.browse:
+          settings.setBrowseListStyle(style);
+        case DesktopListScope.stacks:
+          settings.setStacksListStyle(style);
+      }
     }
   }
 
@@ -52,9 +57,11 @@ class _DesktopListStyleToggleState extends State<DesktopListStyleToggle> {
       builder: (context, _) {
         final settings = SettingsManager();
         final l10n = LocalizationService();
-        final current = widget.scope == DesktopListScope.library
-            ? settings.resolvedLibraryListStyle
-            : settings.resolvedBrowseListStyle;
+        final current = switch (widget.scope) {
+          DesktopListScope.library => settings.resolvedLibraryListStyle,
+          DesktopListScope.browse => settings.resolvedBrowseListStyle,
+          DesktopListScope.stacks => settings.resolvedStacksListStyle,
+        };
         if (_pending == current) _pending = null;
 
         return DesktopSegmented<AppListStyle>(

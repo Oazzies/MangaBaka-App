@@ -41,6 +41,11 @@ class SettingsManager extends ChangeNotifier {
     AppListStyle.compactGrid,
     AppListStyle.values,
   );
+  final _stacksListStyle = EnumSetting(
+    SettingsKeys.stacksListStyle,
+    AppListStyle.compactGrid,
+    AppListStyle.values,
+  );
   final _publisherStatsStyle = EnumSetting(
     SettingsKeys.publisherStatsStyle,
     PublisherStatsStyle.charts,
@@ -131,6 +136,8 @@ class SettingsManager extends ChangeNotifier {
       IntSetting(SettingsKeys.libraryGridColumnCount, 0);
   final _browseGridColumnCount =
       IntSetting(SettingsKeys.browseGridColumnCount, 0);
+  final _stacksGridColumnCount =
+      IntSetting(SettingsKeys.stacksGridColumnCount, 0);
   final _collectionsListColumns =
       IntSetting(SettingsKeys.collectionsGridColumns, 0);
   final _newsListColumns = IntSetting(SettingsKeys.newsListColumns, 1);
@@ -160,6 +167,7 @@ class SettingsManager extends ChangeNotifier {
     _currentListStyle,
     _libraryListStyle,
     _browseListStyle,
+    _stacksListStyle,
     _worksListStyle,
     _publisherStatsStyle,
     _similarListStyle,
@@ -190,6 +198,7 @@ class SettingsManager extends ChangeNotifier {
     _gridColumnCount,
     _libraryGridColumnCount,
     _browseGridColumnCount,
+    _stacksGridColumnCount,
     _collectionsListColumns,
     _newsListColumns,
     _compactGridTitleRows,
@@ -206,6 +215,13 @@ class SettingsManager extends ChangeNotifier {
     final prefs = await _getPrefs();
     for (final setting in _all) {
       setting.load(prefs);
+    }
+    // Stacks used to follow Browse; until it is configured it keeps doing so.
+    if (!prefs.containsKey(SettingsKeys.stacksListStyle)) {
+      _stacksListStyle.set(_browseListStyle.value);
+    }
+    if (!prefs.containsKey(SettingsKeys.stacksGridColumnCount)) {
+      _stacksGridColumnCount.set(_browseGridColumnCount.value);
     }
     notifyListeners();
   }
@@ -244,6 +260,10 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setBrowseListStyle(AppListStyle style) =>
       _apply(_browseListStyle, style);
 
+  AppListStyle get stacksListStyle => _stacksListStyle.value;
+  Future<void> setStacksListStyle(AppListStyle style) =>
+      _apply(_stacksListStyle, style);
+
   PublisherStatsStyle get publisherStatsStyle => _publisherStatsStyle.value;
   Future<void> setPublisherStatsStyle(PublisherStatsStyle style) =>
       _apply(_publisherStatsStyle, style);
@@ -269,6 +289,10 @@ class SettingsManager extends ChangeNotifier {
   AppListStyle get resolvedBrowseListStyle =>
       separateListStyles ? browseListStyle : currentListStyle;
 
+  /// The style the Stacks list actually uses.
+  AppListStyle get resolvedStacksListStyle =>
+      separateListStyles ? stacksListStyle : currentListStyle;
+
   // ─── Grid columns ────────────────────────────────────────────────────────
 
   bool get separateGridColumnCounts => _separateGridColumnCounts.value;
@@ -285,6 +309,14 @@ class SettingsManager extends ChangeNotifier {
   int get browseGridColumnCount => _browseGridColumnCount.value;
   Future<void> setBrowseGridColumnCount(int value) =>
       _apply(_browseGridColumnCount, value);
+
+  int get stacksGridColumnCount => _stacksGridColumnCount.value;
+  Future<void> setStacksGridColumnCount(int value) =>
+      _apply(_stacksGridColumnCount, value);
+
+  /// The column count the Stacks grid actually uses.
+  int get resolvedStacksGridColumnCount =>
+      separateGridColumnCounts ? stacksGridColumnCount : gridColumnCount;
 
   /// The column count the Library grid actually uses.
   int get resolvedLibraryGridColumnCount =>

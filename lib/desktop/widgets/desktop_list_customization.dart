@@ -107,6 +107,7 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
                     _l10n.translate('start_page_browse'),
                     null,
                   ),
+                  (ListScopeTab.stacks, _l10n.translate('stacks'), null),
                 ],
                 onChanged: (tab) => setState(() => _tab = tab),
               ),
@@ -257,21 +258,13 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: DesktopPillButton(
-                    label: _l10n.translate(
-                      scope.tab.isLibrary
-                          ? 'copy_to_browse'
-                          : 'copy_to_library',
-                    ),
+                    label: _l10n.translate('copy_to_other_lists'),
                     icon: Icons.copy_all_outlined,
                     onPressed: () {
-                      scope.copyToOtherTab();
+                      scope.copyToOtherTabs();
                       AppSnackBar.show(
                         context,
-                        _l10n.translate(
-                          scope.tab.isLibrary
-                              ? 'copied_to_browse'
-                              : 'copied_to_library',
-                        ),
+                        _l10n.translate('copied_to_other_lists'),
                       );
                     },
                   ),

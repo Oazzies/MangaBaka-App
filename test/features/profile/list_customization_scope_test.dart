@@ -114,7 +114,7 @@ void main() {
       await settings.setLibraryListStyle(AppListStyle.comfortable);
       await settings.setBrowseListStyle(AppListStyle.coverOnlyGrid);
 
-      scope(ListScopeTab.library).copyToOtherTab();
+      scope(ListScopeTab.library).copyToOtherTabs();
 
       expect(settings.browseListStyle, AppListStyle.comfortable);
     });
@@ -123,10 +123,21 @@ void main() {
       await settings.setSeparateListStyles(false);
       await settings.setListStyle(AppListStyle.comfortable);
 
-      scope(ListScopeTab.library).copyToOtherTab();
+      scope(ListScopeTab.library).copyToOtherTabs();
 
       expect(settings.currentListStyle, AppListStyle.comfortable);
     });
+  });
+
+  test('the stacks tab edits its own style once styles are separate', () async {
+    await settings.setSeparateListStyles(true);
+    await settings.setBrowseListStyle(AppListStyle.compact);
+
+    scope(ListScopeTab.stacks).setStyle(AppListStyle.coverOnlyGrid);
+
+    expect(settings.stacksListStyle, AppListStyle.coverOnlyGrid);
+    expect(settings.resolvedStacksListStyle, AppListStyle.coverOnlyGrid);
+    expect(settings.browseListStyle, AppListStyle.compact);
   });
 
   test('hasAnySeparation is true when either switch is on', () async {

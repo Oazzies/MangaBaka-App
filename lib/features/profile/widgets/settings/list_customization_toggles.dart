@@ -10,7 +10,7 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_item.da
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_switch_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The two switches that decide whether Library and Browse are configured
+/// The two switches that decide whether Library, Browse and Stacks are configured
 /// together or apart.
 class ListSeparationSwitches extends StatelessWidget {
   final ListCustomizationScope scope;
@@ -153,20 +153,13 @@ class CopyToOtherListButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final toBrowse = scope.tab.isLibrary;
-
     return OutlinedButton.icon(
       onPressed: () {
-        scope.copyToOtherTab();
-        AppSnackBar.show(
-          context,
-          l10n.translate(toBrowse ? 'copied_to_browse' : 'copied_to_library'),
-        );
+        scope.copyToOtherTabs();
+        AppSnackBar.show(context, l10n.translate('copied_to_other_lists'));
       },
       icon: const Icon(Icons.copy_all_outlined),
-      label: Text(
-        l10n.translate(toBrowse ? 'copy_to_browse' : 'copy_to_library'),
-      ),
+      label: Text(l10n.translate('copy_to_other_lists')),
       style: OutlinedButton.styleFrom(
         foregroundColor: context.colors.accent,
         side: BorderSide(color: context.colors.accent.withValues(alpha: 0.5)),

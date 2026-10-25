@@ -18,6 +18,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/desktop/widgets/desktop_list_controls.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -474,7 +475,8 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
       ListenableBuilder(
         listenable: SettingsManager(),
         builder: (context, _) {
-          final style = SettingsManager().resolvedBrowseListStyle;
+          final style = SettingsManager().resolvedStacksListStyle;
+          final columns = SettingsManager().resolvedStacksGridColumnCount;
           final entries = _sorted(detail.entries);
           final landscape =
               MediaQuery.orientationOf(context) == Orientation.landscape;
@@ -490,12 +492,19 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
             return SliverPadding(
               padding: pad,
               sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: desktop ? 190 : 160,
-                  childAspectRatio: style.childAspectRatio,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
+                gridDelegate: columns > 0
+                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columns,
+                        childAspectRatio: style.childAspectRatio,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      )
+                    : SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: desktop ? 190 : 160,
+                        childAspectRatio: style.childAspectRatio,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
                 delegate: SliverChildBuilderDelegate((context, i) {
                   final e = entries[i];
                   final series = e.series;
@@ -620,10 +629,8 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
   }
 
   Widget _toolbar(BuildContext context, StackDetail detail) {
-    // The list style is the Browse one from Settings, like the Library has.
-    return Align(
-      alignment: Alignment.centerRight,
-      child: MbDropdown<StackEntrySort>(
+    // The list style comes from the Stacks list in List customization.
+    final sort = MbDropdown<StackEntrySort>(
         label: _l10n.translate('sort_by'),
         icon: Icons.sort_rounded,
         value: _sort,
@@ -632,7 +639,17 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
             (s, _l10n.translate(s.labelKey)),
         ],
         onChanged: (s) => setState(() => _sort = s),
-      ),
+      );
+    return Wrap(
+      alignment: WrapAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 8,
+      children: [
+        if (DesktopLayout.isActive(context))
+          const DesktopListStyleToggle(scope: DesktopListScope.stacks),
+        sort,
+      ],
     );
   }
 }
