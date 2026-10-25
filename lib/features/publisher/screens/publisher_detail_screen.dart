@@ -87,6 +87,15 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
   late Future<List<SimilarPublisher>> _similar;
   late Map<PublisherShelf, Future<List<Series>>> _shelves;
 
+  /// Complete once the stats and similar publishers have settled (either way),
+  /// and once every shelf has. The phone's Info tab builds those sections as
+  /// one block each instead of letting every section resize on its own: a
+  /// section that finishes loading above the viewport — or collapses because
+  /// it came back empty — would shift everything below it, and the scroll
+  /// position appears to jump.
+  late Future<void> _factsReady;
+  late Future<void> _shelvesReady;
+
   _PublisherTab _tab = _PublisherTab.info;
 
   /// How close to the end of the list (in logical pixels) the next page of
@@ -121,7 +130,14 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
       for (final shelf in PublisherShelf.values)
         shelf: _service.getShelf(widget.publisherId, shelf)..ignore(),
     };
+    _factsReady = _settled([_stats, _similar]);
+    _shelvesReady = _settled(_shelves.values);
   }
+
+  static Future<void> _settled(Iterable<Future<Object?>> futures) =>
+      Future.wait([
+        for (final f in futures) f.then<void>((_) {}, onError: (Object _) {}),
+      ]);
 
   void _retry() => setState(_load);
 
@@ -511,7 +527,7 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
         if (publisher.note != null && publisher.note!.isNotEmpty) {
           add(_NoteLine(text: publisher.note!));
         }
-        add(_statsSection(l10n, publisher));
+        add(_factsBlock(l10n, publisher));
         if (publisher.parent != null || publisher.imprints.isNotEmpty) {
           add(_Family(publisher: publisher, l10n: l10n));
         }
@@ -521,18 +537,7 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
         if (publisher.links.isNotEmpty) {
           add(_Links(publisher: publisher, l10n: l10n));
         }
-        add(_similarSection(l10n));
-        if (loading) {
-          add(
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: MbSpinner(size: 20, strokeWidth: 2)),
-            ),
-          );
-        }
-        for (final (shelf, title, sort) in _shelfDefs(l10n)) {
-          add(_shelf(publisher, shelf, title, sort), bare: true);
-        }
+        add(_shelvesBlock(publisher, l10n, loading: loading), bare: true);
       case _PublisherTab.collections:
         for (final w in _collectionsItems(l10n)) {
           add(w);
@@ -669,13 +674,62 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
 
   List<(PublisherShelf, String, String?)> _shelfDefs(LocalizationService l10n) => [
         (PublisherShelf.newest, l10n.translate('publisher_shelf_newest'), 'published_start_date_desc'),
-        (PublisherShelf.popular, l10n.translate('publisher_shelf_popular'), 'popularity_desc'),
+        (PublisherShelf.popular, l10n.translate('publisher_shelf_popular'), 'popularity_asc'),
         (PublisherShelf.highestRated, l10n.translate('publisher_shelf_highest_rated'), 'score_desc'),
         (PublisherShelf.trending, l10n.translate('trending'), 'trending_7d'),
         (PublisherShelf.hiddenGems, l10n.translate('hidden_gems'), null),
       ];
 
-  /// One series rail. Loads on its own and drops out if it fails or is empty.
+  /// Stats and similar publishers, shown together once both have settled.
+  Widget _factsBlock(LocalizationService l10n, Publisher publisher) {
+    return FutureBuilder<void>(
+      future: _factsReady,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const _SectionLoading();
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _statsSection(l10n, publisher),
+            const SizedBox(height: 14),
+            _similarSection(l10n),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Every series rail, shown together once all of them have settled. Until
+  /// then a single spinner holds the place at the end of the list, so rails
+  /// that load, or drop out because they are empty, never resize anything that
+  /// is already on screen.
+  Widget _shelvesBlock(
+    Publisher publisher,
+    LocalizationService l10n, {
+    required bool loading,
+  }) {
+    return FutureBuilder<void>(
+      future: _shelvesReady,
+      builder: (context, snapshot) {
+        if (loading || snapshot.connectionState != ConnectionState.done) {
+          return const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: MbSpinner(size: 20, strokeWidth: 2)),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (final (shelf, title, sort) in _shelfDefs(l10n))
+              _shelf(publisher, shelf, title, sort),
+          ],
+        );
+      },
+    );
+  }
+
+  /// One series rail. Drops out if it failed or is empty.
   Widget _shelf(Publisher publisher, PublisherShelf shelf, String title, String? sort) {
     return FutureBuilder<List<Series>>(
       future: _shelves[shelf],
@@ -1129,7 +1183,7 @@ class _StatsView extends StatelessWidget {
       AppTransitions.slideRight(
         BrowseResultsScreen(
           sortType: '${publisher.name} · $refine',
-          sortBy: 'popularity_desc',
+          sortBy: 'popularity_asc',
           publisher: publisher.name,
           publisherId: publisher.id,
           genre: genre,

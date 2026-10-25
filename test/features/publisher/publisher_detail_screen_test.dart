@@ -95,8 +95,11 @@ Future<void> _pump(WidgetTester tester, _FakePublishers fake) async {
   await tester.pumpWidget(
     const MaterialApp(home: PublisherDetailScreen(publisherId: '35')),
   );
-  await tester.pump();
-  await tester.pump();
+  // The stats and similar sections appear together once both have settled,
+  // which takes a few more microtask turns than either future alone.
+  for (var i = 0; i < 5; i++) {
+    await tester.pump();
+  }
 }
 
 void main() {
