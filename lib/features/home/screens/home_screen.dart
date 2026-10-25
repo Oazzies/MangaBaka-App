@@ -114,6 +114,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _loadingRails = false;
       _loadingTrending = false;
     });
+    // Library marks and fallback covers for the upcoming rail.
+    final resolved = await _upcoming.withLibrary();
+    if (!mounted) return;
+    setState(() => _upcoming = resolved);
   }
 
   /// Re-fetch only the Trending rail after a type / window change. The old

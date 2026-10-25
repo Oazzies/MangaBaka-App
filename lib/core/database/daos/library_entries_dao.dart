@@ -6,6 +6,37 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
   final _logger = LoggingService.logger;
   LibraryEntriesDao(super.db);
 
+  /// Which of [seriesIds] are in the library, with their covers. Asks the
+  /// database about just those series instead of reading the whole library, so
+  /// the cost follows the question, not a library of tens of thousands.
+  Future<Map<String, String>> libraryCoversFor(Iterable<String> seriesIds) async {
+    final ids = seriesIds.toSet().toList();
+    final covers = <String, String>{};
+    try {
+      for (var i = 0; i < ids.length; i += 500) {
+        final chunk = ids.sublist(i, i + 500 > ids.length ? ids.length : i + 500);
+        final query = selectOnly(libraryEntriesTable).join([
+          innerJoin(
+            seriesTable,
+            seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+          ),
+        ])
+          ..addColumns([seriesTable.id, seriesTable.coverUrl])
+          ..where(libraryEntriesTable.seriesId.isIn(chunk));
+        for (final row in await query.get()) {
+          covers[row.read(seriesTable.id)!] = row.read(seriesTable.coverUrl)!;
+        }
+      }
+      return covers;
+    } catch (e) {
+      _logger.severe('Failed to look up library series: $e');
+      throw exc.DatabaseException(
+        message: 'Failed to look up library series',
+        originalError: e,
+      );
+    }
+  }
+
   Future<LibraryEntryWithSeries?> getEntryBySeriesId(String seriesId) async {
     try {
       final query = select(libraryEntriesTable).join([

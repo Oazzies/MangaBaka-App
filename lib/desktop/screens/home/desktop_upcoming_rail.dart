@@ -34,6 +34,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
   Map<String, String> _seriesCovers = const {};
   bool _loading = true;
   bool _onlyLibrary = false;
+  bool _libraryResolved = false;
   int _page = 1;
   bool _hasMore = false;
   bool _loadingMore = false;
@@ -46,34 +47,42 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _libraryResolved = false;
+    });
     final works = await _home.fetchUpcomingWorks(page: 1, perPage: 40);
-
-    // Load user's library series IDs and covers from local database
-    final lib = getIt<LibraryService>();
-    final Set<String> libraryIds = {};
-    final Map<String, String> seriesCovers = {};
-    try {
-      final entries = await lib.database.libraryEntriesDao
-          .watchAllEntriesWithSeries()
-          .first;
-      for (final e in entries) {
-        libraryIds.add(e.series.id);
-        final cover = e.series.coverUrl;
-        if (cover.isNotEmpty) {
-          seriesCovers[e.series.id] = cover;
-        }
-      }
-    } catch (_) {}
-
     if (!mounted) return;
     setState(() {
       _works = works;
       _page = 1;
       _hasMore = works.length >= 25;
-      _librarySeriesIds = libraryIds;
-      _seriesCovers = seriesCovers;
       _loading = false;
+    });
+    await _resolveLibrary();
+  }
+
+  /// Works out which releases are in the library, asking the database only
+  /// about their series. Until it answers, a library-only view shows a spinner.
+  Future<void> _resolveLibrary() async {
+    final works = _works;
+    final ids = {
+      for (final w in works)
+        if (w.seriesId != null) w.seriesId.toString(),
+    };
+    var covers = const <String, String>{};
+    try {
+      covers = await getIt<LibraryService>().database.libraryEntriesDao
+          .libraryCoversFor(ids);
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _librarySeriesIds = covers.keys.toSet();
+      _seriesCovers = {
+        for (final e in covers.entries)
+          if (e.value.isNotEmpty) e.key: e.value,
+      };
+      _libraryResolved = true;
     });
   }
 
@@ -94,7 +103,9 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
       _page++;
       _hasMore = next.length >= 25;
       _loadingMore = false;
+      _libraryResolved = false;
     });
+    await _resolveLibrary();
   }
 
   /// One header per release day, then that day's releases — the date is what
@@ -232,7 +243,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
         ),
         Divider(height: 1, color: context.colors.border),
         Expanded(
-          child: _loading
+          child: _loading || (_onlyLibrary && !_libraryResolved)
               ? const Center(child: MbSpinner())
               : displayedWorks.isEmpty
               ? Center(
