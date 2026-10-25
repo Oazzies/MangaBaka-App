@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'dart:math';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class DynamicRowHeightGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (itemCount == 0) return const SizedBox.shrink();
-    
+
     final int rowCount = (itemCount / crossAxisCount).ceil();
 
     return ListView.builder(
@@ -36,13 +37,20 @@ class DynamicRowHeightGrid extends StatelessWidget {
       physics: physics,
       padding: padding,
       shrinkWrap: shrinkWrap,
+      // Build rows well ahead of the scroll so covers are decoded by the time
+      // they arrive.
+      scrollCacheExtent: shrinkWrap
+          ? null
+          : const ScrollCacheExtent.pixels(500),
       itemCount: rowCount,
       itemBuilder: (context, rowIndex) {
         final int startIndex = rowIndex * crossAxisCount;
         final int endIndex = min(startIndex + crossAxisCount, itemCount);
 
         return Padding(
-          padding: EdgeInsets.only(bottom: rowIndex == rowCount - 1 ? 0 : mainAxisSpacing),
+          padding: EdgeInsets.only(
+            bottom: rowIndex == rowCount - 1 ? 0 : mainAxisSpacing,
+          ),
           // responsive-ok: a row is as tall as its tallest cell; the extra
           // pass covers one row of a few cells, only for rows on screen.
           child: IntrinsicHeight(
@@ -50,8 +58,12 @@ class DynamicRowHeightGrid extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: List.generate(crossAxisCount, (colIndex) {
                 final int itemIndex = startIndex + colIndex;
-                final double leftPadding = colIndex * crossAxisSpacing / crossAxisCount;
-                final double rightPadding = (crossAxisCount - 1 - colIndex) * crossAxisSpacing / crossAxisCount;
+                final double leftPadding =
+                    colIndex * crossAxisSpacing / crossAxisCount;
+                final double rightPadding =
+                    (crossAxisCount - 1 - colIndex) *
+                    crossAxisSpacing /
+                    crossAxisCount;
 
                 final Widget childWidget = itemIndex < endIndex
                     ? itemBuilder(context, itemIndex)

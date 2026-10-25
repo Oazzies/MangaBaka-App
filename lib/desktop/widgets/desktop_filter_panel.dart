@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/utils/content_rating_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -211,6 +212,25 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
             ),
         ]),
       ),
+      _Section(
+        title: l10n.translate('content_rating'),
+        child: _chipWrap([
+          for (final r in ContentRatingFilter.all)
+            _chip(
+              label: l10n.translate(r),
+              state: _stateOf(r, _f.contentRating, _f.contentRatingNot),
+              onChanged: (s) {
+                final (inc, exc) = _apply(
+                  r,
+                  s,
+                  _f.contentRating,
+                  _f.contentRatingNot,
+                );
+                _emit(_f.copyWith(contentRating: inc, contentRatingNot: exc));
+              },
+            ),
+        ]),
+      ),
       _Section(title: l10n.translate('genres'), child: _genreSection(l10n)),
       _Section(title: l10n.translate('tags'), child: _tagSection(l10n)),
       _Section(
@@ -285,6 +305,16 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
             ],
             onChanged: (v) => _emit(_f.copyWithHasAnime(v)),
           ),
+        ),
+      ),
+      _Section(
+        title: l10n.translate('filter_publisher'),
+        child: _PublisherField(
+          hint: l10n.translate('filter_publisher_hint'),
+          onSubmit: (name) {
+            if (name.isEmpty || _f.publisher.contains(name)) return;
+            _emit(_f.copyWith(publisher: [..._f.publisher, name]));
+          },
         ),
       ),
       if (_f.staff.isNotEmpty || _f.publisher.isNotEmpty)
@@ -579,14 +609,15 @@ class DesktopTriChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (Color bg, Color fg, IconData? icon) = switch (state) {
+      // Solid fills: the translucent tints read as muddy on the panel.
       TriState.include => (
-        context.colors.accent.withValues(alpha: 0.18),
         context.colors.accent,
+        context.colors.onAccent,
         Icons.check_rounded,
       ),
       TriState.exclude => (
-        context.colors.error.withValues(alpha: 0.16),
         context.colors.error,
+        context.colors.on(context.colors.error),
         Icons.remove_rounded,
       ),
       TriState.off => (
@@ -609,7 +640,7 @@ class DesktopTriChip extends StatelessWidget {
       idleColor: bg,
       hoverColor: state == TriState.off
           ? context.colors.surfaceRaised
-          : bg.withValues(alpha: 0.3),
+          : Color.lerp(bg, context.colors.text, 0.14),
       borderRadius: BorderRadius.circular(AppConstants.pillRadius),
       padding: EdgeInsets.fromLTRB(icon == null ? 12 : 8, 6, 12, 6),
       child: Row(
@@ -861,6 +892,56 @@ class _SearchBox extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: context.colors.accent, width: 1.2),
+        ),
+      ),
+    );
+  }
+}
+
+/// A one-line field that hands back the trimmed text on submit and clears.
+class _PublisherField extends StatefulWidget {
+  final String hint;
+  final ValueChanged<String> onSubmit;
+
+  const _PublisherField({required this.hint, required this.onSubmit});
+
+  @override
+  State<_PublisherField> createState() => _PublisherFieldState();
+}
+
+class _PublisherFieldState extends State<_PublisherField> {
+  final TextEditingController _text = TextEditingController();
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    widget.onSubmit(_text.text.trim());
+    _text.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return TextField(
+      controller: _text,
+      onSubmitted: (_) => _submit(),
+      style: AppTypography.sans(color: c.text, fontSize: 13),
+      decoration: InputDecoration(
+        hintText: widget.hint,
+        isDense: true,
+        filled: true,
+        fillColor: c.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 10,
+        ),
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.add_rounded, size: 18),
+          onPressed: _submit,
         ),
       ),
     );

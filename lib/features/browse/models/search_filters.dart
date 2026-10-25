@@ -9,6 +9,11 @@ class SearchFilters {
   final List<String> tagNot;
   final List<String> staff;
   final List<String> publisher;
+
+  /// Content ratings to include / exclude, within what the user's content
+  /// preference already allows.
+  final List<String> contentRating;
+  final List<String> contentRatingNot;
   final String? sortBy;
   final double ratingLower;
   final double ratingUpper;
@@ -31,6 +36,8 @@ class SearchFilters {
       tagNot.isEmpty &&
       staff.isEmpty &&
       publisher.isEmpty &&
+      contentRating.isEmpty &&
+      contentRatingNot.isEmpty &&
       sortBy == null &&
       ratingLower == 0 &&
       ratingUpper == 100 &&
@@ -52,6 +59,8 @@ class SearchFilters {
     count += tagNot.length;
     count += staff.length;
     count += publisher.length;
+    count += contentRating.length;
+    count += contentRatingNot.length;
     if (sortBy != null && sortBy!.isNotEmpty) count++;
     if (ratingLower > 0 || ratingUpper < 100) count++;
     if (publishedYearLower != null || publishedYearUpper != null) count++;
@@ -71,6 +80,8 @@ class SearchFilters {
     this.tagNot = const [],
     this.staff = const [],
     this.publisher = const [],
+    this.contentRating = const [],
+    this.contentRatingNot = const [],
     this.sortBy,
     this.ratingLower = 0,
     this.ratingUpper = 100,
@@ -92,6 +103,8 @@ class SearchFilters {
     List<String>? tagNot,
     List<String>? staff,
     List<String>? publisher,
+    List<String>? contentRating,
+    List<String>? contentRatingNot,
     String? sortBy,
     double? ratingLower,
     double? ratingUpper,
@@ -112,6 +125,8 @@ class SearchFilters {
       tagNot: tagNot ?? this.tagNot,
       staff: staff ?? this.staff,
       publisher: publisher ?? this.publisher,
+      contentRating: contentRating ?? this.contentRating,
+      contentRatingNot: contentRatingNot ?? this.contentRatingNot,
       sortBy: sortBy ?? this.sortBy,
       ratingLower: ratingLower ?? this.ratingLower,
       ratingUpper: ratingUpper ?? this.ratingUpper,
@@ -127,92 +142,102 @@ class SearchFilters {
 
   /// Convenience wrapper — clears or sets [sortBy] without touching other fields.
   SearchFilters copyWithSortBy(String? sortBy) => SearchFilters(
-        type: type,
-        typeNot: typeNot,
-        status: status,
-        statusNot: statusNot,
-        genre: genre,
-        genreNot: genreNot,
-        tag: tag,
-        tagNot: tagNot,
-        staff: staff,
-        publisher: publisher,
-        sortBy: sortBy,
-        ratingLower: ratingLower,
-        ratingUpper: ratingUpper,
-        publishedYearLower: publishedYearLower,
-        publishedYearUpper: publishedYearUpper,
-        isLicensed: isLicensed,
-        hasAnime: hasAnime,
-        tagMode: tagMode,
-      );
+    type: type,
+    typeNot: typeNot,
+    status: status,
+    statusNot: statusNot,
+    genre: genre,
+    genreNot: genreNot,
+    tag: tag,
+    tagNot: tagNot,
+    staff: staff,
+    publisher: publisher,
+    contentRating: contentRating,
+    contentRatingNot: contentRatingNot,
+    sortBy: sortBy,
+    ratingLower: ratingLower,
+    ratingUpper: ratingUpper,
+    publishedYearLower: publishedYearLower,
+    publishedYearUpper: publishedYearUpper,
+    isLicensed: isLicensed,
+    hasAnime: hasAnime,
+    tagMode: tagMode,
+  );
 
   /// Convenience wrapper — replaces publication-year bounds without touching other fields.
-  SearchFilters copyWithYear({int? publishedYearLower, int? publishedYearUpper}) =>
-      SearchFilters(
-        type: type,
-        typeNot: typeNot,
-        status: status,
-        statusNot: statusNot,
-        genre: genre,
-        genreNot: genreNot,
-        tag: tag,
-        tagNot: tagNot,
-        staff: staff,
-        publisher: publisher,
-        sortBy: sortBy,
-        ratingLower: ratingLower,
-        ratingUpper: ratingUpper,
-        publishedYearLower: publishedYearLower,
-        publishedYearUpper: publishedYearUpper,
-        isLicensed: isLicensed,
-        hasAnime: hasAnime,
-        tagMode: tagMode,
-      );
+  SearchFilters copyWithYear({
+    int? publishedYearLower,
+    int? publishedYearUpper,
+  }) => SearchFilters(
+    type: type,
+    typeNot: typeNot,
+    status: status,
+    statusNot: statusNot,
+    genre: genre,
+    genreNot: genreNot,
+    tag: tag,
+    tagNot: tagNot,
+    staff: staff,
+    publisher: publisher,
+    contentRating: contentRating,
+    contentRatingNot: contentRatingNot,
+    sortBy: sortBy,
+    ratingLower: ratingLower,
+    ratingUpper: ratingUpper,
+    publishedYearLower: publishedYearLower,
+    publishedYearUpper: publishedYearUpper,
+    isLicensed: isLicensed,
+    hasAnime: hasAnime,
+    tagMode: tagMode,
+  );
 
   /// Convenience wrapper — sets or clears [isLicensed] without touching other fields.
   SearchFilters copyWithIsLicensed(bool? isLicensed) => SearchFilters(
-        type: type,
-        typeNot: typeNot,
-        status: status,
-        statusNot: statusNot,
-        genre: genre,
-        genreNot: genreNot,
-        tag: tag,
-        tagNot: tagNot,
-        staff: staff,
-        publisher: publisher,
-        sortBy: sortBy,
-        ratingLower: ratingLower,
-        ratingUpper: ratingUpper,
-        publishedYearLower: publishedYearLower,
-        publishedYearUpper: publishedYearUpper,
-        isLicensed: isLicensed,
-        hasAnime: hasAnime,
-        tagMode: tagMode,
-      );
+    type: type,
+    typeNot: typeNot,
+    status: status,
+    statusNot: statusNot,
+    genre: genre,
+    genreNot: genreNot,
+    tag: tag,
+    tagNot: tagNot,
+    staff: staff,
+    publisher: publisher,
+    contentRating: contentRating,
+    contentRatingNot: contentRatingNot,
+    sortBy: sortBy,
+    ratingLower: ratingLower,
+    ratingUpper: ratingUpper,
+    publishedYearLower: publishedYearLower,
+    publishedYearUpper: publishedYearUpper,
+    isLicensed: isLicensed,
+    hasAnime: hasAnime,
+    tagMode: tagMode,
+  );
 
   /// Convenience wrapper - sets or clears [hasAnime] without touching other fields.
   SearchFilters copyWithHasAnime(bool? hasAnime) => SearchFilters(
-        type: type,
-        typeNot: typeNot,
-        status: status,
-        statusNot: statusNot,
-        genre: genre,
-        genreNot: genreNot,
-        tag: tag,
-        tagNot: tagNot,
-        staff: staff,
-        publisher: publisher,
-        sortBy: sortBy,
-        ratingLower: ratingLower,
-        ratingUpper: ratingUpper,
-        publishedYearLower: publishedYearLower,
-        publishedYearUpper: publishedYearUpper,
-        isLicensed: isLicensed,
-        hasAnime: hasAnime,
-        tagMode: tagMode,
-      );
+    type: type,
+    typeNot: typeNot,
+    status: status,
+    statusNot: statusNot,
+    genre: genre,
+    genreNot: genreNot,
+    tag: tag,
+    tagNot: tagNot,
+    staff: staff,
+    publisher: publisher,
+    contentRating: contentRating,
+    contentRatingNot: contentRatingNot,
+    sortBy: sortBy,
+    ratingLower: ratingLower,
+    ratingUpper: ratingUpper,
+    publishedYearLower: publishedYearLower,
+    publishedYearUpper: publishedYearUpper,
+    isLicensed: isLicensed,
+    hasAnime: hasAnime,
+    tagMode: tagMode,
+  );
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};
@@ -227,6 +252,10 @@ class SearchFilters {
     if (tagNot.isNotEmpty) map['tag_not'] = tagNot;
     if (staff.isNotEmpty) map['staff'] = staff;
     if (publisher.isNotEmpty) map['publisher'] = publisher;
+    if (contentRating.isNotEmpty) map['content_rating'] = contentRating;
+    if (contentRatingNot.isNotEmpty) {
+      map['not_content_rating'] = contentRatingNot;
+    }
 
     if (sortBy != null && sortBy!.isNotEmpty) {
       map['sort_by'] = sortBy;
