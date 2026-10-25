@@ -388,7 +388,15 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                                     series.contentRating,
                                                   ),
                                               fit: BoxFit.cover,
-                                              memCacheWidth: 460,
+                                              // The size the list already
+                                              // decoded this cover at, so it
+                                              // comes straight from memory.
+                                              memCacheWidth:
+                                                  WidgetUtils.shownDecodeWidth(
+                                                    series.coverUrl,
+                                                  ) ??
+                                                  460,
+                                              fadeIn: Duration.zero,
                                             )
                                           : Container(
                                               color:
