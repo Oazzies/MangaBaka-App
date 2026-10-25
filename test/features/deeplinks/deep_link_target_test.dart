@@ -86,7 +86,19 @@ void main() {
           isA<DiscoverTarget>());
       expect(parse('https://mangabaka.org/mix'), isA<MixTarget>());
       expect(parse('https://mangabaka.org/my/stats'), isA<StatsTarget>());
-      expect(parse('https://mangabaka.org/stacks'), isA<CollectionsTarget>());
+    });
+
+    test('stacks', () {
+      expect(parse('https://mangabaka.org/stacks'), isA<StackHubTarget>());
+      expect(parse('https://mangabaka.org/stacks/new'), isA<StackListTarget>());
+      final stack = parse(
+        'https://mangabaka.org/stacks/18-non-slop-fantasy-reincarnation-manga-only',
+      );
+      expect(stack, isA<StackTarget>());
+      expect((stack as StackTarget).id, 18);
+      expect((parse('mangabaka://stacks/35') as StackTarget).id, 35);
+      expect(parse('https://mangabaka.org/stacks/oops'), isA<StackHubTarget>());
+      expect(parse('https://mangabaka.org/my/stacks'), isA<MyStacksTarget>());
     });
   });
 

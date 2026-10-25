@@ -65,7 +65,7 @@ sealed class DeepLinkTarget {
       case 'mix':
         return const MixTarget();
       case 'stacks':
-        return const CollectionsTarget();
+        return _parseStacks(second);
       case 'news':
         return const TabTarget(NavTabs.news);
       case 'library':
@@ -89,9 +89,17 @@ sealed class DeepLinkTarget {
       case 'discover':
         return const DiscoverTarget();
       case 'stacks':
-        return const CollectionsTarget();
+        return const MyStacksTarget();
     }
     return null;
+  }
+
+  /// `/stacks`, `/stacks/new`, `/stacks/<id>-<slug>`.
+  static DeepLinkTarget _parseStacks(String? section) {
+    if (section == null || section.isEmpty) return const StackHubTarget();
+    if (section.toLowerCase() == 'new') return const StackListTarget();
+    final id = int.tryParse(RegExp(r'^\d+').stringMatch(section) ?? '');
+    return id == null ? const StackHubTarget() : StackTarget(id);
   }
 
   /// `/search?q=berserk&genre=action&tag=94&tag=126&type=manga&sort_by=...`
@@ -157,6 +165,23 @@ class StatsTarget extends DeepLinkTarget {
   const StatsTarget();
 }
 
-class CollectionsTarget extends DeepLinkTarget {
-  const CollectionsTarget();
+/// The Stacks hub (`/stacks`).
+class StackHubTarget extends DeepLinkTarget {
+  const StackHubTarget();
+}
+
+/// Every public stack, newest first (`/stacks/new`).
+class StackListTarget extends DeepLinkTarget {
+  const StackListTarget();
+}
+
+/// One stack (`/stacks/<id>-<slug>`).
+class StackTarget extends DeepLinkTarget {
+  final int id;
+  const StackTarget(this.id);
+}
+
+/// The reader's own stacks (`/my/stacks`).
+class MyStacksTarget extends DeepLinkTarget {
+  const MyStacksTarget();
 }

@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/stacks/screens/my_stacks_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stack_detail_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stacks_list_screen.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -12,7 +16,6 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/browse/screens/mix_screen.dart';
 import 'package:mangabaka_app/features/browse/utils/browse_navigation.dart';
-import 'package:mangabaka_app/features/collections/screens/collections_browse_screen.dart';
 import 'package:mangabaka_app/features/deeplinks/deep_link_target.dart';
 import 'package:mangabaka_app/features/home/screens/discovery_queue_screen.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
@@ -75,8 +78,7 @@ class DeepLinkService {
     // Handle subsequent links while the app is running.
     _sub = _appLinks.uriLinkStream.listen(
       _handle,
-      onError: (e) =>
-          _logger.warning('DeepLinkService: link stream error: $e'),
+      onError: (e) => _logger.warning('DeepLinkService: link stream error: $e'),
     );
   }
 
@@ -117,7 +119,9 @@ class DeepLinkService {
 
       _logger.info('DeepLinkService: Windows protocol registration done');
     } catch (e) {
-      _logger.warning('DeepLinkService: Windows protocol registration failed: $e');
+      _logger.warning(
+        'DeepLinkService: Windows protocol registration failed: $e',
+      );
     }
   }
 
@@ -149,7 +153,8 @@ class DeepLinkService {
       final desktopFile = File('${appDir.path}/mangabaka.desktop');
       final execPath = Platform.resolvedExecutable;
 
-      final contents = '''
+      final contents =
+          '''
 [Desktop Entry]
 Type=Application
 Name=MangaBaka
@@ -167,13 +172,18 @@ MimeType=x-scheme-handler/$_scheme;
       }
       desktopFile.writeAsStringSync(contents);
 
-      await Process.run(
-          'xdg-mime', ['default', 'mangabaka.desktop', 'x-scheme-handler/$_scheme']);
+      await Process.run('xdg-mime', [
+        'default',
+        'mangabaka.desktop',
+        'x-scheme-handler/$_scheme',
+      ]);
       await Process.run('update-desktop-database', [appDir.path]);
 
       _logger.info('DeepLinkService: Linux protocol registration done');
     } catch (e) {
-      _logger.warning('DeepLinkService: Linux protocol registration failed: $e');
+      _logger.warning(
+        'DeepLinkService: Linux protocol registration failed: $e',
+      );
     }
   }
 
@@ -219,7 +229,9 @@ MimeType=x-scheme-handler/$_scheme;
       }
       if (++attempts >= _readyAttempts) {
         _readyTimer = null;
-        _logger.warning('DeepLinkService: app never became ready; link dropped');
+        _logger.warning(
+          'DeepLinkService: app never became ready; link dropped',
+        );
         return;
       }
       _readyTimer = Timer(_readyPoll, attempt);
@@ -245,19 +257,25 @@ MimeType=x-scheme-handler/$_scheme;
       case SearchTarget(:final query, :final filters):
         BrowseNavigation.search(context, query, filters);
       case DiscoverTarget():
-        Navigator.of(context).push(
-          AppTransitions.slideRight(const DiscoveryQueueScreen()),
-        );
+        Navigator.of(
+          context,
+        ).push(AppTransitions.slideRight(const DiscoveryQueueScreen()));
       case MixTarget():
-        Navigator.of(context).push(
-          AppTransitions.slideRight(const MixScreen()),
-        );
+        Navigator.of(
+          context,
+        ).push(AppTransitions.slideRight(const MixScreen()));
       case StatsTarget():
-        Navigator.of(context).push(
-          AppTransitions.slideRight(const StatisticsScreen()),
-        );
-      case CollectionsTarget():
-        CollectionsBrowseScreen.open(context);
+        Navigator.of(
+          context,
+        ).push(AppTransitions.slideRight(const StatisticsScreen()));
+      case StackHubTarget():
+        StacksHubScreen.open(context);
+      case StackListTarget():
+        StacksListScreen.open(context, const StacksListSource.newest());
+      case StackTarget(:final id):
+        StackDetailScreen.open(context, id: id);
+      case MyStacksTarget():
+        MyStacksScreen.open(context);
     }
   }
 
@@ -272,9 +290,10 @@ MimeType=x-scheme-handler/$_scheme;
     try {
       final series = await getIt<SeriesService>().fetchSeries(seriesId);
       if (!context.mounted) return;
-      Navigator.of(context, rootNavigator: true).push(
-        AppTransitions.slideUp(SeriesDetailScreen(series: series)),
-      );
+      Navigator.of(
+        context,
+        rootNavigator: true,
+      ).push(AppTransitions.slideUp(SeriesDetailScreen(series: series)));
     } catch (e) {
       _logger.warning('DeepLinkService: failed to open series $seriesId: $e');
       final ctx = AppConstants.navigatorKey.currentContext;
