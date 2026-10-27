@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -77,7 +78,7 @@ class ListStyleDialogs {
   }) {
     final settingsManager = SettingsManager();
 
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

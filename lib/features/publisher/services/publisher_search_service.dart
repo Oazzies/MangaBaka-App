@@ -133,7 +133,7 @@ class PublisherSearchService {
         'limit': limit,
         'sort_by': switch (shelf) {
           PublisherShelf.newest => 'published_start_date_desc',
-          PublisherShelf.popular => 'popularity_desc',
+          PublisherShelf.popular => 'popularity_asc',
           PublisherShelf.highestRated => 'score_desc',
           _ => 'trending_7d',
         },

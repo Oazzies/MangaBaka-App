@@ -2,7 +2,6 @@ import 'package:mangabaka_app/core/utils/json_utils.dart';
 import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 
-
 /// A publisher as embedded in a series: enough to link through to the
 /// publisher page by id and to tell regional editions apart.
 class SeriesPublisher {
@@ -124,7 +123,6 @@ class Series {
     }
   }
 
-
   factory Series.fromSimilarJson(Map<String, dynamic> json) {
     // The /similar endpoint uses genres_v2, tags_v2, links_v2, and a titles array
     // instead of the flat title/native_title/romanized_title fields.
@@ -192,7 +190,7 @@ class Series {
   //Thanks GPT4.1
   factory Series.fromJson(Map<String, dynamic> json) {
     final source = (json['source'] as Map?)?.cast<String, dynamic>();
-    
+
     // Calculate combined average if source data is available
     String rating = json['rating']?.toString() ?? '';
     if (source != null && source.isNotEmpty) {
@@ -201,7 +199,9 @@ class Series {
           .whereType<double>()
           .toList();
       if (normalizedRatings.isNotEmpty) {
-        final avg = normalizedRatings.reduce((a, b) => a + b) / normalizedRatings.length;
+        final avg =
+            normalizedRatings.reduce((a, b) => a + b) /
+            normalizedRatings.length;
         rating = avg.toStringAsFixed(1);
       }
     }
@@ -213,7 +213,9 @@ class Series {
 
     final secTitlesRaw = json['secondary_titles'];
     if (secTitlesRaw is Map) {
-      secondaryTitlesList = secTitlesRaw.values.map((e) => e.toString()).toList();
+      secondaryTitlesList = secTitlesRaw.values
+          .map((e) => e.toString())
+          .toList();
     } else if (secTitlesRaw is List) {
       secondaryTitlesList = secTitlesRaw.map((e) => e.toString()).toList();
     }
@@ -241,16 +243,29 @@ class Series {
         return null;
       }
 
-      // 1. Determine main display title: prefer English, then any romanized, then any primary, then first available.
-      final chosen = pick((t) => langOf(t) == 'en') ??
-          pick(isRomanized) ??
-          pick((t) => t is Map && t['is_primary'] == true) ??
-          (titlesList.first is Map
-              ? (titlesList.first as Map).cast<String, dynamic>()
-              : null);
+      // 1. The v1 API's own `title` is the canonical main title. v2 only sends
+      // the `titles` array (every language is "primary"), so mirror how v1 picks
+      // it: the official English title, else the romanized one, else any
+      // English one. Taking just any English entry shows fan/alt titles.
+      if (title.isEmpty) {
+        final chosen =
+            pick(
+              (t) =>
+                  langOf(t) == 'en' &&
+                  JsonUtils.stringList(
+                    (t as Map)['traits'],
+                  ).contains('official'),
+            ) ??
+            pick(isRomanized) ??
+            pick((t) => langOf(t) == 'en') ??
+            pick((t) => t is Map && t['is_primary'] == true) ??
+            (titlesList.first is Map
+                ? (titlesList.first as Map).cast<String, dynamic>()
+                : null);
 
-      if (chosen != null) {
-        title = chosen['title']?.toString() ?? '';
+        if (chosen != null) {
+          title = chosen['title']?.toString() ?? '';
+        }
       }
 
       // 2. Determine native title: prefer ja, ko, zh/zh-* without romanized trait
@@ -314,9 +329,10 @@ class Series {
       links: (json['links'] as List?) ?? [],
       publishers: _namesOf(json['publishers']),
       publisherRefs: [
-        for (final p in (json['publishers'] is List
-            ? json['publishers'] as List
-            : const []))
+        for (final p
+            in (json['publishers'] is List
+                ? json['publishers'] as List
+                : const []))
           if (SeriesPublisher.tryParse(p) case final ref?) ref,
       ],
       genres: JsonUtils.stringList(json['genres']),

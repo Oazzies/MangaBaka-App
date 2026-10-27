@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ class SelectionBottomSheet {
     required void Function(T) onSelected,
     bool isScrollable = false,
   }) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: isScrollable,

@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
@@ -12,7 +13,7 @@ class SortSelectionDialog {
     required SearchFilters currentFilters,
     required ValueChanged<String?> onSortSelected,
   }) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

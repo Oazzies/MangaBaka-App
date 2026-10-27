@@ -9,7 +9,16 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 /// slightly away instead of leaving it static — so a push reads as one surface
 /// replacing another rather than a new screen sliding over a frozen one.
 abstract final class AppTransitions {
-  static Widget _fadeThroughOutgoing(Animation<double> secondary, Widget child) {
+  /// Landscape and desktop have a wide, pointer-friendly screen where pages
+  /// rising or sliding in from an edge look off, so they cross-fade instead.
+  static bool _calm(BuildContext context) =>
+      DesktopLayout.isActive(context) ||
+      MediaQuery.orientationOf(context) == Orientation.landscape;
+
+  static Widget _fadeThroughOutgoing(
+    Animation<double> secondary,
+    Widget child,
+  ) {
     // The outgoing page dims and recedes a touch; barely perceptible on its
     // own, but it is what stops a push from feeling flat.
     //
@@ -51,9 +60,11 @@ abstract final class AppTransitions {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final curved =
-            CurvedAnimation(parent: animation, curve: AppMotion.enter);
-        if (DesktopLayout.isActive(context)) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: AppMotion.enter,
+        );
+        if (_calm(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return FadeTransition(
@@ -79,9 +90,9 @@ abstract final class AppTransitions {
           curve: AppMotion.enter,
           reverseCurve: AppMotion.exit,
         );
-        // Moving up or sideways means nothing to a mouse-driven window, so on
-        // desktop the page just fades in over the one beneath.
-        if (DesktopLayout.isActive(context)) {
+        // Moving up or sideways means nothing on a wide screen, so there the
+        // page just fades in over the one beneath.
+        if (_calm(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return SlideTransition(
@@ -111,7 +122,7 @@ abstract final class AppTransitions {
           curve: AppMotion.enter,
           reverseCurve: AppMotion.exit,
         );
-        if (DesktopLayout.isActive(context)) {
+        if (_calm(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return SlideTransition(

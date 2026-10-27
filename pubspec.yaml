@@ -1,7 +1,7 @@
 name: mangabaka_app
 description: "Official MangaBaka mobile app"
 publish_to: 'none'
-version: 0.4.1+16
+version: 0.4.2+17
 
 
 environment:
@@ -41,6 +41,7 @@ dependencies:
   device_info_plus: ^13.1.0
   open_filex: ^4.7.0
   file_picker: ^13.1.0
+  flutter_markdown: ^0.7.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

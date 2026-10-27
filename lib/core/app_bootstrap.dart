@@ -13,6 +13,7 @@ import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/deeplinks/deep_link_service.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// Everything that has to happen before the first frame.
@@ -80,6 +81,10 @@ class AppBootstrap {
 
     ThemeController().init();
     AppTheme.applySystemOverlay(ThemeController().current);
+
+    // Deep links need settings (for the toggle) and services (to fetch series)
+    // to be ready — init last.
+    await getIt<DeepLinkService>().init();
   }
 
   static Future<void> _configureDesktopWindow() async {

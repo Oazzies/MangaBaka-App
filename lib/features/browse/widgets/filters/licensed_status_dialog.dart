@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
@@ -14,7 +15,7 @@ class LicensedStatusDialog {
     bool? Function(SearchFilters filters)? selected,
   }) {
     final current = (selected ?? (f) => f.isLicensed)(currentFilters);
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (BuildContext dialogContext) {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   static const String appName = 'MangaBaka';
-  static const String appVersion = '0.4.1';
+  static const String appVersion = '0.4.2';
   static const String baseApiUrl = 'https://api.mangabaka.org/v1';
   static const String baseApiUrlV2 = 'https://api.mangabaka.org/v2';
 
@@ -45,7 +45,8 @@ class AppConstants {
     'considering',
   };
 
-  static const List<String> oauthScopes = [
+  /// Scopes every session has asked for since sign-in first shipped.
+  static const List<String> baseOauthScopes = [
     'openid',
     'profile',
     'library.read',
@@ -53,7 +54,19 @@ class AppConstants {
     'offline_access',
   ];
 
+  /// Scopes Stacks needs (added to MangaBaka 2026-10-13). A session from
+  /// before then lacks them until the user signs in again.
+  static const List<String> stackOauthScopes = ['stack.read', 'stack.write'];
+
+  /// What a new sign-in asks for.
+  static const List<String> oauthScopes = [
+    ...baseOauthScopes,
+    ...stackOauthScopes,
+  ];
+
   static const String prefixStorageKey = 'mangabaka_app_';
+  static const String libraryCursorKey =
+      '${prefixStorageKey}library_changes_cursor';
   static const String lastSyncKey = '${prefixStorageKey}last_sync';
   static const String userPreferencesKey = '${prefixStorageKey}preferences';
 

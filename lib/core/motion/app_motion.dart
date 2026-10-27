@@ -44,6 +44,11 @@ abstract final class AppMotion {
 ///
 /// Used for list rows, rails and card grids so content arrives rather than
 /// simply appearing. Runs once on first build.
+///
+/// Only the content that arrives together animates: inside a scrollable, an
+/// entrance plays only within [window] of the first one in that scrollable.
+/// Rows built later because they scrolled into view (or paged in) show at once,
+/// instead of fading in at the screen edge as the reader scrolls.
 class MbEntrance extends StatefulWidget {
   final Widget child;
   final int index;
@@ -87,10 +92,29 @@ class _MbEntranceState extends State<MbEntrance>
     ),
   );
 
+  /// When the first entrance in each scrollable was built.
+  static final Expando<DateTime> _windowStart = Expando('MbEntrance window');
+  static const Duration _window = Duration(milliseconds: 700);
+
+  bool _decided = false;
+
   @override
-  void initState() {
-    super.initState();
-    _controller.forward();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_decided) return;
+    _decided = true;
+    final position = Scrollable.maybeOf(context)?.position;
+    var animate = true;
+    if (position != null) {
+      final now = DateTime.now();
+      final start = _windowStart[position] ??= now;
+      animate = now.difference(start) < _window;
+    }
+    if (animate) {
+      _controller.forward();
+    } else {
+      _controller.value = 1;
+    }
   }
 
   @override

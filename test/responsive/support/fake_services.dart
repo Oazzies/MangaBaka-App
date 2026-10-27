@@ -21,6 +21,9 @@ class FakeAuth extends ChangeNotifier with Fake implements ProfileAuthService {
   bool get isLoggedIn => signedIn;
 
   @override
+  bool get hasStackScopes => signedIn;
+
+  @override
   MbProfile? get cachedProfile => signedIn ? _profile : null;
 
   @override

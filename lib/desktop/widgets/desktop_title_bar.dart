@@ -75,12 +75,7 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
           Expanded(
             child: SizedBox(
               height: DesktopTitleBar.height,
-              child: DragToMoveArea(
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-              ),
+              child: const TitleDragArea(),
             ),
           ),
           // Custom styled window controls
@@ -428,4 +423,70 @@ class _FloatingWindowPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _FloatingWindowPainter oldDelegate) =>
       oldDelegate.color != color || oldDelegate.fillColor != fillColor;
+}
+
+/// The draggable strip of the title bar: press and move to drag the window,
+/// double-click to maximize or restore.
+///
+/// Built on raw pointer events instead of window_manager's `DragToMoveArea`.
+/// That widget is a `GestureDetector` with a double-tap recognizer, which
+/// stays in the gesture arena for the double-tap timeout and so held back the
+/// first tap on every button sitting in the top strip (headers' share, back,
+/// menus) by a visible beat. A `Listener` never enters the arena.
+class TitleDragArea extends StatefulWidget {
+  const TitleDragArea({super.key});
+
+  @override
+  State<TitleDragArea> createState() => _TitleDragAreaState();
+}
+
+class _TitleDragAreaState extends State<TitleDragArea> {
+  static const double _dragSlop = 4;
+  static const Duration _doubleClick = Duration(milliseconds: 350);
+
+  Offset? _down;
+  bool _dragging = false;
+  DateTime? _lastUp;
+
+  Future<void> _toggleMaximize() async {
+    if (await windowManager.isMaximized()) {
+      await windowManager.unmaximize();
+    } else {
+      await windowManager.maximize();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (e) {
+        _down = e.position;
+        _dragging = false;
+      },
+      onPointerMove: (e) {
+        final down = _down;
+        if (down == null || _dragging) return;
+        if ((e.position - down).distance > _dragSlop) {
+          _dragging = true;
+          windowManager.startDragging();
+        }
+      },
+      onPointerUp: (e) {
+        if (!_dragging) {
+          final now = DateTime.now();
+          final last = _lastUp;
+          if (last != null && now.difference(last) < _doubleClick) {
+            _lastUp = null;
+            _toggleMaximize();
+          } else {
+            _lastUp = now;
+          }
+        }
+        _down = null;
+        _dragging = false;
+      },
+      child: const SizedBox(width: double.infinity, height: double.infinity),
+    );
+  }
 }

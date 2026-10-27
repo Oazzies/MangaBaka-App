@@ -300,7 +300,45 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
   @override
   Widget build(BuildContext context) {
     final menuRadius = BorderRadius.circular(14);
-    final menuWidth = math.max(widget.targetSize.width, widget.minWidth);
+    // Wide enough for the longest option, so labels are not ellipsised while
+    // the screen has room.
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    var widest = 0.0;
+    for (final item in widget.items) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: item.label,
+          style: AppTypography.sans(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        maxLines: 1,
+        textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final extras =
+          (item.icon != null || item.leading != null ? 27.0 : 0) +
+          (item.trailing != null ? 28.0 : 26.0);
+      widest = math.max(widest, painter.width + extras);
+      painter.dispose();
+    }
+    final menuWidth = math
+        .max(math.max(widget.targetSize.width, widget.minWidth), widest + 40)
+        .clamp(0.0, screenWidth - 24);
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final maxMenuHeight = math
+        .max(
+          160.0,
+          widget.openUpward
+              ? widget.targetRect.top - 4 - 16
+              : screenHeight - widget.targetRect.bottom - 4 - 16,
+        )
+        .toDouble();
+    final menuLeft = math.min(
+      widget.targetRect.left,
+      screenWidth - menuWidth - 12,
+    );
 
     return Stack(
       children: [
@@ -313,7 +351,7 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
         ),
         // Dropdown menu positioned just below/above the button with matching styling
         Positioned(
-          left: widget.targetRect.left,
+          left: math.max(12.0, menuLeft),
           top: widget.openUpward ? null : widget.targetRect.bottom + 4,
           bottom: widget.openUpward
               ? (MediaQuery.sizeOf(context).height - widget.targetRect.top + 4)
@@ -329,19 +367,17 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
                     : Alignment.topCenter,
                 child: Container(
                   width: menuWidth,
-                  constraints: const BoxConstraints(maxHeight: 320),
+                  // Tall enough to show every option when the window has the
+                  // room, so no scroll bar is needed.
+                  constraints: BoxConstraints(maxHeight: maxMenuHeight),
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: widget.backgroundColor,
                     borderRadius: menuRadius,
+                    // No drop shadow: SizeTransition clips to a rectangle,
+                    // which turned the shadow into a dim box with square
+                    // edges around the rounded menu.
                     border: Border.all(color: context.colors.border, width: 1),
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.shadowAt(0.5),
-                        blurRadius: 18,
-                        offset: Offset(0, widget.openUpward ? -8 : 8),
-                      ),
-                    ],
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
@@ -454,4 +490,45 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
       ),
     );
   }
+}
+
+/// Opens the app's dropdown menu under [anchor] (a rect in global
+/// coordinates) for a button that is not itself a [DesktopDropdown], with the
+/// menu's right edge on the anchor's. The same light overlay the dropdowns
+/// use, so it opens as quickly as they do.
+void showDropdownMenuAt<T>(
+  BuildContext context, {
+  required Rect anchor,
+  required List<DesktopDropdownItem<T>> items,
+  required ValueChanged<T> onSelected,
+  double width = 200,
+}) {
+  final overlay = Overlay.maybeOf(context, rootOverlay: true);
+  if (overlay == null) return;
+  final screen = MediaQuery.sizeOf(context);
+  final left = (anchor.right - width).clamp(8.0, screen.width - width - 8);
+  final target = Rect.fromLTWH(left, anchor.top, width, anchor.height);
+  late final OverlayEntry entry;
+  void close() {
+    if (entry.mounted) entry.remove();
+  }
+
+  entry = OverlayEntry(
+    builder: (ctx) => _DesktopDropdownOverlay<T>(
+      layerLink: LayerLink(),
+      targetSize: target.size,
+      targetRect: target,
+      openUpward: false,
+      items: items,
+      selected: null,
+      backgroundColor: context.colors.surface,
+      minWidth: width,
+      onSelected: (value) {
+        close();
+        onSelected(value);
+      },
+      onDismiss: close,
+    ),
+  );
+  overlay.insert(entry);
 }

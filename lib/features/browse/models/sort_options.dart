@@ -38,6 +38,14 @@ Map<String, String> searchSortOptions(
     'score_asc': l10n.translate('rating_asc'),
     'chapters_desc': l10n.translate('chapters_desc'),
     'chapters_asc': l10n.translate('chapters_asc'),
+    if (!library) ...{
+      'trending_7d': l10n.translate('trending_7d'),
+      'trending_30d': l10n.translate('trending_30d'),
+      'published_start_date_desc': l10n.translate('published_start_desc'),
+      'published_start_date_asc': l10n.translate('published_start_asc'),
+      'published_end_date_desc': l10n.translate('published_end_desc'),
+      'published_end_date_asc': l10n.translate('published_end_asc'),
+    },
     if (library) ...{
       'unread_desc': l10n.translate('unread_desc'),
       'unread_asc': l10n.translate('unread_asc'),

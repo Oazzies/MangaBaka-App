@@ -65,6 +65,9 @@
     "open_links": "Ouvrir les liens MangaBaka",
     "open_links_subtext": "Gérer les URL MangaBaka directement dans l'application",
     "open_links_subtitle": "Paramètres système par défaut",
+    "open_links_subtext_scheme": "Gérer les liens mangabaka:// directement dans l'application",
+    "deep_link_failed": "Impossible d'ouvrir ce lien.",
+    "deep_link_unsupported": "Ce lien ne peut pas être ouvert dans l'application.",
     "advanced_settings": "Outils de développement",
     "advanced_settings_subtitle": "Configuration initiale, journaux, aperçus visuels",
     "developer_mode_enabled": "Mode développeur activé",
@@ -672,6 +675,8 @@
     "mix_dna_additional": "Éléments d'ADN supplémentaires :",
     "no_release_notes": "Aucune note de version fournie.",
     "update_downloading": "Téléchargement en cours {percent}%",
-    "open_download": "Ouvrir le téléchargement"
+    "open_download": "Ouvrir le téléchargement",
+    "onboarding_links_title": "Ouvrir les liens",
+    "onboarding_links_subtitle": "Ouvrez les pages des séries et autres liens MangaBaka directement dans l'application au lieu de votre navigateur. Vous pouvez modifier ce paramètre à tout moment dans les Paramètres."
   }
 }

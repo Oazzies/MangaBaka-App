@@ -300,40 +300,110 @@ void main() {
       expect(service.syncStatus.value.isSyncing, isFalse);
     });
 
-    group('a changed rating whose updated_at did not move', () {
-      http.Response page() => http.Response(
+    group('change feed', () {
+      Map<String, dynamic> entryItem(int seriesId, {int? rating}) => {
+            'type': 'entry',
+            'action': 'upsert',
+            'revision': 1,
+            'current': {
+              'id': 1000 + seriesId,
+              'series_id': seriesId,
+              'state': 'reading',
+              'rating': rating,
+              'progress_chapter': 3,
+            },
+          };
+
+      http.Response feed(
+        List<Map<String, dynamic>> items, {
+        String cursor = 'c1',
+        bool more = false,
+      }) =>
+          http.Response(
+            jsonEncode({
+              'data': items,
+              'pagination': {'limit': 1000, 'cursor': cursor, 'more': more},
+            }),
+            200,
+          );
+
+      http.Response batch(Iterable<int> ids) => http.Response(
             jsonEncode({
               'data': [
-                {
-                  'id': 'entry-42',
-                  'state': 'reading',
-                  'rating': 9,
-                  'updated_at': '2025-01-01T00:00:00Z',
-                  'series': {'id': 42, 'title': 'Series 42'},
-                },
+                for (final id in ids) {'id': id, 'title': 'Series $id'},
               ],
             }),
             200,
           );
 
-      setUp(() async {
-        SharedPreferences.setMockInitialValues({
-          AppConstants.lastSyncKey: '2026-01-01T00:00:00Z',
-        });
-        await seedEntry('42');
-      });
+      Future<http.Response> server(http.Request r) async =>
+          r.url.path.endsWith('/series/batch')
+              ? batch(r.url.queryParametersAll['id']!.map(int.parse))
+              : feed([entryItem(42, rating: 9)]);
 
-      test('is missed by the incremental sync', () async {
-        await withServer((_) async => page(), () => service.syncLibrary());
-        expect((await entryFor('42'))!.rating, isNull);
-      });
-
-      test('is picked up by a deep sync', () async {
-        await withServer(
-          (_) async => page(),
-          () => service.syncLibrary(deep: true),
-        );
+      test('the first sync scans from the start and stores the cursor',
+          () async {
+        await withServer(server, () => service.syncLibrary());
+        final changes = requests.firstWhere((r) => r.url.path.endsWith('/changes'));
+        expect(changes.url.queryParameters.containsKey('cursor'), isFalse);
+        expect(changes.url.queryParameters['limit'], '1000');
         expect((await entryFor('42'))!.rating, 9);
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString(AppConstants.libraryCursorKey), 'c1');
+        expect(await service.isLibraryIncomplete(), isFalse);
+      });
+
+      test('a later sync sends the stored cursor', () async {
+        SharedPreferences.setMockInitialValues({
+          AppConstants.libraryCursorKey: 'saved',
+        });
+        await withServer((_) async => feed([], cursor: 'next'), () => service.syncLibrary());
+        expect(requests.single.url.queryParameters['cursor'], 'saved');
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString(AppConstants.libraryCursorKey), 'next');
+      });
+
+      test('a delete removes the entry', () async {
+        await seedEntry('42');
+        SharedPreferences.setMockInitialValues({
+          AppConstants.libraryCursorKey: 'saved',
+        });
+        await withServer(
+          (_) async => feed([
+            {
+              'type': 'entry',
+              'action': 'delete',
+              'current': {'series_id': 42},
+            },
+          ]),
+          () => service.syncLibrary(),
+        );
+        expect(await entryFor('42'), isNull);
+      });
+
+      test('a rejected cursor rescans from the start', () async {
+        SharedPreferences.setMockInitialValues({
+          AppConstants.libraryCursorKey: 'stale',
+        });
+        await withServer(
+          (r) async => r.url.path.endsWith('/series/batch')
+              ? batch([42])
+              : r.url.queryParameters['cursor'] == 'stale'
+              ? http.Response('bad cursor', 400)
+              : feed([entryItem(42)], cursor: 'fresh'),
+          () => service.syncLibrary(),
+        );
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString(AppConstants.libraryCursorKey), 'fresh');
+        expect(await entryFor('42'), isNotNull);
+      });
+
+      test('a full scan drops local entries the server no longer lists',
+          () async {
+        await seedEntry('7');
+        await withServer(server, () => service.syncLibrary(deep: true));
+        expect(await entryFor('7'), isNull);
+        expect(await entryFor('42'), isNotNull);
       });
     });
 

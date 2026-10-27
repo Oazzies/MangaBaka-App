@@ -63,7 +63,7 @@ void main() {
       final mockJsonWithTitles = {
         'id': '124',
         'titles': [
-          {'title': 'The Apothecary Diaries', 'language': 'en', 'is_primary': true},
+          {'title': 'The Apothecary Diaries', 'language': 'en', 'is_primary': true, 'traits': ['official']},
           {'title': '薬屋のひとりごと', 'language': 'ja', 'is_primary': true},
           {'title': 'Kusuriya no Hitorigoto', 'language': 'ja-ro', 'is_primary': true, 'traits': ['romanized']},
           {'title': 'Alternative Title 1', 'language': 'en', 'is_primary': false},
@@ -91,6 +91,17 @@ void main() {
       expect(series.secondaryTitles, contains('薬屋のひとりごと'));
       expect(series.secondaryTitles, contains('Kusuriya no Hitorigoto'));
       expect(series.secondaryTitles, isNot(contains('The Apothecary Diaries')));
+    });
+
+    test('an unofficial English title does not beat the romanized one', () {
+      final series = Series.fromJson({
+        'id': '9',
+        'titles': [
+          {'title': 'Fan Translation', 'language': 'en', 'is_primary': true},
+          {'title': 'Real Romaji', 'language': 'ja-Latn', 'is_primary': true},
+        ],
+      });
+      expect(series.title, 'Real Romaji');
     });
   });
 }

@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
@@ -18,6 +19,9 @@ class MbDropdown<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final IconData icon;
 
+  /// On a phone, fill the width given (to share a row with a sibling).
+  final bool expand;
+
   const MbDropdown({
     super.key,
     required this.label,
@@ -25,6 +29,7 @@ class MbDropdown<T> extends StatelessWidget {
     required this.options,
     required this.onChanged,
     this.icon = Icons.filter_list_rounded,
+    this.expand = false,
   });
 
   String get _valueLabel =>
@@ -46,6 +51,7 @@ class MbDropdown<T> extends StatelessWidget {
       label: label,
       valueLabel: _valueLabel,
       icon: icon,
+      expand: expand,
       onTap: () => showMbOptionSheet<T>(
         context,
         title: label,
@@ -62,12 +68,14 @@ class _PhonePill<T> extends StatelessWidget {
   final String valueLabel;
   final IconData icon;
   final VoidCallback onTap;
+  final bool expand;
 
   const _PhonePill({
     required this.label,
     required this.valueLabel,
     required this.icon,
     required this.onTap,
+    required this.expand,
   });
 
   @override
@@ -76,23 +84,29 @@ class _PhonePill<T> extends StatelessWidget {
     return MbTappable(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        padding: EdgeInsets.symmetric(
+          horizontal: expand ? 12 : 16,
+          vertical: 11,
+        ),
         decoration: BoxDecoration(
           color: colors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppConstants.pillRadius),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           children: [
             Icon(icon, size: 16, color: colors.textMuted),
             const SizedBox(width: 8),
-            Text(
-              '${label.toUpperCase()}: ',
-              style: AppTypography.monoLabel(
-                color: colors.textMuted,
-                fontSize: 11,
+            // A pill sharing a row drops its caption: the icon and the value
+            // read on their own, and the sheet it opens carries the title.
+            if (!expand)
+              Text(
+                '${label.toUpperCase()}: ',
+                style: AppTypography.monoLabel(
+                  color: colors.textMuted,
+                  fontSize: 11,
+                ),
               ),
-            ),
             Flexible(
               child: Text(
                 valueLabel,
@@ -105,7 +119,7 @@ class _PhonePill<T> extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 4),
+            if (expand) const Spacer() else const SizedBox(width: 4),
             Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 18,
@@ -126,7 +140,7 @@ Future<void> showMbOptionSheet<T>(
   required T current,
   required ValueChanged<T> onSelected,
 }) {
-  return showModalBottomSheet<void>(
+  return showAdaptiveSheet<void>(
     context: context,
     useSafeArea: true,
     isScrollControlled: true,

@@ -21,6 +21,10 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}library_list_style';
   static const String browseListStyle =
       '${AppConstants.prefixStorageKey}browse_list_style';
+  static const String stacksListStyle =
+      '${AppConstants.prefixStorageKey}stacks_list_style';
+  static const String stacksGridColumnCount =
+      '${AppConstants.prefixStorageKey}stacks_grid_column_count';
   static const String pushNotifications =
       '${AppConstants.prefixStorageKey}push_notifications';
   static const String developerMode =
@@ -80,4 +84,6 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}custom_themes';
   static const String dismissedRecommendations =
       '${AppConstants.prefixStorageKey}dismissed_recommendations';
+  static const String openLinksInApp =
+      '${AppConstants.prefixStorageKey}open_links_in_app';
 }

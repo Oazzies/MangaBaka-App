@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -51,7 +52,11 @@ class EntryProgressOverlay extends StatelessWidget {
     color: FixedColors.imageBadge,
     borderRadius: BorderRadius.all(Radius.circular(20)),
     boxShadow: [
-      BoxShadow(color: FixedColors.imageBadgeShadow, blurRadius: 4, offset: Offset(0, 2)),
+      BoxShadow(
+        color: FixedColors.imageBadgeShadow,
+        blurRadius: 4,
+        offset: Offset(0, 2),
+      ),
     ],
   );
 
@@ -215,7 +220,7 @@ class EntryProgressOverlay extends StatelessWidget {
   }
 
   void _openUpdateDialog(BuildContext context) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

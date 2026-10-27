@@ -65,6 +65,9 @@
     "open_links": "MangaBaka-Links öffnen",
     "open_links_subtext": "MangaBaka-URLs direkt in der App verarbeiten",
     "open_links_subtitle": "Systemstandard-Einstellungen",
+    "open_links_subtext_scheme": "mangabaka://-Links direkt in der App verarbeiten",
+    "deep_link_failed": "Dieser Link konnte nicht geöffnet werden.",
+    "deep_link_unsupported": "Dieser Link kann nicht in der App geöffnet werden.",
     "advanced_settings": "Entwicklerwerkzeuge",
     "advanced_settings_subtitle": "Einrichtung, Protokolle, visuelle Vorschauen",
     "developer_mode_enabled": "Entwicklermodus aktiviert",
@@ -672,6 +675,8 @@
     "mix_dna_additional": "Zusätzliche DNA-Elemente:",
     "no_release_notes": "Keine Versionshinweise bereitgestellt.",
     "update_downloading": "Wird heruntergeladen {percent}%",
-    "open_download": "Download öffnen"
+    "open_download": "Download öffnen",
+    "onboarding_links_title": "Links öffnen",
+    "onboarding_links_subtitle": "Öffne Serienseiten und andere MangaBaka-Links direkt in der App statt in deinem Browser. Du kannst dies jederzeit in den Einstellungen ändern."
   }
 }

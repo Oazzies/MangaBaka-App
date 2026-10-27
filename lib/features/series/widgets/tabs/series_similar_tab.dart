@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/list_style_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
@@ -72,53 +73,59 @@ class SeriesSimilarTab extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-      child: ListenableBuilder(
-        listenable: SettingsManager(),
-        builder: (context, _) {
-          final settings = SettingsManager();
-          final style = settings.similarListStyle;
+      child: ListStyleSwitchGate(
+        shrink: true,
+        child: ListenableBuilder(
+          listenable: SettingsManager(),
+          builder: (context, _) {
+            final settings = SettingsManager();
+            final style = settings.similarListStyle;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (similarList.isNotEmpty)
-                _section(
-                  context,
-                  title: l10n.translate('tab_similar'),
-                  series: similarList,
-                  style: style,
-                  // Distinct per section: the same series can appear in both
-                  // lists, and a Hero tag must be unique within a route.
-                  heroTagPrefix: 'similar',
-                  // One layout switch for the whole tab, on the first header.
-                  toggle: IconButton(
-                    icon: Icon(style.next.icon, color: context.colors.text),
-                    onPressed: () => settings.setSimilarListStyle(style.next),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (similarList.isNotEmpty)
+                  _section(
+                    context,
+                    title: l10n.translate('tab_similar'),
+                    series: similarList,
+                    style: style,
+                    // Distinct per section: the same series can appear in both
+                    // lists, and a Hero tag must be unique within a route.
+                    heroTagPrefix: 'similar',
+                    // One layout switch for the whole tab, on the first header.
+                    toggle: IconButton(
+                      icon: Icon(style.next.icon, color: context.colors.text),
+                      onPressed: () => ListStyleSwitch.run(
+                        () => settings.setSimilarListStyle(style.next),
+                      ),
+                    ),
                   ),
-                ),
-              if (readersList.isNotEmpty) ...[
-                if (similarList.isNotEmpty) const SizedBox(height: 32),
-                _section(
-                  context,
-                  title: l10n.translate('readers_also_like'),
-                  series: readersList,
-                  style: style,
-                  heroTagPrefix: 'readers',
-                  toggle: similarList.isEmpty
-                      ? IconButton(
-                          icon: Icon(
-                            style.next.icon,
-                            color: context.colors.text,
-                          ),
-                          onPressed: () =>
-                              settings.setSimilarListStyle(style.next),
-                        )
-                      : null,
-                ),
+                if (readersList.isNotEmpty) ...[
+                  if (similarList.isNotEmpty) const SizedBox(height: 32),
+                  _section(
+                    context,
+                    title: l10n.translate('readers_also_like'),
+                    series: readersList,
+                    style: style,
+                    heroTagPrefix: 'readers',
+                    toggle: similarList.isEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              style.next.icon,
+                              color: context.colors.text,
+                            ),
+                            onPressed: () => ListStyleSwitch.run(
+                              () => settings.setSimilarListStyle(style.next),
+                            ),
+                          )
+                        : null,
+                  ),
+                ],
               ],
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -138,15 +145,30 @@ class SeriesSimilarTab extends StatelessWidget {
           width: double.infinity,
           child: Stack(
             alignment: Alignment.centerLeft,
+            clipBehavior: Clip.none,
             children: [
-              SeriesSectionHeader(title: title),
+              ConstrainedBox(
+                // Tall enough to hold the toggle, so its hover highlight
+                // stays inside the header instead of under the list below.
+                constraints: const BoxConstraints(minHeight: 44),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SeriesSectionHeader(title: title),
+                ),
+              ),
               if (toggle != null)
                 Positioned(
                   right: 0,
-                  top: -12,
-                  child: WidgetUtils.tooltip(
-                    message: l10n.translate('toggle_layout'),
-                    child: toggle,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: WidgetUtils.tooltip(
+                      message: l10n.translate('toggle_layout'),
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: toggle,
+                      ),
+                    ),
                   ),
                 ),
             ],

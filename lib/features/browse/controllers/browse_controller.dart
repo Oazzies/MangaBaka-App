@@ -219,6 +219,15 @@ class BrowseController extends ChangeNotifier {
     _startFilteredSearch(filters);
   }
 
+  /// Runs [query] with [filters] as a fresh series search.
+  void startQuerySearch(String query, SearchFilters filters) {
+    searchController.text = query;
+    _currentSearchQuery = query;
+    _currentType = BrowseType.series;
+    _currentFilters = filters;
+    searchSeries();
+  }
+
   /// Replaces the whole search context with [filters] and runs it. The text
   /// query is cleared: these entry points come from tapping a chip elsewhere
   /// in the app, where a leftover query would silently narrow the results.

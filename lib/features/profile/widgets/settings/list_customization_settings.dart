@@ -19,7 +19,7 @@ export 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_
 
 /// The "List customization" settings category.
 ///
-/// Library and Browse can be configured together or apart;
+/// Library, Browse and Stacks can be configured together or apart;
 /// [ListCustomizationScope] resolves which of the two the visible controls are
 /// editing, so nothing here has to re-derive it.
 class ListCustomizationSettings extends StatefulWidget {
@@ -81,7 +81,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
     if (tab == _tab) return;
     setState(() {
       // Slide in from the side the new tab sits on.
-      _slideSign = tab == ListScopeTab.browse ? 1.0 : -1.0;
+      _slideSign = tab.index > _tab.index ? 1.0 : -1.0;
       _tab = tab;
     });
     _slideController.forward(from: 0.0);
@@ -130,6 +130,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
             active: _tab,
             libraryLabel: widget.l10n.translate('start_page_library'),
             browseLabel: widget.l10n.translate('start_page_browse'),
+            stacksLabel: widget.l10n.translate('stacks'),
             onChanged: _switchTab,
           ),
 

@@ -3,6 +3,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/features/stacks/screens/my_stacks_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stack_detail_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stack_editor_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
+import 'package:mangabaka_app/features/stacks/screens/stacks_list_screen.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_home_screen.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
@@ -28,6 +33,16 @@ void main() {
     'browse results': () =>
         const BrowseResultsScreen(sortType: 'Trending', sortBy: 'trending_7d'),
     'bulk import': () => const ImportExportScreen(),
+    'stacks hub': () => const StacksHubScreen(),
+    'stack detail': () => const StackDetailScreen(stackId: 501),
+    'stack detail (owner)': () =>
+        const StackDetailScreen(stackId: 502, asOwner: true),
+    'stacks of a series': () => const StacksListScreen(
+      source: StacksListSource.series('1002', 'A Long Series Title'),
+    ),
+    'my stacks': () => const MyStacksScreen(),
+    'stack editor (new)': () => const StackEditorScreen(),
+    'stack editor (edit)': () => const StackEditorScreen(stackId: 503),
   };
 
   for (final env in const [Environment(), Environment(language: 'de')]) {

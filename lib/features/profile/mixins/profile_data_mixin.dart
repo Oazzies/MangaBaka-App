@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
@@ -111,13 +112,21 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
       if (!mounted) return;
       setState(() => profile = fetchedProfile);
 
-      await libraryService.performInitialSyncIfNeeded();
-
       await fetchStatistics();
       await fetchRecentlyChanged(initial: true);
       await fetchRecentlyAdded(initial: true);
 
       if (mounted) setState(() => loading = false);
+
+      // The library sync of a big account runs for a while: start it once the
+      // profile is on screen rather than holding sign-in (and every toast and
+      // snackbar behind it) until it finishes. Its progress card and the
+      // library's own banner report how it goes.
+      unawaited(
+        libraryService.performInitialSyncIfNeeded().catchError((Object e) {
+          // Reported through the sync status.
+        }),
+      );
     } catch (e) {
       if (mounted) {
         setState(() {

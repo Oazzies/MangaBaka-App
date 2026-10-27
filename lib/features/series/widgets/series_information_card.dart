@@ -348,8 +348,8 @@ class _LinkedRow extends StatelessWidget {
   }
 }
 
-/// Publishers as one tappable line each — name, then the edition's language
-/// and role (e.g. "EN · English") so regional editions of the same series can
+/// Publishers as one tappable block each — the name, with the edition's
+/// language and role (e.g. "EN · English") beneath it so regional editions of the same series can
 /// be told apart.
 class _PublisherRefsRow extends StatelessWidget {
   final String label;
@@ -384,10 +384,9 @@ class _PublisherRefsRow extends StatelessWidget {
               onTap: () => onTap(p),
               behavior: HitTestBehavior.opaque,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       p.name,
@@ -403,11 +402,14 @@ class _PublisherRefsRow extends StatelessWidget {
                       ),
                     ),
                     if (_detail(p) != null)
-                      Text(
-                        _detail(p)!,
-                        style: AppTypography.monoLabel(
-                          color: context.colors.textMuted,
-                          fontSize: 10,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 1),
+                        child: Text(
+                          _detail(p)!,
+                          style: AppTypography.monoLabel(
+                            color: context.colors.textMuted,
+                            fontSize: 10,
+                          ),
                         ),
                       ),
                   ],

@@ -7,10 +7,17 @@ import 'package:mangabaka_app/features/series/models/series_work.dart';
 /// Upcoming releases plus what the phone UI needs to dress them: which of
 /// them are in the user's library, and a cover for works that have none of
 /// their own.
+///
+/// The releases arrive first; the library marks follow ([withLibrary]) and are
+/// not there until [libraryReady]. Callers showing a library-only view wait for
+/// that rather than presenting a half-known list as the answer.
 class UpcomingData {
   final List<SeriesWork> works;
   final Set<String> librarySeriesIds;
   final Map<String, String> libraryCovers;
+
+  /// Whether [librarySeriesIds] has been worked out for every work in [works].
+  final bool libraryReady;
 
   /// The last page of releases loaded; the API pages from today onward, so
   /// each further page reaches later into the future.
@@ -23,6 +30,7 @@ class UpcomingData {
     required this.works,
     required this.librarySeriesIds,
     required this.libraryCovers,
+    this.libraryReady = true,
     this.page = 1,
     this.hasMore = false,
   });
@@ -36,7 +44,8 @@ class UpcomingData {
   /// The API's fixed page size; a shorter page is the last one.
   static const int pageSize = 25;
 
-  /// This data with the next page of releases appended.
+  /// This data with the next page of releases appended. The new works' library
+  /// marks are not known yet: see [withLibrary].
   Future<UpcomingData> loadMore(HomeService home) async {
     final next = await home.fetchUpcomingWorks(page: page + 1);
     final known = {for (final w in works) w.id};
@@ -48,6 +57,7 @@ class UpcomingData {
       ],
       librarySeriesIds: librarySeriesIds,
       libraryCovers: libraryCovers,
+      libraryReady: false,
       page: page + 1,
       hasMore: next.length >= pageSize,
     );
@@ -62,36 +72,44 @@ class UpcomingData {
     return work.seriesId == null ? null : libraryCovers['${work.seriesId}'];
   }
 
+  /// The first page of releases, without library marks yet.
   static Future<UpcomingData> load(HomeService home) async {
     final works = await home.fetchUpcomingWorks(page: 1);
-    final hasMore = works.length >= pageSize;
+    return UpcomingData(
+      works: works,
+      librarySeriesIds: const {},
+      libraryCovers: const {},
+      // Signed out means no library to mark.
+      libraryReady: !_signedIn,
+      hasMore: works.length >= pageSize,
+    );
+  }
 
-    final ids = <String>{};
-    final covers = <String, String>{};
-    // Signed out means no library to mark.
-    if (!getIt<ProfileAuthService>().isLoggedIn) {
-      return UpcomingData(
-        works: works,
-        librarySeriesIds: ids,
-        libraryCovers: covers,
-        hasMore: hasMore,
-      );
-    }
+  static bool get _signedIn => getIt<ProfileAuthService>().isLoggedIn;
+
+  /// This data with the library marks filled in for every work. The database is
+  /// asked only about these works' series, never for the whole library.
+  Future<UpcomingData> withLibrary() async {
+    if (libraryReady) return this;
+    final ids = {
+      for (final w in works)
+        if (w.seriesId != null) '${w.seriesId}',
+    };
+    var covers = const <String, String>{};
     try {
-      final entries = await getIt<LibraryService>().database.libraryEntriesDao
-          .watchAllEntriesWithSeries()
-          .first;
-      for (final e in entries) {
-        ids.add(e.series.id);
-        if (e.series.coverUrl.isNotEmpty) covers[e.series.id] = e.series.coverUrl;
-      }
+      covers = await getIt<LibraryService>().database.libraryEntriesDao
+          .libraryCoversFor(ids);
     } catch (_) {
-      // Signed out or no database yet: the list simply has no library marks.
+      // No database yet: the list simply has no library marks.
     }
     return UpcomingData(
       works: works,
-      librarySeriesIds: ids,
-      libraryCovers: covers,
+      librarySeriesIds: covers.keys.toSet(),
+      libraryCovers: {
+        for (final e in covers.entries)
+          if (e.value.isNotEmpty) e.key: e.value,
+      },
+      page: page,
       hasMore: hasMore,
     );
   }

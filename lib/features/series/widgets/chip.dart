@@ -3,9 +3,9 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A pill-shaped chip. When it is tappable it answers a pointer: on hover it
-/// warms toward the accent, its border takes the accent, and it lifts a hair —
-/// so a row of tags reads as clickable before anything is pressed.
+/// A pill-shaped chip. When it is tappable it answers a pointer: on hover its
+/// border takes the accent — nothing grows or tints, so a row of tags reads as
+/// clickable without the row shifting.
 class ChipBase extends StatefulWidget {
   final Widget label;
   final Color? backgroundColor;
@@ -56,22 +56,13 @@ class _ChipBaseState extends State<ChipBase> {
     final border = widget.borderColor;
     final hovered = _interactive && _hovered;
 
-    final bg = hovered ? Color.lerp(base, colors.accent, 0.16)! : base;
-    final borderColor = hovered
-        ? colors.accent.withValues(alpha: 0.85)
-        : border;
-
-    Widget chip = AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.emphasized,
+    Widget chip = Container(
       padding: widget.padding ??
           const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: bg,
+        color: base,
         borderRadius: BorderRadius.circular(widget.borderRadius),
-        border: borderColor != null
-            ? Border.all(color: borderColor, width: 1)
-            : null,
+        border: border != null ? Border.all(color: border, width: 1) : null,
       ),
       child: DefaultTextStyle(
         style: widget.labelStyle ??
@@ -85,14 +76,30 @@ class _ChipBaseState extends State<ChipBase> {
       ),
     );
 
-    if (!_interactive) return chip;
+    if (_interactive) {
+      // Laid over the chip so a chip without a border can gain one on hover
+      // without changing size. Same quick fade as a series row's hover.
+      chip = Stack(
+        children: [
+          chip,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: AppMotion.fast,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  border: Border.all(
+                    color: hovered ? colors.accent : Colors.transparent,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
 
-    chip = AnimatedScale(
-      scale: hovered ? 1.04 : 1,
-      duration: AppMotion.fast,
-      curve: AppMotion.emphasized,
-      child: chip,
-    );
+    if (!_interactive) return chip;
 
     Widget interactive = MouseRegion(
       cursor: SystemMouseCursors.click,

@@ -53,30 +53,37 @@ class LogoutDialog {
               ),
             ),
             const SizedBox(height: 16),
+            // A solid raised block with a solid icon tile, in the app's own
+            // surfaces rather than a tinted, outlined box.
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colors.error.withValues(alpha: 0.05),
+                color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(AppConstants.denseRadius),
-                border: Border.all(
-                  color: context.colors.error.withValues(alpha: 0.1),
-                ),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    color: context.colors.error,
-                    size: 18,
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: context.colors.warning,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.priority_high_rounded,
+                      color: context.colors.on(context.colors.warning),
+                      size: 18,
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       l10n.translate('logout_warning'),
                       style: AppTypography.sans(
-                        color: context.colors.error.withValues(alpha: 0.8),
-                        fontSize: 13,
+                        color: context.colors.text,
+                        fontSize: 13.5,
                         height: 1.4,
                       ),
                     ),

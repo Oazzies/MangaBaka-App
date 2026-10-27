@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -40,7 +41,7 @@ class ContentPreferencesDialogs {
       'pornographic': l10n.translate('pornographic'),
     };
 
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (BuildContext dialogContext) {
@@ -86,10 +87,12 @@ class ContentPreferencesDialogs {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  ...options.map((option) => ContentRatingRow(
-                        option: option,
-                        label: labels[option]!,
-                      )),
+                  ...options.map(
+                    (option) => ContentRatingRow(
+                      option: option,
+                      label: labels[option]!,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -181,11 +184,7 @@ class ContentRatingRow extends StatelessWidget {
           ),
           if (isSelected) ...[
             const SizedBox(width: 16),
-            Container(
-              width: 1,
-              height: 24,
-              color: context.colors.border,
-            ),
+            Container(width: 1, height: 24, color: context.colors.border),
             const SizedBox(width: 16),
             WidgetUtils.tooltip(
               message: l10n.translate('blur_covers'),
@@ -216,8 +215,9 @@ class ContentRatingRow extends StatelessWidget {
                         settings.setBlurredContentRatings(newBlurred);
                       },
                       activeThumbColor: context.colors.accent,
-                      activeTrackColor: context.colors.accent
-                          .withValues(alpha: 0.3),
+                      activeTrackColor: context.colors.accent.withValues(
+                        alpha: 0.3,
+                      ),
                     ),
                   ),
                 ],

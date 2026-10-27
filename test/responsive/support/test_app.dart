@@ -4,6 +4,8 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -146,7 +148,12 @@ Future<FakeBackend> setUpEnvironment(Environment env) async {
     ..registerLazySingleton<CollectionService>(CollectionService.new)
     ..registerLazySingleton<MixService>(MixService.new)
     ..registerLazySingleton<BookLookupService>(BookLookupService.new)
-    ..registerLazySingleton<UpdateService>(UpdateService.new);
+    ..registerLazySingleton<UpdateService>(UpdateService.new)
+    ..registerLazySingleton<StackService>(StackService.new)
+    ..registerLazySingleton<StackStatusController>(
+      StackStatusController.new,
+      dispose: (c) => c.dispose(),
+    );
   return backend;
 }
 

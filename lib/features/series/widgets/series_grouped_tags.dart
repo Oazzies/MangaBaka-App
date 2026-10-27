@@ -207,7 +207,14 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
 
   Widget _card(Widget child) => Padding(
     padding: const EdgeInsets.only(bottom: 24),
-    child: MbCard(label: widget.l10n.translate('tags'), child: child),
+    child: MbCard(
+      label: widget.l10n.translate('tags'),
+      // Tapping the header folds or unfolds the card, same as the button.
+      onHeaderTap: _groups != null && (_hasMore || _tagsExpanded)
+          ? () => setState(() => _tagsExpanded = !_tagsExpanded)
+          : null,
+      child: child,
+    ),
   );
 
   Widget _clippedContent() {

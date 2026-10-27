@@ -12,12 +12,16 @@ class MbCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
 
+  /// A tap on the header row. There is no visual cue; it is a shortcut.
+  final VoidCallback? onHeaderTap;
+
   const MbCard({
     super.key,
     this.label,
     this.trailing,
     required this.child,
     this.padding = const EdgeInsets.all(16),
+    this.onHeaderTap,
   });
 
   @override
@@ -33,21 +37,31 @@ class MbCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (label != null) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label!.toUpperCase(),
-                    style: AppTypography.monoLabel(
-                      color: context.colors.textMuted,
-                      fontSize: 11,
-                    ),
-                  ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onHeaderTap,
+              child: Padding(
+                // Taller than the text so the shortcut is easy to hit.
+                padding: EdgeInsets.only(
+                  top: onHeaderTap == null ? 0 : 4,
+                  bottom: onHeaderTap == null ? 14 : 18,
                 ),
-                if (trailing != null) trailing!,
-              ],
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label!.toUpperCase(),
+                        style: AppTypography.monoLabel(
+                          color: context.colors.textMuted,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                    if (trailing != null) trailing!,
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 14),
           ],
           child,
         ],

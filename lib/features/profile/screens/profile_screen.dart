@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/features/stacks/widgets/my_stacks_entry_card.dart';
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
@@ -181,6 +182,8 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
               volumesRead: volumesRead,
               meanScore: meanScore,
             ),
+            const SizedBox(height: 16),
+            const MyStacksEntryCard(),
             const SizedBox(height: 24),
             ProfileSnapshotSection(
               recentlyChanged: recentlyChanged,

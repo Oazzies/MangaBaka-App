@@ -5,14 +5,15 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 /// Which list the customization panel is currently editing.
 enum ListScopeTab {
   library,
-  browse;
+  browse,
+  stacks;
 
   bool get isLibrary => this == ListScopeTab.library;
 }
 
 /// Resolves "what does the active tab actually read and write?".
 ///
-/// Library and Browse can each keep their own list style and grid column
+/// Library, Browse and Stacks can each keep their own list style and grid column
 /// count, or share one of each — and the two are separate switches, so a user
 /// can have separate styles but a shared column count. That produced the same
 /// nested ternary in half a dozen places (once per read, once per write, once
@@ -36,24 +37,35 @@ class ListCustomizationScope {
 
   AppListStyle get style {
     if (!settings.separateListStyles) return settings.currentListStyle;
-    return tab.isLibrary ? settings.libraryListStyle : settings.browseListStyle;
+    return switch (tab) {
+      ListScopeTab.library => settings.libraryListStyle,
+      ListScopeTab.browse => settings.browseListStyle,
+      ListScopeTab.stacks => settings.stacksListStyle,
+    };
   }
 
   void setStyle(AppListStyle style) {
     if (!settings.separateListStyles) {
       settings.setListStyle(style);
-    } else if (tab.isLibrary) {
-      settings.setLibraryListStyle(style);
     } else {
-      settings.setBrowseListStyle(style);
+      switch (tab) {
+        case ListScopeTab.library:
+          settings.setLibraryListStyle(style);
+        case ListScopeTab.browse:
+          settings.setBrowseListStyle(style);
+        case ListScopeTab.stacks:
+          settings.setStacksListStyle(style);
+      }
     }
   }
 
   String styleLabel(LocalizationService l10n) {
     if (!settings.separateListStyles) return l10n.translate('list_style');
-    return l10n.translate(
-      tab.isLibrary ? 'library_list_style' : 'browse_list_style',
-    );
+    return l10n.translate(switch (tab) {
+      ListScopeTab.library => 'library_list_style',
+      ListScopeTab.browse => 'browse_list_style',
+      ListScopeTab.stacks => 'stacks_list_style',
+    });
   }
 
   // ─── Grid columns ────────────────────────────────────────────────────────
@@ -61,18 +73,25 @@ class ListCustomizationScope {
   /// The column count, where 0 means "auto — fit as many as the width allows".
   int get gridColumns {
     if (!settings.separateGridColumnCounts) return settings.gridColumnCount;
-    return tab.isLibrary
-        ? settings.libraryGridColumnCount
-        : settings.browseGridColumnCount;
+    return switch (tab) {
+      ListScopeTab.library => settings.libraryGridColumnCount,
+      ListScopeTab.browse => settings.browseGridColumnCount,
+      ListScopeTab.stacks => settings.stacksGridColumnCount,
+    };
   }
 
   void setGridColumns(int count) {
     if (!settings.separateGridColumnCounts) {
       settings.setGridColumnCount(count);
-    } else if (tab.isLibrary) {
-      settings.setLibraryGridColumnCount(count);
     } else {
-      settings.setBrowseGridColumnCount(count);
+      switch (tab) {
+        case ListScopeTab.library:
+          settings.setLibraryGridColumnCount(count);
+        case ListScopeTab.browse:
+          settings.setBrowseGridColumnCount(count);
+        case ListScopeTab.stacks:
+          settings.setStacksGridColumnCount(count);
+      }
     }
   }
 
@@ -80,9 +99,11 @@ class ListCustomizationScope {
     if (!settings.separateGridColumnCounts) {
       return l10n.translate('grid_columns');
     }
-    return l10n.translate(
-      tab.isLibrary ? 'library_grid_columns' : 'browse_grid_columns',
-    );
+    return l10n.translate(switch (tab) {
+      ListScopeTab.library => 'library_grid_columns',
+      ListScopeTab.browse => 'browse_grid_columns',
+      ListScopeTab.stacks => 'stacks_grid_columns',
+    });
   }
 
   /// Only the grid styles have a column count to configure.
@@ -99,10 +120,9 @@ class ListCustomizationScope {
       final shared = settings.currentListStyle;
       settings.setLibraryListStyle(shared);
       settings.setBrowseListStyle(shared);
+      settings.setStacksListStyle(shared);
     } else {
-      settings.setListStyle(
-        tab.isLibrary ? settings.libraryListStyle : settings.browseListStyle,
-      );
+      settings.setListStyle(style);
     }
     settings.setSeparateListStyles(separate);
   }
@@ -114,33 +134,23 @@ class ListCustomizationScope {
       final shared = settings.gridColumnCount;
       settings.setLibraryGridColumnCount(shared);
       settings.setBrowseGridColumnCount(shared);
+      settings.setStacksGridColumnCount(shared);
     } else {
-      settings.setGridColumnCount(
-        tab.isLibrary
-            ? settings.libraryGridColumnCount
-            : settings.browseGridColumnCount,
-      );
+      settings.setGridColumnCount(gridColumns);
     }
     settings.setSeparateGridColumnCounts(separate);
   }
 
   /// Copies whatever is configured independently from the active tab's list to
-  /// the other one. Shared settings are left alone — there is nothing to copy.
-  void copyToOtherTab() {
-    final toBrowse = tab.isLibrary;
-    if (settings.separateListStyles) {
-      if (toBrowse) {
-        settings.setBrowseListStyle(settings.libraryListStyle);
-      } else {
-        settings.setLibraryListStyle(settings.browseListStyle);
-      }
-    }
-    if (settings.separateGridColumnCounts) {
-      if (toBrowse) {
-        settings.setBrowseGridColumnCount(settings.libraryGridColumnCount);
-      } else {
-        settings.setLibraryGridColumnCount(settings.browseGridColumnCount);
-      }
+  /// the other lists. Shared settings are left alone — there is nothing to copy.
+  void copyToOtherTabs() {
+    final style = this.style;
+    final columns = gridColumns;
+    for (final other in ListScopeTab.values) {
+      if (other == tab) continue;
+      final target = ListCustomizationScope(settings: settings, tab: other);
+      if (settings.separateListStyles) target.setStyle(style);
+      if (settings.separateGridColumnCounts) target.setGridColumns(columns);
     }
   }
 }

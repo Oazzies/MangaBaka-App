@@ -45,6 +45,18 @@ class WidgetUtils {
     return ((px + step - 1) ~/ step) * step;
   }
 
+  /// The decode width each cover URL was last shown at, so another view of
+  /// the same cover (the hover preview) can ask for exactly that size and hit
+  /// the in-memory image cache, which is keyed by URL and decode size.
+  static final Map<String, int> _decodeWidths = {};
+
+  /// The decode width [url] is already on screen at, if that is big enough
+  /// to be shown larger without looking soft; otherwise null.
+  static int? shownDecodeWidth(String url, {int atLeast = 256}) {
+    final w = _decodeWidths[url];
+    return w != null && w >= atLeast ? w : null;
+  }
+
   static Widget networkImage({
     required String url,
     double? width,
@@ -55,11 +67,15 @@ class WidgetUtils {
     int? memCacheWidth,
     int? memCacheHeight,
     bool blurred = false,
+    Duration fadeIn = const Duration(milliseconds: 140),
   }) {
+    if (memCacheWidth != null && url.isNotEmpty) {
+      if (_decodeWidths.length > 600) _decodeWidths.clear();
+      _decodeWidths[url] = memCacheWidth;
+    }
     if (url.isEmpty) {
       final iconSize = (width != null && width.isFinite) ? width : 24.0;
-      return errorWidget ??
-          _BrokenImageIcon(size: iconSize);
+      return errorWidget ?? _BrokenImageIcon(size: iconSize);
     }
 
     final Widget image = url.startsWith('assets/')
@@ -70,8 +86,7 @@ class WidgetUtils {
             fit: fit,
             errorBuilder: (context, error, stackTrace) {
               final iconSize = (width != null && width.isFinite) ? width : 24.0;
-              return errorWidget ??
-                  _BrokenImageIcon(size: iconSize);
+              return errorWidget ?? _BrokenImageIcon(size: iconSize);
             },
           )
         : CachedNetworkImage(
@@ -83,19 +98,20 @@ class WidgetUtils {
             memCacheWidth: memCacheWidth,
             memCacheHeight: memCacheHeight,
             placeholder: (context, url) =>
-                placeholder ??
-                const _ImagePlaceholder(),
+                placeholder ?? const _ImagePlaceholder(),
             errorWidget: (context, url, error) {
               // Surface the failing host + error so image outages (dead CDN,
               // TLS handshake, cleartext block, rate limit) are diagnosable from
               // the in-app log rather than a silent broken-image icon.
               LoggingService.logger.warning('Image load failed: $url — $error');
               final iconSize = (width != null && width.isFinite) ? width : 24.0;
-              return errorWidget ??
-                  _BrokenImageIcon(size: iconSize);
+              return errorWidget ?? _BrokenImageIcon(size: iconSize);
             },
-            fadeOutDuration: const Duration(milliseconds: 300),
-            fadeInDuration: const Duration(milliseconds: 300),
+            // The placeholder is a flat colour: fading it out slowly just
+            // shows a half-loaded cover while scrolling.
+            fadeOutDuration: Duration.zero,
+            filterQuality: FilterQuality.medium,
+            fadeInDuration: fadeIn,
           );
 
     if (!blurred) return image;
@@ -337,7 +353,8 @@ class _ImagePlaceholder extends StatelessWidget {
   const _ImagePlaceholder();
 
   @override
-  Widget build(BuildContext context) => ColoredBox(color: context.colors.surface);
+  Widget build(BuildContext context) =>
+      ColoredBox(color: context.colors.surface);
 }
 
 class _SectionLabel extends StatelessWidget {

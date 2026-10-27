@@ -36,7 +36,11 @@ class UpcomingWorksScreen extends StatefulWidget {
   /// Data the Home rail already loaded, shown immediately while a refresh runs.
   final UpcomingData? initial;
 
-  const UpcomingWorksScreen({super.key, this.initial});
+  /// Replaces the network and database load.
+  @visibleForTesting
+  final Future<UpcomingData> Function()? loader;
+
+  const UpcomingWorksScreen({super.key, this.initial, this.loader});
 
   static void open(BuildContext context, {UpcomingData? initial}) {
     Navigator.of(context).push(
@@ -67,12 +71,20 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
   }
 
   Future<void> _load() async {
-    final data = await UpcomingData.load(_home);
+    final data = await (widget.loader?.call() ?? UpcomingData.load(_home));
     if (!mounted) return;
     setState(() {
       _data = data;
       _loading = false;
     });
+    _resolveLibrary();
+  }
+
+  /// Fills in the library marks in the background; the list is usable meanwhile.
+  Future<void> _resolveLibrary() async {
+    final resolved = await _data.withLibrary();
+    if (!mounted) return;
+    setState(() => _data = resolved);
   }
 
   bool _loadingMore = false;
@@ -87,6 +99,7 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
       _data = data;
       _loadingMore = false;
     });
+    _resolveLibrary();
   }
 
   /// Chronological days; works with no parseable date collect at the end.
@@ -113,6 +126,9 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
+    // Until the library marks are in, a library-only list would be wrong, so
+    // it waits behind the spinner instead.
+    final waitingForLibrary = _onlyLibrary && !_data.libraryReady;
     final works = _onlyLibrary
         ? _data.works.where(_data.isInLibrary).toList()
         : _data.works;
@@ -153,7 +169,7 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
               ),
             ),
             Expanded(
-              child: _loading
+              child: _loading || waitingForLibrary
                   ? const Center(child: MbSpinner())
                   : MbRefreshIndicator(
                       onRefresh: _load,

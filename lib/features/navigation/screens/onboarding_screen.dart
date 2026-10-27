@@ -20,6 +20,7 @@ import 'package:mangabaka_app/features/navigation/widgets/onboarding/camera_perm
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/content_preferences_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/import_page.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/login_page.dart';
+import 'package:mangabaka_app/features/navigation/widgets/onboarding/open_links_page.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/screens/onboarding/onboarding_window.dart';
@@ -86,6 +87,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         page: CameraPermissionPage(
           onRequestPermission: _requestCameraPermission,
         ),
+      ),
+    if (Platform.isAndroid || Platform.isIOS)
+      (
+        titleKey: 'onboarding_links_title',
+        icon: Icons.link_rounded,
+        page: const OpenLinksPage(),
       ),
     (
       titleKey: 'onboarding_login_title',

@@ -8,6 +8,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_icons.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
 
 /// What Browse shows before anything is searched: Mix as a feature card, then
 /// one card per content type with its three ready-made lists.
@@ -66,6 +67,8 @@ class DesktopBrowseLanding extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(height: 16),
+        _StacksCard(onTap: () => StacksHubScreen.open(context)),
         const SizedBox(height: DesktopTokens.sectionGap),
         DesktopSectionTitle(title: l10n.translate('discover')),
         // Columns are a whole number decided per breakpoint; their width
@@ -236,6 +239,68 @@ class _MixCard extends StatelessWidget {
         ),
         trailing: DesktopPillButton(
           label: l10n.translate('mix_empty_title'),
+          primary: true,
+          onPressed: onTap,
+        ),
+      ),
+    );
+  }
+}
+
+/// Stacks: hand-picked lists from the community, as a full-width feature
+/// card under Mix and the queue.
+class _StacksCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _StacksCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = LocalizationService();
+    return DesktopHoverSurface(
+      onTap: onTap,
+      idleColor: context.colors.surface,
+      hoverColor: context.colors.surfaceRaised,
+      borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
+      padding: const EdgeInsets.fromLTRB(30, 22, 26, 22),
+      child: BesideOrBelow(
+        minBodyWidth: 180,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.layers_rounded,
+                  size: 22,
+                  color: context.colors.accent,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.translate('stacks').toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.display(
+                      color: context.colors.text,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.translate('stacks_tagline'),
+              style: AppTypography.sans(
+                color: context.colors.textMuted,
+                fontSize: 14.5,
+              ),
+            ),
+          ],
+        ),
+        trailing: DesktopPillButton(
+          label: l10n.translate('stacks_browse'),
           primary: true,
           onPressed: onTap,
         ),

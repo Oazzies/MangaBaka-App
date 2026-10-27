@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/widgets/design/lucide_icon.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_icons.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/shortcut_section.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
 
 class BrowseShortcuts extends StatelessWidget {
   final Function(String, String, {String? type}) onNavigate;
@@ -36,11 +37,8 @@ class BrowseShortcuts extends StatelessWidget {
         'score_desc',
         type: typeValue,
       ),
-      onRandom: () => onNavigate(
-        l10n.translate('random'),
-        'random',
-        type: typeValue,
-      ),
+      onRandom: () =>
+          onNavigate(l10n.translate('random'), 'random', type: typeValue),
     );
   }
 
@@ -69,12 +67,29 @@ class BrowseShortcuts extends StatelessWidget {
                     // The same compass as the Browse tab.
                     icon: const Icon(MbIcons.compass),
                   ),
+                  ShortcutButtonEntry(
+                    label: l10n.translate('stacks'),
+                    onPressed: () => StacksHubScreen.open(context),
+                    icon: const Icon(Icons.layers_rounded),
+                  ),
                 ],
               ),
               // ── Content types ────────────────────────────────────────
-              _buildTypeSection(l10n, headerKey: 'type_manga', typeValue: 'manga'),
-              _buildTypeSection(l10n, headerKey: 'type_manhwa', typeValue: 'manhwa'),
-              _buildTypeSection(l10n, headerKey: 'type_manhua', typeValue: 'manhua'),
+              _buildTypeSection(
+                l10n,
+                headerKey: 'type_manga',
+                typeValue: 'manga',
+              ),
+              _buildTypeSection(
+                l10n,
+                headerKey: 'type_manhwa',
+                typeValue: 'manhwa',
+              ),
+              _buildTypeSection(
+                l10n,
+                headerKey: 'type_manhua',
+                typeValue: 'manhua',
+              ),
               _buildTypeSection(l10n, headerKey: 'novels', typeValue: 'novel'),
               _buildTypeSection(l10n, headerKey: 'oel_other', typeValue: 'oel'),
             ],
@@ -84,4 +99,3 @@ class BrowseShortcuts extends StatelessWidget {
     );
   }
 }
-

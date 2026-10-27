@@ -1,9 +1,11 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_dialog.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/utils/content_rating_filter.dart';
 
 class SearchFilterTypeStatusSection extends StatelessWidget {
   final SearchFilters filters;
@@ -32,7 +34,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
     required Function(List<String>, List<String>) onApply,
     bool showSearch = true,
   }) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -54,6 +56,45 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Future<void> _askPublisher(BuildContext context) async {
+    final text = TextEditingController(text: filters.publisher.join(', '));
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: context.colors.surface,
+        title: Text(l10n.translate('filter_publisher')),
+        content: TextField(
+          controller: text,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: l10n.translate('filter_publisher_hint'),
+          ),
+          onSubmitted: (v) => Navigator.of(context).pop(v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.translate('cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(text.text),
+            child: Text(l10n.translate('apply')),
+          ),
+        ],
+      ),
+    );
+    text.dispose();
+    if (result == null) return;
+    onFiltersChanged(
+      filters.copyWith(
+        publisher: [
+          for (final p in result.split(','))
+            if (p.trim().isNotEmpty) p.trim(),
+        ],
+      ),
     );
   }
 
@@ -95,7 +136,6 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
               subtitle: filters.status.isEmpty && filters.statusNot.isEmpty
                   ? l10n.translate('any')
                   : '${filters.status.length} ${l10n.translate('included')}, ${filters.statusNot.length} ${l10n.translate('excluded')}',
-              isLast: true,
               onTap: () => _showFilterDialog(
                 context,
                 title: l10n.translate('status'),
@@ -113,6 +153,41 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                 ),
                 showSearch: false,
               ),
+            ),
+            const SettingsDivider(),
+            SettingsItem(
+              icon: Icons.shield_outlined,
+              title: l10n.translate('content_rating'),
+              subtitle:
+                  filters.contentRating.isEmpty &&
+                      filters.contentRatingNot.isEmpty
+                  ? l10n.translate('any')
+                  : '${filters.contentRating.length} ${l10n.translate('included')}, ${filters.contentRatingNot.length} ${l10n.translate('excluded')}',
+              onTap: () => _showFilterDialog(
+                context,
+                title: l10n.translate('content_rating'),
+                items: ContentRatingFilter.all
+                    .map((r) => {'value': r, 'label': l10n.translate(r)})
+                    .toList(),
+                idKey: 'value',
+                nameKey: 'label',
+                includes: filters.contentRating,
+                excludes: filters.contentRatingNot,
+                onApply: (inc, exc) => onFiltersChanged(
+                  filters.copyWith(contentRating: inc, contentRatingNot: exc),
+                ),
+                showSearch: false,
+              ),
+            ),
+            const SettingsDivider(),
+            SettingsItem(
+              icon: Icons.business_outlined,
+              title: l10n.translate('filter_publisher'),
+              subtitle: filters.publisher.isEmpty
+                  ? l10n.translate('any')
+                  : filters.publisher.join(', '),
+              isLast: true,
+              onTap: () => _askPublisher(context),
             ),
           ],
         ),

@@ -30,5 +30,16 @@
 	<string>NSApplication</string>
 	<key>NSCameraUsageDescription</key>
 	<string>MangaBaka needs camera access to scan ISBN barcodes.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>dev.oazzies.mangabaka</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>mangabaka</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

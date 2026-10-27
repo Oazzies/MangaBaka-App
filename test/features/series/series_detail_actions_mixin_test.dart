@@ -142,7 +142,7 @@ void main() {
       await tester.pumpWidget(buildWidget(svc));
       final state = tester.state<_TestWidgetState>(find.byType(_TestWidget));
 
-      state.copyToClipboard('https://mangabaka.dev/series/222');
+      state.copyToClipboard('https://mangabaka.org/series/222');
       await tester.pump();
 
       expect(find.byType(SnackBar), findsOneWidget);

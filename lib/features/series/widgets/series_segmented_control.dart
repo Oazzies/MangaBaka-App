@@ -20,6 +20,7 @@ class SeriesSegmentedControl extends StatefulWidget {
     'Covers',
     'Related',
     'Similar',
+    'Stacks',
     'News',
     'Collections',
     'Works',

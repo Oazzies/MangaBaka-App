@@ -85,11 +85,23 @@ class EntryListLayoutHelper {
   }
 }
 
+/// The grid card's outline: an accent ring while hovered, none otherwise.
+ShapeBorder _gridCardShape(BuildContext context, bool hovered) {
+  return RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+    side: BorderSide(
+      color: hovered ? context.colors.accent : Colors.transparent,
+      width: 2,
+    ),
+  );
+}
+
 class CoverOnlyGridItem extends StatelessWidget {
   final Series series;
   final String? heroTagPrefix;
   final LibraryEntry? entry;
   final int? progressOverride;
+  final bool hovered;
 
   const CoverOnlyGridItem({
     super.key,
@@ -97,6 +109,7 @@ class CoverOnlyGridItem extends StatelessWidget {
     this.heroTagPrefix,
     this.entry,
     this.progressOverride,
+    this.hovered = false,
   });
 
   @override
@@ -104,7 +117,7 @@ class CoverOnlyGridItem extends StatelessWidget {
     return Card(
       color: context.colors.surface,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: _gridCardShape(context, hovered),
       // Rebuilt only when the card crosses the badge-merging width.
       child: DerivedLayoutBuilder<bool>(
         derive: (constraints) =>
@@ -145,6 +158,7 @@ class CompactGridItem extends StatelessWidget {
   final String displayTitle;
   final LibraryEntry? entry;
   final int? progressOverride;
+  final bool hovered;
 
   const CompactGridItem({
     super.key,
@@ -153,6 +167,7 @@ class CompactGridItem extends StatelessWidget {
     required this.displayTitle,
     this.entry,
     this.progressOverride,
+    this.hovered = false,
   });
 
   @override
@@ -167,9 +182,7 @@ class CompactGridItem extends StatelessWidget {
           child: Card(
             color: context.colors.surface,
             clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: _gridCardShape(context, hovered),
             margin: EdgeInsets.zero,
             child: DerivedLayoutBuilder<bool>(
               derive: (constraints) =>
@@ -208,7 +221,7 @@ class CompactGridItem extends StatelessWidget {
               displayTitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: context.colors.text,
+                color: hovered ? context.colors.accent : context.colors.text,
                 fontSize: 12,
               ),
               maxLines: settings.compactGridTitleRows,

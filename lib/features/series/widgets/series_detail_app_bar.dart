@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/app_bar/glass_control.dart';
 import 'package:mangabaka_app/features/series/widgets/app_bar/series_app_bar_metrics.dart';
 import 'package:mangabaka_app/features/series/widgets/app_bar/series_banner_background.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// Banner hero for the series detail page: a full-bleed blurred cover that
 /// fades into the page background, with the cover artwork and serif title
@@ -27,7 +28,9 @@ class SeriesDetailAppBar extends StatefulWidget {
   final bool showCover;
   final double horizontalPadding;
   final VoidCallback onBack;
-  final VoidCallback onShare;
+
+  /// Called with the share button's rect, so landscape can drop a menu from it.
+  final ValueChanged<Rect?> onShare;
   final VoidCallback onDelete;
   final Function(String) onCopy;
   final String? heroTagPrefix;
@@ -181,13 +184,22 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
     return [
       AppTooltip(
         message: l10n.translate('share_series'),
-        child: _actionIcon(
-          icon: Icons.share_outlined,
-          onTap: widget.onShare,
-          metrics: metrics,
-          // Staggered behind the back pill so the controls arrive in reading
-          // order rather than all at once.
-          delay: 80.ms,
+        child: Builder(
+          builder: (buttonContext) => _actionIcon(
+            icon: Icons.share_outlined,
+            onTap: () {
+              final box = buttonContext.findRenderObject() as RenderBox?;
+              widget.onShare(
+                box != null && box.hasSize
+                    ? box.localToGlobal(Offset.zero) & box.size
+                    : null,
+              );
+            },
+            metrics: metrics,
+            // Staggered behind the back pill so the controls arrive in reading
+            // order rather than all at once.
+            delay: 80.ms,
+          ),
         ),
       ),
       // Nothing to delete unless the series is in the library.
@@ -233,13 +245,13 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
         opacity: metrics.titleOpacity,
         child: Text(
           widget.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: AppTypography.display(
             color: context.colors.text,
             fontWeight: FontWeight.w600,
             fontSize: 19,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

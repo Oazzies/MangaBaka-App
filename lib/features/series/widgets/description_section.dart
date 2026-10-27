@@ -10,7 +10,16 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 
 class DescriptionSection extends StatefulWidget {
   final String description;
-  const DescriptionSection({super.key, required this.description});
+
+  /// Start expanded when the whole text fits on the screen from where it
+  /// sits down to the bottom (nothing is below it to push out of view).
+  final bool expandIfFits;
+
+  const DescriptionSection({
+    super.key,
+    required this.description,
+    this.expandIfFits = false,
+  });
 
   @override
   State<DescriptionSection> createState() => _DescriptionSectionState();
@@ -19,6 +28,45 @@ class DescriptionSection extends StatefulWidget {
 class _DescriptionSectionState extends State<DescriptionSection> {
   bool expanded = false;
   final List<GestureRecognizer> _recognizers = [];
+  final GlobalKey _key = GlobalKey();
+  bool _fitChecked = false;
+
+  /// Bumped to remount the size animation, so the automatic expansion lands
+  /// at its final size without animating.
+  int _epoch = 0;
+
+  /// Expands once, after layout, when the full text ends above the screen's
+  /// bottom edge.
+  void _expandIfItFits() {
+    if (!widget.expandIfFits || _fitChecked) return;
+    _fitChecked = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || expanded) return;
+      final box = _key.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) return;
+      final spans = MarkdownUtils.buildTextSpans(
+        text: widget.description,
+        context: context,
+      );
+      final painter = TextPainter(
+        text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: spans,
+        ),
+        textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout(maxWidth: box.size.width);
+      final top = box.localToGlobal(Offset.zero).dy;
+      final bottom = top + painter.height + 16;
+      painter.dispose();
+      if (bottom <= MediaQuery.sizeOf(context).height - 24) {
+        setState(() {
+          expanded = true;
+          _epoch++;
+        });
+      }
+    });
+  }
 
   void _clearRecognizers() {
     for (final r in _recognizers) {
@@ -36,6 +84,7 @@ class _DescriptionSectionState extends State<DescriptionSection> {
   @override
   Widget build(BuildContext context) {
     _clearRecognizers();
+    _expandIfItFits();
 
     final isLong =
         widget.description
@@ -53,9 +102,11 @@ class _DescriptionSectionState extends State<DescriptionSection> {
     );
 
     return Column(
+      key: _key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AnimatedSize(
+          key: ValueKey(_epoch),
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           alignment: Alignment.topCenter,
@@ -102,7 +153,9 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                   Expanded(
                     child: Center(
                       child: InkWell(
-                        onTap: () => setState(() => expanded = !expanded),
+                        onTap: () => setState(() {
+                          expanded = !expanded;
+                        }),
                         borderRadius: BorderRadius.circular(8),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(

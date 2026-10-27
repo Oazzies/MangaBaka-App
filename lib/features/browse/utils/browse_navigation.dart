@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
+import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
 import 'package:mangabaka_app/desktop/screens/browse/desktop_browse_screen.dart';
@@ -30,6 +31,20 @@ class BrowseNavigation {
 
   static void searchWithFilters(BuildContext context, SearchFilters filters) {
     _go(context, (controller) => controller.startSearchWithFilters(filters));
+  }
+
+  /// A text query with filters, as arrives from a `/search?...` link.
+  static void search(
+    BuildContext context,
+    String query,
+    SearchFilters filters,
+  ) {
+    _go(context, (controller) => controller.startQuerySearch(query, filters));
+  }
+
+  /// The Browse tab on its Publishers list.
+  static void showPublishers(BuildContext context) {
+    _go(context, (controller) => controller.setType(BrowseType.publishers));
   }
 
   static void _go(BuildContext context, void Function(BrowseController controller) seed) {

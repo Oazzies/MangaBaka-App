@@ -1,17 +1,18 @@
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
-import 'package:mangabaka_app/features/updates/models/app_release.dart';
-import 'package:mangabaka_app/features/updates/services/update_service.dart';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/features/updates/models/app_release.dart';
+import 'package:mangabaka_app/features/updates/services/update_service.dart';
 
 /// Dialog shown when a newer GitHub release is detected. Title is the release
 /// name, body is the release description, with "Later" and "Update now"
@@ -190,16 +191,75 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 280),
                   child: SingleChildScrollView(
-                    child: Text(
-                      release.body.trim().isEmpty
-                          ? l10n.translate('no_release_notes')
-                          : release.body.trim(),
-                      style: AppTypography.sans(
-                        color: context.colors.text,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                    ),
+                    child: release.body.trim().isEmpty
+                        ? Text(
+                            l10n.translate('no_release_notes'),
+                            style: AppTypography.sans(
+                              color: context.colors.text,
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          )
+                        : MarkdownBody(
+                            data: release.body.trim(),
+                            selectable: true,
+                            onTapLink: (text, href, title) {
+                              if (href != null) {
+                                final uri = Uri.tryParse(href);
+                                if (uri != null) {
+                                  launchUrl(
+                                    uri,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                }
+                              }
+                            },
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              Theme.of(context),
+                            ).copyWith(
+                              p: AppTypography.sans(
+                                color: context.colors.text,
+                                fontSize: 14,
+                                height: 1.5,
+                              ),
+                              listBullet: AppTypography.sans(
+                                color: context.colors.textMuted,
+                                fontSize: 14,
+                              ),
+                              h1: AppTypography.display(
+                                color: context.colors.text,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              h2: AppTypography.display(
+                                color: context.colors.text,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              h3: AppTypography.display(
+                                color: context.colors.text,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              a: AppTypography.sans(
+                                color: context.colors.accent,
+                                fontSize: 14,
+                              ).copyWith(
+                                decoration: TextDecoration.underline,
+                              ),
+                              code: TextStyle(
+                                fontFamily: 'monospace',
+                                color: context.colors.accent,
+                                fontSize: 13,
+                              ),
+                              codeblockDecoration: BoxDecoration(
+                                color: context.colors.surfaceRaised,
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.denseRadius,
+                                ),
+                              ),
+                            ),
+                          ),
                   ),
                 ),
               ),

@@ -13,6 +13,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
+import 'package:mangabaka_app/features/stacks/widgets/home_stacks_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_publishers_rail.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -232,9 +233,8 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                           rail.series,
                           onViewAll: () => _openGenreAll(rail.genre),
                         ),
-                      _padded(
-                        const HomePublishersRail(horizontalPadding: 0),
-                      ),
+                      _padded(const HomePublishersRail(horizontalPadding: 0)),
+                      _padded(const HomeStacksRail()),
                       _rail(l10n.translate('rising'), _rising),
                       _rail(l10n.translate('hidden_gems'), _hiddenGems),
                       _rail(l10n.translate('new_releases'), _newReleases),
@@ -288,9 +288,14 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: context.colors.background,
-                  border: Border(left: BorderSide(color: context.colors.border)),
+                  border: Border(
+                    left: BorderSide(color: context.colors.border),
+                  ),
                   boxShadow: [
-                    BoxShadow(color: FixedColors.dim.withValues(alpha: 0.3), blurRadius: 24),
+                    BoxShadow(
+                      color: FixedColors.dim.withValues(alpha: 0.3),
+                      blurRadius: 24,
+                    ),
                   ],
                 ),
                 child: _upcomingBuilt

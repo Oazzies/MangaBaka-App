@@ -24,7 +24,7 @@ void openSeriesDetail(BuildContext context, Series series, {String? heroTag}) {
 
 /// A cover with its title beneath, for rails and grids.
 ///
-/// On hover the cover lifts and gains an accent ring, and the detail page is
+/// On hover the cover gains an accent ring, and the detail page is
 /// prefetched — by the time the click lands it usually has its data.
 class DesktopCoverCard extends StatefulWidget {
   final Series series;
@@ -153,11 +153,6 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
                     child: AnimatedContainer(
                       duration: AppMotion.fast,
                       curve: AppMotion.emphasized,
-                      transform: Matrix4.translationValues(
-                        0,
-                        _hovered ? -DesktopCoverCard.hoverLift : 0,
-                        0,
-                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(

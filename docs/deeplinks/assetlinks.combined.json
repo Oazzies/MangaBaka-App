@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.oazzies.mangabaka_app",
+      "sha256_cert_fingerprints": [
+        "7E:DB:12:3A:61:D6:3E:D3:E4:EC:F7:D9:DC:D9:46:FB:F3:8C:32:B5:BB:CC:B7:5C:A6:8E:4E:8E:3C:D0:93:AC",
+        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256"
+      ]
+    }
+  }
+]

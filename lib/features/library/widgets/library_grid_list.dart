@@ -1,4 +1,4 @@
-import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
@@ -10,6 +10,7 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
+import 'package:mangabaka_app/core/widgets/list_style_switch.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
@@ -67,7 +68,7 @@ class LibraryGridList extends StatelessWidget {
                 ),
               ],
             )
-          : _buildList(context),
+          : ListStyleSwitchGate(child: _buildList(context)),
     );
   }
 
@@ -87,6 +88,10 @@ class LibraryGridList extends StatelessWidget {
           key: ValueKey('${activeStyle.name}_${entry.series.id}'),
           series: entry.series,
           isLibrary: true,
+          // The list is already built from the database, so the row need not
+          // open a database watch of its own: one per visible row made
+          // scrolling stutter as rows were created and torn down.
+          previewEntry: entry,
           heroTagPrefix: 'library',
           listStyle: activeStyle,
         ),
@@ -118,20 +123,15 @@ class LibraryGridList extends StatelessWidget {
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 itemCount: items.length,
-                itemBuilder: (context, index) => MbEntrance(
-                  index: index,
-                  child: _buildEntryItem(
-                    items[index],
-                    seriesService,
-                    activeStyle,
-                  ),
-                ),
+                itemBuilder: (context, index) =>
+                    _buildEntryItem(items[index], seriesService, activeStyle),
               );
             }
 
             return GridView.builder(
               controller: scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
+              scrollCacheExtent: const ScrollCacheExtent.pixels(500),
               padding: const EdgeInsets.all(12),
               gridDelegate: columns > 0
                   ? SliverGridDelegateWithFixedCrossAxisCount(
@@ -147,14 +147,8 @@ class LibraryGridList extends StatelessWidget {
                       mainAxisSpacing: 10,
                     ),
               itemCount: items.length,
-              itemBuilder: (context, index) => MbEntrance(
-                index: index,
-                child: _buildEntryItem(
-                  items[index],
-                  seriesService,
-                  activeStyle,
-                ),
-              ),
+              itemBuilder: (context, index) =>
+                  _buildEntryItem(items[index], seriesService, activeStyle),
             );
           }
 
@@ -182,12 +176,11 @@ class LibraryGridList extends StatelessWidget {
         final list = ListView.builder(
           controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
+          scrollCacheExtent: const ScrollCacheExtent.pixels(500),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           itemCount: items.length,
-          itemBuilder: (context, index) => MbEntrance(
-            index: index,
-            child: _buildEntryItem(items[index], seriesService, activeStyle),
-          ),
+          itemBuilder: (context, index) =>
+              _buildEntryItem(items[index], seriesService, activeStyle),
         );
 
         // On desktop the list styles are tables, so they get column labels.

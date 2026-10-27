@@ -81,17 +81,17 @@ class SeriesAppBarMetrics {
 
   /// Space reserved for the leading control. Fixed rather than intrinsic, so
   /// the "Back" pill's label cannot shift the title as it appears.
-  double get leadingWidth => (isWide ? 150 : 120) + horizontalMargin;
+  double get leadingWidth => (isWide ? 130 : 104) + horizontalMargin;
 
-  /// Where the collapsed title starts — clear of the leading pill.
-  double get titleStartPadding => (isWide ? 166 : 136) + horizontalMargin;
+  /// Where the collapsed title starts — clear of the leading pill with balanced spacing.
+  double get titleStartPadding => (isWide ? 138 : 112) + horizontalMargin;
 
   /// Where the collapsed title ends — clear of whichever trailing controls are
-  /// present.
+  /// present with balanced spacing matching the leading side.
   double get titleEndPadding {
     if (!showsBannerActions) return 16.0 + horizontalMargin;
     // Share alone, or share and delete.
-    return (hasEntry ? 104.0 : 60.0) + horizontalMargin;
+    return (hasEntry ? 108.0 : 64.0) + horizontalMargin;
   }
 
   /// Whether share and delete appear on the banner itself.

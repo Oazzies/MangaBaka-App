@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/settings/setting_value.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -36,6 +38,11 @@ class SettingsManager extends ChangeNotifier {
   );
   final _browseListStyle = EnumSetting(
     SettingsKeys.browseListStyle,
+    AppListStyle.compactGrid,
+    AppListStyle.values,
+  );
+  final _stacksListStyle = EnumSetting(
+    SettingsKeys.stacksListStyle,
     AppListStyle.compactGrid,
     AppListStyle.values,
   );
@@ -118,12 +125,19 @@ class SettingsManager extends ChangeNotifier {
   final _showLibraryTabCounts =
       BoolSetting(SettingsKeys.showLibraryTabCounts, true);
 
+  /// Whether https://mangabaka.org links should open inside the app
+  /// rather than in a browser. Defaults to true on Android, false elsewhere.
+  final _openLinksInApp =
+      BoolSetting(SettingsKeys.openLinksInApp, Platform.isAndroid);
+
   /// 0 means "auto": fit as many columns as the available width allows.
   final _gridColumnCount = IntSetting(SettingsKeys.gridColumnCount, 0);
   final _libraryGridColumnCount =
       IntSetting(SettingsKeys.libraryGridColumnCount, 0);
   final _browseGridColumnCount =
       IntSetting(SettingsKeys.browseGridColumnCount, 0);
+  final _stacksGridColumnCount =
+      IntSetting(SettingsKeys.stacksGridColumnCount, 0);
   final _collectionsListColumns =
       IntSetting(SettingsKeys.collectionsGridColumns, 0);
   final _newsListColumns = IntSetting(SettingsKeys.newsListColumns, 1);
@@ -153,6 +167,7 @@ class SettingsManager extends ChangeNotifier {
     _currentListStyle,
     _libraryListStyle,
     _browseListStyle,
+    _stacksListStyle,
     _worksListStyle,
     _publisherStatsStyle,
     _similarListStyle,
@@ -183,6 +198,7 @@ class SettingsManager extends ChangeNotifier {
     _gridColumnCount,
     _libraryGridColumnCount,
     _browseGridColumnCount,
+    _stacksGridColumnCount,
     _collectionsListColumns,
     _newsListColumns,
     _compactGridTitleRows,
@@ -190,6 +206,7 @@ class SettingsManager extends ChangeNotifier {
     _contentPreferences,
     _blurredContentRatings,
     _dismissedRecommendations,
+    _openLinksInApp,
   ];
 
   // ─── Lifecycle ───────────────────────────────────────────────────────────
@@ -198,6 +215,13 @@ class SettingsManager extends ChangeNotifier {
     final prefs = await _getPrefs();
     for (final setting in _all) {
       setting.load(prefs);
+    }
+    // Stacks used to follow Browse; until it is configured it keeps doing so.
+    if (!prefs.containsKey(SettingsKeys.stacksListStyle)) {
+      _stacksListStyle.set(_browseListStyle.value);
+    }
+    if (!prefs.containsKey(SettingsKeys.stacksGridColumnCount)) {
+      _stacksGridColumnCount.set(_browseGridColumnCount.value);
     }
     notifyListeners();
   }
@@ -236,6 +260,10 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setBrowseListStyle(AppListStyle style) =>
       _apply(_browseListStyle, style);
 
+  AppListStyle get stacksListStyle => _stacksListStyle.value;
+  Future<void> setStacksListStyle(AppListStyle style) =>
+      _apply(_stacksListStyle, style);
+
   PublisherStatsStyle get publisherStatsStyle => _publisherStatsStyle.value;
   Future<void> setPublisherStatsStyle(PublisherStatsStyle style) =>
       _apply(_publisherStatsStyle, style);
@@ -261,6 +289,10 @@ class SettingsManager extends ChangeNotifier {
   AppListStyle get resolvedBrowseListStyle =>
       separateListStyles ? browseListStyle : currentListStyle;
 
+  /// The style the Stacks list actually uses.
+  AppListStyle get resolvedStacksListStyle =>
+      separateListStyles ? stacksListStyle : currentListStyle;
+
   // ─── Grid columns ────────────────────────────────────────────────────────
 
   bool get separateGridColumnCounts => _separateGridColumnCounts.value;
@@ -277,6 +309,14 @@ class SettingsManager extends ChangeNotifier {
   int get browseGridColumnCount => _browseGridColumnCount.value;
   Future<void> setBrowseGridColumnCount(int value) =>
       _apply(_browseGridColumnCount, value);
+
+  int get stacksGridColumnCount => _stacksGridColumnCount.value;
+  Future<void> setStacksGridColumnCount(int value) =>
+      _apply(_stacksGridColumnCount, value);
+
+  /// The column count the Stacks grid actually uses.
+  int get resolvedStacksGridColumnCount =>
+      separateGridColumnCounts ? stacksGridColumnCount : gridColumnCount;
 
   /// The column count the Library grid actually uses.
   int get resolvedLibraryGridColumnCount =>
@@ -378,6 +418,10 @@ class SettingsManager extends ChangeNotifier {
   bool get pushNotifications => _pushNotifications.value;
   Future<void> setPushNotifications(bool value) =>
       _apply(_pushNotifications, value);
+
+  bool get openLinksInApp => _openLinksInApp.value;
+  Future<void> setOpenLinksInApp(bool value) =>
+      _apply(_openLinksInApp, value);
 
   /// Reveals the Developer Tools category in Settings. Off by default; toggled
   /// by tapping the app logo on the Settings screen ten times quickly.

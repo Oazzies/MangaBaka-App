@@ -23,6 +23,11 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
   await AppBootstrap.run();
+  // The default image cache (100 images) is smaller than one screen of a
+  // cover grid, so scrolling back re-decoded covers it had just shown.
+  PaintingBinding.instance.imageCache
+    ..maximumSize = 1200
+    ..maximumSizeBytes = 300 << 20;
   runApp(const MangaBakaApp());
 }
 

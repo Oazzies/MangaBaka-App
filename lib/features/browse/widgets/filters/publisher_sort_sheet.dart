@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -13,7 +14,7 @@ Future<void> showPublisherSortSheet(
   required ValueChanged<String?> onSelected,
 }) {
   final l10n = LocalizationService();
-  return showModalBottomSheet<void>(
+  return showAdaptiveSheet<void>(
     context: context,
     useSafeArea: true,
     backgroundColor: context.colors.surface,
@@ -46,12 +47,16 @@ Future<void> showPublisherSortSheet(
                     color: value == current
                         ? sheetContext.colors.accent
                         : sheetContext.colors.text,
-                    fontWeight:
-                        value == current ? FontWeight.bold : FontWeight.w500,
+                    fontWeight: value == current
+                        ? FontWeight.bold
+                        : FontWeight.w500,
                   ),
                 ),
                 trailing: value == current
-                    ? Icon(Icons.check_rounded, color: sheetContext.colors.accent)
+                    ? Icon(
+                        Icons.check_rounded,
+                        color: sheetContext.colors.accent,
+                      )
                     : null,
                 onTap: () {
                   Navigator.of(sheetContext).pop();

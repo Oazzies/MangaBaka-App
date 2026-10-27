@@ -3,7 +3,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_scope.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The Library / Browse switch at the top of the list customization panel.
+/// The Library / Browse / Stacks switch at the top of the list customization panel.
 ///
 /// A sliding pill rather than two buttons, so the selected side is legible at
 /// a glance and the transition matches the panel sliding beneath it.
@@ -11,6 +11,7 @@ class ListScopeTabSelector extends StatelessWidget {
   final ListScopeTab active;
   final String libraryLabel;
   final String browseLabel;
+  final String stacksLabel;
   final ValueChanged<ListScopeTab> onChanged;
 
   static const Duration _pillDuration = Duration(milliseconds: 180);
@@ -21,6 +22,7 @@ class ListScopeTabSelector extends StatelessWidget {
     required this.active,
     required this.libraryLabel,
     required this.browseLabel,
+    required this.stacksLabel,
     required this.onChanged,
   });
 
@@ -37,14 +39,12 @@ class ListScopeTabSelector extends StatelessWidget {
       child: Stack(
         children: [
           AnimatedAlign(
-            alignment: active.isLibrary
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
+            alignment: Alignment(active.index - 1.0, 0),
             duration: _pillDuration,
             curve: Curves.easeOutCubic,
-            // Half the bar, worked out at layout.
+            // A third of the bar, worked out at layout.
             child: FractionallySizedBox(
-              widthFactor: 0.5,
+              widthFactor: 1 / 3,
               heightFactor: 1,
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -63,8 +63,13 @@ class ListScopeTabSelector extends StatelessWidget {
               ),
               _Tab(
                 label: browseLabel,
-                isActive: !active.isLibrary,
+                isActive: active == ListScopeTab.browse,
                 onTap: () => onChanged(ListScopeTab.browse),
+              ),
+              _Tab(
+                label: stacksLabel,
+                isActive: active == ListScopeTab.stacks,
+                onTap: () => onChanged(ListScopeTab.stacks),
               ),
             ],
           ),
