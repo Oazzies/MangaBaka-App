@@ -277,6 +277,7 @@ class _AccountChip extends StatelessWidget {
                     fit: BoxFit.cover,
                     width: 34,
                     height: 34,
+                    memCacheWidth: WidgetUtils.decodeWidth(context, 34),
                     errorWidget: Center(
                       child: Text(
                         initial ?? '?',

@@ -590,7 +590,11 @@ class _UpcomingWorkCoverState extends State<_UpcomingWorkCover> {
   @override
   Widget build(BuildContext context) {
     if (_resolvedUrl != null && _resolvedUrl!.isNotEmpty) {
-      return WidgetUtils.networkImage(url: _resolvedUrl!, fit: BoxFit.cover);
+      return WidgetUtils.networkImage(
+        url: _resolvedUrl!,
+        fit: BoxFit.cover,
+        memCacheWidth: WidgetUtils.decodeWidth(context, 48),
+      );
     }
     return Container(
       color: context.colors.surfaceRaised,

@@ -44,6 +44,7 @@ class StaffListItem extends StatelessWidget {
                   child: WidgetUtils.networkImage(
                     url: staff.image!,
                     fit: BoxFit.cover,
+                    memCacheWidth: WidgetUtils.decodeWidth(context, 50),
                   ),
                 ),
               ),

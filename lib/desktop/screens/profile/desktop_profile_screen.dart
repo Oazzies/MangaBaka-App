@@ -611,6 +611,7 @@ class _IdentityCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     width: 88,
                     height: 88,
+                    memCacheWidth: WidgetUtils.decodeWidth(context, 88),
                     errorWidget: Center(
                       child: Text(
                         name.isEmpty ? '?' : name[0].toUpperCase(),
