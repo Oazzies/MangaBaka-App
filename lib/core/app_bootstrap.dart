@@ -10,6 +10,7 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_theme.dart';
 import 'package:mangabaka_app/core/theme/theme_controller.dart';
+import 'package:mangabaka_app/core/widgets/build_error_fallback.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
@@ -97,8 +98,9 @@ class AppBootstrap {
       // The Windows runner enforces its own, DPI-exact minimum (see
       // windows/runner/flutter_window.cpp).
       minimumSize: Platform.isWindows ? null : _minWindowSize,
-      titleBarStyle:
-          Platform.isWindows ? TitleBarStyle.hidden : TitleBarStyle.normal,
+      titleBarStyle: Platform.isWindows
+          ? TitleBarStyle.hidden
+          : TitleBarStyle.normal,
       windowButtonVisibility: !Platform.isWindows,
     );
 
@@ -116,6 +118,10 @@ class AppBootstrap {
   /// to the console and lost — the log is the only diagnostic available from
   /// a user's device.
   static void _installErrorHandlers() {
+    // A widget that throws in build is replaced with a contained tile instead
+    // of release mode's full-bleed grey box.
+    BuildErrorFallback.install();
+
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
       LoggingService.logger.severe(
