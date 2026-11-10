@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
@@ -28,6 +29,11 @@ import 'package:mangabaka_app/core/utils/uri_utils.dart';
 /// * [ApiException] — a response arrived but its status was not accepted.
 /// * [ParseException] — the body was not the JSON shape the caller expected.
 /// * [AppError] — anything else, so no bug escapes as a raw error.
+///
+/// Rate limiting: a 429 (or a 503 carrying `Retry-After`) is retried up to
+/// [maxRateLimitRetries] times, honouring the server's `Retry-After` when it
+/// is sane and falling back to exponential backoff otherwise. Only GETs go
+/// through this client, so a retry can never duplicate a write.
 class ApiClient {
   /// Label this client's requests report under in [BackendHealthService].
   ///
@@ -36,36 +42,62 @@ class ApiClient {
   /// whose availability says nothing about the MangaBaka backend.
   final String? healthContext;
 
+  /// How many times a rate-limited request is retried before the 429 is
+  /// surfaced as an [ApiException]. Zero disables retrying — for callers that
+  /// run their own backoff and must see the first 429.
+  final int maxRateLimitRetries;
+
   final http.Client _client;
   final bool _ownsClient;
   final Duration _timeout;
+  final Future<void> Function(Duration) _delay;
 
   static final _logger = LoggingService.logger;
 
+  /// First fallback wait when the server gives no usable `Retry-After`;
+  /// doubles on each further attempt.
+  static const Duration _baseBackoff = Duration(seconds: 1);
+
+  /// Upper bound on any single wait. A `Retry-After` beyond this means the
+  /// quota is exhausted for a while — failing fast beats a frozen screen.
+  static const Duration _maxBackoff = Duration(seconds: 10);
+
+  /// Creates a client.
+  ///
+  /// [delay] exists for tests, which pass a no-op so retries run instantly.
   ApiClient({
     this.healthContext,
     http.Client? client,
     Duration? timeout,
-  })  : _client = client ?? http.Client(),
-        _ownsClient = client == null,
-        _timeout = timeout ??
-            const Duration(seconds: AppConstants.networkTimeoutSeconds);
+    this.maxRateLimitRetries = 2,
+    Future<void> Function(Duration)? delay,
+  }) : _client = client ?? http.Client(),
+       _ownsClient = client == null,
+       _timeout =
+           timeout ??
+           const Duration(seconds: AppConstants.networkTimeoutSeconds),
+       _delay = delay ?? Future<void>.delayed;
 
   ApiClient._shared({
     required this.healthContext,
     required http.Client client,
     required Duration timeout,
-  })  : _client = client,
-        _ownsClient = false,
-        _timeout = timeout;
+    required this.maxRateLimitRetries,
+    required Future<void> Function(Duration) delay,
+  }) : _client = client,
+       _ownsClient = false,
+       _timeout = timeout,
+       _delay = delay;
 
   /// Derives a client sharing this one's connection pool but reporting under a
   /// different [context]. Closing the derived client leaves the pool open.
   ApiClient withContext(String context) => ApiClient._shared(
-        healthContext: context,
-        client: _client,
-        timeout: _timeout,
-      );
+    healthContext: context,
+    client: _client,
+    timeout: _timeout,
+    maxRateLimitRetries: maxRateLimitRetries,
+    delay: _delay,
+  );
 
   /// Builds a request URI from [base] and [params], dropping null and empty
   /// values and stringifying the rest (lists become repeated parameters).
@@ -118,7 +150,7 @@ class ApiClient {
   }
 
   /// Performs a GET and returns the raw body, having applied the timeout,
-  /// health reporting and status check.
+  /// rate-limit retries, health reporting and status check.
   Future<ApiResult> send(
     Uri url, {
     required String operation,
@@ -128,12 +160,20 @@ class ApiClient {
   }) async {
     _logger.info('$operation: GET $url');
     try {
-      final response = await _client
-          .get(url, headers: _headersFor(headers))
-          .timeout(
-            timeout ?? _timeout,
-            onTimeout: () => throw TimeoutException('$operation timed out'),
-          );
+      var response = await _get(url, operation, headers, timeout);
+
+      for (var attempt = 0; attempt < maxRateLimitRetries; attempt++) {
+        // A caller that accepts the status wants to see it, not a retry.
+        if (acceptedStatuses.contains(response.statusCode)) break;
+        final wait = rateLimitWait(response, attempt);
+        if (wait == null) break;
+        _logger.warning(
+          '$operation: HTTP ${response.statusCode}, retry ${attempt + 1}/'
+          '$maxRateLimitRetries in ${wait.inMilliseconds}ms',
+        );
+        await _delay(wait);
+        response = await _get(url, operation, headers, timeout);
+      }
 
       _logger.fine('$operation: status ${response.statusCode}');
       _report(
@@ -222,10 +262,61 @@ class ApiClient {
     }
   }
 
+  Future<http.Response> _get(
+    Uri url,
+    String operation,
+    Map<String, String>? headers,
+    Duration? timeout,
+  ) => _client
+      .get(url, headers: _headersFor(headers))
+      .timeout(
+        timeout ?? _timeout,
+        onTimeout: () => throw TimeoutException('$operation timed out'),
+      );
+
+  /// How long to wait before retrying [response], or null when it should not
+  /// be retried.
+  ///
+  /// A 429 is always retryable; a 503 only when the server says when to come
+  /// back — a bare 503 is an outage, which the health banner handles.
+  @visibleForTesting
+  static Duration? rateLimitWait(http.Response response, int attempt) {
+    final status = response.statusCode;
+    if (status != 429 && status != 503) return null;
+    final retryAfter = parseRetryAfter(response.headers['retry-after']);
+    if (status == 503 && retryAfter == null) return null;
+
+    final wait = retryAfter ?? _baseBackoff * (1 << attempt);
+    // Past the cap the quota is gone for a while; give up rather than stall.
+    if (wait > _maxBackoff) return null;
+    return wait;
+  }
+
+  /// Parses a `Retry-After` header: delta-seconds or an HTTP-date.
+  /// Returns null when absent or unparseable; a past date yields zero.
+  @visibleForTesting
+  static Duration? parseRetryAfter(String? value, {DateTime? now}) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    final seconds = int.tryParse(trimmed);
+    if (seconds != null) {
+      return seconds < 0 ? null : Duration(seconds: seconds);
+    }
+    try {
+      final at = HttpDate.parse(trimmed);
+      final delta = at.difference(now ?? DateTime.now().toUtc());
+      return delta.isNegative ? Duration.zero : delta;
+    } on HttpException {
+      return null;
+    } on FormatException {
+      return null;
+    }
+  }
+
   Map<String, String> _headersFor(Map<String, String>? extra) => {
-        'User-Agent': AppConstants.userAgent,
-        if (extra != null) ...extra,
-      };
+    'User-Agent': AppConstants.userAgent,
+    if (extra != null) ...extra,
+  };
 
   void _report({required bool ok, int? statusCode, Object? error}) {
     final context = healthContext;
