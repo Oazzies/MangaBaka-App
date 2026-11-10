@@ -33,6 +33,30 @@ void main() {
       expect(series.status, 'ongoing');
     });
 
+    test('seriesFromDb reuses the mapping only for an unchanged row', () {
+      db.SeriesTableData row(String genres) => db.SeriesTableData(
+        id: 'memo-1',
+        title: 'Memo',
+        coverUrl: '',
+        description: '',
+        secondaryTitles: '[]',
+        authors: '[]',
+        artists: '[]',
+        links: '[]',
+        publishers: '[]',
+        genres: genres,
+        tags: '[]',
+      );
+
+      final first = DbToApiMapper.seriesFromDb(row('["Action"]'));
+      final same = DbToApiMapper.seriesFromDb(row('["Action"]'));
+      final changed = DbToApiMapper.seriesFromDb(row('["Drama"]'));
+
+      expect(identical(first, same), isTrue);
+      expect(identical(first, changed), isFalse);
+      expect(changed.genres, ['Drama']);
+    });
+
     test('seriesFromDb decodes JSON fields correctly', () {
       final dbSeries = db.SeriesTableData(
         id: '1',
