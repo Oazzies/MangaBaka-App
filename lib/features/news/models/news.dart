@@ -20,11 +20,19 @@ class News {
   });
 
   factory News.fromJson(Map<String, dynamic> json) {
-    var seriesList =
-        (json['series'] as List<dynamic>?)
-            ?.map((item) => Series.fromJson(item as Map<String, dynamic>))
-            .toList() ??
-        [];
+    // One malformed linked series must not drop the whole article.
+    final seriesList = <Series>[];
+    final rawSeries = json['series'];
+    if (rawSeries is List) {
+      for (final item in rawSeries) {
+        if (item is! Map<String, dynamic>) continue;
+        try {
+          seriesList.add(Series.fromJson(item));
+        } on Object {
+          continue;
+        }
+      }
+    }
 
     String sourceName = json['source_name']?.toString() ?? '';
 

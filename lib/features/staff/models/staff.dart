@@ -19,13 +19,17 @@ class Staff {
 
   factory Staff.fromJson(Map<String, dynamic> json) {
     return Staff(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      nativeName: json['native_name'] as String?,
-      role: json['role'] as String?,
-      image: json['image'] as String?,
-      seriesCount: json['series_count'] as int?,
-      notes: json['notes'] as String?,
+      id: json['id'] is num
+          ? (json['id'] as num).toInt()
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? '',
+      nativeName: json['native_name']?.toString(),
+      role: json['role']?.toString(),
+      image: json['image']?.toString(),
+      seriesCount: json['series_count'] is num
+          ? (json['series_count'] as num).toInt()
+          : null,
+      notes: json['notes']?.toString(),
     );
   }
 
