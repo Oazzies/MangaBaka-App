@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:mangabaka_app/core/logging/log_redactor.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -73,7 +74,9 @@ class LoggingService {
     if (record.stackTrace != null) {
       buffer.write('\nStackTrace: ${record.stackTrace}');
     }
-    final logMessage = buffer.toString();
+    // Redacted before it reaches the console, the in-app viewer or the file:
+    // all three end up in screenshots and shared bug reports.
+    final logMessage = LogRedactor.redact(buffer.toString());
 
     // Console output is noise (and an avoidable cost) in release builds, but
     // profile builds are only ever run from `flutter run` — surfacing logs
