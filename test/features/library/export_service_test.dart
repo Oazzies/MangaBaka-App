@@ -3,6 +3,7 @@ import 'package:mangabaka_app/features/library/export/export_service.dart';
 import 'package:mangabaka_app/features/library/import/import_parser.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/models/series_titles.dart';
 
 LibraryEntry _entry(
   String id,
@@ -23,6 +24,9 @@ LibraryEntry _entry(
 );
 
 void main() {
+  // These tests reuse ids for different titles.
+  setUp(SeriesTitles.clearRemembered);
+
   group('ExportService.build', () {
     test('mangaBaka round-trips through ImportParser', () {
       final entries = [

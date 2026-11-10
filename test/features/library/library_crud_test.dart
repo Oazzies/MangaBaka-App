@@ -12,6 +12,7 @@ import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/library/constants/library_constants.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/library/services/mixins/library_sync_mixin.dart';
 import 'package:mangabaka_app/features/profile/services/auth/auth_storage.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -356,11 +357,52 @@ void main() {
       test('a later sync sends the stored cursor', () async {
         SharedPreferences.setMockInitialValues({
           AppConstants.libraryCursorKey: 'saved',
+          librarySeriesDataKey: librarySeriesDataVersion,
         });
         await withServer((_) async => feed([], cursor: 'next'), () => service.syncLibrary());
         expect(requests.single.url.queryParameters['cursor'], 'saved');
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.getString(AppConstants.libraryCursorKey), 'next');
+      });
+
+      test('series are fetched from v1, which carries the canonical titles',
+          () async {
+        await withServer(server, () => service.syncLibrary());
+        final batchRequest =
+            requests.firstWhere((r) => r.url.path.endsWith('/series/batch'));
+        expect(batchRequest.url.path, startsWith('/v1/'));
+      });
+
+      test('series stored by an older data generation are re-fetched once',
+          () async {
+        // A row as the old v2-based sync stored it, under a saved cursor.
+        await seedEntry('42');
+        await (db.update(db.seriesTable)..where((t) => t.id.equals('42')))
+            .write(const SeriesTableCompanion(title: Value('Guessed title')));
+        SharedPreferences.setMockInitialValues({
+          AppConstants.libraryCursorKey: 'saved',
+        });
+
+        await withServer(server, () => service.syncLibrary());
+
+        // The cursor is dropped for a full scan, and the stored row replaced.
+        final changes =
+            requests.firstWhere((r) => r.url.path.endsWith('/changes'));
+        expect(changes.url.queryParameters.containsKey('cursor'), isFalse);
+        final row = await (db.select(db.seriesTable)
+              ..where((t) => t.id.equals('42')))
+            .getSingle();
+        expect(row.title, 'Series 42');
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getInt(librarySeriesDataKey), librarySeriesDataVersion);
+
+        // Done once: the next sync is incremental again.
+        requests.clear();
+        await withServer(
+          (_) async => feed([], cursor: 'c2'),
+          () => service.syncLibrary(),
+        );
+        expect(requests.single.url.queryParameters['cursor'], 'c1');
       });
 
       test('a delete removes the entry', () async {

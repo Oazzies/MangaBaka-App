@@ -4,11 +4,22 @@ import 'package:mangabaka_app/features/library/models/library_sync_status.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 const String _lastSyncKey = AppConstants.lastSyncKey;
 const String _cursorKey = AppConstants.libraryCursorKey;
 const String _isIncompleteKey =
     '${AppConstants.prefixStorageKey}library_is_incomplete';
+
+/// Which generation of series data the local database holds. Raised whenever
+/// stored series rows are known to be wrong or incomplete, so the next sync
+/// re-fetches every one of them once.
+///
+/// 2: rows used to be built from the lean v2 batch, whose guessed titles
+///    disagreed with the detail page and which lacked genres, tags and year.
+const String librarySeriesDataKey =
+    '${AppConstants.prefixStorageKey}library_series_data_version';
+const int librarySeriesDataVersion = 2;
 
 mixin LibrarySyncMixin on LibraryServiceBase {
   bool _hasPerformedInitialSync = false;
@@ -67,7 +78,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       _initialSyncTask = null;
       rethrow;
     } catch (e, st) {
-      logger.severe('Failed to perform initial import: $e\n$st');
+      logger.severe('Failed to perform initial import', e, st);
       _initialSyncTask = null;
       rethrow;
     }
@@ -135,7 +146,11 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     try {
       await auth.getValidAccessToken();
       final prefs = await SharedPreferences.getInstance();
-      var cursor = deep ? null : prefs.getString(_cursorKey);
+      // Stored series from an older data generation are re-fetched in full,
+      // which needs a scan from the start of the feed.
+      final refreshSeries =
+          (prefs.getInt(librarySeriesDataKey) ?? 0) < librarySeriesDataVersion;
+      var cursor = (deep || refreshSeries) ? null : prefs.getString(_cursorKey);
       var restarted = false;
       var totalFetched = 0;
       // Entry ids seen by a scan that began at the start of the feed. Only
@@ -167,7 +182,12 @@ mixin LibrarySyncMixin on LibraryServiceBase {
           return;
         }
 
-        final applied = await _applyChanges(page.items, seen, generation);
+        final applied = await _applyChanges(
+          page.items,
+          seen,
+          generation,
+          refreshSeries: refreshSeries,
+        );
         if (applied == null || _isStale(generation)) return;
         totalFetched += applied;
         syncStatus.value = syncStatus.value.copyWith(
@@ -198,6 +218,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         await database.libraryEntriesDao.deleteEntriesNotIn(seen.toList());
       }
       await prefs.setBool(_isIncompleteKey, false);
+      await prefs.setInt(librarySeriesDataKey, librarySeriesDataVersion);
       await prefs.setString(
         _lastSyncKey,
         DateTime.now().toUtc().toIso8601String(),
@@ -205,11 +226,12 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       logger.info('Library sync completed. Applied $totalFetched entries.');
       syncStatus.value = syncStatus.value.copyWith(isSyncing: false);
     } catch (e, st) {
-      logger.severe('Library sync failed: $e\n$st');
+      logger.severe('Library sync failed', e, st);
       if (generation == _syncGeneration) {
         syncStatus.value = syncStatus.value.copyWith(
           isSyncing: false,
-          error: e.toString(),
+          // Shown in the sync banner and card: wording, not a stack dump.
+          error: ErrorMessages.describe(e),
         );
       }
       rethrow;
@@ -221,8 +243,9 @@ mixin LibrarySyncMixin on LibraryServiceBase {
   Future<int?> _applyChanges(
     List<Map<String, dynamic>> items,
     Set<String>? seen,
-    int generation,
-  ) async {
+    int generation, {
+    bool refreshSeries = false,
+  }) async {
     // Later items win: the feed can repeat a series.
     final bySeries = <String, Map<String, dynamic>?>{};
     for (final item in items) {
@@ -248,10 +271,11 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         if (e.value == null) e.key,
     ];
 
-    // A full scan only needs series it has not stored; an incremental one
-    // refreshes the series of every entry that changed.
+    // A full scan only needs series it has not stored (unless the stored ones
+    // are of an outdated data generation); an incremental one refreshes the
+    // series of every entry that changed.
     final ids = [for (final e in upserts) e['series_id'].toString()];
-    final stored = seen != null
+    final stored = seen != null && !refreshSeries
         ? await database.seriesDao.existingIds(ids)
         : <String>{};
     final series = await fetchSeriesBatch([

@@ -1,6 +1,8 @@
 import 'package:mangabaka_app/core/utils/json_utils.dart';
 import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/features/series/models/series_titles.dart';
 
 /// A publisher as embedded in a series: enough to link through to the
 /// publisher page by id and to tell regional editions apart.
@@ -112,16 +114,65 @@ class Series {
     this.source,
   });
 
+  /// This series with its title fields replaced by [t].
+  Series copyWithTitles(SeriesTitles t) => Series(
+    id: id,
+    state: state,
+    mergedWith: mergedWith,
+    title: t.main,
+    nativeTitle: t.native,
+    romanizedTitle: t.romanized,
+    secondaryTitles: t.secondary,
+    coverUrl: coverUrl,
+    rawCoverUrl: rawCoverUrl,
+    authors: authors,
+    artists: artists,
+    description: description,
+    year: year,
+    published: published,
+    status: status,
+    isLicensed: isLicensed,
+    hasAnime: hasAnime,
+    anime: anime,
+    contentRating: contentRating,
+    type: type,
+    rating: rating,
+    finalVolume: finalVolume,
+    totalChapters: totalChapters,
+    links: links,
+    publishers: publishers,
+    publisherRefs: publisherRefs,
+    genres: genres,
+    tags: tags,
+    lastUpdated: lastUpdated,
+    relationships: relationships,
+    source: source,
+  );
+
+  /// All titles of this series as one value; see [SeriesTitles].
+  SeriesTitles get titles => SeriesTitles.stored(
+    main: title,
+    native: nativeTitle,
+    romanized: romanizedTitle,
+    secondary: secondaryTitles,
+  );
+
+  /// The title to show for [lang]. Falls back across the other kinds rather
+  /// than ever returning an empty string while any title is known.
   String getDisplayTitle(TitleLanguage lang) {
-    switch (lang) {
-      case TitleLanguage.native:
-        return nativeTitle.isNotEmpty ? nativeTitle : title;
-      case TitleLanguage.romanized:
-        return romanizedTitle.isNotEmpty ? romanizedTitle : title;
-      case TitleLanguage.defaultLang:
-        return title;
-    }
+    final t = SeriesTitles.choose(
+      lang,
+      main: title,
+      native: nativeTitle,
+      romanized: romanizedTitle,
+    );
+    if (t.isNotEmpty) return t;
+    return secondaryTitles.isNotEmpty ? secondaryTitles.first : '';
   }
+
+  /// The title in the user's chosen title language.
+  String get displayTitle =>
+      getDisplayTitle(SettingsManager().defaultTitleLanguage);
 
   factory Series.fromSimilarJson(Map<String, dynamic> json) {
     // The /similar endpoint uses genres_v2, tags_v2, links_v2, and a titles array
@@ -206,108 +257,16 @@ class Series {
       }
     }
 
-    String title = JsonUtils.stringOr(json['title']);
-    String nativeTitle = JsonUtils.stringOr(json['native_title']);
-    String romanizedTitle = JsonUtils.stringOr(json['romanized_title']);
-    List<String> secondaryTitlesList = [];
-
-    final secTitlesRaw = json['secondary_titles'];
-    if (secTitlesRaw is Map) {
-      secondaryTitlesList = secTitlesRaw.values
-          .map((e) => e.toString())
-          .toList();
-    } else if (secTitlesRaw is List) {
-      secondaryTitlesList = secTitlesRaw.map((e) => e.toString()).toList();
-    }
-
-    final titlesList = json['titles'] as List?;
-    if (titlesList != null && titlesList.isNotEmpty) {
-      String langOf(dynamic t) =>
-          (t is Map ? t['language']?.toString() : null)?.toLowerCase() ?? '';
-
-      bool isRomanized(dynamic t) {
-        if (t is! Map) return false;
-        final l = langOf(t);
-        final traits = JsonUtils.stringList(t['traits']);
-        return l.endsWith('-latn') ||
-            l.endsWith('-ro') ||
-            l.contains('hepburn') ||
-            l.contains('romaji') ||
-            traits.contains('romanized');
-      }
-
-      Map<String, dynamic>? pick(bool Function(dynamic) test) {
-        for (final t in titlesList) {
-          if (t is Map && test(t)) return t.cast<String, dynamic>();
-        }
-        return null;
-      }
-
-      // 1. The v1 API's own `title` is the canonical main title. v2 only sends
-      // the `titles` array (every language is "primary"), so mirror how v1 picks
-      // it: the official English title, else the romanized one, else any
-      // English one. Taking just any English entry shows fan/alt titles.
-      if (title.isEmpty) {
-        final chosen =
-            pick(
-              (t) =>
-                  langOf(t) == 'en' &&
-                  JsonUtils.stringList(
-                    (t as Map)['traits'],
-                  ).contains('official'),
-            ) ??
-            pick(isRomanized) ??
-            pick((t) => langOf(t) == 'en') ??
-            pick((t) => t is Map && t['is_primary'] == true) ??
-            (titlesList.first is Map
-                ? (titlesList.first as Map).cast<String, dynamic>()
-                : null);
-
-        if (chosen != null) {
-          title = chosen['title']?.toString() ?? '';
-        }
-      }
-
-      // 2. Determine native title: prefer ja, ko, zh/zh-* without romanized trait
-      final nativeChosen = pick((t) {
-        final l = langOf(t);
-        final traits = JsonUtils.stringList(t['traits']);
-        return (l == 'ja' || l == 'ko' || l == 'zh' || l.startsWith('zh-')) &&
-            !traits.contains('romanized');
-      });
-      if (nativeChosen != null) {
-        nativeTitle = nativeChosen['title']?.toString() ?? '';
-      }
-
-      // 3. Determine romanized title
-      final romanizedChosen = pick(isRomanized);
-      if (romanizedChosen != null) {
-        romanizedTitle = romanizedChosen['title']?.toString() ?? '';
-      }
-
-      // 4. Secondary titles: all other titles in the list that aren't the main chosen title
-      final List<String> extractedSecondary = [];
-      for (final t in titlesList) {
-        if (t is Map && t['title'] != null) {
-          final tStr = t['title'].toString();
-          if (tStr.isNotEmpty && tStr != title) {
-            extractedSecondary.add(tStr);
-          }
-        }
-      }
-      if (extractedSecondary.isNotEmpty) {
-        secondaryTitlesList = extractedSecondary.toSet().toList();
-      }
-    }
+    final titles = SeriesTitles.fromJson(json);
 
     return Series(
       id: json['id']?.toString() ?? '',
       state: JsonUtils.stringOr(json['state']),
       mergedWith: json['merged_with']?.toString(),
-      title: title,
-      nativeTitle: nativeTitle,
-      romanizedTitle: romanizedTitle,
-      secondaryTitles: secondaryTitlesList,
+      title: titles.main,
+      nativeTitle: titles.native,
+      romanizedTitle: titles.romanized,
+      secondaryTitles: titles.secondary,
       coverUrl: JsonUtils.getCover(json),
       rawCoverUrl: JsonUtils.getRawCover(json),
       authors: JsonUtils.stringList(json['authors']),

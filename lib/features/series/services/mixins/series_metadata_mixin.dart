@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_title_enricher.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
@@ -26,6 +27,10 @@ mixin SeriesMetadataMixin {
 
   /// Overridable so a test can inject a client; defaults to the shared one.
   ApiClient get metadataApi => _defaultApi;
+
+  /// Overridable like [metadataApi]; resolves the canonical titles of the
+  /// v2 lists ("similar", "readers also like").
+  SeriesTitleEnricher get titleEnricher => SeriesTitleEnricher.shared;
   static final ApiClient _defaultApi = ApiClient(healthContext: 'series-meta');
 
   Future<List<SeriesLink>> fetchSeriesLinks(String id) =>
@@ -48,31 +53,23 @@ mixin SeriesMetadataMixin {
   /// [_fetchList] would read as empty. Each item wraps the series.
   Future<List<Series>> fetchSeriesRelated(String id) async =>
       _allowedByContentRating(
-        await _fetchList(
-          id,
-          'relationships',
-          (item) {
-            final nested = item['series'];
-            if (nested is! Map) return null;
-            return Series.fromJson(nested.cast<String, dynamic>());
-          },
-          params: {'limit': 50},
-        ),
+        await _fetchList(id, 'relationships', (item) {
+          final nested = item['series'];
+          if (nested is! Map) return null;
+          return Series.fromJson(nested.cast<String, dynamic>());
+        }, params: {'limit': 50}),
       );
 
   /// Similar titles come back wrapped (`{series: {...}, score: …}`) and in the
   /// lean v2 shape, hence the different unwrap and constructor.
   Future<List<Series>> fetchSeriesSimilar(String id) async =>
       _allowedByContentRating(
-        await _fetchList(
-          id,
-          'similar',
-          (item) {
+        await titleEnricher.canonicalize(
+          await _fetchList(id, 'similar', (item) {
             final nested = item['series'];
             if (nested is! Map) return null;
             return Series.fromSimilarJson(nested.cast<String, dynamic>());
-          },
-          params: {'limit': 20},
+          }, params: {'limit': 20}),
         ),
       );
 
@@ -87,16 +84,18 @@ mixin SeriesMetadataMixin {
   Future<List<Series>> fetchSeriesReadersAlsoLike(String id) async {
     final prefs = SettingsManager().contentPreferences;
     return _allowedByContentRating(
-      await _fetchList(
-        id,
-        'readers-also-like',
-        (item) {
-          final nested = item['series'];
-          if (nested is! Map) return null;
-          return Series.fromSimilarJson(nested.cast<String, dynamic>());
-        },
-        params: {'limit': 24, 'content_rating': prefs},
-        base: AppConstants.baseApiUrlV2,
+      await titleEnricher.canonicalize(
+        await _fetchList(
+          id,
+          'readers-also-like',
+          (item) {
+            final nested = item['series'];
+            if (nested is! Map) return null;
+            return Series.fromSimilarJson(nested.cast<String, dynamic>());
+          },
+          params: {'limit': 24, 'content_rating': prefs},
+          base: AppConstants.baseApiUrlV2,
+        ),
       ),
     );
   }

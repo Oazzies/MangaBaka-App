@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:mangabaka_app/core/database/database.dart' as db;
 import 'package:mangabaka_app/core/utils/json_utils.dart';
-import 'package:mangabaka_app/features/library/models/library_entry.dart' as api;
+import 'package:mangabaka_app/features/library/models/library_entry.dart'
+    as api;
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
+import 'package:mangabaka_app/features/series/models/series_titles.dart';
 
 class DbToApiMapper {
   // ── JSON decode helpers ───────────────────────────────────────────────────
@@ -12,7 +14,9 @@ class DbToApiMapper {
     try {
       final decoded = jsonDecode(jsonStr);
       if (decoded is List) return decoded.whereType<String>().toList();
-    } catch (_) {}
+    } on FormatException {
+      // A corrupt cached column reads as empty.
+    }
     return [];
   }
 
@@ -21,7 +25,9 @@ class DbToApiMapper {
     try {
       final decoded = jsonDecode(jsonStr);
       if (decoded is Map) return decoded.cast<String, dynamic>();
-    } catch (_) {}
+    } on FormatException {
+      // A corrupt cached column reads as empty.
+    }
     return null;
   }
 
@@ -30,7 +36,9 @@ class DbToApiMapper {
     try {
       final decoded = jsonDecode(jsonStr);
       if (decoded is List) return decoded;
-    } catch (_) {}
+    } on FormatException {
+      // A corrupt cached column reads as empty.
+    }
     return [];
   }
 
@@ -53,7 +61,7 @@ class DbToApiMapper {
 
   static api.Series seriesFromDb(db.SeriesTableData dbSeries) {
     final source = _decodeJsonObject(dbSeries.source);
-    
+
     // Calculate combined average if source data is available
     String rating = dbSeries.rating ?? '';
     if (source != null && source.isNotEmpty) {
@@ -62,9 +70,26 @@ class DbToApiMapper {
           .whereType<double>()
           .toList();
       if (normalizedRatings.isNotEmpty) {
-        final avg = normalizedRatings.reduce((a, b) => a + b) / normalizedRatings.length;
+        final avg =
+            normalizedRatings.reduce((a, b) => a + b) /
+            normalizedRatings.length;
         rating = avg.toStringAsFixed(1);
       }
+    }
+
+    final secondaryTitles = _decodeStringArray(dbSeries.secondaryTitles);
+    // Stored rows hold the server's canonical titles; remember them so a
+    // later, less exact payload for the same series (a v2 rail) agrees.
+    if (SeriesTitles.lookup(dbSeries.id)?.main != dbSeries.title) {
+      SeriesTitles.remember(
+        dbSeries.id,
+        SeriesTitles.stored(
+          main: dbSeries.title,
+          native: dbSeries.nativeTitle ?? '',
+          romanized: dbSeries.romanizedTitle ?? '',
+          secondary: secondaryTitles,
+        ),
+      );
     }
 
     return api.Series(
@@ -74,7 +99,7 @@ class DbToApiMapper {
       title: dbSeries.title,
       nativeTitle: dbSeries.nativeTitle ?? '',
       romanizedTitle: dbSeries.romanizedTitle ?? '',
-      secondaryTitles: _decodeStringArray(dbSeries.secondaryTitles),
+      secondaryTitles: secondaryTitles,
       coverUrl: dbSeries.coverUrl,
       rawCoverUrl: dbSeries.coverUrl,
       authors: _decodeStringArray(dbSeries.authors),
