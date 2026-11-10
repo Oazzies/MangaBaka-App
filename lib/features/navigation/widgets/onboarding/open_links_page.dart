@@ -31,10 +31,7 @@ class OpenLinksPage extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     l10n.translate('open_links'),
-                    style: TextStyle(
-                      color: context.colors.text,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: context.colors.text, fontSize: 16),
                   ),
                   subtitle: Text(
                     l10n.translate(DeepLinkService.subtextKey),

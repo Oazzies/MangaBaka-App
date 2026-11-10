@@ -13,7 +13,7 @@ class AppDateUtils {
     try {
       final dt = DateTime.parse(date);
       return DateFormat('MMM d, yyyy').format(dt);
-    } catch (_) {
+    } on FormatException {
       return date;
     }
   }

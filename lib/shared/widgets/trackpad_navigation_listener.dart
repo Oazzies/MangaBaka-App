@@ -13,10 +13,12 @@ class TrackpadNavigationListener extends StatefulWidget {
   });
 
   @override
-  State<TrackpadNavigationListener> createState() => _TrackpadNavigationListenerState();
+  State<TrackpadNavigationListener> createState() =>
+      _TrackpadNavigationListenerState();
 }
 
-class _TrackpadNavigationListenerState extends State<TrackpadNavigationListener> {
+class _TrackpadNavigationListenerState
+    extends State<TrackpadNavigationListener> {
   double _cumulativeDelta = 0;
   static const double _threshold = 250.0;
   DateTime? _lastNavigationTime;
@@ -27,7 +29,7 @@ class _TrackpadNavigationListenerState extends State<TrackpadNavigationListener>
     // Only enable on macOS
     try {
       if (!Platform.isMacOS) return widget.child;
-    } catch (_) {
+    } on UnsupportedError {
       // In web, Platform.isMacOS might throw or be false
       return widget.child;
     }
@@ -37,18 +39,18 @@ class _TrackpadNavigationListenerState extends State<TrackpadNavigationListener>
         // macOS trackpad 2-finger horizontal swipe is reported as panDelta
         final dx = event.panDelta.dx;
         final dy = event.panDelta.dy;
-        
+
         // Only accumulate if the movement is primarily horizontal
         if (dx.abs() > dy.abs()) {
           _cumulativeDelta += dx;
-          
+
           // Swipe from left to right (dx > 0) is "Back"
           if (_cumulativeDelta > _threshold) {
             _cumulativeDelta = 0;
-            
+
             // Prevent multiple rapid pops from a single gesture stream
             final now = DateTime.now();
-            if (_lastNavigationTime != null && 
+            if (_lastNavigationTime != null &&
                 now.difference(_lastNavigationTime!) < _cooldown) {
               return;
             }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -20,14 +21,24 @@ class MockSeriesSearchService extends Fake implements SeriesSearchService {
   Future<SeriesSearchResult> Function(String query)? onSearch;
 
   @override
-  Future<SeriesSearchResult> searchSeries(String query, {String? sortBy, String? type, Map<String, dynamic>? extraParams}) async {
+  Future<SeriesSearchResult> searchSeries(
+    String query, {
+    String? sortBy,
+    String? type,
+    Map<String, dynamic>? extraParams,
+  }) async {
     if (onSearch != null) return onSearch!(query);
     if (throwError) throw Exception('Search failed');
     return SeriesSearchResult(series: mockResults, total: mockResults.length);
   }
 
   @override
-  Future<List<Series>> searchSeriesByName(String query, {String? sortBy, String? type, Map<String, dynamic>? extraParams}) async {
+  Future<List<Series>> searchSeriesByName(
+    String query, {
+    String? sortBy,
+    String? type,
+    Map<String, dynamic>? extraParams,
+  }) async {
     if (throwError) throw Exception('Search failed');
     return mockResults;
   }
@@ -38,14 +49,15 @@ class MockProfileAuthService extends Fake implements ProfileAuthService {
   bool get isLoggedIn => false;
   @override
   MbProfile? get cachedProfile => null;
-  
+
   @override
   void addListener(VoidCallback listener) {}
   @override
   void removeListener(VoidCallback listener) {}
 }
 
-class MockPublisherSearchService extends Fake implements PublisherSearchService {
+class MockPublisherSearchService extends Fake
+    implements PublisherSearchService {
   @override
   Future<PublisherSearchResult> search(Map<String, dynamic> params) async {
     return PublisherSearchResult(publishers: [], total: 0);
@@ -61,11 +73,13 @@ void main() {
     mockSearchService = MockSeriesSearchService();
     getIt.registerSingleton<SeriesSearchService>(mockSearchService);
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
-    getIt.registerSingleton<PublisherSearchService>(MockPublisherSearchService());
-    
+    getIt.registerSingleton<PublisherSearchService>(
+      MockPublisherSearchService(),
+    );
+
     // We need to initialize SettingsManager if needed, but it's a singleton.
     // In a real test we might want to mock SharedPreferences.
-    
+
     controller = BrowseController();
   });
 
@@ -121,7 +135,8 @@ void main() {
       await controller.searchSeries();
 
       expect(controller.searchResults, isEmpty);
-      expect(controller.error, contains('Exception: Search failed'));
+      // User-facing wording, never the raw exception text.
+      expect(controller.error, ErrorMessages.describe(Exception('any')));
       expect(controller.isLoading, isFalse);
     });
 
@@ -129,7 +144,10 @@ void main() {
       expect(BrowseHelpers.cleanTitle('One Piece Vol. 100'), 'One Piece');
       expect(BrowseHelpers.cleanTitle('Naruto Volume 1'), 'Naruto');
       expect(BrowseHelpers.cleanTitle('Bleach (Manga)'), 'Bleach');
-      expect(BrowseHelpers.cleanTitle('Attack on Titan Deluxe Edition'), 'Attack on Titan');
+      expect(
+        BrowseHelpers.cleanTitle('Attack on Titan Deluxe Edition'),
+        'Attack on Titan',
+      );
       expect(BrowseHelpers.cleanTitle('Spy x Family - Part 1'), 'Spy x Family');
     });
 
@@ -143,32 +161,32 @@ void main() {
     });
 
     Series makeSeries(String id, String title) => Series(
-          id: id,
-          title: title,
-          state: '',
-          nativeTitle: '',
-          romanizedTitle: '',
-          secondaryTitles: [],
-          coverUrl: '',
-          rawCoverUrl: '',
-          authors: [],
-          artists: [],
-          description: '',
-          year: '',
-          status: '',
-          isLicensed: '',
-          hasAnime: '',
-          contentRating: '',
-          type: '',
-          rating: '',
-          finalVolume: '',
-          totalChapters: '',
-          links: [],
-          publishers: [],
-          genres: [],
-          tags: [],
-          lastUpdated: '',
-        );
+      id: id,
+      title: title,
+      state: '',
+      nativeTitle: '',
+      romanizedTitle: '',
+      secondaryTitles: [],
+      coverUrl: '',
+      rawCoverUrl: '',
+      authors: [],
+      artists: [],
+      description: '',
+      year: '',
+      status: '',
+      isLicensed: '',
+      hasAnime: '',
+      contentRating: '',
+      type: '',
+      rating: '',
+      finalVolume: '',
+      totalChapters: '',
+      links: [],
+      publishers: [],
+      genres: [],
+      tags: [],
+      lastUpdated: '',
+    );
 
     test('slow results from a superseded search are discarded', () async {
       final slowResponse = Completer<SeriesSearchResult>();

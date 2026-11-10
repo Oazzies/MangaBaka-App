@@ -677,6 +677,16 @@
     "update_downloading": "ダウンロード中 {percent}%",
     "open_download": "ダウンロードを開く",
     "onboarding_links_title": "リンクを開く",
-    "onboarding_links_subtitle": "シリーズページやその他のMangaBakaリンクを、ブラウザではなくアプリで直接開きます。この設定はいつでも設定から変更できます。"
+    "onboarding_links_subtitle": "シリーズページやその他のMangaBakaリンクを、ブラウザではなくアプリで直接開きます。この設定はいつでも設定から変更できます。",
+    "error_generic": "問題が発生しました。もう一度お試しください。",
+    "error_network": "MangaBakaに接続できません。接続を確認してください。",
+    "error_timeout": "リクエストがタイムアウトしました。もう一度お試しください。",
+    "error_server": "MangaBakaで問題が発生しています。後でもう一度お試しください。",
+    "error_rate_limited": "リクエストが多すぎます。少し待ってからお試しください。",
+    "error_not_found": "見つかりませんでした。",
+    "error_session_expired": "セッションの有効期限が切れました。もう一度ログインしてください。",
+    "logout_failed": "ログアウトできませんでした。もう一度お試しください。",
+    "logs_save_failed": "ログを保存できませんでした。",
+    "open_series_failed": "このシリーズを開けませんでした。"
   }
 }

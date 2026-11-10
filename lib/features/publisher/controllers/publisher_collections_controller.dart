@@ -22,7 +22,7 @@ class PublisherCollectionsController extends ChangeNotifier {
   CollectionService get _service => _injected ?? getIt<CollectionService>();
 
   PublisherCollectionsController(this.publisherId, {CollectionService? service})
-      : _injected = service;
+    : _injected = service;
 
   final List<SeriesCollection> _items = [];
   int _page = 1;
@@ -46,10 +46,9 @@ class PublisherCollectionsController extends ChangeNotifier {
 
   /// Edition names present in what has loaded, for the filter pills.
   List<String> get editionNames => {
-        for (final c in _items)
-          if (c.editionName.isNotEmpty) c.editionName,
-      }.toList()
-        ..sort();
+    for (final c in _items)
+      if (c.editionName.isNotEmpty) c.editionName,
+  }.toList()..sort();
 
   bool get hasNext => _hasNext;
   bool get loading => _loading;

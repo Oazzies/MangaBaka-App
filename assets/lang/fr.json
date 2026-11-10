@@ -677,6 +677,16 @@
     "update_downloading": "Téléchargement en cours {percent}%",
     "open_download": "Ouvrir le téléchargement",
     "onboarding_links_title": "Ouvrir les liens",
-    "onboarding_links_subtitle": "Ouvrez les pages des séries et autres liens MangaBaka directement dans l'application au lieu de votre navigateur. Vous pouvez modifier ce paramètre à tout moment dans les Paramètres."
+    "onboarding_links_subtitle": "Ouvrez les pages des séries et autres liens MangaBaka directement dans l'application au lieu de votre navigateur. Vous pouvez modifier ce paramètre à tout moment dans les Paramètres.",
+    "error_generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "error_network": "Impossible de joindre MangaBaka. Vérifiez votre connexion.",
+    "error_timeout": "La requête a expiré. Veuillez réessayer.",
+    "error_server": "MangaBaka rencontre des problèmes. Réessayez plus tard.",
+    "error_rate_limited": "Trop de requêtes. Patientez un instant puis réessayez.",
+    "error_not_found": "Introuvable.",
+    "error_session_expired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "logout_failed": "Échec de la déconnexion. Veuillez réessayer.",
+    "logs_save_failed": "Impossible d'enregistrer les journaux.",
+    "open_series_failed": "Impossible d'ouvrir cette série."
   }
 }

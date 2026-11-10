@@ -73,7 +73,10 @@ class BrowseContent extends StatelessWidget {
       final activeStyle = settings.resolvedBrowseListStyle;
       final isGrid = activeStyle.isGrid;
 
-      return SeriesListSkeleton(isGrid: isGrid, horizontalPadding: horizontalInset);
+      return SeriesListSkeleton(
+        isGrid: isGrid,
+        horizontalPadding: horizontalInset,
+      );
     }
 
     return const Center(child: MbSpinner());
@@ -204,7 +207,8 @@ class BrowseContent extends StatelessWidget {
               builder: buildGridContent,
             );
           }
-          final expectedWidth = columns * 160.0 + (columns - 1) * 10.0 + horizontalInset * 2;
+          final expectedWidth =
+              columns * 160.0 + (columns - 1) * 10.0 + horizontalInset * 2;
           return Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(

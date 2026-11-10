@@ -29,7 +29,9 @@ class AppearanceSettings extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final grid = box.maxWidth >= gridBreakpoint;
-        final layout = grid ? ThemeGalleryLayout.grid : ThemeGalleryLayout.strip;
+        final layout = grid
+            ? ThemeGalleryLayout.grid
+            : ThemeGalleryLayout.strip;
         final cardWidth = grid ? 120.0 : 104.0;
         return ListenableBuilder(
           listenable: controller,
@@ -132,7 +134,10 @@ class CustomThemesSection extends StatelessWidget {
                       onTap: () => ThemeActions.edit(context, custom[i]),
                       trailing: Builder(
                         builder: (btnContext) => IconButton(
-                          icon: Icon(Icons.more_vert_rounded, color: c.textMuted),
+                          icon: Icon(
+                            Icons.more_vert_rounded,
+                            color: c.textMuted,
+                          ),
                           onPressed: () {
                             final box =
                                 btnContext.findRenderObject()! as RenderBox;
@@ -179,7 +184,10 @@ class _Hint extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(4, top, 4, 0),
       child: Text(
         text,
-        style: AppTypography.sans(color: context.colors.textMuted, fontSize: 13),
+        style: AppTypography.sans(
+          color: context.colors.textMuted,
+          fontSize: 13,
+        ),
       ),
     );
   }

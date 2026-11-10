@@ -47,9 +47,13 @@ class BrowseNavigation {
     _go(context, (controller) => controller.setType(BrowseType.publishers));
   }
 
-  static void _go(BuildContext context, void Function(BrowseController controller) seed) {
+  static void _go(
+    BuildContext context,
+    void Function(BrowseController controller) seed,
+  ) {
     // Whichever Browse is mounted — the phone screen or the desktop page.
-    final controller = BrowseScreen.browseScreenKey.currentState?.controller ??
+    final controller =
+        BrowseScreen.browseScreenKey.currentState?.controller ??
         DesktopBrowseScreen.stateKey.currentState?.controller;
     if (controller != null) seed(controller);
 

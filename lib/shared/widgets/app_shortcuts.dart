@@ -47,24 +47,40 @@ class AppShortcuts extends StatelessWidget {
       shortcuts: <ShortcutActivator, Intent>{
         const SingleActivator(LogicalKeyboardKey.escape): const BackIntent(),
         const SingleActivator(LogicalKeyboardKey.f11): const FullscreenIntent(),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF): const SearchIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyF): const SearchIntent(),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.comma): const SettingsIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.comma): const SettingsIntent(),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR): const RefreshIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyR): const RefreshIntent(),
-        
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF):
+            const SearchIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyF):
+            const SearchIntent(),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.comma):
+            const SettingsIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.comma):
+            const SettingsIntent(),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR):
+            const RefreshIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyR):
+            const RefreshIntent(),
+
         // Tab switching
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1): const TabIntent(0),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit1): const TabIntent(0),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit2): const TabIntent(1),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit2): const TabIntent(1),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit3): const TabIntent(2),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit3): const TabIntent(2),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit4): const TabIntent(3),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit4): const TabIntent(3),
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit5): const TabIntent(4),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit5): const TabIntent(4),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1):
+            const TabIntent(0),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit1):
+            const TabIntent(0),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit2):
+            const TabIntent(1),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit2):
+            const TabIntent(1),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit3):
+            const TabIntent(2),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit3):
+            const TabIntent(2),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit4):
+            const TabIntent(3),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit4):
+            const TabIntent(3),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit5):
+            const TabIntent(4),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit5):
+            const TabIntent(4),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -121,9 +137,7 @@ class AppShortcuts extends StatelessWidget {
         child: WindowRepaintGuard(
           child: MouseNavigationListener(
             child: MiddleClickAutoScroll(
-              child: TrackpadNavigationListener(
-                child: child,
-              ),
+              child: TrackpadNavigationListener(child: child),
             ),
           ),
         ),

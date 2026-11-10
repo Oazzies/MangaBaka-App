@@ -116,7 +116,8 @@ class UpdateService {
           final match = apks.where((a) => a.name.toLowerCase().contains(token));
           if (match.isNotEmpty) return match.first;
         }
-      } catch (e) {
+      } on Exception catch (e) {
+        // PlatformException from device_info; fall back to name matching.
         _logger.warning('Could not resolve device ABI: $e');
       }
       // Prefer a universal apk (no abi token) if present, else the first.
@@ -164,7 +165,9 @@ class UpdateService {
     // used, so it can never place the file outside the temp directory.
     final safeName = p.basename(asset.name);
     if (safeName.isEmpty || safeName == '.' || safeName == '..') {
-      throw NetworkException(message: 'Invalid update file name: ${asset.name}');
+      throw NetworkException(
+        message: 'Invalid update file name: ${asset.name}',
+      );
     }
     final file = File(p.join(dir.path, safeName));
     if (await file.exists()) {
@@ -193,7 +196,9 @@ class UpdateService {
     try {
       // A connection that stalls mid-transfer would otherwise leave the
       // progress dialog hanging forever.
-      await for (final chunk in response.stream.timeout(_downloadStallTimeout)) {
+      await for (final chunk in response.stream.timeout(
+        _downloadStallTimeout,
+      )) {
         received += chunk.length;
         sink.add(chunk);
         hasher.add(chunk);
@@ -261,11 +266,7 @@ class UpdateService {
     }
 
     if (Platform.isWindows) {
-      await Process.start(
-        file.path,
-        const [],
-        mode: ProcessStartMode.detached,
-      );
+      await Process.start(file.path, const [], mode: ProcessStartMode.detached);
       // Give the installer a moment to spawn, then quit so it can overwrite
       // the running executable.
       await Future.delayed(const Duration(milliseconds: 500));
@@ -286,17 +287,18 @@ class UpdateService {
 /// was published at all and the update was not downloaded.
 class UpdateIntegrityException extends AppException {
   UpdateIntegrityException()
-      : super(
-          message: 'The downloaded update failed its integrity check.',
-          code: 'CHECKSUM_MISMATCH',
-        );
+    : super(
+        message: 'The downloaded update failed its integrity check.',
+        code: 'CHECKSUM_MISMATCH',
+      );
 
   UpdateIntegrityException.unverifiable()
-      : super(
-          message: 'This update has no published checksum, so it cannot be '
-              'installed from inside the app.',
-          code: 'CHECKSUM_MISSING',
-        );
+    : super(
+        message:
+            'This update has no published checksum, so it cannot be '
+            'installed from inside the app.',
+        code: 'CHECKSUM_MISSING',
+      );
 }
 
 /// Receives the single [Digest] a chunked hash conversion produces.
@@ -316,5 +318,5 @@ class _DigestSink implements Sink<Digest> {
 /// to apply an Android update.
 class InstallPermissionException extends AppException {
   InstallPermissionException()
-      : super(message: 'Install permission was denied.');
+    : super(message: 'Install permission was denied.');
 }

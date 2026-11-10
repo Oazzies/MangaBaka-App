@@ -35,7 +35,8 @@ class AppTypography {
   }) {
     // Bakbak One ships a single weight; tracking opens up slightly at display
     // sizes and tightens at label sizes so caps stay readable either way.
-    final tracking = letterSpacing ??
+    final tracking =
+        letterSpacing ??
         (fontSize != null ? (fontSize >= 20 ? 0.5 : fontSize * 0.06) : null);
     return TextStyle(
       fontFamily: _testMode ? null : displayFamily,
@@ -99,7 +100,9 @@ class AppTypography {
       );
     }
 
-    return base.apply(fontFamily: sansFamily).copyWith(
+    return base
+        .apply(fontFamily: sansFamily)
+        .copyWith(
           displayLarge: toDisplay(base.displayLarge),
           displayMedium: toDisplay(base.displayMedium),
           displaySmall: toDisplay(base.displaySmall),

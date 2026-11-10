@@ -63,11 +63,7 @@ class MixLoadingState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          MbSpinner(
-            size: 28,
-            strokeWidth: 2.5,
-            color: context.colors.accent,
-          ),
+          MbSpinner(size: 28, strokeWidth: 2.5, color: context.colors.accent),
           const SizedBox(height: 16),
           Text(
             l10n.translate('mix_generating'),

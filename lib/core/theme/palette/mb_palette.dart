@@ -81,13 +81,14 @@ class MbPalette {
 
   /// [c] nudged toward the ink — the hover/pressed step for a filled control.
   /// Lightens on dark themes and darkens on light ones.
-  Color hoverOf(Color c, [double amount = 0.15]) => Color.lerp(c, text, amount)!;
+  Color hoverOf(Color c, [double amount = 0.15]) =>
+      Color.lerp(c, text, amount)!;
 
   /// A drop-shadow colour at [alpha] as tuned for the dark themes; light
   /// themes get a much softer shadow, since the same black on a pale canvas
   /// reads as a smudge rather than depth.
-  Color shadowAt(double alpha) => const Color(0xFF000000)
-      .withValues(alpha: isDark ? alpha : alpha * 0.35);
+  Color shadowAt(double alpha) =>
+      const Color(0xFF000000).withValues(alpha: isDark ? alpha : alpha * 0.35);
 
   /// A canvas one step *below* [background], for chrome that should recede
   /// behind the page (the desktop sidebar).
@@ -97,8 +98,7 @@ class MbPalette {
 
   /// [c] adjusted until it reads as UI on [surface] — for categorical colours
   /// (content types, publication status) chosen outside the palette.
-  Color legibleOnSurface(Color c) =>
-      ColorMath.ensureContrast(c, surface, 3.0);
+  Color legibleOnSurface(Color c) => ColorMath.ensureContrast(c, surface, 3.0);
 
   /// Colour for a library state key (`reading`, `completed`, …).
   Color forState(String state) {

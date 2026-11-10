@@ -21,9 +21,6 @@ class ChaptersChip extends StatelessWidget {
 
     if (inLibrary) return const SizedBox.shrink();
 
-    return MiniBadge(
-      text: '$chapters Ch.',
-      icon: Icons.format_list_bulleted,
-    );
+    return MiniBadge(text: '$chapters Ch.', icon: Icons.format_list_bulleted);
   }
 }

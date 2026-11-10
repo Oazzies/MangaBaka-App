@@ -22,8 +22,8 @@ class AccentPicker extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final override = controller.accentOverride;
-        final isCustom = override != null &&
-            !ThemePresets.accentSwatches.contains(override);
+        final isCustom =
+            override != null && !ThemePresets.accentSwatches.contains(override);
         return Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -111,9 +111,14 @@ class _AccentSwatch extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
           alignment: Alignment.center,
-          child: child ??
+          child:
+              child ??
               (selected
-                  ? Icon(Icons.check_rounded, size: size * 0.45, color: c.on(fill))
+                  ? Icon(
+                      Icons.check_rounded,
+                      size: size * 0.45,
+                      color: c.on(fill),
+                    )
                   : null),
         ),
       ),
@@ -137,6 +142,10 @@ class _DefaultGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    return Icon(Icons.format_color_reset_rounded, size: size * 0.5, color: c.text);
+    return Icon(
+      Icons.format_color_reset_rounded,
+      size: size * 0.5,
+      color: c.text,
+    );
   }
 }

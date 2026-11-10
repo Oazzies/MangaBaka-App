@@ -34,10 +34,7 @@ class TagGrouping {
   ///
   /// Headers come back sorted so the card's order is stable between opens
   /// rather than following whatever order the API listed the tags in.
-  static List<TagGroup> resolve(
-    List<String> tags,
-    MetadataService metadata,
-  ) {
+  static List<TagGroup> resolve(List<String> tags, MetadataService metadata) {
     final grouped = <String, Map<String, List<TagChipData>>>{};
 
     for (final tag in tags) {
@@ -51,11 +48,13 @@ class TagGrouping {
       grouped
           .putIfAbsent(header, () => {})
           .putIfAbsent(subheader, () => [])
-          .add(TagChipData(
-            tag: tag,
-            tagId: metadata.getTagId(tag) ?? tag,
-            labelParts: _labelParts(tag, parts),
-          ));
+          .add(
+            TagChipData(
+              tag: tag,
+              tagId: metadata.getTagId(tag) ?? tag,
+              labelParts: _labelParts(tag, parts),
+            ),
+          );
     }
 
     final headers = grouped.keys.toList()..sort();

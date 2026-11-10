@@ -9,30 +9,37 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
   /// Which of [seriesIds] are in the library, with their covers. Asks the
   /// database about just those series instead of reading the whole library, so
   /// the cost follows the question, not a library of tens of thousands.
-  Future<Map<String, String>> libraryCoversFor(Iterable<String> seriesIds) async {
+  Future<Map<String, String>> libraryCoversFor(
+    Iterable<String> seriesIds,
+  ) async {
     final ids = seriesIds.toSet().toList();
     final covers = <String, String>{};
     try {
       for (var i = 0; i < ids.length; i += 500) {
-        final chunk = ids.sublist(i, i + 500 > ids.length ? ids.length : i + 500);
-        final query = selectOnly(libraryEntriesTable).join([
-          innerJoin(
-            seriesTable,
-            seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-          ),
-        ])
-          ..addColumns([seriesTable.id, seriesTable.coverUrl])
-          ..where(libraryEntriesTable.seriesId.isIn(chunk));
+        final chunk = ids.sublist(
+          i,
+          i + 500 > ids.length ? ids.length : i + 500,
+        );
+        final query =
+            selectOnly(libraryEntriesTable).join([
+                innerJoin(
+                  seriesTable,
+                  seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+                ),
+              ])
+              ..addColumns([seriesTable.id, seriesTable.coverUrl])
+              ..where(libraryEntriesTable.seriesId.isIn(chunk));
         for (final row in await query.get()) {
           covers[row.read(seriesTable.id)!] = row.read(seriesTable.coverUrl)!;
         }
       }
       return covers;
-    } catch (e) {
-      _logger.severe('Failed to look up library series: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to look up library series', e, st);
       throw exc.DatabaseException(
         message: 'Failed to look up library series',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -52,11 +59,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
         libraryEntry: row.readTable(libraryEntriesTable),
         series: row.readTable(seriesTable),
       );
-    } catch (e) {
-      _logger.severe('Failed to get entry by series ID: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to get entry by series ID', e, st);
       throw exc.DatabaseException(
         message: 'Failed to get entry by series ID',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -73,11 +81,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
         libraryEntriesTable,
       )..where((t) => t.seriesId.isIn(ids))).get();
       return {for (final r in rows) r.seriesId: r};
-    } catch (e) {
-      _logger.severe('Failed to get entries by series IDs: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to get entries by series IDs', e, st);
       throw exc.DatabaseException(
         message: 'Failed to get entries by series IDs',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -98,11 +107,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           series: row.readTable(seriesTable),
         );
       });
-    } catch (e) {
-      _logger.severe('Failed to watch entry with series: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to watch entry with series', e, st);
       throw exc.DatabaseException(
         message: 'Failed to watch entry with series',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -126,11 +136,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
             )
             .toList();
       });
-    } catch (e) {
-      _logger.severe('Failed to watch all entries with series: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to watch all entries with series', e, st);
       throw exc.DatabaseException(
         message: 'Failed to watch all entries with series',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -168,11 +179,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           );
         });
       });
-    } catch (e) {
-      _logger.severe('Failed to upsert library entries: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to upsert library entries', e, st);
       throw exc.DatabaseException(
         message: 'Failed to upsert library entries',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -221,11 +233,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           ], mode: InsertMode.insertOrReplace);
         });
       });
-    } catch (e) {
-      _logger.severe('Failed to apply library changes: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to apply library changes', e, st);
       throw exc.DatabaseException(
         message: 'Failed to apply library changes',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -235,11 +248,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       await (update(libraryEntriesTable)
             ..where((t) => t.seriesId.equals(seriesId)))
           .write(LibraryEntriesTableCompanion(state: Value(newState)));
-    } catch (e) {
-      _logger.severe('Failed to update entry state: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to update entry state', e, st);
       throw exc.DatabaseException(
         message: 'Failed to update entry state',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -249,11 +263,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       await (update(libraryEntriesTable)
             ..where((t) => t.seriesId.equals(seriesId)))
           .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
-    } catch (e) {
-      _logger.severe('Failed to update entry rating: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to update entry rating', e, st);
       throw exc.DatabaseException(
         message: 'Failed to update entry rating',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -276,11 +291,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
               : const Value.absent(),
         ),
       );
-    } catch (e) {
-      _logger.severe('Failed to update entry progress: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to update entry progress', e, st);
       throw exc.DatabaseException(
         message: 'Failed to update entry progress',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -290,11 +306,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
       await (delete(
         libraryEntriesTable,
       )..where((tbl) => tbl.seriesId.equals(seriesId))).go();
-    } catch (e) {
-      _logger.severe('Failed to delete entry: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to delete entry', e, st);
       throw exc.DatabaseException(
         message: 'Failed to delete entry',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -322,11 +339,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           )..where((t) => t.id.isIn(chunk))).go();
         }
       });
-    } catch (e) {
-      _logger.severe('Failed to delete stale entries: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to delete stale entries', e, st);
       throw exc.DatabaseException(
         message: 'Failed to delete stale entries',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -334,11 +352,12 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
   Future<void> deleteAllEntries() async {
     try {
       await delete(libraryEntriesTable).go();
-    } catch (e) {
-      _logger.severe('Failed to delete all entries: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to delete all entries', e, st);
       throw exc.DatabaseException(
         message: 'Failed to delete all entries',
         originalError: e,
+        stackTrace: st,
       );
     }
   }

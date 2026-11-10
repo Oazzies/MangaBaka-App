@@ -20,6 +20,7 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_compone
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
 /// The contents of each settings category.
 ///
@@ -40,7 +41,8 @@ class SettingsCategories {
   static const AppRelease debugRelease = AppRelease(
     tagName: 'v9.9.9',
     name: 'MangaBaka 9.9.9',
-    body: 'This is placeholder release-note text used to preview the update '
+    body:
+        'This is placeholder release-note text used to preview the update '
         'dialog. It exists only to check the dialog\'s styling and layout — '
         'nothing was actually released.',
     htmlUrl: '',
@@ -304,9 +306,14 @@ class SettingsCategories {
 
     try {
       await auth.logout();
-    } catch (e) {
+    } on AppException {
+      // logout() logs the cause and wraps every failure in AuthException.
       if (context.mounted) {
-        AppSnackBar.show(context, 'Logout failed: $e', isError: true);
+        AppSnackBar.show(
+          context,
+          LocalizationService().translate('logout_failed'),
+          isError: true,
+        );
       }
       return;
     }

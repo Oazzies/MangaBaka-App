@@ -21,7 +21,9 @@ class IdChip extends StatelessWidget {
           if (context.mounted) {
             AppSnackBar.show(
               context,
-              LocalizationService().translate('id_copied').replaceAll('{id}', id),
+              LocalizationService()
+                  .translate('id_copied')
+                  .replaceAll('{id}', id),
               duration: const Duration(seconds: 1),
             );
           }

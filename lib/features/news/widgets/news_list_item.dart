@@ -16,7 +16,7 @@ String _formatDate(String date) {
   if (date.isEmpty) return '';
   try {
     return DateFormat('MMM d, yyyy').format(DateTime.parse(date));
-  } catch (_) {
+  } on FormatException {
     return date;
   }
 }

@@ -36,7 +36,9 @@ class StackApiException extends ApiException {
         code = json['code']?.toString();
         message = json['message']?.toString();
       }
-    } catch (_) {}
+    } on FormatException {
+      // An HTML error page from a proxy: keep the status, drop the body.
+    }
     return StackApiException(
       message: 'Failed to $operation',
       statusCode: statusCode,

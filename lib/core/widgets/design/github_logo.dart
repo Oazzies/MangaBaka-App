@@ -13,10 +13,7 @@ class GithubLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.square(size),
-      painter: _GithubPainter(color),
-    );
+    return CustomPaint(size: Size.square(size), painter: _GithubPainter(color));
   }
 }
 
@@ -42,7 +39,12 @@ class _GithubPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / 16, size.height / 16);
-    canvas.drawPath(_path, Paint()..color = color..isAntiAlias = true);
+    canvas.drawPath(
+      _path,
+      Paint()
+        ..color = color
+        ..isAntiAlias = true,
+    );
     canvas.restore();
   }
 

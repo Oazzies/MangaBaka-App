@@ -97,9 +97,11 @@ class AuthNetworkClient {
         message: 'Failed to fetch profile from API',
         originalError: lastError,
       );
+    } on AppException catch (e, st) {
+      _logger.severe('Profile fetch failed', e, st);
+      rethrow;
     } catch (e, st) {
-      _logger.severe('Network error during profile fetch: $e\n$st');
-      if (e is AppException) rethrow;
+      _logger.severe('Network error during profile fetch', e, st);
       throw AuthException(
         message: 'Network fetch profile failed',
         originalError: e,

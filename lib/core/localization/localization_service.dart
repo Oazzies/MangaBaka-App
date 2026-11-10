@@ -8,7 +8,7 @@ class LocalizationService extends ChangeNotifier {
   static final LocalizationService _instance = LocalizationService._internal();
   factory LocalizationService() => _instance;
   LocalizationService._internal();
-  
+
   @visibleForTesting
   static void resetForTesting() {
     _instance._manifest = {};
@@ -17,7 +17,8 @@ class LocalizationService extends ChangeNotifier {
     _instance._currentLanguage = 'en';
   }
 
-  static const String _languageKey = '${AppConstants.prefixStorageKey}language_pref';
+  static const String _languageKey =
+      '${AppConstants.prefixStorageKey}language_pref';
 
   Map<String, dynamic> _manifest = {};
   Map<String, dynamic> _currentStrings = {};
@@ -27,7 +28,9 @@ class LocalizationService extends ChangeNotifier {
   Future<void> init() async {
     try {
       // Load manifest
-      final manifestString = await rootBundle.loadString('assets/lang/languages.json');
+      final manifestString = await rootBundle.loadString(
+        'assets/lang/languages.json',
+      );
       _manifest = json.decode(manifestString);
 
       // Load English fallback strings
@@ -38,19 +41,21 @@ class LocalizationService extends ChangeNotifier {
       } catch (e) {
         debugPrint('Error loading English fallback strings: $e');
       }
-      
+
       final prefs = await SharedPreferences.getInstance();
       final savedLang = prefs.getString(_languageKey);
-      
+
       if (savedLang != null && _manifest.containsKey(savedLang)) {
         _currentLanguage = savedLang;
       } else {
         // Set to English by default if not set
-        _currentLanguage = _manifest.containsKey('en') ? 'en' : _manifest.keys.first;
+        _currentLanguage = _manifest.containsKey('en')
+            ? 'en'
+            : _manifest.keys.first;
       }
 
       await _loadLanguageStrings(_currentLanguage);
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading localization data: $e');
@@ -59,7 +64,9 @@ class LocalizationService extends ChangeNotifier {
 
   Future<void> _loadLanguageStrings(String langCode) async {
     try {
-      final langString = await rootBundle.loadString('assets/lang/$langCode.json');
+      final langString = await rootBundle.loadString(
+        'assets/lang/$langCode.json',
+      );
       final langData = json.decode(langString);
       _currentStrings = langData['strings'] ?? {};
     } catch (e) {
@@ -76,7 +83,7 @@ class LocalizationService extends ChangeNotifier {
       // strings now would leave the text and the selected code disagreeing.
       if (_currentLanguage != langCode) return;
       notifyListeners();
-      
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_languageKey, langCode);
     }
@@ -84,7 +91,8 @@ class LocalizationService extends ChangeNotifier {
 
   String get currentLanguage => _currentLanguage;
 
-  Map<String, dynamic> get currentLanguageData => _manifest[_currentLanguage] ?? {};
+  Map<String, dynamic> get currentLanguageData =>
+      _manifest[_currentLanguage] ?? {};
 
   List<Map<String, dynamic>> getLanguages() {
     return _manifest.entries.map((e) {
@@ -106,12 +114,12 @@ class LocalizationService extends ChangeNotifier {
 
   String formatPossessive(String name) {
     if (name.isEmpty) return name;
-    
+
     // In Spanish and French, we use "de [name]" which is handled in the translation string
     if (_currentLanguage == 'es' || _currentLanguage == 'fr') {
       return name;
     }
-    
+
     // English/German/Japanese/etc. rules
     if (_currentLanguage == 'ja') {
       return name; // Japanese uses "の" which is handled in the translation string

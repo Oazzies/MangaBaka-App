@@ -42,8 +42,8 @@ class GhostTextEditingController extends TextEditingController {
         TextSpan(
           text: ghostSuffix,
           style: style?.copyWith(
-            color: ghostColor ??
-                context.colors.textMuted.withValues(alpha: 0.5),
+            color:
+                ghostColor ?? context.colors.textMuted.withValues(alpha: 0.5),
           ),
         ),
       ],

@@ -47,7 +47,8 @@ abstract final class ExportService {
       'exported_at': DateTime.now().toUtc().toIso8601String(),
       'entries': [
         for (final e in entries)
-          if (e.series.title.trim().isNotEmpty || e.series.nativeTitle.trim().isNotEmpty)
+          if (e.series.title.trim().isNotEmpty ||
+              e.series.nativeTitle.trim().isNotEmpty)
             {
               'id': e.series.id,
               'titles': {
@@ -57,8 +58,10 @@ abstract final class ExportService {
               },
               'entry': {
                 'state': e.state,
-                if (e.progressChapter != null) 'progress_chapter': e.progressChapter,
-                if (e.progressVolume != null) 'progress_volume': e.progressVolume,
+                if (e.progressChapter != null)
+                  'progress_chapter': e.progressChapter,
+                if (e.progressVolume != null)
+                  'progress_volume': e.progressVolume,
                 if (e.rating != null) 'rating': e.rating,
                 if (e.note != null && e.note!.isNotEmpty) 'note': e.note,
               },
@@ -75,19 +78,18 @@ abstract final class ExportService {
       'title,state,progress_chapter,progress_volume,rating,note\n',
     );
     for (final e in entries) {
-      final title = e.series.title.isNotEmpty ? e.series.title : e.series.nativeTitle;
+      final title = e.series.title.isNotEmpty
+          ? e.series.title
+          : e.series.nativeTitle;
       if (title.trim().isEmpty) continue;
-      rows.writeAll(
-        [
-          _cell(title),
-          _cell(e.state),
-          e.progressChapter?.toString() ?? '',
-          e.progressVolume?.toString() ?? '',
-          e.rating?.toString() ?? '',
-          _cell(e.note ?? ''),
-        ],
-        ',',
-      );
+      rows.writeAll([
+        _cell(title),
+        _cell(e.state),
+        e.progressChapter?.toString() ?? '',
+        e.progressVolume?.toString() ?? '',
+        e.rating?.toString() ?? '',
+        _cell(e.note ?? ''),
+      ], ',');
       rows.write('\n');
     }
     return rows.toString();
@@ -104,7 +106,10 @@ abstract final class ExportService {
 
   static String _buildPlain(List<LibraryEntry> entries) {
     return entries
-        .map((e) => e.series.title.isNotEmpty ? e.series.title : e.series.nativeTitle)
+        .map(
+          (e) =>
+              e.series.title.isNotEmpty ? e.series.title : e.series.nativeTitle,
+        )
         .where((t) => t.trim().isNotEmpty)
         .join('\n');
   }

@@ -21,12 +21,9 @@ class MetadataService {
   final MetadataCache _cache;
   final ApiClient _api;
 
-  MetadataService({
-    http.Client? client,
-    ApiClient? api,
-    MetadataCache? cache,
-  })  : _cache = cache ?? MetadataCache(),
-        _api = api ?? ApiClient(healthContext: 'metadata', client: client);
+  MetadataService({http.Client? client, ApiClient? api, MetadataCache? cache})
+    : _cache = cache ?? MetadataCache(),
+      _api = api ?? ApiClient(healthContext: 'metadata', client: client);
 
   List<Map<String, dynamic>> _genresList = const [];
   List<Map<String, dynamic>> _tagsList = const [];
@@ -69,8 +66,10 @@ class MetadataService {
   /// Fires the background refresh without blocking the caller. Failures are
   /// contained inside [fetchGenres]/[fetchTags] and only logged.
   void unawaitedRefresh() {
-    Future.wait([fetchGenres(), fetchTags()])
-        .then((_) => _logger.info('MetadataService fresh data fetch complete'));
+    Future.wait([
+      fetchGenres(),
+      fetchTags(),
+    ]).then((_) => _logger.info('MetadataService fresh data fetch complete'));
   }
 
   Future<void> _loadCachedGenres() async {
@@ -88,20 +87,20 @@ class MetadataService {
   }
 
   Future<void> fetchGenres() => _refresh(
-        endpoint: '/genres',
-        operation: 'fetch genres',
-        cacheKey: MetadataCache.genresKey,
-        current: () => _genresList,
-        apply: _applyGenres,
-      );
+    endpoint: '/genres',
+    operation: 'fetch genres',
+    cacheKey: MetadataCache.genresKey,
+    current: () => _genresList,
+    apply: _applyGenres,
+  );
 
   Future<void> fetchTags() => _refresh(
-        endpoint: '/tags',
-        operation: 'fetch tags',
-        cacheKey: MetadataCache.tagsKey,
-        current: () => _tagsList,
-        apply: _applyTags,
-      );
+    endpoint: '/tags',
+    operation: 'fetch tags',
+    cacheKey: MetadataCache.tagsKey,
+    current: () => _tagsList,
+    apply: _applyTags,
+  );
 
   /// Shared refresh path for both vocabularies.
   ///
@@ -176,8 +175,10 @@ class MetadataService {
     if (value.isEmpty) return value;
     return value
         .split('_')
-        .map((word) =>
-            word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : '')
+        .map(
+          (word) =>
+              word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : '',
+        )
         .join(' ');
   }
 

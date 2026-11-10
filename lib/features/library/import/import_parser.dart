@@ -86,14 +86,16 @@ abstract final class ImportParser {
           }
         }
         return ImportFormat.json;
-      } catch (_) {}
+      } on FormatException {
+        // Looked like JSON but is not; fall through to the CSV / text sniff.
+      }
     }
 
     // CSV only when the first line looks like a header naming a title column;
     // a plain list whose titles happen to contain commas must stay plain.
-    final header = _splitCsvLine(trimmed.split(RegExp(r'\r?\n')).first)
-        .map((c) => c.trim().toLowerCase())
-        .toList();
+    final header = _splitCsvLine(
+      trimmed.split(RegExp(r'\r?\n')).first,
+    ).map((c) => c.trim().toLowerCase()).toList();
     if (header.length > 1 && header.any(_titleColumns.contains)) {
       return ImportFormat.csv;
     }
@@ -166,14 +168,14 @@ abstract final class ImportParser {
   static const _stateColumns = {'status', 'state', 'my_status', 'list'};
 
   static List<ImportEntry> _parseCsv(String text) {
-    final lines = _splitCsvRecords(text)
-        .where((l) => l.trim().isNotEmpty)
-        .toList();
+    final lines = _splitCsvRecords(
+      text,
+    ).where((l) => l.trim().isNotEmpty).toList();
     if (lines.isEmpty) return const [];
 
-    final header = _splitCsvLine(lines.first)
-        .map((c) => c.trim().toLowerCase())
-        .toList();
+    final header = _splitCsvLine(
+      lines.first,
+    ).map((c) => c.trim().toLowerCase()).toList();
     var titleIndex = header.indexWhere(_titleColumns.contains);
     final stateIndex = header.indexWhere(_stateColumns.contains);
 
@@ -268,7 +270,7 @@ abstract final class ImportParser {
     final Object? decoded;
     try {
       decoded = jsonDecode(text);
-    } catch (_) {
+    } on FormatException {
       return const [];
     }
 
@@ -304,14 +306,11 @@ abstract final class ImportParser {
 
   // ─── Manga-Updates ───────────────────────────────────────────────────────
 
-  static List<ImportEntry> _parseMangaUpdates(
-    String text, {
-    String? fileName,
-  }) {
+  static List<ImportEntry> _parseMangaUpdates(String text, {String? fileName}) {
     final Object? decoded;
     try {
       decoded = jsonDecode(text);
-    } catch (_) {
+    } on FormatException {
       return const [];
     }
     if (decoded is! List) return const [];
@@ -338,7 +337,8 @@ abstract final class ImportParser {
       final title = item['title']?.toString();
       if (title == null || title.trim().isEmpty) continue;
       final status = item['status']?.toString();
-      final state = stateFromFile ?? (status != null ? mapStatus(status) : null);
+      final state =
+          stateFromFile ?? (status != null ? mapStatus(status) : null);
       entries.add(ImportEntry(title, state: state));
     }
     return entries;
@@ -350,7 +350,7 @@ abstract final class ImportParser {
     final Object? decoded;
     try {
       decoded = jsonDecode(text);
-    } catch (_) {
+    } on FormatException {
       return const [];
     }
 
@@ -380,7 +380,9 @@ abstract final class ImportParser {
       if (entryObj is Map && entryObj['state'] != null) {
         state = mapStatus(entryObj['state'].toString());
       }
-      state ??= item['state'] != null ? mapStatus(item['state'].toString()) : null;
+      state ??= item['state'] != null
+          ? mapStatus(item['state'].toString())
+          : null;
 
       entries.add(ImportEntry(title, state: state));
     }

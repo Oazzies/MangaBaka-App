@@ -77,7 +77,9 @@ class ThemePreviewCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     child: Stack(
                       children: [
-                        Positioned.fill(child: ThemeMiniature(palette: palette)),
+                        Positioned.fill(
+                          child: ThemeMiniature(palette: palette),
+                        ),
                         if (badge != null || selected)
                           Positioned(
                             top: 6,
@@ -205,9 +207,7 @@ class ThemeMiniature extends StatelessWidget {
                                   ),
                                   alignment: Alignment.bottomLeft,
                                   padding: EdgeInsets.all(2.5 * u),
-                                  child: i == 0
-                                      ? bar(10, 3.5, p.star)
-                                      : null,
+                                  child: i == 0 ? bar(10, 3.5, p.star) : null,
                                 ),
                               ),
                               SizedBox(height: 3 * u),

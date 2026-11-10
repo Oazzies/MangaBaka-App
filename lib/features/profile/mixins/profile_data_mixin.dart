@@ -8,6 +8,8 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
   ProfileAuthService get auth;
@@ -72,7 +74,8 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
         hasMoreChanged = entries.isNotEmpty;
         isLoadingChanged = false;
       });
-    } catch (e) {
+    } catch (e, st) {
+      LoggingService.logger.warning('Recently changed failed', e, st);
       if (!mounted) return;
       setState(() => isLoadingChanged = false);
     }
@@ -95,7 +98,8 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
         hasMoreAdded = entries.isNotEmpty;
         isLoadingAdded = false;
       });
-    } catch (e) {
+    } catch (e, st) {
+      LoggingService.logger.warning('Recently added failed', e, st);
       if (!mounted) return;
       setState(() => isLoadingAdded = false);
     }
@@ -127,10 +131,11 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
           // Reported through the sync status.
         }),
       );
-    } catch (e) {
+    } catch (e, st) {
+      LoggingService.logger.severe('Failed to load profile', e, st);
       if (mounted) {
         setState(() {
-          error = 'Failed to load profile: $e';
+          error = ErrorMessages.describe(e);
           loading = false;
         });
       }
@@ -146,14 +151,13 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
     try {
       await auth.login();
       await bootstrap();
-    } catch (e) {
+    } on AuthCancelledException {
+      if (mounted) setState(() => loading = false);
+    } catch (e, st) {
+      LoggingService.logger.severe('Login from profile failed', e, st);
       if (!mounted) return;
-      if (e is AuthCancelledException) {
-        setState(() => loading = false);
-        return;
-      }
       setState(() {
-        error = 'Login failed: $e';
+        error = ErrorMessages.describe(e);
         loading = false;
       });
     }

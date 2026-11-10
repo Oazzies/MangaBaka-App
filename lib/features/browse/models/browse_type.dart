@@ -1,6 +1,1 @@
-enum BrowseType {
-  series,
-  publishers,
-  staff,
-  characters,
-}
+enum BrowseType { series, publishers, staff, characters }

@@ -109,8 +109,8 @@ class _NewsScreenState extends State<NewsScreen> {
         _hasMore = newNews.length == AppConstants.defaultPageLimit;
         _currentPage++;
       });
-    } catch (e) {
-      _logger.severe('Error in NewsScreen while fetching news: $e');
+    } catch (e, st) {
+      _logger.severe('Error in NewsScreen while fetching news', e, st);
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -320,10 +320,7 @@ class _NewsScreenState extends State<NewsScreen> {
       itemBuilder: (context, index) {
         if (index == _newsList.length) {
           return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: MbSpinner(),
-            ),
+            child: Padding(padding: EdgeInsets.all(16.0), child: MbSpinner()),
           );
         }
         return MbEntrance(

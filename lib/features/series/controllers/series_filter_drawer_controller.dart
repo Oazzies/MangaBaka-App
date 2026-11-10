@@ -48,17 +48,19 @@ class SeriesFilterDrawerController extends ChangeNotifier {
     required TickerProvider vsync,
     SeriesSearchService? searchService,
   }) : _searchService = searchService ?? getIt<SeriesSearchService>() {
-    drawerAnimation =
-        AnimationController(vsync: vsync, duration: _drawerDuration);
+    drawerAnimation = AnimationController(
+      vsync: vsync,
+      duration: _drawerDuration,
+    );
     marchingAnts = AnimationController(vsync: vsync, duration: _antsDuration);
-    drawerSlide = Tween<Offset>(
-      begin: const Offset(0.0, 0.4),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: drawerAnimation,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
-    ));
+    drawerSlide = Tween<Offset>(begin: const Offset(0.0, 0.4), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: drawerAnimation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          ),
+        );
   }
 
   /// The filters being assembled, or null when the drawer is closed.
@@ -135,39 +137,39 @@ class SeriesFilterDrawerController extends ChangeNotifier {
   }
 
   void toggleGenre(String genreKey) => _toggleList(
-        read: (f) => f.genre,
-        write: (f, values) => f.copyWith(genre: values),
-        empty: (values) => SearchFilters(genre: values),
-        value: genreKey,
-      );
+    read: (f) => f.genre,
+    write: (f, values) => f.copyWith(genre: values),
+    empty: (values) => SearchFilters(genre: values),
+    value: genreKey,
+  );
 
   void toggleType(String typeKey) => _toggleList(
-        read: (f) => f.type,
-        write: (f, values) => f.copyWith(type: values),
-        empty: (values) => SearchFilters(type: values),
-        value: typeKey,
-      );
+    read: (f) => f.type,
+    write: (f, values) => f.copyWith(type: values),
+    empty: (values) => SearchFilters(type: values),
+    value: typeKey,
+  );
 
   void toggleStatus(String statusKey) => _toggleList(
-        read: (f) => f.status,
-        write: (f, values) => f.copyWith(status: values),
-        empty: (values) => SearchFilters(status: values),
-        value: statusKey,
-      );
+    read: (f) => f.status,
+    write: (f, values) => f.copyWith(status: values),
+    empty: (values) => SearchFilters(status: values),
+    value: statusKey,
+  );
 
   void toggleStaff(String staffName) => _toggleList(
-        read: (f) => f.staff,
-        write: (f, values) => f.copyWith(staff: values),
-        empty: (values) => SearchFilters(staff: values),
-        value: staffName,
-      );
+    read: (f) => f.staff,
+    write: (f, values) => f.copyWith(staff: values),
+    empty: (values) => SearchFilters(staff: values),
+    value: staffName,
+  );
 
   void togglePublisher(String publisherName) => _toggleList(
-        read: (f) => f.publisher,
-        write: (f, values) => f.copyWith(publisher: values),
-        empty: (values) => SearchFilters(publisher: values),
-        value: publisherName,
-      );
+    read: (f) => f.publisher,
+    write: (f, values) => f.copyWith(publisher: values),
+    empty: (values) => SearchFilters(publisher: values),
+    value: publisherName,
+  );
 
   /// A year filter is a range, so toggling one sets both bounds to that year —
   /// or clears them when that exact year is already selected.
@@ -180,7 +182,8 @@ class SeriesFilterDrawerController extends ChangeNotifier {
           publishedYearUpper: year,
         );
       }
-      final isSelected = current.publishedYearLower == year &&
+      final isSelected =
+          current.publishedYearLower == year &&
           current.publishedYearUpper == year;
       return current.copyWithYear(
         publishedYearLower: isSelected ? null : year,
@@ -192,7 +195,7 @@ class SeriesFilterDrawerController extends ChangeNotifier {
   void _toggleList({
     required List<String> Function(SearchFilters filters) read,
     required SearchFilters Function(SearchFilters filters, List<String> values)
-        write,
+    write,
     required SearchFilters Function(List<String> values) empty,
     required String value,
   }) {

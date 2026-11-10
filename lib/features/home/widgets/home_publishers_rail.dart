@@ -71,7 +71,8 @@ class _HomePublishersRailState extends State<HomePublishersRail> {
   @override
   Widget build(BuildContext context) {
     final publishers = _publishers;
-    if (publishers == null || publishers.isEmpty) return const SizedBox.shrink();
+    if (publishers == null || publishers.isEmpty)
+      return const SizedBox.shrink();
     final l10n = LocalizationService();
 
     if (DesktopLayout.isActive(context)) {
@@ -153,7 +154,10 @@ class _PublisherCard extends StatelessWidget {
                 Text(
                   l10n
                       .translate('publisher_series_count')
-                      .replaceAll('{count}', formatCount(publisher.seriesCount!)),
+                      .replaceAll(
+                        '{count}',
+                        formatCount(publisher.seriesCount!),
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.sans(

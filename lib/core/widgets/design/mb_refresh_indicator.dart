@@ -10,14 +10,7 @@ const double _kDragContainerExtentPercentage = 0.25;
 const double _kDragSizeFactorLimit = 1.5;
 const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 
-enum _MbRefreshStatus {
-  drag,
-  armed,
-  snap,
-  refresh,
-  done,
-  canceled,
-}
+enum _MbRefreshStatus { drag, armed, snap, refresh, done, canceled }
 
 /// A refresh indicator that displays MangaBaka's custom [MbSpinner] instead
 /// of the standard Material [RefreshProgressIndicator].
@@ -65,14 +58,10 @@ class MbRefreshIndicatorState extends State<MbRefreshIndicator>
     _positionFactor = _positionController.drive(
       Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit),
     );
-    _value = _positionController.drive(
-      Tween<double>(begin: 0.0, end: 0.75),
-    );
+    _value = _positionController.drive(Tween<double>(begin: 0.0, end: 0.75));
 
     _scaleController = AnimationController(vsync: this);
-    _scaleFactor = _scaleController.drive(
-      Tween<double>(begin: 1.0, end: 0.0),
-    );
+    _scaleFactor = _scaleController.drive(Tween<double>(begin: 1.0, end: 0.0));
   }
 
   @override
@@ -276,7 +265,8 @@ class MbRefreshIndicatorState extends State<MbRefreshIndicator>
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: widget.backgroundColor ??
+                            color:
+                                widget.backgroundColor ??
                                 context.colors.surfaceRaised,
                             shape: BoxShape.circle,
                             border: Border.all(
@@ -296,8 +286,7 @@ class MbRefreshIndicatorState extends State<MbRefreshIndicator>
                             size: 22,
                             strokeWidth: 2.3,
                             color: widget.color ?? context.colors.accent,
-                            value:
-                                showIndeterminate ? null : _value.value,
+                            value: showIndeterminate ? null : _value.value,
                           ),
                         );
                       },

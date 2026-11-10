@@ -71,10 +71,10 @@ class NavTabs {
 /// [navItems] as the destinations the rail and bottom bar take, with labels
 /// resolved through [l10n].
 List<MbNavDestination> navDestinations(LocalizationService l10n) => [
-      for (final item in navItems)
-        MbNavDestination(
-          icon: item.icon,
-          selectedIcon: item.selectedIcon,
-          label: l10n.translate(item.labelKey),
-        ),
-    ];
+  for (final item in navItems)
+    MbNavDestination(
+      icon: item.icon,
+      selectedIcon: item.selectedIcon,
+      label: l10n.translate(item.labelKey),
+    ),
+];

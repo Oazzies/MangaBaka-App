@@ -220,7 +220,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
       logger.info('Successfully updated progress for $seriesId on server');
     } catch (e, st) {
-      logger.severe('Error updating entry progress for $seriesId: $e');
+      logger.severe('Error updating entry progress for $seriesId', e, st);
       try {
         await _rollbackProgress(
           seriesId,
@@ -228,8 +228,13 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           wroteChapter: progressChapter,
           wroteVolume: progressVolume,
         );
-      } catch (rollbackError) {
-        logger.severe('Progress rollback failed for $seriesId: $rollbackError');
+      } catch (rollbackError, rollbackStack) {
+        // Logged, not thrown: the original failure is the one to report.
+        logger.severe(
+          'Progress rollback failed for $seriesId',
+          rollbackError,
+          rollbackStack,
+        );
       }
       _rethrowAsAppException(e, st, seriesId, 'update entry progress');
     }

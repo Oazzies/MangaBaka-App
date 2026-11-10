@@ -17,16 +17,15 @@ class BookLookupService {
   final ApiClient _api;
 
   BookLookupService({http.Client? client, ApiClient? api})
-      : _api = api ?? ApiClient(healthContext: 'book-lookup', client: client);
+    : _api = api ?? ApiClient(healthContext: 'book-lookup', client: client);
 
   Future<String?> lookupTitleByIsbn(String isbn) async {
     _logger.info('Looking up title for ISBN: $isbn');
 
     final title = await _api.getJson<String?>(
-      ApiClient.uri(
-        '${AppConstants.baseApiUrl}$_identifiersPath',
-        {'identifier': isbn},
-      ),
+      ApiClient.uri('${AppConstants.baseApiUrl}$_identifiersPath', {
+        'identifier': isbn,
+      }),
       operation: 'lookup book by ISBN',
       parse: (json) {
         final items = dataList(json);

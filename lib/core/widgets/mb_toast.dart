@@ -8,18 +8,18 @@ enum ToastKind { success, error, warning, info }
 extension ToastKindStyle on ToastKind {
   /// The colour of the glyph disc.
   Color tone(MbPalette c) => switch (this) {
-        ToastKind.success => c.success,
-        ToastKind.error => c.error,
-        ToastKind.warning => c.warning,
-        ToastKind.info => c.accent,
-      };
+    ToastKind.success => c.success,
+    ToastKind.error => c.error,
+    ToastKind.warning => c.warning,
+    ToastKind.info => c.accent,
+  };
 
   IconData get icon => switch (this) {
-        ToastKind.success => Icons.check_rounded,
-        ToastKind.error => Icons.priority_high_rounded,
-        ToastKind.warning => Icons.warning_amber_rounded,
-        ToastKind.info => Icons.info_outline_rounded,
-      };
+    ToastKind.success => Icons.check_rounded,
+    ToastKind.error => Icons.priority_high_rounded,
+    ToastKind.warning => Icons.warning_amber_rounded,
+    ToastKind.info => Icons.info_outline_rounded,
+  };
 }
 
 /// The solid colours a toast is drawn in. Nothing here is translucent: the
@@ -128,7 +128,9 @@ class MbToastCard extends StatelessWidget {
     final t = ToastColors.of(colors, kind);
 
     Widget card = Container(
-      constraints: maxWidth == null ? null : BoxConstraints(maxWidth: maxWidth!),
+      constraints: maxWidth == null
+          ? null
+          : BoxConstraints(maxWidth: maxWidth!),
       padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
       decoration: BoxDecoration(
         color: t.fill,

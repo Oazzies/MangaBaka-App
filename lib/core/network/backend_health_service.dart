@@ -34,9 +34,9 @@ class BackendHealthService {
     http.Client? client,
     Duration? probeInterval,
     int? failureThreshold,
-  })  : _client = client ?? http.Client(),
-        _probeInterval = probeInterval ?? const Duration(seconds: 15),
-        _failureThreshold = failureThreshold ?? 3;
+  }) : _client = client ?? http.Client(),
+       _probeInterval = probeInterval ?? const Duration(seconds: 15),
+       _failureThreshold = failureThreshold ?? 3;
 
   static final _logger = LoggingService.logger;
 
@@ -92,8 +92,10 @@ class BackendHealthService {
   }) {
     if (_disposed) return;
     if (statusCode == 429) {
-      _logger.fine('Backend health: rate-limited (HTTP 429) on $context — '
-          'not counted against backend health');
+      _logger.fine(
+        'Backend health: rate-limited (HTTP 429) on $context — '
+        'not counted against backend health',
+      );
       return;
     }
 

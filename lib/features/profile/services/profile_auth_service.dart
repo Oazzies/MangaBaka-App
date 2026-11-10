@@ -109,8 +109,9 @@ class ProfileAuthService extends ChangeNotifier {
       } else {
         _logger.fine('No active session found');
       }
-    } catch (e) {
-      _logger.warning('Failed to load cached profile during init: $e');
+    } catch (e, st) {
+      // Startup must not fail on a damaged cache: the user just signs in.
+      _logger.warning('Failed to load cached profile during init', e, st);
     }
   }
 
@@ -177,11 +178,10 @@ class ProfileAuthService extends ChangeNotifier {
       _logger.info(
         'Login complete for: ${_cachedProfile?.preferredUsername ?? _cachedProfile?.id}',
       );
+    } on AuthCancelledException {
+      _logger.info('Login cancelled by user');
+      rethrow;
     } catch (e, st) {
-      if (e is AuthCancelledException) {
-        _logger.info('Login cancelled by user');
-        rethrow;
-      }
       if (e is PlatformException &&
           (e.code == 'authorize_and_exchange_code_failed' ||
               e.code == 'user_cancelled')) {
@@ -469,9 +469,11 @@ class ProfileAuthService extends ChangeNotifier {
       final profile = await _loadProfile();
       notifyListeners();
       return profile;
+    } on AppException catch (e, st) {
+      _logger.severe('Failed to fetch profile', e, st);
+      rethrow;
     } catch (e, st) {
       _logger.severe('Failed to fetch profile', e, st);
-      if (e is AppException) rethrow;
       throw AuthException(
         message: 'Failed to fetch profile',
         originalError: e,
@@ -503,9 +505,11 @@ class ProfileAuthService extends ChangeNotifier {
         throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
       }
       return token;
+    } on AppException catch (e, st) {
+      _logger.severe('Failed to get valid access token', e, st);
+      rethrow;
     } catch (e, st) {
       _logger.severe('Failed to get valid access token', e, st);
-      if (e is AppException) rethrow;
       throw AuthException(
         message: 'Failed to get valid access token',
         originalError: e,

@@ -97,7 +97,9 @@ class _LucidePainter extends CustomPainter {
       old.color != color || old.paths != paths;
 }
 
-final RegExp _token = RegExp(r'[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?');
+final RegExp _token = RegExp(
+  r'[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?',
+);
 
 /// Reads SVG path data: M L H V C S Q A Z, absolute and relative.
 Path _parse(String d) {

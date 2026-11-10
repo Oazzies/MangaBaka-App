@@ -179,9 +179,11 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
           if (mounted) _onScroll();
         });
       }
-    } catch (e) {
+    } catch (e, st) {
       _logger.severe(
-        'Failed to fetch results for "${widget.sortType}" at page $_currentPage: $e',
+        'Failed to fetch results for "${widget.sortType}" at page $_currentPage',
+        e,
+        st,
       );
       if (!mounted) return;
       setState(() {
@@ -326,9 +328,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
                 child: WidgetUtils.responsiveConstraint(
                   SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
                       child: BrowseResultsBody(
                         error: _error,
                         isLoading: _isLoading,

@@ -21,9 +21,6 @@ class VolumeChip extends StatelessWidget {
 
     if (inLibrary) return const SizedBox.shrink();
 
-    return MiniBadge(
-      text: '$volume Vol.',
-      icon: Icons.shelves,
-    );
+    return MiniBadge(text: '$volume Vol.', icon: Icons.shelves);
   }
 }

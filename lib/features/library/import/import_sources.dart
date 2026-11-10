@@ -220,7 +220,7 @@ query ($user: String) {
     final Object? decoded;
     try {
       decoded = jsonDecode(body);
-    } catch (_) {
+    } on FormatException {
       throw const ImportSourceException('import_source_unreachable');
     }
     final data = decoded is Map ? decoded['data'] : null;
@@ -253,7 +253,9 @@ query ($user: String) {
 /// JSON:API (`kitsu.io/api/edge`) — no key needed, unlike a MyAnimeList list,
 /// which has no public read API of its own to fetch this way.
 class KitsuImporter {
-  static final Uri _usersEndpoint = Uri.parse('https://kitsu.io/api/edge/users');
+  static final Uri _usersEndpoint = Uri.parse(
+    'https://kitsu.io/api/edge/users',
+  );
   static final Uri _entriesEndpoint = Uri.parse(
     'https://kitsu.io/api/edge/library-entries',
   );
@@ -277,7 +279,8 @@ class KitsuImporter {
     if (name.isEmpty) throw const ImportSourceException('import_user_empty');
 
     final userId = await _resolveUserId(name);
-    if (userId == null) throw const ImportSourceException('import_user_not_found');
+    if (userId == null)
+      throw const ImportSourceException('import_user_not_found');
 
     final entries = <Map<String, String>>[];
     Uri? next = _entriesEndpoint.replace(
@@ -295,7 +298,9 @@ class KitsuImporter {
     // add nothing to [entries], so a feed that keeps linking to a "next" page
     // would otherwise loop forever.
     var pages = 0;
-    while (next != null && entries.length < _maxEntries && pages++ < _maxPages) {
+    while (next != null &&
+        entries.length < _maxEntries &&
+        pages++ < _maxPages) {
       final Map<String, dynamic> page = await _getJson(next);
 
       final included = page['included'];
@@ -328,7 +333,8 @@ class KitsuImporter {
       final nextUrl = links is Map ? links['next']?.toString() : null;
       final parsed = nextUrl != null ? Uri.tryParse(nextUrl) : null;
       // The link comes from the response: only follow it back to Kitsu.
-      next = parsed != null &&
+      next =
+          parsed != null &&
               parsed.scheme == 'https' &&
               parsed.host == _entriesEndpoint.host
           ? parsed
@@ -364,7 +370,9 @@ class KitsuImporter {
     try {
       final decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) return decoded;
-    } catch (_) {}
+    } on FormatException {
+      // Handled below: not JSON is as unusable as the wrong shape.
+    }
     throw const ImportSourceException('import_source_unreachable');
   }
 

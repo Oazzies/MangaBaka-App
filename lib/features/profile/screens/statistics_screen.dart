@@ -157,7 +157,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         if (topPublishers.isNotEmpty) ...[
                           const SizedBox(height: 32),
                           Text(
-                            l10n.translate('library_your_publishers').toUpperCase(),
+                            l10n
+                                .translate('library_your_publishers')
+                                .toUpperCase(),
                             style: AppTypography.display(
                               color: context.colors.text,
                               fontSize: 20,

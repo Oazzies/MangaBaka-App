@@ -16,11 +16,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
             ])
             ..limit(1))
           .getSingleOrNull();
-    } catch (e) {
-      _logger.severe('Failed to get latest updated series: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to get latest updated series', e, st);
       throw exc.DatabaseException(
         message: 'Failed to get latest updated series',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -143,11 +144,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           ),
         );
       });
-    } catch (e) {
-      _logger.severe('Failed to upsert series: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to upsert series', e, st);
       throw exc.DatabaseException(
         message: 'Failed to upsert series',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -165,11 +167,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           seriesId: seriesId,
         ),
       );
-    } catch (e) {
-      _logger.severe('Failed to insert library entry: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to insert library entry', e, st);
       throw exc.DatabaseException(
         message: 'Failed to insert library entry',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -190,11 +193,12 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
         libraryEntry: result.readTable(db.libraryEntriesTable),
         series: result.readTable(db.seriesTable),
       );
-    } catch (e) {
-      _logger.severe('Failed to get entry with series: $e');
+    } catch (e, st) {
+      _logger.severe('Failed to get entry with series', e, st);
       throw exc.DatabaseException(
         message: 'Failed to get entry with series',
         originalError: e,
+        stackTrace: st,
       );
     }
   }
@@ -219,8 +223,9 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
       _logger.info(
         'Database Maintenance: Cleaned up $deletedCount stale series entries.',
       );
-    } catch (e) {
-      _logger.warning('Failed to clean up stale series: $e');
+    } catch (e, st) {
+      // Housekeeping only: stale rows cost disk, not correctness.
+      _logger.warning('Failed to clean up stale series', e, st);
     }
   }
 }

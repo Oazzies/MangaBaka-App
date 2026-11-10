@@ -27,7 +27,7 @@ class NewsService {
   bool _isFetching = false;
 
   NewsService({http.Client? client, ApiClient? api})
-      : _api = api ?? ApiClient(healthContext: 'news', client: client);
+    : _api = api ?? ApiClient(healthContext: 'news', client: client);
 
   /// The last cached first page, or an empty list when there is none.
   ///
@@ -88,7 +88,8 @@ class NewsService {
     }
   }
 
-  Future<List<News>> _parse(dynamic json) => compute(_parseNewsList, dataList(json));
+  Future<List<News>> _parse(dynamic json) =>
+      compute(_parseNewsList, dataList(json));
 
   /// Runs on a background isolate — must stay a top-level/static function
   /// operating only on data that can cross the isolate boundary.

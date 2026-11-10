@@ -56,20 +56,14 @@ class MixResultsSliver extends StatelessWidget {
   Widget _buildResults(BuildContext context, SettingsManager settings) {
     final style = settings.resolvedBrowseListStyle;
 
-    final delegate = SliverChildBuilderDelegate(
-      (context, index) {
-        final series = controller.results[index];
-        return InkWell(
-          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-          onTap: () => onSeriesTap(series),
-          child: EntryListItem(
-            key: ValueKey('mix_${series.id}'),
-            series: series,
-          ),
-        );
-      },
-      childCount: controller.results.length,
-    );
+    final delegate = SliverChildBuilderDelegate((context, index) {
+      final series = controller.results[index];
+      return InkWell(
+        borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+        onTap: () => onSeriesTap(series),
+        child: EntryListItem(key: ValueKey('mix_${series.id}'), series: series),
+      );
+    }, childCount: controller.results.length);
 
     // The list styles are row layouts, not cells — forcing them through a grid
     // delegate squeezes them into cover-shaped boxes.

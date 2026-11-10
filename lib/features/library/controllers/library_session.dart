@@ -29,8 +29,8 @@ class LibrarySession extends ChangeNotifier {
     required this.onEntries,
     ProfileAuthService? auth,
     LibraryService? library,
-  })  : _auth = auth ?? getIt<ProfileAuthService>(),
-        _library = library ?? getIt<LibraryService>() {
+  }) : _auth = auth ?? getIt<ProfileAuthService>(),
+       _library = library ?? getIt<LibraryService>() {
     _loggedIn = _auth.isLoggedIn;
     _auth.addListener(_onAuthStateChanged);
     _logger.fine('Library bootstrap: loggedIn=$_loggedIn');
@@ -102,10 +102,10 @@ class LibrarySession extends ChangeNotifier {
       if (_disposed) return;
       _isIncomplete = incomplete;
       _safeNotify();
-    } catch (e) {
+    } catch (e, st) {
       // The local copy is still usable; the banner and a manual retry cover
       // it, so a failed sync must not take the screen down.
-      _logger.severe('Initial sync task failed: $e');
+      _logger.severe('Initial sync task failed', e, st);
     }
   }
 
@@ -121,8 +121,8 @@ class LibrarySession extends ChangeNotifier {
     } on AuthCancelledException {
       _logger.info('Login cancelled by user in library screen');
       return null;
-    } catch (e) {
-      _logger.severe('Login failed in library screen: $e');
+    } catch (e, st) {
+      _logger.severe('Login failed in library screen', e, st);
       return 'login_failed_retry';
     }
 
@@ -144,8 +144,9 @@ class LibrarySession extends ChangeNotifier {
     _logger.info('User triggered manual library refresh from screen');
     try {
       await _library.syncLibrary(deep: true);
-    } catch (e) {
-      _logger.severe('Manual refresh failed: $e');
+    } catch (e, st) {
+      // Reported to the user through the sync status banner.
+      _logger.severe('Manual refresh failed', e, st);
     }
   }
 

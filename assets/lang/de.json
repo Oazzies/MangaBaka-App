@@ -677,6 +677,16 @@
     "update_downloading": "Wird heruntergeladen {percent}%",
     "open_download": "Download öffnen",
     "onboarding_links_title": "Links öffnen",
-    "onboarding_links_subtitle": "Öffne Serienseiten und andere MangaBaka-Links direkt in der App statt in deinem Browser. Du kannst dies jederzeit in den Einstellungen ändern."
+    "onboarding_links_subtitle": "Öffne Serienseiten und andere MangaBaka-Links direkt in der App statt in deinem Browser. Du kannst dies jederzeit in den Einstellungen ändern.",
+    "error_generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "error_network": "MangaBaka ist nicht erreichbar. Prüfe deine Verbindung.",
+    "error_timeout": "Die Anfrage hat zu lange gedauert. Bitte versuche es erneut.",
+    "error_server": "MangaBaka hat gerade Probleme. Versuche es später erneut.",
+    "error_rate_limited": "Zu viele Anfragen. Warte kurz und versuche es erneut.",
+    "error_not_found": "Das wurde nicht gefunden.",
+    "error_session_expired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+    "logout_failed": "Abmelden fehlgeschlagen. Bitte versuche es erneut.",
+    "logs_save_failed": "Die Protokolle konnten nicht gespeichert werden.",
+    "open_series_failed": "Diese Serie konnte nicht geöffnet werden."
   }
 }

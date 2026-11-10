@@ -57,7 +57,8 @@ class _ChipBaseState extends State<ChipBase> {
     final hovered = _interactive && _hovered;
 
     Widget chip = Container(
-      padding: widget.padding ??
+      padding:
+          widget.padding ??
           const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: base,
@@ -65,7 +66,8 @@ class _ChipBaseState extends State<ChipBase> {
         border: border != null ? Border.all(color: border, width: 1) : null,
       ),
       child: DefaultTextStyle(
-        style: widget.labelStyle ??
+        style:
+            widget.labelStyle ??
             AppTypography.sans(
               fontSize: 14,
               fontWeight: FontWeight.w600,

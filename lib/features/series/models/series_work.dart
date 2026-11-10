@@ -28,7 +28,10 @@ class SeriesWork {
     final images = json['images'] as List?;
     if (images != null && images.isNotEmpty) {
       final firstImg = images[0]['image'];
-      img = firstImg?['x250']?['x1'] ?? firstImg?['x150']?['x1'] ?? firstImg?['raw']?['url'];
+      img =
+          firstImg?['x250']?['x1'] ??
+          firstImg?['x150']?['x1'] ??
+          firstImg?['raw']?['url'];
     }
 
     String? price;
@@ -45,7 +48,9 @@ class SeriesWork {
     }
 
     final sid = json['series_id'];
-    final int? seriesId = sid is num ? sid.toInt() : (sid is String ? int.tryParse(sid) : null);
+    final int? seriesId = sid is num
+        ? sid.toInt()
+        : (sid is String ? int.tryParse(sid) : null);
 
     return SeriesWork(
       id: json['id']?.toString() ?? '',

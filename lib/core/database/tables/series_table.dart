@@ -41,5 +41,10 @@ class SeriesTable extends Table {
   @override
   Set<Column> get primaryKey => {id};
 
-  List<Index> get indexes => [Index('series_title_idx', 'CREATE INDEX IF NOT EXISTS series_title_idx ON series_table (title)')];
+  List<Index> get indexes => [
+    Index(
+      'series_title_idx',
+      'CREATE INDEX IF NOT EXISTS series_title_idx ON series_table (title)',
+    ),
+  ];
 }

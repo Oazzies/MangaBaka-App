@@ -30,8 +30,10 @@ class SearchFilterSheetLauncher {
         context: context,
         builder: (_) => Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 20,
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxDialogWidth),
             child: SearchFilterBottomSheet(

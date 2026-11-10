@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -102,8 +103,17 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
       Navigator.of(
         context,
       ).push(AppTransitions.slideRight(SeriesDetailScreen(series: series)));
-    } catch (_) {
-      // The series page is a convenience here; the works are the point.
+    } catch (e, st) {
+      // The series page is a convenience here; the works are the point —
+      // but the tap must not silently do nothing.
+      _logger.warning('Opening series $id failed', e, st);
+      if (mounted) {
+        AppSnackBar.show(
+          context,
+          LocalizationService().translate('open_series_failed'),
+          isError: true,
+        );
+      }
     } finally {
       if (mounted) setState(() => _opening = false);
     }

@@ -482,7 +482,10 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               Text(
                                 l10n
                                     .translate('publisher_established')
-                                    .replaceAll('{year}', publisher.founded.toString()),
+                                    .replaceAll(
+                                      '{year}',
+                                      publisher.founded.toString(),
+                                    ),
                                 style: AppTypography.sans(
                                   color: context.colors.textMuted,
                                   fontSize: 12,
@@ -493,7 +496,10 @@ class _CollectionsBrowseScreenState extends State<CollectionsBrowseScreen>
                               Text(
                                 l10n
                                     .translate('publisher_closed')
-                                    .replaceAll('{year}', publisher.closed.toString()),
+                                    .replaceAll(
+                                      '{year}',
+                                      publisher.closed.toString(),
+                                    ),
                                 style: AppTypography.sans(
                                   color: context.colors.error.withValues(
                                     alpha: 0.8,

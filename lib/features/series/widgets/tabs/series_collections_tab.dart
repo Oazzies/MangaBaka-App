@@ -24,10 +24,7 @@ class SeriesCollectionsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (collections == null) {
       return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: MbSpinner(),
-        ),
+        child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()),
       );
     }
     final l10n = LocalizationService();

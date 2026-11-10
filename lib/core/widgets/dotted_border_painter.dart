@@ -35,12 +35,14 @@ class DottedBorderPainter extends CustomPainter {
     // Inset by half the stroke so the border sits fully inside the bounds
     // instead of being clipped along its outer edge.
     final path = Path()
-      ..addRect(Rect.fromLTWH(
-        strokeWidth / 2,
-        strokeWidth / 2,
-        size.width - strokeWidth,
-        size.height - strokeWidth,
-      ));
+      ..addRect(
+        Rect.fromLTWH(
+          strokeWidth / 2,
+          strokeWidth / 2,
+          size.width - strokeWidth,
+          size.height - strokeWidth,
+        ),
+      );
 
     final dashLength = gap * 2;
     for (final PathMetric metric in path.computeMetrics()) {

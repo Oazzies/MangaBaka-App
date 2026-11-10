@@ -24,7 +24,14 @@ final Series mockSeries222 = Series(
   totalChapters: '83',
   links: const [],
   publishers: const [],
-  genres: const ['drama', 'mystery', 'historical', 'romance', 'seinen', 'slice_of_life'],
+  genres: const [
+    'drama',
+    'mystery',
+    'historical',
+    'romance',
+    'seinen',
+    'slice_of_life',
+  ],
   tags: const [],
   lastUpdated: '',
 );

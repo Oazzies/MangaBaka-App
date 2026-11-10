@@ -20,8 +20,8 @@ class SeriesRelatedTab extends StatelessWidget {
   final String? heroTagPrefix;
 
   const SeriesRelatedTab({
-    super.key, 
-    this.related, 
+    super.key,
+    this.related,
     required this.l10n,
     this.horizontalPadding = 16.0,
     this.currentSeriesId,
@@ -31,7 +31,9 @@ class SeriesRelatedTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (related == null) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()));
+      return const Center(
+        child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()),
+      );
     }
     // Filter out the current series and any duplicate IDs to prevent Hero tag collisions
     final uniqueRelated = <String, Series>{};
@@ -43,9 +45,14 @@ class SeriesRelatedTab extends StatelessWidget {
     final finalRelated = uniqueRelated.values.toList();
 
     if (finalRelated.isEmpty) {
-      return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_related_series'))));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Text(l10n.translate('no_related_series')),
+        ),
+      );
     }
-    
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: ListenableBuilder(
@@ -61,7 +68,13 @@ class SeriesRelatedTab extends StatelessWidget {
               LayoutBuilder(
                 builder: (context, constraints) {
                   if (style.isGrid) {
-                    return _buildGrid(context, settings, style, finalRelated, constraints.maxWidth);
+                    return _buildGrid(
+                      context,
+                      settings,
+                      style,
+                      finalRelated,
+                      constraints.maxWidth,
+                    );
                   }
                   return _buildList(context, finalRelated);
                 },
@@ -87,10 +100,9 @@ class SeriesRelatedTab extends StatelessWidget {
           child: InkWell(
             onTap: () {
               Navigator.of(context).push(
-                AppTransitions.slideUp(SeriesDetailScreen(
-                  series: s,
-                  heroTagPrefix: heroTagPrefix,
-                )),
+                AppTransitions.slideUp(
+                  SeriesDetailScreen(series: s, heroTagPrefix: heroTagPrefix),
+                ),
               );
             },
             child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
@@ -100,11 +112,19 @@ class SeriesRelatedTab extends StatelessWidget {
     );
   }
 
-  Widget _buildGrid(BuildContext context, SettingsManager settings, AppListStyle style, List<Series> series, double maxWidth) {
+  Widget _buildGrid(
+    BuildContext context,
+    SettingsManager settings,
+    AppListStyle style,
+    List<Series> series,
+    double maxWidth,
+  ) {
     final seriesService = getIt<SeriesService>();
     final columnCount = settings.resolvedBrowseGridColumnCount;
     const spacing = 10.0;
-    final cols = columnCount > 0 ? columnCount : (maxWidth / 160).floor().clamp(2, 6);
+    final cols = columnCount > 0
+        ? columnCount
+        : (maxWidth / 160).floor().clamp(2, 6);
     final itemWidth = (maxWidth - spacing * (cols - 1)) / cols;
     // Compact grid needs room for the title rows under the cover, so take the
     // ratio from the style rather than assuming a bare cover.
@@ -114,24 +134,28 @@ class SeriesRelatedTab extends StatelessWidget {
       spacing: spacing,
       runSpacing: spacing,
       children: series
-          .map((s) => SizedBox(
-                width: itemWidth,
-                height: itemHeight,
-                child: MouseRegion(
-                  onEnter: (_) => seriesService.fetchSeries(s.id),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        AppTransitions.slideUp(SeriesDetailScreen(
+          .map(
+            (s) => SizedBox(
+              width: itemWidth,
+              height: itemHeight,
+              child: MouseRegion(
+                onEnter: (_) => seriesService.fetchSeries(s.id),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      AppTransitions.slideUp(
+                        SeriesDetailScreen(
                           series: s,
                           heroTagPrefix: heroTagPrefix,
-                        )),
-                      );
-                    },
-                    child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
-                  ),
+                        ),
+                      ),
+                    );
+                  },
+                  child: EntryListItem(series: s, heroTagPrefix: heroTagPrefix),
                 ),
-              ))
+              ),
+            ),
+          )
           .toList(),
     );
   }

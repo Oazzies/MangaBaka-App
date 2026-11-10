@@ -13,6 +13,8 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
+import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
 /// Dialog shown when a newer GitHub release is detected. Title is the release
 /// name, body is the release description, with "Later" and "Update now"
@@ -95,7 +97,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
       if (!mounted) return;
       setState(() {
         _phase = _Phase.error;
-        _errorMessage = e.toString();
+        // These two carry wording written for the user; anything else is
+        // described generically (the cause is in the log above).
+        _errorMessage =
+            e is UpdateIntegrityException || e is InstallPermissionException
+            ? (e as AppException).message
+            : ErrorMessages.describe(e);
       });
     }
   }
@@ -105,8 +112,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
     if (url.isEmpty) return;
     try {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } catch (e) {
-      _logger.warning('Failed to open release page: $e');
+    } on Exception catch (e, st) {
+      // PlatformException from the launcher, FormatException from a bad URL.
+      _logger.warning('Failed to open release page', e, st);
     }
   }
 
@@ -214,51 +222,53 @@ class _UpdateDialogState extends State<UpdateDialog> {
                                 }
                               }
                             },
-                            styleSheet: MarkdownStyleSheet.fromTheme(
-                              Theme.of(context),
-                            ).copyWith(
-                              p: AppTypography.sans(
-                                color: context.colors.text,
-                                fontSize: 14,
-                                height: 1.5,
-                              ),
-                              listBullet: AppTypography.sans(
-                                color: context.colors.textMuted,
-                                fontSize: 14,
-                              ),
-                              h1: AppTypography.display(
-                                color: context.colors.text,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              h2: AppTypography.display(
-                                color: context.colors.text,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              h3: AppTypography.display(
-                                color: context.colors.text,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              a: AppTypography.sans(
-                                color: context.colors.accent,
-                                fontSize: 14,
-                              ).copyWith(
-                                decoration: TextDecoration.underline,
-                              ),
-                              code: TextStyle(
-                                fontFamily: 'monospace',
-                                color: context.colors.accent,
-                                fontSize: 13,
-                              ),
-                              codeblockDecoration: BoxDecoration(
-                                color: context.colors.surfaceRaised,
-                                borderRadius: BorderRadius.circular(
-                                  AppConstants.denseRadius,
+                            styleSheet:
+                                MarkdownStyleSheet.fromTheme(
+                                  Theme.of(context),
+                                ).copyWith(
+                                  p: AppTypography.sans(
+                                    color: context.colors.text,
+                                    fontSize: 14,
+                                    height: 1.5,
+                                  ),
+                                  listBullet: AppTypography.sans(
+                                    color: context.colors.textMuted,
+                                    fontSize: 14,
+                                  ),
+                                  h1: AppTypography.display(
+                                    color: context.colors.text,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  h2: AppTypography.display(
+                                    color: context.colors.text,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  h3: AppTypography.display(
+                                    color: context.colors.text,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  a:
+                                      AppTypography.sans(
+                                        color: context.colors.accent,
+                                        fontSize: 14,
+                                      ).copyWith(
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                  code: TextStyle(
+                                    fontFamily: 'monospace',
+                                    color: context.colors.accent,
+                                    fontSize: 13,
+                                  ),
+                                  codeblockDecoration: BoxDecoration(
+                                    color: context.colors.surfaceRaised,
+                                    borderRadius: BorderRadius.circular(
+                                      AppConstants.denseRadius,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
                           ),
                   ),
                 ),

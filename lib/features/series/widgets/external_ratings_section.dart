@@ -22,8 +22,9 @@ class ExternalRatingsSection extends StatelessWidget {
             .where((e) => JsonUtils.normalizedRating(e.value) != null)
             .toList()
           ..sort(
-            (a, b) => JsonUtils.normalizedRating(b.value)!
-                .compareTo(JsonUtils.normalizedRating(a.value)!),
+            (a, b) => JsonUtils.normalizedRating(
+              b.value,
+            )!.compareTo(JsonUtils.normalizedRating(a.value)!),
           );
 
     if (ratingSources.isEmpty) return const SizedBox.shrink();

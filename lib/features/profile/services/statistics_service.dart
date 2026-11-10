@@ -34,7 +34,7 @@ class StatisticsService {
       _logger.fine('Total series count: $val');
       return val;
     } catch (e, st) {
-      _logger.severe('Failed to get total series from DB: $e\n$st');
+      _logger.severe('Failed to get total series from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get total series',
         originalError: e,
@@ -66,7 +66,7 @@ class StatisticsService {
       _logger.fine('Total chapters read: $val');
       return val;
     } catch (e, st) {
-      _logger.severe('Failed to get chapters read from DB: $e\n$st');
+      _logger.severe('Failed to get chapters read from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get chapters read',
         originalError: e,
@@ -98,7 +98,7 @@ class StatisticsService {
       _logger.fine('Total volumes read: $val');
       return val;
     } catch (e, st) {
-      _logger.severe('Failed to get volumes read from DB: $e\n$st');
+      _logger.severe('Failed to get volumes read from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get volumes read',
         originalError: e,
@@ -138,7 +138,7 @@ class StatisticsService {
       _logger.fine('Completion rate: $rate% ($completed/$total)');
       return rate;
     } catch (e, st) {
-      _logger.severe('Failed to calculate completion rate: $e\n$st');
+      _logger.severe('Failed to calculate completion rate', e, st);
       throw DatabaseException(
         message: 'Failed to get completion rate',
         originalError: e,
@@ -170,7 +170,7 @@ class StatisticsService {
       _logger.fine('Total rereads: $val');
       return val;
     } catch (e, st) {
-      _logger.severe('Failed to get total rereads from DB: $e\n$st');
+      _logger.severe('Failed to get total rereads from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get total rereads',
         originalError: e,
@@ -205,7 +205,7 @@ class StatisticsService {
       _logger.fine('Mean score: $val');
       return val;
     } catch (e, st) {
-      _logger.severe('Failed to calculate mean score: $e\n$st');
+      _logger.severe('Failed to calculate mean score', e, st);
       throw DatabaseException(
         message: 'Failed to get mean score',
         originalError: e,
@@ -250,7 +250,7 @@ class StatisticsService {
       );
       return rate;
     } catch (e, st) {
-      _logger.severe('Failed to calculate finish rate: $e\n$st');
+      _logger.severe('Failed to calculate finish rate', e, st);
       throw DatabaseException(
         message: 'Failed to get finish rate',
         originalError: e,
@@ -304,7 +304,7 @@ class StatisticsService {
       _logger.fine('Highest rated series found: ${entry.series.title}');
       return entry;
     } catch (e, st) {
-      _logger.severe('Failed to get highest rated series from DB: $e\n$st');
+      _logger.severe('Failed to get highest rated series from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get highest rated series',
         originalError: e,
@@ -363,7 +363,7 @@ class StatisticsService {
         for (final e in sorted.take(limit)) (name: e.key, count: e.value),
       ];
     } catch (e, st) {
-      _logger.severe('Failed to get top publishers from DB: $e\n$st');
+      _logger.severe('Failed to get top publishers from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get top publishers',
         originalError: e,
@@ -424,7 +424,7 @@ class StatisticsService {
       _logger.fine('Most reread series found: ${entry.series.title}');
       return entry;
     } catch (e, st) {
-      _logger.severe('Failed to get most reread series from DB: $e\n$st');
+      _logger.severe('Failed to get most reread series from DB', e, st);
       throw DatabaseException(
         message: 'Failed to get most reread series',
         originalError: e,

@@ -66,7 +66,8 @@ class _MbSpinnerState extends State<MbSpinner>
   @override
   Widget build(BuildContext context) {
     final color = widget.color ?? context.colors.accent;
-    final trackColor = widget.trackColor ??
+    final trackColor =
+        widget.trackColor ??
         (widget.value != null ? context.colors.surfaceRaised : null);
     final strokeWidth =
         widget.strokeWidth ?? (widget.size * 0.11).clamp(2.0, 3.8);
@@ -145,7 +146,12 @@ class _MbSpinnerPainter extends CustomPainter {
         final straightTopHalf = (rect.width - 2 * cornerRadius) / 2.0;
         final startOffset = straightTopHalf.clamp(0.0, totalLength);
         final sweepLength = clampedProgress * totalLength;
-        final path = _extractSubPath(metric, totalLength, startOffset, sweepLength);
+        final path = _extractSubPath(
+          metric,
+          totalLength,
+          startOffset,
+          sweepLength,
+        );
         canvas.drawPath(path, strokePaint);
       }
       return;
@@ -163,13 +169,16 @@ class _MbSpinnerPainter extends CustomPainter {
 
     // Dynamic sweeping stroke along the rounded square perimeter:
     // Expands and contracts between ~30% and ~85% of total perimeter
-    final sweepSine =
-        (math.sin(t * 2 * math.pi - (math.pi / 2)) + 1.0) / 2.0;
+    final sweepSine = (math.sin(t * 2 * math.pi - (math.pi / 2)) + 1.0) / 2.0;
     final sweepLength = totalLength * (0.30 + 0.55 * sweepSine);
     final startOffset = (t * 1.35 * totalLength) % totalLength;
 
-    final sweepPath =
-        _extractSubPath(metric, totalLength, startOffset, sweepLength);
+    final sweepPath = _extractSubPath(
+      metric,
+      totalLength,
+      startOffset,
+      sweepLength,
+    );
     canvas.drawPath(sweepPath, strokePaint);
     canvas.restore();
   }

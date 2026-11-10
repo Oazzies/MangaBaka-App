@@ -41,11 +41,13 @@ class SeriesAutocompleteService {
   /// 220ms: comfortable for fast typists, avoids a request per character.
   static const Duration _debounceDuration = Duration(milliseconds: 220);
 
-  static const Duration _timeout =
-      Duration(seconds: AppConstants.networkTimeoutSeconds);
+  static const Duration _timeout = Duration(
+    seconds: AppConstants.networkTimeoutSeconds,
+  );
 
-  final AutocompleteCache _cache =
-      AutocompleteCache(pageLimit: autocompleteLimit);
+  final AutocompleteCache _cache = AutocompleteCache(
+    pageLimit: autocompleteLimit,
+  );
 
   Timer? _debounceTimer;
   http.Client? _activeClient;
@@ -95,15 +97,13 @@ class SeriesAutocompleteService {
     });
   }
 
-  Uri _buildUri(String query) => ApiClient.uri(
-        '${AppConstants.baseApiUrl}/series/search',
-        {
-          'q': query,
-          'limit': autocompleteLimit,
-          'sort_by': 'relevance_desc',
-          'content_rating': SettingsManager().contentPreferences,
-        },
-      );
+  Uri _buildUri(String query) =>
+      ApiClient.uri('${AppConstants.baseApiUrl}/series/search', {
+        'q': query,
+        'limit': autocompleteLimit,
+        'sort_by': 'relevance_desc',
+        'content_rating': SettingsManager().contentPreferences,
+      });
 
   Future<void> _executeSearch(
     String query, {
@@ -117,8 +117,10 @@ class SeriesAutocompleteService {
 
     try {
       final response = await client
-          .get(_buildUri(query),
-              headers: {'User-Agent': AppConstants.userAgent})
+          .get(
+            _buildUri(query),
+            headers: {'User-Agent': AppConstants.userAgent},
+          )
           .timeout(_timeout);
 
       // A newer keystroke has already superseded this request; delivering its

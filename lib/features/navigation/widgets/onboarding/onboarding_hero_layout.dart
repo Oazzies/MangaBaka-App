@@ -34,7 +34,10 @@ class OnboardingHeroLayout extends StatelessWidget {
     this.titleFontWeight = FontWeight.bold,
     this.titleLetterSpacing,
     this.action,
-  }) : assert(icon != null || heroWidget != null, 'Either icon or heroWidget must be provided');
+  }) : assert(
+         icon != null || heroWidget != null,
+         'Either icon or heroWidget must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,8 @@ class OnboardingHeroLayout extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             MbEntrance(
-              child: heroWidget ??
+              child:
+                  heroWidget ??
                   Icon(
                     icon,
                     size: isShort ? 56 : 72,

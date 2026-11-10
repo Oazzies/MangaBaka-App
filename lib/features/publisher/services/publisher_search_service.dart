@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:mangabaka_app/features/series/services/series_title_enricher.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/network/api_client.dart';
 import 'package:mangabaka_app/core/network/api_envelope.dart';
@@ -36,10 +37,15 @@ class PublisherSearchService {
   };
 
   final ApiClient _api;
+  final SeriesTitleEnricher _titles;
 
-  PublisherSearchService({http.Client? client, ApiClient? api})
-      : _api = api ??
-            ApiClient(healthContext: 'publisher-search', client: client);
+  PublisherSearchService({
+    http.Client? client,
+    ApiClient? api,
+    SeriesTitleEnricher? titles,
+  }) : _api =
+           api ?? ApiClient(healthContext: 'publisher-search', client: client),
+       _titles = titles ?? SeriesTitleEnricher.shared;
 
   Future<List<Publisher>> searchPublishers({
     String? query,
@@ -122,11 +128,14 @@ class PublisherSearchService {
 
     final Uri uri;
     if (shelf == PublisherShelf.hiddenGems) {
-      uri = ApiClient.uri('${AppConstants.baseApiUrlV2}/series/discover/hidden-gems', {
-        'publisher_id': publisherId,
-        'limit': limit,
-        'not_content_rating': ContentRatingFilter.excludedByPreference(),
-      });
+      uri = ApiClient.uri(
+        '${AppConstants.baseApiUrlV2}/series/discover/hidden-gems',
+        {
+          'publisher_id': publisherId,
+          'limit': limit,
+          'not_content_rating': ContentRatingFilter.excludedByPreference(),
+        },
+      );
     } else {
       uri = ApiClient.uri('${AppConstants.baseApiUrlV2}/series/search', {
         'publisher_id': publisherId,
@@ -142,11 +151,13 @@ class PublisherSearchService {
         if (prefs.isNotEmpty) 'content_rating': prefs,
       });
     }
-    return _api.getJson(
-      uri,
-      operation: 'fetch publisher series',
-      parse: (json) => parseDataList(json, Series.fromSimilarJson),
-    );
+    return _api
+        .getJson(
+          uri,
+          operation: 'fetch publisher series',
+          parse: (json) => parseDataList(json, Series.fromSimilarJson),
+        )
+        .then(_titles.canonicalize);
   }
 
   void dispose() => _api.close();

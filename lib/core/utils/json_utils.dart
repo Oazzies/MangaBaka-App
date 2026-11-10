@@ -16,10 +16,10 @@ class JsonUtils {
   /// For fields the API documents as numbers: a hard `as num` cast would turn
   /// one oddly-typed value into a failure of the whole payload around it.
   static double? toDouble(Object? value) => switch (value) {
-        final num n => n.toDouble(),
-        final String s => double.tryParse(s.trim()),
-        _ => null,
-      };
+    final num n => n.toDouble(),
+    final String s => double.tryParse(s.trim()),
+    _ => null,
+  };
 
   /// The `rating_normalized` of one entry of a series' `source` map, or null
   /// when the entry is not a map or carries no usable rating.

@@ -206,12 +206,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       _logger.info('Login successful during onboarding');
       setState(() => _isLoggedIn = true);
       _nextPage();
-    } catch (e) {
-      if (e is AuthCancelledException) {
-        _logger.info('Login cancelled by user');
-        return;
-      }
-      _logger.severe('Login failed during onboarding: $e');
+    } on AuthCancelledException {
+      _logger.info('Login cancelled by user');
+    } catch (e, st) {
+      _logger.severe('Login failed during onboarding', e, st);
       if (mounted) {
         final localization = LocalizationService();
         AppSnackBar.show(
@@ -270,10 +268,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             decoration: BoxDecoration(
               color: context.colors.background,
               border: Border(
-                bottom: BorderSide(
-                  color: context.colors.border,
-                  width: 1,
-                ),
+                bottom: BorderSide(color: context.colors.border, width: 1),
               ),
             ),
             child: Row(
@@ -323,7 +318,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 620),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(36, 24, 36, 16),
+                              padding: const EdgeInsets.fromLTRB(
+                                36,
+                                24,
+                                36,
+                                16,
+                              ),
                               child: _pageView(),
                             ),
                           ),
@@ -446,10 +446,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               title.toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.display(
-                color: fg,
-                fontSize: 13.5,
-              ),
+              style: AppTypography.display(color: fg, fontSize: 13.5),
             ),
           ),
         ],
@@ -464,12 +461,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
       decoration: BoxDecoration(
         color: context.colors.background,
-        border: Border(
-          top: BorderSide(
-            color: context.colors.border,
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: context.colors.border, width: 1)),
       ),
       child: Center(
         child: ConstrainedBox(

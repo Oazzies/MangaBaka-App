@@ -84,11 +84,7 @@ class _LoadingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        MbSpinner(
-          size: 14,
-          strokeWidth: 2,
-          color: context.colors.accent,
-        ),
+        MbSpinner(size: 14, strokeWidth: 2, color: context.colors.accent),
         const SizedBox(width: 10),
         Text(
           label,

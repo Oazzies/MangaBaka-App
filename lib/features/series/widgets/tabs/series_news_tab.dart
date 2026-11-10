@@ -9,22 +9,25 @@ class SeriesNewsTab extends StatelessWidget {
   final List<News>? news;
   final double horizontalPadding;
 
-  const SeriesNewsTab({
-    super.key, 
-    this.news, 
-    this.horizontalPadding = 16.0,
-  });
+  const SeriesNewsTab({super.key, this.news, this.horizontalPadding = 16.0});
 
   @override
   Widget build(BuildContext context) {
     if (news == null) {
-      return const Center(child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()));
+      return const Center(
+        child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()),
+      );
     }
     final l10n = LocalizationService();
     if (news!.isEmpty) {
-      return Center(child: Padding(padding: const EdgeInsets.all(32.0), child: Text(l10n.translate('no_news_available'))));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Text(l10n.translate('no_news_available')),
+        ),
+      );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,7 +43,7 @@ class SeriesNewsTab extends StatelessWidget {
           itemBuilder: (context, index) {
             return NewsListItem(
               key: ValueKey('series_news_${news![index].id}'),
-              news: news![index], 
+              news: news![index],
               showReferencedSeries: false,
             );
           },

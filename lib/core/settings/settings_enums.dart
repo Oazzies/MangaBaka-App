@@ -14,8 +14,8 @@ enum AppListStyle {
 }
 
 extension AppListStyleExtension on AppListStyle {
-  bool get isGrid => this == AppListStyle.coverOnlyGrid || 
-                     this == AppListStyle.compactGrid;
+  bool get isGrid =>
+      this == AppListStyle.coverOnlyGrid || this == AppListStyle.compactGrid;
 
   double get childAspectRatio {
     if (this == AppListStyle.compactGrid) {

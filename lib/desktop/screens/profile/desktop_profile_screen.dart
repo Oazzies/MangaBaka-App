@@ -30,6 +30,7 @@ import 'package:mangabaka_app/features/publisher/utils/open_publisher.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
 /// The profile on desktop: an identity card beside a statistics dashboard.
 ///
@@ -189,9 +190,14 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
     if (confirmed != true) return;
     try {
       await _auth.logout();
-    } catch (e) {
+    } on AppException {
+      // logout() logs the cause and wraps every failure in AuthException.
       if (!mounted) return;
-      AppSnackBar.show(context, 'Logout failed: $e', isError: true);
+      AppSnackBar.show(
+        context,
+        LocalizationService().translate('logout_failed'),
+        isError: true,
+      );
     }
   }
 

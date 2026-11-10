@@ -9,10 +9,11 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 /// Deliberately callback-shaped rather than a `Future`: the Browse source is
 /// debounced and cancellable and may answer more than once or not at all,
 /// while the Library source answers synchronously from memory.
-typedef SuggestionRequest = void Function(
-  String query,
-  ValueChanged<List<AutocompleteSeriesResult>> onResults,
-);
+typedef SuggestionRequest =
+    void Function(
+      String query,
+      ValueChanged<List<AutocompleteSeriesResult>> onResults,
+    );
 
 /// The state machine behind the search field: what suggestions exist, which
 /// one is highlighted, what the inline completion is, and when suggestions are
@@ -128,13 +129,15 @@ class SearchBarController extends ChangeNotifier {
   /// title, so there is nothing left to complete.
   void _applyGhost(List<AutocompleteSeriesResult> results) {
     final query = text.text;
-    final blocked = _isSuppressed ||
+    final blocked =
+        _isSuppressed ||
         _selectedIndex != -1 ||
         query.isEmpty ||
         query == _suppressedQuery;
 
-    _ghostSuffix =
-        blocked ? '' : AutocompleteRanking.ghostSuffix(results, query);
+    _ghostSuffix = blocked
+        ? ''
+        : AutocompleteRanking.ghostSuffix(results, query);
     text.ghostSuffix = _ghostSuffix;
   }
 
@@ -246,8 +249,11 @@ class SearchBarController extends ChangeNotifier {
   }
 
   void acceptGhostText() {
-    final match =
-        AutocompleteRanking.matchForGhost(_results, text.text, _ghostSuffix);
+    final match = AutocompleteRanking.matchForGhost(
+      _results,
+      text.text,
+      _ghostSuffix,
+    );
     if (match == null) return;
     _commit(match.title);
   }
@@ -290,8 +296,11 @@ class SearchBarController extends ChangeNotifier {
   /// Returns the chosen result, or null when the caller should run the query
   /// itself.
   AutocompleteSeriesResult? resolveSubmission() {
-    final match =
-        AutocompleteRanking.matchForGhost(_results, text.text, _ghostSuffix);
+    final match = AutocompleteRanking.matchForGhost(
+      _results,
+      text.text,
+      _ghostSuffix,
+    );
     if (match != null) {
       selectResult(match.result);
       return match.result;

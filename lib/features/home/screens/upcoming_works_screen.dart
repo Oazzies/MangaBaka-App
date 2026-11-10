@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -16,6 +17,7 @@ import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 /// Opens the series a release belongs to, if it has one.
 Future<void> openUpcomingSeries(BuildContext context, SeriesWork work) async {
@@ -26,7 +28,20 @@ Future<void> openUpcomingSeries(BuildContext context, SeriesWork work) async {
     Navigator.of(
       context,
     ).push(AppTransitions.slideUp(SeriesDetailScreen(series: series)));
-  } catch (_) {}
+  } catch (e, st) {
+    LoggingService.logger.warning(
+      'Opening series ${work.seriesId} failed',
+      e,
+      st,
+    );
+    if (context.mounted) {
+      AppSnackBar.show(
+        context,
+        LocalizationService().translate('open_series_failed'),
+        isError: true,
+      );
+    }
+  }
 }
 
 /// Releases coming up, grouped by day, with a switch to show only the ones
@@ -43,9 +58,9 @@ class UpcomingWorksScreen extends StatefulWidget {
   const UpcomingWorksScreen({super.key, this.initial, this.loader});
 
   static void open(BuildContext context, {UpcomingData? initial}) {
-    Navigator.of(context).push(
-      AppTransitions.slideRight(UpcomingWorksScreen(initial: initial)),
-    );
+    Navigator.of(
+      context,
+    ).push(AppTransitions.slideRight(UpcomingWorksScreen(initial: initial)));
   }
 
   @override
@@ -173,9 +188,7 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
                   ? const Center(child: MbSpinner())
                   : MbRefreshIndicator(
                       onRefresh: _load,
-                      child: works.isEmpty
-                          ? _empty(l10n)
-                          : _list(works, l10n),
+                      child: works.isEmpty ? _empty(l10n) : _list(works, l10n),
                     ),
             ),
           ],
@@ -269,7 +282,8 @@ class _DayHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = day;
-    final isToday = d != null && _relative(d) == l10n.translate('upcoming_today');
+    final isToday =
+        d != null && _relative(d) == l10n.translate('upcoming_today');
     return Padding(
       padding: EdgeInsets.fromLTRB(0, first ? 8 : 20, 0, 10),
       child: Row(
@@ -392,7 +406,9 @@ class _WorkRow extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: context.colors.accent.withValues(alpha: 0.16),
+                            color: context.colors.accent.withValues(
+                              alpha: 0.16,
+                            ),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

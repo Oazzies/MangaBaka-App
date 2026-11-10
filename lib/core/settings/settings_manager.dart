@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/settings/setting_value.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 /// Every user preference, and the only place they are persisted.
 ///
@@ -103,49 +104,85 @@ class SettingsManager extends ChangeNotifier {
   /// JSON-encoded `MbThemeSpec`s.
   final _customThemes = StringListSetting(SettingsKeys.customThemes, const []);
 
-  final _separateListStyles = BoolSetting(SettingsKeys.separateListStyles, false);
-  final _separateGridColumnCounts =
-      BoolSetting(SettingsKeys.separateGridColumnCounts, false);
-  final _hideLibrarySeriesInBrowse =
-      BoolSetting(SettingsKeys.hideLibrarySeriesInBrowse, false);
-  final _hasCompletedOnboarding =
-      BoolSetting(SettingsKeys.onboardingCompleted, false);
+  final _separateListStyles = BoolSetting(
+    SettingsKeys.separateListStyles,
+    false,
+  );
+  final _separateGridColumnCounts = BoolSetting(
+    SettingsKeys.separateGridColumnCounts,
+    false,
+  );
+  final _hideLibrarySeriesInBrowse = BoolSetting(
+    SettingsKeys.hideLibrarySeriesInBrowse,
+    false,
+  );
+  final _hasCompletedOnboarding = BoolSetting(
+    SettingsKeys.onboardingCompleted,
+    false,
+  );
   final _pushNotifications = BoolSetting(SettingsKeys.pushNotifications, false);
   final _autoSuggestBrowse = BoolSetting(SettingsKeys.autoSuggestBrowse, true);
   final _developerMode = BoolSetting(SettingsKeys.developerMode, false);
-  final _autoFocusBrowseSearch =
-      BoolSetting(SettingsKeys.autoFocusBrowseSearch, false);
-  final _autoSuggestLibrary = BoolSetting(SettingsKeys.autoSuggestLibrary, false);
+  final _autoFocusBrowseSearch = BoolSetting(
+    SettingsKeys.autoFocusBrowseSearch,
+    false,
+  );
+  final _autoSuggestLibrary = BoolSetting(
+    SettingsKeys.autoSuggestLibrary,
+    false,
+  );
   final _showTooltips = BoolSetting(SettingsKeys.showTooltips, true);
   final _showQuickProgress = BoolSetting(SettingsKeys.showQuickProgress, true);
-  final _showLibraryProgress =
-      BoolSetting(SettingsKeys.showLibraryProgress, true);
-  final _showRemainingProgress =
-      BoolSetting(SettingsKeys.showRemainingProgress, false);
-  final _showLibraryTabCounts =
-      BoolSetting(SettingsKeys.showLibraryTabCounts, true);
+  final _showLibraryProgress = BoolSetting(
+    SettingsKeys.showLibraryProgress,
+    true,
+  );
+  final _showRemainingProgress = BoolSetting(
+    SettingsKeys.showRemainingProgress,
+    false,
+  );
+  final _showLibraryTabCounts = BoolSetting(
+    SettingsKeys.showLibraryTabCounts,
+    true,
+  );
 
   /// Whether https://mangabaka.org links should open inside the app
   /// rather than in a browser. Defaults to true on Android, false elsewhere.
-  final _openLinksInApp =
-      BoolSetting(SettingsKeys.openLinksInApp, Platform.isAndroid);
+  final _openLinksInApp = BoolSetting(
+    SettingsKeys.openLinksInApp,
+    Platform.isAndroid,
+  );
 
   /// 0 means "auto": fit as many columns as the available width allows.
   final _gridColumnCount = IntSetting(SettingsKeys.gridColumnCount, 0);
-  final _libraryGridColumnCount =
-      IntSetting(SettingsKeys.libraryGridColumnCount, 0);
-  final _browseGridColumnCount =
-      IntSetting(SettingsKeys.browseGridColumnCount, 0);
-  final _stacksGridColumnCount =
-      IntSetting(SettingsKeys.stacksGridColumnCount, 0);
-  final _collectionsListColumns =
-      IntSetting(SettingsKeys.collectionsGridColumns, 0);
+  final _libraryGridColumnCount = IntSetting(
+    SettingsKeys.libraryGridColumnCount,
+    0,
+  );
+  final _browseGridColumnCount = IntSetting(
+    SettingsKeys.browseGridColumnCount,
+    0,
+  );
+  final _stacksGridColumnCount = IntSetting(
+    SettingsKeys.stacksGridColumnCount,
+    0,
+  );
+  final _collectionsListColumns = IntSetting(
+    SettingsKeys.collectionsGridColumns,
+    0,
+  );
   final _newsListColumns = IntSetting(SettingsKeys.newsListColumns, 1);
-  final _compactGridTitleRows =
-      IntSetting(SettingsKeys.compactGridTitleRows, 1, min: 1, max: 99);
+  final _compactGridTitleRows = IntSetting(
+    SettingsKeys.compactGridTitleRows,
+    1,
+    min: 1,
+    max: 99,
+  );
 
-  final _addLibraryDefaultTab =
-      StringSetting(SettingsKeys.addLibraryDefaultTab, 'plan_to_read');
+  final _addLibraryDefaultTab = StringSetting(
+    SettingsKeys.addLibraryDefaultTab,
+    'plan_to_read',
+  );
 
   /// Series the user marked "not interested" in the Discovery Queue; filtered
   /// out of future recommendation fetches.
@@ -158,8 +195,10 @@ class SettingsManager extends ChangeNotifier {
     SettingsKeys.contentPreferences,
     const ['safe', 'suggestive'],
   );
-  final _blurredContentRatings =
-      StringListSetting(SettingsKeys.blurredContentRatings, const []);
+  final _blurredContentRatings = StringListSetting(
+    SettingsKeys.blurredContentRatings,
+    const [],
+  );
 
   /// Every declared setting, in no particular order — the list `init` and
   /// `resetForTesting` walk. Adding a setting above and here is all it takes.
@@ -241,8 +280,9 @@ class SettingsManager extends ChangeNotifier {
     try {
       final prefs = await _getPrefs();
       await setting.persist(prefs);
-    } catch (_) {
-      // In-memory update succeeded; ignore disk persistence errors in background
+    } on Exception catch (e) {
+      // In-memory update succeeded; the value is only lost on restart.
+      LoggingService.logger.warning('Failed to persist setting: $e');
     }
   }
 
@@ -384,8 +424,7 @@ class SettingsManager extends ChangeNotifier {
 
   // ─── Recommendations ─────────────────────────────────────────────────────
 
-  List<String> get dismissedRecommendations =>
-      _dismissedRecommendations.value;
+  List<String> get dismissedRecommendations => _dismissedRecommendations.value;
 
   Future<void> dismissRecommendation(String seriesId) {
     final current = _dismissedRecommendations.value;
@@ -420,8 +459,7 @@ class SettingsManager extends ChangeNotifier {
       _apply(_pushNotifications, value);
 
   bool get openLinksInApp => _openLinksInApp.value;
-  Future<void> setOpenLinksInApp(bool value) =>
-      _apply(_openLinksInApp, value);
+  Future<void> setOpenLinksInApp(bool value) => _apply(_openLinksInApp, value);
 
   /// Reveals the Developer Tools category in Settings. Off by default; toggled
   /// by tapping the app logo on the Settings screen ten times quickly.

@@ -42,7 +42,9 @@ class SeriesLocalSort {
           : ratingA.compareTo(ratingB);
     }
     if (sortBy.startsWith('name_')) {
-      return descending ? b.title.compareTo(a.title) : a.title.compareTo(b.title);
+      return descending
+          ? b.title.compareTo(a.title)
+          : a.title.compareTo(b.title);
     }
     // chapters_
     final chaptersA = int.tryParse(a.totalChapters) ?? 0;

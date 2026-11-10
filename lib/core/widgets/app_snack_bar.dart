@@ -71,7 +71,9 @@ class AppSnackBar {
                 bottom: 28,
               )
             : const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        content: isDesktop ? Align(alignment: Alignment.centerRight, child: card) : card,
+        content: isDesktop
+            ? Align(alignment: Alignment.centerRight, child: card)
+            : card,
       ),
     );
   }

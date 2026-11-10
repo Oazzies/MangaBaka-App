@@ -39,7 +39,7 @@ class BarcodeSearch {
   final BookLookupService? _injectedLookup;
 
   BarcodeSearch({BookLookupService? lookupService})
-      : _injectedLookup = lookupService;
+    : _injectedLookup = lookupService;
 
   /// Resolved per call rather than in the constructor: scanning is rare, and
   /// constructing a BrowseController must not require the lookup service to be
@@ -60,10 +60,10 @@ class BarcodeSearch {
     final String? title;
     try {
       title = await _lookup.lookupTitleByIsbn(isbn);
-    } catch (e) {
+    } catch (e, st) {
       // Only the lookup is wrapped: a failure inside `search` is a search bug
       // and should surface as one rather than as a lookup failure.
-      _logger.severe('Error handling barcode scan for ISBN $isbn: $e');
+      _logger.severe('Error handling barcode scan for ISBN $isbn', e, st);
       return BarcodeSearchFailure.lookupFailed;
     }
 

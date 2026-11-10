@@ -57,8 +57,10 @@ class WindowsAuthHandler {
       key.close();
 
       _logger.info('Protocol registration successful');
-    } catch (e) {
-      _logger.severe('Failed to register protocol $scheme: $e');
+    } on Exception catch (e, st) {
+      // Registry writes (WindowsException) only; sign-in then falls back to
+      // whatever handler is registered already.
+      _logger.severe('Failed to register protocol $scheme', e, st);
     }
   }
 
@@ -155,7 +157,10 @@ class WindowsAuthHandler {
       // than returning false) still cancels the subscription and clears the
       // pending state.
       if (!await launchUrl(authUri, mode: LaunchMode.externalApplication)) {
-        throw Exception('Could not launch the browser for sign-in');
+        throw AuthException(
+          message: 'Could not launch the browser for sign-in',
+          code: 'BROWSER_LAUNCH_FAILED',
+        );
       }
       onBrowserOpened?.call();
 
@@ -168,17 +173,19 @@ class WindowsAuthHandler {
       _logger.info('OAuth code received, exchanging for tokens...');
 
       // 6. Exchange code for tokens
-      final response = await http.post(
-        Uri.parse(tokenEndpoint),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {
-          'grant_type': 'authorization_code',
-          'client_id': clientId,
-          'redirect_uri': redirectUri,
-          'code': code,
-          'code_verifier': codeVerifier,
-        },
-      ).timeout(_tokenTimeout);
+      final response = await http
+          .post(
+            Uri.parse(tokenEndpoint),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: {
+              'grant_type': 'authorization_code',
+              'client_id': clientId,
+              'redirect_uri': redirectUri,
+              'code': code,
+              'code_verifier': codeVerifier,
+            },
+          )
+          .timeout(_tokenTimeout);
 
       if (response.statusCode == 200) {
         final data = _tokenBody(response.body);
@@ -198,13 +205,19 @@ class WindowsAuthHandler {
         _logger.severe(
           'Token exchange failed: ${response.statusCode} ${_oauthError(response.body)}',
         );
-        throw Exception('Token exchange failed: ${response.statusCode}');
+        // Typed with the status so the invalid_grant check can read it.
+        throw ApiException(
+          message: 'Token exchange failed',
+          statusCode: response.statusCode,
+          code: 'TOKEN_EXCHANGE_FAILED',
+        );
       }
     } on TimeoutException {
       await sub.cancel();
       _logger.warning('OAuth login timed out');
-      throw Exception('Login timed out');
-    } catch (e) {
+      throw AuthException(message: 'Login timed out', code: 'LOGIN_TIMEOUT');
+    } catch (_) {
+      // Cancel before propagating, or the link listener outlives the attempt.
       await sub.cancel();
       rethrow;
     } finally {
@@ -226,16 +239,18 @@ class WindowsAuthHandler {
   }) async {
     _logger.info('Refreshing token on Windows...');
 
-    final response = await http.post(
-      Uri.parse(tokenEndpoint),
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: {
-        'grant_type': 'refresh_token',
-        'client_id': clientId,
-        'refresh_token': refreshToken,
-        'scope': scopes.join(' '),
-      },
-    ).timeout(_tokenTimeout);
+    final response = await http
+        .post(
+          Uri.parse(tokenEndpoint),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: {
+            'grant_type': 'refresh_token',
+            'client_id': clientId,
+            'refresh_token': refreshToken,
+            'scope': scopes.join(' '),
+          },
+        )
+        .timeout(_tokenTimeout);
 
     if (response.statusCode == 200) {
       final data = _tokenBody(response.body);
@@ -307,7 +322,7 @@ class WindowsAuthHandler {
     try {
       final data = jsonDecode(body);
       if (data is Map && data['error'] is String) return data['error'];
-    } catch (_) {
+    } on FormatException {
       // Not JSON; fall through.
     }
     return '(no OAuth error code)';

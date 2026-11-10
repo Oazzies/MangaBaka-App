@@ -321,9 +321,21 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
                     DesktopSegmented<_PublisherTab>(
                       value: _tab,
                       segments: [
-                        (_PublisherTab.info, l10n.translate('publisher_tab_info'), null),
-                        (_PublisherTab.collections, l10n.translate('tab_collections'), null),
-                        (_PublisherTab.editions, l10n.translate('editions'), null),
+                        (
+                          _PublisherTab.info,
+                          l10n.translate('publisher_tab_info'),
+                          null,
+                        ),
+                        (
+                          _PublisherTab.collections,
+                          l10n.translate('tab_collections'),
+                          null,
+                        ),
+                        (
+                          _PublisherTab.editions,
+                          l10n.translate('editions'),
+                          null,
+                        ),
                       ],
                       onChanged: _selectTab,
                     ),
@@ -388,19 +400,20 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
       _similarSection(l10n),
       if (publisher.parent != null || publisher.imprints.isNotEmpty)
         _Family(publisher: publisher, l10n: l10n),
-      if (publisher.aliases.isNotEmpty) _Aliases(publisher: publisher, l10n: l10n),
+      if (publisher.aliases.isNotEmpty)
+        _Aliases(publisher: publisher, l10n: l10n),
       if (publisher.links.isNotEmpty) _Links(publisher: publisher, l10n: l10n),
     ];
 
     Widget stacked(List<Widget> items) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(height: 16),
-              items[i],
-            ],
-          ],
-        );
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          if (i > 0) const SizedBox(height: 16),
+          items[i],
+        ],
+      ],
+    );
 
     final main = <Widget>[
       identity,
@@ -469,16 +482,16 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
             onViewAll: sort == null
                 ? null
                 : () => Navigator.of(context).push(
-                      AppTransitions.slideRight(
-                        BrowseResultsScreen(
-                          sortType: title,
-                          sortBy: sort,
-                          publisher: publisher.name,
-                          publisherId: publisher.id,
-                          refineLabel: title,
-                        ),
+                    AppTransitions.slideRight(
+                      BrowseResultsScreen(
+                        sortType: title,
+                        sortBy: sort,
+                        publisher: publisher.name,
+                        publisherId: publisher.id,
+                        refineLabel: title,
                       ),
                     ),
+                  ),
             itemBuilder: (context, i) => DesktopCoverCard(
               series: series[i],
               heroTag: 'publisher_${publisher.id}_${shelf.name}_$i',
@@ -502,14 +515,16 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
     // is on screen. The rails inset themselves (`bare`); everything else is
     // inset here.
     final items = <({Widget child, bool bare})>[];
-    void add(Widget w, {bool bare = false}) => items.add((child: w, bare: bare));
+    void add(Widget w, {bool bare = false}) =>
+        items.add((child: w, bare: bare));
 
     add(_Header(publisher: publisher, l10n: l10n));
     add(_tabBar(l10n));
 
     switch (_tab) {
       case _PublisherTab.info:
-        if (publisher.description != null && publisher.description!.isNotEmpty) {
+        if (publisher.description != null &&
+            publisher.description!.isNotEmpty) {
           add(
             _Panel(
               label: l10n.translate('publisher_about'),
@@ -672,13 +687,27 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
     ];
   }
 
-  List<(PublisherShelf, String, String?)> _shelfDefs(LocalizationService l10n) => [
-        (PublisherShelf.newest, l10n.translate('publisher_shelf_newest'), 'published_start_date_desc'),
-        (PublisherShelf.popular, l10n.translate('publisher_shelf_popular'), 'popularity_asc'),
-        (PublisherShelf.highestRated, l10n.translate('publisher_shelf_highest_rated'), 'score_desc'),
-        (PublisherShelf.trending, l10n.translate('trending'), 'trending_7d'),
-        (PublisherShelf.hiddenGems, l10n.translate('hidden_gems'), null),
-      ];
+  List<(PublisherShelf, String, String?)> _shelfDefs(
+    LocalizationService l10n,
+  ) => [
+    (
+      PublisherShelf.newest,
+      l10n.translate('publisher_shelf_newest'),
+      'published_start_date_desc',
+    ),
+    (
+      PublisherShelf.popular,
+      l10n.translate('publisher_shelf_popular'),
+      'popularity_asc',
+    ),
+    (
+      PublisherShelf.highestRated,
+      l10n.translate('publisher_shelf_highest_rated'),
+      'score_desc',
+    ),
+    (PublisherShelf.trending, l10n.translate('trending'), 'trending_7d'),
+    (PublisherShelf.hiddenGems, l10n.translate('hidden_gems'), null),
+  ];
 
   /// Stats and similar publishers, shown together once both have settled.
   Widget _factsBlock(LocalizationService l10n, Publisher publisher) {
@@ -730,7 +759,12 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
   }
 
   /// One series rail. Drops out if it failed or is empty.
-  Widget _shelf(Publisher publisher, PublisherShelf shelf, String title, String? sort) {
+  Widget _shelf(
+    Publisher publisher,
+    PublisherShelf shelf,
+    String title,
+    String? sort,
+  ) {
     return FutureBuilder<List<Series>>(
       future: _shelves[shelf],
       builder: (context, snapshot) {
@@ -743,16 +777,16 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
           onViewAll: sort == null
               ? null
               : () => Navigator.of(context).push(
-                    AppTransitions.slideRight(
-                      BrowseResultsScreen(
-                        sortType: title,
-                        sortBy: sort,
-                        publisher: publisher.name,
-                        publisherId: publisher.id,
-                        refineLabel: title,
-                      ),
+                  AppTransitions.slideRight(
+                    BrowseResultsScreen(
+                      sortType: title,
+                      sortBy: sort,
+                      publisher: publisher.name,
+                      publisherId: publisher.id,
+                      refineLabel: title,
                     ),
                   ),
+                ),
         );
       },
     );
@@ -772,11 +806,7 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
         final stats = snapshot.data;
         if (stats == null) return const _SectionLoading();
         if (stats.seriesCount == 0) return const SizedBox.shrink();
-        return _StatsView(
-          stats: stats,
-          publisher: publisher,
-          l10n: l10n,
-        );
+        return _StatsView(stats: stats, publisher: publisher, l10n: l10n);
       },
     );
   }
@@ -889,12 +919,15 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final facts = <String>[
-      if (publisher.countryOfOrigin != null && publisher.countryOfOrigin!.isNotEmpty)
+      if (publisher.countryOfOrigin != null &&
+          publisher.countryOfOrigin!.isNotEmpty)
         publisher.countryOfOrigin!,
       if (publisher.languages.isNotEmpty)
         publisher.languages.map((l) => l.toUpperCase()).join(' · '),
       if (publisher.founded != null)
-        l10n.translate('publisher_established').replaceAll('{year}', '${publisher.founded}'),
+        l10n
+            .translate('publisher_established')
+            .replaceAll('{year}', '${publisher.founded}'),
       if (publisher.seriesCount != null)
         l10n
             .translate('publisher_series_count')
@@ -997,7 +1030,11 @@ class _NoteLine extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.info_outline_rounded, size: 16, color: context.colors.textMuted),
+        Icon(
+          Icons.info_outline_rounded,
+          size: 16,
+          color: context.colors.textMuted,
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -1025,16 +1062,12 @@ class _Family extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget pill(Publisher p) => MbPill(
-          label: p.name,
-          icon: Icons.business_rounded,
-          onTap: p.id.isEmpty
-              ? null
-              : () => PublisherDetailScreen.open(
-                    context,
-                    id: p.id,
-                    publisher: p,
-                  ),
-        );
+      label: p.name,
+      icon: Icons.business_rounded,
+      onTap: p.id.isEmpty
+          ? null
+          : () => PublisherDetailScreen.open(context, id: p.id, publisher: p),
+    );
 
     return _Panel(
       label: publisher.parent != null && publisher.imprints.isEmpty
@@ -1073,12 +1106,12 @@ class _SubLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        text.toUpperCase(),
-        style: AppTypography.monoLabel(
-          color: context.colors.textMuted,
-          fontSize: 10,
-        ),
-      );
+    text.toUpperCase(),
+    style: AppTypography.monoLabel(
+      color: context.colors.textMuted,
+      fontSize: 10,
+    ),
+  );
 }
 
 class _Aliases extends StatelessWidget {
@@ -1132,10 +1165,10 @@ class _Aliases extends StatelessWidget {
   }
 
   static int _rank(PublisherAlias a) => switch (a.type) {
-        'native' => 0,
-        'official' => 1,
-        _ => 2,
-      };
+    'native' => 0,
+    'official' => 1,
+    _ => 2,
+  };
 }
 
 class _Links extends StatelessWidget {
@@ -1155,9 +1188,12 @@ class _Links extends StatelessWidget {
           for (final link in publisher.links)
             if (Uri.tryParse(link.link) case final uri? when uri.hasScheme)
               MbPill(
-                label: link.type.isEmpty ? uri.host : '${_cap(link.type)} · ${uri.host}',
+                label: link.type.isEmpty
+                    ? uri.host
+                    : '${_cap(link.type)} · ${uri.host}',
                 icon: Icons.link_rounded,
-                onTap: () => launchUrl(uri, mode: LaunchMode.externalApplication),
+                onTap: () =>
+                    launchUrl(uri, mode: LaunchMode.externalApplication),
               ),
         ],
       ),
@@ -1178,7 +1214,12 @@ class _StatsView extends StatelessWidget {
     required this.l10n,
   });
 
-  void _browse(BuildContext context, {String? genre, String? tag, required String refine}) {
+  void _browse(
+    BuildContext context, {
+    String? genre,
+    String? tag,
+    required String refine,
+  }) {
     Navigator.of(context).push(
       AppTransitions.slideRight(
         BrowseResultsScreen(
@@ -1210,7 +1251,10 @@ class _StatsView extends StatelessWidget {
     final tiles = <(String, String)>[
       (l10n.translate('publisher_series'), formatCount(stats.seriesCount)),
       if (stats.averageScore != null)
-        (l10n.translate('publisher_stat_avg_score'), (stats.averageScore! / 10).toStringAsFixed(1)),
+        (
+          l10n.translate('publisher_stat_avg_score'),
+          (stats.averageScore! / 10).toStringAsFixed(1),
+        ),
       if (stats.firstYear != null && stats.lastYear != null)
         (
           l10n.translate('publisher_stat_years'),
@@ -1226,38 +1270,33 @@ class _StatsView extends StatelessWidget {
       List<StatBucket> b, {
       String Function(String)? label,
       Color Function(String)? color,
-    }) =>
-        [
-          for (final e in b)
-            ChartEntry(
-              (label ?? _cap)(e.key),
-              e.count,
-              color: color?.call(e.key),
-            ),
-        ];
+    }) => [
+      for (final e in b)
+        ChartEntry((label ?? _cap)(e.key), e.count, color: color?.call(e.key)),
+    ];
 
     Color statusColor(String k) => switch (k) {
-          'completed' => colors.success,
-          'releasing' => colors.info,
-          'hiatus' => colors.warning,
-          'cancelled' => colors.error,
-          _ => colors.textMuted,
-        };
+      'completed' => colors.success,
+      'releasing' => colors.info,
+      'hiatus' => colors.warning,
+      'cancelled' => colors.error,
+      _ => colors.textMuted,
+    };
     Color ratingColor(String k) => switch (k) {
-          'safe' => colors.success,
-          'suggestive' => colors.warning,
-          'erotica' => colors.error.withValues(alpha: 0.75),
-          'pornographic' => colors.error,
-          _ => colors.textMuted,
-        };
+      'safe' => colors.success,
+      'suggestive' => colors.warning,
+      'erotica' => colors.error.withValues(alpha: 0.75),
+      'pornographic' => colors.error,
+      _ => colors.textMuted,
+    };
 
     Widget section(String label, Widget child) => Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [_SubLabel(label), const SizedBox(height: 8), child],
-          ),
-        );
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [_SubLabel(label), const SizedBox(height: 8), child],
+      ),
+    );
 
     Widget bars(List<ChartEntry> e) =>
         _BarList(entries: [for (final x in e) (x.label, x.count)]);
@@ -1276,7 +1315,10 @@ class _StatsView extends StatelessWidget {
           Wrap(
             spacing: 24,
             runSpacing: 12,
-            children: [for (final (label, value) in tiles) _StatTile(label: label, value: value)],
+            children: [
+              for (final (label, value) in tiles)
+                _StatTile(label: label, value: value),
+            ],
           ),
           // Each kind of data gets the chart that reads best: time-ordered
           // data as columns, unordered categories as bars, parts of a whole as
@@ -1303,11 +1345,29 @@ class _StatsView extends StatelessWidget {
               charts ? StackedBarChart(entries: ratings) : bars(ratings),
             ),
           if (stats.knownFor.isNotEmpty)
-            _tagBlock(context, l10n.translate('publisher_known_for'), stats.knownFor, byGenre: false, charts: charts),
+            _tagBlock(
+              context,
+              l10n.translate('publisher_known_for'),
+              stats.knownFor,
+              byGenre: false,
+              charts: charts,
+            ),
           if (stats.genres.isNotEmpty)
-            _tagBlock(context, l10n.translate('publisher_genres'), stats.genres, byGenre: true, charts: charts),
+            _tagBlock(
+              context,
+              l10n.translate('publisher_genres'),
+              stats.genres,
+              byGenre: true,
+              charts: charts,
+            ),
           if (stats.audience.isNotEmpty)
-            _tagBlock(context, l10n.translate('publisher_audience'), stats.audience, byGenre: false, charts: charts),
+            _tagBlock(
+              context,
+              l10n.translate('publisher_audience'),
+              stats.audience,
+              byGenre: false,
+              charts: charts,
+            ),
           if (stats.sharesWith.isNotEmpty)
             section(
               l10n.translate('publisher_shares_with'),
@@ -1323,10 +1383,10 @@ class _StatsView extends StatelessWidget {
                       onTap: p.id.isEmpty
                           ? null
                           : () => PublisherDetailScreen.open(
-                                context,
-                                id: p.id,
-                                name: p.name,
-                              ),
+                              context,
+                              id: p.id,
+                              name: p.name,
+                            ),
                     ),
                 ],
               ),
@@ -1449,7 +1509,10 @@ class _StatTile extends StatelessWidget {
       children: [
         Text(
           value,
-          style: AppTypography.display(color: context.colors.accent, fontSize: 22),
+          style: AppTypography.display(
+            color: context.colors.accent,
+            fontSize: 22,
+          ),
         ),
         const SizedBox(height: 2),
         _SubLabel(label),
@@ -1524,9 +1587,9 @@ class _SectionLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(child: MbSpinner(size: 20, strokeWidth: 2)),
-      );
+    padding: EdgeInsets.symmetric(vertical: 24),
+    child: Center(child: MbSpinner(size: 20, strokeWidth: 2)),
+  );
 }
 
 class _SectionError extends StatelessWidget {
@@ -1609,12 +1672,15 @@ class _DesktopIdentity extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final facts = <String>[
-      if (publisher.countryOfOrigin != null && publisher.countryOfOrigin!.isNotEmpty)
+      if (publisher.countryOfOrigin != null &&
+          publisher.countryOfOrigin!.isNotEmpty)
         publisher.countryOfOrigin!,
       if (publisher.languages.isNotEmpty)
         publisher.languages.map((l) => l.toUpperCase()).join(' · '),
       if (publisher.founded != null)
-        l10n.translate('publisher_established').replaceAll('{year}', '${publisher.founded}'),
+        l10n
+            .translate('publisher_established')
+            .replaceAll('{year}', '${publisher.founded}'),
       if (publisher.seriesCount != null)
         l10n
             .translate('publisher_series_count')

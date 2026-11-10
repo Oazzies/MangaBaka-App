@@ -167,8 +167,11 @@ class LibraryScreenState extends State<LibraryScreen>
   }
 
   void _navigateToSeriesDetail(api.Series series) {
-    Navigator.of(context)
-        .push(AppTransitions.slideUp(SeriesDetailScreen(series: series, heroTagPrefix: 'library')));
+    Navigator.of(context).push(
+      AppTransitions.slideUp(
+        SeriesDetailScreen(series: series, heroTagPrefix: 'library'),
+      ),
+    );
   }
 
   // ─── Build ───────────────────────────────────────────────────────────────

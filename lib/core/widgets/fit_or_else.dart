@@ -116,8 +116,6 @@ class RenderFitOrElse extends RenderBox
     if (primary.width <= constraints.maxWidth + 0.5) {
       return constraints.constrain(primary);
     }
-    return constraints.constrain(
-      lastChild!.getDryLayout(constraints.loosen()),
-    );
+    return constraints.constrain(lastChild!.getDryLayout(constraints.loosen()));
   }
 }

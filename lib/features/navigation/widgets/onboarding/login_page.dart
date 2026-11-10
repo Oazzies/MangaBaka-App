@@ -26,10 +26,7 @@ class LoginPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.colors.surfaceRaised,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: context.colors.border,
-          width: 1,
-        ),
+        border: Border.all(color: context.colors.border, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

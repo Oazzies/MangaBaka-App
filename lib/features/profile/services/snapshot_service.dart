@@ -130,7 +130,7 @@ class SnapshotService {
     } on AppException {
       rethrow;
     } catch (e, st) {
-      _logger.severe('Failed to fetch library snapshot: $e\n$st');
+      _logger.severe('Failed to fetch library snapshot', e, st);
       reportApiOutcome(ok: false, context: 'library-snapshot', error: e);
       throw NetworkException(
         message: 'Failed to fetch library snapshot',

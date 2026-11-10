@@ -53,14 +53,14 @@ class ThemeActions {
       builder: (ctx) => AlertDialog(
         title: Text(_l10n.translate('theme_delete').toUpperCase()),
         content: Text(
-          _l10n.translate('theme_delete_confirm').replaceAll('{name}', spec.name),
+          _l10n
+              .translate('theme_delete_confirm')
+              .replaceAll('{name}', spec.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            style: TextButton.styleFrom(
-              foregroundColor: ctx.colors.textMuted,
-            ),
+            style: TextButton.styleFrom(foregroundColor: ctx.colors.textMuted),
             child: Text(_l10n.translate('cancel')),
           ),
           TextButton(
@@ -102,9 +102,7 @@ class ThemeActions {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            style: TextButton.styleFrom(
-              foregroundColor: ctx.colors.textMuted,
-            ),
+            style: TextButton.styleFrom(foregroundColor: ctx.colors.textMuted),
             child: Text(_l10n.translate('cancel')),
           ),
           TextButton(
@@ -141,18 +139,21 @@ class ThemeActions {
     final overlay =
         Overlay.of(context).context.findRenderObject()! as RenderBox;
     final c = context.colors;
-    PopupMenuItem<String> item(String value, IconData icon, String key,
-            {Color? color}) =>
-        PopupMenuItem(
-          value: value,
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: color ?? c.textMuted),
-              const SizedBox(width: 12),
-              Text(_l10n.translate(key), style: TextStyle(color: color)),
-            ],
-          ),
-        );
+    PopupMenuItem<String> item(
+      String value,
+      IconData icon,
+      String key, {
+      Color? color,
+    }) => PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color ?? c.textMuted),
+          const SizedBox(width: 12),
+          Text(_l10n.translate(key), style: TextStyle(color: color)),
+        ],
+      ),
+    );
 
     final choice = await showMenu<String>(
       context: context,
@@ -164,8 +165,12 @@ class ThemeActions {
         item('edit', Icons.edit_rounded, 'theme_edit'),
         item('duplicate', Icons.copy_all_rounded, 'theme_duplicate'),
         item('share', Icons.ios_share_rounded, 'theme_share'),
-        item('delete', Icons.delete_outline_rounded, 'theme_delete',
-            color: c.error),
+        item(
+          'delete',
+          Icons.delete_outline_rounded,
+          'theme_delete',
+          color: c.error,
+        ),
       ],
     );
     if (!context.mounted) return;

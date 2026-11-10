@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -55,7 +56,9 @@ class _MockMixService extends Fake implements MixService {
   }
 
   @override
-  Future<List<AutocompleteSeriesResult>> fetchSeedSuggestions(List<int> seriesIds) async {
+  Future<List<AutocompleteSeriesResult>> fetchSeedSuggestions(
+    List<int> seriesIds,
+  ) async {
     fetchSeedCalls++;
     return seedSuggestions;
   }
@@ -112,9 +115,9 @@ void main() {
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/path_provider'),
-      (call) async => '.',
-    );
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (call) async => '.',
+        );
     SharedPreferences.setMockInitialValues({});
     SettingsManager.resetForTesting();
     await SettingsManager().init();
@@ -153,7 +156,11 @@ void main() {
     });
 
     test('removeSeed clears results when last seed removed', () async {
-      mockMix.mixResult = MixResult(series: [_series('99')], dna: const [], seedCount: 1);
+      mockMix.mixResult = MixResult(
+        series: [_series('99')],
+        dna: const [],
+        seedCount: 1,
+      );
       controller.addSeed(_series('1'));
       await Future<void>.delayed(Duration.zero);
       expect(controller.results, isNotEmpty);
@@ -183,24 +190,28 @@ void main() {
   });
 
   group('MixController fetch behavior', () {
-    test('passes strict, blendUserId, excludeUserLibrary when enabled', () async {
-      controller.setStrictMode(true);
-      controller.setBlendUser(true);
-      controller.setExcludeLibrary(true);
-      controller.addSeed(_series('5'));
-      await Future<void>.delayed(Duration.zero);
+    test(
+      'passes strict, blendUserId, excludeUserLibrary when enabled',
+      () async {
+        controller.setStrictMode(true);
+        controller.setBlendUser(true);
+        controller.setExcludeLibrary(true);
+        controller.addSeed(_series('5'));
+        await Future<void>.delayed(Duration.zero);
 
-      final args = mockMix.lastFetchMixArgs!;
-      expect(args['strict'], isTrue);
-      expect(args['blendUserId'], 'user-42');
-      expect(args['excludeUserLibrary'], 'user-42');
-    });
+        final args = mockMix.lastFetchMixArgs!;
+        expect(args['strict'], isTrue);
+        expect(args['blendUserId'], 'user-42');
+        expect(args['excludeUserLibrary'], 'user-42');
+      },
+    );
 
     test('records error string on failure and clears results', () async {
       mockMix.mixError = Exception('mix down');
       controller.addSeed(_series('1'));
       await Future<void>.delayed(Duration.zero);
-      expect(controller.error, contains('mix down'));
+      // User-facing wording, never the raw exception text.
+      expect(controller.error, ErrorMessages.describe(Exception('mix down')));
       expect(controller.results, isEmpty);
       expect(controller.isLoading, isFalse);
     });
@@ -236,30 +247,40 @@ void main() {
       expect(controller.isLoading, isFalse);
     });
 
-    test('slow mix response is discarded when a newer fetch finished', () async {
-      final slowResponse = Completer<MixResult>();
-      mockMix.pendingMixResponse = slowResponse.future;
+    test(
+      'slow mix response is discarded when a newer fetch finished',
+      () async {
+        final slowResponse = Completer<MixResult>();
+        mockMix.pendingMixResponse = slowResponse.future;
 
-      // First fetch hangs.
-      controller.addSeed(_series('1'));
-      await Future<void>.delayed(Duration.zero);
+        // First fetch hangs.
+        controller.addSeed(_series('1'));
+        await Future<void>.delayed(Duration.zero);
 
-      // Second fetch resolves immediately with the fresh result.
-      mockMix.mixResult =
-          MixResult(series: [_series('2', title: 'Fresh')], dna: const [], seedCount: 2);
-      controller.addSeed(_series('2'));
-      await Future<void>.delayed(Duration.zero);
-      expect(controller.results.map((s) => s.title), ['Fresh']);
+        // Second fetch resolves immediately with the fresh result.
+        mockMix.mixResult = MixResult(
+          series: [_series('2', title: 'Fresh')],
+          dna: const [],
+          seedCount: 2,
+        );
+        controller.addSeed(_series('2'));
+        await Future<void>.delayed(Duration.zero);
+        expect(controller.results.map((s) => s.title), ['Fresh']);
 
-      // The old response arrives late — it must not overwrite the fresh one.
-      slowResponse.complete(
-        MixResult(series: [_series('99', title: 'Stale')], dna: const [], seedCount: 1),
-      );
-      await Future<void>.delayed(Duration.zero);
+        // The old response arrives late — it must not overwrite the fresh one.
+        slowResponse.complete(
+          MixResult(
+            series: [_series('99', title: 'Stale')],
+            dna: const [],
+            seedCount: 1,
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
 
-      expect(controller.results.map((s) => s.title), ['Fresh']);
-      expect(controller.isLoading, isFalse);
-    });
+        expect(controller.results.map((s) => s.title), ['Fresh']);
+        expect(controller.isLoading, isFalse);
+      },
+    );
   });
 
   group('MixController seed suggestions', () {

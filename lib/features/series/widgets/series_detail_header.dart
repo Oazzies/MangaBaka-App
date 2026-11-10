@@ -37,21 +37,9 @@ class SeriesDetailHeader extends StatelessWidget {
       settings.defaultTitleLanguage,
     );
 
-    // Determine which other titles to show
-    final otherTitles = <String>[];
-    if (series.title.isNotEmpty && series.title != preferredTitle) {
-      otherTitles.add(series.title);
-    }
-    if (series.nativeTitle.isNotEmpty &&
-        series.nativeTitle != preferredTitle &&
-        !otherTitles.contains(series.nativeTitle)) {
-      otherTitles.add(series.nativeTitle);
-    }
-    if (series.romanizedTitle.isNotEmpty &&
-        series.romanizedTitle != preferredTitle &&
-        !otherTitles.contains(series.romanizedTitle)) {
-      otherTitles.add(series.romanizedTitle);
-    }
+    final otherTitles = series.titles.alternatives(
+      settings.defaultTitleLanguage,
+    );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

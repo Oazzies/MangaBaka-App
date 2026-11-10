@@ -72,13 +72,17 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
           // separate (beta) endpoint and must never hold up, or take down,
           // the tag-based list that has always been here.
           if (readersAlsoLike == null) {
-            seriesService.fetchSeriesReadersAlsoLike(id).then((data) {
-              if (mounted) setState(() => readersAlsoLike = data);
-            }).catchError((Object e) {
-              seriesService.logger
-                  .warning('Error fetching readers-also-like: $e');
-              if (mounted) setState(() => readersAlsoLike = const []);
-            });
+            seriesService
+                .fetchSeriesReadersAlsoLike(id)
+                .then((data) {
+                  if (mounted) setState(() => readersAlsoLike = data);
+                })
+                .catchError((Object e) {
+                  seriesService.logger.warning(
+                    'Error fetching readers-also-like: $e',
+                  );
+                  if (mounted) setState(() => readersAlsoLike = const []);
+                });
           }
           if (similar == null) {
             final data = await seriesService.fetchSeriesSimilar(id);
@@ -101,9 +105,9 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
         .fetchSeriesLinks(series.id)
         .then<List<SeriesLink>?>((links) => links)
         .catchError((Object e) {
-      seriesService.logger.warning('Error fetching series links: $e');
-      return null;
-    });
+          seriesService.logger.warning('Error fetching series links: $e');
+          return null;
+        });
     final seriesFuture = seriesService.fetchSeries(series.id);
 
     try {

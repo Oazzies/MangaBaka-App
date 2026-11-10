@@ -252,19 +252,22 @@ class LibraryService extends LibraryServiceBase
         originalError: e,
         stackTrace: st,
       );
-    } catch (e, st) {
-      _logger.severe(
-        'Exception occurred while fetching library page $page: $e\n$st',
-      );
-      if (e is FormatException || e is TypeError) {
-        throw ParseException(
-          message: 'Failed to parse library page $page',
-          originalError: e,
-          stackTrace: st,
-        );
-      }
-      rethrow;
+    } on FormatException catch (e, st) {
+      throw _pageParseFailure(page, e, st);
+    } on TypeError catch (e, st) {
+      // A field of an unexpected type in the payload, not a bug in this
+      // client: the server shape drifted.
+      throw _pageParseFailure(page, e, st);
     }
+  }
+
+  ParseException _pageParseFailure(int page, Object e, StackTrace st) {
+    _logger.severe('Failed to parse library page $page', e, st);
+    return ParseException(
+      message: 'Failed to parse library page $page',
+      originalError: e,
+      stackTrace: st,
+    );
   }
 
   /// Largest page the feed allows; a full scan of 15,000 series is 15 calls.
@@ -367,7 +370,12 @@ class LibraryService extends LibraryServiceBase
     }
   }
 
-  /// Catalog data for [ids] from `GET /v2/series/batch`, 50 per request.
+  /// Catalog data for [ids] from `GET /v1/series/batch`, 50 per request.
+  ///
+  /// v1, not v2: only v1 carries the server's canonical `title` /
+  /// `native_title` / `romanized_title` (v2 has just the per-language list, so
+  /// the title would have to be guessed and then disagree with the detail
+  /// page), and the genres, tags, year and links the library filters on.
   Future<List<api_series.Series>> _fetchSeriesBatch(List<String> ids) async {
     final result = <api_series.Series>[];
     for (var i = 0; i < ids.length; i += 50) {
@@ -382,7 +390,7 @@ class LibraryService extends LibraryServiceBase
     return result;
   }
 
-  /// One `GET /v2/series/batch` of at most 50 ids.
+  /// One `GET /v1/series/batch` of at most 50 ids.
   ///
   /// Rate limits and server errors are retried with backoff (honouring
   /// `Retry-After`). A chunk the server refuses outright (one bad id fails the
@@ -393,7 +401,7 @@ class LibraryService extends LibraryServiceBase
     int attempt = 0,
   }) async {
     final uri = Uri.parse(
-      '${AppConstants.baseApiUrlV2}/series/batch',
+      '${AppConstants.baseApiUrl}/series/batch',
     ).replace(queryParameters: {'id': chunk});
     try {
       final response = await http
@@ -485,7 +493,10 @@ class LibraryService extends LibraryServiceBase
     final numValue = int.tryParse(dateStr);
     if (numValue != null) {
       if (dateStr.length == 10) {
-        return DateTime.fromMillisecondsSinceEpoch(numValue * 1000, isUtc: true);
+        return DateTime.fromMillisecondsSinceEpoch(
+          numValue * 1000,
+          isUtc: true,
+        );
       }
       if (dateStr.length == 13) {
         return DateTime.fromMillisecondsSinceEpoch(numValue, isUtc: true);

@@ -55,7 +55,8 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
   }
 
   void _handleTransformationChanged() {
-    final scale = _transformationControllers[_currentIndex].value.getMaxScaleOnAxis();
+    final scale = _transformationControllers[_currentIndex].value
+        .getMaxScaleOnAxis();
     if (scale > 1.0 != _isZoomed) {
       setState(() {
         _isZoomed = scale > 1.0;
@@ -101,7 +102,8 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
         : null;
 
     return PopScope(
-      canPop: !_isMacOS, // Disable system back gesture on macOS to prevent interference with cover swiping
+      canPop:
+          !_isMacOS, // Disable system back gesture on macOS to prevent interference with cover swiping
       child: Scaffold(
         backgroundColor: FixedColors.imageScrim,
         extendBodyBehindAppBar: true,
@@ -111,7 +113,10 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                 elevation: 0,
                 scrolledUnderElevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: FixedColors.onImage),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: FixedColors.onImage,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: title != null
@@ -131,7 +136,10 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                         padding: const EdgeInsets.only(right: 16),
                         child: Text(
                           '${_currentIndex + 1} / ${widget.imageUrls.length}',
-                          style: AppTypography.sans(color: FixedColors.onImage.withValues(alpha: 0.7), fontSize: 14),
+                          style: AppTypography.sans(
+                            color: FixedColors.onImage.withValues(alpha: 0.7),
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ),
@@ -156,25 +164,34 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                   physics: _isZoomed
                       ? const NeverScrollableScrollPhysics()
                       : (_isMacOS
-                          ? const ClampingScrollPhysics()
-                          : const BouncingScrollPhysics()),
+                            ? const ClampingScrollPhysics()
+                            : const BouncingScrollPhysics()),
                   itemCount: widget.imageUrls.length,
                   onPageChanged: (index) {
                     // Remove listener from old page
-                    _transformationControllers[_currentIndex].removeListener(_handleTransformationChanged);
-                    
+                    _transformationControllers[_currentIndex].removeListener(
+                      _handleTransformationChanged,
+                    );
+
                     setState(() {
                       _currentIndex = index;
                       _isZoomed = false;
                     });
-  
+
                     // Add listener to new page
-                    _transformationControllers[index].addListener(_handleTransformationChanged);
-  
+                    _transformationControllers[index].addListener(
+                      _handleTransformationChanged,
+                    );
+
                     // Reset zoom of other pages
-                    for (int i = 0; i < _transformationControllers.length; i++) {
+                    for (
+                      int i = 0;
+                      i < _transformationControllers.length;
+                      i++
+                    ) {
                       if (i != index) {
-                        _transformationControllers[i].value = Matrix4.identity();
+                        _transformationControllers[i].value =
+                            Matrix4.identity();
                       }
                     }
                   },
@@ -189,12 +206,15 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                           final position = _doubleTapDetails!.localPosition;
                           // Zoom in to 3x at the tapped position
                           controller.value = Matrix4.identity()
-                            ..translateByVector3(Vector3(-position.dx * 2, -position.dy * 2, 0.0))
+                            ..translateByVector3(
+                              Vector3(-position.dx * 2, -position.dy * 2, 0.0),
+                            )
                             ..scaleByVector3(Vector3(3.0, 3.0, 1.0));
                         }
                       },
                       child: InteractiveViewer(
-                        transformationController: _transformationControllers[index],
+                        transformationController:
+                            _transformationControllers[index],
                         minScale: 1.0,
                         maxScale: 5.0,
                         child: Center(
@@ -226,10 +246,16 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                         icon: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: FixedColors.imageScrim.withValues(alpha: 0.4),
+                            color: FixedColors.imageScrim.withValues(
+                              alpha: 0.4,
+                            ),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new, color: FixedColors.onImage, size: 24),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new,
+                            color: FixedColors.onImage,
+                            size: 24,
+                          ),
                         ),
                         onPressed: _previousPage,
                       ),
@@ -246,10 +272,16 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                         icon: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: FixedColors.imageScrim.withValues(alpha: 0.4),
+                            color: FixedColors.imageScrim.withValues(
+                              alpha: 0.4,
+                            ),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_forward_ios, color: FixedColors.onImage, size: 24),
+                          child: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: FixedColors.onImage,
+                            size: 24,
+                          ),
                         ),
                         onPressed: _nextPage,
                       ),
@@ -263,13 +295,18 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                   right: 32,
                   child: Center(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: FixedColors.imageScrim.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: FixedColors.imageScrim.withValues(alpha: 0.3),
+                            color: FixedColors.imageScrim.withValues(
+                              alpha: 0.3,
+                            ),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),

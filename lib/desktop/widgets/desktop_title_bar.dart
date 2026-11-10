@@ -8,6 +8,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/shared/widgets/window_repaint_guard.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 /// A sleek, custom Windows title overlay that integrates directly into the app
 /// header without pushing the app content down.
@@ -20,6 +21,9 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 /// - Custom-styled window control buttons (minimize, expand/restore, close)
 ///   styled to match MangaBaka's design system: solid backgrounds, no borders,
 ///   matching the 38px height of dropdown controls, with tooltip support.
+
+final _logger = LoggingService.logger;
+
 class DesktopTitleBar extends StatefulWidget implements PreferredSizeWidget {
   static const double height = 54.0;
 
@@ -146,7 +150,10 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
           _isMaximizable = isMaximizable;
         });
       }
-    } catch (_) {}
+    } on Exception catch (e) {
+      // Window chrome only; the platform window keeps its own controls.
+      _logger.fine('Window manager call failed: $e');
+    }
   }
 
   @override
@@ -186,7 +193,10 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
       } else {
         await windowManager.minimize();
       }
-    } catch (_) {}
+    } on Exception catch (e) {
+      // Window chrome only; the platform window keeps its own controls.
+      _logger.fine('Window manager call failed: $e');
+    }
   }
 
   Future<void> _handleMaximize() async {
@@ -207,7 +217,10 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
       } else {
         await windowManager.maximize();
       }
-    } catch (_) {}
+    } on Exception catch (e) {
+      // Window chrome only; the platform window keeps its own controls.
+      _logger.fine('Window manager call failed: $e');
+    }
   }
 
   Future<void> _handleClose() async {
@@ -217,7 +230,10 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
     }
     try {
       await windowManager.close();
-    } catch (_) {}
+    } on Exception catch (e) {
+      // Window chrome only; the platform window keeps its own controls.
+      _logger.fine('Window manager call failed: $e');
+    }
   }
 
   @override

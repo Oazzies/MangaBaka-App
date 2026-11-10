@@ -37,10 +37,10 @@ class PublisherLogoView extends StatelessWidget {
     // Centred at the box's own size: an error or placeholder widget is laid
     // out at the top-left of whatever it is given otherwise.
     Widget fill(Widget child) => SizedBox(
-          width: inner,
-          height: inner,
-          child: Center(child: child),
-        );
+      width: inner,
+      height: inner,
+      child: Center(child: child),
+    );
 
     return Padding(
       padding: const EdgeInsets.all(4),
@@ -60,7 +60,9 @@ class PublisherLogoView extends StatelessWidget {
     final name = publisher.name.trim();
     return Center(
       child: Text(
-        name.isEmpty ? '?' : String.fromCharCode(name.runes.first).toUpperCase(),
+        name.isEmpty
+            ? '?'
+            : String.fromCharCode(name.runes.first).toUpperCase(),
         textAlign: TextAlign.center,
         style: AppTypography.display(
           color: context.colors.textMuted,

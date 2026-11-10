@@ -59,8 +59,8 @@ class BrowseSearchGateway {
   BrowseSearchGateway({
     SeriesSearchService? seriesSearchService,
     PublisherSearchService? publisherSearchService,
-  })  : _series = seriesSearchService ?? getIt<SeriesSearchService>(),
-        _publishers = publisherSearchService ?? getIt<PublisherSearchService>();
+  }) : _series = seriesSearchService ?? getIt<SeriesSearchService>(),
+       _publishers = publisherSearchService ?? getIt<PublisherSearchService>();
 
   Future<BrowsePage<Series>> fetchSeries({
     required String query,
@@ -129,9 +129,7 @@ class BrowseSearchGateway {
     });
 
     final items = result.publishers;
-    _logger.info(
-      'Fetched ${items.length} publisher results for page $page',
-    );
+    _logger.info('Fetched ${items.length} publisher results for page $page');
 
     return BrowsePage(
       items: items,

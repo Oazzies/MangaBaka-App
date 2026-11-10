@@ -61,8 +61,8 @@ class LibraryEntry {
   /// thrown on: a throw drops the whole entry, and the full import then
   /// prunes that entry from the local library as if it had been deleted.
   static int? _asInt(Object? raw) => switch (raw) {
-        final num n => n.toInt(),
-        final String s => num.tryParse(s)?.toInt(),
-        _ => null,
-      };
+    final num n => n.toInt(),
+    final String s => num.tryParse(s)?.toInt(),
+    _ => null,
+  };
 }

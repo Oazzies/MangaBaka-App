@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/browse/services/browse_search_gateway.dar
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 /// Drives the Browse screen: the query, the filters, the active result type,
 /// and the loading lifecycle.
@@ -33,11 +34,9 @@ class BrowseController extends ChangeNotifier {
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
-  BrowseController({
-    BrowseSearchGateway? gateway,
-    BarcodeSearch? barcodeSearch,
-  })  : _gateway = gateway ?? BrowseSearchGateway(),
-        _barcode = barcodeSearch ?? BarcodeSearch() {
+  BrowseController({BrowseSearchGateway? gateway, BarcodeSearch? barcodeSearch})
+    : _gateway = gateway ?? BrowseSearchGateway(),
+      _barcode = barcodeSearch ?? BarcodeSearch() {
     scrollController.addListener(_onScroll);
   }
 
@@ -130,7 +129,8 @@ class BrowseController extends ChangeNotifier {
       return;
     }
 
-    final isNearEnd = scrollController.position.pixels >=
+    final isNearEnd =
+        scrollController.position.pixels >=
         scrollController.position.maxScrollExtent -
             AppConstants.scrollThresholdPx;
 
@@ -187,7 +187,9 @@ class BrowseController extends ChangeNotifier {
     _currentSearchQuery = text;
     if (text.isEmpty && _currentFilters.toMap().isEmpty) {
       // Clearing the box on the Publishers tab goes back to browsing them.
-      _currentType == BrowseType.publishers ? searchSeries() : resetSearchState();
+      _currentType == BrowseType.publishers
+          ? searchSeries()
+          : resetSearchState();
     }
   }
 
@@ -320,11 +322,13 @@ class BrowseController extends ChangeNotifier {
           _results.markExhausted();
       }
       _finishPage();
-    } catch (e) {
+    } catch (e, st) {
       if (generation != _requestGeneration) return;
       _logger.severe(
         'Failed to fetch search results for type $_currentType, query '
-        '"$_currentSearchQuery" at page ${_results.page}: $e',
+        '"$_currentSearchQuery" at page ${_results.page}',
+        e,
+        st,
       );
       // The page was advanced before the request; without stepping back, the
       // next scroll-triggered retry would request the page after it and the
@@ -332,7 +336,7 @@ class BrowseController extends ChangeNotifier {
       if (isLoadMore) _results.retreatPage();
       _isLoading = false;
       _isLoadingMore = false;
-      _error = e.toString();
+      _error = ErrorMessages.describe(e);
       notifyListeners();
     }
   }

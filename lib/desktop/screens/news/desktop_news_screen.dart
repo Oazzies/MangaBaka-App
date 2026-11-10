@@ -102,8 +102,8 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
       });
       // A first page that does not fill the window leaves nothing to scroll.
       WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
-    } catch (e) {
-      _logger.severe('Desktop news fetch failed: $e');
+    } catch (e, st) {
+      _logger.severe('Desktop news fetch failed', e, st);
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -345,7 +345,7 @@ String _formatDate(String date) {
   if (date.isEmpty) return '';
   try {
     return DateFormat('MMM d, yyyy').format(DateTime.parse(date));
-  } catch (_) {
+  } on FormatException {
     return date;
   }
 }

@@ -26,10 +26,7 @@ class SeriesWorksTab extends StatelessWidget {
     final l10n = LocalizationService();
     if (works == null) {
       return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: MbSpinner(),
-        ),
+        child: Padding(padding: EdgeInsets.all(32.0), child: MbSpinner()),
       );
     }
     if (works!.isEmpty) {

@@ -22,7 +22,7 @@ class LibraryAutocompleteService {
       final titleLower = series.title.toLowerCase();
       final nativeLower = series.nativeTitle.toLowerCase();
       final romanizedLower = series.romanizedTitle.toLowerCase();
-      
+
       int score = 0;
       if (titleLower.startsWith(q)) {
         score = 100; // Strongest match
@@ -66,15 +66,17 @@ class LibraryAutocompleteService {
       if (b.score != a.score) return b.score.compareTo(a.score);
       return a.entry.series.title.length.compareTo(b.entry.series.title.length);
     });
-    
+
     final topMatches = scored.take(maxResults);
-    
+
     return topMatches.map((match) {
       final series = match.entry.series;
-      
+
       int? year;
       if (series.year.isNotEmpty) {
-        year = int.tryParse(series.year.length >= 4 ? series.year.substring(0, 4) : series.year);
+        year = int.tryParse(
+          series.year.length >= 4 ? series.year.substring(0, 4) : series.year,
+        );
       }
 
       final List<String> allTitles = [

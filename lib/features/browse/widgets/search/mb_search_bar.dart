@@ -70,8 +70,8 @@ class _MBSearchBarState extends State<MBSearchBar> {
   /// instead — the field still works, it just cannot show a ghost.
   GhostTextEditingController? get _ghostController =>
       widget.controller is GhostTextEditingController
-          ? widget.controller as GhostTextEditingController
-          : null;
+      ? widget.controller as GhostTextEditingController
+      : null;
 
   void _requestSuggestions(
     String query,

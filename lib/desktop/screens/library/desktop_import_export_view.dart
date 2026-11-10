@@ -274,7 +274,8 @@ class DesktopImportExportView extends StatelessWidget {
                       scrollDirection: Axis.horizontal,
                       itemCount: sources.length,
                       separatorBuilder: (_, _) => const SizedBox(width: 8),
-                      itemBuilder: (context, i) => _SourceCard(source: sources[i]),
+                      itemBuilder: (context, i) =>
+                          _SourceCard(source: sources[i]),
                     ),
                   ),
                   if (sourceLabel != null) ...[

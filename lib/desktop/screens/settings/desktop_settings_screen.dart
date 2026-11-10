@@ -27,6 +27,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
 /// Settings as a real page on desktop: categories down the left,
 /// inline desktop-native controls (dropdowns, switches, chips) on the right.
@@ -781,11 +782,12 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
                 if (confirmed != true) return;
                 try {
                   await _auth.logout();
-                } catch (e) {
+                } on AppException {
+                  // logout() logs the cause and wraps it in AuthException.
                   if (mounted) {
                     AppSnackBar.show(
                       context,
-                      'Logout failed: $e',
+                      LocalizationService().translate('logout_failed'),
                       isError: true,
                     );
                   }
@@ -1139,9 +1141,15 @@ class _DesktopLogsViewState extends State<_DesktopLogsView> {
       await SharePlus.instance.share(
         ShareParams(files: [XFile(file.path)], subject: 'MangaBaka Logs'),
       );
-    } catch (e) {
+    } catch (e, st) {
+      // File I/O or the share sheet; either way only the export failed.
+      LoggingService.logger.warning('Failed to save logs', e, st);
       if (mounted) {
-        AppSnackBar.show(context, 'Failed to save logs: $e', isError: true);
+        AppSnackBar.show(
+          context,
+          LocalizationService().translate('logs_save_failed'),
+          isError: true,
+        );
       }
     }
   }

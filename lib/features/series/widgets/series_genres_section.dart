@@ -73,7 +73,9 @@ class SeriesGenresSection extends StatelessWidget {
                     onSecondaryTap: () =>
                         detailState?.handleGenreLongPress(genre),
                     tooltip: DesktopLayout.isActive(context)
-                        ? LocalizationService().translate('filter_right_click_hint')
+                        ? LocalizationService().translate(
+                            'filter_right_click_hint',
+                          )
                         : null,
                   );
                 },

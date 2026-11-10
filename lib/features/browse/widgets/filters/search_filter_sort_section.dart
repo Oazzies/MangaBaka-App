@@ -39,7 +39,8 @@ class SearchFilterSortSection extends StatelessWidget {
                 l10n: l10n,
                 sortOptions: sortOptions,
                 currentFilters: filters,
-                onSortSelected: (val) => onFiltersChanged(filters.copyWith(sortBy: val)),
+                onSortSelected: (val) =>
+                    onFiltersChanged(filters.copyWith(sortBy: val)),
               ),
             ),
           ],

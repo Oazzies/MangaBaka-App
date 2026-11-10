@@ -1,5 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 /// Pins the desktop window to a fixed, centred size while onboarding is open.
 ///
@@ -31,8 +32,9 @@ class OnboardingWindow {
       await windowManager.setMaximumSize(size);
       await windowManager.setSize(size);
       await windowManager.center();
-    } catch (_) {
+    } on Exception catch (e) {
       // Window sizing is cosmetic; onboarding works in any window.
+      LoggingService.logger.fine('Onboarding window sizing failed: $e');
     }
   }
 
@@ -48,6 +50,8 @@ class OnboardingWindow {
         await windowManager.setSize(previous);
         await windowManager.center();
       }
-    } catch (_) {}
+    } on Exception catch (e) {
+      LoggingService.logger.fine('Onboarding window restore failed: $e');
+    }
   }
 }

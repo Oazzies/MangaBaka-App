@@ -631,15 +631,14 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
   Widget _toolbar(BuildContext context, StackDetail detail) {
     // The list style comes from the Stacks list in List customization.
     final sort = MbDropdown<StackEntrySort>(
-        label: _l10n.translate('sort_by'),
-        icon: Icons.sort_rounded,
-        value: _sort,
-        options: [
-          for (final s in StackEntrySort.values)
-            (s, _l10n.translate(s.labelKey)),
-        ],
-        onChanged: (s) => setState(() => _sort = s),
-      );
+      label: _l10n.translate('sort_by'),
+      icon: Icons.sort_rounded,
+      value: _sort,
+      options: [
+        for (final s in StackEntrySort.values) (s, _l10n.translate(s.labelKey)),
+      ],
+      onChanged: (s) => setState(() => _sort = s),
+    );
     return Wrap(
       alignment: WrapAlignment.end,
       crossAxisAlignment: WrapCrossAlignment.center,

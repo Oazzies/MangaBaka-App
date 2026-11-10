@@ -322,22 +322,21 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                       ],
                     )
                   : c.currentType == BrowseType.publishers
-                      ? DesktopMenuButton<String>(
-                          label: l10n.translate('sort_by'),
-                          valueLabel: publisherSortOptions(l10n)
-                              .firstWhere((o) => o.$1 == c.publisherSort)
-                              .$2,
-                          icon: Icons.sort_rounded,
-                          selected: c.publisherSort ?? '',
-                          items: [
-                            for (final (value, label)
-                                in publisherSortOptions(l10n))
-                              (value ?? '', label),
-                          ],
-                          onSelected: (key) =>
-                              c.setPublisherSort(key.isEmpty ? null : key),
-                        )
-                      : null;
+                  ? DesktopMenuButton<String>(
+                      label: l10n.translate('sort_by'),
+                      valueLabel: publisherSortOptions(
+                        l10n,
+                      ).firstWhere((o) => o.$1 == c.publisherSort).$2,
+                      icon: Icons.sort_rounded,
+                      selected: c.publisherSort ?? '',
+                      items: [
+                        for (final (value, label) in publisherSortOptions(l10n))
+                          (value ?? '', label),
+                      ],
+                      onSelected: (key) =>
+                          c.setPublisherSort(key.isEmpty ? null : key),
+                    )
+                  : null;
 
               if (rightControls == null) {
                 return SingleChildScrollView(

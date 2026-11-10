@@ -869,6 +869,16 @@
     "stacks_error_stack_locked": "A moderator locked this stack.",
     "stacks_error_spoiler_locked": "A moderator locked the spoiler setting on.",
     "stacks_error_username_required": "Pick a username on mangabaka.org before publishing a stack.",
-    "stacks_error_rate_limited": "You've hit the hourly limit for this. Try again later."
+    "stacks_error_rate_limited": "You've hit the hourly limit for this. Try again later.",
+    "error_generic": "Something went wrong. Please try again.",
+    "error_network": "Couldn't reach MangaBaka. Check your connection.",
+    "error_timeout": "The request timed out. Please try again.",
+    "error_server": "MangaBaka is having trouble right now. Try again later.",
+    "error_rate_limited": "Too many requests. Wait a moment and try again.",
+    "error_not_found": "That couldn't be found.",
+    "error_session_expired": "Your session expired. Please sign in again.",
+    "logout_failed": "Couldn't sign out. Please try again.",
+    "logs_save_failed": "Couldn't save the logs.",
+    "open_series_failed": "Couldn't open that series."
   }
 }

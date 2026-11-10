@@ -126,7 +126,8 @@ class MbThemeSpec {
         ),
       );
       return decode(json)?.copyWith(id: newId());
-    } catch (_) {
+    } on FormatException {
+      // Bad base64 or bad UTF-8: not a share code.
       return null;
     }
   }

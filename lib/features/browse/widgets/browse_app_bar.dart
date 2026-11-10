@@ -63,10 +63,10 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
           showFilterButton: controller.currentType != BrowseType.staff,
           onFilterTapOverride: controller.currentType == BrowseType.publishers
               ? () => showPublisherSortSheet(
-                    context,
-                    current: controller.publisherSort,
-                    onSelected: controller.setPublisherSort,
-                  )
+                  context,
+                  current: controller.publisherSort,
+                  onSelected: controller.setPublisherSort,
+                )
               : null,
           onResultSelected: onResultSelected,
           onChanged: controller.updateSearchQuery,

@@ -16,7 +16,11 @@ class PublisherLogo {
       return (value == null || value.isEmpty) ? null : value;
     }
 
-    final logo = PublisherLogo(raw: read('raw'), x150: read('x150'), x250: read('x250'));
+    final logo = PublisherLogo(
+      raw: read('raw'),
+      x150: read('x150'),
+      x250: read('x250'),
+    );
     return logo.best == null ? null : logo;
   }
 
@@ -48,7 +52,6 @@ class PublisherLogo {
     }
     return url == null ? null : _rasterised(url, proxy);
   }
-
 
   Map<String, dynamic> toJson() => {'raw': raw, 'x150': x150, 'x250': x250};
 }
@@ -132,7 +135,9 @@ class Publisher {
       parentId: json['parent_id']?.toString(),
       name: json['name']?.toString() ?? '',
       links: _list(json['links'], PublisherLink.fromJson),
-      parent: parent is Map ? Publisher.fromJson(Map<String, dynamic>.from(parent)) : null,
+      parent: parent is Map
+          ? Publisher.fromJson(Map<String, dynamic>.from(parent))
+          : null,
       imprints: _list(json['imprints'], Publisher.fromJson),
       founded: _asInt(json['founded']),
       closed: _asInt(json['closed']),
@@ -194,11 +199,7 @@ class PublisherLink {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'link': link,
-      'language': language,
-    };
+    return {'type': type, 'link': link, 'language': language};
   }
 }
 
@@ -225,12 +226,7 @@ class PublisherAlias {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'language': language,
-      'type': type,
-      'title': title,
-      'note': note,
-    };
+    return {'language': language, 'type': type, 'title': title, 'note': note};
   }
 }
 
@@ -250,7 +246,8 @@ class SimilarPublisher {
     this.score = 0,
   });
 
-  factory SimilarPublisher.fromJson(Map<String, dynamic> json) => SimilarPublisher(
+  factory SimilarPublisher.fromJson(Map<String, dynamic> json) =>
+      SimilarPublisher(
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
         canonicalUrl: json['canonical_url']?.toString(),
@@ -297,7 +294,11 @@ class SharedPublisher {
   final String name;
   final int sharedCount;
 
-  const SharedPublisher({required this.id, required this.name, required this.sharedCount});
+  const SharedPublisher({
+    required this.id,
+    required this.name,
+    required this.sharedCount,
+  });
 }
 
 /// Catalog statistics from `/publishers/{id}/stats`.
@@ -335,27 +336,27 @@ class PublisherStats {
   });
 
   static List<StatBucket> _buckets(Object? raw, String keyField) => [
-        if (raw is List)
-          for (final e in raw)
-            if (e is Map)
-              StatBucket(
-                key: e[keyField]?.toString() ?? '',
-                count: (e['count'] as num?)?.toInt() ?? 0,
-              ),
-      ];
+    if (raw is List)
+      for (final e in raw)
+        if (e is Map)
+          StatBucket(
+            key: e[keyField]?.toString() ?? '',
+            count: (e['count'] as num?)?.toInt() ?? 0,
+          ),
+  ];
 
   static List<StatTag> _tags(Object? raw) => [
-        if (raw is List)
-          for (final e in raw)
-            if (e is Map)
-              StatTag(
-                id: e['id']?.toString() ?? '',
-                name: e['name']?.toString() ?? '',
-                count: (e['count'] as num?)?.toInt() ?? 0,
-                share: (e['share'] as num?)?.toDouble() ?? 0,
-                catalogShare: (e['catalog_share'] as num?)?.toDouble() ?? 0,
-              ),
-      ];
+    if (raw is List)
+      for (final e in raw)
+        if (e is Map)
+          StatTag(
+            id: e['id']?.toString() ?? '',
+            name: e['name']?.toString() ?? '',
+            count: (e['count'] as num?)?.toInt() ?? 0,
+            share: (e['share'] as num?)?.toDouble() ?? 0,
+            catalogShare: (e['catalog_share'] as num?)?.toDouble() ?? 0,
+          ),
+  ];
 
   factory PublisherStats.fromJson(Map<String, dynamic> json) {
     final years = json['years'];
@@ -365,7 +366,9 @@ class PublisherStats {
       seriesCount: (json['series_count'] as num?)?.toInt() ?? 0,
       taggedCount: (json['tagged_count'] as num?)?.toInt() ?? 0,
       hasAnime: (json['has_anime'] as num?)?.toInt() ?? 0,
-      averageScore: score is Map ? (score['average'] as num?)?.toDouble() : null,
+      averageScore: score is Map
+          ? (score['average'] as num?)?.toDouble()
+          : null,
       firstYear: years is Map ? (years['first'] as num?)?.toInt() : null,
       lastYear: years is Map ? (years['last'] as num?)?.toInt() : null,
       mediaTypes: _buckets(json['media_type'], 'key'),

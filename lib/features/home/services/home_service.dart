@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/home/models/top_genre_rail.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
+import 'package:mangabaka_app/features/series/services/series_title_enricher.dart';
 
 export 'package:mangabaka_app/features/home/models/for_you_readiness.dart';
 export 'package:mangabaka_app/features/home/models/top_genre_rail.dart';
@@ -32,9 +33,14 @@ class HomeService {
   static const String _v2Base = 'https://api.mangabaka.org/v2';
 
   final ApiClient _api;
+  final SeriesTitleEnricher _titles;
 
-  HomeService({http.Client? client, ApiClient? api})
-    : _api = api ?? ApiClient(healthContext: 'home', client: client);
+  HomeService({
+    http.Client? client,
+    ApiClient? api,
+    SeriesTitleEnricher? titles,
+  }) : _api = api ?? ApiClient(healthContext: 'home', client: client),
+       _titles = titles ?? SeriesTitleEnricher.shared;
 
   /// Content-rating preferences apply to every discovery rail, so an unwanted
   /// rating never reaches the Home screen in the first place.
@@ -120,17 +126,19 @@ class HomeService {
     if (headers == null) return const [];
 
     try {
-      final uri = ApiClient.uri('${AppConstants.baseApiUrl}/my/series/recommendations', {
-        'limit': limit,
-        ..._contentParams(),
-      });
-      final series = await _api
+      final uri = ApiClient.uri(
+        '${AppConstants.baseApiUrl}/my/series/recommendations',
+        {'limit': limit, ..._contentParams()},
+      );
+      final raw = await _api
           .withContext('home:for-you')
           .getJson(
             uri,
             operation: 'fetch for-you',
             parse: (json) {
-              final list = (json is Map) ? (json['results'] ?? json['data']) : null;
+              final list = (json is Map)
+                  ? (json['results'] ?? json['data'])
+                  : null;
               if (list is! List) return const <Series>[];
               // One malformed recommendation must not empty the whole rail.
               final parsed = <Series>[];
@@ -147,6 +155,7 @@ class HomeService {
             },
             headers: headers,
           );
+      final series = await _titles.canonicalize(raw);
       _logger.info('HomeService for-you returned ${series.length} series');
       final dismissed = SettingsManager().dismissedRecommendations.toSet();
       if (dismissed.isEmpty) return series;
@@ -275,7 +284,7 @@ class HomeService {
     Map<String, String>? headers,
   }) async {
     try {
-      final series = await _api
+      final raw = await _api
           .withContext('home:$label')
           .getJson(
             uri,
@@ -283,6 +292,7 @@ class HomeService {
             parse: (json) => parseDataList(json, Series.fromSimilarJson),
             headers: headers,
           );
+      final series = await _titles.canonicalize(raw);
       _logger.info('HomeService $label returned ${series.length} series');
       return series;
     } catch (e) {

@@ -35,10 +35,8 @@ class ReferencedListItem extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => SeriesDetailScreen(
-                series: series,
-                heroTagPrefix: heroScope,
-              ),
+              builder: (context) =>
+                  SeriesDetailScreen(series: series, heroTagPrefix: heroScope),
             ),
           );
         },

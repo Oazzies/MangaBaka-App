@@ -62,9 +62,15 @@ class _LogsScreenState extends State<LogsScreen> {
       await SharePlus.instance.share(
         ShareParams(files: [XFile(file.path)], subject: 'MangaBaka Logs'),
       );
-    } catch (e) {
+    } catch (e, st) {
+      // File I/O or the share sheet; either way only the export failed.
+      LoggingService.logger.warning('Failed to save logs', e, st);
       if (mounted) {
-        AppSnackBar.show(context, 'Failed to save logs: $e', isError: true);
+        AppSnackBar.show(
+          context,
+          LocalizationService().translate('logs_save_failed'),
+          isError: true,
+        );
       }
     }
   }

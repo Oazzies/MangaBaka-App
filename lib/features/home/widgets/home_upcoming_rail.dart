@@ -20,7 +20,11 @@ class HomeUpcomingRail extends StatelessWidget {
   /// How many releases the rail shows before deferring to the full screen.
   static const int _maxCards = 12;
 
-  const HomeUpcomingRail({super.key, required this.data, this.coverWidth = 118});
+  const HomeUpcomingRail({
+    super.key,
+    required this.data,
+    this.coverWidth = 118,
+  });
 
   @override
   Widget build(BuildContext context) {

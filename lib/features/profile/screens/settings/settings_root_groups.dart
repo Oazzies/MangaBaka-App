@@ -154,11 +154,8 @@ Widget _externalLink({
     onTap: () =>
         launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
     trailing: Builder(
-      builder: (context) => Icon(
-        Icons.open_in_new,
-        color: context.colors.textMuted,
-        size: 18,
-      ),
+      builder: (context) =>
+          Icon(Icons.open_in_new, color: context.colors.textMuted, size: 18),
     ),
     isFirst: isFirst,
   );

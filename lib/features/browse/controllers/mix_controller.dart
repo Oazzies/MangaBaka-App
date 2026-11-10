@@ -8,7 +8,7 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
-
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 class MixController extends ChangeNotifier {
   static final _logger = LoggingService.logger;
@@ -71,7 +71,6 @@ class MixController extends ChangeNotifier {
   int _mixGeneration = 0;
   int _suggestionsGeneration = 0;
 
-
   // ─── Seed Management ─────────────────────────────────────────────────────
 
   bool isSeed(int seriesId) => _seeds.any((s) => s.id == seriesId.toString());
@@ -79,7 +78,9 @@ class MixController extends ChangeNotifier {
   void addSeed(Series series) {
     if (isSeed(int.tryParse(series.id) ?? -1)) return;
     _seeds.add(series);
-    _logger.info('MixController: added seed "${series.title}" (id=${series.id})');
+    _logger.info(
+      'MixController: added seed "${series.title}" (id=${series.id})',
+    );
     notifyListeners();
     _fetchMix();
     if (_seeds.length >= 2) {
@@ -140,7 +141,10 @@ class MixController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final ids = _seeds.map((s) => int.tryParse(s.id) ?? 0).where((id) => id > 0).toList();
+      final ids = _seeds
+          .map((s) => int.tryParse(s.id) ?? 0)
+          .where((id) => id > 0)
+          .toList();
       final contentPrefs = SettingsManager().contentPreferences;
       final auth = getIt<ProfileAuthService>();
       final userId = auth.isLoggedIn ? (auth.cachedProfile?.id ?? '') : '';
@@ -152,17 +156,19 @@ class MixController extends ChangeNotifier {
         notContentRating: ContentRatingFilter.excluded(contentPrefs),
         strict: _strictMode,
         blendUserId: (_blendUser && userId.isNotEmpty) ? userId : null,
-        excludeUserLibrary: (_excludeLibrary && userId.isNotEmpty) ? userId : null,
+        excludeUserLibrary: (_excludeLibrary && userId.isNotEmpty)
+            ? userId
+            : null,
       );
 
       if (generation != _mixGeneration) return;
       _results = result.series;
       _dna = result.dna;
       _logger.info('MixController: got ${_results.length} recommendations');
-    } catch (e) {
+    } catch (e, st) {
       if (generation != _mixGeneration) return;
-      _logger.severe('MixController._fetchMix error: $e');
-      _error = e.toString();
+      _logger.severe('MixController._fetchMix error', e, st);
+      _error = ErrorMessages.describe(e);
       _results = [];
       _dna = [];
     } finally {
@@ -193,15 +199,18 @@ class MixController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final ids = _seeds.map((s) => int.tryParse(s.id) ?? 0).where((id) => id > 0).toList();
+      final ids = _seeds
+          .map((s) => int.tryParse(s.id) ?? 0)
+          .where((id) => id > 0)
+          .toList();
       final suggestions = await _mixService.fetchSeedSuggestions(ids);
 
       if (generation != _suggestionsGeneration) return;
       // Filter out series already added as seeds
-      _seedSuggestions = suggestions
-          .where((sug) => !isSeed(sug.id))
-          .toList();
-      _logger.info('MixController: got ${_seedSuggestions.length} seed suggestions');
+      _seedSuggestions = suggestions.where((sug) => !isSeed(sug.id)).toList();
+      _logger.info(
+        'MixController: got ${_seedSuggestions.length} seed suggestions',
+      );
     } catch (e) {
       if (generation != _suggestionsGeneration) return;
       _logger.warning('MixController._fetchSeedSuggestions error: $e');

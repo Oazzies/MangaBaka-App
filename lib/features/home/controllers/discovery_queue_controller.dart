@@ -6,6 +6,7 @@ import 'package:mangabaka_app/features/home/services/home_service.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 /// Manages an interactive Discovery Queue session.
 ///
@@ -33,9 +34,9 @@ class DiscoveryQueueController extends ChangeNotifier {
     HomeService? homeService,
     LibraryService? libraryService,
     ProfileAuthService? authService,
-  })  : _homeService = homeService ?? HomeService(),
-        _libraryService = libraryService ?? getIt<LibraryService>(),
-        _authService = authService ?? getIt<ProfileAuthService>();
+  }) : _homeService = homeService ?? HomeService(),
+       _libraryService = libraryService ?? getIt<LibraryService>(),
+       _authService = authService ?? getIt<ProfileAuthService>();
 
   List<Series> get queue => _queue;
   int get currentIndex => _currentIndex;
@@ -50,8 +51,8 @@ class DiscoveryQueueController extends ChangeNotifier {
 
   Series? get currentSeries =>
       (_currentIndex >= 0 && _currentIndex < _queue.length)
-          ? _queue[_currentIndex]
-          : null;
+      ? _queue[_currentIndex]
+      : null;
 
   int get totalCount => _queue.length;
   int get remainingCount =>
@@ -112,7 +113,7 @@ class DiscoveryQueueController extends ChangeNotifier {
     } catch (e, st) {
       if (_disposed || generation != _loadGeneration) return;
       _logger.severe('Failed to load discovery queue: $e', e, st);
-      _errorMessage = e.toString();
+      _errorMessage = ErrorMessages.keyFor(e);
       _isLoading = false;
     }
 

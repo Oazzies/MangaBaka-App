@@ -141,15 +141,18 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       logoAsset: 'assets/import/myanimelist.png',
       labelKey: 'import_mal',
       hintKey: 'import_mal_hint',
-      onTap: () => _openFileAs(extensions: const ['xml', 'gz'], labelKey: 'import_mal'),
+      onTap: () =>
+          _openFileAs(extensions: const ['xml', 'gz'], labelKey: 'import_mal'),
     ),
     ImportSource(
       icon: Icons.description_outlined,
       logoAsset: 'assets/import/mangaupdates.png',
       labelKey: 'import_mangaupdates',
       hintKey: 'import_mangaupdates_hint',
-      onTap: () =>
-          _openFileAs(extensions: const ['json'], labelKey: 'import_mangaupdates'),
+      onTap: () => _openFileAs(
+        extensions: const ['json'],
+        labelKey: 'import_mangaupdates',
+      ),
     ),
     ImportSource(
       icon: Icons.description_outlined,
@@ -166,8 +169,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       logoAsset: 'assets/import/comick.webp',
       labelKey: 'import_comick',
       hintKey: 'import_comick_hint',
-      onTap: () =>
-          _openFileAs(extensions: const ['json', 'csv'], labelKey: 'import_comick'),
+      onTap: () => _openFileAs(
+        extensions: const ['json', 'csv'],
+        labelKey: 'import_comick',
+      ),
     ),
     ImportSource(
       icon: Icons.content_paste_rounded,
@@ -400,7 +405,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       if (!mounted) return;
       AppSnackBar.show(
         context,
-        l10n.translate('export_done').replaceAll('{count}', '${filtered.length}'),
+        l10n
+            .translate('export_done')
+            .replaceAll('{count}', '${filtered.length}'),
       );
     } catch (_) {
       if (!mounted) return;
@@ -480,8 +487,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
                                 : StreamBuilder<List<LibraryEntry>>(
                                     stream: _library.watchEntriesFromDb(),
                                     initialData: const [],
-                                    builder: (context, snapshot) =>
-                                        _export(l10n, snapshot.data ?? const []),
+                                    builder: (context, snapshot) => _export(
+                                      l10n,
+                                      snapshot.data ?? const [],
+                                    ),
                                   ),
                           ),
                         ],
@@ -653,7 +662,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
             for (final f in ImportFormat.values)
               DropdownMenuItem(
                 value: f,
-                child: Text(l10n.translate(DesktopImportExportView.formatKey(f))),
+                child: Text(
+                  l10n.translate(DesktopImportExportView.formatKey(f)),
+                ),
               ),
           ],
           onChanged: (v) {
@@ -832,7 +843,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
         ),
         const SizedBox(height: 20),
         Text(
-          l10n.translate('export_count').replaceAll('{count}', '${filtered.length}'),
+          l10n
+              .translate('export_count')
+              .replaceAll('{count}', '${filtered.length}'),
           style: AppTypography.monoLabel(
             color: context.colors.textMuted,
             fontSize: 11.5,
@@ -935,7 +948,9 @@ class _FormatTile extends StatelessWidget {
               Icon(
                 selected ? Icons.radio_button_checked : Icons.radio_button_off,
                 size: 20,
-                color: selected ? context.colors.accent : context.colors.textMuted,
+                color: selected
+                    ? context.colors.accent
+                    : context.colors.textMuted,
               ),
               const SizedBox(width: 12),
               Expanded(

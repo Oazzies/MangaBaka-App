@@ -20,7 +20,7 @@ class MixService {
   final ApiClient _api;
 
   MixService({http.Client? client, ApiClient? api})
-      : _api = api ?? ApiClient(healthContext: 'mix', client: client);
+    : _api = api ?? ApiClient(healthContext: 'mix', client: client);
 
   /// Fetch mix recommendations based on seed series IDs.
   Future<MixResult> fetchMix({
@@ -89,22 +89,23 @@ class MixService {
     );
 
     final dnaJson = (json is Map ? json['dna'] : null);
-    final dna = (dnaJson is List ? dnaJson : const [])
-        .whereType<Map>()
-        .map((d) {
-          try {
-            return MixDnaTag.fromJson(d.cast<String, dynamic>());
-          } catch (e) {
-            _logger.fine('MixService: skipping malformed DNA tag: $e');
-            return null;
-          }
-        })
-        .whereType<MixDnaTag>()
-        .where((d) => d.name.isNotEmpty)
-        .toList()
-      // Heaviest traits first: the DNA strip is a summary, and the tail is
-      // truncated on narrow screens.
-      ..sort((a, b) => b.weight.compareTo(a.weight));
+    final dna =
+        (dnaJson is List ? dnaJson : const [])
+            .whereType<Map>()
+            .map((d) {
+              try {
+                return MixDnaTag.fromJson(d.cast<String, dynamic>());
+              } catch (e) {
+                _logger.fine('MixService: skipping malformed DNA tag: $e');
+                return null;
+              }
+            })
+            .whereType<MixDnaTag>()
+            .where((d) => d.name.isNotEmpty)
+            .toList()
+          // Heaviest traits first: the DNA strip is a summary, and the tail is
+          // truncated on narrow screens.
+          ..sort((a, b) => b.weight.compareTo(a.weight));
 
     final rawSeedCount = json is Map ? json['seed_count'] : null;
     final seedCount = rawSeedCount is num ? rawSeedCount.toInt() : 0;
@@ -123,7 +124,9 @@ class MixService {
     final seriesMap = item['series'];
     if (seriesMap is! Map) return null;
     try {
-      return fromJson(normalizeMixSeriesJson(seriesMap.cast<String, dynamic>()));
+      return fromJson(
+        normalizeMixSeriesJson(seriesMap.cast<String, dynamic>()),
+      );
     } catch (e) {
       _logger.warning('MixService: failed to parse series item: $e');
       return null;

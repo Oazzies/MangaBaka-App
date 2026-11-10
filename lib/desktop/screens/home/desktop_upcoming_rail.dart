@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -15,6 +16,7 @@ import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 class DesktopUpcomingRail extends StatefulWidget {
   /// Space above the title; the docked rail leaves room for the window
@@ -74,7 +76,10 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     try {
       covers = await getIt<LibraryService>().database.libraryEntriesDao
           .libraryCoversFor(ids);
-    } catch (_) {}
+    } catch (e, st) {
+      // Library marks are decoration; the rail renders without them.
+      LoggingService.logger.fine('Upcoming rail library lookup failed', e, st);
+    }
     if (!mounted) return;
     setState(() {
       _librarySeriesIds = covers.keys.toSet();
@@ -379,7 +384,20 @@ class _UpcomingWorkCard extends StatelessWidget {
       Navigator.of(
         context,
       ).push(AppTransitions.slideRight(SeriesDetailScreen(series: series)));
-    } catch (_) {}
+    } catch (e, st) {
+      LoggingService.logger.warning(
+        'Opening series ${work.seriesId} failed',
+        e,
+        st,
+      );
+      if (context.mounted) {
+        AppSnackBar.show(
+          context,
+          LocalizationService().translate('open_series_failed'),
+          isError: true,
+        );
+      }
+    }
   }
 
   @override
@@ -449,7 +467,9 @@ class _UpcomingWorkCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        LocalizationService().translate('upcoming_in_library').toUpperCase(),
+                        LocalizationService()
+                            .translate('upcoming_in_library')
+                            .toUpperCase(),
                         style: AppTypography.monoLabel(
                           color: context.colors.accent,
                           fontSize: 9.5,

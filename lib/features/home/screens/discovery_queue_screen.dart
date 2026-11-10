@@ -139,9 +139,7 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
     final l10n = LocalizationService();
 
     if (_controller.isLoading) {
-      return const Center(
-        child: MbSpinner(),
-      );
+      return const Center(child: MbSpinner());
     }
 
     if (!_controller.isReady) {
@@ -268,7 +266,8 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                _controller.errorMessage ?? l10n.translate('error_loading'),
+                // The controller hands over a localization key, never text.
+                l10n.translate(_controller.errorMessage ?? 'error_loading'),
                 style: AppTypography.sans(
                   color: context.colors.textMuted,
                   fontSize: 14,
@@ -613,12 +612,7 @@ class _AddToLibraryButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (busy)
-              MbSpinner(
-                size: 16,
-                strokeWidth: 2,
-                color: fg,
-              ),
+            if (busy) MbSpinner(size: 16, strokeWidth: 2, color: fg),
             if (busy) const SizedBox(width: 10),
             Flexible(
               child: Text(
