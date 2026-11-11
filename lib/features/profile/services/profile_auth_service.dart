@@ -13,7 +13,7 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/features/profile/services/auth/auth_storage.dart';
 import 'package:mangabaka_app/features/profile/services/auth/auth_network_client.dart';
-import 'package:mangabaka_app/features/profile/services/auth/windows_auth_handler.dart';
+import 'package:mangabaka_app/features/profile/services/auth/desktop_auth_handler.dart';
 
 class ProfileAuthService extends ChangeNotifier {
   final _logger = LoggingService.logger;
@@ -26,7 +26,7 @@ class ProfileAuthService extends ChangeNotifier {
   final AuthNetworkClient _network;
 
   /// Exchanges a refresh token for new tokens. Injected by tests; defaults to
-  /// the platform flow ([WindowsAuthHandler] on Windows, AppAuth elsewhere).
+  /// the platform flow ([DesktopAuthHandler] on Windows/Linux, AppAuth elsewhere).
   final Future<TokenResponse?> Function(String refreshToken)? _refresher;
 
   ProfileAuthService({
@@ -47,14 +47,14 @@ class ProfileAuthService extends ChangeNotifier {
 
   /// True while a desktop sign-in is waiting on the user in their browser.
   ///
-  /// Drives the "check your browser" prompt. Only the Windows flow can be
+  /// Drives the "check your browser" prompt. Only desktop flows can be
   /// stranded this way; on mobile the system's auth sheet reports its own
   /// dismissal.
   final ValueNotifier<bool> awaitingBrowser = ValueNotifier(false);
 
-  void cancelLogin() => WindowsAuthHandler.cancelPending();
+  void cancelLogin() => DesktopAuthHandler.cancelPending();
 
-  Future<void> reopenBrowser() => WindowsAuthHandler.reopenBrowser();
+  Future<void> reopenBrowser() => DesktopAuthHandler.reopenBrowser();
 
   bool get isLoggedIn => _hasSessionCache;
   MbProfile? get cachedProfile => _cachedProfile;
@@ -134,8 +134,8 @@ class ProfileAuthService extends ChangeNotifier {
 
       TokenResponse? response;
 
-      if (Platform.isWindows) {
-        response = await WindowsAuthHandler.authorizeAndExchangeCode(
+      if (Platform.isWindows || Platform.isLinux) {
+        response = await DesktopAuthHandler.authorizeAndExchangeCode(
           clientId: _clientId,
           redirectUri: _redirectUri,
           authorizationEndpoint: _authorizationEndpoint,
@@ -360,8 +360,8 @@ class ProfileAuthService extends ChangeNotifier {
   }
 
   Future<TokenResponse?> _platformRefresh(String refreshToken) {
-    if (Platform.isWindows) {
-      return WindowsAuthHandler.refresh(
+    if (Platform.isWindows || Platform.isLinux) {
+      return DesktopAuthHandler.refresh(
         clientId: _clientId,
         redirectUri: _redirectUri,
         tokenEndpoint: _tokenEndpoint,

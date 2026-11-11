@@ -35,7 +35,8 @@ class UpdateService {
 
   /// Whether this platform can download and apply an update in-app. Other
   /// platforms fall back to opening the release page in a browser.
-  bool get supportsInAppUpdate => Platform.isAndroid || Platform.isWindows;
+  bool get supportsInAppUpdate =>
+      Platform.isAndroid || Platform.isWindows || Platform.isLinux;
 
   /// Returns the newest non-draft release (including pre-releases), or `null` on failure.
   Future<AppRelease?> fetchLatestRelease() async {
@@ -137,6 +138,25 @@ class UpdateService {
       if (setup.isNotEmpty) return setup.first;
       final win = release.assets.where((a) => lower(a).contains('windows'));
       return win.isNotEmpty ? win.first : null;
+    }
+
+    if (Platform.isLinux) {
+      String lower(ReleaseAsset a) => a.name.toLowerCase();
+      // AppImage is the primary standalone Linux executable
+      final appImage = release.assets.where(
+        (a) => lower(a).contains('linux') && lower(a).endsWith('.appimage'),
+      );
+      if (appImage.isNotEmpty) return appImage.first;
+      final debOrRpm = release.assets.where(
+        (a) =>
+            lower(a).contains('linux') &&
+            (lower(a).endsWith('.deb') ||
+                lower(a).endsWith('.rpm') ||
+                lower(a).endsWith('.tar.gz')),
+      );
+      if (debOrRpm.isNotEmpty) return debOrRpm.first;
+      final lin = release.assets.where((a) => lower(a).contains('linux'));
+      return lin.isNotEmpty ? lin.first : null;
     }
 
     return null;
@@ -271,6 +291,27 @@ class UpdateService {
       // the running executable.
       await Future.delayed(const Duration(milliseconds: 500));
       exit(0);
+    }
+
+    if (Platform.isLinux) {
+      final lowerPath = file.path.toLowerCase();
+      if (lowerPath.endsWith('.appimage')) {
+        await Process.run('chmod', ['+x', file.path]);
+        await Process.start(
+          file.path,
+          const [],
+          mode: ProcessStartMode.detached,
+        );
+        await Future.delayed(const Duration(milliseconds: 500));
+        exit(0);
+      }
+      final result = await OpenFilex.open(file.path);
+      if (result.type != ResultType.done) {
+        throw NetworkException(
+          message: 'Could not open the update file: ${result.message}',
+        );
+      }
+      return;
     }
 
     throw NetworkException(

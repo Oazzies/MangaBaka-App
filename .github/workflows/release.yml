@@ -454,156 +454,180 @@ jobs:
 #          name: ios-sideload-artifact
 #          path: ios-mangabaka-app-v*-sideload.ipa
 
-#  build-linux:
-#    name: Build Linux
-#    needs: analyze-and-test
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout Code
-#        uses: actions/checkout@v4
-#
-#      - name: Create .env File
-#        env:
-#          ENV_FILE: ${{ secrets.ENV_FILE }}
-#        shell: bash
-#        run: |
-#          if [ -n "$ENV_FILE" ]; then
-#            echo "$ENV_FILE" > .env
-#          else
-#            echo "" > .env
-#          fi
-#
-#      - name: Set up Flutter
-#        uses: subosito/flutter-action@v2
-#        with:
-#          channel: 'stable'
-#          cache: true
-#
-#      - name: Install Linux Dependencies
-#        run: |
-#          sudo apt-get update -qq
-#          sudo apt-get install -y -qq ninja-build cmake maven clang mpv libgtk-3-dev \
-#            libblkid-dev liblzma-dev pkg-config libmpv-dev webkit2gtk-4.1 fuse rpm
-#          wget -qO appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
-#          chmod +x appimagetool && sudo mv appimagetool /usr/local/bin/
-#
-#      - name: Install Dependencies
-#        run: flutter pub get
-#
-#      - name: Build Linux Application
-#        run: flutter build linux --release
-#
-#      - name: Package AppImage
-#        run: |
-#          VERSION_LINE=$(grep "^version:" pubspec.yaml)
-#          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
-#          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-#
-#          # Create AppDir structure
-#          rm -rf AppDir && mkdir -p AppDir/usr/{bin,share/icons/hicolor/256x256/apps,lib}
-#          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
-#          
-#          # Copy icon if exists
-#          if [ -f "assets/images/logo.png" ]; then
-#            cp assets/images/logo.png AppDir/usr/share/icons/hicolor/256x256/apps/mangabaka.png
-#            cp assets/images/logo.png AppDir/mangabaka.png
-#          fi
-#
-#          # Create desktop file (printf avoids heredoc indentation issues in YAML)
-#          printf '%s\n' \
-#            '[Desktop Entry]' \
-#            'Name=MangaBaka' \
-#            'Exec=usr/bin/mangabaka_app' \
-#            'Icon=mangabaka' \
-#            'Type=Application' \
-#            'Categories=Utility;' \
-#            > AppDir/mangabaka.desktop
-#
-#          # Create AppRun script
-#          printf '%s\n' \
-#            '#!/bin/sh' \
-#            'SELF=$(readlink -f "$0")' \
-#            'HERE=${SELF%/*}' \
-#            'export PATH="${HERE}/usr/bin/:${PATH}"' \
-#            'export LD_LIBRARY_PATH="${HERE}/usr/bin/lib/:${HERE}/usr/lib/:${LD_LIBRARY_PATH}"' \
-#            'exec "${HERE}/usr/bin/mangabaka_app" "$@"' \
-#            > AppDir/AppRun
-#          chmod +x AppDir/AppRun
-#
-#          # Build AppImage
-#          /usr/local/bin/appimagetool AppDir
-#          mv MangaBaka-x86_64.AppImage "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.AppImage"
-#
-#      - name: Package RPM
-#        run: |
-#          VERSION_LINE=$(grep "^version:" pubspec.yaml)
-#          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
-#          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
-#
-#          mkdir -p rpm_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-#          cp -r build/linux/x64/release/bundle rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}
-#          tar czf rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}.tar.gz -C rpm_build/SOURCES mangabaka-${VERSION_CLEAN}
-#
-#          HAS_ICON=0
-#          if [ -f "assets/images/logo.png" ]; then
-#            mkdir -p rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps
-#            cp assets/images/logo.png rpm_build/SOURCES/usr/share/icons/hicolor/256x256/apps/mangabaka.png
-#            HAS_ICON=1
-#          fi
-#
-#          # Build spec with printf to avoid heredoc indentation issues in YAML
-#          {
-#            printf 'Name: mangabaka\n'
-#            printf 'Version: %s\n' "${VERSION_CLEAN}"
-#            printf 'Release: 1%%{?dist}\n'
-#            printf 'Summary: MangaBaka - A manga reader application\n'
-#            printf 'License: MIT\n'
-#            printf 'Source0: %%{name}-%%{version}.tar.gz\n'
-#            printf 'BuildArch: x86_64\n'
-#            printf '\n'
-#            printf '%%description\n'
-#            printf 'MangaBaka is a Flutter-based manga reader application.\n'
-#            printf '\n'
-#            printf '%%prep\n'
-#            printf '%%setup -q\n'
-#            printf '\n'
-#            printf '%%install\n'
-#            printf 'mkdir -p %%{buildroot}/usr/bin\n'
-#            printf 'mkdir -p %%{buildroot}/usr/share/applications\n'
-#            printf 'cp -r * %%{buildroot}/usr/bin/\n'
-#            if [ "$HAS_ICON" = "1" ]; then
-#              printf 'mkdir -p %%{buildroot}/usr/share/icons/hicolor/256x256/apps\n'
-#              printf 'cp %%{_sourcedir}/usr/share/icons/hicolor/256x256/apps/mangabaka.png %%{buildroot}/usr/share/icons/hicolor/256x256/apps/mangabaka.png\n'
-#            fi
-#            printf 'echo '"'"'[Desktop Entry]'"'"' > %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
-#            printf 'echo '"'"'Name=MangaBaka'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
-#            printf 'echo '"'"'Exec=/usr/bin/mangabaka_app'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
-#            printf 'echo '"'"'Icon=mangabaka'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
-#            printf 'echo '"'"'Type=Application'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
-#            printf 'echo '"'"'Categories=Utility;'"'"' >> %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
-#            printf '\n'
-#            printf '%%files\n'
-#            printf '/usr/bin/*\n'
-#            printf '/usr/share/applications/mangabaka.desktop\n'
-#            if [ "$HAS_ICON" = "1" ]; then
-#              printf '/usr/share/icons/hicolor/256x256/apps/mangabaka.png\n'
-#            fi
-#          } > rpm_build/SPECS/mangabaka.spec
-#
-#          rpmbuild --define "_topdir $(pwd)/rpm_build" -ba rpm_build/SPECS/mangabaka.spec
-#          mv rpm_build/RPMS/x86_64/*.rpm "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.rpm"
-#
-#      - name: Upload Artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: linux-artifact
-#          path: |
-#            build/linux/x64/release/linux-mangabaka-app-v*.AppImage
-#            build/linux/x64/release/linux-mangabaka-app-v*.rpm
+  build-linux:
+    name: Build Linux
+    needs: analyze-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create .env File
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -z "$ENV_FILE" ]; then
+            echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
+            exit 1
+          fi
+          echo "$ENV_FILE" > .env
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.44.3'
+          cache: true
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ninja-build cmake clang pkg-config \
+            libgtk-3-dev libblkid-dev liblzma-dev libsecret-1-dev libjsoncpp-dev \
+            fuse libfuse2 rpm
+          wget -qO appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool && sudo mv appimagetool /usr/local/bin/
+
+      - name: Install Dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build Linux Application
+        run: flutter build linux --release
+
+      - name: Package AppImage
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          # Create AppDir structure
+          rm -rf AppDir && mkdir -p AppDir/usr/{bin,share/icons/hicolor/512x512/apps,share/applications,lib}
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
+          # Copy icon
+          cp assets/mangabaka512.png AppDir/usr/share/icons/hicolor/512x512/apps/mangabaka.png
+          cp assets/mangabaka512.png AppDir/mangabaka.png
+          cp assets/mangabaka512.png AppDir/.DirIcon
+
+          # Copy desktop file
+          cp linux/mangabaka.desktop AppDir/mangabaka.desktop
+          cp linux/mangabaka.desktop AppDir/usr/share/applications/mangabaka.desktop
+
+          # Create AppRun script
+          printf '%s\n' \
+            '#!/bin/sh' \
+            'SELF=$(readlink -f "$0")' \
+            'HERE=${SELF%/*}' \
+            'export PATH="${HERE}/usr/bin/:${PATH}"' \
+            'export LD_LIBRARY_PATH="${HERE}/usr/bin/lib/:${HERE}/usr/lib/:${LD_LIBRARY_PATH}"' \
+            'exec "${HERE}/usr/bin/mangabaka_app" "$@"' \
+            > AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+          # Build AppImage
+          ARCH=x86_64 /usr/local/bin/appimagetool --appimage-extract-and-run AppDir "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.AppImage"
+
+      - name: Package Tarball
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          tar czf "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.tar.gz" -C build/linux/x64/release/bundle .
+
+      - name: Package DEB
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          DEB_DIR="deb_build/mangabaka_${VERSION_CLEAN}_amd64"
+          mkdir -p "$DEB_DIR"/DEBIAN
+          mkdir -p "$DEB_DIR"/usr/lib/mangabaka
+          mkdir -p "$DEB_DIR"/usr/bin
+          mkdir -p "$DEB_DIR"/usr/share/applications
+          mkdir -p "$DEB_DIR"/usr/share/icons/hicolor/512x512/apps
+
+          cp -r build/linux/x64/release/bundle/* "$DEB_DIR"/usr/lib/mangabaka/
+          ln -sf /usr/lib/mangabaka/mangabaka_app "$DEB_DIR"/usr/bin/mangabaka_app
+          cp linux/mangabaka.desktop "$DEB_DIR"/usr/share/applications/
+          cp assets/mangabaka512.png "$DEB_DIR"/usr/share/icons/hicolor/512x512/apps/mangabaka.png
+
+          cat <<EOF > "$DEB_DIR"/DEBIAN/control
+Package: mangabaka
+Version: ${VERSION_CLEAN}
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: MangaBaka <dev.oazzies.mangabaka>
+Description: MangaBaka - Official MangaBaka desktop app
+EOF
+
+          dpkg-deb --build "$DEB_DIR" "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.deb"
+
+      - name: Package RPM
+        run: |
+          VERSION_LINE=$(grep "^version:" pubspec.yaml)
+          VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
+          VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
+
+          mkdir -p rpm_build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          cp -r build/linux/x64/release/bundle rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}
+          tar czf rpm_build/SOURCES/mangabaka-${VERSION_CLEAN}.tar.gz -C rpm_build/SOURCES mangabaka-${VERSION_CLEAN}
+
+          mkdir -p rpm_build/SOURCES/usr/share/icons/hicolor/512x512/apps
+          cp assets/mangabaka512.png rpm_build/SOURCES/usr/share/icons/hicolor/512x512/apps/mangabaka.png
+          cp linux/mangabaka.desktop rpm_build/SOURCES/mangabaka.desktop
+
+          {
+            printf 'Name: mangabaka\n'
+            printf 'Version: %s\n' "${VERSION_CLEAN}"
+            printf 'Release: 1%%{?dist}\n'
+            printf 'Summary: MangaBaka - Official MangaBaka desktop app\n'
+            printf 'License: Apache-2.0\n'
+            printf 'Source0: %%{name}-%%{version}.tar.gz\n'
+            printf 'BuildArch: x86_64\n'
+            printf '\n'
+            printf '%%description\n'
+            printf 'MangaBaka is a Flutter-based manga tracking application.\n'
+            printf '\n'
+            printf '%%prep\n'
+            printf '%%setup -q\n'
+            printf '\n'
+            printf '%%install\n'
+            printf 'mkdir -p %%{buildroot}/usr/lib/mangabaka\n'
+            printf 'mkdir -p %%{buildroot}/usr/bin\n'
+            printf 'mkdir -p %%{buildroot}/usr/share/applications\n'
+            printf 'mkdir -p %%{buildroot}/usr/share/icons/hicolor/512x512/apps\n'
+            printf 'cp -r * %%{buildroot}/usr/lib/mangabaka/\n'
+            printf 'ln -sf /usr/lib/mangabaka/mangabaka_app %%{buildroot}/usr/bin/mangabaka_app\n'
+            printf 'cp %%{_sourcedir}/mangabaka.desktop %%{buildroot}/usr/share/applications/mangabaka.desktop\n'
+            printf 'cp %%{_sourcedir}/usr/share/icons/hicolor/512x512/apps/mangabaka.png %%{buildroot}/usr/share/icons/hicolor/512x512/apps/mangabaka.png\n'
+            printf '\n'
+            printf '%%files\n'
+            printf '/usr/lib/mangabaka/*\n'
+            printf '/usr/bin/mangabaka_app\n'
+            printf '/usr/share/applications/mangabaka.desktop\n'
+            printf '/usr/share/icons/hicolor/512x512/apps/mangabaka.png\n'
+          } > rpm_build/SPECS/mangabaka.spec
+
+          rpmbuild --define "_topdir $(pwd)/rpm_build" -ba rpm_build/SPECS/mangabaka.spec
+          mv rpm_build/RPMS/x86_64/*.rpm "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.rpm"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-artifact
+          path: |
+            build/linux/x64/release/linux-mangabaka-app-v*.AppImage
+            build/linux/x64/release/linux-mangabaka-app-v*.tar.gz
+            build/linux/x64/release/linux-mangabaka-app-v*.deb
+            build/linux/x64/release/linux-mangabaka-app-v*.rpm
 
   create-draft-release:
     name: Create Draft Release
-    needs: [build-android, build-windows]
+    needs: [build-android, build-windows, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code

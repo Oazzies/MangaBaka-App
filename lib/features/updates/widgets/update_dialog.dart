@@ -120,7 +120,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
   String _getUpdateButtonLabel(LocalizationService l10n) {
     if (_phase == _Phase.installing) {
-      return Platform.isWindows
+      return (Platform.isWindows || Platform.isLinux)
           ? l10n.translate('update_installing_windows')
           : l10n.translate('update_installing');
     }
@@ -297,7 +297,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     const SizedBox(width: 12),
                     Flexible(
                       child: Text(
-                        Platform.isWindows
+                        (Platform.isWindows || Platform.isLinux)
                             ? l10n.translate('update_installing_windows')
                             : l10n.translate('update_installing'),
                         style: AppTypography.sans(

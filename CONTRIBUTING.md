@@ -24,6 +24,16 @@ Before you start, please note that the ability to use following technologies is 
 - Any code editor
 - Emulator or phone with developer options enabled to test changes.
 
+### Linux Desktop Prerequisites
+
+If developing or building for Linux, install the required native development libraries:
+
+```sh
+sudo apt update
+sudo apt install -y ninja-build cmake clang pkg-config \
+  libgtk-3-dev libblkid-dev liblzma-dev libsecret-1-dev libjsoncpp-dev
+```
+
 ## Local setup
 
 The app bundles a `.env` file as an asset, but the file itself is gitignored. On a fresh clone, create it before building or running tests (an empty file is enough unless you need OAuth login):

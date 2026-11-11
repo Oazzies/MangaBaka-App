@@ -15,6 +15,13 @@ analyzer:
     # It does not compile and is not referenced by the app; kept out of
     # analysis until it is removed from the repository.
     - series-backup/**
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   # The lint rules applied to this project can be customized in the

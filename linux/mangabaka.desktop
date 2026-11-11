@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=MangaBaka
+Comment=Official MangaBaka desktop app
+Exec=mangabaka_app %u
+Icon=mangabaka
+Terminal=false
+Categories=Utility;Network;Viewer;
+MimeType=x-scheme-handler/mangabaka;x-scheme-handler/dev.oazzies.mangabaka;
+Keywords=manga;reader;mangabaka;
+StartupWMClass=dev.oazzies.mangabaka_app

@@ -117,5 +117,44 @@ void main() {
       expect(asset, isNull);
       svc.dispose();
     });
+
+    if (Platform.isLinux) {
+      test('selects AppImage on Linux when available', () async {
+        final client = MockClient((_) async => throw UnimplementedError());
+        final svc = UpdateService(client: client);
+        final release = releaseWithAssets([
+          {
+            'name': 'linux-mangabaka-app-v1.0.0.tar.gz',
+            'browser_download_url': 'https://example.com/app.tar.gz',
+            'size': 100,
+          },
+          {
+            'name': 'linux-mangabaka-app-v1.0.0.AppImage',
+            'browser_download_url': 'https://example.com/app.AppImage',
+            'size': 200,
+          },
+        ]);
+        final asset = await svc.selectAssetForPlatform(release);
+        expect(asset, isNotNull);
+        expect(asset!.name, 'linux-mangabaka-app-v1.0.0.AppImage');
+        svc.dispose();
+      });
+
+      test('falls back to deb/rpm on Linux if no AppImage', () async {
+        final client = MockClient((_) async => throw UnimplementedError());
+        final svc = UpdateService(client: client);
+        final release = releaseWithAssets([
+          {
+            'name': 'linux-mangabaka-app-v1.0.0.deb',
+            'browser_download_url': 'https://example.com/app.deb',
+            'size': 150,
+          },
+        ]);
+        final asset = await svc.selectAssetForPlatform(release);
+        expect(asset, isNotNull);
+        expect(asset!.name, 'linux-mangabaka-app-v1.0.0.deb');
+        svc.dispose();
+      });
+    }
   });
 }

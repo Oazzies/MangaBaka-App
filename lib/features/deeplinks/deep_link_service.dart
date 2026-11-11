@@ -153,6 +153,22 @@ class DeepLinkService {
       final desktopFile = File('${appDir.path}/mangabaka.desktop');
       final execPath = Platform.resolvedExecutable;
 
+      // Ensure app icon is installed in user icon directory if available
+      final iconDir = Directory('$homeDir/.local/share/icons/hicolor/512x512/apps');
+      final targetIcon = File('${iconDir.path}/mangabaka.png');
+      if (!targetIcon.existsSync()) {
+        final exeDir = File(execPath).parent;
+        final assetIcon = File(
+          '${exeDir.path}/data/flutter_assets/assets/mangabaka512.png',
+        );
+        if (assetIcon.existsSync()) {
+          iconDir.createSync(recursive: true);
+          try {
+            assetIcon.copySync(targetIcon.path);
+          } catch (_) {}
+        }
+      }
+
       final contents =
           '''
 [Desktop Entry]
@@ -161,21 +177,26 @@ Name=MangaBaka
 Exec="$execPath" %u
 Icon=mangabaka
 Terminal=false
-Categories=Utility;
-MimeType=x-scheme-handler/$_scheme;
+Categories=Utility;Network;Viewer;
+MimeType=x-scheme-handler/$_scheme;x-scheme-handler/dev.oazzies.mangabaka;
+StartupWMClass=dev.oazzies.mangabaka_app
 ''';
 
       // Unchanged since last launch: the OS already knows about it.
-      if (desktopFile.existsSync() &&
-          desktopFile.readAsStringSync() == contents) {
-        return;
+      if (!desktopFile.existsSync() ||
+          desktopFile.readAsStringSync() != contents) {
+        desktopFile.writeAsStringSync(contents);
       }
-      desktopFile.writeAsStringSync(contents);
 
       await Process.run('xdg-mime', [
         'default',
         'mangabaka.desktop',
         'x-scheme-handler/$_scheme',
+      ]);
+      await Process.run('xdg-mime', [
+        'default',
+        'mangabaka.desktop',
+        'x-scheme-handler/dev.oazzies.mangabaka',
       ]);
       await Process.run('update-desktop-database', [appDir.path]);
 
