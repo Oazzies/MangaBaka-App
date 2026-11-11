@@ -48,18 +48,34 @@ class DesktopBrowseLanding extends StatelessWidget {
         40,
       ),
       children: [
-        DerivedLayoutBuilder<bool>(
-          derive: (constraints) => constraints.maxWidth >= 720,
-          builder: (context, isWide) {
-            final queueCard = _DiscoveryQueueCard(onTap: onDiscoveryQueue);
-            final mixCard = _MixCard(onTap: onMix);
-            if (isWide) {
-              return Row(
-                children: [
-                  Expanded(child: queueCard),
-                  const SizedBox(width: 16),
-                  Expanded(child: mixCard),
-                ],
+        DerivedLayoutBuilder<({bool isWide, bool isStacked})>(
+          derive: (constraints) {
+            final isWide = constraints.maxWidth >= 720;
+            final cardWidth = isWide
+                ? (constraints.maxWidth - 16) / 2
+                : constraints.maxWidth;
+            return (isWide: isWide, isStacked: cardWidth < 680);
+          },
+          builder: (context, layout) {
+            final queueCard = _DiscoveryQueueCard(
+              onTap: onDiscoveryQueue,
+              isStacked: layout.isStacked,
+            );
+            final mixCard = _MixCard(
+              onTap: onMix,
+              isStacked: layout.isStacked,
+            );
+            if (layout.isWide) {
+              // responsive-ok: Discovery Queue and Mix surfaces match the taller card's height.
+              return IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: queueCard),
+                    const SizedBox(width: 16),
+                    Expanded(child: mixCard),
+                  ],
+                ),
               );
             }
             return Column(
@@ -126,123 +142,149 @@ class DesktopBrowseLanding extends StatelessWidget {
   }
 }
 
-class _DiscoveryQueueCard extends StatelessWidget {
+class _FeatureCard extends StatelessWidget {
   final VoidCallback onTap;
+  final Widget icon;
+  final String title;
+  final String subtitle;
+  final String buttonLabel;
+  final bool isStacked;
 
-  const _DiscoveryQueueCard({required this.onTap});
+  const _FeatureCard({
+    required this.onTap,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.buttonLabel,
+    required this.isStacked,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = LocalizationService();
+    final titleRow = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(padding: const EdgeInsets.only(top: 2), child: icon),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            title.toUpperCase(),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypography.display(
+              color: context.colors.text,
+              fontSize: 24,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    final subtitleText = Text(
+      subtitle,
+      style: AppTypography.sans(
+        color: context.colors.textMuted,
+        fontSize: 14.5,
+      ),
+    );
+
+    final button = DesktopPillButton(
+      label: buttonLabel,
+      primary: true,
+      onPressed: onTap,
+    );
+
+    final Widget content;
+    if (isStacked) {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              titleRow,
+              const SizedBox(height: 4),
+              subtitleText,
+            ],
+          ),
+          const SizedBox(height: 14),
+          button,
+        ],
+      );
+    } else {
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                titleRow,
+                const SizedBox(height: 4),
+                subtitleText,
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          button,
+        ],
+      );
+    }
+
     return DesktopHoverSurface(
       onTap: onTap,
       idleColor: context.colors.surface,
       hoverColor: context.colors.surfaceRaised,
       borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
       padding: const EdgeInsets.fromLTRB(30, 26, 26, 26),
-      // The button beside the text while the text keeps its room, beneath
-      // it in a narrow card or at a large text size.
-      child: BesideOrBelow(
-        minBodyWidth: 180,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                // The same compass as the Browse tab.
-                Icon(MbIcons.compass, size: 22, color: context.colors.accent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.translate('discovery_queue').toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.display(
-                      color: context.colors.text,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.translate('discovery_queue_subtitle'),
-              style: AppTypography.sans(
-                color: context.colors.textMuted,
-                fontSize: 14.5,
-              ),
-            ),
-          ],
-        ),
-        trailing: DesktopPillButton(
-          label: l10n.translate('discovery_queue_start'),
-          primary: true,
-          onPressed: onTap,
-        ),
-      ),
+      child: content,
+    );
+  }
+}
+
+class _DiscoveryQueueCard extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool isStacked;
+
+  const _DiscoveryQueueCard({required this.onTap, this.isStacked = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = LocalizationService();
+    return _FeatureCard(
+      onTap: onTap,
+      isStacked: isStacked,
+      icon: Icon(MbIcons.compass, size: 22, color: context.colors.accent),
+      title: l10n.translate('discovery_queue'),
+      subtitle: l10n.translate('discovery_queue_subtitle'),
+      buttonLabel: l10n.translate('discovery_queue_start'),
     );
   }
 }
 
 class _MixCard extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isStacked;
 
-  const _MixCard({required this.onTap});
+  const _MixCard({required this.onTap, this.isStacked = false});
 
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    return DesktopHoverSurface(
+    return _FeatureCard(
       onTap: onTap,
-      idleColor: context.colors.surface,
-      hoverColor: context.colors.surfaceRaised,
-      borderRadius: BorderRadius.circular(DesktopTokens.panelRadius),
-      padding: const EdgeInsets.fromLTRB(30, 26, 26, 26),
-      // The button beside the text while the text keeps its room, beneath
-      // it in a narrow card or at a large text size.
-      child: BesideOrBelow(
-        minBodyWidth: 180,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                MbLucideIcon(
-                  LucideGlyph.flaskConical,
-                  size: 22,
-                  color: context.colors.accent,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.translate('mix').toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.display(
-                      color: context.colors.text,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.translate('mix_subtitle'),
-              style: AppTypography.sans(
-                color: context.colors.textMuted,
-                fontSize: 14.5,
-              ),
-            ),
-          ],
-        ),
-        trailing: DesktopPillButton(
-          label: l10n.translate('mix_empty_title'),
-          primary: true,
-          onPressed: onTap,
-        ),
+      isStacked: isStacked,
+      icon: MbLucideIcon(
+        LucideGlyph.flaskConical,
+        size: 22,
+        color: context.colors.accent,
       ),
+      title: l10n.translate('mix'),
+      subtitle: l10n.translate('mix_subtitle'),
+      buttonLabel: l10n.translate('mix_empty_title'),
     );
   }
 }
