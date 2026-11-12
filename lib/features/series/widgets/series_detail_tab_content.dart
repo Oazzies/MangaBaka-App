@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -22,7 +23,7 @@ class SeriesDetailTabContent extends StatelessWidget {
   final LocalizationService l10n;
   final String selectedTab;
   final List<SeriesCover>? covers;
-  final List<Series>? related;
+  final List<RelatedSeries>? related;
   final List<Series>? similar;
   final List<Series>? readersAlsoLike;
   final List<News>? news;

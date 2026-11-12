@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/constants/mock_series_data.dart';
 import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.dart';
+import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
@@ -21,7 +22,7 @@ class _FakeSeriesService extends SeriesService {
   }
 
   @override
-  Future<List<Series>> fetchSeriesRelated(String id) async => [];
+  Future<List<RelatedSeries>> fetchSeriesRelated(String id) async => [];
 
   @override
   Future<Series> fetchSeries(String id) async => mockSeries222;

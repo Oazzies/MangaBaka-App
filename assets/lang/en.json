@@ -881,6 +881,24 @@
     "error_session_expired": "Your session expired. Please sign in again.",
     "logout_failed": "Couldn't sign out. Please try again.",
     "logs_save_failed": "Couldn't save the logs.",
-    "open_series_failed": "Couldn't open that series."
+    "open_series_failed": "Couldn't open that series.",
+    "relation_prequel": "Prequel",
+    "relation_sequel": "Sequel",
+    "relation_main_story": "Main Story",
+    "relation_parent_story": "Parent Story",
+    "relation_parent": "Parent",
+    "relation_side_story": "Side Story",
+    "relation_spin_off": "Spin-off",
+    "relation_adaptation": "Adaptation",
+    "relation_alternative": "Alternative",
+    "relation_alternative_version": "Alternative Version",
+    "relation_alternative_setting": "Alternative Setting",
+    "relation_full_story": "Full Story",
+    "relation_summary": "Summary",
+    "relation_compilation": "Compilation",
+    "relation_contains": "Contains",
+    "relation_character": "Character",
+    "relation_source": "Source",
+    "relation_other": "Other"
   }
 }

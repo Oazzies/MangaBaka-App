@@ -51,7 +51,8 @@ void main() {
 
       expect(requested.path, '/v1/series/84926/relationships');
       expect(requested.queryParameters['limit'], '50');
-      expect(related.map((s) => s.id), ['1', '2']);
+      expect(related.map((r) => r.series.id), ['1', '2']);
+      expect(related.map((r) => r.relationType), ['sequel', 'sequel']);
     });
 
     test('skips an edge with no series rather than failing the tab', () async {
@@ -71,7 +72,8 @@ void main() {
 
       final related = await host.fetchSeriesRelated('1');
 
-      expect(related.map((s) => s.id), ['3']);
+      expect(related.map((r) => r.series.id), ['3']);
+      expect(related.map((r) => r.relationType), ['sequel']);
     });
   });
 }

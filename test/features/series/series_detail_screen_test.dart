@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
@@ -56,7 +57,7 @@ class MockSeriesService extends Fake implements SeriesService {
   }
   
   @override
-  Future<List<Series>> fetchSeriesRelated(String id) async => [];
+  Future<List<RelatedSeries>> fetchSeriesRelated(String id) async => [];
   @override
   Future<List<News>> fetchSeriesNews(String id) async => [];
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
@@ -13,7 +14,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   String get selectedTab;
 
   List<SeriesCover>? covers;
-  List<Series>? related;
+  List<RelatedSeries>? related;
   List<Series>? similar;
   List<Series>? readersAlsoLike;
   List<News>? news;

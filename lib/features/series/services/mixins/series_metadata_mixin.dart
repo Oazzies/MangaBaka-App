@@ -4,6 +4,7 @@ import 'package:mangabaka_app/core/network/api_client.dart';
 import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
+import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_title_enricher.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
@@ -50,14 +51,17 @@ mixin SeriesMetadataMixin {
 
   /// Uses `/relationships`: the older `/related` is deprecated and answers
   /// with an object of relation buckets rather than a `data` array, which
-  /// [_fetchList] would read as empty. Each item wraps the series.
-  Future<List<Series>> fetchSeriesRelated(String id) async =>
-      _allowedByContentRating(
-        await _fetchList(id, 'relationships', (item) {
-          final nested = item['series'];
-          if (nested is! Map) return null;
-          return Series.fromJson(nested.cast<String, dynamic>());
-        }, params: {'limit': 50}),
+  /// [_fetchList] would read as empty. Each item wraps the series alongside
+  /// its `relation_type`.
+  Future<List<RelatedSeries>> fetchSeriesRelated(String id) async =>
+      _filterByContentRating(
+        await _fetchList(
+          id,
+          'relationships',
+          RelatedSeries.fromJson,
+          params: {'limit': 50},
+        ),
+        (r) => r.series,
       );
 
   /// Similar titles come back wrapped (`{series: {...}, score: …}`) and in the
@@ -130,11 +134,19 @@ mixin SeriesMetadataMixin {
 
   /// Drops series the user has chosen not to see. An empty preference list
   /// means no preference has been recorded, which permits everything.
-  List<Series> _allowedByContentRating(List<Series> series) {
+  List<Series> _allowedByContentRating(List<Series> series) =>
+      _filterByContentRating(series, (s) => s);
+
+  List<T> _filterByContentRating<T>(
+    List<T> items,
+    Series Function(T) seriesOf,
+  ) {
     final prefs = SettingsManager().contentPreferences;
-    if (prefs.isEmpty) return series;
-    return series
-        .where((s) => prefs.contains(s.contentRating.toLowerCase()))
+    if (prefs.isEmpty) return items;
+    return items
+        .where(
+          (item) => prefs.contains(seriesOf(item).contentRating.toLowerCase()),
+        )
         .toList();
   }
 }
