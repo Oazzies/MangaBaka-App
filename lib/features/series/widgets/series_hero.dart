@@ -22,20 +22,27 @@ class SeriesTitleBlock extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.start,
   });
 
-  String _buildKicker() {
-    final parts = <String>[];
+  List<InlineSpan> _buildKicker(BuildContext context) {
+    final c = context.colors;
+    final spans = <InlineSpan>[];
+    void add(String text, Color color) {
+      if (spans.isNotEmpty) {
+        spans.add(TextSpan(text: ' · ', style: TextStyle(color: c.accent)));
+      }
+      spans.add(TextSpan(text: text, style: TextStyle(color: color)));
+    }
+
     if (series.type.isNotEmpty && series.type.toLowerCase() != 'null') {
-      parts.add(series.type.toUpperCase());
+      add(series.type.toUpperCase(), c.forSeriesType(series.type));
     }
     if (series.status.isNotEmpty && series.status.toLowerCase() != 'null') {
-      parts.add(series.status.toUpperCase());
+      add(series.status.toUpperCase(), c.forSeriesStatus(series.status));
     }
-    final rating = series.rating;
-    final parsed = double.tryParse(rating);
+    final parsed = double.tryParse(series.rating);
     if (parsed != null && parsed > 0) {
-      parts.add('★ ${parsed.toStringAsFixed(1)}');
+      add('★ ${parsed.toStringAsFixed(1)}', c.accent);
     }
-    return parts.join(' · ');
+    return spans;
   }
 
   String _buildByline(LocalizationService l10n) {
@@ -61,7 +68,7 @@ class SeriesTitleBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    final kicker = _buildKicker();
+    final kicker = _buildKicker(context);
     final byline = _buildByline(l10n);
 
     final otherTitles = <String>[];
@@ -83,8 +90,8 @@ class SeriesTitleBlock extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (kicker.isNotEmpty) ...[
-          Text(
-            kicker,
+          Text.rich(
+            TextSpan(children: kicker),
             textAlign: textAlign,
             style: AppTypography.monoLabel(
               color: context.colors.accent,

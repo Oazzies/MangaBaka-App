@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/content_rating_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -244,11 +245,27 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
               _draggingRating ?? RangeValues(_f.ratingLower, _f.ratingUpper),
           min: 0,
           max: 100,
-          divisions: 20,
-          onChanged: (v) => setState(() => _draggingRating = v),
+          divisions: SettingsManager().ratingSliderStep.divisions,
+          onChanged: (v) {
+            final step = SettingsManager().ratingSliderStep.stepValue;
+            final start = ((v.start / step).round() * step)
+                .toDouble()
+                .clamp(0.0, 100.0);
+            final end = ((v.end / step).round() * step)
+                .toDouble()
+                .clamp(0.0, 100.0);
+            setState(() => _draggingRating = RangeValues(start, end));
+          },
           onChangeEnd: (v) {
+            final step = SettingsManager().ratingSliderStep.stepValue;
+            final start = ((v.start / step).round() * step)
+                .toDouble()
+                .clamp(0.0, 100.0);
+            final end = ((v.end / step).round() * step)
+                .toDouble()
+                .clamp(0.0, 100.0);
             setState(() => _draggingRating = null);
-            _emit(_f.copyWith(ratingLower: v.start, ratingUpper: v.end));
+            _emit(_f.copyWith(ratingLower: start, ratingUpper: end));
           },
         ),
       ),

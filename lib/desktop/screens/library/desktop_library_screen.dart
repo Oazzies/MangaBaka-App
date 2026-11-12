@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/constants/status_icons.dart';
 import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
 import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -388,6 +389,7 @@ class _StatusList extends StatelessWidget {
         _StatusRow(
           label: l10n.translate('all'),
           color: context.colors.textMuted,
+          icon: Icons.apps_rounded,
           count: total,
           selected: selected == DesktopLibraryScreenState.allKey,
           onTap: () => onSelected(DesktopLibraryScreenState.allKey),
@@ -396,6 +398,7 @@ class _StatusList extends StatelessWidget {
           _StatusRow(
             label: l10n.translate(tab.key),
             color: context.colors.forState(tab.key),
+            icon: StatusIcons.forState(tab.key),
             count: counts[tab.key] ?? 0,
             selected: selected == tab.key,
             onTap: () => onSelected(tab.key),
@@ -408,6 +411,7 @@ class _StatusList extends StatelessWidget {
 class _StatusRow extends StatelessWidget {
   final String label;
   final Color color;
+  final IconData icon;
   final int count;
   final bool selected;
   final VoidCallback onTap;
@@ -415,6 +419,7 @@ class _StatusRow extends StatelessWidget {
   const _StatusRow({
     required this.label,
     required this.color,
+    required this.icon,
     required this.count,
     required this.selected,
     required this.onTap,
@@ -433,11 +438,7 @@ class _StatusRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
         child: Row(
           children: [
-            Container(
-              width: 9,
-              height: 9,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
+            Icon(icon, size: 17, color: color),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

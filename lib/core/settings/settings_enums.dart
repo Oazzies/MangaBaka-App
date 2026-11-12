@@ -49,7 +49,18 @@ extension AppListStyleExtension on AppListStyle {
 
 enum AppStartPage { home, library, browse, news, profile }
 
-enum RatingSliderStep { step1, step5, step10, step20, step25 }
+enum RatingSliderStep {
+  step1(1, 100),
+  step5(5, 20),
+  step10(10, 10),
+  step20(20, 5),
+  step25(25, 4);
+
+  final int stepValue;
+  final int divisions;
+
+  const RatingSliderStep(this.stepValue, this.divisions);
+}
 
 enum TitleLanguage { defaultLang, native, romanized }
 

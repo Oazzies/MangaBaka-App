@@ -35,20 +35,8 @@ class GeneralSettingsDialogs {
     );
   }
 
-  static String getRatingSliderStepName(RatingSliderStep step) {
-    switch (step) {
-      case RatingSliderStep.step1:
-        return '1';
-      case RatingSliderStep.step5:
-        return '5';
-      case RatingSliderStep.step10:
-        return '10';
-      case RatingSliderStep.step20:
-        return '20';
-      case RatingSliderStep.step25:
-        return '25';
-    }
-  }
+  static String getRatingSliderStepName(RatingSliderStep step) =>
+      step.stepValue.toString();
 
   static void showRatingSliderStepSelectionDialog(BuildContext context) {
     final l10n = LocalizationService();

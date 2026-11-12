@@ -1275,13 +1275,7 @@ class _StatsView extends StatelessWidget {
         ChartEntry((label ?? _cap)(e.key), e.count, color: color?.call(e.key)),
     ];
 
-    Color statusColor(String k) => switch (k) {
-      'completed' => colors.success,
-      'releasing' => colors.info,
-      'hiatus' => colors.warning,
-      'cancelled' => colors.error,
-      _ => colors.textMuted,
-    };
+    Color statusColor(String k) => colors.forSeriesStatus(k);
     Color ratingColor(String k) => switch (k) {
       'safe' => colors.success,
       'suggestive' => colors.warning,

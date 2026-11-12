@@ -57,6 +57,11 @@ class DesktopDropdown<T> extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final double radius;
 
+  /// Renders each item as a coloured badge row (icon tile in the item's
+  /// [DesktopDropdownItem.iconColor], selected row filled solid) with a rounder
+  /// menu, so the menu reads as an extension of a coloured pill button.
+  final bool badgeMenu;
+
   const DesktopDropdown({
     super.key,
     this.label,
@@ -74,6 +79,7 @@ class DesktopDropdown<T> extends StatefulWidget {
     this.minWidth = 160,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     this.radius = AppConstants.pillRadius,
+    this.badgeMenu = false,
   });
 
   @override
@@ -130,6 +136,7 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
         selected: widget.selected,
         backgroundColor: widget.menuBackgroundColor ?? context.colors.surface,
         minWidth: widget.minWidth,
+        badgeMenu: widget.badgeMenu,
         onSelected: (val) {
           _closeMenu();
           widget.onSelected(val);
@@ -251,6 +258,7 @@ class _DesktopDropdownOverlay<T> extends StatefulWidget {
   final T? selected;
   final Color backgroundColor;
   final double minWidth;
+  final bool badgeMenu;
   final ValueChanged<T> onSelected;
   final VoidCallback onDismiss;
 
@@ -263,6 +271,7 @@ class _DesktopDropdownOverlay<T> extends StatefulWidget {
     required this.selected,
     required this.backgroundColor,
     required this.minWidth,
+    this.badgeMenu = false,
     required this.onSelected,
     required this.onDismiss,
   });
@@ -299,7 +308,7 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
 
   @override
   Widget build(BuildContext context) {
-    final menuRadius = BorderRadius.circular(14);
+    final menuRadius = BorderRadius.circular(widget.badgeMenu ? 22 : 14);
     // Wide enough for the longest option, so labels are not ellipsised while
     // the screen has room.
     final screenWidth = MediaQuery.sizeOf(context).width;
@@ -318,7 +327,9 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
         textScaler: MediaQuery.textScalerOf(context),
       )..layout();
       final extras =
-          (item.icon != null || item.leading != null ? 27.0 : 0) +
+          (widget.badgeMenu
+              ? 46.0
+              : (item.icon != null || item.leading != null ? 27.0 : 0)) +
           (item.trailing != null ? 28.0 : 26.0);
       widest = math.max(widest, painter.width + extras);
       painter.dispose();
@@ -370,7 +381,7 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
                   // Tall enough to show every option when the window has the
                   // room, so no scroll bar is needed.
                   constraints: BoxConstraints(maxHeight: maxMenuHeight),
-                  padding: const EdgeInsets.all(6),
+                  padding: EdgeInsets.all(widget.badgeMenu ? 8 : 6),
                   decoration: BoxDecoration(
                     color: widget.backgroundColor,
                     borderRadius: menuRadius,
@@ -380,7 +391,9 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
                     border: Border.all(color: context.colors.border, width: 1),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(
+                      widget.badgeMenu ? 16 : 10,
+                    ),
                     child: SingleChildScrollView(
                       physics: const ClampingScrollPhysics(),
                       child: Column(
@@ -390,6 +403,7 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
                           for (int i = 0; i < widget.items.length; i++)
                             _DropdownRow<T>(
                               item: widget.items[i],
+                              badge: widget.badgeMenu,
                               isSelected:
                                   widget.items[i].value == widget.selected,
                               onTap: () =>
@@ -411,11 +425,13 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
 
 class _DropdownRow<T> extends StatefulWidget {
   final DesktopDropdownItem<T> item;
+  final bool badge;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _DropdownRow({
     required this.item,
+    this.badge = false,
     required this.isSelected,
     required this.onTap,
   });
@@ -432,6 +448,69 @@ class _DropdownRowState<T> extends State<_DropdownRow<T>> {
     final isSelected = widget.isSelected;
     final item = widget.item;
     final activeColor = item.iconColor ?? context.colors.accent;
+
+    if (widget.badge) {
+      final fg = context.colors.on(activeColor);
+      final rowFill = isSelected
+          ? activeColor
+          : (_hovered
+                ? activeColor.withValues(alpha: 0.12)
+                : Colors.transparent);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 1.5),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 110),
+              padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+              decoration: BoxDecoration(
+                color: rowFill,
+                borderRadius: BorderRadius.circular(AppConstants.pillRadius),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? fg.withValues(alpha: 0.18)
+                          : activeColor.withValues(alpha: 0.16),
+                    ),
+                    child: Icon(
+                      item.icon,
+                      size: 17,
+                      color: isSelected ? fg : activeColor,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.display(
+                        color: isSelected ? fg : context.colors.text,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ),
+                  if (isSelected) ...[
+                    const SizedBox(width: 8),
+                    Icon(Icons.check_rounded, size: 18, color: fg),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,

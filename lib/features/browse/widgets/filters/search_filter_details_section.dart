@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
@@ -95,15 +96,24 @@ class SearchFilterDetailsSection extends StatelessWidget {
                     ),
                     min: 0,
                     max: 100,
-                    divisions: 20,
+                    divisions: SettingsManager().ratingSliderStep.divisions,
                     activeColor: context.colors.accent,
                     inactiveColor: context.colors.border.withValues(alpha: 0.2),
-                    onChanged: (values) => onFiltersChanged(
-                      filters.copyWith(
-                        ratingLower: values.start,
-                        ratingUpper: values.end,
-                      ),
-                    ),
+                    onChanged: (values) {
+                      final step = SettingsManager().ratingSliderStep.stepValue;
+                      final start = ((values.start / step).round() * step)
+                          .toDouble()
+                          .clamp(0.0, 100.0);
+                      final end = ((values.end / step).round() * step)
+                          .toDouble()
+                          .clamp(0.0, 100.0);
+                      onFiltersChanged(
+                        filters.copyWith(
+                          ratingLower: start,
+                          ratingUpper: end,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

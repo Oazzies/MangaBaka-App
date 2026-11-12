@@ -222,20 +222,7 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
     ).replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
-  Color _statusColor(String status) {
-    final s = status.toLowerCase();
-    if (s.contains('ongoing')) {
-      return context.colors.success;
-    } else if (s.contains('completed')) {
-      return context.colors.info;
-    } else if (s.contains('hiatus')) {
-      return context.colors.warning;
-    } else if (s.contains('cancelled') || s.contains('canceled')) {
-      return context.colors.error;
-    } else {
-      return context.colors.textMuted;
-    }
-  }
+  Color _statusColor(String status) => context.colors.forSeriesStatus(status);
 
   String _capitalizeGenre(String text) {
     if (text.isEmpty) return text;

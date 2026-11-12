@@ -58,6 +58,7 @@ class SeriesInformationCard extends StatelessWidget {
         _Row(
           label: l10n.translate('type'),
           value: _cap(series.type),
+          valueColor: context.colors.forSeriesType(series.type),
           isSelected: isTypeSelected,
           onTap: () {
             if (isSelecting) {
@@ -73,7 +74,7 @@ class SeriesInformationCard extends StatelessWidget {
         _Row(
           label: l10n.translate('status'),
           value: _cap(series.status),
-          accent: true,
+          valueColor: context.colors.forSeriesStatus(series.status),
           isSelected: isStatusSelected,
           onTap: () {
             if (isSelecting) {
@@ -224,14 +225,14 @@ class SeriesInformationCard extends StatelessWidget {
 class _Row extends StatelessWidget {
   final String label;
   final String value;
-  final bool accent;
+  final Color? valueColor;
   final VoidCallback? onTap;
   final bool isSelected;
 
   const _Row({
     required this.label,
     required this.value,
-    this.accent = false,
+    this.valueColor,
     this.onTap,
     this.isSelected = false,
   });
@@ -240,7 +241,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     final textColor = isSelected
         ? context.colors.accent
-        : (accent ? context.colors.accent : context.colors.text);
+        : (valueColor ?? context.colors.text);
     final textWeight = isSelected ? FontWeight.bold : FontWeight.w500;
 
     return GestureDetector(

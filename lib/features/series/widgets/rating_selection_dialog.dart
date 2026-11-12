@@ -1,7 +1,6 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -22,16 +21,25 @@ class RatingSelectionDialog extends StatefulWidget {
 
 class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
   late double _currentRating;
+  late final int _stepValue;
+  late final int _divisions;
 
   @override
   void initState() {
     super.initState();
-    _currentRating = widget.initialRating.toDouble();
+    final step = SettingsManager().ratingSliderStep;
+    _stepValue = step.stepValue;
+    _divisions = step.divisions;
+    _currentRating = ((widget.initialRating / _stepValue).round() * _stepValue)
+        .toDouble()
+        .clamp(0.0, 100.0);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
+    final displayRating = _currentRating.round();
+    final isUnrated = displayRating == 0;
     return Container(
       decoration: BoxDecoration(
         color: context.colors.surface,
@@ -101,26 +109,26 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    _currentRating.toInt() == 0
+                    isUnrated
                         ? Icons.star_outline
                         : Icons.star,
-                    color: _currentRating.toInt() == 0
+                    color: isUnrated
                         ? context.colors.textMuted
                         : context.colors.star,
                     size: 28,
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    _currentRating.toInt() == 0
+                    isUnrated
                         ? l10n.translate('rating_unrated')
-                        : _currentRating.toInt().toString(),
+                        : displayRating.toString(),
                     style: AppTypography.display(
                       color: context.colors.text,
                       fontSize: 26,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  if (_currentRating.toInt() > 0)
+                  if (!isUnrated)
                     Text(
                       ' / 100',
                       style: AppTypography.sans(
@@ -148,10 +156,13 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               value: _currentRating,
               min: 0,
               max: 100,
-              divisions: _getDivisions(),
+              divisions: _divisions,
               onChanged: (double value) {
+                final snapped = ((value / _stepValue).round() * _stepValue)
+                    .toDouble()
+                    .clamp(0.0, 100.0);
                 setState(() {
-                  _currentRating = value;
+                  _currentRating = snapped;
                 });
               },
             ),
@@ -208,7 +219,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
               const SizedBox(width: 12),
               FilledButton(
                 onPressed: () {
-                  final newRating = _currentRating.toInt();
+                  final newRating = _currentRating.round();
                   if (newRating != widget.initialRating) {
                     widget.onRatingChanged(newRating);
                   }
@@ -238,21 +249,5 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
         ],
       ),
     );
-  }
-
-  int _getDivisions() {
-    final step = SettingsManager().ratingSliderStep;
-    switch (step) {
-      case RatingSliderStep.step5:
-        return 20;
-      case RatingSliderStep.step10:
-        return 10;
-      case RatingSliderStep.step20:
-        return 5;
-      case RatingSliderStep.step25:
-        return 4;
-      case RatingSliderStep.step1:
-        return 100;
-    }
   }
 }

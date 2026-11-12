@@ -148,8 +148,18 @@ class EnumSetting<T extends Enum> extends SettingValue<T> {
 
   @override
   void load(SharedPreferences prefs) {
-    final index = prefs.get(key);
-    if (index is! int || index < 0 || index >= values.length) return;
+    final stored = prefs.get(key);
+    int? index;
+    if (stored is int) {
+      index = stored;
+    } else if (stored is String) {
+      index = int.tryParse(stored);
+      if (index == null) {
+        final match = values.indexWhere((v) => v.name == stored);
+        if (match != -1) index = match;
+      }
+    }
+    if (index == null || index < 0 || index >= values.length) return;
     _value = values[index];
   }
 

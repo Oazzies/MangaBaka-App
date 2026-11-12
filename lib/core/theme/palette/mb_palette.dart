@@ -100,31 +100,66 @@ class MbPalette {
   /// (content types, publication status) chosen outside the palette.
   Color legibleOnSurface(Color c) => ColorMath.ensureContrast(c, surface, 3.0);
 
-  /// Colour for a library state key (`reading`, `completed`, …).
+  /// Colour for a library state key (`reading`, `completed`, …): the theme's
+  /// semantic hues, with a fixed purple for the states that have no token.
   Color forState(String state) {
     switch (state) {
       case 'reading':
       case 'rereading':
         return success;
       case 'completed':
-        return text;
+        return info;
       case 'paused':
         return warning;
       case 'dropped':
         return error;
-      case 'plan_to_read':
-        return info;
       case 'considering':
-        return accent;
+        return legibleOnSurface(const Color(0xFF9B7BFF));
       default:
         return textMuted;
     }
   }
 
   /// Ink for a [forState] fill.
-  Color onForState(String state) {
-    if (state == 'considering') return onAccent;
-    return ColorMath.onColor(forState(state));
+  Color onForState(String state) => ColorMath.onColor(forState(state));
+
+  /// Colour for a series publication status (`releasing`, `completed`, …).
+  Color forSeriesStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'releasing':
+      case 'ongoing':
+        return success;
+      case 'completed':
+        return info;
+      case 'hiatus':
+        return warning;
+      case 'cancelled':
+      case 'canceled':
+        return error;
+      case 'upcoming':
+        return legibleOnSurface(const Color(0xFF9B7BFF));
+      default:
+        return textMuted;
+    }
+  }
+
+  /// Colour for a series type: manga blue, manhwa purple, manhua orange,
+  /// OEL red, novel light blue.
+  Color forSeriesType(String type) {
+    switch (type.toLowerCase()) {
+      case 'manga':
+        return legibleOnSurface(const Color(0xFF4C8DFF));
+      case 'manhwa':
+        return legibleOnSurface(const Color(0xFF9B7BFF));
+      case 'manhua':
+        return legibleOnSurface(const Color(0xFFFF9A3D));
+      case 'oel':
+        return legibleOnSurface(const Color(0xFFFF5C6C));
+      case 'novel':
+        return legibleOnSurface(const Color(0xFF5CCBFF));
+      default:
+        return textMuted;
+    }
   }
 
   MbPalette copyWith({

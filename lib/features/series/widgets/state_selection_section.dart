@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/constants/status_icons.dart';
 import 'package:mangabaka_app/features/library/constants/library_screen_constants.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -60,6 +61,7 @@ class _StateSelectionSectionState extends State<StateSelectionSection> {
               menuBackgroundColor: context.colors.surface,
               foregroundColor: onStateColor,
               radius: AppConstants.pillRadius,
+              badgeMenu: true,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               leading: Icon(
                 _getIconForState(activeState),
@@ -90,24 +92,5 @@ class _StateSelectionSectionState extends State<StateSelectionSection> {
     );
   }
 
-  IconData _getIconForState(String state) {
-    switch (state) {
-      case 'reading':
-        return Icons.play_arrow_outlined;
-      case 'rereading':
-        return Icons.refresh;
-      case 'completed':
-        return Icons.check_circle_outline_outlined;
-      case 'paused':
-        return Icons.pause_circle_outline;
-      case 'dropped':
-        return Icons.delete_outline;
-      case 'plan_to_read':
-        return Icons.bookmark_border;
-      case 'considering':
-        return Icons.lightbulb_outline;
-      default:
-        return Icons.help_outline;
-    }
-  }
+  IconData _getIconForState(String state) => StatusIcons.forState(state);
 }
