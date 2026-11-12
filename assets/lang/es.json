@@ -50,6 +50,8 @@
     "content_preferences": "Preferencias de clasificación de contenido",
     "hide_library": "Ocultar obras de la biblioteca",
     "hide_library_subtext": "Ocultar de Explorar las obras de tu biblioteca.",
+    "auto_complete_chapters": "Autocompletar progreso de capítulos",
+    "auto_complete_chapters_subtitle": "Establecer el progreso al total de capítulos al marcar una serie como completada",
     "notifications": "Notificaciones",
     "push_notifications": "Notificaciones push",
     "push_notifications_subtext": "Recibir alertas de nuevos capítulos y actualizaciones",

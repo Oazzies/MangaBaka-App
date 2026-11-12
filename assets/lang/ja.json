@@ -48,6 +48,8 @@
     "content_preferences": "コンテンツ評価の設定",
     "hide_library": "ライブラリの作品を非表示",
     "hide_library_subtext": "ライブラリにある作品を検索結果から除外する",
+    "auto_complete_chapters": "章の進捗を自動設定",
+    "auto_complete_chapters_subtitle": "作品を完了にしたとき、章の進捗を総章数に自動設定する",
     "notifications": "通知",
     "push_notifications": "プッシュ通知",
     "push_notifications_subtext": "新刊や更新の通知を受け取る",

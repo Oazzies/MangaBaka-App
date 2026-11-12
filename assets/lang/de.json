@@ -48,6 +48,8 @@
     "content_preferences": "Inhaltsbewertungs-Präferenzen",
     "hide_library": "Bibliotheksserien ausblenden",
     "hide_library_subtext": "Bereits in der Bibliothek vorhandene Serien aus den Suchergebnissen ausschließen",
+    "auto_complete_chapters": "Kapitelfortschritt automatisch vervollständigen",
+    "auto_complete_chapters_subtitle": "Kapitelfortschritt beim Markieren einer Serie als abgeschlossen auf die Gesamtkapitelzahl setzen",
     "notifications": "Benachrichtigungen",
     "push_notifications": "Push-Benachrichtigungen",
     "push_notifications_subtext": "Benachrichtigungen für neue Kapitel und Updates erhalten",

@@ -243,11 +243,22 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
-  Future<void> updateEntryState(String seriesId, String newState) async {
+  Future<void> updateEntryState(
+    String seriesId,
+    String newState, {
+    int? progressChapter,
+  }) async {
     try {
       await (update(libraryEntriesTable)
             ..where((t) => t.seriesId.equals(seriesId)))
-          .write(LibraryEntriesTableCompanion(state: Value(newState)));
+          .write(
+            LibraryEntriesTableCompanion(
+              state: Value(newState),
+              progressChapter: progressChapter != null
+                  ? Value(progressChapter)
+                  : const Value.absent(),
+            ),
+          );
     } catch (e, st) {
       _logger.severe('Failed to update entry state', e, st);
       throw exc.DatabaseException(

@@ -7,6 +7,7 @@ import 'package:mangabaka_app/features/library/constants/library_constants.dart'
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/database/database.dart' as db;
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,14 +76,38 @@ mixin LibraryCrudMixin on LibraryServiceBase {
 
   // ── CRUD operations ───────────────────────────────────────────────────────
 
-  Future<void> updateLibraryEntryState(String seriesId, String state) async {
+  Future<void> updateLibraryEntryState(
+    String seriesId,
+    String state, {
+    int? totalChapters,
+  }) async {
     logger.info('Updating library entry state for $seriesId to: $state');
+    int? autoProgressChapter;
+    if (state == 'completed' &&
+        SettingsManager().autoCompleteChapterProgress) {
+      final existing = await database.libraryEntriesDao.getEntryBySeriesId(
+        seriesId,
+      );
+      final resolvedTotal =
+          totalChapters ?? int.tryParse(existing?.series.totalChapters ?? '');
+      final currentProgress = existing?.libraryEntry.progressChapter ?? 0;
+      if (resolvedTotal != null &&
+          resolvedTotal > 0 &&
+          currentProgress < resolvedTotal) {
+        autoProgressChapter = resolvedTotal;
+      }
+    }
+
     final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
     try {
+      final body = <String, dynamic>{
+        'state': state,
+        if (autoProgressChapter != null)
+          'progress_chapter': autoProgressChapter,
+      };
       final response = await _sendAuthorized(
         'Update state',
-        (headers) =>
-            http.put(url, headers: headers, body: jsonEncode({'state': state})),
+        (headers) => http.put(url, headers: headers, body: jsonEncode(body)),
       );
 
       if (response.statusCode != 200) {
@@ -97,7 +122,11 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         );
       }
 
-      await database.libraryEntriesDao.updateEntryState(seriesId, state);
+      await database.libraryEntriesDao.updateEntryState(
+        seriesId,
+        state,
+        progressChapter: autoProgressChapter,
+      );
       logger.info('Successfully updated state for $seriesId to $state in DB');
     } catch (e, st) {
       _rethrowAsAppException(e, st, seriesId, 'update entry state');

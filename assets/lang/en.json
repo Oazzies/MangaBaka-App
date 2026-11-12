@@ -50,6 +50,8 @@
     "content_preferences": "Content Rating Preferences",
     "hide_library": "Hide Library Series",
     "hide_library_subtext": "Exclude series already in your library from Browse search results",
+    "auto_complete_chapters": "Auto-Complete Chapter Progress",
+    "auto_complete_chapters_subtitle": "Set chapter progress to total chapters when marking a series as completed",
     "notifications": "Notifications",
     "push_notifications": "Push Notifications",
     "push_notifications_subtext": "Receive alerts for new chapters and updates",

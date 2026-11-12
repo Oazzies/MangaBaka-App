@@ -48,6 +48,8 @@
     "content_preferences": "Préférences de classification du contenu",
     "hide_library": "Masquer les séries de la bibliothèque",
     "hide_library_subtext": "Exclure les séries déjà présentes dans votre bibliothèque des résultats de recherche",
+    "auto_complete_chapters": "Compléter automatiquement la progression des chapitres",
+    "auto_complete_chapters_subtitle": "Définir la progression sur le total des chapitres lors du marquage comme terminé",
     "notifications": "Notifications",
     "push_notifications": "Notifications push",
     "push_notifications_subtext": "Recevoir des alertes pour les nouveaux chapitres et les mises à jour",

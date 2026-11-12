@@ -145,6 +145,10 @@ class SettingsManager extends ChangeNotifier {
     SettingsKeys.showLibraryTabCounts,
     true,
   );
+  final _autoCompleteChapterProgress = BoolSetting(
+    SettingsKeys.autoCompleteChapterProgress,
+    true,
+  );
 
   /// Whether https://mangabaka.org links should open inside the app
   /// rather than in a browser. Defaults to true on Android, false elsewhere.
@@ -246,6 +250,7 @@ class SettingsManager extends ChangeNotifier {
     _blurredContentRatings,
     _dismissedRecommendations,
     _openLinksInApp,
+    _autoCompleteChapterProgress,
   ];
 
   // ─── Lifecycle ───────────────────────────────────────────────────────────
@@ -421,6 +426,10 @@ class SettingsManager extends ChangeNotifier {
   String get addLibraryDefaultTab => _addLibraryDefaultTab.value;
   Future<void> setAddLibraryDefaultTab(String tabKey) =>
       _apply(_addLibraryDefaultTab, tabKey);
+
+  bool get autoCompleteChapterProgress => _autoCompleteChapterProgress.value;
+  Future<void> setAutoCompleteChapterProgress(bool value) =>
+      _apply(_autoCompleteChapterProgress, value);
 
   // ─── Recommendations ─────────────────────────────────────────────────────
 

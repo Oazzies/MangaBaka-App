@@ -10,6 +10,7 @@ import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/library/constants/library_constants.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/library/services/mixins/library_sync_mixin.dart';
@@ -32,6 +33,7 @@ void main() {
 
   setUp(() async {
     await resetServiceLocator();
+    SettingsManager.resetForTesting();
     getIt.registerSingleton<LoggingService>(LoggingService());
     SharedPreferences.setMockInitialValues({});
     db = AppDatabase.forTesting(NativeDatabase.memory());
@@ -53,6 +55,7 @@ void main() {
 
   tearDown(() async {
     await db.close();
+    SettingsManager.resetForTesting();
     await resetServiceLocator();
   });
 
@@ -77,6 +80,7 @@ void main() {
     String seriesId, {
     String state = 'reading',
     int? chapter,
+    String? totalChapters,
   }) async {
     await db.into(db.seriesTable).insert(
           SeriesTableCompanion.insert(
@@ -84,6 +88,7 @@ void main() {
             title: 'Series $seriesId',
             coverUrl: 'url',
             description: 'desc',
+            totalChapters: Value(totalChapters),
           ),
         );
     await db.into(db.libraryEntriesTable).insert(
@@ -170,6 +175,100 @@ void main() {
       );
       expect(storage.values[AuthStorage.kAccessToken], isNull);
       expect((await entryFor('42'))!.state, 'reading');
+    });
+
+    test(
+        'auto-sets progress_chapter from DB totalChapters when marking completed',
+        () async {
+      await seedEntry('42', chapter: 10, totalChapters: '83');
+
+      await withServer(
+        (_) async => http.Response('{}', 200),
+        () => service.updateLibraryEntryState('42', 'completed'),
+      );
+
+      expect(jsonDecode(requests.single.body), {
+        'state': 'completed',
+        'progress_chapter': 83,
+      });
+      final updated = (await entryFor('42'))!;
+      expect(updated.state, 'completed');
+      expect(updated.progressChapter, 83);
+    });
+
+    test(
+        'auto-sets progress_chapter from explicit totalChapters when marking completed',
+        () async {
+      await seedEntry('42', chapter: 5);
+
+      await withServer(
+        (_) async => http.Response('{}', 200),
+        () => service.updateLibraryEntryState(
+          '42',
+          'completed',
+          totalChapters: 50,
+        ),
+      );
+
+      expect(jsonDecode(requests.single.body), {
+        'state': 'completed',
+        'progress_chapter': 50,
+      });
+      final updated = (await entryFor('42'))!;
+      expect(updated.state, 'completed');
+      expect(updated.progressChapter, 50);
+    });
+
+    test(
+        'does not overwrite progress_chapter when already at or above totalChapters',
+        () async {
+      await seedEntry('42', chapter: 85, totalChapters: '83');
+
+      await withServer(
+        (_) async => http.Response('{}', 200),
+        () => service.updateLibraryEntryState('42', 'completed'),
+      );
+
+      expect(jsonDecode(requests.single.body), {'state': 'completed'});
+      final updated = (await entryFor('42'))!;
+      expect(updated.state, 'completed');
+      expect(updated.progressChapter, 85);
+    });
+
+    test(
+        'leaves state and progressChapter untouched when completing fails on server',
+        () async {
+      await seedEntry('42', chapter: 10, totalChapters: '83');
+
+      await expectLater(
+        withServer(
+          (_) async => http.Response('boom', 500),
+          () => service.updateLibraryEntryState('42', 'completed'),
+        ),
+        throwsA(isA<ApiException>()),
+      );
+
+      final existing = (await entryFor('42'))!;
+      expect(existing.state, 'reading');
+      expect(existing.progressChapter, 10);
+    });
+
+    test(
+        'does not auto-set progress_chapter when autoCompleteChapterProgress is disabled',
+        () async {
+      await SettingsManager().init();
+      await SettingsManager().setAutoCompleteChapterProgress(false);
+      await seedEntry('42', chapter: 10, totalChapters: '83');
+
+      await withServer(
+        (_) async => http.Response('{}', 200),
+        () => service.updateLibraryEntryState('42', 'completed'),
+      );
+
+      expect(jsonDecode(requests.single.body), {'state': 'completed'});
+      final updated = (await entryFor('42'))!;
+      expect(updated.state, 'completed');
+      expect(updated.progressChapter, 10);
     });
   });
 

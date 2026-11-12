@@ -156,7 +156,11 @@ class SeriesDetailBody extends StatelessWidget {
     final id = series.id;
 
     final library = state.libraryService;
-    void setState(String value) => library.updateLibraryEntryState(id, value);
+    void setState(String value) => library.updateLibraryEntryState(
+      id,
+      value,
+      totalChapters: int.tryParse(series.totalChapters),
+    );
     void setRating(int rating) => library.updateLibraryEntryRating(id, rating);
 
     // Progress and rating dialogs need an entry to edit; without one in the

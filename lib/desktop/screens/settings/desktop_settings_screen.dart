@@ -696,6 +696,16 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
             ),
           ),
           const Divider(height: 24),
+          DesktopSettingRow(
+            icon: Icons.check_circle_outline,
+            title: l10n.translate('auto_complete_chapters'),
+            subtitle: l10n.translate('auto_complete_chapters_subtitle'),
+            control: Switch(
+              value: settings.autoCompleteChapterProgress,
+              onChanged: settings.setAutoCompleteChapterProgress,
+            ),
+          ),
+          const Divider(height: 24),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -50,6 +50,8 @@
     "content_preferences": "সমলৰ ৰেটিং পচন্দ",
     "hide_library": "পুথিভঁৰালৰ ধাৰাবাহিক লুকুৱাওক",
     "hide_library_subtext": "পুথিভঁৰালত ইতিমধ্যে থকা ধাৰাবাহিকসমূহ ব্ৰাউজৰ সন্ধান ফলাফলত নেদেখুৱাব",
+    "auto_complete_chapters": "অধ্যায়ৰ অগ্ৰগতি স্বয়ংক্ৰিয়ভাৱে সম্পূৰ্ণ কৰক",
+    "auto_complete_chapters_subtitle": "ধাৰাবাহিক সম্পূৰ্ণ হিচাপে চিহ্নিত কৰিলে অধ্যায়ৰ অগ্ৰগতি মুঠ অধ্যায়লৈ চেট কৰক",
     "notifications": "অধিসূচনা",
     "push_notifications": "পুশ অধিসূচনা",
     "push_notifications_subtext": "নতুন অধ্যায় আৰু আপডেটৰ সতৰ্কবাৰ্তা লাভ কৰক",

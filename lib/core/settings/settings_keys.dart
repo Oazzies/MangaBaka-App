@@ -86,4 +86,6 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}dismissed_recommendations';
   static const String openLinksInApp =
       '${AppConstants.prefixStorageKey}open_links_in_app';
+  static const String autoCompleteChapterProgress =
+      '${AppConstants.prefixStorageKey}auto_complete_chapter_progress';
 }
