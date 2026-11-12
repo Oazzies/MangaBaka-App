@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/widgets/complete_progress_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/layouts/series_detail_mobile_layout.dart';
 import 'package:mangabaka_app/features/series/widgets/layouts/series_detail_wide_layout.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_app_bar.dart';
@@ -128,6 +130,7 @@ class SeriesDetailBody extends StatelessWidget {
                         maxWidth: _maxContentWidth,
                       ),
                       child: _layout(
+                        context: context,
                         series: series,
                         entry: snapshot.data,
                         isLoaded: isLoaded,
@@ -147,6 +150,7 @@ class SeriesDetailBody extends StatelessWidget {
   }
 
   Widget _layout({
+    required BuildContext context,
     required Series series,
     required LibraryEntry? entry,
     required bool isLoaded,
@@ -156,11 +160,51 @@ class SeriesDetailBody extends StatelessWidget {
     final id = series.id;
 
     final library = state.libraryService;
-    void setState(String value) => library.updateLibraryEntryState(
-      id,
-      value,
-      totalChapters: int.tryParse(series.totalChapters),
-    );
+    Future<void> setState(String value) async {
+      final totalChapters = int.tryParse(series.totalChapters);
+      final totalVolumes = int.tryParse(series.finalVolume);
+
+      if (value == 'completed' &&
+          settings.autoCompleteChapterProgress ==
+              AutoCompleteProgressMode.prompt) {
+        final currentChapter = entry?.progressChapter ?? 0;
+        final currentVolume = entry?.progressVolume ?? 0;
+        final chaptersCanUpdate =
+            totalChapters != null &&
+            totalChapters > 0 &&
+            currentChapter < totalChapters;
+        final volumesCanUpdate =
+            totalVolumes != null &&
+            totalVolumes > 0 &&
+            currentVolume < totalVolumes;
+
+        if (chaptersCanUpdate || volumesCanUpdate) {
+          final choice = await showCompleteProgressDialog(
+            context,
+            currentChapter: currentChapter,
+            totalChapters: totalChapters,
+            currentVolume: currentVolume,
+            totalVolumes: totalVolumes,
+          );
+          await library.updateLibraryEntryState(
+            id,
+            value,
+            totalChapters: totalChapters,
+            totalVolumes: totalVolumes,
+            completeChapters: choice?.updateChapters ?? false,
+            completeVolumes: choice?.updateVolumes ?? false,
+          );
+          return;
+        }
+      }
+
+      await library.updateLibraryEntryState(
+        id,
+        value,
+        totalChapters: totalChapters,
+        totalVolumes: totalVolumes,
+      );
+    }
     void setRating(int rating) => library.updateLibraryEntryRating(id, rating);
 
     // Progress and rating dialogs need an entry to edit; without one in the

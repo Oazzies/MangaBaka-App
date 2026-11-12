@@ -145,9 +145,10 @@ class SettingsManager extends ChangeNotifier {
     SettingsKeys.showLibraryTabCounts,
     true,
   );
-  final _autoCompleteChapterProgress = BoolSetting(
+  final _autoCompleteChapterProgress = EnumSetting(
     SettingsKeys.autoCompleteChapterProgress,
-    true,
+    AutoCompleteProgressMode.prompt,
+    AutoCompleteProgressMode.values,
   );
 
   /// Whether https://mangabaka.org links should open inside the app
@@ -266,6 +267,18 @@ class SettingsManager extends ChangeNotifier {
     }
     if (!prefs.containsKey(SettingsKeys.stacksGridColumnCount)) {
       _stacksGridColumnCount.set(_browseGridColumnCount.value);
+    }
+    // Migrate legacy bool autoCompleteChapterProgress to AutoCompleteProgressMode.
+    final legacyAutoComplete = prefs.get(
+      SettingsKeys.autoCompleteChapterProgress,
+    );
+    if (legacyAutoComplete is bool) {
+      _autoCompleteChapterProgress.set(
+        legacyAutoComplete
+            ? AutoCompleteProgressMode.always
+            : AutoCompleteProgressMode.never,
+      );
+      await _autoCompleteChapterProgress.persist(prefs);
     }
     notifyListeners();
   }
@@ -427,9 +440,11 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setAddLibraryDefaultTab(String tabKey) =>
       _apply(_addLibraryDefaultTab, tabKey);
 
-  bool get autoCompleteChapterProgress => _autoCompleteChapterProgress.value;
-  Future<void> setAutoCompleteChapterProgress(bool value) =>
-      _apply(_autoCompleteChapterProgress, value);
+  AutoCompleteProgressMode get autoCompleteChapterProgress =>
+      _autoCompleteChapterProgress.value;
+  Future<void> setAutoCompleteChapterProgress(
+    AutoCompleteProgressMode mode,
+  ) => _apply(_autoCompleteChapterProgress, mode);
 
   // ─── Recommendations ─────────────────────────────────────────────────────
 

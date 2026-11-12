@@ -7,6 +7,7 @@ import 'package:mangabaka_app/features/library/constants/library_constants.dart'
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/database/database.dart' as db;
+import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,21 +81,45 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     String seriesId,
     String state, {
     int? totalChapters,
+    int? totalVolumes,
+    bool? completeChapters,
+    bool? completeVolumes,
   }) async {
     logger.info('Updating library entry state for $seriesId to: $state');
     int? autoProgressChapter;
-    if (state == 'completed' &&
-        SettingsManager().autoCompleteChapterProgress) {
-      final existing = await database.libraryEntriesDao.getEntryBySeriesId(
-        seriesId,
-      );
-      final resolvedTotal =
-          totalChapters ?? int.tryParse(existing?.series.totalChapters ?? '');
-      final currentProgress = existing?.libraryEntry.progressChapter ?? 0;
-      if (resolvedTotal != null &&
-          resolvedTotal > 0 &&
-          currentProgress < resolvedTotal) {
-        autoProgressChapter = resolvedTotal;
+    int? autoProgressVolume;
+    if (state == 'completed') {
+      final mode = SettingsManager().autoCompleteChapterProgress;
+      final shouldCompleteChapters =
+          completeChapters ?? (mode == AutoCompleteProgressMode.always);
+      final shouldCompleteVolumes =
+          completeVolumes ?? (mode == AutoCompleteProgressMode.always);
+
+      if (shouldCompleteChapters || shouldCompleteVolumes) {
+        final existing = await database.libraryEntriesDao.getEntryBySeriesId(
+          seriesId,
+        );
+        if (shouldCompleteChapters) {
+          final resolvedTotal =
+              totalChapters ??
+              int.tryParse(existing?.series.totalChapters ?? '');
+          final currentProgress = existing?.libraryEntry.progressChapter ?? 0;
+          if (resolvedTotal != null &&
+              resolvedTotal > 0 &&
+              currentProgress < resolvedTotal) {
+            autoProgressChapter = resolvedTotal;
+          }
+        }
+        if (shouldCompleteVolumes) {
+          final resolvedVolumes =
+              totalVolumes ?? int.tryParse(existing?.series.finalVolume ?? '');
+          final currentVolume = existing?.libraryEntry.progressVolume ?? 0;
+          if (resolvedVolumes != null &&
+              resolvedVolumes > 0 &&
+              currentVolume < resolvedVolumes) {
+            autoProgressVolume = resolvedVolumes;
+          }
+        }
       }
     }
 
@@ -104,6 +129,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         'state': state,
         if (autoProgressChapter != null)
           'progress_chapter': autoProgressChapter,
+        if (autoProgressVolume != null) 'progress_volume': autoProgressVolume,
       };
       final response = await _sendAuthorized(
         'Update state',
@@ -126,6 +152,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
         seriesId,
         state,
         progressChapter: autoProgressChapter,
+        progressVolume: autoProgressVolume,
       );
       logger.info('Successfully updated state for $seriesId to $state in DB');
     } catch (e, st) {

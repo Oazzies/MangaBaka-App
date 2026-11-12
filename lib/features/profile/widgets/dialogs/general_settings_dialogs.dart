@@ -179,4 +179,30 @@ class GeneralSettingsDialogs {
           SettingsManager().setLandscapeAppBarPosition(position),
     );
   }
+
+  static String getAutoCompleteProgressModeName(AutoCompleteProgressMode mode) {
+    final l10n = LocalizationService();
+    switch (mode) {
+      case AutoCompleteProgressMode.prompt:
+        return l10n.translate('auto_complete_prompt');
+      case AutoCompleteProgressMode.always:
+        return l10n.translate('auto_complete_always');
+      case AutoCompleteProgressMode.never:
+        return l10n.translate('auto_complete_never');
+    }
+  }
+
+  static void showAutoCompleteProgressSelectionDialog(BuildContext context) {
+    final l10n = LocalizationService();
+    SelectionBottomSheet.showSelectionBottomSheet<AutoCompleteProgressMode>(
+      context: context,
+      title: l10n.translate('auto_complete_chapters'),
+      subtitle: l10n.translate('auto_complete_chapters_subtitle'),
+      options: AutoCompleteProgressMode.values,
+      currentValue: SettingsManager().autoCompleteChapterProgress,
+      getLabel: getAutoCompleteProgressModeName,
+      onSelected: (mode) =>
+          SettingsManager().setAutoCompleteChapterProgress(mode),
+    );
+  }
 }

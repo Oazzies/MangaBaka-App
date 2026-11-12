@@ -70,3 +70,6 @@ enum LandscapeAppBarPosition { bottom, left, right }
 
 /// Which palette slot the app shows: follow the OS, or pin light or dark.
 enum AppThemeMode { system, light, dark }
+
+/// Behavior for chapter and volume progress when marking a series as completed.
+enum AutoCompleteProgressMode { prompt, always, never }

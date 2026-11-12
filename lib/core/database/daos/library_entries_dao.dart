@@ -247,6 +247,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     String seriesId,
     String newState, {
     int? progressChapter,
+    int? progressVolume,
   }) async {
     try {
       await (update(libraryEntriesTable)
@@ -256,6 +257,9 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
               state: Value(newState),
               progressChapter: progressChapter != null
                   ? Value(progressChapter)
+                  : const Value.absent(),
+              progressVolume: progressVolume != null
+                  ? Value(progressVolume)
                   : const Value.absent(),
             ),
           );

@@ -700,9 +700,21 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
             icon: Icons.check_circle_outline,
             title: l10n.translate('auto_complete_chapters'),
             subtitle: l10n.translate('auto_complete_chapters_subtitle'),
-            control: Switch(
-              value: settings.autoCompleteChapterProgress,
-              onChanged: settings.setAutoCompleteChapterProgress,
+            control: DesktopMenuButton<AutoCompleteProgressMode>(
+              valueLabel:
+                  GeneralSettingsDialogs.getAutoCompleteProgressModeName(
+                    settings.autoCompleteChapterProgress,
+                  ),
+              items: AutoCompleteProgressMode.values
+                  .map(
+                    (m) => (
+                      m,
+                      GeneralSettingsDialogs.getAutoCompleteProgressModeName(m),
+                    ),
+                  )
+                  .toList(),
+              selected: settings.autoCompleteChapterProgress,
+              onSelected: settings.setAutoCompleteChapterProgress,
             ),
           ),
           const Divider(height: 24),

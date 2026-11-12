@@ -107,5 +107,45 @@ void main() {
       await manager.setCompactGridTitleRows(0);
       expect(manager.compactGridTitleRows, 1); // Clamped to 1
     });
+
+    test('autoCompleteChapterProgress defaults to prompt and persists', () async {
+      final manager = SettingsManager();
+      await manager.init();
+
+      expect(manager.autoCompleteChapterProgress, AutoCompleteProgressMode.prompt);
+
+      await manager.setAutoCompleteChapterProgress(
+        AutoCompleteProgressMode.always,
+      );
+      expect(manager.autoCompleteChapterProgress, AutoCompleteProgressMode.always);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getInt(SettingsKeys.autoCompleteChapterProgress),
+        AutoCompleteProgressMode.always.index,
+      );
+    });
+
+    test('migrates legacy bool autoCompleteChapterProgress on init', () async {
+      SharedPreferences.setMockInitialValues({
+        SettingsKeys.autoCompleteChapterProgress: false,
+      });
+
+      final manager = SettingsManager();
+      await manager.init();
+
+      expect(manager.autoCompleteChapterProgress, AutoCompleteProgressMode.never);
+
+      SettingsManager.resetForTesting();
+      SharedPreferences.setMockInitialValues({
+        SettingsKeys.autoCompleteChapterProgress: true,
+      });
+
+      await SettingsManager().init();
+      expect(
+        SettingsManager().autoCompleteChapterProgress,
+        AutoCompleteProgressMode.always,
+      );
+    });
   });
 }

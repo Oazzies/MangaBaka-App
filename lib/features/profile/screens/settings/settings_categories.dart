@@ -238,12 +238,17 @@ class SettingsCategories {
                 onChanged: settings.setHideLibrarySeriesInBrowse,
               ),
               const SettingsDivider(),
-              SettingsSwitchItem(
+              SettingsItem(
                 icon: Icons.check_circle_outline,
                 title: l10n.translate('auto_complete_chapters'),
-                subtitle: l10n.translate('auto_complete_chapters_subtitle'),
-                value: settings.autoCompleteChapterProgress,
-                onChanged: settings.setAutoCompleteChapterProgress,
+                subtitle:
+                    GeneralSettingsDialogs.getAutoCompleteProgressModeName(
+                      settings.autoCompleteChapterProgress,
+                    ),
+                onTap: () =>
+                    GeneralSettingsDialogs.showAutoCompleteProgressSelectionDialog(
+                      ctx,
+                    ),
                 isLast: true,
               ),
             ],
