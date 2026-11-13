@@ -1,28 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 import 'package:mangabaka_app/core/theme/palette/palette_derivation.dart';
+import 'package:mangabaka_app/core/theme/presets/default_palette.dart';
 import 'package:mangabaka_app/core/theme/presets/theme_preset.dart';
 
-/// The app's original palette, spelled out token by token rather than derived
-/// so the default theme stays pixel-identical to the pre-theming design.
-const MbPalette inkPalette = MbPalette(
-  brightness: Brightness.dark,
-  background: Color(0xFF0B0B0B),
-  surface: Color(0xFF151515),
-  surfaceRaised: Color(0xFF1F1F1F),
-  border: Color(0xFF262626),
-  accent: Color(0xFF5BBD74),
-  onAccent: Color(0xFF0B140D),
-  star: Color(0xFFFBD24B),
-  success: Color(0xFF4ADE80),
-  warning: Color(0xFFFBD24B),
-  error: Color(0xFFF87171),
-  info: Color(0xFF60A5FA),
-  text: Color(0xFFFFFFFF),
-  textMuted: Color(0xFF8E8E8E),
-  shadow: Color(0x66000000),
-  scrim: Color(0x99000000),
-);
+export 'package:mangabaka_app/core/theme/presets/default_palette.dart'
+    show inkPalette;
 
 /// Every built-in theme, in display order.
 ///
@@ -306,17 +288,5 @@ class ThemePresets {
     ),
   ];
 
-  /// Accent swatches offered by the accent picker, on top of "theme default".
-  static const List<Color> accentSwatches = [
-    Color(0xFF5BBD74), // emerald
-    Color(0xFFFBD24B), // amber
-    Color(0xFFFB923C), // orange
-    Color(0xFFF43F5E), // rose
-    Color(0xFFF472B6), // pink
-    Color(0xFFA78BFA), // violet
-    Color(0xFF60A5FA), // blue
-    Color(0xFF22D3EE), // cyan
-    Color(0xFF2DD4BF), // teal
-    Color(0xFFA3E635), // lime
-  ];
+  static const List<Color> accentSwatches = presetAccentSwatches;
 }

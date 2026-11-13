@@ -294,10 +294,6 @@ class MbPalette {
   @override
   int get hashCode => Object.hash(brightness, Object.hashAll(tokens.values));
 
-  static bool _mapEquals(Map<String, Color> a, Map<String, Color> b) {
-    for (final k in a.keys) {
-      if (a[k] != b[k]) return false;
-    }
-    return true;
-  }
+  static bool _mapEquals(Map<String, Color> a, Map<String, Color> b) =>
+      a.keys.every((k) => a[k] == b[k]);
 }

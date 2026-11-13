@@ -1,10 +1,12 @@
+﻿part 'prepared_query_part.dart';
+
 /// Utilities for normalizing and matching local search queries against titles,
 /// names, and filter labels.
 ///
 /// Handles the common differences between what a user types and how titles are
-/// formatted: apostrophes/quotes (`can't` / `cant` / `can’t`), hyphens and
+/// formatted: apostrophes/quotes (`can't` / `cant` / `canâ€™t`), hyphens and
 /// punctuation (`Kaguya-sama` / `kaguya sama` / `kaguyasama`, `Re:Zero` /
-/// `re zero` / `rezero`), diacritics/macrons (`Yū Yū` / `yu yu`, `Pokémon` /
+/// `re zero` / `rezero`), diacritics/macrons (`YÅ« YÅ«` / `yu yu`, `PokÃ©mon` /
 /// `pokemon`), full-width characters, and multi-word queries.
 class SearchUtils {
   SearchUtils._();
@@ -17,7 +19,7 @@ class SearchUtils {
   ///
   /// - Full-width ASCII and ideographic spaces are folded to half-width.
   /// - When [keepApostrophes] is `false` (default), apostrophes and quotation
-  ///   marks are removed without inserting spaces, so `can't` and `can’t` both
+  ///   marks are removed without inserting spaces, so `can't` and `canâ€™t` both
   ///   become `cant`. When `true`, they are canonicalized to `'`, so queries
   ///   that explicitly include an apostrophe (like `Can'` or `Can't`) only
   ///   match candidates that also have one.
@@ -118,50 +120,50 @@ class SearchUtils {
     0x0027, // '
     0x0022, // "
     0x0060, // `
-    0x00B4, // ´
-    0x02BC, // ʼ
-    0x2018, // ‘
-    0x2019, // ’
-    0x201C, // “
-    0x201D, // ”
-    0x2032, // ′
-    0x2033, // ″
+    0x00B4, // Â´
+    0x02BC, // Ê¼
+    0x2018, // â€˜
+    0x2019, // â€™
+    0x201C, // â€œ
+    0x201D, // â€
+    0x2032, // â€²
+    0x2033, // â€³
   };
 
   static const Set<int> _unicodeSeparators = {
     0x00A0, // non-breaking space
-    0x00B7, // ·
-    0x00D7, // ×
-    0x00F7, // ÷
-    0x2010, // ‐
-    0x2011, // ‑
-    0x2012, // ‒
-    0x2013, // –
-    0x2014, // —
-    0x2015, // ―
-    0x2022, // •
-    0x2026, // …
-    0x2212, // −
-    0x2605, // ★
-    0x2606, // ☆
-    0x2661, // ♡
-    0x2665, // ♥
-    0x266A, // ♪
-    0x266B, // ♫
-    0x3001, // 、
-    0x3002, // 。
-    0x3008, // 〈
-    0x3009, // 〉
-    0x300A, // 《
-    0x300B, // 》
-    0x300C, // 「
-    0x300D, // 」
-    0x300E, // 『
-    0x300F, // 』
-    0x3010, // 【
-    0x3011, // 】
-    0x301C, // 〜
-    0x30FB, // ・
+    0x00B7, // Â·
+    0x00D7, // Ã—
+    0x00F7, // Ã·
+    0x2010, // â€
+    0x2011, // â€‘
+    0x2012, // â€’
+    0x2013, // â€“
+    0x2014, // â€”
+    0x2015, // â€•
+    0x2022, // â€¢
+    0x2026, // â€¦
+    0x2212, // âˆ’
+    0x2605, // â˜…
+    0x2606, // â˜†
+    0x2661, // â™¡
+    0x2665, // â™¥
+    0x266A, // â™ª
+    0x266B, // â™«
+    0x3001, // ã€
+    0x3002, // ã€‚
+    0x3008, // ã€ˆ
+    0x3009, // ã€‰
+    0x300A, // ã€Š
+    0x300B, // ã€‹
+    0x300C, // ã€Œ
+    0x300D, // ã€
+    0x300E, // ã€Ž
+    0x300F, // ã€
+    0x3010, // ã€
+    0x3011, // ã€‘
+    0x301C, // ã€œ
+    0x30FB, // ãƒ»
   };
 
   static const Map<int, String> _latinFold = {
@@ -230,92 +232,9 @@ class SearchUtils {
     0x0179: 'z', 0x017B: 'z', 0x017D: 'z',
     0x017A: 'z', 0x017C: 'z', 0x017E: 'z',
     // Ligatures / special
-    0x00DF: 'ss', // ß
-    0x1E9E: 'ss', // ẞ
-    0x00C6: 'ae', 0x00E6: 'ae', // Æ / æ
-    0x0152: 'oe', 0x0153: 'oe', // Œ / œ
+    0x00DF: 'ss', // ÃŸ
+    0x1E9E: 'ss', // áºž
+    0x00C6: 'ae', 0x00E6: 'ae', // Ã† / Ã¦
+    0x0152: 'oe', 0x0153: 'oe', // Å’ / Å“
   };
-}
-
-/// A pre-normalized search query for matching against candidate strings.
-class PreparedQuery {
-  final String rawLower;
-  final bool keepApostrophes;
-  final String normalized;
-  final List<String> words;
-  final String compact;
-
-  PreparedQuery._(String query)
-    : this._fromNormalized(
-        rawLower: query.trim().toLowerCase(),
-        keepApostrophes: SearchUtils.containsApostrophe(query),
-        normalized: SearchUtils.normalize(
-          query,
-          keepApostrophes: SearchUtils.containsApostrophe(query),
-        ),
-      );
-
-  PreparedQuery._fromNormalized({
-    required this.rawLower,
-    required this.keepApostrophes,
-    required this.normalized,
-  }) : words = _splitWords(normalized),
-       compact = normalized.replaceAll(' ', '');
-
-  static List<String> _splitWords(String normalized) =>
-      normalized.isEmpty ? const [] : normalized.split(' ');
-
-  /// True when the query has no non-whitespace characters.
-  bool get isEmpty => rawLower.isEmpty;
-
-  /// True when [candidate] matches this query.
-  bool matches(String candidate) {
-    if (isEmpty) return true;
-    if (candidate.isEmpty) return false;
-    if (normalized.isEmpty) {
-      return candidate.toLowerCase().contains(rawLower);
-    }
-    final norm = SearchUtils.normalize(
-      candidate,
-      keepApostrophes: keepApostrophes,
-    );
-    if (norm.isEmpty) return false;
-    if (words.length <= 1) {
-      return norm.contains(normalized) ||
-          norm.replaceAll(' ', '').contains(compact);
-    }
-    return words.every(norm.contains) ||
-        norm.replaceAll(' ', '').contains(compact);
-  }
-
-  /// True when [candidate] starts with this query after normalization.
-  bool startsWith(String candidate) {
-    if (isEmpty) return true;
-    if (candidate.isEmpty) return false;
-    if (normalized.isEmpty) {
-      return candidate.toLowerCase().startsWith(rawLower);
-    }
-    final norm = SearchUtils.normalize(
-      candidate,
-      keepApostrophes: keepApostrophes,
-    );
-    if (norm.isEmpty) return false;
-    return norm.startsWith(normalized) ||
-        norm.replaceAll(' ', '').startsWith(compact);
-  }
-
-  /// True when [candidate] is an exact match for this query after normalization.
-  bool exactMatch(String candidate) {
-    if (isEmpty) return candidate.trim().isEmpty;
-    if (candidate.isEmpty) return false;
-    if (normalized.isEmpty) {
-      return candidate.trim().toLowerCase() == rawLower;
-    }
-    final norm = SearchUtils.normalize(
-      candidate,
-      keepApostrophes: keepApostrophes,
-    );
-    if (norm.isEmpty) return false;
-    return norm == normalized || norm.replaceAll(' ', '') == compact;
-  }
 }

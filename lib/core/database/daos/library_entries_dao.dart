@@ -6,156 +6,137 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
   final _logger = LoggingService.logger;
   LibraryEntriesDao(super.db);
 
-  /// Which of [seriesIds] are in the library, with their covers. Asks the
-  /// database about just those series instead of reading the whole library, so
-  /// the cost follows the question, not a library of tens of thousands.
+  Future<T> _guard<T>(String message, Future<T> Function() run) async {
+    try {
+      return await run();
+    } catch (e, st) {
+      _logger.severe(message, e, st);
+      throw exc.DatabaseException(
+        message: message,
+        originalError: e,
+        stackTrace: st,
+      );
+    }
+  }
+
+  Stream<T> _guardStream<T>(String message, Stream<T> Function() run) {
+    try {
+      return run();
+    } catch (e, st) {
+      _logger.severe(message, e, st);
+      throw exc.DatabaseException(
+        message: message,
+        originalError: e,
+        stackTrace: st,
+      );
+    }
+  }
+
+  /// Which of [seriesIds] are in the library, with their covers.
   Future<Map<String, String>> libraryCoversFor(
     Iterable<String> seriesIds,
-  ) async {
+  ) => _guard('Failed to look up library series', () async {
     final ids = seriesIds.toSet().toList();
     final covers = <String, String>{};
-    try {
-      for (var i = 0; i < ids.length; i += 500) {
-        final chunk = ids.sublist(
-          i,
-          i + 500 > ids.length ? ids.length : i + 500,
-        );
-        final query =
-            selectOnly(libraryEntriesTable).join([
-                innerJoin(
-                  seriesTable,
-                  seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-                ),
-              ])
-              ..addColumns([seriesTable.id, seriesTable.coverUrl])
-              ..where(libraryEntriesTable.seriesId.isIn(chunk));
-        for (final row in await query.get()) {
-          covers[row.read(seriesTable.id)!] = row.read(seriesTable.coverUrl)!;
-        }
+    for (var i = 0; i < ids.length; i += 500) {
+      final chunk = ids.sublist(
+        i,
+        i + 500 > ids.length ? ids.length : i + 500,
+      );
+      final query =
+          selectOnly(libraryEntriesTable).join([
+              innerJoin(
+                seriesTable,
+                seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+              ),
+            ])
+            ..addColumns([seriesTable.id, seriesTable.coverUrl])
+            ..where(libraryEntriesTable.seriesId.isIn(chunk));
+      for (final row in await query.get()) {
+        covers[row.read(seriesTable.id)!] = row.read(seriesTable.coverUrl)!;
       }
-      return covers;
-    } catch (e, st) {
-      _logger.severe('Failed to look up library series', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to look up library series',
-        originalError: e,
-        stackTrace: st,
-      );
     }
-  }
+    return covers;
+  });
 
-  Future<LibraryEntryWithSeries?> getEntryBySeriesId(String seriesId) async {
-    try {
-      final query = select(libraryEntriesTable).join([
-        innerJoin(
-          seriesTable,
-          seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-        ),
-      ])..where(libraryEntriesTable.seriesId.equals(seriesId));
+  Future<LibraryEntryWithSeries?> getEntryBySeriesId(String seriesId) =>
+      _guard('Failed to get entry by series ID', () async {
+        final query = select(libraryEntriesTable).join([
+          innerJoin(
+            seriesTable,
+            seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+          ),
+        ])..where(libraryEntriesTable.seriesId.equals(seriesId));
 
-      final row = await query.getSingleOrNull();
-      if (row == null) return null;
-      return LibraryEntryWithSeries(
-        libraryEntry: row.readTable(libraryEntriesTable),
-        series: row.readTable(seriesTable),
-      );
-    } catch (e, st) {
-      _logger.severe('Failed to get entry by series ID', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to get entry by series ID',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
-
-  /// The stored entry rows for [seriesIds], keyed by series id. Series rows
-  /// are not joined: callers compare the entry fields only.
-  Future<Map<String, LibraryEntriesTableData>> getEntriesBySeriesIds(
-    Iterable<String> seriesIds,
-  ) async {
-    final ids = seriesIds.toList();
-    if (ids.isEmpty) return {};
-    try {
-      final rows = await (select(
-        libraryEntriesTable,
-      )..where((t) => t.seriesId.isIn(ids))).get();
-      return {for (final r in rows) r.seriesId: r};
-    } catch (e, st) {
-      _logger.severe('Failed to get entries by series IDs', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to get entries by series IDs',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
-
-  Stream<LibraryEntryWithSeries?> watchEntryWithSeries(String seriesId) {
-    try {
-      final query = select(libraryEntriesTable).join([
-        innerJoin(
-          seriesTable,
-          seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-        ),
-      ])..where(libraryEntriesTable.seriesId.equals(seriesId));
-
-      return query.watchSingleOrNull().map((row) {
+        final row = await query.getSingleOrNull();
         if (row == null) return null;
         return LibraryEntryWithSeries(
           libraryEntry: row.readTable(libraryEntriesTable),
           series: row.readTable(seriesTable),
         );
       });
-    } catch (e, st) {
-      _logger.severe('Failed to watch entry with series', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to watch entry with series',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
+
+  Future<Map<String, LibraryEntriesTableData>> getEntriesBySeriesIds(
+    Iterable<String> seriesIds,
+  ) {
+    final ids = seriesIds.toList();
+    if (ids.isEmpty) return Future.value({});
+    return _guard('Failed to get entries by series IDs', () async {
+      final rows = await (select(
+        libraryEntriesTable,
+      )..where((t) => t.seriesId.isIn(ids))).get();
+      return {for (final r in rows) r.seriesId: r};
+    });
   }
 
-  Stream<List<LibraryEntryWithSeries>> watchAllEntriesWithSeries() {
-    try {
-      final query = select(libraryEntriesTable).join([
-        innerJoin(
-          seriesTable,
-          seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
-        ),
-      ]);
+  Stream<LibraryEntryWithSeries?> watchEntryWithSeries(String seriesId) =>
+      _guardStream('Failed to watch entry with series', () {
+        final query = select(libraryEntriesTable).join([
+          innerJoin(
+            seriesTable,
+            seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+          ),
+        ])..where(libraryEntriesTable.seriesId.equals(seriesId));
 
-      return query.watch().map((rows) {
-        return rows
-            .map(
-              (row) => LibraryEntryWithSeries(
-                libraryEntry: row.readTable(libraryEntriesTable),
-                series: row.readTable(seriesTable),
-              ),
-            )
-            .toList();
+        return query.watchSingleOrNull().map((row) {
+          if (row == null) return null;
+          return LibraryEntryWithSeries(
+            libraryEntry: row.readTable(libraryEntriesTable),
+            series: row.readTable(seriesTable),
+          );
+        });
       });
-    } catch (e, st) {
-      _logger.severe('Failed to watch all entries with series', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to watch all entries with series',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
 
-  Future<void> upsertLibraryEntries(List<api.LibraryEntry> entries) async {
-    if (entries.isEmpty) return;
-    try {
+  Stream<List<LibraryEntryWithSeries>> watchAllEntriesWithSeries() =>
+      _guardStream('Failed to watch all entries with series', () {
+        final query = select(libraryEntriesTable).join([
+          innerJoin(
+            seriesTable,
+            seriesTable.id.equalsExp(libraryEntriesTable.seriesId),
+          ),
+        ]);
+
+        return query.watch().map((rows) {
+          return rows
+              .map(
+                (row) => LibraryEntryWithSeries(
+                  libraryEntry: row.readTable(libraryEntriesTable),
+                  series: row.readTable(seriesTable),
+                ),
+              )
+              .toList();
+        });
+      });
+
+  Future<void> upsertLibraryEntries(List<api.LibraryEntry> entries) {
+    if (entries.isEmpty) return Future.value();
+    return _guard('Failed to upsert library entries', () async {
       await db.transaction(() async {
         final uniqueSeriesIds = entries
             .map((e) => e.series.id)
             .toSet()
             .toList();
 
-        // Delete any existing entries for these series to prevent duplicates
         await (delete(
           db.libraryEntriesTable,
         )..where((t) => t.seriesId.isIn(uniqueSeriesIds))).go();
@@ -179,30 +160,20 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           );
         });
       });
-    } catch (e, st) {
-      _logger.severe('Failed to upsert library entries', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to upsert library entries',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
+    });
   }
 
-  /// Applies a page of the library change feed: `entry` upserts (the feed's
-  /// `current` objects) replace the stored row for their series, and the
-  /// deleted series lose theirs.
   Future<void> applyFeedChanges({
     required List<Map<String, dynamic>> upserts,
     required List<String> deletedSeriesIds,
-  }) async {
-    if (upserts.isEmpty && deletedSeriesIds.isEmpty) return;
+  }) {
+    if (upserts.isEmpty && deletedSeriesIds.isEmpty) return Future.value();
     int? asInt(Object? v) => switch (v) {
       final num n => n.toInt(),
       final String s => num.tryParse(s)?.toInt(),
       _ => null,
     };
-    try {
+    return _guard('Failed to apply library changes', () async {
       await db.transaction(() async {
         final replaced = [
           ...deletedSeriesIds,
@@ -233,14 +204,7 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
           ], mode: InsertMode.insertOrReplace);
         });
       });
-    } catch (e, st) {
-      _logger.severe('Failed to apply library changes', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to apply library changes',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
+    });
   }
 
   Future<void> updateEntryState(
@@ -248,147 +212,89 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     String newState, {
     int? progressChapter,
     int? progressVolume,
-  }) async {
-    try {
-      await (update(libraryEntriesTable)
-            ..where((t) => t.seriesId.equals(seriesId)))
-          .write(
-            LibraryEntriesTableCompanion(
-              state: Value(newState),
-              progressChapter: progressChapter != null
-                  ? Value(progressChapter)
-                  : const Value.absent(),
-              progressVolume: progressVolume != null
-                  ? Value(progressVolume)
-                  : const Value.absent(),
-            ),
-          );
-    } catch (e, st) {
-      _logger.severe('Failed to update entry state', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to update entry state',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  }) => _guard('Failed to update entry state', () async {
+    await (update(
+      libraryEntriesTable,
+    )..where((t) => t.seriesId.equals(seriesId))).write(
+      LibraryEntriesTableCompanion(
+        state: Value(newState),
+        progressChapter: progressChapter != null
+            ? Value(progressChapter)
+            : const Value.absent(),
+        progressVolume: progressVolume != null
+            ? Value(progressVolume)
+            : const Value.absent(),
+      ),
+    );
+  });
 
-  Future<void> updateEntryRating(String seriesId, int newRating) async {
-    try {
-      await (update(libraryEntriesTable)
-            ..where((t) => t.seriesId.equals(seriesId)))
-          .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
-    } catch (e, st) {
-      _logger.severe('Failed to update entry rating', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to update entry rating',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  Future<void> updateEntryRating(String seriesId, int newRating) =>
+      _guard('Failed to update entry rating', () async {
+        await (update(libraryEntriesTable)
+              ..where((t) => t.seriesId.equals(seriesId)))
+            .write(LibraryEntriesTableCompanion(rating: Value(newRating)));
+      });
 
-  Future<void> updateEntryNote(String seriesId, String? newNote) async {
-    try {
-      await (update(libraryEntriesTable)
-            ..where((t) => t.seriesId.equals(seriesId)))
-          .write(LibraryEntriesTableCompanion(note: Value(newNote)));
-    } catch (e, st) {
-      _logger.severe('Failed to update entry note', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to update entry note',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  Future<void> updateEntryNote(String seriesId, String? newNote) =>
+      _guard('Failed to update entry note', () async {
+        await (update(libraryEntriesTable)
+              ..where((t) => t.seriesId.equals(seriesId)))
+            .write(LibraryEntriesTableCompanion(note: Value(newNote)));
+      });
 
   Future<void> updateEntryProgress(
     String seriesId, {
     int? progressChapter,
     int? progressVolume,
-  }) async {
-    try {
-      await (update(
-        libraryEntriesTable,
-      )..where((t) => t.seriesId.equals(seriesId))).write(
-        LibraryEntriesTableCompanion(
-          progressChapter: progressChapter != null
-              ? Value(progressChapter)
-              : const Value.absent(),
-          progressVolume: progressVolume != null
-              ? Value(progressVolume)
-              : const Value.absent(),
-        ),
-      );
-    } catch (e, st) {
-      _logger.severe('Failed to update entry progress', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to update entry progress',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  }) => _guard('Failed to update entry progress', () async {
+    await (update(
+      libraryEntriesTable,
+    )..where((t) => t.seriesId.equals(seriesId))).write(
+      LibraryEntriesTableCompanion(
+        progressChapter: progressChapter != null
+            ? Value(progressChapter)
+            : const Value.absent(),
+        progressVolume: progressVolume != null
+            ? Value(progressVolume)
+            : const Value.absent(),
+      ),
+    );
+  });
 
-  Future<void> deleteEntry(String seriesId) async {
-    try {
-      await (delete(
-        libraryEntriesTable,
-      )..where((tbl) => tbl.seriesId.equals(seriesId))).go();
-    } catch (e, st) {
-      _logger.severe('Failed to delete entry', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to delete entry',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
-
-  Future<void> deleteEntriesNotIn(List<String> validIds) async {
-    try {
-      final validSet = validIds.toSet();
-      // Only select IDs to save memory
-      final query = selectOnly(libraryEntriesTable)
-        ..addColumns([libraryEntriesTable.id]);
-      final allIds = await query
-          .map((row) => row.read(libraryEntriesTable.id)!)
-          .get();
-
-      final toDelete = allIds.where((id) => !validSet.contains(id)).toList();
-
-      if (toDelete.isEmpty) return;
-
-      await db.transaction(() async {
-        for (var i = 0; i < toDelete.length; i += 500) {
-          final end = (i + 500 > toDelete.length) ? toDelete.length : i + 500;
-          final chunk = toDelete.sublist(i, end);
-          await (delete(
-            libraryEntriesTable,
-          )..where((t) => t.id.isIn(chunk))).go();
-        }
+  Future<void> deleteEntry(String seriesId) =>
+      _guard('Failed to delete entry', () async {
+        await (delete(
+          libraryEntriesTable,
+        )..where((tbl) => tbl.seriesId.equals(seriesId))).go();
       });
-    } catch (e, st) {
-      _logger.severe('Failed to delete stale entries', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to delete stale entries',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
 
-  Future<void> deleteAllEntries() async {
-    try {
-      await delete(libraryEntriesTable).go();
-    } catch (e, st) {
-      _logger.severe('Failed to delete all entries', e, st);
-      throw exc.DatabaseException(
-        message: 'Failed to delete all entries',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  Future<void> deleteEntriesNotIn(List<String> validIds) =>
+      _guard('Failed to delete stale entries', () async {
+        final validSet = validIds.toSet();
+        final query = selectOnly(libraryEntriesTable)
+          ..addColumns([libraryEntriesTable.id]);
+        final allIds = await query
+            .map((row) => row.read(libraryEntriesTable.id)!)
+            .get();
+
+        final toDelete = allIds.where((id) => !validSet.contains(id)).toList();
+        if (toDelete.isEmpty) return;
+
+        await db.transaction(() async {
+          for (var i = 0; i < toDelete.length; i += 500) {
+            final end = (i + 500 > toDelete.length)
+                ? toDelete.length
+                : i + 500;
+            final chunk = toDelete.sublist(i, end);
+            await (delete(
+              libraryEntriesTable,
+            )..where((t) => t.id.isIn(chunk))).go();
+          }
+        });
+      });
+
+  Future<void> deleteAllEntries() =>
+      _guard('Failed to delete all entries', () async {
+        await delete(libraryEntriesTable).go();
+      });
 }

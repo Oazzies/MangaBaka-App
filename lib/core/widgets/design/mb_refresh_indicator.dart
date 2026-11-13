@@ -269,10 +269,7 @@ class MbRefreshIndicatorState extends State<MbRefreshIndicator>
                                 widget.backgroundColor ??
                                 context.colors.surfaceRaised,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: context.colors.border,
-                              width: 1.0,
-                            ),
+                            border: Border.all(color: context.colors.border),
                             boxShadow: [
                               BoxShadow(
                                 color: context.colors.shadow,

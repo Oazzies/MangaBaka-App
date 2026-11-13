@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 class LocalizationService extends ChangeNotifier {
   static final LocalizationService _instance = LocalizationService._internal();
@@ -38,8 +39,12 @@ class LocalizationService extends ChangeNotifier {
         final enString = await rootBundle.loadString('assets/lang/en.json');
         final enData = json.decode(enString);
         _englishStrings = enData['strings'] ?? {};
-      } catch (e) {
-        debugPrint('Error loading English fallback strings: $e');
+      } catch (e, st) {
+        LoggingService.logger.warning(
+          'Error loading English fallback strings',
+          e,
+          st,
+        );
       }
 
       final prefs = await SharedPreferences.getInstance();
@@ -57,8 +62,12 @@ class LocalizationService extends ChangeNotifier {
       await _loadLanguageStrings(_currentLanguage);
 
       notifyListeners();
-    } catch (e) {
-      debugPrint('Error loading localization data: $e');
+    } catch (e, st) {
+      LoggingService.logger.warning(
+        'Error loading localization data',
+        e,
+        st,
+      );
     }
   }
 
@@ -69,8 +78,12 @@ class LocalizationService extends ChangeNotifier {
       );
       final langData = json.decode(langString);
       _currentStrings = langData['strings'] ?? {};
-    } catch (e) {
-      debugPrint('Error loading strings for $langCode: $e');
+    } catch (e, st) {
+      LoggingService.logger.warning(
+        'Error loading strings for $langCode',
+        e,
+        st,
+      );
       _currentStrings = {};
     }
   }

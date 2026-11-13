@@ -1,204 +1,31 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/utils/markdown_normalizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// Utility for cleaning, normalizing, and rendering Markdown and rich text
-/// found in manga and series descriptions.
+/// Utility for cleaning, normalizing, and rendering Markdown descriptions.
 class MarkdownUtils {
   static final _logger = LoggingService.logger;
 
-  /// Map of common HTML entities to their characters.
-  static const Map<String, String> _htmlEntities = {
-    '&quot;': '"',
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&#39;': "'",
-    '&#039;': "'",
-    '&apos;': "'",
-    '&nbsp;': ' ',
-    '&ndash;': '–',
-    '&mdash;': '—',
-    '&hellip;': '…',
-    '&lsquo;': '‘',
-    '&rsquo;': '’',
-    '&ldquo;': '“',
-    '&rdquo;': '”',
-    '&copy;': '©',
-    '&reg;': '®',
-    '&trade;': '™',
-  };
+  static final RegExp _spanPattern = RegExp(
+    r'(\[(?:[^\]]+)\]\((?:[^\)]+)\))|'
+    r'(<(?:https?://[^\s>]+)>)|'
+    r'(\bhttps?://[^\s<>\)\]]+)|'
+    r'(\*\*\*(?:.+?)\*\*\*|___(?:.+?)___)|'
+    r'(\*\*(?:.+?)\*\*|__(?:.+?)__)|'
+    r'((?<!\*)\*(?!\*)(?:[^\*\n]+?)(?<!\*)\*(?!\*)|(?<!_)_(?!_)(?:[^_\n]+?)(?<!_)_(?!_))|'
+    r'(~~(?:.+?)~~)|'
+    r'(`(?:[^`]+)`)',
+    dotAll: true,
+  );
 
-  /// Common UTF-8 mojibake replacements (from improperly decoded Windows-1252/ISO-8859-1).
-  static const Map<String, String> _mojibake = {
-    'â€™': '’',
-    'â€˜': '‘',
-    'â€œ': '“',
-    'â€ ': '”',
-    'â€”': '—',
-    'â€“': '–',
-    'â€¦': '…',
-    'â™¥': '♥',
-    'Ã©': 'é',
-    'Ã¨': 'è',
-    'Ã ': 'à',
-    'Ã§': 'ç',
-  };
+  static String normalizeDescription(String raw) =>
+      MarkdownNormalizer.normalizeDescription(raw);
 
-  /// Normalizes description text by decoding HTML entities, cleaning HTML tags,
-  /// correcting mojibake, unescaping backslashes, and repairing corrupted tokens.
-  static String normalizeDescription(String raw) {
-    if (raw.isEmpty) return '';
+  static String toPlainText(String raw) => MarkdownNormalizer.toPlainText(raw);
 
-    String text = raw;
-
-    // 1. Repair common UTF-8 mojibake
-    for (final entry in _mojibake.entries) {
-      text = text.replaceAll(entry.key, entry.value);
-    }
-
-    // 2. Decode HTML entities
-    for (final entry in _htmlEntities.entries) {
-      text = text.replaceAll(entry.key, entry.value);
-    }
-    // Numeric decimal entities: &#123;
-    text = text.replaceAllMapped(RegExp(r'&#(\d+);'), (match) {
-      final code = int.tryParse(match.group(1)!);
-      return _isValidCodePoint(code)
-          ? String.fromCharCode(code!)
-          : match.group(0)!;
-    });
-    // Numeric hex entities: &#x1f;
-    text = text.replaceAllMapped(RegExp(r'&#x([0-9a-fA-F]+);'), (match) {
-      final code = int.tryParse(match.group(1)!, radix: 16);
-      return _isValidCodePoint(code)
-          ? String.fromCharCode(code!)
-          : match.group(0)!;
-    });
-
-    // 3. Normalize HTML break tags into newlines
-    text = text.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n');
-    text = text.replaceAll(RegExp(r'<p\b[^>]*>', caseSensitive: false), '\n\n');
-    text = text.replaceAll(RegExp(r'</p>', caseSensitive: false), '\n');
-
-    // 4. Convert basic HTML formatting into Markdown
-    text = text.replaceAll(
-      RegExp(r'</?(?:b|strong)>', caseSensitive: false),
-      '**',
-    );
-    text = text.replaceAll(RegExp(r'</?(?:i|em)>', caseSensitive: false), '*');
-    text = text.replaceAllMapped(
-      RegExp(
-        r'<a\s+[^>]*href=["\x27]([^"\x27]+)["\x27][^>]*>(.*?)</a>',
-        caseSensitive: false,
-      ),
-      (match) => '[${match.group(2)}](${match.group(1)})',
-    );
-
-    // 5. Strip any remaining valid HTML tags (without stripping `<Title>` or `<url>` or `<3`)
-    // Matches standard HTML tag names
-    text = text.replaceAll(
-      RegExp(
-        r'</?(?:div|span|h[1-6]|ul|ol|li|blockquote|pre|code|hr|table|tr|td|th|tbody|thead|tfoot|img|font|small|sub|sup)\b[^>]*>',
-        caseSensitive: false,
-      ),
-      '',
-    );
-
-    // 6. Unescape backslashes before Markdown characters & punctuation
-    // e.g. \*\* -> **, \** -> **, \* -> *, \[ -> [, \] -> ], \| -> |
-    text = text.replaceAll(r'\*\*', '**');
-    text = text.replaceAll(r'\**', '**');
-    text = text.replaceAll(r'**\', '**');
-    text = text.replaceAll(r'\*', '*');
-    text = text.replaceAll(r'\_', '_');
-    text = text.replaceAll(r'\[', '[');
-    text = text.replaceAll(r'\]', ']');
-    text = text.replaceAll(r'\|', '|');
-    text = text.replaceAll(r'\\', r'\');
-
-    // 7. Fix corrupted / stray backslashes surrounding tokens
-    // e.g. \Original Webtoon:\|\KakaoPage\ -> Original Webtoon:|KakaoPage
-    // Backslashes before ASCII letters or after words/punctuation (not escaping Markdown)
-    text = text.replaceAllMapped(RegExp(r'\\([a-zA-Z])'), (m) => m.group(1)!);
-    text = text.replaceAllMapped(
-      RegExp(r'([a-zA-Z0-9_:])\\'),
-      (m) => m.group(1)!,
-    );
-
-    // 8. Fix malformed nested URLs in Markdown links
-    // e.g. [KakaoPage]([https://page.kakao.com/...](https://page.kakao.com/...))
-    // or [KakaoPage](<https://page.kakao.com/...>)
-    text = text.replaceAllMapped(
-      RegExp(
-        r'\[(.*?)\]\(\[?(https?://[^\s\)]+?)\]?\((?:https?://[^\s\)]+?)\)\)',
-      ),
-      (match) => '[${match.group(1)}](${match.group(2)})',
-    );
-    text = text.replaceAllMapped(
-      RegExp(r'\[(.*?)\]\(<(https?://[^\s>]+?)>\)'),
-      (match) => '[${match.group(1)}](${match.group(2)})',
-    );
-
-    // 9. Clean excessive empty lines (more than 2 consecutive newlines)
-    text = text.replaceAll(RegExp(r'\n{3,}'), '\n\n');
-
-    return text.trim();
-  }
-
-  /// `String.fromCharCode` throws a RangeError above U+10FFFF, and a lone
-  /// surrogate produces a string the text engine rejects. A description is
-  /// untrusted API text, so `&#99999999;` must be left as-is, not crash the
-  /// widget rendering it.
-  static bool _isValidCodePoint(int? code) =>
-      code != null &&
-      code >= 0 &&
-      code <= 0x10FFFF &&
-      (code < 0xD800 || code > 0xDFFF);
-
-  /// Converts Markdown description into clean plain text for synopsis previews or clipboard.
-  static String toPlainText(String raw) {
-    if (raw.isEmpty) return '';
-
-    String text = normalizeDescription(raw);
-
-    // Links: [text](url) -> text
-    text = text.replaceAllMapped(
-      RegExp(r'\[(.*?)\]\(.*?\)'),
-      (match) => match.group(1)!,
-    );
-
-    // Angle bracket URLs: <https://...> -> https://...
-    text = text.replaceAllMapped(
-      RegExp(r'<(https?://[^\s>]+)>'),
-      (match) => match.group(1)!,
-    );
-
-    // Bold & italic: ***text*** -> text, **text** -> text, *text* -> text
-    text = text.replaceAllMapped(
-      RegExp(r'\*{1,3}(.*?)\*{1,3}'),
-      (m) => m.group(1)!,
-    );
-    text = text.replaceAllMapped(
-      RegExp(r'_{1,3}(.*?)_{1,3}'),
-      (m) => m.group(1)!,
-    );
-
-    // Strikethrough: ~~text~~ -> text
-    text = text.replaceAllMapped(RegExp(r'~~(.*?)~~'), (m) => m.group(1)!);
-
-    // Inline code: `code` -> code
-    text = text.replaceAllMapped(RegExp(r'`([^`]+)`'), (m) => m.group(1)!);
-
-    // Collapsed whitespace
-    text = text.replaceAll(RegExp(r'[ \t]+'), ' ');
-
-    return text.trim();
-  }
-
-  /// Opens an external URL safely using [launchUrl].
   static Future<void> openUrl(String url) async {
     try {
       String clean = url.trim();
@@ -214,10 +41,9 @@ class MarkdownUtils {
     }
   }
 
-  /// Builds a tree of [InlineSpan]s from a normalized or raw Markdown string.
+  /// Builds [InlineSpan]s from a Markdown string.
   ///
-  /// [registerRecognizer] should be used by StatefulWidget parents to track
-  /// gesture recognizers for proper disposal in [State.dispose].
+  /// Pass [registerRecognizer] to track gesture recognizers for disposal.
   static List<InlineSpan> buildTextSpans({
     required String text,
     required BuildContext context,
@@ -254,7 +80,23 @@ class MarkdownUtils {
     );
   }
 
-  /// Internal recursive parser for inline spans.
+  static TapGestureRecognizer _makeTapRecognizer(
+    String url,
+    void Function(String url)? onLinkTap,
+    void Function(GestureRecognizer recognizer)? registerRecognizer,
+  ) {
+    final recognizer = TapGestureRecognizer()
+      ..onTap = () {
+        if (onLinkTap != null) {
+          onLinkTap(url);
+        } else {
+          openUrl(url);
+        }
+      };
+    registerRecognizer?.call(recognizer);
+    return recognizer;
+  }
+
   static List<InlineSpan> _parseSpans({
     required String input,
     required TextStyle baseStyle,
@@ -265,30 +107,9 @@ class MarkdownUtils {
     if (input.isEmpty) return const [];
 
     final spans = <InlineSpan>[];
-
-    // Master regex matching markdown elements in order of priority:
-    // 1. Markdown link: [text](url)
-    // 2. Angle bracket URL: <https://...>
-    // 3. Raw URL: https://...
-    // 4. Bold + Italic: ***...*** or ___...___
-    // 5. Bold: **...** or __...__
-    // 6. Italic: *...* or _..._
-    // 7. Strikethrough: ~~...~~
-    // 8. Inline code: `...`
-    final pattern = RegExp(
-      r'(\[(?:[^\]]+)\]\((?:[^\)]+)\))|' // group 1: link
-      r'(<(?:https?://[^\s>]+)>)|' // group 2: angle URL
-      r'(\bhttps?://[^\s<>\)\]]+)|' // group 3: raw URL
-      r'(\*\*\*(?:.+?)\*\*\*|___(?:.+?)___)|' // group 4: bold italic
-      r'(\*\*(?:.+?)\*\*|__(?:.+?)__)|' // group 5: bold
-      r'((?<!\*)\*(?!\*)(?:[^\*\n]+?)(?<!\*)\*(?!\*)|(?<!_)_(?!_)(?:[^_\n]+?)(?<!_)_(?!_))|' // group 6: italic
-      r'(~~(?:.+?)~~)|' // group 7: strike
-      r'(`(?:[^`]+)`)', // group 8: code
-      dotAll: true,
-    );
-
     int currentIndex = 0;
-    for (final match in pattern.allMatches(input)) {
+
+    for (final match in _spanPattern.allMatches(input)) {
       if (match.start > currentIndex) {
         spans.add(
           TextSpan(
@@ -301,27 +122,18 @@ class MarkdownUtils {
       final matchedText = match.group(0)!;
 
       if (match.group(1) != null) {
-        // Markdown link: [text](url)
         final linkMatch = RegExp(
           r'^\[(.*?)\]\((.*?)\)$',
           dotAll: true,
         ).firstMatch(matchedText);
         if (linkMatch != null) {
           final linkText = linkMatch.group(1) ?? '';
-          final rawUrl = (linkMatch.group(2) ?? '').trim();
-          final cleanUrl = _extractCleanUrl(rawUrl);
-
-          final recognizer = TapGestureRecognizer()
-            ..onTap = () {
-              if (onLinkTap != null) {
-                onLinkTap(cleanUrl);
-              } else {
-                openUrl(cleanUrl);
-              }
-            };
-          registerRecognizer?.call(recognizer);
-
-          // Recursively parse inner link text (e.g. [**Bold Link**](url))
+          final cleanUrl = _extractCleanUrl((linkMatch.group(2) ?? '').trim());
+          final recognizer = _makeTapRecognizer(
+            cleanUrl,
+            onLinkTap,
+            registerRecognizer,
+          );
           final innerSpans = _parseSpans(
             input: linkText,
             baseStyle: linkStyle,
@@ -329,7 +141,6 @@ class MarkdownUtils {
             onLinkTap: onLinkTap,
             registerRecognizer: registerRecognizer,
           );
-
           spans.add(
             TextSpan(
               children: innerSpans,
@@ -341,18 +152,12 @@ class MarkdownUtils {
           spans.add(TextSpan(text: matchedText, style: baseStyle));
         }
       } else if (match.group(2) != null) {
-        // Angle bracket URL: <url>
         final rawUrl = matchedText.substring(1, matchedText.length - 1).trim();
-        final recognizer = TapGestureRecognizer()
-          ..onTap = () {
-            if (onLinkTap != null) {
-              onLinkTap(rawUrl);
-            } else {
-              openUrl(rawUrl);
-            }
-          };
-        registerRecognizer?.call(recognizer);
-
+        final recognizer = _makeTapRecognizer(
+          rawUrl,
+          onLinkTap,
+          registerRecognizer,
+        );
         spans.add(
           TextSpan(
             text: rawUrl,
@@ -362,18 +167,12 @@ class MarkdownUtils {
           ),
         );
       } else if (match.group(3) != null) {
-        // Raw URL
         final url = matchedText.trim();
-        final recognizer = TapGestureRecognizer()
-          ..onTap = () {
-            if (onLinkTap != null) {
-              onLinkTap(url);
-            } else {
-              openUrl(url);
-            }
-          };
-        registerRecognizer?.call(recognizer);
-
+        final recognizer = _makeTapRecognizer(
+          url,
+          onLinkTap,
+          registerRecognizer,
+        );
         spans.add(
           TextSpan(
             text: url,
@@ -383,73 +182,51 @@ class MarkdownUtils {
           ),
         );
       } else if (match.group(4) != null) {
-        // Bold + Italic: ***...*** or ___...___
-        final inner = matchedText.substring(3, matchedText.length - 3);
-        final style = baseStyle.copyWith(
-          fontWeight: FontWeight.bold,
-          fontStyle: FontStyle.italic,
-        );
-        spans.addAll(
-          _parseSpans(
-            input: inner,
-            baseStyle: style,
-            linkStyle: linkStyle.copyWith(
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-            ),
-            onLinkTap: onLinkTap,
-            registerRecognizer: registerRecognizer,
+        _addStyledInner(
+          spans: spans,
+          inner: matchedText.substring(3, matchedText.length - 3),
+          style: baseStyle.copyWith(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
           ),
+          linkStyle: linkStyle.copyWith(
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+          ),
+          onLinkTap: onLinkTap,
+          registerRecognizer: registerRecognizer,
         );
       } else if (match.group(5) != null) {
-        // Bold: **...** or __...__
-        final inner = matchedText.substring(2, matchedText.length - 2);
-        final style = baseStyle.copyWith(fontWeight: FontWeight.bold);
-        spans.addAll(
-          _parseSpans(
-            input: inner,
-            baseStyle: style,
-            linkStyle: linkStyle.copyWith(fontWeight: FontWeight.bold),
-            onLinkTap: onLinkTap,
-            registerRecognizer: registerRecognizer,
-          ),
+        _addStyledInner(
+          spans: spans,
+          inner: matchedText.substring(2, matchedText.length - 2),
+          style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+          linkStyle: linkStyle.copyWith(fontWeight: FontWeight.bold),
+          onLinkTap: onLinkTap,
+          registerRecognizer: registerRecognizer,
         );
       } else if (match.group(6) != null) {
-        // Italic: *...* or _..._
-        final inner = matchedText.substring(1, matchedText.length - 1);
-        final style = baseStyle.copyWith(fontStyle: FontStyle.italic);
-        spans.addAll(
-          _parseSpans(
-            input: inner,
-            baseStyle: style,
-            linkStyle: linkStyle.copyWith(fontStyle: FontStyle.italic),
-            onLinkTap: onLinkTap,
-            registerRecognizer: registerRecognizer,
-          ),
+        _addStyledInner(
+          spans: spans,
+          inner: matchedText.substring(1, matchedText.length - 1),
+          style: baseStyle.copyWith(fontStyle: FontStyle.italic),
+          linkStyle: linkStyle.copyWith(fontStyle: FontStyle.italic),
+          onLinkTap: onLinkTap,
+          registerRecognizer: registerRecognizer,
         );
       } else if (match.group(7) != null) {
-        // Strikethrough: ~~...~~
-        final inner = matchedText.substring(2, matchedText.length - 2);
-        final style = baseStyle.copyWith(
-          decoration: TextDecoration.lineThrough,
-        );
-        spans.addAll(
-          _parseSpans(
-            input: inner,
-            baseStyle: style,
-            linkStyle: linkStyle.copyWith(
-              decoration: TextDecoration.lineThrough,
-            ),
-            onLinkTap: onLinkTap,
-            registerRecognizer: registerRecognizer,
-          ),
+        _addStyledInner(
+          spans: spans,
+          inner: matchedText.substring(2, matchedText.length - 2),
+          style: baseStyle.copyWith(decoration: TextDecoration.lineThrough),
+          linkStyle: linkStyle.copyWith(decoration: TextDecoration.lineThrough),
+          onLinkTap: onLinkTap,
+          registerRecognizer: registerRecognizer,
         );
       } else if (match.group(8) != null) {
-        // Inline code: `...`
-        final inner = matchedText.substring(1, matchedText.length - 1);
         spans.add(
           TextSpan(
-            text: inner,
+            text: matchedText.substring(1, matchedText.length - 1),
             style: baseStyle.copyWith(
               fontFamily: 'monospace',
               backgroundColor: baseStyle.color?.withValues(alpha: 0.1),
@@ -470,17 +247,31 @@ class MarkdownUtils {
     return spans;
   }
 
-  /// Extracts a clean URL from potentially malformed or wrapped URLs
-  /// such as `<https://...>` or nested links.
+  static void _addStyledInner({
+    required List<InlineSpan> spans,
+    required String inner,
+    required TextStyle style,
+    required TextStyle linkStyle,
+    void Function(String url)? onLinkTap,
+    void Function(GestureRecognizer recognizer)? registerRecognizer,
+  }) {
+    spans.addAll(
+      _parseSpans(
+        input: inner,
+        baseStyle: style,
+        linkStyle: linkStyle,
+        onLinkTap: onLinkTap,
+        registerRecognizer: registerRecognizer,
+      ),
+    );
+  }
+
   static String _extractCleanUrl(String raw) {
     String url = raw.trim();
     if (url.startsWith('<') && url.endsWith('>')) {
       url = url.substring(1, url.length - 1).trim();
     }
     final urlMatch = RegExp(r'https?://[^\s\)<>\]]+').firstMatch(url);
-    if (urlMatch != null) {
-      return urlMatch.group(0)!;
-    }
-    return url;
+    return urlMatch?.group(0) ?? url;
   }
 }

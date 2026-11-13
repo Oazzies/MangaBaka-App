@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/features/series/widgets/chip.dart';
-import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/settings/settings_manager.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/utils/link_chip.dart';
+import 'package:mangabaka_app/features/series/widgets/chip.dart';
 
 class WidgetUtils {
   static Widget responsiveConstraint(Widget child, {double maxWidth = 800}) {
@@ -25,33 +25,20 @@ class WidgetUtils {
     return AppTooltip(message: message, child: child);
   }
 
-  /// Whether covers of [contentRating] are blurred, per the user's content
-  /// preferences. The one answer every cover should ask, so a rating the user
-  /// blurs is blurred everywhere it shows.
   static bool isRatingBlurred(String contentRating) => SettingsManager()
       .blurredContentRatings
       .contains(contentRating.toLowerCase());
 
-  /// The pixel width to decode an image at when it's drawn [logicalWidth]
-  /// wide and that width follows the window.
-  ///
-  /// Every distinct `memCacheWidth` is a separate decode and cache entry, so
-  /// passing a width that changes per pixel re-decodes every cover on every
-  /// frame of a resize. This rounds up to a 64px step at the display's
-  /// density: a resize re-decodes only when a cover grows past a step.
+  /// Rounds up to a 64px step at display density so window resizes do not
+  /// re-decode every cover on every frame.
   static int decodeWidth(BuildContext context, double logicalWidth) {
     const step = 64;
     final px = (logicalWidth * MediaQuery.devicePixelRatioOf(context)).ceil();
     return ((px + step - 1) ~/ step) * step;
   }
 
-  /// The decode width each cover URL was last shown at, so another view of
-  /// the same cover (the hover preview) can ask for exactly that size and hit
-  /// the in-memory image cache, which is keyed by URL and decode size.
   static final Map<String, int> _decodeWidths = {};
 
-  /// The decode width [url] is already on screen at, if that is big enough
-  /// to be shown larger without looking soft; otherwise null.
   static int? shownDecodeWidth(String url, {int atLeast = 256}) {
     final w = _decodeWidths[url];
     return w != null && w >= atLeast ? w : null;
@@ -100,15 +87,10 @@ class WidgetUtils {
             placeholder: (context, url) =>
                 placeholder ?? const _ImagePlaceholder(),
             errorWidget: (context, url, error) {
-              // Surface the failing host + error so image outages (dead CDN,
-              // TLS handshake, cleartext block, rate limit) are diagnosable from
-              // the in-app log rather than a silent broken-image icon.
               LoggingService.logger.warning('Image load failed: $url — $error');
               final iconSize = (width != null && width.isFinite) ? width : 24.0;
               return errorWidget ?? _BrokenImageIcon(size: iconSize);
             },
-            // The placeholder is a flat colour: fading it out slowly just
-            // shows a half-loaded cover while scrolling.
             fadeOutDuration: Duration.zero,
             filterQuality: FilterQuality.medium,
             fadeInDuration: fadeIn,
@@ -156,69 +138,19 @@ class WidgetUtils {
 
   static Widget linkList(List<dynamic> links) {
     if (links.isEmpty) return const SizedBox.shrink();
+    final chips = links
+        .map(HoverableLinkChip.fromDynamic)
+        .whereType<Widget>()
+        .toList();
+    if (chips.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 14),
+        const Padding(
+          padding: EdgeInsets.only(bottom: 14),
           child: _SectionLabel('Links'),
         ),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: links.map<Widget>((l) {
-            String url = '';
-            String displayName = '';
-            String? language;
-
-            if (l is String) {
-              final parsed = Uri.tryParse(l);
-              // A relative path or a host-less string has no site to name (and
-              // indexing its empty "display name" would throw while building).
-              if (parsed != null &&
-                  parsed.hasAbsolutePath &&
-                  parsed.host.isNotEmpty) {
-                url = l;
-                final uri = parsed;
-                final domain = uri.host.replaceFirst('www.', '');
-                displayName = domain.split('.').first;
-                if (displayName.isNotEmpty) {
-                  displayName =
-                      displayName[0].toUpperCase() + displayName.substring(1);
-                }
-
-                final langMatch = RegExp(
-                  r'\/([a-z]{2})\/',
-                ).firstMatch(uri.path);
-                if (langMatch != null) {
-                  language = langMatch.group(1)!.toUpperCase();
-                }
-              }
-            } else if (l.runtimeType.toString() == 'SeriesLink') {
-              try {
-                url = l.url;
-                displayName = l.nameDisplay;
-                language = l.language?.toString().toUpperCase();
-              } catch (e) {
-                return const SizedBox.shrink();
-              }
-            }
-
-            if (url.isEmpty) return const SizedBox.shrink();
-            final uri = Uri.tryParse(url);
-            if (uri == null) return const SizedBox.shrink();
-            final domain = uri.host.replaceFirst('www.', '');
-            final faviconUrl =
-                'https://www.google.com/s2/favicons?domain=$domain&sz=64';
-
-            return _HoverableLinkChip(
-              uri: uri,
-              faviconUrl: faviconUrl,
-              displayName: displayName,
-              language: language,
-            );
-          }).toList(),
-        ),
+        Wrap(spacing: 12, runSpacing: 12, children: chips),
         const SizedBox(height: 16),
       ],
     );
@@ -240,102 +172,6 @@ class AppTooltip extends StatelessWidget {
         if (!SettingsManager().showTooltips) return child;
         return Tooltip(message: message, child: child);
       },
-    );
-  }
-}
-
-/// A link chip that shows a subtle highlight on hover.
-class _HoverableLinkChip extends StatelessWidget {
-  final Uri uri;
-  final String faviconUrl;
-  final String displayName;
-  final String? language;
-
-  const _HoverableLinkChip({
-    required this.uri,
-    required this.faviconUrl,
-    required this.displayName,
-    this.language,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.circular(AppConstants.cardRadius);
-    return WidgetUtils.tooltip(
-      message: LocalizationService()
-          .translate('open_link')
-          .replaceAll('{name}', displayName),
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          border: Border.all(color: context.colors.border, width: 1),
-          borderRadius: borderRadius,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => launchUrl(uri),
-            borderRadius: borderRadius,
-            hoverColor: context.colors.accent.withValues(alpha: 0.1),
-            splashColor: context.colors.accent.withValues(alpha: 0.1),
-            highlightColor: context.colors.accent.withValues(alpha: 0.05),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: WidgetUtils.networkImage(
-                      url: faviconUrl,
-                      width: 18,
-                      height: 18,
-                      errorWidget: Icon(
-                        Icons.link,
-                        size: 18,
-                        color: context.colors.textMuted,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    displayName,
-                    style: AppTypography.sans(
-                      color: context.colors.text,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (language?.isNotEmpty ?? false) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: context.colors.surfaceRaised,
-                        border: Border.all(
-                          color: context.colors.border,
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        language!,
-                        style: AppTypography.monoLabel(
-                          color: context.colors.textMuted,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

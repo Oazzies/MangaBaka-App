@@ -104,7 +104,9 @@ class MbThemeSpec {
   static MbThemeSpec? decode(String stored) {
     try {
       return fromJson(jsonDecode(stored));
-    } catch (_) {
+    } on FormatException {
+      return null;
+    } on TypeError {
       return null;
     }
   }

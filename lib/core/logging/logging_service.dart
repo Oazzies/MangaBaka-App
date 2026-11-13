@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -54,10 +55,14 @@ class LoggingService {
           await _logFile!.length() > _maxLogFileBytes) {
         await _logFile!.writeAsString('');
       }
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        // ignore: avoid_print
-        print('Failed to initialize log file: $e');
+        developer.log(
+          'Failed to initialize log file: $e',
+          name: 'MangaBakaApp',
+          error: e,
+          stackTrace: st,
+        );
       }
     }
 
@@ -83,8 +88,11 @@ class LoggingService {
     // there makes field diagnosis (network failures, rate limits) possible
     // without the in-app viewer.
     if (kDebugMode || kProfileMode) {
-      // ignore: avoid_print
-      print(logMessage);
+      developer.log(
+        logMessage,
+        name: 'MangaBakaApp',
+        level: record.level.value,
+      );
     }
 
     _logBuffer.add(logMessage);
@@ -107,10 +115,14 @@ class LoggingService {
     _writeChain = _writeChain.then((_) async {
       try {
         await _logFile!.writeAsString(payload, mode: FileMode.append);
-      } catch (e) {
+      } catch (e, st) {
         if (kDebugMode) {
-          // ignore: avoid_print
-          print('Failed to write to log file: $e');
+          developer.log(
+            'Failed to write to log file: $e',
+            name: 'MangaBakaApp',
+            error: e,
+            stackTrace: st,
+          );
         }
       }
     });
@@ -134,10 +146,14 @@ class LoggingService {
       // Truncate (creating the file if necessary) so the persisted log is
       // left in a known-empty state.
       await _logFile?.writeAsString('');
-    } catch (e) {
+    } catch (e, st) {
       if (kDebugMode) {
-        // ignore: avoid_print
-        print('Failed to clear log file: $e');
+        developer.log(
+          'Failed to clear log file: $e',
+          name: 'MangaBakaApp',
+          error: e,
+          stackTrace: st,
+        );
       }
     }
   }

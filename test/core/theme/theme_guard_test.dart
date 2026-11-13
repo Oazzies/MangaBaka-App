@@ -11,6 +11,7 @@ void main() {
   const allowed = {
     // The picker renders the colour space itself (white→hue, clear→black).
     'lib/features/appearance/widgets/mb_color_picker.dart',
+    'lib/features/appearance/widgets/color_picker_controls.dart',
   };
 
   final banned = <String, RegExp>{

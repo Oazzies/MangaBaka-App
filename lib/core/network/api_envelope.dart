@@ -9,6 +9,8 @@
 /// malformed body still fails at [ApiClient.decode].
 library;
 
+import 'package:mangabaka_app/core/logging/logging_service.dart';
+
 /// The `data` array of a list response, as raw JSON maps.
 ///
 /// Returns an empty list when `data` is absent or not a list, so a caller
@@ -58,7 +60,12 @@ List<T> parseDataList<T>(
     final T? parsed;
     try {
       parsed = fromJson(item);
-    } catch (_) {
+    } catch (e, st) {
+      LoggingService.logger.warning(
+        'Skipping malformed item in list response',
+        e,
+        st,
+      );
       continue;
     }
     if (parsed != null) out.add(parsed);

@@ -16,7 +16,7 @@ void main() {
         'i': 'three',
         's': 7,
         'l': true,
-        'e': 'green',
+        'e': true,
       });
       final p = await prefs();
 
