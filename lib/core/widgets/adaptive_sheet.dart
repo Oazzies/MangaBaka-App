@@ -69,3 +69,38 @@ Future<T?> showAdaptiveSheet<T>({
     },
   );
 }
+
+/// A bottom-sheet drag handle that hides itself when [showAdaptiveSheet]
+/// presents as a centred dialog (landscape or desktop).
+class AdaptiveSheetHandle extends StatelessWidget {
+  final double width;
+  final Color? color;
+  final double topSpacing;
+  final double bottomSpacing;
+
+  const AdaptiveSheetHandle({
+    super.key,
+    this.width = 32,
+    this.color,
+    this.topSpacing = 0,
+    this.bottomSpacing = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (prefersDialogSheet(context)) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(top: topSpacing, bottom: bottomSpacing),
+      child: Center(
+        child: Container(
+          width: width,
+          height: 4,
+          decoration: BoxDecoration(
+            color: color ?? context.colors.surfaceRaised,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      ),
+    );
+  }
+}

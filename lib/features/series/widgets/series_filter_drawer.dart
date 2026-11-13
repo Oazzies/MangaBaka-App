@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_sort
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_type_status_section.dart';
 import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_controller.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 /// The filter sheet that long-pressing a chip on the series detail screen
@@ -182,17 +183,7 @@ class _Header extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 12),
-        Center(
-          child: Container(
-            width: 32,
-            height: 4,
-            decoration: BoxDecoration(
-              color: context.colors.surfaceRaised,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ),
+        const AdaptiveSheetHandle(topSpacing: 12),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: Row(

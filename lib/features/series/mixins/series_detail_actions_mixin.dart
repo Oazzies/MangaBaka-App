@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/widgets/complete_series_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/delete_from_library_dialog.dart';
+import 'package:mangabaka_app/features/series/widgets/note_editor_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -51,6 +52,30 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
             }
           },
         ),
+      ),
+    );
+  }
+
+  void showUpdateNoteDialog(LibraryEntry entry) {
+    showAdaptiveSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => NoteEditorDialog(
+        initialNote: entry.note,
+        onSave: (note) async {
+          try {
+            await libraryService.updateLibraryEntryNote(series.id, note);
+          } catch (e) {
+            if (mounted) {
+              AppSnackBar.show(
+                this.context,
+                LocalizationService().translate('failed_to_update'),
+                isError: true,
+              );
+            }
+          }
+        },
       ),
     );
   }
@@ -186,14 +211,10 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
+                AdaptiveSheetHandle(
                   width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: context.colors.textMuted.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                  color: context.colors.textMuted.withValues(alpha: 0.2),
+                  bottomSpacing: 20,
                 ),
                 _buildShareOption(
                   icon: Icons.share_rounded,

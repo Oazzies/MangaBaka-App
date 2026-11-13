@@ -86,16 +86,7 @@ class SortSelectionDialog {
   }
 
   static Widget _buildHeader(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 32,
-        height: 4,
-        decoration: BoxDecoration(
-          color: context.colors.surfaceRaised,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
+    return const AdaptiveSheetHandle();
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/tri_state_chip.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 
 class FilterListDialog extends StatefulWidget {
   final String title;
@@ -140,16 +141,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
   }
 
   Widget _buildDragHandle() {
-    return Center(
-      child: Container(
-        width: 32,
-        height: 4,
-        decoration: BoxDecoration(
-          color: context.colors.surfaceRaised,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
+    return const AdaptiveSheetHandle();
   }
 
   Widget _buildHeader() {

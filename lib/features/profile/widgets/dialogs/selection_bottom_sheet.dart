@@ -36,17 +36,7 @@ class SelectionBottomSheet {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: dialogContext.colors.surfaceRaised,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
+              const AdaptiveSheetHandle(width: 40, bottomSpacing: 24),
               Text(
                 title.toUpperCase(),
                 style: AppTypography.display(

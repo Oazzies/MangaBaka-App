@@ -922,6 +922,17 @@
     "relation_contains": "Contains",
     "relation_character": "Character",
     "relation_source": "Source",
-    "relation_other": "Other"
+    "relation_other": "Other",
+    "notes": "Notes",
+    "series_note_placeholder": "Add a note (Markdown supported)...",
+    "series_note_add_title": "Add Note",
+    "series_note_edit_title": "Edit Note",
+    "series_note_hint": "Write your thoughts, reminders, or review (Markdown supported)...",
+    "series_note_write": "Write",
+    "series_note_preview": "Preview",
+    "series_note_preview_empty": "Nothing to preview yet.",
+    "series_note_clear": "Clear",
+    "series_note_show_more": "Show more",
+    "series_note_show_less": "Show less"
   }
 }

@@ -4,6 +4,7 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 
 class RatingSelectionDialog extends StatefulWidget {
   final int initialRating;
@@ -57,17 +58,7 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 32,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.colors.surfaceRaised,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
+          const AdaptiveSheetHandle(bottomSpacing: 24),
           Row(
             children: [
               Container(

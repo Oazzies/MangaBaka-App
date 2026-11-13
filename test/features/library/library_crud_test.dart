@@ -793,4 +793,50 @@ void main() {
       });
     });
   });
+
+  group('updateLibraryEntryNote', () {
+    test('PUTs trimmed note with bearer token and updates the local entry',
+        () async {
+      await seedEntry('42');
+
+      await withServer(
+        (_) async => http.Response('{}', 200),
+        () => service.updateLibraryEntryNote('42', '  **Great** arc!  '),
+      );
+
+      expect(requests.single.method, 'PUT');
+      expect(requests.single.url, Uri.parse('${LibraryConstants.baseUrl}/42'));
+      expect(requests.single.headers['Authorization'], 'Bearer old');
+      expect(jsonDecode(requests.single.body), {'note': '**Great** arc!'});
+      expect((await entryFor('42'))!.note, '**Great** arc!');
+    });
+
+    test('normalizes blank note to null and clears the local entry', () async {
+      await seedEntry('42');
+      await db.libraryEntriesDao.updateEntryNote('42', 'Existing note');
+
+      await withServer(
+        (_) async => http.Response('{}', 200),
+        () => service.updateLibraryEntryNote('42', '   \n  '),
+      );
+
+      expect(jsonDecode(requests.single.body), {'note': null});
+      expect((await entryFor('42'))!.note, isNull);
+    });
+
+    test('a server error leaves the local note untouched', () async {
+      await seedEntry('42');
+      await db.libraryEntriesDao.updateEntryNote('42', 'Keep me');
+
+      await expectLater(
+        withServer(
+          (_) async => http.Response('boom', 500),
+          () => service.updateLibraryEntryNote('42', 'New note'),
+        ),
+        throwsA(isA<ApiException>()),
+      );
+
+      expect((await entryFor('42'))!.note, 'Keep me');
+    });
+  });
 }

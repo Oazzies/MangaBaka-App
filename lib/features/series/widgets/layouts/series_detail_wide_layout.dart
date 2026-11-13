@@ -30,6 +30,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
   final VoidCallback onUpdateChapter;
   final VoidCallback onUpdateVolume;
   final VoidCallback onUpdateRating;
+  final VoidCallback onUpdateNote;
   final Function(String)? onAuthorTap;
   final Function(String)? onPublisherTap;
 
@@ -61,6 +62,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
     required this.onUpdateChapter,
     required this.onUpdateVolume,
     required this.onUpdateRating,
+    required this.onUpdateNote,
     this.onAuthorTap,
     this.onPublisherTap,
     this.rightRail,
@@ -112,6 +114,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
                     onUpdateChapter: onUpdateChapter,
                     onUpdateVolume: onUpdateVolume,
                     onUpdateRating: onUpdateRating,
+                    onUpdateNote: onUpdateNote,
                   ),
                   const SizedBox(height: 18),
                 ],

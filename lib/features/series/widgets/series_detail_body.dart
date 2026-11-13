@@ -217,6 +217,8 @@ class SeriesDetailBody extends StatelessWidget {
         : state.showUpdateProgressDialog(entry, isChapter: false);
     void updateRating() =>
         entry == null ? null : state.showUpdateRatingDialog(entry);
+    void updateNote() =>
+        entry == null ? null : state.showUpdateNoteDialog(entry);
 
     SeriesDetailTabContent tabContent({
       required double hPadding,
@@ -258,6 +260,7 @@ class SeriesDetailBody extends StatelessWidget {
         onUpdateChapter: updateChapter,
         onUpdateVolume: updateVolume,
         onUpdateRating: updateRating,
+        onUpdateNote: updateNote,
         rightRail: rightRail,
         buildTabContent:
             (hPadding, {isWide = false, wideRightPaddingOnly = false}) =>
@@ -282,6 +285,7 @@ class SeriesDetailBody extends StatelessWidget {
       onUpdateChapter: updateChapter,
       onUpdateVolume: updateVolume,
       onUpdateRating: updateRating,
+      onUpdateNote: updateNote,
       onAuthorTap: onAuthorTap,
       onPublisherTap: onPublisherTap,
       buildTabContent: (hPadding) => tabContent(hPadding: hPadding),

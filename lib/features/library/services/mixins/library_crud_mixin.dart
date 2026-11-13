@@ -192,6 +192,45 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     }
   }
 
+  /// Updates the user's personal note on a library entry.
+  ///
+  /// Blank or whitespace-only strings are normalized to `null` so the server
+  /// and local database clear the note consistently.
+  Future<void> updateLibraryEntryNote(String seriesId, String? note) async {
+    final normalized = (note == null || note.trim().isEmpty)
+        ? null
+        : note.trim();
+    logger.info('Updating library entry note for $seriesId');
+    final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
+    try {
+      final response = await _sendAuthorized(
+        'Update note',
+        (headers) => http.put(
+          url,
+          headers: headers,
+          body: jsonEncode({'note': normalized}),
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        logger.severe(
+          'Failed to update entry note for $seriesId. Status: ${response.statusCode}',
+        );
+        throw ApiException(
+          message: 'Failed to update entry note',
+          statusCode: response.statusCode,
+          responseBody: response.body,
+          code: 'UPDATE_NOTE_FAILED',
+        );
+      }
+
+      await database.libraryEntriesDao.updateEntryNote(seriesId, normalized);
+      logger.info('Successfully updated note for $seriesId in DB');
+    } catch (e, st) {
+      _rethrowAsAppException(e, st, seriesId, 'update entry note');
+    }
+  }
+
   /// Restores local progress to the values captured before an optimistic update.
   ///
   /// Skipped when the row no longer holds what this update wrote: a later

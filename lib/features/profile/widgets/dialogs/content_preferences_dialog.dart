@@ -60,17 +60,7 @@ class ContentPreferencesDialogs {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 32,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: context.colors.surfaceRaised,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                  const AdaptiveSheetHandle(bottomSpacing: 24),
                   Text(
                     l10n.translate('content_preferences').toUpperCase(),
                     style: AppTypography.display(

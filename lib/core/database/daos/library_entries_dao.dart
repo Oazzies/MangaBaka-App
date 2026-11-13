@@ -288,6 +288,21 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
+  Future<void> updateEntryNote(String seriesId, String? newNote) async {
+    try {
+      await (update(libraryEntriesTable)
+            ..where((t) => t.seriesId.equals(seriesId)))
+          .write(LibraryEntriesTableCompanion(note: Value(newNote)));
+    } catch (e, st) {
+      _logger.severe('Failed to update entry note', e, st);
+      throw exc.DatabaseException(
+        message: 'Failed to update entry note',
+        originalError: e,
+        stackTrace: st,
+      );
+    }
+  }
+
   Future<void> updateEntryProgress(
     String seriesId, {
     int? progressChapter,

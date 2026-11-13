@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
 
@@ -97,14 +98,10 @@ Future<void> showShareChoice(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              AdaptiveSheetHandle(
                 width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: c.textMuted.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                color: c.textMuted.withValues(alpha: 0.2),
+                bottomSpacing: 20,
               ),
               option(Icons.share_rounded, shareLabel, 'share'),
               Padding(
