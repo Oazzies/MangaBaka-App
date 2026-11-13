@@ -3,7 +3,6 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -14,9 +13,8 @@ import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
-import 'package:mangabaka_app/desktop/desktop_layout.dart';
-import 'package:mangabaka_app/desktop/widgets/desktop_list_controls.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/browse/widgets/results/browse_results_helpers.dart';
 
 class BrowseResultsScreen extends StatefulWidget {
   final String sortType;
@@ -197,38 +195,20 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     bool initial,
     String? excludeUserId,
   ) {
-    final params = <String, dynamic>{
-      'limit': AppConstants.defaultPageLimit,
-      'page': _currentPage,
-    };
-
-    if (widget.staff != null) {
-      params['staff'] = widget.staff;
+    if (widget.sortBy == 'random' && !initial) {
+      _currentRandomSeed = BrowseController.generateRandomSeed();
     }
-    if (widget.publisherId != null) {
-      params['publisher_id'] = widget.publisherId;
-    } else if (widget.publisher != null) {
-      params['publisher'] = widget.publisher;
-    }
-    if (widget.genre != null) {
-      params['genre'] = widget.genre;
-    }
-    if (widget.tag != null) {
-      params['tag'] = widget.tag;
-    }
-
-    if (excludeUserId != null && excludeUserId.isNotEmpty) {
-      params['exclude_user_library'] = excludeUserId;
-    }
-
-    if (widget.sortBy == 'random') {
-      if (!initial) {
-        _currentRandomSeed = BrowseController.generateRandomSeed();
-      }
-      params['random_seed'] = _currentRandomSeed;
-    }
-
-    return params;
+    return BrowseResultsHelpers.buildRequestParams(
+      page: _currentPage,
+      sortBy: widget.sortBy,
+      staff: widget.staff,
+      publisherId: widget.publisherId,
+      publisher: widget.publisher,
+      genre: widget.genre,
+      tag: widget.tag,
+      excludeUserId: excludeUserId,
+      randomSeed: _currentRandomSeed,
+    );
   }
 
   void _incrementPageIfNeeded() {
@@ -256,28 +236,6 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
     );
   }
 
-  /// Computes the app-bar title text from the screen's parameters.
-  String _buildTitleText() {
-    final l10n = LocalizationService();
-    if (widget.staff != null) {
-      return l10n
-          .translate('staff_works_title')
-          .replaceAll('{name}', l10n.formatPossessive(widget.staff!));
-    }
-    if (widget.publisher != null) {
-      final name = l10n.formatPossessive(widget.publisher!);
-      final refine = widget.refineLabel;
-      if (refine != null && refine.isNotEmpty) {
-        return l10n
-            .translate('publisher_works_of')
-            .replaceAll('{name}', name)
-            .replaceAll('{subject}', refine);
-      }
-      return l10n.translate('staff_works_title').replaceAll('{name}', name);
-    }
-    return widget.sortType;
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -285,40 +243,19 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       builder: (context, _) {
         return Scaffold(
           backgroundColor: context.colors.background,
-          appBar: AppBar(
-            backgroundColor: context.colors.background,
-            elevation: 0,
-            centerTitle: true,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: context.colors.text),
-              onPressed: () => Navigator.pop(context),
+          appBar: BrowseResultsAppBar(
+            title: BrowseResultsHelpers.buildTitleText(
+              l10n: LocalizationService(),
+              sortType: widget.sortType,
+              staff: widget.staff,
+              publisher: widget.publisher,
+              refineLabel: widget.refineLabel,
             ),
-            title: Text(
-              _buildTitleText().toUpperCase(),
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.display(
-                color: context.colors.text,
-                fontSize: 17,
-              ),
-            ),
-            actions: [
-              if (DesktopLayout.isActive(context))
-                Padding(
-                  // The custom window buttons float over the top-right corner
-                  // of the window, which is where an app bar puts its actions.
-                  padding: const EdgeInsets.only(
-                    right: DesktopTokens.windowControlsClearance,
-                  ),
-                  child: DesktopListStyleToggle(scope: DesktopListScope.browse),
-                ),
-            ],
           ),
           body: ListenableBuilder(
             listenable: SettingsManager(),
             builder: (context, _) {
-              final settings = SettingsManager();
-              final activeStyle = settings.resolvedBrowseListStyle;
-              final isGrid = activeStyle.isGrid;
+              final isGrid = SettingsManager().resolvedBrowseListStyle.isGrid;
 
               return NotificationListener<ScrollMetricsNotification>(
                 onNotification: (notification) {

@@ -4,6 +4,8 @@ import 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.
 import 'package:mangabaka_app/features/browse/widgets/search/autocomplete_ranking.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
+part 'search_bar_navigation_part.dart';
+
 /// Asks for suggestions for [query] and delivers them to [onResults].
 ///
 /// Deliberately callback-shaped rather than a `Future`: the Browse source is
@@ -183,70 +185,12 @@ class SearchBarController extends ChangeNotifier {
     return KeyEventResult.ignored;
   }
 
-  /// Down/Up move through the overlay and write the highlighted title into the
-  /// field; Escape abandons the walk and restores what was typed. Returns null
-  /// for any other key.
-  KeyEventResult? _handleNavigationKey(KeyEvent event) {
-    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      return _navigate(() {
-        _selectedIndex = (_selectedIndex + 1) % _results.length;
-        _setFieldText(_results[_selectedIndex].title);
-      });
-    }
-    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      return _navigate(() {
-        // Walking up past the first row returns to the typed query.
-        if (_selectedIndex <= 0) {
-          _selectedIndex = -1;
-          _setFieldText(_originalQuery);
-        } else {
-          _selectedIndex--;
-          _setFieldText(_results[_selectedIndex].title);
-        }
-      });
-    }
-    if (event.logicalKey == LogicalKeyboardKey.escape) {
-      return _navigate(() {
-        _showSuggestions = false;
-        _selectedIndex = -1;
-        _setFieldText(_originalQuery);
-      });
-    }
-    return null;
-  }
+  KeyEventResult? _handleNavigationKey(KeyEvent event) =>
+      _handleNavigationKeyImpl(this, event);
 
-  /// Runs a programmatic field edit with the typing guard raised, so the
-  /// resulting change is not reported as user input.
-  KeyEventResult _navigate(VoidCallback change) {
-    _isProgrammaticEdit = true;
-    change();
-    _clearGhost();
-    _isProgrammaticEdit = false;
-    _notify();
-    return KeyEventResult.handled;
-  }
+  void _setFieldText(String value) => _setFieldTextImpl(this, value);
 
-  void _setFieldText(String value) {
-    text.value = text.value.copyWith(
-      text: value,
-      selection: TextSelection.collapsed(offset: value.length),
-      composing: TextRange.empty,
-    );
-  }
-
-  /// Backspace over a completion: restore the typed query and stop suggesting
-  /// for it until the user types something that diverges.
-  void _rejectSuggestion() {
-    _isProgrammaticEdit = true;
-    _isSuppressed = true;
-    _suppressedQuery = _originalQuery;
-    _clearGhost();
-    _selectedIndex = -1;
-    _showSuggestions = false;
-    _setFieldText(_originalQuery);
-    _isProgrammaticEdit = false;
-    _notify();
-  }
+  void _rejectSuggestion() => _rejectSuggestionImpl(this);
 
   void acceptGhostText() {
     final match = AutocompleteRanking.matchForGhost(

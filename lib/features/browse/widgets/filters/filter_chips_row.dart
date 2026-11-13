@@ -1,11 +1,11 @@
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/browse/models/search_filters.dart';
-import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
-import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/browse/models/search_filters.dart';
+import 'package:mangabaka_app/features/browse/widgets/filters/filter_chip_badge.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 
 class FilterChipsRow extends StatelessWidget {
   final SearchFilters filters;
@@ -28,7 +28,7 @@ class FilterChipsRow extends StatelessWidget {
 
         // Sort By
         if (filters.sortBy != null && filters.sortBy!.isNotEmpty) {
-          final label = _getSortLabel(filters.sortBy!, l10n);
+          final label = filterSortLabel(filters.sortBy!, l10n);
           chips.add(
             _buildChip(context, label, () {
               onFiltersChanged(filters.copyWithSortBy(null));
@@ -269,9 +269,6 @@ class FilterChipsRow extends StatelessWidget {
     );
   }
 
-  /// Builds include and exclude chips for a single filter category.
-  /// Returns chips for every value in [include] (positive style) followed by
-  /// every value in [exclude] (negative / red style).
   List<Widget> _buildFilterPairChips(
     BuildContext context, {
     required List<String> include,
@@ -279,78 +276,23 @@ class FilterChipsRow extends StatelessWidget {
     required String Function(String) labelFor,
     required void Function(String) onRemoveInclude,
     required void Function(String) onRemoveExclude,
-  }) {
-    return [
-      for (final v in include)
-        _buildChip(context, labelFor(v), () => onRemoveInclude(v)),
-      for (final v in exclude)
-        _buildChip(
-          context,
-          '- ${labelFor(v)}',
-          () => onRemoveExclude(v),
-          isNegative: true,
-        ),
-    ];
-  }
+  }) => buildFilterPairChips(
+    context,
+    include: include,
+    exclude: exclude,
+    labelFor: labelFor,
+    onRemoveInclude: onRemoveInclude,
+    onRemoveExclude: onRemoveExclude,
+  );
 
   Widget _buildChip(
     BuildContext context,
     String label,
     VoidCallback onDeleted, {
     bool isNegative = false,
-  }) {
-    final color = isNegative ? context.colors.error : context.colors.text;
-    final bgColor = isNegative
-        ? context.colors.error.withValues(alpha: 0.12)
-        : context.colors.surfaceRaised;
-
-    return RawChip(
-      label: Text(label.toUpperCase()),
-      onDeleted: onDeleted,
-      deleteIcon: Icon(Icons.close_rounded, size: 14, color: color),
-      backgroundColor: bgColor,
-      side: BorderSide.none,
-      labelStyle: AppTypography.sans(
-        color: color,
-        fontSize: 11,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.0,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-      ),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
-    );
-  }
-
-  String _getSortLabel(String sortBy, LocalizationService l10n) {
-    switch (sortBy) {
-      case 'name_asc':
-        return l10n.translate('title_asc');
-      case 'name_desc':
-        return l10n.translate('title_desc');
-      case 'popularity_asc':
-        return l10n.translate('popularity_asc');
-      case 'popularity_desc':
-        return l10n.translate('popularity_desc');
-      case 'score_desc':
-        return l10n.translate('rating_desc');
-      case 'score_asc':
-        return l10n.translate('rating_asc');
-      case 'chapters_desc':
-        return l10n.translate('chapters_desc');
-      case 'chapters_asc':
-        return l10n.translate('chapters_asc');
-      case 'unread_desc':
-        return l10n.translate('unread_desc');
-      case 'unread_asc':
-        return l10n.translate('unread_asc');
-      case 'random':
-        return l10n.translate('random_sort');
-      default:
-        return sortBy;
-    }
-  }
+  }) => FilterChipBadge(
+    label: label,
+    onDeleted: onDeleted,
+    isNegative: isNegative,
+  );
 }

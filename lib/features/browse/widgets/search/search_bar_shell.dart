@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
-import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar_suffix.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/search_bar_controller.dart';
+import 'package:mangabaka_app/features/browse/widgets/search/search_bar_text_field.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/search_filter_sheet_launcher.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/search_suggestions_panel.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/features/browse/widgets/search/search_bar_controller.dart'
     show SuggestionRequest;
@@ -226,88 +223,18 @@ class _SearchBarShellState extends State<SearchBarShell> {
   }
 
   Widget _buildTextField(BuildContext context) {
-    final l10n = LocalizationService();
-
-    // Kerning is disabled so the ghost span lines up exactly with the typed
-    // text; with it on, the completion visibly shifts as it is accepted.
-    const features = [FontFeature.disable('kern')];
-    final baseStyle =
-        Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: context.colors.text,
-          fontSize: 16,
-          letterSpacing: 0,
-          fontFeatures: features,
-        ) ??
-        TextStyle(
-          color: context.colors.text,
-          fontSize: 16,
-          letterSpacing: 0,
-          fontFeatures: features,
-        );
-
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-      borderSide: BorderSide.none,
-    );
-
-    return TextField(
-      controller: _text,
+    return SearchBarTextField(
+      textController: _text,
       focusNode: _focusNode,
-      style: baseStyle,
-      textInputAction: TextInputAction.search,
-      onChanged: _controller.onTextChanged,
-      onSubmitted: (text) {
-        // A chosen suggestion already ran its own selection path; only a plain
-        // submission needs the query handed on.
-        if (_controller.resolveSubmission() != null) return;
-        (widget.onSubmitted ?? widget.onChanged)(text);
-      },
-      decoration: InputDecoration(
-        hintText: l10n.translate('search_hint'),
-        hintStyle: AppTypography.sans(
-          color: context.colors.textMuted,
-          fontSize: 16,
-        ),
-        prefixIcon: widget.onBackTap == null
-            ? Icon(Icons.search, color: context.colors.text)
-            : IconButton(
-                icon: Icon(
-                  Icons.arrow_back_rounded,
-                  color: context.colors.text,
-                ),
-                onPressed: () {
-                  _controller.clear();
-                  widget.onBackTap!();
-                },
-              ),
-        prefixIconConstraints: const BoxConstraints(
-          minWidth: 48,
-          minHeight: 48,
-        ),
-        suffixIcon: MBSearchBarSuffix(
-          controllerText: _text.text,
-          onClear: _controller.clear,
-          onScanTap: widget.onScanTap,
-          onFilterTap: widget.showFilterButton
-              ? (widget.onFilterTapOverride ?? _openFilterSheet)
-              : null,
-          currentFilters: _filters,
-        ),
-        filled: true,
-        fillColor: context.colors.surfaceRaised,
-        border: border,
-        enabledBorder: border,
-        // Amber ring on focus: the pill is otherwise identical focused and
-        // unfocused, which leaves keyboard users with no cue at all.
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-          borderSide: BorderSide(color: context.colors.accent, width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 20,
-        ),
-      ),
+      controller: _controller,
+      filters: _filters,
+      onSubmitted: widget.onSubmitted,
+      onChanged: widget.onChanged,
+      onBackTap: widget.onBackTap,
+      onScanTap: widget.onScanTap,
+      onFilterTap: widget.showFilterButton
+          ? (widget.onFilterTapOverride ?? _openFilterSheet)
+          : null,
     );
   }
 

@@ -16,6 +16,8 @@ import 'package:mangabaka_app/features/series/services/series_title_enricher.dar
 export 'package:mangabaka_app/features/home/models/for_you_readiness.dart';
 export 'package:mangabaka_app/features/home/models/top_genre_rail.dart';
 
+part 'home_personalization_part.dart';
+
 /// Backs the Home feed's discovery rails.
 ///
 /// Every rail here reads from v2 (`discover/*` and `series/search`), which
@@ -168,98 +170,6 @@ class HomeService {
     }
   }
 
-  /// The user's top genres from their taste profile. Empty when logged out, when
-  /// the profile has nothing yet, or when the (beta) endpoint fails.
-  ///
-  /// Unlike the other endpoints this one answers with `results`, not `data`.
-  Future<List<TopGenre>> fetchTopGenres({int limit = 3}) async {
-    final headers = await _authHeaders();
-    if (headers == null) return const [];
-    try {
-      final genres = await _api
-          .withContext('home:top-genres')
-          .getJson(
-            ApiClient.uri(
-              '${AppConstants.baseApiUrl}/my/series/discover/top-genres',
-              {'limit': limit},
-            ),
-            operation: 'fetch top genres',
-            parse: (json) {
-              final results = json is Map ? json['results'] : null;
-              if (results is! List) return const <TopGenre>[];
-              return results
-                  .map(TopGenre.tryParse)
-                  .whereType<TopGenre>()
-                  .toList(growable: false);
-            },
-            headers: headers,
-          );
-      _logger.info('HomeService top genres: ${genres.map((g) => g.name)}');
-      return genres;
-    } catch (e) {
-      _logger.warning('HomeService failed to fetch top genres: $e');
-      return const [];
-    }
-  }
-
-  /// The best-rated series carrying [tagId] - the content of a "Top in
-  /// {genre}" rail.
-  Future<List<Series>> fetchTopInGenre(int tagId, {int limit = 20}) {
-    return _fetchRail(
-      _v2Uri('/series/search', {
-        'tag': tagId,
-        'sort_by': 'score_desc',
-        // Unrated series sort unpredictably under a score sort.
-        'rating_lower': 1,
-        'limit': limit,
-      }),
-      'top in genre $tagId',
-    );
-  }
-
-  /// "Top in {genre}" rails for the user's top genres, best-fitting first.
-  /// Genres whose rail came back empty are dropped.
-  Future<List<TopGenreRail>> fetchTopGenreRails({int genres = 3}) async {
-    final top = await fetchTopGenres(limit: genres);
-    if (top.isEmpty) return const [];
-    final lists = await Future.wait([
-      for (final g in top) fetchTopInGenre(g.tagId),
-    ]);
-    return [
-      for (var i = 0; i < top.length; i++)
-        if (lists[i].isNotEmpty) TopGenreRail(top[i], lists[i]),
-    ];
-  }
-
-  /// Cheap probe for whether the taste profile behind "For You" is warm.
-  ///
-  /// Null means "don't show the rail and don't explain why" — logged out, or
-  /// the probe itself failed.
-  Future<ForYouReadiness?> fetchForYouReadiness() async {
-    final headers = await _authHeaders();
-    if (headers == null) return null;
-
-    try {
-      final readiness = await _api.getJson(
-        ApiClient.uri(
-          '${AppConstants.baseApiUrl}/my/series/recommendations/status',
-        ),
-        operation: 'probe For-You readiness',
-        parse: (json) =>
-            ForYouReadiness.fromJson((json as Map).cast<String, dynamic>()),
-        headers: headers,
-      );
-      _logger.info(
-        'For-You readiness: coldStart=${readiness.coldStart} '
-        'stale=${readiness.profileStale} library=${readiness.libraryCount}',
-      );
-      return readiness;
-    } catch (e) {
-      _logger.warning('For-You readiness probe failed: $e');
-      return null;
-    }
-  }
-
   /// The bearer header for the signed-in user, or null when logged out or the
   /// token could not be refreshed — in which case the caller shows nothing
   /// rather than an error, since the rail is only meaningful when signed in.
@@ -306,30 +216,54 @@ class HomeService {
       '${date.month.toString().padLeft(2, '0')}-'
       '${date.day.toString().padLeft(2, '0')}';
 
+  /// The user's top genres from their taste profile. Empty when logged out, when
+  /// the profile has nothing yet, or when the (beta) endpoint fails.
+  ///
+  /// Unlike the other endpoints this one answers with `results`, not `data`.
+  Future<List<TopGenre>> fetchTopGenres({int limit = 3}) =>
+      _fetchTopGenres(this, limit);
+
+  /// The best-rated series carrying [tagId] - the content of a "Top in
+  /// {genre}" rail.
+  Future<List<Series>> fetchTopInGenre(int tagId, {int limit = 20}) {
+    return _fetchRail(
+      _v2Uri('/series/search', {
+        'tag': tagId,
+        'sort_by': 'score_desc',
+        // Unrated series sort unpredictably under a score sort.
+        'rating_lower': 1,
+        'limit': limit,
+      }),
+      'top in genre $tagId',
+    );
+  }
+
+  /// "Top in {genre}" rails for the user's top genres, best-fitting first.
+  /// Genres whose rail came back empty are dropped.
+  Future<List<TopGenreRail>> fetchTopGenreRails({int genres = 3}) async {
+    final top = await fetchTopGenres(limit: genres);
+    if (top.isEmpty) return const [];
+    final lists = await Future.wait([
+      for (final g in top) fetchTopInGenre(g.tagId),
+    ]);
+    return [
+      for (var i = 0; i < top.length; i++)
+        if (lists[i].isNotEmpty) TopGenreRail(top[i], lists[i]),
+    ];
+  }
+
+  /// Cheap probe for whether the taste profile behind "For You" is warm.
+  ///
+  /// Null means "don't show the rail and don't explain why" — logged out, or
+  /// the probe itself failed.
+  Future<ForYouReadiness?> fetchForYouReadiness() =>
+      _fetchForYouReadiness(this);
+
   /// Fetches upcoming work releases.
   Future<List<SeriesWork>> fetchUpcomingWorks({
     int page = 1,
     int perPage = 25,
-  }) async {
-    try {
-      final uri = ApiClient.uri('https://api.mangabaka.org/v1/works/upcoming', {
-        'page': page,
-        'per_page': perPage,
-      });
-      final works = await _api
-          .withContext('home:upcoming')
-          .getJson(
-            uri,
-            operation: 'fetch upcoming works',
-            parse: (json) => parseDataList(json, SeriesWork.fromJson),
-          );
-      _logger.info('HomeService upcoming returned ${works.length} works');
-      return works;
-    } catch (e) {
-      _logger.warning('HomeService failed to fetch upcoming works: $e');
-      return const [];
-    }
-  }
+  }) => _fetchUpcomingWorks(this, page: page, perPage: perPage);
 
   void dispose() => _api.close();
 }

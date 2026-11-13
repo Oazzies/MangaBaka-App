@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -13,6 +12,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
+import 'package:mangabaka_app/features/updates/widgets/update_release_notes.dart';
 import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
@@ -196,82 +196,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               ),
               const SizedBox(height: 16),
               Flexible(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 280),
-                  child: SingleChildScrollView(
-                    child: release.body.trim().isEmpty
-                        ? Text(
-                            l10n.translate('no_release_notes'),
-                            style: AppTypography.sans(
-                              color: context.colors.text,
-                              fontSize: 14,
-                              height: 1.5,
-                            ),
-                          )
-                        : MarkdownBody(
-                            data: release.body.trim(),
-                            selectable: true,
-                            onTapLink: (text, href, title) {
-                              if (href != null) {
-                                final uri = Uri.tryParse(href);
-                                if (uri != null) {
-                                  launchUrl(
-                                    uri,
-                                    mode: LaunchMode.externalApplication,
-                                  );
-                                }
-                              }
-                            },
-                            styleSheet:
-                                MarkdownStyleSheet.fromTheme(
-                                  Theme.of(context),
-                                ).copyWith(
-                                  p: AppTypography.sans(
-                                    color: context.colors.text,
-                                    fontSize: 14,
-                                    height: 1.5,
-                                  ),
-                                  listBullet: AppTypography.sans(
-                                    color: context.colors.textMuted,
-                                    fontSize: 14,
-                                  ),
-                                  h1: AppTypography.display(
-                                    color: context.colors.text,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  h2: AppTypography.display(
-                                    color: context.colors.text,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  h3: AppTypography.display(
-                                    color: context.colors.text,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  a:
-                                      AppTypography.sans(
-                                        color: context.colors.accent,
-                                        fontSize: 14,
-                                      ).copyWith(
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                  code: TextStyle(
-                                    fontFamily: 'monospace',
-                                    color: context.colors.accent,
-                                    fontSize: 13,
-                                  ),
-                                  codeblockDecoration: BoxDecoration(
-                                    color: context.colors.surfaceRaised,
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.denseRadius,
-                                    ),
-                                  ),
-                                ),
-                          ),
-                  ),
-                ),
+                child: UpdateReleaseNotes(body: release.body, l10n: l10n),
               ),
               if (_phase == _Phase.downloading) ...[
                 const SizedBox(height: 20),
@@ -311,39 +236,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               ],
               if (_phase == _Phase.error && _errorMessage != null) ...[
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: context.colors.error.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.denseRadius,
-                    ),
-                    border: Border.all(
-                      color: context.colors.error.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.error_outline_rounded,
-                        color: context.colors.error,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          l10n.translate('update_failed'),
-                          style: AppTypography.sans(
-                            color: context.colors.error.withValues(alpha: 0.9),
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                UpdateErrorBanner(l10n: l10n),
               ],
             ],
           ),

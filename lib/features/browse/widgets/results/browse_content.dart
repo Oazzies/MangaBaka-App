@@ -1,28 +1,20 @@
-import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
-import 'package:mangabaka_app/features/browse/widgets/shortcuts/browse_shortcuts.dart';
-import 'package:mangabaka_app/core/settings/settings_manager.dart';
-import 'package:mangabaka_app/core/settings/settings_enums.dart';
-import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/settings/settings_enums.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
-
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
-import 'package:mangabaka_app/features/publisher/models/publisher.dart';
-import 'package:mangabaka_app/features/publisher/widgets/publisher_list_item.dart';
-import 'package:mangabaka_app/features/collections/screens/collections_browse_screen.dart';
-import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
-import 'package:mangabaka_app/features/staff/models/staff.dart';
-import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/features/browse/widgets/results/browse_people_results.dart';
+import 'package:mangabaka_app/features/browse/widgets/shortcuts/browse_shortcuts.dart';
+import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
+import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
 
 class BrowseContent extends StatelessWidget {
   final List<dynamic> searchResults;
@@ -82,27 +74,8 @@ class BrowseContent extends StatelessWidget {
     return const Center(child: MbSpinner());
   }
 
-  Widget _buildErrorState(BuildContext context, LocalizationService l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, color: context.colors.error, size: 48),
-          const SizedBox(height: 16),
-          Text(
-            error ?? 'An unexpected error occurred.',
-            style: AppTypography.sans(color: context.colors.error),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: onRetry,
-            child: Text(l10n.translate('retry')),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildErrorState(BuildContext context, LocalizationService l10n) =>
+      BrowseErrorState(error: error, l10n: l10n, onRetry: onRetry);
 
   Widget _buildResultsList(LocalizationService l10n) {
     return switch (browseType) {
@@ -250,94 +223,21 @@ class BrowseContent extends StatelessWidget {
     );
   }
 
-  Widget _buildPublisherResults() {
-    return _buildPeopleResults(
-      cellHeight: 136,
-      itemBuilder: (context, index, margin) {
-        final publisher = searchResults[index] as Publisher;
-        return PublisherListItem(
-          publisher: publisher,
-          margin: margin,
-          onTap: () => PublisherDetailScreen.open(
-            context,
-            id: publisher.id,
-            publisher: publisher,
-          ),
-        );
-      },
-    );
-  }
+  Widget _buildPublisherResults() => BrowsePeopleResults(
+    searchResults: searchResults,
+    browseType: BrowseType.publishers,
+    isLoadingMore: isLoadingMore,
+    scrollController: scrollController,
+    onNavigateToResults: onNavigateToResults,
+  );
 
-  Widget _buildStaffResults() {
-    return _buildPeopleResults(
-      cellHeight: 88,
-      itemBuilder: (context, index, margin) {
-        final staff = searchResults[index] as Staff;
-        return StaffListItem(
-          staff: staff,
-          margin: margin,
-          onTap: () => onNavigateToResults(
-            staff.name,
-            'popularity_desc',
-            staff: staff.name,
-          ),
-        );
-      },
-    );
-  }
-
-  /// Publishers and staff share their layout: a plain list on a phone, and a
-  /// grid of cards on desktop — a card stretched across a wide window is mostly
-  /// empty space between the name and the chevron.
-  Widget _buildPeopleResults({
-    required double cellHeight,
-    required Widget Function(BuildContext, int, EdgeInsetsGeometry?)
-    itemBuilder,
-  }) {
-    return Builder(
-      builder: (context) {
-        final itemCount = searchResults.length + (isLoadingMore ? 1 : 0);
-        Widget spinner() => const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(child: MbSpinner()),
-        );
-
-        if (DesktopLayout.isActive(context)) {
-          return GridView.builder(
-            controller: scrollController,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 460,
-              mainAxisExtent: cellHeight,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemCount: itemCount,
-            itemBuilder: (context, index) => index >= searchResults.length
-                ? spinner()
-                : itemBuilder(context, index, EdgeInsets.zero),
-          );
-        }
-
-        return ListView.builder(
-          controller: scrollController,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          itemCount: itemCount,
-          itemBuilder: (context, index) => index >= searchResults.length
-              ? spinner()
-              // Null margin: each card keeps its own list default.
-              : itemBuilder(context, index, null),
-        );
-      },
-    );
-  }
-
-  /// Returns an appropriate icon for the empty / prompt state of each browse type.
-  IconData _emptyStateIconFor(BrowseType type) => switch (type) {
-    BrowseType.publishers => Icons.business,
-    BrowseType.staff => Icons.people,
-    _ => Icons.search,
-  };
+  Widget _buildStaffResults() => BrowsePeopleResults(
+    searchResults: searchResults,
+    browseType: BrowseType.staff,
+    isLoadingMore: isLoadingMore,
+    scrollController: scrollController,
+    onNavigateToResults: onNavigateToResults,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -355,69 +255,10 @@ class BrowseContent extends StatelessWidget {
               onMix: onNavigateToMix,
               onDiscoveryQueue: onNavigateToDiscoveryQueue,
             );
-          } else if (browseType == BrowseType.publishers) {
-            content = Center(
-              key: const ValueKey('publishers_prompt'),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.business_rounded,
-                    size: 64,
-                    color: context.colors.textMuted,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.translate('search_publishers_hint'),
-                    style: AppTypography.sans(
-                      color: context.colors.textMuted,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  OutlinedButton.icon(
-                    icon: const Icon(
-                      Icons.collections_bookmark_rounded,
-                      size: 18,
-                    ),
-                    label: Text(l10n.translate('collections_and_editions')),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: context.colors.accent,
-                      side: BorderSide(color: context.colors.border),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () => CollectionsBrowseScreen.open(context),
-                  ),
-                ],
-              ),
-            );
           } else {
-            content = Center(
-              key: const ValueKey('search_prompt'),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    _emptyStateIconFor(browseType),
-                    size: 64,
-                    color: context.colors.textMuted,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.translate('no_results'),
-                    style: AppTypography.sans(
-                      color: context.colors.textMuted,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
+            content = BrowseEmptyPrompt(
+              browseType: browseType,
+              l10n: l10n,
             );
           }
         } else if (isLoading && searchResults.isEmpty) {

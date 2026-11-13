@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
-import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_theme_spec.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
-import 'package:mangabaka_app/features/appearance/widgets/mb_color_picker.dart';
+import 'package:mangabaka_app/features/appearance/widgets/theme_editor_controls.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_live_preview.dart';
 
 /// The draft being edited: the seeds the user picks, and the palette derived
@@ -118,7 +117,7 @@ class _EditorScreen extends StatelessWidget {
               listenable: controller,
               builder: (_, _) => ThemeLivePreview(palette: controller.palette),
             );
-            final controls = _EditorControls(controller: controller);
+            final controls = ThemeEditorControls(controller: controller);
             if (sideBySide) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,7 +191,7 @@ class _EditorDialogBody extends StatelessWidget {
                 SizedBox(
                   width: 380,
                   child: SingleChildScrollView(
-                    child: _EditorControls(controller: controller),
+                    child: ThemeEditorControls(controller: controller),
                   ),
                 ),
               ],
@@ -222,257 +221,6 @@ class _EditorDialogBody extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _EditorControls extends StatefulWidget {
-  final ThemeEditorController controller;
-  const _EditorControls({required this.controller});
-
-  @override
-  State<_EditorControls> createState() => _EditorControlsState();
-}
-
-class _EditorControlsState extends State<_EditorControls> {
-  late final TextEditingController _name = TextEditingController(
-    text: widget.controller.spec.name,
-  );
-
-  @override
-  void dispose() {
-    _name.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pick(
-    String titleKey,
-    Color initial,
-    ValueChanged<Color> onPicked, {
-    Color? contrastAgainst,
-  }) async {
-    final picked = await showMbColorPicker(
-      context,
-      initial: initial,
-      title: LocalizationService().translate(titleKey),
-      contrastAgainst: contrastAgainst,
-    );
-    if (picked != null) onPicked(picked);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = LocalizationService();
-    final ctrl = widget.controller;
-    final c = context.colors;
-    return ListenableBuilder(
-      listenable: ctrl,
-      builder: (context, _) {
-        final spec = ctrl.spec;
-        final p = ctrl.palette;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _label(context, l10n.translate('theme_name')),
-            TextField(
-              controller: _name,
-              maxLength: MbThemeSpec.maxNameLength,
-              style: AppTypography.sans(color: c.text, fontSize: 15),
-              decoration: const InputDecoration(counterText: ''),
-              onChanged: ctrl.setName,
-            ),
-            const SizedBox(height: 20),
-            _ColorRow(
-              label: l10n.translate('theme_background'),
-              color: spec.background,
-              onTap: () => _pick(
-                'theme_background',
-                spec.background,
-                ctrl.setBackground,
-              ),
-            ),
-            _ColorRow(
-              label: l10n.translate('theme_accent'),
-              color: p.accent,
-              onTap: () => _pick(
-                'theme_accent',
-                spec.accent,
-                ctrl.setAccent,
-                contrastAgainst: p.surface,
-              ),
-            ),
-            _ColorRow(
-              label: l10n.translate('theme_surface'),
-              color: p.surface,
-              isAuto: spec.surface == null,
-              onAuto: () => ctrl.setSurface(null),
-              onTap: () => _pick('theme_surface', p.surface, ctrl.setSurface),
-            ),
-            _ColorRow(
-              label: l10n.translate('theme_text'),
-              color: p.text,
-              isAuto: spec.text == null,
-              onAuto: () => ctrl.setText(null),
-              onTap: () => _pick(
-                'theme_text',
-                p.text,
-                ctrl.setText,
-                contrastAgainst: p.background,
-              ),
-            ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              child: ctrl.adjusted
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            size: 16,
-                            color: c.textMuted,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l10n.translate('theme_contrast_adjusted'),
-                              style: AppTypography.sans(
-                                color: c.textMuted,
-                                fontSize: 12.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : const SizedBox(width: double.infinity),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _label(BuildContext context, String text) => Padding(
-    padding: const EdgeInsets.only(left: 4, bottom: 8),
-    child: Text(
-      text.toUpperCase(),
-      style: AppTypography.monoLabel(
-        color: context.colors.textMuted,
-        fontSize: 11.5,
-      ),
-    ),
-  );
-}
-
-/// One editable colour: swatch, name, hex, and an optional "auto" reset for
-/// the tokens that are derived unless the user overrides them.
-class _ColorRow extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  final bool? isAuto;
-  final VoidCallback? onAuto;
-
-  const _ColorRow({
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.isAuto,
-    this.onAuto,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final l10n = LocalizationService();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      // Outlined rather than filled: the rows sit on the page background on
-      // phones but on a surface-coloured dialog on desktop.
-      child: Material(
-        color: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.denseRadius),
-          side: BorderSide(color: c.border),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.denseRadius),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: c.border),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label,
-                        style: AppTypography.sans(
-                          color: c.text,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        isAuto == true
-                            ? l10n.translate('theme_auto_hint')
-                            : ColorMath.toHex(color),
-                        style: AppTypography.sans(
-                          color: c.textMuted,
-                          fontSize: 12.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isAuto != null)
-                  _AutoChip(active: isAuto!, onTap: isAuto! ? null : onAuto),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AutoChip extends StatelessWidget {
-  final bool active;
-  final VoidCallback? onTap;
-  const _AutoChip({required this.active, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: active ? c.accent : c.surfaceRaised,
-          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-        ),
-        child: Text(
-          LocalizationService().translate('theme_auto').toUpperCase(),
-          style: AppTypography.display(
-            color: active ? c.onAccent : c.textMuted,
-            fontSize: 10,
-          ),
-        ),
       ),
     );
   }

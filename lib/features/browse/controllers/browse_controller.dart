@@ -13,6 +13,8 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
+part 'browse_fetch_part.dart';
+
 /// Drives the Browse screen: the query, the filters, the active result type,
 /// and the loading lifecycle.
 ///
@@ -241,125 +243,13 @@ class BrowseController extends ChangeNotifier {
     searchSeries();
   }
 
-  // ─── Fetching ────────────────────────────────────────────────────────────
+  // ─── Fetching & Barcode ──────────────────────────────────────────────────
 
-  Future<void> searchSeries() async {
-    if (_currentSearchQuery.trim().isEmpty &&
-        _currentFilters.toMap().isEmpty &&
-        _currentType != BrowseType.publishers) {
-      _logger.fine('Search query and filters are empty, skipping search');
-      resetSearchState();
-      return;
-    }
+  void _notify() => notifyListeners();
 
-    _logger.info(
-      'Starting new search for $_currentType with query: '
-      '"$_currentSearchQuery" with filters: ${_currentFilters.toMap()}',
-    );
-    _requestGeneration++;
-    _isLoading = true;
-    _isLoadingMore = false;
-    _error = null;
-    _results.clear();
-    notifyListeners();
+  Future<void> searchSeries() => _searchSeriesImpl(this);
 
-    await _fetchPage();
-  }
-
-  Future<void> loadMoreResults() async {
-    // _isLoading guards against the initial page still being in flight: an
-    // empty list has maxScrollExtent 0, which counts as "near end", so the
-    // scroll listener could otherwise fire page 2 concurrently with page 1.
-    if (_isLoading || _isLoadingMore || !_results.hasMore) return;
-
-    _logger.info(
-      'Loading more results for query: "$_currentSearchQuery", '
-      'page: ${_results.page + 1}',
-    );
-    _isLoadingMore = true;
-    notifyListeners();
-
-    _results.advancePage();
-    await _fetchPage(isLoadMore: true);
-  }
-
-  Future<void> _fetchPage({bool isLoadMore = false}) async {
-    final generation = _requestGeneration;
-    try {
-      switch (_currentType) {
-        case BrowseType.series:
-          final page = await _gateway.fetchSeries(
-            query: _currentSearchQuery,
-            page: _results.page,
-            filters: _currentFilters,
-            alreadyLoaded: _results.loadedCount(BrowseType.series),
-          );
-          if (_isStale(generation, 'series')) return;
-          _results.addSeries(page);
-
-        case BrowseType.publishers:
-          final page = await _gateway.fetchPublishers(
-            query: _currentSearchQuery,
-            page: _results.page,
-            sortBy: _publisherSort,
-            alreadyLoaded: _results.loadedCount(BrowseType.publishers),
-          );
-          if (_isStale(generation, 'publisher')) return;
-          _results.addPublishers(page);
-
-        case BrowseType.staff:
-          final page = await _gateway.fetchStaff(
-            query: _currentSearchQuery,
-            page: _results.page,
-            filters: _currentFilters,
-          );
-          if (_isStale(generation, 'staff')) return;
-          _results.addStaff(page);
-
-        default:
-          // A type with no backing endpoint yet: settle into an empty,
-          // non-loading state rather than spinning forever.
-          _results.markExhausted();
-      }
-      _finishPage();
-    } catch (e, st) {
-      if (generation != _requestGeneration) return;
-      _logger.severe(
-        'Failed to fetch search results for type $_currentType, query '
-        '"$_currentSearchQuery" at page ${_results.page}',
-        e,
-        st,
-      );
-      // The page was advanced before the request; without stepping back, the
-      // next scroll-triggered retry would request the page after it and the
-      // failed page's results would be silently missing from the list.
-      if (isLoadMore) _results.retreatPage();
-      _isLoading = false;
-      _isLoadingMore = false;
-      _error = ErrorMessages.describe(e);
-      notifyListeners();
-    }
-  }
-
-  bool _isStale(int generation, String label) {
-    if (generation == _requestGeneration) return false;
-    _logger.fine('Discarding stale $label results for superseded search');
-    return true;
-  }
-
-  void _finishPage() {
-    _isLoading = false;
-    _isLoadingMore = false;
-    notifyListeners();
-    // A short page may not fill the viewport, leaving nothing to scroll and so
-    // no way to ask for the next one; re-check once it has been laid out.
-    if (!_results.hasMore) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_disposed) checkScroll();
-    });
-  }
-
-  // ─── Barcode ─────────────────────────────────────────────────────────────
+  Future<void> loadMoreResults() => _loadMoreResultsImpl(this);
 
   static double generateRandomSeed() => Random().nextDouble();
 
@@ -367,30 +257,6 @@ class BrowseController extends ChangeNotifier {
   ///
   /// Returns null on success, or a localisation key naming what went wrong —
   /// the caller shows it, since only the UI knows how.
-  Future<String?> handleBarcodeScan(String isbn) async {
-    if (isbn.isEmpty) return null;
-
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    final failure = await _barcode.run(isbn, search: _searchFor);
-    if (failure == null) return null;
-
-    // A search that ran and found nothing has already settled the flags; a
-    // lookup that never got that far has not.
-    if (_isLoading) {
-      _isLoading = false;
-      notifyListeners();
-    }
-    return failure.messageKey;
-  }
-
-  /// Runs [title] as a search, returning whether it matched anything.
-  Future<bool> _searchFor(String title) async {
-    searchController.text = title;
-    _currentSearchQuery = title;
-    await searchSeries();
-    return _results.series.isNotEmpty;
-  }
+  Future<String?> handleBarcodeScan(String isbn) =>
+      _handleBarcodeScanImpl(this, isbn);
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -98,8 +99,14 @@ class NewsService {
     for (final item in data) {
       try {
         out.add(News.fromJson(item));
-      } catch (_) {
+      } catch (e, st) {
         // Skip the malformed article rather than losing the whole page.
+        developer.log(
+          'Skipped malformed news item',
+          name: 'NewsService',
+          error: e,
+          stackTrace: st,
+        );
       }
     }
     return out;

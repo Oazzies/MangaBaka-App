@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/motion/app_motion.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
-import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/home/controllers/discovery_queue_controller.dart';
+import 'package:mangabaka_app/features/home/widgets/discovery_queue_controls.dart';
+import 'package:mangabaka_app/features/home/widgets/discovery_queue_states.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
 
 /// Interactive Discovery Queue screen.
 ///
@@ -87,7 +84,12 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
       if (success && mounted) {
         AppSnackBar.show(context, l10n.translate('added_to_library'));
       }
-    } catch (_) {
+    } catch (e, st) {
+      LoggingService.logger.warning(
+        'Failed to add discovery queue series to library',
+        e,
+        st,
+      );
       if (mounted) {
         AppSnackBar.show(
           context,
@@ -143,221 +145,43 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
     }
 
     if (!_controller.isReady) {
-      return _buildNotReadyState(l10n, isDesktop);
+      return DiscoveryQueueNotReadyState(l10n: l10n);
     }
 
     if (_controller.errorMessage != null && _controller.queue.isEmpty) {
-      return _buildErrorState(l10n, isDesktop);
+      return DiscoveryQueueErrorState(
+        l10n: l10n,
+        messageKey: _controller.errorMessage!,
+        onRestart: _controller.restart,
+      );
     }
 
     if (_controller.queue.isEmpty) {
-      return _buildEmptyState(l10n, isDesktop);
+      return DiscoveryQueueEmptyState(
+        l10n: l10n,
+        onRestart: _controller.restart,
+      );
     }
 
     if (_controller.isCompleted) {
-      return _buildCompletedState(l10n, isDesktop);
+      return DiscoveryQueueCompletedState(
+        l10n: l10n,
+        reviewedCount: _controller.reviewedCount,
+        addedCount: _controller.addedCount,
+        onRestart: _controller.restart,
+      );
     }
 
     final series = _controller.currentSeries;
     if (series == null) {
-      return _buildEmptyState(l10n, isDesktop);
+      return DiscoveryQueueEmptyState(
+        l10n: l10n,
+        onRestart: _controller.restart,
+      );
     }
 
     return _buildQueueView(context, series, isDesktop, l10n);
   }
-
-  // ─── States ───────────────────────────────────────────────────────────────
-
-  Widget _buildNotReadyState(LocalizationService l10n, bool isDesktop) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.auto_awesome_outlined,
-                size: 64,
-                color: context.colors.accent,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.translate('discovery_queue').toUpperCase(),
-                style: AppTypography.display(
-                  color: context.colors.text,
-                  fontSize: 22,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.translate('discovery_queue_not_ready'),
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                child: Text(l10n.translate('back')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(LocalizationService l10n, bool isDesktop) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.explore_off_outlined,
-                size: 64,
-                color: context.colors.textMuted,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.translate('discovery_queue_empty'),
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _controller.restart,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.translate('retry')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorState(LocalizationService l10n, bool isDesktop) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 64,
-                color: context.colors.error,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                // The controller hands over a localization key, never text.
-                l10n.translate(_controller.errorMessage ?? 'error_loading'),
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _controller.restart,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.translate('retry')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompletedState(LocalizationService l10n, bool isDesktop) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.colors.accent.withValues(alpha: 0.15),
-                ),
-                child: Icon(
-                  Icons.check_circle_outline_rounded,
-                  size: 48,
-                  color: context.colors.accent,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                l10n.translate('discovery_queue_complete_title').toUpperCase(),
-                style: AppTypography.display(
-                  color: context.colors.text,
-                  fontSize: 24,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n
-                    .translate('discovery_queue_complete_message')
-                    .replaceAll('{reviewed}', '${_controller.reviewedCount}')
-                    .replaceAll('{added}', '${_controller.addedCount}'),
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Wrap(
-                spacing: 16,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    child: Text(l10n.translate('done')),
-                  ),
-                  FilledButton.icon(
-                    onPressed: _controller.restart,
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(
-                      l10n.translate('discovery_queue_start_another'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ─── Queue View ───────────────────────────────────────────────────────────
 
   Widget _buildQueueView(
     BuildContext context,
@@ -376,7 +200,22 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
               series: series,
               embedded: true,
               heroTagPrefix: 'discovery_queue_${series.id}',
-              rightRail: showRail ? _buildControlCard(l10n) : null,
+              rightRail: showRail
+                  ? DiscoveryQueueControlCard(
+                      l10n: l10n,
+                      currentIndex: _controller.currentIndex,
+                      totalCount: _controller.totalCount,
+                      progress: _controller.progress,
+                      selectedState: _selectedState,
+                      states: _libraryStates,
+                      busy: _controller.isActionInProgress,
+                      onAdd: () => _addWithState(_selectedState),
+                      onStateSelected: (state) =>
+                          setState(() => _selectedState = state),
+                      onSkip: _controller.skip,
+                      onNotInterested: _controller.markNotInterested,
+                    )
+                  : null,
             );
 
         // With the rail, the controls live inside the detail page's scrolling
@@ -393,10 +232,21 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
                     bottom: atBottom ? 0 : null,
                     left: 0,
                     right: 0,
-                    child: _buildControlBar(
-                      l10n,
-                      isDesktop,
+                    child: DiscoveryQueueControlBar(
+                      l10n: l10n,
+                      isDesktop: isDesktop,
                       atBottom: atBottom,
+                      currentIndex: _controller.currentIndex,
+                      totalCount: _controller.totalCount,
+                      progress: _controller.progress,
+                      selectedState: _selectedState,
+                      states: _libraryStates,
+                      busy: _controller.isActionInProgress,
+                      onAdd: () => _addWithState(_selectedState),
+                      onStateSelected: (state) =>
+                          setState(() => _selectedState = state),
+                      onSkip: _controller.skip,
+                      onNotInterested: _controller.markNotInterested,
                     ),
                   ),
                 ],
@@ -418,249 +268,6 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildControlCard(LocalizationService l10n) {
-    final counter =
-        '${_controller.currentIndex + 1} / ${_controller.totalCount}';
-
-    return MbCard(
-      label: l10n.translate('discovery_queue'),
-      trailing: _buildCounterPill(counter),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: _controller.progress,
-              color: context.colors.accent,
-              backgroundColor: context.colors.surfaceRaised,
-              minHeight: 3,
-            ),
-          ),
-          const SizedBox(height: 18),
-          _buildAddButton(),
-          const SizedBox(height: 12),
-          _buildSkipButton(l10n, expand: true),
-          const SizedBox(height: 12),
-          _buildNotInterestedButton(l10n, expand: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCounterPill(String counter) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: context.colors.surfaceRaised,
-        borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-      ),
-      child: Text(
-        counter,
-        style: AppTypography.monoLabel(
-          color: context.colors.textMuted,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildControlBar(
-    LocalizationService l10n,
-    bool isDesktop, {
-    bool atBottom = false,
-  }) {
-    final horizontal = isDesktop ? DesktopTokens.pagePadding : 12.0;
-    final counter =
-        '${_controller.currentIndex + 1} / ${_controller.totalCount}';
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(horizontal, 10, horizontal, 10),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        decoration: BoxDecoration(
-          color: context.colors.surface,
-          borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-          border: atBottom
-              ? Border.all(color: context.colors.border, width: 1)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: context.colors.shadowAt(0.35),
-              blurRadius: 16,
-              offset: Offset(0, atBottom ? -6 : 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            BesideOrBelow(
-              minBodyWidth: 140,
-              gap: 10,
-              stackGap: 8,
-              body: Text(
-                l10n.translate('discovery_queue').toUpperCase(),
-                style: AppTypography.display(
-                  color: context.colors.text,
-                  fontSize: 14,
-                ),
-              ),
-              trailing: _buildCounterPill(counter),
-            ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: _controller.progress,
-                color: context.colors.accent,
-                backgroundColor: context.colors.surfaceRaised,
-                minHeight: 3,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildAddButton(),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: _buildSkipButton(l10n, expand: true)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildNotInterestedButton(l10n, expand: true)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddButton({bool expand = true}) {
-    return _AddToLibraryButton(
-      selectedState: _selectedState,
-      states: _libraryStates,
-      expand: expand,
-      busy: _controller.isActionInProgress,
-      onAdd: _controller.isActionInProgress
-          ? null
-          : () => _addWithState(_selectedState),
-      onStateSelected: (state) => setState(() => _selectedState = state),
-    );
-  }
-
-  Widget _buildSkipButton(LocalizationService l10n, {bool expand = true}) {
-    return MbSecondaryButton(
-      label: l10n.translate('discovery_queue_skip'),
-      icon: Icons.skip_next_rounded,
-      onPressed: _controller.isActionInProgress ? null : _controller.skip,
-      expand: expand,
-    );
-  }
-
-  Widget _buildNotInterestedButton(
-    LocalizationService l10n, {
-    bool expand = true,
-  }) {
-    return MbSecondaryButton(
-      label: l10n.translate('discovery_queue_not_interested'),
-      icon: Icons.thumb_down_alt_outlined,
-      onPressed: _controller.isActionInProgress
-          ? null
-          : _controller.markNotInterested,
-      expand: expand,
-    );
-  }
-}
-
-/// Primary "add to library" pill with an attached dropdown for choosing the
-/// target state. The dropdown only changes the button's label; the state is
-/// applied when the main button is pressed.
-class _AddToLibraryButton extends StatelessWidget {
-  final String selectedState;
-  final List<String> states;
-  final ValueChanged<String> onStateSelected;
-  final VoidCallback? onAdd;
-  final bool busy;
-  final bool expand;
-
-  const _AddToLibraryButton({
-    required this.selectedState,
-    required this.states,
-    required this.onStateSelected,
-    required this.onAdd,
-    this.busy = false,
-    this.expand = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = LocalizationService();
-    final enabled = onAdd != null && !busy;
-    final bg = enabled
-        ? context.colors.accent
-        : context.colors.accent.withValues(alpha: 0.35);
-    final fg = context.colors.onAccent;
-
-    final addSection = MbTappable(
-      onTap: enabled ? onAdd : null,
-      pressedScale: 0.975,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (busy) MbSpinner(size: 16, strokeWidth: 2, color: fg),
-            if (busy) const SizedBox(width: 10),
-            Flexible(
-              child: Text(
-                '+ ${l10n.translate(selectedState)}'.toUpperCase(),
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.display(color: fg, fontSize: 15),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    final menuSection = PopupMenuButton<String>(
-      enabled: !busy,
-      tooltip: l10n.translate('import_add_as'),
-      color: context.colors.surface,
-      padding: EdgeInsets.zero,
-      onSelected: onStateSelected,
-      itemBuilder: (context) => [
-        for (final state in states)
-          PopupMenuItem(
-            value: state,
-            child: Text(
-              l10n.translate(state),
-              style: AppTypography.sans(color: context.colors.text),
-            ),
-          ),
-      ],
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-        child: Icon(Icons.arrow_drop_down_rounded, size: 22, color: fg),
-      ),
-    );
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-      child: ColoredBox(
-        color: bg,
-        child: Row(
-          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-          children: [
-            if (expand) Expanded(child: addSection) else addSection,
-            Container(width: 1, height: 24, color: fg.withValues(alpha: 0.3)),
-            menuSection,
-          ],
-        ),
-      ),
     );
   }
 }

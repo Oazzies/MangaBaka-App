@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
-import 'package:mangabaka_app/features/news/widgets/news_list_item.dart';
+import 'package:mangabaka_app/features/news/widgets/news_feed_views.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -13,7 +12,6 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -261,94 +259,25 @@ class _NewsScreenState extends State<NewsScreen> {
 
     return MbRefreshIndicator(
       onRefresh: _onRefresh,
-      child: isGrid ? _buildGridView() : _buildListView(),
-    );
-  }
-
-  /// Hand-rolled 2-column masonry layout: odd-indexed items go left, even go right.
-  Widget _buildGridView() {
-    return SingleChildScrollView(
-      controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (int i = 0; i < _newsList.length; i += 2)
-                      NewsListItem(
-                        key: ValueKey('grid_${_newsList[i].id}'),
-                        news: _newsList[i],
-                      ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (int i = 1; i < _newsList.length; i += 2)
-                      NewsListItem(
-                        key: ValueKey('grid_${_newsList[i].id}'),
-                        news: _newsList[i],
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Center(child: MbSpinner()),
+      child: isGrid
+          ? NewsFeedGrid(
+              scrollController: _scrollController,
+              newsList: _newsList,
+              isLoading: _isLoading,
+            )
+          : NewsFeedList(
+              scrollController: _scrollController,
+              newsList: _newsList,
+              isLoading: _isLoading,
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildListView() {
-    return ListView.builder(
-      controller: _scrollController,
-      physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: _newsList.length + (_isLoading ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == _newsList.length) {
-          return const Center(
-            child: Padding(padding: EdgeInsets.all(16.0), child: MbSpinner()),
-          );
-        }
-        return MbEntrance(
-          index: index,
-          child: NewsListItem(
-            key: ValueKey('list_${_newsList[index].id}'),
-            news: _newsList[index],
-          ),
-        );
-      },
     );
   }
 
   Widget? _buildBackToTopFab(LocalizationService l10n) {
     if (!_showBackToTop) return null;
-    return WidgetUtils.tooltip(
-      message: l10n.translate('back_to_top'),
-      child: FloatingActionButton(
-        onPressed: () {
-          _scrollController.animateTo(
-            0,
-            duration: AppConstants.mediumAnimationDuration,
-            curve: Curves.easeInOut,
-          );
-        },
-        backgroundColor: context.colors.accent,
-        child: Icon(Icons.arrow_upward, color: context.colors.background),
-      ),
+    return NewsBackToTopFab(
+      l10n: l10n,
+      scrollController: _scrollController,
     );
   }
 }

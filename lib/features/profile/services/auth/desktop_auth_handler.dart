@@ -1,15 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:app_links/app_links.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/features/profile/services/auth/desktop_auth_tokens.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:win32_registry/win32_registry.dart';
 
@@ -138,9 +136,9 @@ StartupWMClass=dev.oazzies.mangabaka_app
     final appLinks = AppLinks();
 
     // 1. Generate PKCE
-    final codeVerifier = _generateCodeVerifier();
-    final codeChallenge = _generateCodeChallenge(codeVerifier);
-    final state = _generateRandomString(16);
+    final codeVerifier = DesktopAuthTokens.generateCodeVerifier();
+    final codeChallenge = DesktopAuthTokens.generateCodeChallenge(codeVerifier);
+    final state = DesktopAuthTokens.generateRandomString(16);
 
     // 2. Prepare Auth URI
     final authUri = Uri.parse(authorizationEndpoint).replace(
@@ -241,14 +239,14 @@ StartupWMClass=dev.oazzies.mangabaka_app
           .timeout(_tokenTimeout);
 
       if (response.statusCode == 200) {
-        final data = _tokenBody(response.body);
+        final data = DesktopAuthTokens.tokenBody(response.body);
         _logger.info('Token exchange successful on desktop');
 
         // Map to TokenResponse for compatibility with ProfileAuthService
         return TokenResponse(
           data['access_token'] as String,
           data['refresh_token'] as String?,
-          _expiryFrom(data['expires_in']),
+          DesktopAuthTokens.expiryFrom(data['expires_in']),
           data['id_token'] as String?,
           'Bearer',
           scopes,
@@ -256,7 +254,7 @@ StartupWMClass=dev.oazzies.mangabaka_app
         );
       } else {
         _logger.severe(
-          'Token exchange failed: ${response.statusCode} ${_oauthError(response.body)}',
+          'Token exchange failed: ${response.statusCode} ${DesktopAuthTokens.oauthError(response.body)}',
         );
         throw ApiException(
           message: 'Token exchange failed',
@@ -268,7 +266,8 @@ StartupWMClass=dev.oazzies.mangabaka_app
       await sub.cancel();
       _logger.warning('OAuth login timed out');
       throw AuthException(message: 'Login timed out', code: 'LOGIN_TIMEOUT');
-    } catch (_) {
+    } catch (e, st) {
+      _logger.warning('OAuth login flow interrupted', e, st);
       await sub.cancel();
       rethrow;
     } finally {
@@ -286,102 +285,13 @@ StartupWMClass=dev.oazzies.mangabaka_app
     required String tokenEndpoint,
     required String refreshToken,
     required List<String> scopes,
-  }) async {
-    _logger.info('Refreshing token on desktop...');
+  }) => DesktopAuthTokens.refresh(
+    clientId: clientId,
+    redirectUri: redirectUri,
+    tokenEndpoint: tokenEndpoint,
+    refreshToken: refreshToken,
+    scopes: scopes,
+  );
 
-    final response = await http
-        .post(
-          Uri.parse(tokenEndpoint),
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: {
-            'grant_type': 'refresh_token',
-            'client_id': clientId,
-            'refresh_token': refreshToken,
-            'scope': scopes.join(' '),
-          },
-        )
-        .timeout(_tokenTimeout);
-
-    if (response.statusCode == 200) {
-      final data = _tokenBody(response.body);
-      _logger.info('Token refresh successful on desktop');
-
-      return TokenResponse(
-        data['access_token'] as String,
-        (data['refresh_token'] as String?) ?? refreshToken,
-        _expiryFrom(data['expires_in']),
-        data['id_token'] as String?,
-        'Bearer',
-        scopes,
-        data,
-      );
-    } else {
-      _logger.severe(
-        'Token refresh failed: ${response.statusCode} ${_oauthError(response.body)}',
-      );
-      throw ApiException(
-        message: 'Token refresh failed',
-        statusCode: response.statusCode,
-        responseBody: response.body,
-      );
-    }
-  }
-
-  static const _tokenTimeout = Duration(seconds: 30);
-
-  static Map<String, dynamic> _tokenBody(String body) {
-    final decoded = jsonDecode(body);
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('token response is not a JSON object');
-    }
-    final access = decoded['access_token'];
-    if (access is! String || access.isEmpty) {
-      throw const FormatException('token response has no access_token');
-    }
-    for (final key in const ['refresh_token', 'id_token']) {
-      if (decoded[key] != null && decoded[key] is! String) {
-        throw FormatException('token response has a non-string $key');
-      }
-    }
-    return decoded;
-  }
-
-  static DateTime _expiryFrom(Object? raw) {
-    final seconds = switch (raw) {
-      final num n => n.toInt(),
-      final String s => int.tryParse(s) ?? 3600,
-      _ => 3600,
-    };
-    return DateTime.now().add(Duration(seconds: seconds));
-  }
-
-  static String _oauthError(String body) {
-    try {
-      final data = jsonDecode(body);
-      if (data is Map && data['error'] is String) return data['error'];
-    } on FormatException {
-      // Not JSON; fall through.
-    }
-    return '(no OAuth error code)';
-  }
-
-  static String _generateRandomString(int length) {
-    const charset =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    final random = Random.secure();
-    return List.generate(
-      length,
-      (_) => charset[random.nextInt(charset.length)],
-    ).join();
-  }
-
-  static String _generateCodeVerifier() {
-    return _generateRandomString(128);
-  }
-
-  static String _generateCodeChallenge(String verifier) {
-    final bytes = utf8.encode(verifier);
-    final digest = sha256.convert(bytes);
-    return base64Url.encode(digest.bytes).replaceAll('=', '');
-  }
+  static const _tokenTimeout = DesktopAuthTokens.tokenTimeout;
 }

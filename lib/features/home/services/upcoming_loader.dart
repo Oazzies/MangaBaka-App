@@ -1,4 +1,5 @@
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -99,8 +100,9 @@ class UpcomingData {
     try {
       covers = await getIt<LibraryService>().database.libraryEntriesDao
           .libraryCoversFor(ids);
-    } catch (_) {
+    } catch (e, st) {
       // No database yet: the list simply has no library marks.
+      LoggingService.logger.warning('Library covers lookup skipped', e, st);
     }
     return UpcomingData(
       works: works,

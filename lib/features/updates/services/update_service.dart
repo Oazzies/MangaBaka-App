@@ -6,15 +6,17 @@ import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
+import 'package:mangabaka_app/features/updates/services/update_exceptions.dart';
+import 'package:mangabaka_app/features/updates/services/update_installer.dart';
+
+export 'package:mangabaka_app/features/updates/services/update_exceptions.dart';
 
 /// Handles checking GitHub for a newer release, downloading the right asset
 /// for the current platform, and applying the update.
@@ -264,82 +266,11 @@ class UpdateService {
   /// Applies a downloaded update file. On Android this launches the system
   /// package installer; on Windows it runs the installer and quits the app so
   /// it can replace the running files.
-  Future<void> installDownloaded(File file) async {
-    if (Platform.isAndroid) {
-      var status = await Permission.requestInstallPackages.status;
-      if (!status.isGranted) {
-        status = await Permission.requestInstallPackages.request();
-      }
-      if (!status.isGranted) {
-        throw InstallPermissionException();
-      }
-      final result = await OpenFilex.open(
-        file.path,
-        type: 'application/vnd.android.package-archive',
-      );
-      if (result.type != ResultType.done) {
-        throw NetworkException(
-          message: 'Could not open the installer: ${result.message}',
-        );
-      }
-      return;
-    }
-
-    if (Platform.isWindows) {
-      await Process.start(file.path, const [], mode: ProcessStartMode.detached);
-      // Give the installer a moment to spawn, then quit so it can overwrite
-      // the running executable.
-      await Future.delayed(const Duration(milliseconds: 500));
-      exit(0);
-    }
-
-    if (Platform.isLinux) {
-      final lowerPath = file.path.toLowerCase();
-      if (lowerPath.endsWith('.appimage')) {
-        await Process.run('chmod', ['+x', file.path]);
-        await Process.start(
-          file.path,
-          const [],
-          mode: ProcessStartMode.detached,
-        );
-        await Future.delayed(const Duration(milliseconds: 500));
-        exit(0);
-      }
-      final result = await OpenFilex.open(file.path);
-      if (result.type != ResultType.done) {
-        throw NetworkException(
-          message: 'Could not open the update file: ${result.message}',
-        );
-      }
-      return;
-    }
-
-    throw NetworkException(
-      message: 'In-app updates are not supported on this platform.',
-    );
-  }
+  Future<void> installDownloaded(File file) =>
+      UpdateInstaller.installDownloaded(file);
 
   @visibleForTesting
   void dispose() => _client.close();
-}
-
-/// Thrown when a downloaded update does not match the checksum GitHub
-/// published for it (the file has already been deleted), or when no checksum
-/// was published at all and the update was not downloaded.
-class UpdateIntegrityException extends AppException {
-  UpdateIntegrityException()
-    : super(
-        message: 'The downloaded update failed its integrity check.',
-        code: 'CHECKSUM_MISMATCH',
-      );
-
-  UpdateIntegrityException.unverifiable()
-    : super(
-        message:
-            'This update has no published checksum, so it cannot be '
-            'installed from inside the app.',
-        code: 'CHECKSUM_MISSING',
-      );
 }
 
 /// Receives the single [Digest] a chunked hash conversion produces.
@@ -353,11 +284,4 @@ class _DigestSink implements Sink<Digest> {
 
   @override
   void close() {}
-}
-
-/// Thrown when the user denies the "install unknown apps" permission required
-/// to apply an Android update.
-class InstallPermissionException extends AppException {
-  InstallPermissionException()
-    : super(message: 'Install permission was denied.');
 }

@@ -71,8 +71,9 @@ class _HomePublishersRailState extends State<HomePublishersRail> {
   @override
   Widget build(BuildContext context) {
     final publishers = _publishers;
-    if (publishers == null || publishers.isEmpty)
+    if (publishers == null || publishers.isEmpty) {
       return const SizedBox.shrink();
+    }
     final l10n = LocalizationService();
 
     if (DesktopLayout.isActive(context)) {

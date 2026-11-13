@@ -15,6 +15,8 @@ import 'package:mangabaka_app/features/profile/services/auth/auth_storage.dart';
 import 'package:mangabaka_app/features/profile/services/auth/auth_network_client.dart';
 import 'package:mangabaka_app/features/profile/services/auth/desktop_auth_handler.dart';
 
+part 'profile_auth_session_part.dart';
+
 class ProfileAuthService extends ChangeNotifier {
   final _logger = LoggingService.logger;
   static const _authorizationEndpoint = '${AppConstants.authBaseUrl}/authorize';
@@ -236,52 +238,11 @@ class ProfileAuthService extends ChangeNotifier {
     return raw.split(' ').where((s) => s.isNotEmpty).toList();
   }
 
-  /// Records what a fresh sign-in was granted: the token response's scopes
-  /// when the server lists them, otherwise everything that was asked for.
-  Future<void> _persistGrantedScopes(TokenResponse response) async {
-    final granted = (response.scopes?.isNotEmpty ?? false)
-        ? response.scopes!
-        : AppConstants.oauthScopes;
-    _grantedScopes = List.unmodifiable(granted);
-    try {
-      await _storage.write(AuthStorage.kGrantedScopes, granted.join(' '));
-    } catch (e) {
-      _logger.warning('Could not record granted scopes: $e');
-    }
-  }
+  Future<void> _persistGrantedScopes(TokenResponse response) =>
+      _persistGrantedScopesImpl(this, response);
 
-  Future<void> _persistTokens(TokenResponse response) async {
-    try {
-      await _storage.write(AuthStorage.kAccessToken, response.accessToken);
-      // A refresh response may omit the refresh/id token when the provider
-      // does not rotate them. Writing null would delete the stored one and
-      // break the next refresh, so only overwrite with a real value.
-      if (response.refreshToken?.isNotEmpty ?? false) {
-        await _storage.write(AuthStorage.kRefreshToken, response.refreshToken);
-      }
-      if (response.idToken?.isNotEmpty ?? false) {
-        await _storage.write(AuthStorage.kIdToken, response.idToken);
-      }
-      final exp = response.accessTokenExpirationDateTime
-          ?.toUtc()
-          .toIso8601String();
-      if (exp != null) {
-        _logger.fine('Token expiration set to: $exp');
-        await _storage.write(AuthStorage.kAccessTokenExp, exp);
-      } else {
-        // An expiry left over from the previous token would be wrong for
-        // this one; without one, refresh is attempted only on demand.
-        await _storage.delete(AuthStorage.kAccessTokenExp);
-      }
-    } catch (e, st) {
-      _logger.severe('Failed to persist tokens', e, st);
-      throw AuthException(
-        message: 'Failed to persist tokens',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  Future<void> _persistTokens(TokenResponse response) =>
+      _persistTokensImpl(this, response);
 
   /// Guards against concurrent refreshes. With rotating refresh tokens, two
   /// parallel refreshes would race: the first invalidates the token the second
@@ -295,262 +256,32 @@ class ProfileAuthService extends ChangeNotifier {
     ).whenComplete(() => _refreshInFlight = null);
   }
 
-  /// Refreshes the tokens when the access token is near expiry, or
-  /// unconditionally when [force] is set (the server rejected a token that
-  /// had not expired locally).
-  Future<void> _runRefresh({bool force = false}) async {
-    if (!force) {
-      final expRaw = await _storage.read(AuthStorage.kAccessTokenExp);
-      if (expRaw == null) {
-        _logger.fine('No token expiration found, assuming refresh not needed');
-        return;
-      }
+  void _notifyStateChanged() => notifyListeners();
 
-      final exp = DateTime.tryParse(expRaw);
-      if (exp == null) return;
+  Future<void> _runRefresh({bool force = false}) =>
+      _runRefreshImpl(this, force: force);
 
-      final now = DateTime.now().toUtc();
-      final threshold = exp.subtract(const Duration(minutes: 5));
-
-      if (now.isBefore(threshold)) {
-        _logger.fine('Access token still valid. Expires at: $exp');
-        return;
-      }
-    }
-
-    _logger.info(
-      force
-          ? 'Access token rejected by the server. Attempting refresh...'
-          : 'Access token expiring soon or already expired. Attempting refresh...',
-    );
-    final refreshToken = await _storage.read(AuthStorage.kRefreshToken);
-    if (refreshToken == null || refreshToken.isEmpty) {
-      _logger.warning('No refresh token available to perform refresh');
-      await _clearSession();
-      throw SessionExpiredException();
-    }
-
-    TokenResponse? response;
-    try {
-      response = await (_refresher ?? _platformRefresh)(refreshToken);
-    } catch (e, st) {
-      _logger.severe('Token refresh failed', e, st);
-      // An invalid_grant (HTTP 400/401) means the refresh token is dead and no
-      // amount of retrying will help — clear the session and force re-login.
-      // Anything else (network, 5xx) stays retryable.
-      if (_isInvalidGrant(e)) {
-        await _clearSession();
-        throw SessionExpiredException(originalError: e, stackTrace: st);
-      }
-      throw AuthException(
-        message: 'Failed to refresh tokens',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-
-    if (response == null) {
-      throw AuthException(
-        message: 'Token refresh failed: No response from auth server',
-      );
-    }
-
-    _logger.info('Token refresh successful');
-    await _persistTokens(response);
-  }
-
-  Future<TokenResponse?> _platformRefresh(String refreshToken) {
-    if (Platform.isWindows || Platform.isLinux) {
-      return DesktopAuthHandler.refresh(
-        clientId: _clientId,
-        redirectUri: _redirectUri,
-        tokenEndpoint: _tokenEndpoint,
-        refreshToken: refreshToken,
-        scopes: _refreshScopes,
-      );
-    }
-    return _appAuth.token(
-      TokenRequest(
-        _clientId,
-        _redirectUri,
-        serviceConfiguration: _serviceConfig,
-        refreshToken: refreshToken,
-        scopes: _refreshScopes,
-      ),
-    );
-  }
+  Future<TokenResponse?> _platformRefresh(String refreshToken) =>
+      _platformRefreshImpl(this, refreshToken);
 
   /// Sends a request that needs the user's bearer token, recovering once
   /// from an HTTP 401.
   ///
-  /// The local expiry only says when a token *should* stop working; the
-  /// server can reject one earlier (revoked from the website, a password
-  /// change, clock skew). On a 401 the tokens are refreshed and the request
-  /// is sent again. If the refresh token is dead too, or the retry is also
-  /// rejected, the session is cleared and [SessionExpiredException] is thrown
-  /// so the UI can send the user back to sign-in. Never returns a 401.
+  /// Never returns a 401; clears the session and throws
+  /// [SessionExpiredException] if recovery fails.
   Future<http.Response> sendAuthorized(
     Future<http.Response> Function(String token) send,
-  ) async {
-    final token = await getValidAccessToken();
-    final response = await send(token);
-    if (response.statusCode != 401) return response;
+  ) => _sendAuthorizedImpl(this, send);
 
-    _logger.warning('Request rejected with 401; refreshing the session');
-    final fresh = await _recoverFromUnauthorized(token);
-    final retried = await send(fresh);
-    if (retried.statusCode != 401) return retried;
+  Future<void> _clearSession() => _clearSessionImpl(this);
 
-    _logger.severe('Request rejected with 401 after a token refresh');
-    await _clearSession();
-    throw SessionExpiredException();
-  }
-
-  /// Returns a token to retry with after [rejected] got a 401.
-  ///
-  /// Several requests can be rejected at once with the same token; they share
-  /// one refresh, and a caller arriving after another has already replaced
-  /// the token simply takes the new one. With rotating refresh tokens a
-  /// second refresh would consume the token the first one just issued.
-  Future<String> _recoverFromUnauthorized(String rejected) async {
-    final inFlight = _refreshInFlight;
-    if (inFlight != null) await inFlight;
-
-    var token = await _storage.read(AuthStorage.kAccessToken);
-    if (token == null || token.isEmpty) throw SessionExpiredException();
-    if (token != rejected) return token;
-
-    await _refreshIfNeeded(force: true);
-    token = await _storage.read(AuthStorage.kAccessToken);
-    if (token == null || token.isEmpty) throw SessionExpiredException();
-    return token;
-  }
-
-  /// Detects an unrecoverable `invalid_grant` from either the Windows handler
-  /// (typed [ApiException]) or flutter_appauth (a [PlatformException] whose
-  /// payload carries the OAuth error).
-  bool _isInvalidGrant(Object e) {
-    if (e is ApiException) {
-      return e.statusCode == 400 || e.statusCode == 401;
-    }
-    if (e is PlatformException) {
-      final blob = '${e.code} ${e.message ?? ''} ${e.details ?? ''}'
-          .toLowerCase();
-      return blob.contains('invalid_grant') ||
-          blob.contains('invalid_token') ||
-          blob.contains(' 400') ||
-          blob.contains(' 401');
-    }
-    return false;
-  }
-
-  /// Drops the local credentials and flips state to logged-out so the UI can
-  /// route the user back to login. Library data is left intact (it is
-  /// server-backed and re-syncs on the next login); explicit [logout] is the
-  /// path that also clears the library.
-  Future<void> _clearSession() async {
-    try {
-      await _storage.deleteAll();
-    } catch (e) {
-      _logger.warning('Failed to clear storage during session expiry: $e');
-    }
-    _cachedProfile = null;
-    _grantedScopes = null;
-    _hasSessionCache = false;
-    notifyListeners();
-  }
-
-  Future<MbProfile> fetchProfile({bool forceRefresh = false}) async {
-    try {
-      if (!forceRefresh && _cachedProfile != null) {
-        return _cachedProfile!;
-      }
-
-      final profile = await _loadProfile();
-      notifyListeners();
-      return profile;
-    } on AppException catch (e, st) {
-      _logger.severe('Failed to fetch profile', e, st);
-      rethrow;
-    } catch (e, st) {
-      _logger.severe('Failed to fetch profile', e, st);
-      throw AuthException(
-        message: 'Failed to fetch profile',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  Future<MbProfile> fetchProfile({bool forceRefresh = false}) =>
+      _fetchProfileImpl(this, forceRefresh: forceRefresh);
 
   /// Fetches and caches the profile without notifying listeners.
-  Future<MbProfile> _loadProfile() async {
-    await _refreshIfNeeded();
-    final accessToken = await _storage.read(AuthStorage.kAccessToken);
+  Future<MbProfile> _loadProfile() => _loadProfileImpl(this);
 
-    if (accessToken == null || accessToken.isEmpty) {
-      throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
-    }
+  Future<String> getValidAccessToken() => _getValidAccessTokenImpl(this);
 
-    final profile = await _network.fetchProfile(accessToken);
-    _cachedProfile = profile;
-    await _storage.cacheProfile(profile);
-    return profile;
-  }
-
-  Future<String> getValidAccessToken() async {
-    try {
-      await _refreshIfNeeded();
-      final token = await _storage.read(AuthStorage.kAccessToken);
-      if (token == null || token.isEmpty) {
-        throw AuthException(message: 'Not logged in', code: 'NOT_LOGGED_IN');
-      }
-      return token;
-    } on AppException catch (e, st) {
-      _logger.severe('Failed to get valid access token', e, st);
-      rethrow;
-    } catch (e, st) {
-      _logger.severe('Failed to get valid access token', e, st);
-      throw AuthException(
-        message: 'Failed to get valid access token',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
-
-  Future<void> logout() async {
-    try {
-      // A refresh still in flight would write fresh tokens back after the
-      // delete below and silently resurrect the session.
-      final inFlight = _refreshInFlight;
-      if (inFlight != null) {
-        try {
-          await inFlight;
-        } catch (_) {
-          // Its failure is irrelevant: the session is being dropped anyway.
-        }
-      }
-      await _storage.deleteAll();
-      _cachedProfile = null;
-      _grantedScopes = null;
-      _hasSessionCache = false;
-
-      try {
-        await getIt<LibraryService>().clearLibrary();
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(_libraryOwnerKey);
-      } catch (e) {
-        _logger.warning('Failed to clear library on logout: $e');
-      }
-
-      notifyListeners();
-    } catch (e, st) {
-      _logger.severe('Failed to logout', e, st);
-      throw AuthException(
-        message: 'Failed to logout',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  Future<void> logout() => _logoutImpl(this);
 }
