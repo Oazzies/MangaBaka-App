@@ -222,7 +222,27 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
     ).replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
+  Color _typeColor(String type) => context.colors.forSeriesType(type);
+
   Color _statusColor(String status) => context.colors.forSeriesStatus(status);
+
+  Widget _buildMetaBadge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.monoLabel(
+          color: color,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
+        ).copyWith(decoration: TextDecoration.none),
+      ),
+    );
+  }
 
   String _capitalizeGenre(String text) {
     if (text.isEmpty) return text;
@@ -441,72 +461,16 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                                       Row(
                                         children: [
                                           if (series.type.isNotEmpty) ...[
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: context.colors.accent
-                                                    .withValues(alpha: 0.15),
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                series.type.toUpperCase(),
-                                                style:
-                                                    AppTypography.monoLabel(
-                                                      color:
-                                                          context.colors.accent,
-                                                      fontSize: 9.5,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ).copyWith(
-                                                      decoration:
-                                                          TextDecoration.none,
-                                                    ),
-                                              ),
+                                            _buildMetaBadge(
+                                              series.type.toUpperCase(),
+                                              _typeColor(series.type),
                                             ),
                                             const SizedBox(width: 7),
                                           ],
                                           if (series.status.isNotEmpty) ...[
-                                            Builder(
-                                              builder: (_) {
-                                                final statusColor =
-                                                    _statusColor(series.status);
-                                                return Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 2,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: statusColor
-                                                        .withValues(
-                                                          alpha: 0.15,
-                                                        ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    series.status.toUpperCase(),
-                                                    style:
-                                                        AppTypography.monoLabel(
-                                                          color: statusColor,
-                                                          fontSize: 9.5,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ).copyWith(
-                                                          decoration:
-                                                              TextDecoration
-                                                                  .none,
-                                                        ),
-                                                  ),
-                                                );
-                                              },
+                                            _buildMetaBadge(
+                                              series.status.toUpperCase(),
+                                              _statusColor(series.status),
                                             ),
                                           ],
                                           if (ratingDisplay.isNotEmpty) ...[
