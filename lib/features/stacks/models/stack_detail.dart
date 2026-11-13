@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 
@@ -53,7 +54,8 @@ class StackEntry {
     if (seriesJson is Map) {
       try {
         series = Series.fromJson(seriesJson.cast<String, dynamic>());
-      } catch (_) {
+      } catch (e, st) {
+        LoggingService.logger.warning('Failed to parse stack entry series', e, st);
         series = null;
       }
     }
@@ -110,8 +112,9 @@ class StackDetail {
       if (e is! Map) continue;
       try {
         entries.add(StackEntry.fromJson(e.cast<String, dynamic>()));
-      } catch (_) {
+      } catch (e, st) {
         // One unreadable entry costs that entry, not the stack.
+        LoggingService.logger.warning('Failed to parse stack entry', e, st);
       }
     }
     entries.sort((a, b) => a.rank.compareTo(b.rank));

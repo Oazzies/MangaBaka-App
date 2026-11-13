@@ -1,22 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
-import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
-import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/api_client.dart';
 import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/core/network/paged_list.dart';
-import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_draft.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_authed_client.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 
 /// Reads and writes MangaBaka Stacks (`/v2/stacks`, `/v2/my/stacks`).
@@ -29,24 +25,16 @@ class StackService {
   static const String _base = AppConstants.baseApiUrlV2;
   static const int defaultLimit = 24;
 
-  static final _logger = LoggingService.logger;
-
   final ApiClient _api;
   final http.Client _http;
   final bool _ownsHttp;
-  final ProfileAuthService? _authOverride;
+  final StackAuthedClient _client;
 
   StackService({http.Client? client, ApiClient? api, ProfileAuthService? auth})
     : _api = api ?? ApiClient(healthContext: 'stacks', client: client),
       _http = client ?? http.Client(),
       _ownsHttp = client == null,
-      _authOverride = auth;
-
-  ProfileAuthService get _auth => _authOverride ?? getIt<ProfileAuthService>();
-
-  /// The ratings listings are limited to: the user's content preference.
-  /// Empty (no preference) leaves it to the server, which lists every rating.
-  static List<String> get _ratings => SettingsManager().contentPreferences;
+      _client = StackAuthedClient(auth: auth);
 
   // ── Public reads ──────────────────────────────────────────────────────────
 
@@ -152,30 +140,8 @@ class StackService {
   }
 
   /// The user's vote / save / follow state and live counts for [ids].
-  Future<Map<int, StackStatus>> status(Iterable<int> ids) async {
-    final unique = ids.toSet().toList();
-    final out = <int, StackStatus>{};
-    for (var i = 0; i < unique.length; i += StackLimits.statusBatch) {
-      final chunk = unique.sublist(
-        i,
-        (i + StackLimits.statusBatch).clamp(0, unique.length),
-      );
-      final uri = ApiClient.uri('$_base/my/stacks/status', {'id': chunk});
-      final body = await _authed(
-        'fetch stack status',
-        (h) => _http.get(uri, headers: h),
-      );
-      final list = ApiClient.decode(
-        body,
-        operation: 'fetch stack status',
-        parse: (json) => parseDataList(json, StackStatus.fromJson),
-      );
-      for (final s in list) {
-        out[s.id] = s;
-      }
-    }
-    return out;
-  }
+  Future<Map<int, StackStatus>> status(Iterable<int> ids) =>
+      _client.fetchStatus(_http, _base, ids);
 
   // ── Writes ────────────────────────────────────────────────────────────────
 
@@ -276,36 +242,13 @@ class StackService {
   Future<StackStatus> follow(int id) => _toggle('followed', id, add: true);
   Future<StackStatus> unfollow(int id) => _toggle('followed', id, add: false);
 
-  Future<StackStatus> _toggle(String what, int id, {required bool add}) async {
-    final uri = Uri.parse('$_base/my/stacks/$what/$id');
-    final operation = '${add ? 'set' : 'clear'} stack $what';
-    final body = await _authed(
-      operation,
-      (h) => add ? _http.put(uri, headers: h) : _http.delete(uri, headers: h),
-      json: false,
-    );
-    return ApiClient.decode(
-      body,
-      operation: operation,
-      parse: (json) => StackStatus.fromJson(dataObject(json) ?? const {}),
-    );
-  }
+  Future<StackStatus> _toggle(String what, int id, {required bool add}) =>
+      _client.toggle(_http, _base, what, id, add: add);
 
   // ── Plumbing ──────────────────────────────────────────────────────────────
 
-  static StackDetail _detail(dynamic json) {
-    final data = dataObject(json);
-    if (data == null) {
-      throw const FormatException('stack response without data');
-    }
-    return StackDetail.fromJson(data);
-  }
-
-  static PagedList<StackSummary> _page(dynamic json) => PagedList(
-    parseDataList(json, StackSummary.fromJson),
-    hasNext: hasNextPage(json),
-    total: totalCount(json),
-  );
+  static StackDetail _detail(dynamic json) =>
+      StackAuthedClient.decodeDetail(json);
 
   Future<PagedList<StackSummary>> _list(
     String url,
@@ -313,17 +256,13 @@ class StackService {
     required int page,
     required int limit,
     required String operation,
-  }) => _guard(
-    () => _api.getJson(
-      ApiClient.uri(url, {
-        ...params,
-        'page': page,
-        'limit': limit.clamp(1, StackLimits.pageMax),
-        'content_rating': _ratings,
-      }),
-      operation: operation,
-      parse: _page,
-    ),
+  }) => _client.list(
+    _api,
+    url,
+    params,
+    page: page,
+    limit: limit,
+    operation: operation,
   );
 
   Future<PagedList<StackSummary>> _myList(
@@ -331,95 +270,16 @@ class StackService {
     int page,
     int limit,
     String operation,
-  ) async {
-    final uri = ApiClient.uri(url, {
-      'page': page,
-      'limit': limit.clamp(1, StackLimits.pageMax),
-      'content_rating': _ratings,
-    });
-    final body = await _authed(operation, (h) => _http.get(uri, headers: h));
-    return ApiClient.decode(body, operation: operation, parse: _page);
-  }
+  ) => _client.myList(_http, url, page, limit, operation);
 
-  /// Runs a public read, turning a refused request into a
-  /// [StackApiException].
-  Future<T> _guard<T>(Future<T> Function() run) async {
-    try {
-      return await run();
-    } on StackApiException {
-      rethrow;
-    } on ApiException catch (e) {
-      throw StackApiException.fromApi(e);
-    }
-  }
+  Future<T> _guard<T>(Future<T> Function() run) => _client.guard(run);
 
-  /// Sends a request that needs the user's token and returns the body of an
-  /// accepted response. A 401 is recovered from by [ProfileAuthService]
-  /// (or ends in [SessionExpiredException]); any other refusal becomes a
-  /// [StackApiException].
   Future<String> _authed(
     String operation,
     Future<http.Response> Function(Map<String, String> headers) request, {
     Set<int> accepted = const {200},
     bool json = true,
-  }) async {
-    final auth = _auth;
-    if (!auth.isLoggedIn) throw SessionExpiredException();
-    _logger.info('Stacks: $operation');
-    try {
-      final response = await auth.sendAuthorized(
-        (token) =>
-            request({
-              'Authorization': 'Bearer $token',
-              'User-Agent': AppConstants.userAgent,
-              if (json) 'Content-Type': 'application/json',
-            }).timeout(
-              const Duration(seconds: AppConstants.networkTimeoutSeconds),
-              onTimeout: () => throw TimeoutException('$operation timed out'),
-            ),
-      );
-      if (!accepted.contains(response.statusCode)) {
-        _logger.severe(
-          'Stacks: $operation failed. Status: ${response.statusCode}',
-        );
-        throw StackApiException.fromResponse(
-          response.statusCode,
-          response.body,
-          operation: operation,
-        );
-      }
-      return response.body;
-    } on AppException {
-      rethrow;
-    } on TimeoutException catch (e, st) {
-      throw NetworkException(
-        message: 'Request timed out.',
-        code: 'TIMEOUT',
-        originalError: e,
-        stackTrace: st,
-      );
-    } on http.ClientException catch (e, st) {
-      throw NetworkException(
-        message: 'Network error.',
-        code: 'NETWORK_ERROR',
-        originalError: e,
-        stackTrace: st,
-      );
-    } on SocketException catch (e, st) {
-      throw NetworkException(
-        message: 'Network error.',
-        code: 'NETWORK_ERROR',
-        originalError: e,
-        stackTrace: st,
-      );
-    } catch (e, st) {
-      throw AppError(
-        message: 'Failed to $operation',
-        originalError: e,
-        stackTrace: st,
-      );
-    }
-  }
+  }) => _client.send(operation, request, accepted: accepted, json: json);
 
   void dispose() {
     _api.close();

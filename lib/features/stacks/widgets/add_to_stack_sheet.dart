@@ -15,7 +15,7 @@ import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
 import 'package:mangabaka_app/features/stacks/screens/stack_editor_screen.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
-import 'package:mangabaka_app/features/stacks/utils/stack_format.dart';
+import 'package:mangabaka_app/features/stacks/widgets/add_to_stack_row.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_auth_gate.dart';
 
 /// Puts [series] into one of the reader's stacks, or takes it out, or starts
@@ -248,7 +248,15 @@ class _AddToStackState extends State<_AddToStack> {
                 return ListView.builder(
                   shrinkWrap: true,
                   itemCount: stacks.length,
-                  itemBuilder: (context, i) => _row(context, stacks[i]),
+                  itemBuilder: (context, i) {
+                    final stack = stacks[i];
+                    return AddToStackRow(
+                      stack: stack,
+                      busy: _busy.contains(stack.id),
+                      l10n: _l10n,
+                      onTap: () => _toggle(stack),
+                    );
+                  },
                 );
               },
             ),
@@ -269,51 +277,6 @@ class _AddToStackState extends State<_AddToStack> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _row(BuildContext context, MySeriesStack stack) {
-    final c = context.colors;
-    final busy = _busy.contains(stack.id);
-    final enabled = stack.contains || stack.canAdd;
-    final subtitle = [
-      _l10n.translate(stack.visibility.labelKey),
-      stackCount('entries', stack.entryCount, _l10n),
-      if (stack.contains)
-        _l10n.translate('stacks_at_rank').replaceAll('{n}', '${stack.rank}'),
-      if (!stack.contains && !stack.canAdd)
-        _l10n.translate('stacks_cannot_add'),
-    ].join(' · ');
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-      enabled: enabled && !busy,
-      onTap: () => _toggle(stack),
-      leading: Icon(
-        Icons.layers_rounded,
-        color: stack.contains ? c.accent : c.textMuted,
-      ),
-      title: Text(
-        stack.title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTypography.sans(
-          color: c.text,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: AppTypography.sans(color: c.textMuted, fontSize: 12.5),
-      ),
-      trailing: busy
-          ? const SizedBox(width: 22, height: 22, child: MbSpinner())
-          : Icon(
-              stack.contains
-                  ? Icons.check_circle_rounded
-                  : Icons.add_circle_outline_rounded,
-              color: stack.contains ? c.accent : c.textMuted,
-            ),
     );
   }
 }

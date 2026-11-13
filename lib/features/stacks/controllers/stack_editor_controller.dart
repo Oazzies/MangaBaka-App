@@ -5,49 +5,11 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_draft.dart';
+import 'package:mangabaka_app/features/stacks/models/stack_editor_types.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 
-/// One series in the editor's working list.
-class EditableStackEntry {
-  final String seriesId;
-  final Series? series;
-  final StackEntryIssue? issue;
-  final String? mergedWith;
-  String note;
-
-  /// Stable across reorders, for the reorderable list.
-  final Key key = UniqueKey();
-
-  EditableStackEntry({
-    required this.seriesId,
-    this.series,
-    this.issue,
-    this.mergedWith,
-    this.note = '',
-  });
-
-  /// Whether the series is gone (merged or deleted): publishing counts only
-  /// live series, and a save with one may be refused.
-  bool get unavailable => issue != null;
-
-  String get title => series?.title ?? '#$seriesId';
-}
-
-/// Why the editor will not save yet.
-enum StackEditorProblem {
-  titleMissing,
-  titleTooLong,
-  descriptionTooLong,
-  noteTooLong,
-  tooManyEntries,
-
-  /// Public or unlisted with fewer than [StackLimits.publishMin] live series.
-  tooFewToPublish,
-
-  /// The rating is below the moderator's floor.
-  ratingBelowMinimum,
-}
+export 'package:mangabaka_app/features/stacks/models/stack_editor_types.dart';
 
 /// The working copy behind the stack editor: creates a stack, or loads one
 /// for editing and saves it back as a single full replace.

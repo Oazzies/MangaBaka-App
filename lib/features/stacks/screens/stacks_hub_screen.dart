@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/paged_list.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -14,10 +14,10 @@ import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 import 'package:mangabaka_app/features/stacks/screens/my_stacks_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stack_editor_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stacks_list_screen.dart';
-import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_auth_gate.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
+import 'package:mangabaka_app/features/stacks/widgets/stacks_hub_newest_slivers.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 /// The front door to Stacks: staff picks, the reader's own, saved and
@@ -98,7 +98,9 @@ class _StacksHubScreenState extends State<StacksHubScreen> {
     setState(_load);
     try {
       await Future.wait([_featured, _newest]);
-    } catch (_) {}
+    } catch (e, st) {
+      LoggingService.logger.warning('Failed to refresh stacks hub', e, st);
+    }
   }
 
   Future<void> _create() async {
@@ -192,68 +194,13 @@ class _StacksHubScreenState extends State<StacksHubScreen> {
               StacksListScreen.open(context, const StacksListSource.saved()),
         ),
       ),
-      SliverPadding(
-        padding: EdgeInsets.fromLTRB(
-          desktop ? pad : 0,
-          0,
-          desktop ? pad : 0,
-          0,
-        ),
-        sliver: SliverToBoxAdapter(
-          child: desktop
-              ? DesktopSectionTitle(
-                  title: _l10n.translate('stacks_new'),
-                  trailing: DesktopPillButton(
-                    label: _l10n.translate('view_all'),
-                    onPressed: () => StacksListScreen.open(
-                      context,
-                      const StacksListSource.newest(),
-                    ),
-                  ),
-                )
-              : MbSectionHeader(
-                  title: _l10n.translate('stacks_new'),
-                  onAction: () => StacksListScreen.open(
-                    context,
-                    const StacksListSource.newest(),
-                  ),
-                ),
-        ),
-      ),
-      FutureBuilder<PagedList<StackSummary>>(
-        future: _newest,
-        builder: (context, snap) {
-          if (snap.hasError) {
-            return SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    Text(
-                      stackErrorMessage(snap.error!, _l10n),
-                      textAlign: TextAlign.center,
-                      style: AppTypography.sans(
-                        color: context.colors.textMuted,
-                        fontSize: 14,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => setState(_load),
-                      child: Text(_l10n.translate('retry')),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          return SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: pad),
-            sliver: SliverStackGrid(
-              stacks: snap.data?.items ?? const [],
-              loading: snap.connectionState != ConnectionState.done,
-            ),
-          );
-        },
+      ...buildStacksHubNewestSlivers(
+        context,
+        desktop: desktop,
+        pad: pad,
+        newest: _newest,
+        l10n: _l10n,
+        onRetry: () => setState(_load),
       ),
       const SliverToBoxAdapter(child: SizedBox(height: 48)),
     ];

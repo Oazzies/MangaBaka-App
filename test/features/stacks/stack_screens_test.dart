@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
-import 'package:mangabaka_app/core/network/paged_list.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -12,10 +11,8 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
-import 'package:mangabaka_app/features/stacks/models/stack_draft.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
-import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 import 'package:mangabaka_app/features/stacks/screens/my_stacks_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stack_detail_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stack_editor_screen.dart';
@@ -26,81 +23,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../responsive/support/fake_services.dart';
 import '../../responsive/support/fixtures.dart' as rf;
+import 'fake_stack_service.dart';
 import 'stack_fixtures.dart';
 
-class _FakeStacks extends Fake implements StackService {
-  StackDetail detail = StackDetail.fromJson(stackDetailJson());
-  List<MySeriesStack> mineForSeries = const [];
-  final List<String> calls = [];
-
-  PagedList<StackSummary> _page(int n) => PagedList([
-    for (var i = 0; i < n; i++)
-      StackSummary.fromJson(stackSummaryJson(id: 100 + i)),
-  ], hasNext: false);
-
-  @override
-  Future<PagedList<StackSummary>> browse({
-    int page = 1,
-    int limit = 24,
-    bool featured = false,
-  }) async => featured ? _page(0) : _page(3);
-
-  @override
-  Future<PagedList<StackSummary>> mine({int page = 1, int limit = 24}) async =>
-      _page(2);
-  @override
-  Future<PagedList<StackSummary>> saved({int page = 1, int limit = 24}) async =>
-      _page(0);
-  @override
-  Future<PagedList<StackSummary>> followed({
-    int page = 1,
-    int limit = 24,
-  }) async => _page(1);
-
-  @override
-  Future<StackDetail> fetch(int id) async => detail;
-
-  @override
-  Future<StackDetail> fetchForEdit(int id) async =>
-      StackDetail.fromJson(ownerStackDetailJson(id: id));
-
-  @override
-  Future<Map<int, StackStatus>> status(Iterable<int> ids) async => {
-    for (final id in ids)
-      id: StackStatus(id: id, libraryCount: 1, voteCount: 9),
-  };
-
-  @override
-  Future<StackStatus> vote(int id) async {
-    calls.add('vote $id');
-    return StackStatus(id: id, hasVoted: true, voteCount: 10);
-  }
-
-  @override
-  Future<List<MySeriesStack>> myStacksForSeries(String seriesId) async =>
-      mineForSeries;
-
-  @override
-  Future<int> addEntry(
-    int stackId,
-    String seriesId, {
-    String? note,
-    int? rank,
-    String? contentRating,
-  }) async {
-    calls.add('add $seriesId to $stackId');
-    return 3;
-  }
-
-  @override
-  Future<StackDetail> create(StackDraft draft) async {
-    calls.add('create ${draft.title}');
-    return StackDetail.fromJson(ownerStackDetailJson(id: 99));
-  }
-}
-
 void main() {
-  late _FakeStacks stacks;
+  late FakeStacksService stacks;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -112,7 +39,7 @@ void main() {
     getIt.registerSingleton<LoggingService>(LoggingService());
     // A list layout, so notes sit under their entries rather than in a sheet.
     await SettingsManager().setListStyle(AppListStyle.comfortable);
-    stacks = _FakeStacks();
+    stacks = FakeStacksService();
   });
 
   tearDown(() {
