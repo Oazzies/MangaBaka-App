@@ -44,6 +44,18 @@ cp .env.example .env
 
 Without it, `flutter build`, `flutter run`, and `flutter test` fail with `No file or variants found for asset: .env`.
 
+## Workflow & Quality Checks
+
+1. Create a feature branch from `main`.
+2. Keep every human-written `.dart` file in `lib/` and `test/` **at or below 300 lines** (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+3. Use `LoggingService.logger` instead of `print()` / `debugPrint()`, and avoid silent `catch (_)` blocks.
+4. When adding a new feature, place it under `lib/features/<feature_name>/` (`models/`, `services/`, `controllers/`, `screens/`, `widgets/`) and mirror its tests under `test/features/<feature_name>/`.
+5. Before opening a PR, verify zero analyzer issues and passing tests:
+   ```sh
+   flutter analyze
+   flutter test
+   ```
+
 ## Getting help
 
 - Join [the Discord server](https://mangabaka.org/discord) for online help and to ask questions while developing.
