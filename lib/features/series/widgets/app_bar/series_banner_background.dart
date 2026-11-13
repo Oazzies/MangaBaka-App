@@ -7,8 +7,8 @@ import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 /// The full-bleed banner behind the series title: a heavily blurred cover,
-/// a hatch texture, a gradient that dissolves into the page background, and
-/// the cover artwork and title block floating at its base.
+/// a gradient that dissolves into the page background, and the cover artwork
+/// and title block floating at its base.
 class SeriesBannerBackground extends StatelessWidget {
   final Series series;
   final String title;
@@ -54,13 +54,6 @@ class SeriesBannerBackground extends StatelessWidget {
           Container(color: context.colors.surfaceRaised),
           if (series.coverUrl.isNotEmpty) _blurredCover(),
           Container(color: context.colors.background.withValues(alpha: 0.2)),
-          IgnorePointer(
-            child: CustomPaint(
-              painter: HatchPainter(
-                color: context.colors.text.withValues(alpha: 0.04),
-              ),
-            ),
-          ),
           const _BottomFade(),
           if (showCover) _coverAndTitle(),
         ],
@@ -150,36 +143,4 @@ class _BottomFade extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Fine diagonal hatching laid over the banner, at very low contrast — it
-/// gives the blurred artwork a texture to sit on instead of reading as a
-/// smear.
-class HatchPainter extends CustomPainter {
-  final Color color;
-
-  /// Spacing between lines, perpendicular to nothing in particular — the lines
-  /// run at 45°, so this is their horizontal step.
-  static const double _gap = 14.0;
-
-  HatchPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    // Starts a full height off the left edge so the diagonals reach the
-    // top-left corner rather than leaving a bare triangle.
-    for (var x = -size.height; x < size.width; x += _gap) {
-      canvas.drawLine(
-        Offset(x, size.height),
-        Offset(x + size.height, 0),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant HatchPainter old) => old.color != color;
 }
