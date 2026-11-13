@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://github.com/Oazzies/MangaBaka-App">
-    <img src="./.github/readme-images/mangabaka512.png" alt="Yokai logo" height="200px" width="200px" />
+    <img src="./assets/mangabaka512.png" alt="Yokai logo" height="200px" width="200px" />
 </a>
 
 # MangaBaka App
