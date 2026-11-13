@@ -150,6 +150,11 @@ class SettingsManager extends ChangeNotifier {
     AutoCompleteProgressMode.prompt,
     AutoCompleteProgressMode.values,
   );
+  final _autoCompleteSeriesStatus = EnumSetting(
+    SettingsKeys.autoCompleteSeriesStatus,
+    AutoCompleteProgressMode.prompt,
+    AutoCompleteProgressMode.values,
+  );
 
   /// Whether https://mangabaka.org links should open inside the app
   /// rather than in a browser. Defaults to true on Android, false elsewhere.
@@ -252,6 +257,7 @@ class SettingsManager extends ChangeNotifier {
     _dismissedRecommendations,
     _openLinksInApp,
     _autoCompleteChapterProgress,
+    _autoCompleteSeriesStatus,
   ];
 
   // ─── Lifecycle ───────────────────────────────────────────────────────────
@@ -445,6 +451,12 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setAutoCompleteChapterProgress(
     AutoCompleteProgressMode mode,
   ) => _apply(_autoCompleteChapterProgress, mode);
+
+  AutoCompleteProgressMode get autoCompleteSeriesStatus =>
+      _autoCompleteSeriesStatus.value;
+  Future<void> setAutoCompleteSeriesStatus(
+    AutoCompleteProgressMode mode,
+  ) => _apply(_autoCompleteSeriesStatus, mode);
 
   // ─── Recommendations ─────────────────────────────────────────────────────
 

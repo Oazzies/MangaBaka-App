@@ -205,4 +205,20 @@ class GeneralSettingsDialogs {
           SettingsManager().setAutoCompleteChapterProgress(mode),
     );
   }
+
+  static void showAutoCompleteSeriesStatusSelectionDialog(
+    BuildContext context,
+  ) {
+    final l10n = LocalizationService();
+    SelectionBottomSheet.showSelectionBottomSheet<AutoCompleteProgressMode>(
+      context: context,
+      title: l10n.translate('auto_complete_series_status'),
+      subtitle: l10n.translate('auto_complete_series_status_subtitle'),
+      options: AutoCompleteProgressMode.values,
+      currentValue: SettingsManager().autoCompleteSeriesStatus,
+      getLabel: getAutoCompleteProgressModeName,
+      onSelected: (mode) =>
+          SettingsManager().setAutoCompleteSeriesStatus(mode),
+    );
+  }
 }

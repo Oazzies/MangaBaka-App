@@ -1,4 +1,5 @@
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
+import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -9,6 +10,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/widgets/complete_series_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
@@ -235,18 +237,41 @@ class EntryProgressOverlay extends StatelessWidget {
             _isChapter ? 'update_chapters' : 'update_volumes',
           ),
           maxValue: _isChapter ? series.totalChapters : series.finalVolume,
-          onUpdate: (value) {
+          onUpdate: (value) async {
             final library = getIt<LibraryService>();
-            if (_isChapter) {
-              library.updateLibraryEntryProgress(
-                series.id,
-                progressChapter: value,
-              );
-            } else {
-              library.updateLibraryEntryProgress(
-                series.id,
-                progressVolume: value,
-              );
+            final currentEntry = entry;
+            try {
+              if (_isChapter) {
+                await library.updateLibraryEntryProgress(
+                  series.id,
+                  progressChapter: value,
+                );
+              } else {
+                await library.updateLibraryEntryProgress(
+                  series.id,
+                  progressVolume: value,
+                );
+              }
+              if (currentEntry != null && context.mounted) {
+                await maybePromptCompleteSeries(
+                  context,
+                  series: series,
+                  entry: currentEntry,
+                  libraryService: library,
+                  previousChapter: _isChapter ? _progress : null,
+                  updatedChapter: _isChapter ? value : null,
+                  previousVolume: _isChapter ? null : _progress,
+                  updatedVolume: _isChapter ? null : value,
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                AppSnackBar.show(
+                  context,
+                  l10n.translate('failed_to_update'),
+                  isError: true,
+                );
+              }
             }
           },
         ),

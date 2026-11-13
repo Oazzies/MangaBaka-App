@@ -122,20 +122,20 @@ class _CompleteProgressDialogState extends State<_CompleteProgressDialog> {
           ),
           const SizedBox(height: 16),
           if (widget.totalChapters != null)
-            _ProgressRow(
+            CompleteDialogChangeRow(
               label: l10n.translate('chapters'),
-              from: widget.currentChapter,
-              to: widget.totalChapters!,
+              fromText: '${widget.currentChapter}',
+              toText: '${widget.totalChapters!}',
               showCheckbox: _hasBoth,
               checked: _updateChapters,
               onChanged: (v) => setState(() => _updateChapters = v ?? false),
             ),
           if (widget.totalVolumes != null) ...[
             if (widget.totalChapters != null) const SizedBox(height: 8),
-            _ProgressRow(
+            CompleteDialogChangeRow(
               label: l10n.translate('volumes'),
-              from: widget.currentVolume,
-              to: widget.totalVolumes!,
+              fromText: '${widget.currentVolume}',
+              toText: '${widget.totalVolumes!}',
               showCheckbox: _hasBoth,
               checked: _updateVolumes,
               onChanged: (v) => setState(() => _updateVolumes = v ?? false),
@@ -192,18 +192,20 @@ class _CompleteProgressDialogState extends State<_CompleteProgressDialog> {
   }
 }
 
-class _ProgressRow extends StatelessWidget {
+/// A row displaying a `from → to` change, with an optional checkbox.
+class CompleteDialogChangeRow extends StatelessWidget {
   final String label;
-  final int from;
-  final int to;
+  final String fromText;
+  final String toText;
   final bool showCheckbox;
   final bool checked;
-  final ValueChanged<bool?> onChanged;
+  final ValueChanged<bool?>? onChanged;
 
-  const _ProgressRow({
+  const CompleteDialogChangeRow({
+    super.key,
     required this.label,
-    required this.from,
-    required this.to,
+    required this.fromText,
+    required this.toText,
     required this.showCheckbox,
     required this.checked,
     required this.onChanged,
@@ -239,7 +241,7 @@ class _ProgressRow extends StatelessWidget {
             ),
           ),
           Text(
-            '$from → $to',
+            '$fromText → $toText',
             style: AppTypography.sans(
               color: context.colors.accent,
               fontSize: 14,
@@ -250,9 +252,9 @@ class _ProgressRow extends StatelessWidget {
       ),
     );
 
-    if (!showCheckbox) return row;
+    if (!showCheckbox || onChanged == null) return row;
     return InkWell(
-      onTap: () => onChanged(!checked),
+      onTap: () => onChanged!(!checked),
       borderRadius: BorderRadius.circular(AppConstants.denseRadius),
       child: row,
     );

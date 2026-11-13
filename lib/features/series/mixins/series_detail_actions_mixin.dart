@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/features/series/widgets/complete_series_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/delete_from_library_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
@@ -81,6 +82,18 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
                 progressChapter: isChapter ? value : null,
                 progressVolume: isChapter ? null : value,
               );
+              if (mounted) {
+                await maybePromptCompleteSeries(
+                  this.context,
+                  series: series,
+                  entry: entry,
+                  libraryService: libraryService,
+                  previousChapter: isChapter ? entry.progressChapter ?? 0 : null,
+                  updatedChapter: isChapter ? value : null,
+                  previousVolume: isChapter ? null : entry.progressVolume ?? 0,
+                  updatedVolume: isChapter ? null : value,
+                );
+              }
             } catch (e) {
               if (mounted) {
                 AppSnackBar.show(

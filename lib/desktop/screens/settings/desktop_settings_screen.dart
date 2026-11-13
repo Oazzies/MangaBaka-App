@@ -718,6 +718,28 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
             ),
           ),
           const Divider(height: 24),
+          DesktopSettingRow(
+            icon: Icons.task_alt_outlined,
+            title: l10n.translate('auto_complete_series_status'),
+            subtitle: l10n.translate('auto_complete_series_status_subtitle'),
+            control: DesktopMenuButton<AutoCompleteProgressMode>(
+              valueLabel:
+                  GeneralSettingsDialogs.getAutoCompleteProgressModeName(
+                    settings.autoCompleteSeriesStatus,
+                  ),
+              items: AutoCompleteProgressMode.values
+                  .map(
+                    (m) => (
+                      m,
+                      GeneralSettingsDialogs.getAutoCompleteProgressModeName(m),
+                    ),
+                  )
+                  .toList(),
+              selected: settings.autoCompleteSeriesStatus,
+              onSelected: settings.setAutoCompleteSeriesStatus,
+            ),
+          ),
+          const Divider(height: 24),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

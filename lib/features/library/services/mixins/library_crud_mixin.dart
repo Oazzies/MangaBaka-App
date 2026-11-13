@@ -202,6 +202,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     db.LibraryEntryWithSeries? snapshot, {
     int? wroteChapter,
     int? wroteVolume,
+    String? wroteState,
   }) async {
     if (snapshot == null) return;
     final current = await database.libraryEntriesDao.getEntryBySeriesId(
@@ -211,17 +212,27 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     if ((wroteChapter != null &&
             current.libraryEntry.progressChapter != wroteChapter) ||
         (wroteVolume != null &&
-            current.libraryEntry.progressVolume != wroteVolume)) {
+            current.libraryEntry.progressVolume != wroteVolume) ||
+        (wroteState != null && current.libraryEntry.state != wroteState)) {
       logger.info(
         'Skipping progress rollback for $seriesId: superseded by a newer update',
       );
       return;
     }
-    await database.libraryEntriesDao.updateEntryProgress(
-      seriesId,
-      progressChapter: snapshot.libraryEntry.progressChapter,
-      progressVolume: snapshot.libraryEntry.progressVolume,
-    );
+    if (wroteState != null) {
+      await database.libraryEntriesDao.updateEntryState(
+        seriesId,
+        snapshot.libraryEntry.state,
+        progressChapter: snapshot.libraryEntry.progressChapter,
+        progressVolume: snapshot.libraryEntry.progressVolume,
+      );
+    } else {
+      await database.libraryEntriesDao.updateEntryProgress(
+        seriesId,
+        progressChapter: snapshot.libraryEntry.progressChapter,
+        progressVolume: snapshot.libraryEntry.progressVolume,
+      );
+    }
   }
 
   Future<void> updateLibraryEntryProgress(
@@ -234,24 +245,75 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     if (progressChapter != null && progressChapter < 0) progressChapter = 0;
     if (progressVolume != null && progressVolume < 0) progressVolume = 0;
 
-    logger.info(
-      'Updating library entry progress for $seriesId — Ch: $progressChapter, Vol: $progressVolume (optimistic)',
-    );
-
-    // Capture state for rollback, then apply optimistic local update.
+    // Capture state for rollback and auto-completion checks.
     final snapshot = await database.libraryEntriesDao.getEntryBySeriesId(
       seriesId,
     );
-    await database.libraryEntriesDao.updateEntryProgress(
-      seriesId,
-      progressChapter: progressChapter,
-      progressVolume: progressVolume,
+
+    String? autoState;
+    if (SettingsManager().autoCompleteSeriesStatus ==
+            AutoCompleteProgressMode.always &&
+        snapshot != null &&
+        snapshot.series.status?.toLowerCase() == 'completed' &&
+        snapshot.libraryEntry.state != 'completed') {
+      final totalChapters = int.tryParse(snapshot.series.totalChapters ?? '');
+      final totalVolumes = int.tryParse(snapshot.series.finalVolume ?? '');
+      final prevChapter = snapshot.libraryEntry.progressChapter ?? 0;
+      final prevVolume = snapshot.libraryEntry.progressVolume ?? 0;
+      final reachedChapters =
+          progressChapter != null &&
+          totalChapters != null &&
+          totalChapters > 0 &&
+          prevChapter < totalChapters &&
+          progressChapter >= totalChapters;
+      final reachedVolumes =
+          progressVolume != null &&
+          totalVolumes != null &&
+          totalVolumes > 0 &&
+          prevVolume < totalVolumes &&
+          progressVolume >= totalVolumes;
+
+      if (reachedChapters || reachedVolumes) {
+        autoState = 'completed';
+        if (progressVolume == null &&
+            totalVolumes != null &&
+            totalVolumes > 0 &&
+            prevVolume < totalVolumes) {
+          progressVolume = totalVolumes;
+        }
+        if (progressChapter == null &&
+            totalChapters != null &&
+            totalChapters > 0 &&
+            prevChapter < totalChapters) {
+          progressChapter = totalChapters;
+        }
+      }
+    }
+
+    logger.info(
+      'Updating library entry progress for $seriesId — Ch: $progressChapter, Vol: $progressVolume${autoState != null ? ', State: $autoState' : ''} (optimistic)',
     );
+
+    if (autoState != null) {
+      await database.libraryEntriesDao.updateEntryState(
+        seriesId,
+        autoState,
+        progressChapter: progressChapter,
+        progressVolume: progressVolume,
+      );
+    } else {
+      await database.libraryEntriesDao.updateEntryProgress(
+        seriesId,
+        progressChapter: progressChapter,
+        progressVolume: progressVolume,
+      );
+    }
 
     try {
       final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
 
       final body = <String, dynamic>{
+        if (autoState != null) 'state': autoState,
         if (progressChapter != null) 'progress_chapter': progressChapter,
         if (progressVolume != null) 'progress_volume': progressVolume,
       };
@@ -283,6 +345,7 @@ mixin LibraryCrudMixin on LibraryServiceBase {
           snapshot,
           wroteChapter: progressChapter,
           wroteVolume: progressVolume,
+          wroteState: autoState,
         );
       } catch (rollbackError, rollbackStack) {
         // Logged, not thrown: the original failure is the one to report.

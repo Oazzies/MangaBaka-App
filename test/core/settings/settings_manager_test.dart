@@ -147,5 +147,23 @@ void main() {
         AutoCompleteProgressMode.always,
       );
     });
+
+    test('autoCompleteSeriesStatus defaults to prompt and persists', () async {
+      final manager = SettingsManager();
+      await manager.init();
+
+      expect(manager.autoCompleteSeriesStatus, AutoCompleteProgressMode.prompt);
+
+      await manager.setAutoCompleteSeriesStatus(
+        AutoCompleteProgressMode.always,
+      );
+      expect(manager.autoCompleteSeriesStatus, AutoCompleteProgressMode.always);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getInt(SettingsKeys.autoCompleteSeriesStatus),
+        AutoCompleteProgressMode.always.index,
+      );
+    });
   });
 }

@@ -80,6 +80,7 @@ void main() {
   Future<void> seedEntry(
     String seriesId, {
     String state = 'reading',
+    String? seriesStatus,
     int? chapter,
     String? totalChapters,
     int? volume,
@@ -91,6 +92,7 @@ void main() {
             title: 'Series $seriesId',
             coverUrl: 'url',
             description: 'desc',
+            status: Value(seriesStatus),
             totalChapters: Value(totalChapters),
             finalVolume: Value(finalVolume),
           ),
@@ -642,6 +644,153 @@ void main() {
 
       expect(refreshCalls, 1);
       expect(service.syncStatus.value.error, isNull);
+    });
+
+    group('autoCompleteSeriesStatus', () {
+      test(
+          'auto-completes state and volumes when chapter reaches total on completed series with always mode',
+          () async {
+        await SettingsManager().init();
+        await SettingsManager().setAutoCompleteSeriesStatus(
+          AutoCompleteProgressMode.always,
+        );
+        await seedEntry(
+          '42',
+          seriesStatus: 'completed',
+          chapter: 82,
+          totalChapters: '83',
+          volume: 10,
+          finalVolume: '16',
+        );
+
+        await withServer(
+          (_) async => http.Response('{}', 200),
+          () => service.updateLibraryEntryProgress('42', progressChapter: 83),
+        );
+
+        expect(jsonDecode(requests.single.body), {
+          'state': 'completed',
+          'progress_chapter': 83,
+          'progress_volume': 16,
+        });
+        final updated = (await entryFor('42'))!;
+        expect(updated.state, 'completed');
+        expect(updated.progressChapter, 83);
+        expect(updated.progressVolume, 16);
+      });
+
+      test(
+          'auto-completes state and chapters when volume reaches total on completed series with always mode',
+          () async {
+        await SettingsManager().init();
+        await SettingsManager().setAutoCompleteSeriesStatus(
+          AutoCompleteProgressMode.always,
+        );
+        await seedEntry(
+          '42',
+          seriesStatus: 'completed',
+          chapter: 50,
+          totalChapters: '83',
+          volume: 15,
+          finalVolume: '16',
+        );
+
+        await withServer(
+          (_) async => http.Response('{}', 200),
+          () => service.updateLibraryEntryProgress('42', progressVolume: 16),
+        );
+
+        expect(jsonDecode(requests.single.body), {
+          'state': 'completed',
+          'progress_chapter': 83,
+          'progress_volume': 16,
+        });
+        final updated = (await entryFor('42'))!;
+        expect(updated.state, 'completed');
+        expect(updated.progressChapter, 83);
+        expect(updated.progressVolume, 16);
+      });
+
+      test('does not auto-complete when series is not completed', () async {
+        await SettingsManager().init();
+        await SettingsManager().setAutoCompleteSeriesStatus(
+          AutoCompleteProgressMode.always,
+        );
+        await seedEntry(
+          '42',
+          seriesStatus: 'releasing',
+          chapter: 82,
+          totalChapters: '83',
+          volume: 10,
+          finalVolume: '16',
+        );
+
+        await withServer(
+          (_) async => http.Response('{}', 200),
+          () => service.updateLibraryEntryProgress('42', progressChapter: 83),
+        );
+
+        expect(jsonDecode(requests.single.body), {'progress_chapter': 83});
+        final updated = (await entryFor('42'))!;
+        expect(updated.state, 'reading');
+        expect(updated.progressChapter, 83);
+        expect(updated.progressVolume, 10);
+      });
+
+      test('rolls back state, chapter, and volume when server fails',
+          () async {
+        await SettingsManager().init();
+        await SettingsManager().setAutoCompleteSeriesStatus(
+          AutoCompleteProgressMode.always,
+        );
+        await seedEntry(
+          '42',
+          seriesStatus: 'completed',
+          chapter: 82,
+          totalChapters: '83',
+          volume: 10,
+          finalVolume: '16',
+        );
+
+        await expectLater(
+          withServer(
+            (_) async => http.Response('boom', 500),
+            () => service.updateLibraryEntryProgress('42', progressChapter: 83),
+          ),
+          throwsA(isA<ApiException>()),
+        );
+
+        final rolledBack = (await entryFor('42'))!;
+        expect(rolledBack.state, 'reading');
+        expect(rolledBack.progressChapter, 82);
+        expect(rolledBack.progressVolume, 10);
+      });
+
+      test('does not auto-complete in prompt or never mode', () async {
+        await SettingsManager().init();
+        await SettingsManager().setAutoCompleteSeriesStatus(
+          AutoCompleteProgressMode.never,
+        );
+        await seedEntry(
+          '42',
+          seriesStatus: 'completed',
+          chapter: 82,
+          totalChapters: '83',
+          volume: 10,
+          finalVolume: '16',
+        );
+
+        await withServer(
+          (_) async => http.Response('{}', 200),
+          () => service.updateLibraryEntryProgress('42', progressChapter: 83),
+        );
+
+        expect(jsonDecode(requests.single.body), {'progress_chapter': 83});
+        final updated = (await entryFor('42'))!;
+        expect(updated.state, 'reading');
+        expect(updated.progressChapter, 83);
+        expect(updated.progressVolume, 10);
+      });
     });
   });
 }

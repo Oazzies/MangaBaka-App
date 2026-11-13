@@ -249,6 +249,19 @@ class SettingsCategories {
                     GeneralSettingsDialogs.showAutoCompleteProgressSelectionDialog(
                       ctx,
                     ),
+              ),
+              const SettingsDivider(),
+              SettingsItem(
+                icon: Icons.task_alt_outlined,
+                title: l10n.translate('auto_complete_series_status'),
+                subtitle:
+                    GeneralSettingsDialogs.getAutoCompleteProgressModeName(
+                      settings.autoCompleteSeriesStatus,
+                    ),
+                onTap: () =>
+                    GeneralSettingsDialogs.showAutoCompleteSeriesStatusSelectionDialog(
+                      ctx,
+                    ),
                 isLast: true,
               ),
             ],

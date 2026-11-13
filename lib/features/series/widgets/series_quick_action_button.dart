@@ -8,6 +8,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/series/widgets/complete_series_dialog.dart';
 
 class SeriesQuickActionButton extends StatefulWidget {
   final Series series;
@@ -113,6 +114,16 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
         widget.series.id,
         progressChapter: newProgress,
       );
+      if (mounted) {
+        await maybePromptCompleteSeries(
+          context,
+          series: widget.series,
+          entry: entry,
+          libraryService: libraryService,
+          previousChapter: currentProgress,
+          updatedChapter: newProgress,
+        );
+      }
     } catch (e) {
       if (mounted) {
         setState(() {

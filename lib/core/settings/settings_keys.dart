@@ -88,4 +88,6 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}open_links_in_app';
   static const String autoCompleteChapterProgress =
       '${AppConstants.prefixStorageKey}auto_complete_chapter_progress';
+  static const String autoCompleteSeriesStatus =
+      '${AppConstants.prefixStorageKey}auto_complete_series_status';
 }
