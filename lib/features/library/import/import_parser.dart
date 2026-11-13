@@ -1,50 +1,9 @@
 import 'dart:convert';
+import 'package:mangabaka_app/features/library/import/import_models.dart';
 
-/// The shapes of list the importer understands.
-enum ImportFormat {
-  /// Work out the format from the text itself.
-  auto,
+export 'package:mangabaka_app/features/library/import/import_models.dart';
 
-  /// One title per line.
-  plain,
-
-  /// Rows with a title column, and optionally a status column.
-  csv,
-
-  /// A JSON array of titles or of objects carrying one.
-  json,
-
-  /// A MyAnimeList manga export (`<myanimelist><manga>…`).
-  myAnimeList,
-
-  /// A Manga-Updates JSON list export.
-  mangaUpdates,
-
-  /// A MangaBaka JSON backup file.
-  mangaBaka,
-}
-
-/// One title read from an import source, with the state its source gave it, if
-/// any.
-class ImportEntry {
-  final String title;
-
-  /// A MangaBaka library state (`reading`, `completed`, …), or null when the
-  /// source did not say or said something unrecognisable.
-  final String? state;
-
-  const ImportEntry(this.title, {this.state});
-
-  @override
-  bool operator ==(Object other) =>
-      other is ImportEntry && other.title == title && other.state == state;
-
-  @override
-  int get hashCode => Object.hash(title, state);
-
-  @override
-  String toString() => 'ImportEntry($title, $state)';
-}
+part 'import_parser_formats.dart';
 
 /// Reads import text in any [ImportFormat] into titles.
 ///
@@ -306,153 +265,23 @@ abstract final class ImportParser {
 
   // ─── Manga-Updates ───────────────────────────────────────────────────────
 
-  static List<ImportEntry> _parseMangaUpdates(String text, {String? fileName}) {
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(text);
-    } on FormatException {
-      return const [];
-    }
-    if (decoded is! List) return const [];
-
-    String? stateFromFile;
-    if (fileName != null) {
-      final name = fileName.toLowerCase();
-      if (name.contains('_id0_')) {
-        stateFromFile = 'reading';
-      } else if (name.contains('_id1_')) {
-        stateFromFile = 'plan_to_read';
-      } else if (name.contains('_id2_')) {
-        stateFromFile = 'completed';
-      } else if (name.contains('_id3_')) {
-        stateFromFile = 'dropped';
-      } else if (name.contains('_id4_')) {
-        stateFromFile = 'paused';
-      }
-    }
-
-    final entries = <ImportEntry>[];
-    for (final item in decoded) {
-      if (item is! Map) continue;
-      final title = item['title']?.toString();
-      if (title == null || title.trim().isEmpty) continue;
-      final status = item['status']?.toString();
-      final state =
-          stateFromFile ?? (status != null ? mapStatus(status) : null);
-      entries.add(ImportEntry(title, state: state));
-    }
-    return entries;
-  }
+  static List<ImportEntry> _parseMangaUpdates(String text, {String? fileName}) =>
+      _parseMangaUpdatesEntries(text, fileName: fileName);
 
   // ─── MangaBaka Backup ─────────────────────────────────────────────────────
 
-  static List<ImportEntry> _parseMangaBaka(String text) {
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(text);
-    } on FormatException {
-      return const [];
-    }
-
-    final List<dynamic> rawEntries;
-    if (decoded is Map && decoded['entries'] is List) {
-      rawEntries = decoded['entries'] as List<dynamic>;
-    } else if (decoded is List) {
-      rawEntries = decoded;
-    } else {
-      return const [];
-    }
-
-    final entries = <ImportEntry>[];
-    for (final item in rawEntries) {
-      if (item is! Map) continue;
-      String? title;
-      final titles = item['titles'];
-      if (titles is Map) {
-        title = (titles['primary'] ?? titles['romanized'] ?? titles['native'])
-            ?.toString();
-      }
-      title ??= item['title']?.toString() ?? item['name']?.toString();
-      if (title == null || title.trim().isEmpty) continue;
-
-      String? state;
-      final entryObj = item['entry'];
-      if (entryObj is Map && entryObj['state'] != null) {
-        state = mapStatus(entryObj['state'].toString());
-      }
-      state ??= item['state'] != null
-          ? mapStatus(item['state'].toString())
-          : null;
-
-      entries.add(ImportEntry(title, state: state));
-    }
-    return entries;
-  }
+  static List<ImportEntry> _parseMangaBaka(String text) =>
+      _parseMangaBakaEntries(text);
 
   // ─── MyAnimeList ─────────────────────────────────────────────────────────
 
-  static List<ImportEntry> _parseMyAnimeList(String text) {
-    final block = RegExp(r'<manga>(.*?)</manga>', dotAll: true);
-    final entries = <ImportEntry>[];
-    for (final match in block.allMatches(text)) {
-      final body = match.group(1) ?? '';
-      final title = _xmlField(body, 'manga_title');
-      if (title == null) continue;
-      final status = _xmlField(body, 'my_status');
-      entries.add(
-        ImportEntry(title, state: status == null ? null : mapStatus(status)),
-      );
-    }
-    return entries;
-  }
-
-  static String? _xmlField(String body, String tag) {
-    final match = RegExp(
-      '<$tag>\\s*(?:<!\\[CDATA\\[(.*?)\\]\\]>|(.*?))\\s*</$tag>',
-      dotAll: true,
-    ).firstMatch(body);
-    if (match == null) return null;
-    final raw = match.group(1) ?? match.group(2);
-    return raw == null ? null : _unescapeXml(raw.trim());
-  }
-
-  static String _unescapeXml(String s) => s
-      .replaceAll('&lt;', '<')
-      .replaceAll('&gt;', '>')
-      .replaceAll('&quot;', '"')
-      .replaceAll('&apos;', "'")
-      .replaceAll('&amp;', '&');
+  static List<ImportEntry> _parseMyAnimeList(String text) =>
+      _parseMyAnimeListEntries(text);
 
   // ─── Status mapping ──────────────────────────────────────────────────────
 
   /// Maps a status as other trackers write it to a MangaBaka library state, or
   /// null when it is not one we recognise (the row then takes the state the
   /// user picked).
-  static String? mapStatus(String status) {
-    switch (status.trim().toLowerCase().replaceAll(RegExp(r'[\s_-]+'), '')) {
-      case 'reading':
-      case 'current':
-      case 'currentlyreading':
-        return 'reading';
-      case 'completed':
-      case 'complete':
-      case 'finished':
-        return 'completed';
-      case 'onhold':
-      case 'paused':
-        return 'paused';
-      case 'dropped':
-        return 'dropped';
-      case 'plantoread':
-      case 'planned':
-      case 'planning':
-        return 'plan_to_read';
-      case 'rereading':
-      case 'repeating':
-        return 'rereading';
-      case 'considering':
-        return 'considering';
-    }
-    return null;
-  }
+  static String? mapStatus(String status) => _mapImportStatus(status);
 }

@@ -292,7 +292,6 @@ class BulkImportController extends ChangeNotifier {
   void _notify() {
     if (!_disposed) notifyListeners();
   }
-
   @override
   void dispose() {
     _disposed = true;

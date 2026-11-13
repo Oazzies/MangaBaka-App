@@ -4,6 +4,7 @@ import 'package:mangabaka_app/features/library/models/library_sync_status.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/library/services/mixins/library_sync_changes.dart';
 import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 const String _lastSyncKey = AppConstants.lastSyncKey;
@@ -116,8 +117,8 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       logger.info('Sync already in progress, deep refresh waits for it.');
       try {
         await running;
-      } catch (_) {
-        // Its failure was reported through syncStatus; the deep run goes on.
+      } catch (e) {
+        logger.fine('Preceding sync failed before deep refresh: $e');
       }
       if (_activeSync != null) return;
     }
@@ -245,73 +246,15 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     Set<String>? seen,
     int generation, {
     bool refreshSeries = false,
-  }) async {
-    // Later items win: the feed can repeat a series.
-    final bySeries = <String, Map<String, dynamic>?>{};
-    for (final item in items) {
-      if (item['type'] != 'entry') continue; // lists are not mirrored locally
-      final current = item['current'];
-      if (current is! Map) continue;
-      final seriesId = current['series_id']?.toString();
-      if (seriesId == null || seriesId.isEmpty) continue;
-      switch (item['action']) {
-        case 'upsert':
-          bySeries[seriesId] = current.cast<String, dynamic>();
-        case 'delete':
-          bySeries[seriesId] = null;
-      }
-    }
-
-    final upserts = [
-      for (final e in bySeries.values)
-        if (e != null) e,
-    ];
-    final deletes = [
-      for (final e in bySeries.entries)
-        if (e.value == null) e.key,
-    ];
-
-    // A full scan only needs series it has not stored (unless the stored ones
-    // are of an outdated data generation); an incremental one refreshes the
-    // series of every entry that changed.
-    final ids = [for (final e in upserts) e['series_id'].toString()];
-    final stored = seen != null && !refreshSeries
-        ? await database.seriesDao.existingIds(ids)
-        : <String>{};
-    final series = await fetchSeriesBatch([
-      for (final id in ids)
-        if (!stored.contains(id)) id,
-    ]);
-    if (_isStale(generation)) return null;
-
-    var written = 0;
-    await database.transaction(() async {
-      await database.seriesDao.upsertSeries(series);
-      // An entry needs its series row (foreign key). A series the catalog no
-      // longer returns (deleted or merged away) would fail the whole page, so
-      // its entry is skipped instead.
-      final have = await database.seriesDao.existingIds(ids);
-      final writable = [
-        for (final e in upserts)
-          if (have.contains(e['series_id'].toString())) e,
-      ];
-      if (writable.length != upserts.length) {
-        logger.warning(
-          'Skipped ${upserts.length - writable.length} entries whose series '
-          'is not in the catalog.',
-        );
-      }
-      await database.libraryEntriesDao.applyFeedChanges(
-        upserts: writable,
-        deletedSeriesIds: deletes,
-      );
-      written = writable.length;
-      if (seen != null) {
-        seen.addAll(writable.map((e) => e['id'].toString()));
-      }
-    });
-    return written;
-  }
+  }) => applyLibraryFeedChanges(
+    items: items,
+    seen: seen,
+    refreshSeries: refreshSeries,
+    database: database,
+    logger: logger,
+    fetchSeriesBatch: fetchSeriesBatch,
+    isStale: () => _isStale(generation),
+  );
 
   /// Also invalidates any sync in flight (see [_syncGeneration]). The
   /// invalidated loop exits without touching [syncStatus] again, so callers

@@ -62,30 +62,37 @@ class LibraryFilterHelper {
       if (f != null) {
         // 3. Series Type
         if (typeLower.isNotEmpty &&
-            !typeLower.contains(entry.series.type.toLowerCase()))
+            !typeLower.contains(entry.series.type.toLowerCase())) {
           return false;
+        }
         if (typeNotLower.isNotEmpty &&
-            typeNotLower.contains(entry.series.type.toLowerCase()))
+            typeNotLower.contains(entry.series.type.toLowerCase())) {
           return false;
+        }
 
         // 4. Series Status
         if (statusLower.isNotEmpty &&
-            !statusLower.contains(entry.series.status.toLowerCase()))
+            !statusLower.contains(entry.series.status.toLowerCase())) {
           return false;
+        }
         if (statusNotLower.isNotEmpty &&
-            statusNotLower.contains(entry.series.status.toLowerCase()))
+            statusNotLower.contains(entry.series.status.toLowerCase())) {
           return false;
+        }
 
         // 5. Genres
         if (genreLower.isNotEmpty || genreNotLower.isNotEmpty) {
           final entryGenres = entry.series.genres
               .map((g) => g.toLowerCase())
               .toSet();
-          if (genreLower.isNotEmpty && !genreLower.every(entryGenres.contains))
+          if (genreLower.isNotEmpty &&
+              !genreLower.every(entryGenres.contains)) {
             return false;
+          }
           if (genreNotLower.isNotEmpty &&
-              genreNotLower.any(entryGenres.contains))
+              genreNotLower.any(entryGenres.contains)) {
             return false;
+          }
         }
 
         // 5b. Tags
@@ -100,26 +107,30 @@ class LibraryFilterHelper {
               if (!tagLower.any(entryTags.contains)) return false;
             }
           }
-          if (tagNotLower.isNotEmpty && tagNotLower.any(entryTags.contains))
+          if (tagNotLower.isNotEmpty && tagNotLower.any(entryTags.contains)) {
             return false;
+          }
         }
 
         // 6. Rating (0-100)
         final rawRating = double.tryParse(entry.series.rating) ?? 0.0;
         final seriesRating = rawRating <= 10.0 ? rawRating * 10 : rawRating;
-        if (seriesRating < f.ratingLower || seriesRating > f.ratingUpper)
+        if (seriesRating < f.ratingLower || seriesRating > f.ratingUpper) {
           return false;
+        }
 
         // 7. Year
         if (f.publishedYearLower != null || f.publishedYearUpper != null) {
           final seriesYear = int.tryParse(entry.series.year);
           if (seriesYear != null) {
             if (f.publishedYearLower != null &&
-                seriesYear < f.publishedYearLower!)
+                seriesYear < f.publishedYearLower!) {
               return false;
+            }
             if (f.publishedYearUpper != null &&
-                seriesYear > f.publishedYearUpper!)
+                seriesYear > f.publishedYearUpper!) {
               return false;
+            }
           } else if (f.publishedYearLower != null ||
               f.publishedYearUpper != null) {
             return false;
