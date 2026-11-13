@@ -73,3 +73,6 @@ enum AppThemeMode { system, light, dark }
 
 /// Behavior for chapter and volume progress when marking a series as completed.
 enum AutoCompleteProgressMode { prompt, always, never }
+
+/// Behavior when chapter or volume progress exceeds the series' known total.
+enum ProgressOverflowMode { never, prompt, always, promptCompletedOnly }

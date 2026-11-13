@@ -90,4 +90,6 @@ class SettingsKeys {
       '${AppConstants.prefixStorageKey}auto_complete_chapter_progress';
   static const String autoCompleteSeriesStatus =
       '${AppConstants.prefixStorageKey}auto_complete_series_status';
+  static const String progressOverflow =
+      '${AppConstants.prefixStorageKey}progress_overflow';
 }

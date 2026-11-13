@@ -740,6 +740,27 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
             ),
           ),
           const Divider(height: 24),
+          DesktopSettingRow(
+            icon: Icons.exposure_plus_1_rounded,
+            title: l10n.translate('progress_overflow'),
+            subtitle: l10n.translate('progress_overflow_subtitle'),
+            control: DesktopMenuButton<ProgressOverflowMode>(
+              valueLabel: GeneralSettingsDialogs.getProgressOverflowModeName(
+                settings.progressOverflow,
+              ),
+              items: ProgressOverflowMode.values
+                  .map(
+                    (m) => (
+                      m,
+                      GeneralSettingsDialogs.getProgressOverflowModeName(m),
+                    ),
+                  )
+                  .toList(),
+              selected: settings.progressOverflow,
+              onSelected: settings.setProgressOverflow,
+            ),
+          ),
+          const Divider(height: 24),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

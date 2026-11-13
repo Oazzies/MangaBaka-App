@@ -9,6 +9,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/series/widgets/complete_series_dialog.dart';
+import 'package:mangabaka_app/features/series/widgets/progress_overflow_dialog.dart';
 
 class SeriesQuickActionButton extends StatefulWidget {
   final Series series;
@@ -101,8 +102,18 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
   Future<void> _handlePress(LibraryEntry entry) async {
     final libraryService = getIt<LibraryService>();
 
+    final totalChapters = int.tryParse(widget.series.totalChapters);
     final currentProgress = _optimisticProgress ?? entry.progressChapter ?? 0;
     final newProgress = currentProgress + 1;
+
+    final allowed = await confirmProgressOverflow(
+      context,
+      newValue: newProgress,
+      total: totalChapters,
+      isChapter: true,
+      seriesStatus: widget.series.status,
+    );
+    if (!allowed || !mounted) return;
 
     setState(() {
       _optimisticProgress = newProgress;

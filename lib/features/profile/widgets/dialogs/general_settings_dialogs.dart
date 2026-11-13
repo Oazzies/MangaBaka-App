@@ -221,4 +221,31 @@ class GeneralSettingsDialogs {
           SettingsManager().setAutoCompleteSeriesStatus(mode),
     );
   }
+
+  static String getProgressOverflowModeName(ProgressOverflowMode mode) {
+    final l10n = LocalizationService();
+    switch (mode) {
+      case ProgressOverflowMode.never:
+        return l10n.translate('progress_overflow_never');
+      case ProgressOverflowMode.prompt:
+        return l10n.translate('progress_overflow_prompt');
+      case ProgressOverflowMode.always:
+        return l10n.translate('progress_overflow_always');
+      case ProgressOverflowMode.promptCompletedOnly:
+        return l10n.translate('progress_overflow_prompt_completed_only');
+    }
+  }
+
+  static void showProgressOverflowSelectionDialog(BuildContext context) {
+    final l10n = LocalizationService();
+    SelectionBottomSheet.showSelectionBottomSheet<ProgressOverflowMode>(
+      context: context,
+      title: l10n.translate('progress_overflow'),
+      subtitle: l10n.translate('progress_overflow_subtitle'),
+      options: ProgressOverflowMode.values,
+      currentValue: SettingsManager().progressOverflow,
+      getLabel: getProgressOverflowModeName,
+      onSelected: (mode) => SettingsManager().setProgressOverflow(mode),
+    );
+  }
 }

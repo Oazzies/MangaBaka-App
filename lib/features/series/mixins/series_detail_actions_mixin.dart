@@ -72,6 +72,8 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
               ? l10n.translate('update_chapters')
               : l10n.translate('update_volumes'),
           maxValue: isChapter ? series.totalChapters : series.finalVolume,
+          isChapter: isChapter,
+          seriesStatus: series.status,
           onUpdate: (value) async {
             // Not fire-and-forget: a failed request (already rolled back
             // locally) would otherwise surface only as an unhandled async

@@ -262,6 +262,18 @@ class SettingsCategories {
                     GeneralSettingsDialogs.showAutoCompleteSeriesStatusSelectionDialog(
                       ctx,
                     ),
+              ),
+              const SettingsDivider(),
+              SettingsItem(
+                icon: Icons.exposure_plus_1_rounded,
+                title: l10n.translate('progress_overflow'),
+                subtitle: GeneralSettingsDialogs.getProgressOverflowModeName(
+                  settings.progressOverflow,
+                ),
+                onTap: () =>
+                    GeneralSettingsDialogs.showProgressOverflowSelectionDialog(
+                      ctx,
+                    ),
                 isLast: true,
               ),
             ],

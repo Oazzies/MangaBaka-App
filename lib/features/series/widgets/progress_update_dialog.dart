@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/core/settings/settings_enums.dart';
+import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/series/widgets/progress_overflow_dialog.dart';
 
 class ProgressUpdateDialog extends StatefulWidget {
   /// Largest value the field accepts. The series' own total is not used as
@@ -14,6 +17,8 @@ class ProgressUpdateDialog extends StatefulWidget {
   final int initialValue;
   final String title;
   final String maxValue;
+  final bool isChapter;
+  final String? seriesStatus;
   final Function(int) onUpdate;
 
   const ProgressUpdateDialog({
@@ -21,6 +26,8 @@ class ProgressUpdateDialog extends StatefulWidget {
     required this.initialValue,
     required this.title,
     required this.maxValue,
+    this.isChapter = true,
+    this.seriesStatus,
     required this.onUpdate,
   });
 
@@ -45,12 +52,43 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
     super.dispose();
   }
 
+  int? get _parsedTotal {
+    final t = int.tryParse(widget.maxValue);
+    return (t != null && t > 0) ? t : null;
+  }
+
+  int get _effectiveMax {
+    final t = _parsedTotal;
+    if (SettingsManager().progressOverflow == ProgressOverflowMode.never &&
+        t != null) {
+      // If initialValue already exceeded total before the setting was changed,
+      // don't allow adding more chapters/volumes, while still allowing reduction.
+      return widget.initialValue > t ? widget.initialValue : t;
+    }
+    return ProgressUpdateDialog.maxProgress;
+  }
+
   void _updateValue(int newValue) {
-    if (newValue < 0 || newValue > ProgressUpdateDialog.maxProgress) return;
+    if (newValue < 0 || newValue > _effectiveMax) return;
     setState(() {
       _currentValue = newValue;
       _controller.text = _currentValue.toString();
     });
+  }
+
+  Future<void> _handleSave() async {
+    if (_currentValue > widget.initialValue) {
+      final allowed = await confirmProgressOverflow(
+        context,
+        newValue: _currentValue,
+        total: _parsedTotal,
+        isChapter: widget.isChapter,
+        seriesStatus: widget.seriesStatus,
+      );
+      if (!allowed || !mounted) return;
+    }
+    widget.onUpdate(_currentValue);
+    Navigator.pop(context);
   }
 
   @override
@@ -171,7 +209,20 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                     onChanged: (value) {
                       final parsed = int.tryParse(value);
                       if (parsed != null) {
-                        setState(() => _currentValue = parsed);
+                        if (parsed > _effectiveMax) {
+                          final clamped = _effectiveMax;
+                          setState(() {
+                            _currentValue = clamped;
+                            _controller.value = TextEditingValue(
+                              text: '$clamped',
+                              selection: TextSelection.collapsed(
+                                offset: '$clamped'.length,
+                              ),
+                            );
+                          });
+                        } else {
+                          setState(() => _currentValue = parsed);
+                        }
                       }
                     },
                   ),
@@ -205,10 +256,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
               ),
               const SizedBox(width: 12),
               FilledButton(
-                onPressed: () {
-                  widget.onUpdate(_currentValue);
-                  Navigator.pop(context);
-                },
+                onPressed: _handleSave,
                 style: FilledButton.styleFrom(
                   backgroundColor: context.colors.accent,
                   foregroundColor: context.colors.onAccent,
