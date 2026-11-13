@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/features/series/widgets/series_tags_fade_out.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -243,7 +244,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
               ),
               // Fades the cut-off row out rather than slicing it, so the clip
               // reads as "there is more" instead of as a rendering fault.
-              if (isClipped) const _FadeOut(),
+              if (isClipped) const SeriesTagsFadeOut(),
             ],
           ),
         ),
@@ -280,32 +281,6 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
               size: 20,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FadeOut extends StatelessWidget {
-  const _FadeOut();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              context.colors.surface.withValues(alpha: 0),
-              context.colors.surface,
-            ],
-          ),
         ),
       ),
     );

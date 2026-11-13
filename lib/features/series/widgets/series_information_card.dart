@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
+import 'package:mangabaka_app/features/series/widgets/series_info_rows.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -55,7 +55,7 @@ class SeriesInformationCard extends StatelessWidget {
 
     final rows = <Widget>[
       if (series.type.isNotEmpty)
-        _Row(
+        SeriesInfoRow(
           label: l10n.translate('type'),
           value: _cap(series.type),
           valueColor: context.colors.forSeriesType(series.type),
@@ -71,7 +71,7 @@ class SeriesInformationCard extends StatelessWidget {
           },
         ),
       if (series.status.isNotEmpty)
-        _Row(
+        SeriesInfoRow(
           label: l10n.translate('status'),
           value: _cap(series.status),
           valueColor: context.colors.forSeriesStatus(series.status),
@@ -87,7 +87,7 @@ class SeriesInformationCard extends StatelessWidget {
           },
         ),
       if (dateRange != null && dateRange.isNotEmpty)
-        _Row(
+        SeriesInfoRow(
           label: l10n.translate('published'),
           value: dateRange,
           isSelected: isYearSelected,
@@ -107,7 +107,7 @@ class SeriesInformationCard extends StatelessWidget {
                 },
         ),
       if (series.year.isNotEmpty && series.year != 'null' && dateRange == null)
-        _Row(
+        SeriesInfoRow(
           label: l10n.translate('year'),
           value: series.year,
           isSelected: isYearSelected,
@@ -127,11 +127,17 @@ class SeriesInformationCard extends StatelessWidget {
                 },
         ),
       if (_validNum(series.totalChapters) != null)
-        _Row(label: l10n.translate('chapters'), value: series.totalChapters),
+        SeriesInfoRow(
+          label: l10n.translate('chapters'),
+          value: series.totalChapters,
+        ),
       if (_validNum(series.finalVolume) != null)
-        _Row(label: l10n.translate('volumes'), value: series.finalVolume),
+        SeriesInfoRow(
+          label: l10n.translate('volumes'),
+          value: series.finalVolume,
+        ),
       if (series.authors.isNotEmpty)
-        _LinkedRow(
+        SeriesInfoLinkedRow(
           label: l10n.translate('authors'),
           items: series.authors,
           isSelected: (name) =>
@@ -145,7 +151,7 @@ class SeriesInformationCard extends StatelessWidget {
           },
         ),
       if (series.artists.isNotEmpty)
-        _LinkedRow(
+        SeriesInfoLinkedRow(
           label: l10n.translate('artists'),
           items: series.artists,
           isSelected: (name) =>
@@ -159,7 +165,7 @@ class SeriesInformationCard extends StatelessWidget {
           },
         ),
       if (series.publisherRefs.isNotEmpty)
-        _PublisherRefsRow(
+        SeriesInfoPublisherRefsRow(
           label: l10n.translate('publishers'),
           publishers: series.publisherRefs,
           isSelected: (name) =>
@@ -179,7 +185,7 @@ class SeriesInformationCard extends StatelessWidget {
           },
         )
       else if (series.publishers.isNotEmpty)
-        _LinkedRow(
+        SeriesInfoLinkedRow(
           label: l10n.translate('publishers'),
           items: series.publishers,
           isSelected: (name) =>
@@ -193,11 +199,11 @@ class SeriesInformationCard extends StatelessWidget {
           },
         ),
       if (series.contentRating.isNotEmpty && series.contentRating != 'null')
-        _Row(
+        SeriesInfoRow(
           label: l10n.translate('content_rating'),
           value: _cap(series.contentRating),
         ),
-      _Row(label: 'MangaBaka ID', value: series.id),
+      SeriesInfoRow(label: 'MangaBaka ID', value: series.id),
     ];
 
     if (rows.isEmpty) return const SizedBox.shrink();
@@ -219,214 +225,5 @@ class SeriesInformationCard extends StatelessWidget {
         children: children,
       ),
     );
-  }
-}
-
-class _Row extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-  final VoidCallback? onTap;
-  final bool isSelected;
-
-  const _Row({
-    required this.label,
-    required this.value,
-    this.valueColor,
-    this.onTap,
-    this.isSelected = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textColor = isSelected
-        ? context.colors.accent
-        : (valueColor ?? context.colors.text);
-    final textWeight = isSelected ? FontWeight.bold : FontWeight.w500;
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 11),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label.toUpperCase(),
-              style: AppTypography.monoLabel(
-                color: context.colors.textMuted,
-                fontSize: 10,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: AppTypography.sans(
-                color: textColor,
-                fontSize: 14,
-                fontWeight: textWeight,
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LinkedRow extends StatelessWidget {
-  final String label;
-  final List<String> items;
-  final Function(String)? onTap;
-  final bool Function(String)? isSelected;
-
-  const _LinkedRow({
-    required this.label,
-    required this.items,
-    this.onTap,
-    this.isSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 11),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: AppTypography.monoLabel(
-              color: context.colors.textMuted,
-              fontSize: 10,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Wrap(
-            runSpacing: 2,
-            children: [
-              for (var i = 0; i < items.length; i++) ...[
-                GestureDetector(
-                  onTap: onTap != null ? () => onTap!(items[i]) : null,
-                  behavior: HitTestBehavior.opaque,
-                  child: Builder(
-                    builder: (context) {
-                      final selected = isSelected?.call(items[i]) ?? false;
-                      return Text(
-                        items[i],
-                        style: AppTypography.sans(
-                          color: selected
-                              ? context.colors.accent
-                              : context.colors.text,
-                          fontSize: 14,
-                          fontWeight: selected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          height: 1.4,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                if (i < items.length - 1)
-                  Text(
-                    ', ',
-                    style: AppTypography.sans(
-                      color: context.colors.text,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
-                    ),
-                  ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Publishers as one tappable block each — the name, with the edition's
-/// language and role (e.g. "EN · English") beneath it so regional editions of the same series can
-/// be told apart.
-class _PublisherRefsRow extends StatelessWidget {
-  final String label;
-  final List<SeriesPublisher> publishers;
-  final void Function(SeriesPublisher) onTap;
-  final bool Function(String) isSelected;
-
-  const _PublisherRefsRow({
-    required this.label,
-    required this.publishers,
-    required this.onTap,
-    required this.isSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 11),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: AppTypography.monoLabel(
-              color: context.colors.textMuted,
-              fontSize: 10,
-            ),
-          ),
-          const SizedBox(height: 4),
-          for (final p in publishers)
-            GestureDetector(
-              onTap: () => onTap(p),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p.name,
-                      style: AppTypography.sans(
-                        color: isSelected(p.name)
-                            ? context.colors.accent
-                            : context.colors.text,
-                        fontSize: 14,
-                        fontWeight: isSelected(p.name)
-                            ? FontWeight.bold
-                            : FontWeight.w500,
-                        height: 1.4,
-                      ),
-                    ),
-                    if (_detail(p) != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 1),
-                        child: Text(
-                          _detail(p)!,
-                          style: AppTypography.monoLabel(
-                            color: context.colors.textMuted,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  static String? _detail(SeriesPublisher p) {
-    final parts = [
-      if (p.language != null) p.language!.toUpperCase(),
-      if (p.role != null) p.role!,
-    ];
-    return parts.isEmpty ? null : parts.join(' · ');
   }
 }

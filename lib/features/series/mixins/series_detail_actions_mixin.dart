@@ -1,5 +1,4 @@
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,7 +13,7 @@ import 'package:mangabaka_app/features/series/widgets/delete_from_library_dialog
 import 'package:mangabaka_app/features/series/widgets/note_editor_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/series/widgets/series_share_sheet.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
 
 mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
@@ -190,95 +189,15 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
         MediaQuery.orientationOf(context) == Orientation.landscape) {
       _showShareMenu(link, anchor);
     } else if (link != null) {
-      showAdaptiveSheet(
+      showSeriesShareSheet(
         context: context,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        builder: (context) => Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          decoration: BoxDecoration(
-            color: context.colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            boxShadow: [
-              BoxShadow(
-                color: context.colors.shadowAt(0.5),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AdaptiveSheetHandle(
-                  width: 40,
-                  color: context.colors.textMuted.withValues(alpha: 0.2),
-                  bottomSpacing: 20,
-                ),
-                _buildShareOption(
-                  icon: Icons.share_rounded,
-                  title: l10n.translate('share_series'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _shareText(link);
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Divider(
-                    height: 1,
-                    thickness: 0.5,
-                    color: context.colors.text.withValues(alpha: 0.1),
-                  ),
-                ),
-                _buildShareOption(
-                  icon: Icons.copy_rounded,
-                  title: l10n.translate('copy_link'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    copyToClipboard(link);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+        link: link,
+        onShare: () => _shareText(link),
+        onCopy: () => copyToClipboard(link),
       );
     } else {
       AppSnackBar.show(context, l10n.translate('no_sharing_link'));
     }
-  }
-
-  Widget _buildShareOption({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: context.colors.accent.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: context.colors.accent, size: 24),
-      ),
-      title: Text(
-        title,
-        style: AppTypography.sans(
-          color: context.colors.text,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: context.colors.textMuted.withValues(alpha: 0.5),
-      ),
-    );
   }
 
   Future<void> showDeleteConfirmationDialog() async {

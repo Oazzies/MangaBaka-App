@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/features/series/widgets/full_screen_image_overlays.dart';
 
 class FullScreenImageScreen extends StatefulWidget {
   final List<String> imageUrls;
@@ -235,95 +236,13 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                 ),
               ),
               if (_showControls && widget.imageUrls.length > 1) ...[
-                // Left Arrow
                 if (_currentIndex > 0)
-                  Positioned(
-                    left: 16,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: IconButton(
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: FixedColors.imageScrim.withValues(
-                              alpha: 0.4,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: FixedColors.onImage,
-                            size: 24,
-                          ),
-                        ),
-                        onPressed: _previousPage,
-                      ),
-                    ),
-                  ),
-                // Right Arrow
+                  FullScreenNavArrow(isLeft: true, onPressed: _previousPage),
                 if (_currentIndex < widget.imageUrls.length - 1)
-                  Positioned(
-                    right: 16,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: IconButton(
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: FixedColors.imageScrim.withValues(
-                              alpha: 0.4,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_forward_ios,
-                            color: FixedColors.onImage,
-                            size: 24,
-                          ),
-                        ),
-                        onPressed: _nextPage,
-                      ),
-                    ),
-                  ),
+                  FullScreenNavArrow(isLeft: false, onPressed: _nextPage),
               ],
               if (_showControls && note != null && note.isNotEmpty)
-                Positioned(
-                  bottom: 60,
-                  left: 32,
-                  right: 32,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: FixedColors.imageScrim.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: FixedColors.imageScrim.withValues(
-                              alpha: 0.3,
-                            ),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        note,
-                        style: AppTypography.sans(
-                          color: FixedColors.onImage,
-                          fontSize: 14,
-                          height: 1.4,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
+                FullScreenImageNoteBanner(note: note),
             ],
           ),
         ),

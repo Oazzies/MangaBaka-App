@@ -1,5 +1,4 @@
-import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
-import 'package:mangabaka_app/features/series/widgets/entry_list_item_list_layouts.dart';
+import 'package:mangabaka_app/features/series/widgets/entry_list_item_content.dart';
 import 'package:mangabaka_app/features/series/widgets/series_quick_action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -193,7 +192,11 @@ class _EntryListItemState extends State<EntryListItem> {
                   isInLibrary &&
                       (settings.showLibraryProgress ||
                           settings.showRemainingProgress)
-                  ? _buildProgressBar(context, entry, style)
+                  ? EntryProgressBar(
+                      series: widget.series,
+                      entry: entry,
+                      optimisticProgress: _optimisticProgress,
+                    )
                   : null,
               trailing: settings.showQuickProgress
                   ? SeriesQuickActionButton(
@@ -219,7 +222,16 @@ class _EntryListItemState extends State<EntryListItem> {
         onExit: style.isGrid ? (_) => setState(() => _hovered = false) : null,
         child: Stack(
           children: [
-            _buildContent(context, style, l10n, displayTitle, entry),
+            EntryListItemContent(
+              series: widget.series,
+              style: style,
+              l10n: l10n,
+              displayTitle: displayTitle,
+              entry: entry,
+              heroTagPrefix: widget.heroTagPrefix,
+              optimisticProgress: _optimisticProgress,
+              hovered: _hovered,
+            ),
 
             if (!style.isGrid &&
                 isInLibrary &&
@@ -233,7 +245,11 @@ class _EntryListItemState extends State<EntryListItem> {
                         : (style == AppListStyle.compact ? 60.0 : 72.0)) +
                     12,
                 right: 12,
-                child: _buildProgressBar(context, entry, style),
+                child: EntryProgressBar(
+                  series: widget.series,
+                  entry: entry,
+                  optimisticProgress: _optimisticProgress,
+                ),
               ),
 
             if (!style.isGrid && settings.showQuickProgress)
@@ -251,105 +267,10 @@ class _EntryListItemState extends State<EntryListItem> {
                 ),
               ),
 
-            if (showBadge) _rankingBadge(),
+            if (showBadge) EntryRankingBadge(ranking: widget.ranking!),
           ],
         ),
       ),
     );
-  }
-
-  Widget _rankingBadge() {
-    return Positioned(
-      top: 0,
-      left: 0,
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.colors.accent,
-          // Matches the 8px grid card it sits in the corner of.
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(8),
-            bottomRight: Radius.circular(8),
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-        child: Text(
-          '${widget.ranking}',
-          style: AppTypography.display(
-            color: context.colors.onAccent,
-            fontSize: 15,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProgressBar(
-    BuildContext context,
-    LibraryEntry entry,
-    AppListStyle style,
-  ) {
-    final totalChapters = int.tryParse(widget.series.totalChapters) ?? 0;
-    if (totalChapters <= 0) return const SizedBox.shrink();
-
-    final progress = _optimisticProgress ?? entry.progressChapter ?? 0;
-    final percentage = (progress / totalChapters).clamp(0.0, 1.0);
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: LinearProgressIndicator(
-        value: percentage,
-        backgroundColor: context.colors.surfaceRaised,
-        valueColor: AlwaysStoppedAnimation<Color>(context.colors.accent),
-        minHeight: 3,
-      ),
-    );
-  }
-
-  Widget _buildContent(
-    BuildContext context,
-    AppListStyle style,
-    LocalizationService l10n,
-    String displayTitle,
-    LibraryEntry? entry,
-  ) {
-    switch (style) {
-      case AppListStyle.coverOnlyGrid:
-        return CoverOnlyGridItem(
-          series: widget.series,
-          heroTagPrefix: widget.heroTagPrefix,
-          entry: entry,
-          progressOverride: _optimisticProgress,
-          hovered: _hovered,
-        );
-      case AppListStyle.compactGrid:
-        return CompactGridItem(
-          series: widget.series,
-          heroTagPrefix: widget.heroTagPrefix,
-          displayTitle: displayTitle,
-          hovered: _hovered,
-          entry: entry,
-          progressOverride: _optimisticProgress,
-        );
-      case AppListStyle.minimalList:
-        return MinimalListItem(
-          series: widget.series,
-          heroTagPrefix: widget.heroTagPrefix,
-          displayTitle: displayTitle,
-        );
-      case AppListStyle.compact:
-        return CompactListItem(
-          series: widget.series,
-          heroTagPrefix: widget.heroTagPrefix,
-          displayTitle: displayTitle,
-          l10n: l10n,
-        );
-      case AppListStyle.comfortable:
-        return ComfortableListItem(
-          series: widget.series,
-          heroTagPrefix: widget.heroTagPrefix,
-          displayTitle: displayTitle,
-          l10n: l10n,
-        );
-    }
   }
 }

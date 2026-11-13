@@ -8,10 +8,10 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/widgets/tabs/series_similar_grid.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
-import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
@@ -175,7 +175,11 @@ class SeriesSimilarTab extends StatelessWidget {
           ),
         ),
         if (style.isGrid)
-          _buildGrid(context, series, style, heroTagPrefix)
+          SeriesSimilarGrid(
+            series: series,
+            style: style,
+            heroTagPrefix: heroTagPrefix,
+          )
         else
           _buildList(context, series, style, heroTagPrefix),
       ],
@@ -215,94 +219,6 @@ class SeriesSimilarTab extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildGrid(
-    BuildContext context,
-    List<Series> series,
-    AppListStyle style,
-    String heroTagPrefix,
-  ) {
-    final seriesService = getIt<SeriesService>();
-    final isCompactGrid = style == AppListStyle.compactGrid;
-
-    Widget buildGridContent(BuildContext context, int calculatedColumns) {
-      if (isCompactGrid) {
-        return DynamicRowHeightGrid(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: calculatedColumns,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          itemCount: series.length,
-          itemBuilder: (context, index) {
-            final s = series[index];
-            return MouseRegion(
-              onEnter: (_) => seriesService.fetchSeries(s.id),
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    AppTransitions.slideUp(
-                      SeriesDetailScreen(
-                        series: s,
-                        heroTagPrefix: heroTagPrefix,
-                      ),
-                    ),
-                  );
-                },
-                child: EntryListItem(
-                  series: s,
-                  heroTagPrefix: heroTagPrefix,
-                  listStyle: style,
-                ),
-              ),
-            );
-          },
-        );
-      }
-
-      return GridView.builder(
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 150,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.65,
-        ),
-        itemCount: series.length,
-        itemBuilder: (context, index) {
-          final s = series[index];
-          return MouseRegion(
-            onEnter: (_) => seriesService.fetchSeries(s.id),
-            child: InkWell(
-              onTap: () {
-                Navigator.of(context).push(
-                  AppTransitions.slideUp(
-                    SeriesDetailScreen(series: s, heroTagPrefix: heroTagPrefix),
-                  ),
-                );
-              },
-              child: EntryListItem(
-                series: s,
-                heroTagPrefix: heroTagPrefix,
-                listStyle: style,
-              ),
-            ),
-          );
-        },
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final calculatedColumns = ((width + 16) / 166).ceil().clamp(1, 12);
-        return buildGridContent(context, calculatedColumns);
-      },
     );
   }
 }

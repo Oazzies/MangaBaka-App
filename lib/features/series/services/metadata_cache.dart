@@ -57,8 +57,8 @@ class MetadataCache {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(key);
-    } catch (_) {
-      // Nothing further to do: the value stays and is re-checked next launch.
+    } catch (e, st) {
+      _logger.warning('Failed to remove metadata cache "$key"', e, st);
     }
   }
 }

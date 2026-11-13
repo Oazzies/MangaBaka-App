@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
-import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/browse/utils/browse_navigation.dart';
@@ -16,13 +15,8 @@ import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin
 import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
-import 'package:mangabaka_app/features/series/widgets/series_detail_body.dart';
-import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
-import 'package:mangabaka_app/desktop/desktop_layout.dart';
-import 'package:mangabaka_app/desktop/widgets/desktop_series_filter_panel.dart';
-import 'package:mangabaka_app/features/series/widgets/series_filter_drawer.dart';
+import 'package:mangabaka_app/features/series/widgets/series_detail_scaffold.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/core/widgets/dotted_border_painter.dart';
 
@@ -283,68 +277,19 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
         _filterDrawer,
       ]),
       builder: (context, _) {
-        return PopScope(
-          // Back closes the filter drawer before it leaves the page.
-          canPop: !_filterDrawer.isOpen,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (_filterDrawer.isOpen) _filterDrawer.close();
-          },
-          // The wide layout carries its own add button in the sidebar; the FAB
-          // is the phone/tablet-portrait affordance only. Measured from the
-          // page's own constraints, as the body does, so the two always agree
-          // on which layout is showing (the desktop sidebar takes width too).
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide =
-                  constraints.maxWidth > SeriesDetailBody.wideBreakpoint;
-              return Scaffold(
-                backgroundColor: context.colors.background,
-                body: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: SeriesDetailBody(
-                        state: this,
-                        entryStream: _entryStream,
-                        settings: SettingsManager(),
-                        l10n: LocalizationService(),
-                        embedded: widget.embedded,
-                        rightRail: widget.rightRail,
-                        onRetry: _retryFetch,
-                        onTabChanged: _onTabChanged,
-                        onAuthorTap: _navigateToAuthorSeries,
-                        onPublisherTap: _navigateToPublisherSeries,
-                      ),
-                    ),
-                    // Positioned, like the body: a non-positioned child would
-                    // make the Stack size itself to that child instead of to the
-                    // incoming constraints, collapsing the page.
-                    if (_filterDrawer.isOpen)
-                      Positioned.fill(
-                        // A pointer gets a panel docked beside the page; a
-                        // thumb gets the bottom sheet.
-                        child: DesktopLayout.isActive(context)
-                            ? DesktopSeriesFilterPanel(
-                                controller: _filterDrawer,
-                                onSearch: executeSearchWithFilters,
-                              )
-                            : SeriesFilterDrawer(
-                                controller: _filterDrawer,
-                                onSearch: executeSearchWithFilters,
-                              ),
-                      ),
-                  ],
-                ),
-                floatingActionButton: (isWide || widget.embedded)
-                    ? null
-                    : SeriesDetailFAB(
-                        entryStream: _entryStream,
-                        isAdding: _isAdding,
-                        onAdd: addSeriesToLibrary,
-                      ),
-              );
-            },
-          ),
+        return SeriesDetailScaffold(
+          state: this,
+          filterDrawer: _filterDrawer,
+          entryStream: _entryStream,
+          embedded: widget.embedded,
+          rightRail: widget.rightRail,
+          isAdding: _isAdding,
+          onRetry: _retryFetch,
+          onTabChanged: _onTabChanged,
+          onAuthorTap: _navigateToAuthorSeries,
+          onPublisherTap: _navigateToPublisherSeries,
+          onSearch: executeSearchWithFilters,
+          onAdd: addSeriesToLibrary,
         );
       },
     );

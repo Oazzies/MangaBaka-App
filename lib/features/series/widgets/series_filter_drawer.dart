@@ -3,14 +3,12 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/dotted_border_painter.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
-import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_categories_section.dart';
-import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_details_section.dart';
-import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_sort_section.dart';
-import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_type_status_section.dart';
 import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_controller.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
-import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
+import 'package:mangabaka_app/features/series/widgets/series_filter_sections.dart';
+
+export 'package:mangabaka_app/features/series/widgets/series_filter_sections.dart';
 
 /// The filter sheet that long-pressing a chip on the series detail screen
 /// raises, together with the marching-ants frame that marks the mode.
@@ -237,64 +235,6 @@ class _Header extends StatelessWidget {
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-class SeriesFilterSections extends StatelessWidget {
-  final SeriesFilterDrawerController controller;
-
-  const SeriesFilterSections({super.key, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final filters = controller.filters;
-    if (filters == null) return const SizedBox.shrink();
-
-    if (controller.isLoadingMetadata) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: MbSpinner()),
-      );
-    }
-
-    final l10n = LocalizationService();
-    final onChanged = controller.replaceFilters;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SearchFilterSortSection(
-          filters: filters,
-          onFiltersChanged: onChanged,
-          l10n: l10n,
-          sortOptions: SeriesFilterDrawer.sortOptions(l10n),
-        ),
-        const SizedBox(height: 8),
-        SearchFilterCategoriesSection(
-          filters: filters,
-          onFiltersChanged: onChanged,
-          l10n: l10n,
-          genres: controller.genres,
-          tags: controller.tags,
-        ),
-        const SizedBox(height: 8),
-        SearchFilterTypeStatusSection(
-          filters: filters,
-          onFiltersChanged: onChanged,
-          l10n: l10n,
-          types: SeriesFilterDrawer.types,
-          statuses: SeriesFilterDrawer.statuses,
-        ),
-        const SizedBox(height: 8),
-        SearchFilterDetailsSection(
-          filters: filters,
-          onFiltersChanged: onChanged,
-          l10n: l10n,
-        ),
-        SizedBox(height: 32 + MediaQuery.paddingOf(context).bottom),
       ],
     );
   }

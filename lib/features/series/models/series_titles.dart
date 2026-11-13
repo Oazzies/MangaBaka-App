@@ -2,6 +2,8 @@ import 'dart:collection';
 
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 
+part 'series_titles_parser.dart';
+
 /// Every title a series goes by, and the one rule for which to show.
 ///
 /// This is the single place that understands the API's title payloads:
@@ -214,74 +216,16 @@ class SeriesTitles {
 
   // ── Derivation from titles[] (v2) ────────────────────────────────────────
 
-  /// The best guess at the server's main title:
-  ///
-  /// 1. an official English title,
-  /// 2. else the original's romanization (what the server uses when there is
-  ///    no official English release — an unofficial English entry is a fan
-  ///    translation and loses to it),
-  /// 3. else any romanization, 4. else any English entry, 5. else the first.
-  ///
-  /// Measured against v1 on 345 random series this matches the server's
-  /// choice for roughly four titles in five; the rest are editorial.
-  static String _deriveMain(List<_Entry> entries, String originalLanguage) {
-    if (entries.isEmpty) return '';
+  static String _deriveMain(List<_Entry> entries, String originalLanguage) =>
+      _deriveMainTitle(entries, originalLanguage);
 
-    final officialEnglish = entries.where(
-      (e) => e.language == 'en' && e.traits.contains('official'),
-    );
-    if (officialEnglish.isNotEmpty) return officialEnglish.first.title;
+  static String _deriveNative(List<_Entry> entries, String originalLanguage) =>
+      _deriveNativeTitle(entries, originalLanguage);
 
-    final romanized = _deriveRomanized(entries, originalLanguage);
-    if (romanized.isNotEmpty) return romanized;
-
-    final english = entries.where((e) => e.language == 'en').toList();
-    final plainEnglish = english.where(
-      (e) => !e.traits.contains('alternative'),
-    );
-    if (plainEnglish.isNotEmpty) return plainEnglish.first.title;
-    if (english.isNotEmpty) return english.first.title;
-    return entries.first.title;
-  }
-
-  /// The original-script title: a non-Latin entry in the series' original
-  /// language, preferring ones flagged `native`. Translations into
-  /// Japanese/Korean/Chinese of a series from elsewhere do not count.
-  static String _deriveNative(List<_Entry> entries, String originalLanguage) {
-    bool inOriginal(_Entry e) => originalLanguage.isEmpty
-        ? const {'ja', 'ko', 'zh'}.contains(e.base)
-        : e.base == originalLanguage;
-
-    final candidates = entries.where((e) => !e.isLatin && inOriginal(e));
-    for (final e in candidates) {
-      if (e.traits.contains('native')) return e.title;
-    }
-    return candidates.isEmpty ? '' : candidates.first.title;
-  }
-
-  /// The original title in Latin script: a `…-Latn` entry, preferring ones
-  /// flagged `native` in the original language.
   static String _deriveRomanized(
     List<_Entry> entries,
     String originalLanguage,
-  ) {
-    final latin = entries.where((e) => e.isLatin).toList();
-    if (latin.isEmpty) return '';
-
-    bool inOriginal(_Entry e) =>
-        originalLanguage.isEmpty || e.base == originalLanguage;
-    final tiers = <bool Function(_Entry)>[
-      (e) => e.traits.contains('native') && inOriginal(e),
-      (e) => e.traits.contains('native'),
-      inOriginal,
-    ];
-    for (final tier in tiers) {
-      for (final e in latin) {
-        if (tier(e)) return e.title;
-      }
-    }
-    return latin.first.title;
-  }
+  ) => _deriveRomanizedTitle(entries, originalLanguage);
 
   // ── Payload helpers ──────────────────────────────────────────────────────
 
@@ -294,56 +238,12 @@ class SeriesTitles {
   static String _baseLanguage(String language) =>
       language.toLowerCase().split(RegExp('[-_]')).first;
 
-  static List<_Entry> _entries(Object? raw) {
-    if (raw is! List) return const [];
-    final out = <_Entry>[];
-    for (final item in raw) {
-      if (item is! Map) continue;
-      final title = _str(item['title']);
-      if (title.isEmpty) continue;
-      final traits = item['traits'];
-      out.add(
-        _Entry(
-          language: _str(item['language']).toLowerCase(),
-          traits: traits is List
-              ? {for (final t in traits) t.toString().toLowerCase()}
-              : const {},
-          title: title,
-        ),
-      );
-    }
-    return out;
-  }
+  static List<_Entry> _entries(Object? raw) => _parseTitleEntries(raw, _str);
 
   /// v1 sends `secondary_titles` as `{type: [{title, note, type}, …]}`; other
   /// endpoints send a plain list of strings or of such objects.
-  static List<String> _flattenSecondary(Object? raw) {
-    String? one(Object? item) {
-      if (item is Map) return _str(item['title']);
-      if (item is String) return item.trim();
-      return null;
-    }
-
-    final out = <String>[];
-    void visit(Object? node) {
-      if (node is Map) {
-        if (node.containsKey('title')) {
-          final t = one(node);
-          if (t != null && t.isNotEmpty) out.add(t);
-        } else {
-          node.values.forEach(visit);
-        }
-      } else if (node is List) {
-        node.forEach(visit);
-      } else {
-        final t = one(node);
-        if (t != null && t.isNotEmpty) out.add(t);
-      }
-    }
-
-    visit(raw);
-    return out;
-  }
+  static List<String> _flattenSecondary(Object? raw) =>
+      _flattenSecondaryTitles(raw, _str);
 
   // ── Canonical memory ─────────────────────────────────────────────────────
 
@@ -367,27 +267,4 @@ class SeriesTitles {
 
   /// For tests: forget everything remembered.
   static void clearRemembered() => _canonical.clear();
-}
-
-class _Entry {
-  final String language;
-  final Set<String> traits;
-  final String title;
-
-  const _Entry({
-    required this.language,
-    required this.traits,
-    required this.title,
-  });
-
-  String get base => SeriesTitles._baseLanguage(language);
-
-  /// Latin-script entry: `ja-Latn`, and the older spellings `ja-ro`,
-  /// `ja-hepburn`, `ja-romaji` or an explicit `romanized` trait.
-  bool get isLatin =>
-      language.endsWith('-latn') ||
-      language.endsWith('-ro') ||
-      language.contains('hepburn') ||
-      language.contains('romaji') ||
-      traits.contains('romanized');
 }
