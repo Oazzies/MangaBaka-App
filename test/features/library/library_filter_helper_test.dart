@@ -98,5 +98,61 @@ void main() {
       );
       expect(helperNoMatch.getFilteredAndSorted(), isEmpty);
     });
+
+    test('matches apostrophes, punctuation, diacritics, and secondary titles', () {
+      final komiSeries = Series(
+        id: '2',
+        title: "Komi Can't Communicate",
+        state: 'reading',
+        nativeTitle: '古見さんは、コミュ症です。',
+        romanizedTitle: 'Komi-san wa, Komyushō desu.',
+        secondaryTitles: ['Komi-san wa, Komyushou desu.'],
+        coverUrl: '',
+        rawCoverUrl: '',
+        authors: [],
+        artists: [],
+        description: '',
+        year: '2016',
+        status: 'completed',
+        isLicensed: 'yes',
+        hasAnime: 'yes',
+        contentRating: 'safe',
+        type: 'manga',
+        rating: '90',
+        finalVolume: '',
+        totalChapters: '500',
+        links: [],
+        publishers: [],
+        genres: [],
+        tags: [],
+        lastUpdated: '',
+      );
+      final komiEntry = LibraryEntry(
+        id: '2',
+        state: 'reading',
+        rating: 9,
+        series: komiSeries,
+      );
+
+      for (final q in [
+        'komi cant',
+        "komi can’t",
+        'komi communicate',
+        'komyusho',
+        'komi san',
+        'komyushou',
+      ]) {
+        final helper = LibraryFilterHelper(
+          allEntries: [komiEntry],
+          query: q,
+          contentPreferences: ['safe'],
+        );
+        expect(
+          helper.getFilteredAndSorted(),
+          hasLength(1),
+          reason: 'Expected "$q" to match Komi entry',
+        );
+      }
+    });
   });
 }

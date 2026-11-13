@@ -1,5 +1,6 @@
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/content_rating_filter.dart';
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -442,13 +443,12 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
       for (final v in _f.tagNot) (v, TriState.exclude),
     ];
 
-    final query = _tagQuery.trim().toLowerCase();
-    final matches = query.isEmpty
+    final preparedQuery = SearchUtils.prepare(_tagQuery);
+    final matches = preparedQuery.isEmpty
         ? const <Map<String, dynamic>>[]
         : _tags
               .where(
-                (t) =>
-                    (t['name']?.toString().toLowerCase() ?? '').contains(query),
+                (t) => preparedQuery.matches(t['name']?.toString() ?? ''),
               )
               .take(_maxTagMatches)
               .toList();
@@ -487,7 +487,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
           hint: l10n.translate('search_tags'),
           onChanged: (v) => setState(() => _tagQuery = v),
         ),
-        if (query.isEmpty && _tags.isNotEmpty)
+        if (preparedQuery.isEmpty && _tags.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 4),
             child: Text(
@@ -500,7 +500,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
               ),
             ),
           ),
-        if (query.isNotEmpty) ...[
+        if (!preparedQuery.isEmpty) ...[
           const SizedBox(height: 6),
           if (matches.isEmpty)
             Padding(

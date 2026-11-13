@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
 /// Ordering and inline-completion rules shared by the Browse and Library
@@ -22,18 +23,15 @@ class AutocompleteRanking {
     String query, {
     bool preferPrefixMatches = true,
   }) {
-    final q = query.toLowerCase();
+    final prepared = SearchUtils.prepare(query);
     results.sort((a, b) {
-      final aTitle = a.title.toLowerCase();
-      final bTitle = b.title.toLowerCase();
-
-      final aExact = aTitle == q;
-      final bExact = bTitle == q;
+      final aExact = prepared.exactMatch(a.title);
+      final bExact = prepared.exactMatch(b.title);
       if (aExact != bExact) return aExact ? -1 : 1;
 
       if (preferPrefixMatches) {
-        final aStarts = aTitle.startsWith(q);
-        final bStarts = bTitle.startsWith(q);
+        final aStarts = prepared.startsWith(a.title);
+        final bStarts = prepared.startsWith(b.title);
         if (aStarts != bStarts) return aStarts ? -1 : 1;
       }
 

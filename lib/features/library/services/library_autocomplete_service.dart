@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
@@ -12,48 +13,29 @@ class LibraryAutocompleteService {
   ) {
     if (query.trim().isEmpty) return [];
 
-    final q = query.trim().toLowerCase();
+    final prepared = SearchUtils.prepare(query);
 
     // Score and sort: title-start matches rank higher than contains matches
     final scored = <_ScoredMatch>[];
 
     for (final entry in allEntries) {
       final series = entry.series;
-      final titleLower = series.title.toLowerCase();
-      final nativeLower = series.nativeTitle.toLowerCase();
-      final romanizedLower = series.romanizedTitle.toLowerCase();
 
       int score = 0;
-      if (titleLower.startsWith(q)) {
+      if (prepared.startsWith(series.title)) {
         score = 100; // Strongest match
-      } else if (nativeLower.startsWith(q) || romanizedLower.startsWith(q)) {
+      } else if (prepared.startsWith(series.nativeTitle) ||
+          prepared.startsWith(series.romanizedTitle)) {
         score = 90;
-      } else {
-        bool secondaryStarts = false;
-        for (var t in series.secondaryTitles) {
-          if (t.toLowerCase().startsWith(q)) {
-            secondaryStarts = true;
-            break;
-          }
-        }
-        if (secondaryStarts) {
-          score = 80;
-        } else if (titleLower.contains(q)) {
-          score = 50;
-        } else if (nativeLower.contains(q) || romanizedLower.contains(q)) {
-          score = 40;
-        } else {
-          bool secondaryContains = false;
-          for (var t in series.secondaryTitles) {
-            if (t.toLowerCase().contains(q)) {
-              secondaryContains = true;
-              break;
-            }
-          }
-          if (secondaryContains) {
-            score = 30;
-          }
-        }
+      } else if (series.secondaryTitles.any(prepared.startsWith)) {
+        score = 80;
+      } else if (prepared.matches(series.title)) {
+        score = 50;
+      } else if (prepared.matches(series.nativeTitle) ||
+          prepared.matches(series.romanizedTitle)) {
+        score = 40;
+      } else if (series.secondaryTitles.any(prepared.matches)) {
+        score = 30;
       }
 
       if (score > 0) {

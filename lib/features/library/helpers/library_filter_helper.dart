@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/constants/library_screen_constants.dart';
@@ -21,9 +22,9 @@ class LibraryFilterHelper {
   List<LibraryEntry> getFilteredAndSorted() {
     if (_cachedFiltered != null) return _cachedFiltered!;
 
-    // Lowercase the query and filter lists once, not per entry — this runs on
-    // every keystroke against the whole library.
-    final queryLower = query.toLowerCase();
+    // Prepare the query and lowercase filter lists once, not per entry — this
+    // runs on every keystroke against the whole library.
+    final preparedQuery = SearchUtils.prepare(query);
     final f = filters;
     final typeLower =
         f?.type.map((t) => t.toLowerCase()).toSet() ?? const <String>{};
@@ -45,10 +46,11 @@ class LibraryFilterHelper {
     List<LibraryEntry> filtered = allEntries.where((entry) {
       // 1. Query Search
       final matchesQuery =
-          queryLower.isEmpty ||
-          entry.series.title.toLowerCase().contains(queryLower) ||
-          entry.series.nativeTitle.toLowerCase().contains(queryLower) ||
-          entry.series.romanizedTitle.toLowerCase().contains(queryLower);
+          preparedQuery.isEmpty ||
+          preparedQuery.matches(entry.series.title) ||
+          preparedQuery.matches(entry.series.nativeTitle) ||
+          preparedQuery.matches(entry.series.romanizedTitle) ||
+          entry.series.secondaryTitles.any(preparedQuery.matches);
       if (!matchesQuery) return false;
 
       // 2. Content Rating (Settings)

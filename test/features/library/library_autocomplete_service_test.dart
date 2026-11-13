@@ -147,5 +147,26 @@ void main() {
       final results = service.search('Naruto', entries);
       expect(results.first.title, 'Naruto Shippuden');
     });
+
+    test('matches queries ignoring apostrophes, punctuation, and macrons', () {
+      final entries = [
+        _entry(id: '1', title: "Komi Can't Communicate"),
+        _entry(id: '2', title: 'Kaguya-sama: Love Is War'),
+        _entry(id: '3', title: 'Yū Yū Hakusho'),
+      ];
+
+      expect(
+        service.search('komi cant', entries).map((r) => r.title),
+        ["Komi Can't Communicate"],
+      );
+      expect(
+        service.search('kaguya sama', entries).map((r) => r.title),
+        ['Kaguya-sama: Love Is War'],
+      );
+      expect(
+        service.search('yu yu', entries).map((r) => r.title),
+        ['Yū Yū Hakusho'],
+      );
+    });
   });
 }

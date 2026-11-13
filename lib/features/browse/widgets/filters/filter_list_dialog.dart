@@ -1,4 +1,5 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/tri_state_chip.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_item.dart';
@@ -60,9 +61,10 @@ class _FilterListDialogState extends State<FilterListDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final preparedQuery = SearchUtils.prepare(_searchQuery);
     final filteredItems = widget.items.where((t) {
       final name = t[widget.nameKey]?.toString() ?? '';
-      return name.toLowerCase().contains(_searchQuery.toLowerCase());
+      return preparedQuery.isEmpty || preparedQuery.matches(name);
     }).toList();
 
     // Sort included/excluded items to the top

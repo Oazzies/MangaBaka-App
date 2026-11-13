@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
 /// What the cache could answer for a query, and whether the network still has
@@ -131,14 +132,9 @@ class AutocompleteCache {
     List<AutocompleteSeriesResult> source,
     String query,
   ) {
-    final words = query.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
-    bool titleMatches(String title) {
-      final lower = title.toLowerCase();
-      return words.every(lower.contains);
-    }
-
+    final prepared = SearchUtils.prepare(query);
     return source
-        .where((r) => titleMatches(r.title) || r.allTitles.any(titleMatches))
+        .where((r) => prepared.matches(r.title) || r.allTitles.any(prepared.matches))
         .take(pageLimit)
         .toList();
   }

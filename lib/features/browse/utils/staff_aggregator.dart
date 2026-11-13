@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 
@@ -23,10 +24,10 @@ class StaffAggregator {
   /// for. An empty query keeps everyone.
   static List<Staff> fromSeries(List<Series> series, String query) {
     final byName = <String, Staff>{};
-    final needle = query.toLowerCase();
+    final needle = SearchUtils.prepare(query);
 
     void upsert(String name, String role) {
-      if (needle.isNotEmpty && !name.toLowerCase().contains(needle)) return;
+      if (!needle.isEmpty && !needle.matches(name)) return;
       final existing = byName[name];
       byName[name] = Staff(
         // Names are the identity here — there is no staff id in the payload —
