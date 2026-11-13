@@ -259,32 +259,28 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
-      await tester.pumpWidget(
-        _host(
-          DesktopWindowFrame(
-            child: Scaffold(
-              body: DesktopPageHeader(
-                title: 'Library',
-                subtitle: 'All · 42 series',
-                actions: [
-                  DesktopPillButton(
-                    key: const ValueKey('import_btn'),
-                    label: 'Import List',
-                    icon: Icons.playlist_add_rounded,
-                    onPressed: () {},
-                  ),
-                  DesktopPillButton(
-                    key: const ValueKey('sync_btn'),
-                    label: 'Sync Now',
-                    icon: Icons.sync_rounded,
-                    onPressed: () {},
-                  ),
-                ],
+      await tester.pumpWidget(_host(DesktopWindowFrame(
+        child: Scaffold(
+          body: DesktopPageHeader(
+            title: 'Library',
+            subtitle: 'All · 42 series',
+            actions: [
+              DesktopPillButton(
+                key: const ValueKey('import_btn'),
+                label: 'Import List',
+                icon: Icons.playlist_add_rounded,
+                onPressed: () {},
               ),
-            ),
+              DesktopPillButton(
+                key: const ValueKey('sync_btn'),
+                label: 'Sync Now',
+                icon: Icons.sync_rounded,
+                onPressed: () {},
+              ),
+            ],
           ),
         ),
-      );
+      )));
 
       expect(tester.takeException(), isNull);
 

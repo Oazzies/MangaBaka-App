@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
-import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/desktop/screens/home/desktop_home_widgets.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_trending_board.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_upcoming_rail.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
-import 'package:mangabaka_app/desktop/widgets/desktop_carousel.dart';
-import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
@@ -268,49 +266,12 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
     );
   }
 
-  /// The feed with the upcoming sidebar sliding in over its right edge — the
-  /// narrow-window stand-in for the docked rail.
-  Widget _withUpcomingOverlay(Widget feed) {
-    return Stack(
-      children: [
-        Positioned.fill(child: feed),
-        Positioned(
-          top: _overlayTop,
-          bottom: 0,
-          right: 0,
-          width: _railWidth,
-          child: IgnorePointer(
-            ignoring: !_upcomingOpen,
-            child: AnimatedSlide(
-              offset: Offset(_upcomingOpen ? 0 : 1, 0),
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: context.colors.background,
-                  border: Border(
-                    left: BorderSide(color: context.colors.border),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: FixedColors.dim.withValues(alpha: 0.3),
-                      blurRadius: 24,
-                    ),
-                  ],
-                ),
-                child: _upcomingBuilt
-                    ? const DesktopUpcomingRail(topPadding: 16)
-                    : const SizedBox.shrink(),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Below the page header, so its buttons stay reachable while open.
-  static const double _overlayTop = 84;
+  Widget _withUpcomingOverlay(Widget feed) => DesktopUpcomingOverlay(
+    feed: feed,
+    railWidth: _railWidth,
+    open: _upcomingOpen,
+    built: _upcomingBuilt,
+  );
 
   Widget _padded(Widget child) => Padding(
     padding: const EdgeInsets.fromLTRB(
@@ -327,30 +288,10 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
     List<Series> series, {
     bool? loading,
     VoidCallback? onViewAll,
-  }) {
-    final isLoading = loading ?? _loadingRails;
-    // A rail that resolved to nothing is dropped rather than shown empty.
-    if (!isLoading && series.isEmpty) return const SizedBox.shrink();
-
-    final textArea = DesktopCoverCard.textAreaHeight(context);
-    return _padded(
-      DesktopCarousel(
-        title: title,
-        loading: isLoading,
-        onViewAll: onViewAll,
-        itemCount: series.length,
-        // Stretched so a whole number of covers exactly fills the row: the
-        // leftmost cover's left edge and the rightmost's right edge line up
-        // with the trending board above.
-        itemWidth: 156,
-        stretch: true,
-        itemHeight: (width) => width * 1.5 + textArea,
-        itemBuilder: (context, i) => DesktopCoverCard(
-          series: series[i],
-          heroTag: 'home_${title}_$i',
-          showRating: false,
-        ),
-      ),
-    );
-  }
+  }) => DesktopHomeRail(
+    title: title,
+    series: series,
+    loading: loading ?? _loadingRails,
+    onViewAll: onViewAll,
+  );
 }

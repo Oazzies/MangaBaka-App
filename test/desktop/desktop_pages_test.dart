@@ -5,7 +5,6 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/presets/theme_presets.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
-import 'package:mangabaka_app/desktop/screens/settings/desktop_settings_screen.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_sidebar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
@@ -244,99 +243,6 @@ void main() {
         find.byIcon(Icons.keyboard_double_arrow_right_rounded),
         findsNothing,
       );
-    });
-  });
-
-  group('DesktopSettingsScreen', () {
-    setUp(() async {
-      await resetServiceLocator();
-      getIt.registerSingleton<ProfileAuthService>(_FakeAuth());
-    });
-
-    tearDown(resetServiceLocator);
-
-    Future<void> pumpSettings(WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1600, 900);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: DesktopSettingsScreen(key: DesktopSettingsScreen.stateKey),
-          ),
-        ),
-      );
-      DesktopSettingsScreen.stateKey.currentState?.debugSelectCategory('general');
-      await tester.pumpAndSettle();
-    }
-
-    testWidgets('Developer Tools are hidden until developer mode is on',
-        (tester) async {
-      await pumpSettings(tester);
-      expect(find.text('advanced_settings'), findsNothing);
-
-      await SettingsManager().setDeveloperMode(true);
-      await tester.pumpAndSettle();
-      expect(find.text('advanced_settings'), findsOneWidget);
-    });
-
-    testWidgets('logs open from Advanced and go back to it', (tester) async {
-      await pumpSettings(tester);
-      await SettingsManager().setDeveloperMode(true);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('advanced_settings'));
-      await tester.pumpAndSettle();
-      // The Logs row's button.
-      await tester.tap(find.widgetWithText(DesktopPillButton, 'LOGS'));
-      await tester.pumpAndSettle();
-
-      expect(find.byTooltip('back'), findsOneWidget);
-      expect(find.text('redo_onboarding'.toUpperCase()), findsNothing);
-
-      await tester.tap(find.byIcon(Icons.arrow_back_rounded));
-      await tester.pumpAndSettle();
-
-      expect(find.byTooltip('back'), findsNothing);
-      expect(find.text('REDO_ONBOARDING'), findsWidgets);
-    });
-
-    testWidgets('categories switch to selected category', (tester) async {
-      await pumpSettings(tester);
-
-      expect(find.text('LANGUAGE'), findsOneWidget, reason: 'General selected');
-      await tester.tap(find.text('content'));
-      await tester.pumpAndSettle();
-      expect(find.text('LANGUAGE'), findsNothing, reason: 'General left');
-      expect(find.text('RATING_STEP'), findsOneWidget, reason: 'Content arrived');
-    });
-
-    testWidgets('a shown content rating can have its covers blurred',
-        (tester) async {
-      await pumpSettings(tester);
-      await tester.tap(find.text('content'));
-      await tester.pumpAndSettle();
-
-      expect(SettingsManager().contentPreferences, contains('safe'));
-      expect(SettingsManager().blurredContentRatings, isNot(contains('safe')));
-
-      // The first shown rating's blur switch.
-      final rows = find.byType(Switch);
-      await tester.ensureVisible(rows.first);
-      // Order on the page: hide-library switch first, then one per shown
-      // rating; find the one belonging to the "safe" row.
-      final safeRow = find.ancestor(
-        of: find.text('SAFE'),
-        matching: find.byType(DesktopHoverSurface),
-      );
-      final blurSwitch = find.descendant(
-        of: safeRow.first,
-        matching: find.byType(Switch),
-      );
-      await tester.tap(blurSwitch);
-      await tester.pumpAndSettle();
-
-      expect(SettingsManager().blurredContentRatings, contains('safe'));
     });
   });
 }

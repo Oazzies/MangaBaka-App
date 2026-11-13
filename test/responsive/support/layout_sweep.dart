@@ -265,21 +265,20 @@ List<LayoutIssue> unreachableControls(
 
     collect(element);
     final hit = result.path.any((e) => own.contains(e.target));
-    if (!hit) {
-      final top = result.path.isEmpty
-          ? 'nothing'
-          : result.path.first.target.toString();
-      final covering = _coveringWidget(result);
-      issues.add(
-        LayoutIssue(
-          scenario: scenario,
-          viewport: viewport,
-          key: '$what is covered at its centre by $covering',
-          location: null,
-          detail: 'rect $rect; topmost hit: $top',
-        ),
-      );
-    }
+    if (hit) continue;
+    final top = result.path.isEmpty
+        ? 'nothing'
+        : result.path.first.target.toString();
+    final covering = _coveringWidget(result);
+    issues.add(
+      LayoutIssue(
+        scenario: scenario,
+        viewport: viewport,
+        key: '$what is covered at its centre by $covering',
+        location: null,
+        detail: 'rect $rect; topmost hit: $top',
+      ),
+    );
   }
   return issues;
 }

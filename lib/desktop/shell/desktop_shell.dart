@@ -18,6 +18,8 @@ import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
+part 'desktop_shell_history_part.dart';
+
 /// Implemented by desktop pages that can reload their content, so Ctrl+R
 /// works wherever keyboard focus happens to be.
 abstract interface class DesktopRefreshable {
@@ -166,66 +168,11 @@ class DesktopShellState extends State<DesktopShell> {
 
   late final NavigatorObserver _historyObserver = _HistoryObserver(this);
 
-  /// A fresh route showing what [route] showed, or null when it cannot be
-  /// rebuilt (dialogs and the like).
-  Route<dynamic>? _replica(Route<dynamic> route) {
-    if (route is PageRouteBuilder) {
-      return PageRouteBuilder<dynamic>(
-        settings: route.settings,
-        opaque: route.opaque,
-        pageBuilder: route.pageBuilder,
-        transitionsBuilder: route.transitionsBuilder,
-        transitionDuration: route.transitionDuration,
-        reverseTransitionDuration: route.reverseTransitionDuration,
-      );
-    }
-    if (route is MaterialPageRoute) {
-      return MaterialPageRoute<dynamic>(
-        settings: route.settings,
-        builder: route.builder,
-      );
-    }
-    return null;
-  }
+  bool goBack() => _goBackImpl(this);
 
-  /// Mouse Back button: closes the open page, or returns to the previous
-  /// destination when none is open. False when there is nowhere to go.
-  bool goBack() {
-    final navigator = _contentNavigatorKey.currentState;
-    if (navigator != null && navigator.canPop()) {
-      navigator.maybePop();
-      return true;
-    }
-    if (_tabBack.isEmpty) return false;
-    _tabForward.add(_index.value);
-    _switchTo(_tabBack.removeLast(), record: false);
-    return true;
-  }
+  bool goForward() => _goForwardImpl(this);
 
-  /// Mouse Forward button: reopens the page Back just closed, or moves on to
-  /// the destination Back just left.
-  bool goForward() {
-    final navigator = _contentNavigatorKey.currentState;
-    if (navigator != null && _routeForward.isNotEmpty) {
-      _replaying = true;
-      navigator.push(_routeForward.removeLast());
-      _replaying = false;
-      return true;
-    }
-    if (_tabForward.isEmpty) return false;
-    _tabBack.add(_index.value);
-    _switchTo(_tabForward.removeLast(), record: false);
-    return true;
-  }
-
-  /// Pops the content area's top route. Returns false when it is already at
-  /// a destination root.
-  bool popContent() {
-    final navigator = _contentNavigatorKey.currentState;
-    if (navigator == null || !navigator.canPop()) return false;
-    navigator.maybePop();
-    return true;
-  }
+  bool popContent() => _popContentImpl(this);
 
   // ─── Build ───────────────────────────────────────────────────────────────
 
@@ -337,28 +284,5 @@ class DesktopShellState extends State<DesktopShell> {
         const SyncProgressOverlay(),
       ],
     );
-  }
-}
-
-/// Feeds the shell's Back/Forward history: remembers what was popped so
-/// Forward can reopen it, and forgets that as soon as something new opens.
-class _HistoryObserver extends NavigatorObserver {
-  final DesktopShellState _shell;
-
-  _HistoryObserver(this._shell);
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (_shell._suppressHistory || previousRoute == null) return;
-    final copy = _shell._replica(route);
-    if (copy != null) _shell._routeForward.add(copy);
-  }
-
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (_shell._replaying || previousRoute == null || route is! PageRoute) {
-      return;
-    }
-    _shell._routeForward.clear();
   }
 }
