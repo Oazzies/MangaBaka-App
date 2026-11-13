@@ -30,8 +30,10 @@ class AuthStorage {
   final _logger = LoggingService.logger;
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
-      encryptedSharedPreferences: false,
       resetOnError: true,
+      // Keep the existing SharedPreferences file name so upgrading from
+      // flutter_secure_storage v8 preserves stored tokens for Android users.
+      // ignore: deprecated_member_use
       sharedPreferencesName: 'mangabaka_app_secure_storage_v3',
     ),
     mOptions: MacOsOptions(
