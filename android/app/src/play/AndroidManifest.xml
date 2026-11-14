@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Google Play rejects apps declaring REQUEST_INSTALL_PACKAGES unless they are
+         approved app stores/browsers. Stripped automatically when STORE_BUILD=true. -->
+    <uses-permission
+        android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:node="remove" />
+</manifest>

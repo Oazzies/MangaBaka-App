@@ -1,0 +1,12 @@
+MangaBaka is the official, free, and open-source companion app for MangaBaka.org.
+
+Features:
+- Track your reading progress across reading, completed, paused, plan to read, dropped, and rereading lists
+- Browse and search the MangaBaka catalog with rich filters, genres, tags, and publisher info
+- Scan ISBN barcodes with your camera to quickly look up physical volumes
+- Organize and explore Stacks (curated lists)
+- Import your existing library from AniList, MyAnimeList, Kitsu, MangaUpdates, Comick, or Mihon
+- Automatic cloud sync with your MangaBaka account and offline-first local caching
+- Light, dark, and customizable theme accents with multilingual support
+
+Note: MangaBaka is a manga tracking and discovery app. It does not host or stream copyrighted reading content.

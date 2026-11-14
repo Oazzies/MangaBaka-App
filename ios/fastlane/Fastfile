@@ -1,27 +1,71 @@
 default_platform(:ios)
 
+def load_asc_api_key
+  key_content = ENV["APP_STORE_CONNECT_API_KEY_KEY"]
+  key_id = ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
+  issuer_id = ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"]
+  return nil if key_content.to_s.empty? || key_id.to_s.empty? || issuer_id.to_s.empty?
+
+  app_store_connect_api_key(
+    key_id: key_id,
+    issuer_id: issuer_id,
+    key_content: key_content,
+    is_key_content_base64: key_content.include?("BEGIN PRIVATE KEY") ? false : true
+  )
+end
+
+def read_changelog(options)
+  if options[:changelog_path] && File.exist?(options[:changelog_path])
+    return File.read(options[:changelog_path]).strip
+  elsif options[:changelog]
+    return options[:changelog]
+  end
+  "New release update"
+end
+
 platform :ios do
   desc "Submit a new build to TestFlight"
   lane :publish_to_testflight do |options|
     ipa_path = options[:ipa_path]
-    
-    changelog = "New pre-release update"
-    if options[:changelog_path] && File.exist?(options[:changelog_path])
-      changelog = File.read(options[:changelog_path]).strip
-    elsif options[:changelog]
-      changelog = options[:changelog]
-    end
+    changelog = read_changelog(options)
+    api_key = load_asc_api_key
 
     UI.message("Uploading to TestFlight...")
     UI.message("IPA path: #{ipa_path}")
-    UI.message("Changelog: #{changelog[0..100]}...") # truncate for logging
 
-    # Pilot uploads build to TestFlight
     pilot(
+      api_key: api_key,
       ipa: ipa_path,
       skip_submission: false,
-      skip_waiting_for_build_processing: true, # true to avoid blocking GitHub Actions workflow
+      skip_waiting_for_build_processing: true,
       changelog: changelog
+    )
+  end
+
+  desc "Submit a new build and metadata to the Apple App Store"
+  lane :publish_to_app_store do |options|
+    ipa_path = options[:ipa_path]
+    submit = options[:submit_for_review] == true || options[:submit_for_review] == "true"
+    changelog = read_changelog(options)
+    api_key = load_asc_api_key
+
+    release_notes_path = "metadata/en-US/release_notes.txt"
+    sh("mkdir", "-p", "metadata/en-US")
+    File.write(release_notes_path, changelog)
+
+    UI.message("Uploading to App Store Connect (submit_for_review=#{submit})...")
+    UI.message("IPA path: #{ipa_path}")
+
+    deliver(
+      api_key: api_key,
+      ipa: ipa_path,
+      submit_for_review: submit,
+      automatic_release: false,
+      force: true,
+      skip_metadata: false,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      precheck_include_in_app_purchases: false
     )
   end
 end

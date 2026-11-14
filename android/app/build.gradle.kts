@@ -60,6 +60,14 @@ android {
             )
         }
     }
+
+    // Store AAB builds set STORE_BUILD=true so REQUEST_INSTALL_PACKAGES is
+    // stripped from the merged release manifest (Google Play policy).
+    val isStoreBuild =
+        System.getenv("STORE_BUILD") == "true" || project.hasProperty("storeBuild")
+    if (isStoreBuild) {
+        sourceSets.getByName("release").manifest.srcFile("src/play/AndroidManifest.xml")
+    }
 }
 
 flutter {

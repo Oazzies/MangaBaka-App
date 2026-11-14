@@ -5,6 +5,6 @@
   "app_name": "MangaBaka",
   "caption": "Update for MangaBaka now available!",
   "tint_colour": "0a0a0a",
-  "image_url": "REPLACE_WITH_NEWS_IMAGE_URL",
+  "image_url": "https://raw.githubusercontent.com/Oazzies/MangaBaka-App/main/assets/mangabaka512.png",
   "sideload_asset_keyword": "sideload"
 }

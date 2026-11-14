@@ -1,11 +1,10 @@
-# The Deliverfile allows you to configure upload settings for App Store Connect / TestFlight
 app_identifier("dev.oazzies.mangabaka-app")
-username("") # Your Apple ID username
+username(ENV["APPLE_ID"]) if ENV["APPLE_ID"] && !ENV["APPLE_ID"].empty?
 
-# Delivery options
 submit_for_review(false)
+automatic_release(false)
+force(true)
 skip_metadata(false)
 skip_screenshots(false)
 skip_binary_upload(false)
-
-# Release notes/changelog can also be fetched/set automatically via lanes
+precheck_include_in_app_purchases(false)

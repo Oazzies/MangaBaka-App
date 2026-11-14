@@ -32,13 +32,19 @@ class UpdateService {
 
   bool _promptedThisLaunch = false;
 
+  /// Set via `--dart-define=STORE_BUILD=true` for app store builds (Google Play,
+  /// Apple App Store, Mac App Store, Microsoft Store) where the store itself
+  /// manages updates and in-app self-update prompts/installers are disallowed.
+  static const bool isStoreBuild = bool.fromEnvironment('STORE_BUILD');
+
   /// Longest silence tolerated between chunks of an update download.
   static const _downloadStallTimeout = Duration(seconds: 30);
 
   /// Whether this platform can download and apply an update in-app. Other
   /// platforms fall back to opening the release page in a browser.
   bool get supportsInAppUpdate =>
-      Platform.isAndroid || Platform.isWindows || Platform.isLinux;
+      !isStoreBuild &&
+      (Platform.isAndroid || Platform.isWindows || Platform.isLinux);
 
   /// Returns the newest non-draft release (including pre-releases), or `null` on failure.
   Future<AppRelease?> fetchLatestRelease() async {
@@ -94,7 +100,9 @@ class UpdateService {
 
   /// Returns `true` once per launch if an update check should be performed.
   /// Marks the launch as prompted so callers don't re-trigger on rebuilds.
+  /// Store builds always return `false` because the store handles updates.
   bool shouldPrompt() {
+    if (isStoreBuild) return false;
     if (_promptedThisLaunch) return false;
     _promptedThisLaunch = true;
     return true;

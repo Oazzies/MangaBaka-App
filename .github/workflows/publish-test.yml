@@ -1,25 +1,46 @@
 name: Publish Release to App Stores
 
 on:
+  release:
+    types:
+      - published
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Specific GitHub Release tag to publish (e.g., v0.2.2). If left blank, it will automatically find the latest release."
+        description: "Specific GitHub Release tag to publish (e.g., v1.0.0). If left blank, uses the latest release."
         required: false
         type: string
+      track:
+        description: "Store release track"
+        required: true
+        type: choice
+        default: testing
+        options:
+          - testing
+          - production
       publish_android:
-        description: "Publish to Google Play Public Testing (Beta)?"
+        description: "Publish to Google Play?"
         required: true
         type: boolean
         default: true
       publish_ios:
-        description: "Publish to Apple TestFlight?"
+        description: "Publish to Apple TestFlight / App Store?"
+        required: true
+        type: boolean
+        default: true
+      publish_macos:
+        description: "Publish to Mac App Store?"
+        required: true
+        type: boolean
+        default: true
+      publish_windows:
+        description: "Publish to Microsoft Store?"
         required: true
         type: boolean
         default: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   get-release-info:
@@ -27,10 +48,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.release-info.outputs.tag }}
+      track: ${{ steps.release-info.outputs.track }}
       has_android_keystore: ${{ steps.check-secrets.outputs.has_android_keystore }}
       has_play_store_key: ${{ steps.check-secrets.outputs.has_play_store_key }}
       has_ios_cert: ${{ steps.check-secrets.outputs.has_ios_cert }}
       has_apple_credentials: ${{ steps.check-secrets.outputs.has_apple_credentials }}
+      has_macos_store_creds: ${{ steps.check-secrets.outputs.has_macos_store_creds }}
+      has_msstore_creds: ${{ steps.check-secrets.outputs.has_msstore_creds }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -42,62 +66,72 @@ jobs:
           PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
           IOS_CERT: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          ASC_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          ASC_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          MACOS_STORE_CERT: ${{ secrets.MACOS_APP_STORE_CERTIFICATE_BASE64 }}
+          MACOS_INSTALLER_CERT: ${{ secrets.MACOS_INSTALLER_CERTIFICATE_BASE64 }}
+          MSSTORE_APP_ID: ${{ secrets.MSSTORE_APP_ID }}
+          MSSTORE_CLIENT_ID: ${{ secrets.MSSTORE_CLIENT_ID }}
+          MSSTORE_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+          MSSTORE_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
         run: |
-          if [ -n "$ANDROID_KEYSTORE" ]; then
-            echo "has_android_keystore=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_android_keystore=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if [ -n "$PLAY_STORE_KEY" ]; then
-            echo "has_play_store_key=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_play_store_key=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if [ -n "$IOS_CERT" ]; then
-            echo "has_ios_cert=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_ios_cert=false" >> $GITHUB_OUTPUT
-          fi
-          
+          [ -n "$ANDROID_KEYSTORE" ] && echo "has_android_keystore=true" >> $GITHUB_OUTPUT || echo "has_android_keystore=false" >> $GITHUB_OUTPUT
+          [ -n "$PLAY_STORE_KEY" ] && echo "has_play_store_key=true" >> $GITHUB_OUTPUT || echo "has_play_store_key=false" >> $GITHUB_OUTPUT
+          [ -n "$IOS_CERT" ] && echo "has_ios_cert=true" >> $GITHUB_OUTPUT || echo "has_ios_cert=false" >> $GITHUB_OUTPUT
+
           if [ -n "$APPLE_ID" ] || [ -n "$ASC_API_KEY" ]; then
             echo "has_apple_credentials=true" >> $GITHUB_OUTPUT
           else
             echo "has_apple_credentials=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Determine Target Release Tag
+          if [ -n "$MACOS_STORE_CERT" ] && [ -n "$MACOS_INSTALLER_CERT" ] && [ -n "$ASC_API_KEY" ]; then
+            echo "has_macos_store_creds=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_macos_store_creds=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "$MSSTORE_APP_ID" ] && [ -n "$MSSTORE_CLIENT_ID" ] && [ -n "$MSSTORE_CLIENT_SECRET" ] && [ -n "$MSSTORE_TENANT_ID" ]; then
+            echo "has_msstore_creds=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_msstore_creds=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine Target Release Tag and Track
         id: release-info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          EVENT_PRERELEASE: ${{ github.event.release.prerelease }}
           INPUT_TAG: ${{ github.event.inputs.release_tag }}
+          INPUT_TRACK: ${{ github.event.inputs.track }}
         run: |
-          # 1. Determine release tag to checkout
-          if [ -n "$INPUT_TAG" ]; then
-            TAG="$INPUT_TAG"
-            echo "Using user-specified release tag: $TAG"
+          if [ "$EVENT_NAME" = "release" ]; then
+            TAG="$EVENT_TAG"
+            if [ "$EVENT_PRERELEASE" = "true" ]; then
+              TRACK="testing"
+            else
+              TRACK="production"
+            fi
           else
-            echo "No tag specified. Finding the latest GitHub release..."
-            TAG=$(gh release list --exclude-drafts --limit 1 --json tagName | jq -r '.[0].tagName')
-            echo "Discovered release tag: $TAG"
+            TRACK="${INPUT_TRACK:-testing}"
+            if [ -n "$INPUT_TAG" ]; then
+              TAG="$INPUT_TAG"
+            else
+              TAG=$(gh release list --exclude-drafts --limit 1 --json tagName -q '.[0].tagName')
+            fi
           fi
-          
+
           if [ -z "$TAG" ]; then
-            echo "Error: Could not find any release tag to publish!"
+            echo "::error::Could not find any release tag to publish."
             exit 1
           fi
-          
+
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          
-          # 2. Extract changelog/description
-          echo "Fetching release description for tag $TAG..."
-          gh release view "$TAG" --json body -q ".body" > changelog.txt
-          
-          echo "=== Changelog Preview ==="
-          cat changelog.txt
-          echo "========================="
+          echo "track=$TRACK" >> $GITHUB_OUTPUT
+          echo "Target release: $TAG (track: $TRACK)"
+
+          gh release view "$TAG" --json body -q ".body" > changelog.txt || echo "Release $TAG" > changelog.txt
 
       - name: Upload Changelog Artifact
         uses: actions/upload-artifact@v4
@@ -106,9 +140,9 @@ jobs:
           path: changelog.txt
 
   publish-android:
-    name: Deploy to Google Play Testing
+    name: Deploy to Google Play
     needs: get-release-info
-    if: ${{ github.event.inputs.publish_android == true }}
+    if: ${{ github.event_name == 'release' || github.event.inputs.publish_android == true }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code at Target Tag
@@ -119,11 +153,11 @@ jobs:
       - name: Verify Android Credentials
         run: |
           if [ "${{ needs.get-release-info.outputs.has_android_keystore }}" != "true" ]; then
-            echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing! Android builds cannot be signed."
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing; Android builds cannot be signed."
             exit 1
           fi
           if [ "${{ needs.get-release-info.outputs.has_play_store_key }}" != "true" ]; then
-            echo "::error::PLAY_STORE_JSON_KEY secret is missing! Fastlane cannot upload AAB to Google Play."
+            echo "::error::PLAY_STORE_JSON_KEY secret is missing; Fastlane cannot upload AAB to Google Play."
             exit 1
           fi
 
@@ -132,8 +166,6 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         shell: bash
         run: |
-          # A build without the OAuth client ID compiles fine but cannot sign
-          # anyone in, so a missing secret fails the job instead.
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
             exit 1
@@ -151,7 +183,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # Pinned so a release is built with the SDK its tests ran on.
           flutter-version: '3.44.3'
           cache: true
 
@@ -161,23 +192,23 @@ jobs:
       - name: Set up Android Keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
 
       - name: Download Changelog Artifact
         uses: actions/download-artifact@v4
         with:
           name: release-changelog
 
-      - name: Build AAB (Android App Bundle)
+      - name: Build Play Store AAB
         run: |
           VERSION_LINE=$(grep "^version:" pubspec.yaml)
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CODE=$(echo "$VERSION_FULL" | cut -d'+' -f2)
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-          
-          flutter build appbundle --release
+
+          flutter build appbundle --release --dart-define=STORE_BUILD=true
         env:
+          STORE_BUILD: "true"
           ANDROID_KEYSTORE_PATH: upload-keystore.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -186,8 +217,7 @@ jobs:
       - name: Set up Google Play Credentials File
         env:
           PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
-        run: |
-          echo "$PLAY_STORE_JSON_KEY" > android/fastlane-service-account.json
+        run: echo "$PLAY_STORE_JSON_KEY" > android/fastlane-service-account.json
 
       - name: Set up Ruby & Fastlane
         uses: ruby/setup-ruby@v1
@@ -199,15 +229,20 @@ jobs:
       - name: Run Fastlane to Google Play
         working-directory: android
         run: |
-          bundle exec fastlane publish_to_testing \
+          if [ "${{ needs.get-release-info.outputs.track }}" = "production" ]; then
+            LANE="publish_to_production"
+          else
+            LANE="publish_to_testing"
+          fi
+          bundle exec fastlane "$LANE" \
             aab_path:"../build/app/outputs/bundle/release/app-release.aab" \
             changelog_path:"../changelog.txt" \
             version_code:"${{ env.VERSION_CODE }}"
 
   publish-ios:
-    name: Deploy to Apple TestFlight
+    name: Deploy to Apple (iOS)
     needs: get-release-info
-    if: ${{ github.event.inputs.publish_ios == true }}
+    if: ${{ github.event_name == 'release' || github.event.inputs.publish_ios == true }}
     runs-on: macos-latest
     steps:
       - name: Checkout Code at Target Tag
@@ -216,17 +251,19 @@ jobs:
           ref: ${{ needs.get-release-info.outputs.tag }}
 
       - name: Check iOS Credentials
-        id: check-credentials
         run: |
-          if [ "${{ needs.get-release-info.outputs.has_ios_cert }}" != "true" ]; then
-            echo "::warning::IOS_CERTIFICATE_BASE64 secret is not configured. Skipping TestFlight publish step."
-            echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
-          elif [ "${{ needs.get-release-info.outputs.has_apple_credentials }}" != "true" ]; then
-            echo "::warning::Apple Credentials (APPLE_ID or APP_STORE_CONNECT_API_KEY) are not configured. Skipping TestFlight publish step."
+          if [ "${{ needs.get-release-info.outputs.has_ios_cert }}" != "true" ] || [ "${{ needs.get-release-info.outputs.has_apple_credentials }}" != "true" ]; then
+            echo "::warning::iOS signing or App Store Connect credentials not configured. Skipping iOS store publish."
             echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
           else
             echo "SKIP_PUBLISH=false" >> $GITHUB_ENV
           fi
+
+      - name: Select Xcode
+        if: env.SKIP_PUBLISH != 'true'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
       - name: Create .env File
         if: env.SKIP_PUBLISH != 'true'
@@ -234,8 +271,6 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         shell: bash
         run: |
-          # A build without the OAuth client ID compiles fine but cannot sign
-          # anyone in, so a missing secret fails the job instead.
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
             exit 1
@@ -247,7 +282,6 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # Pinned so a release is built with the SDK its tests ran on.
           flutter-version: '3.44.3'
           cache: true
 
@@ -265,6 +299,14 @@ jobs:
           p12-file-base64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
 
+      - name: Install iOS Provisioning Profile
+        if: env.SKIP_PUBLISH != 'true' && secrets.IOS_PROVISIONING_PROFILE_BASE64 != ''
+        env:
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/appstore.mobileprovision
+
       - name: Download Changelog Artifact
         if: env.SKIP_PUBLISH != 'true'
         uses: actions/download-artifact@v4
@@ -273,7 +315,7 @@ jobs:
 
       - name: Build iOS IPA
         if: env.SKIP_PUBLISH != 'true'
-        run: flutter build ipa --release
+        run: flutter build ipa --release --dart-define=STORE_BUILD=true
 
       - name: Set up Ruby & Fastlane
         if: env.SKIP_PUBLISH != 'true'
@@ -283,21 +325,201 @@ jobs:
           bundler-cache: true
           working-directory: ios
 
-      - name: Run Fastlane to TestFlight
+      - name: Run Fastlane to TestFlight / App Store
         if: env.SKIP_PUBLISH != 'true'
         working-directory: ios
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
+          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
-          # Alternatively, if using ASC API Key:
           APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
           APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
           APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
         run: |
-          # Find the exact IPA file path dynamically
           IPA_PATH=$(find ../build/ios/ipa -name "*.ipa" | head -n 1)
           echo "Found IPA at: $IPA_PATH"
-          
-          bundle exec fastlane publish_to_testflight \
-            ipa_path:"$IPA_PATH" \
-            changelog_path:"../changelog.txt"
+
+          if [ "${{ needs.get-release-info.outputs.track }}" = "production" ]; then
+            bundle exec fastlane publish_to_app_store \
+              ipa_path:"$IPA_PATH" \
+              changelog_path:"../changelog.txt" \
+              submit_for_review:false
+          else
+            bundle exec fastlane publish_to_testflight \
+              ipa_path:"$IPA_PATH" \
+              changelog_path:"../changelog.txt"
+          fi
+
+  publish-macos:
+    name: Deploy to Mac App Store
+    needs: get-release-info
+    if: ${{ github.event_name == 'release' || github.event.inputs.publish_macos == true }}
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code at Target Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.get-release-info.outputs.tag }}
+
+      - name: Check macOS Store Credentials
+        run: |
+          if [ "${{ needs.get-release-info.outputs.has_macos_store_creds }}" != "true" ]; then
+            echo "::warning::Mac App Store credentials (MACOS_APP_STORE_CERTIFICATE_BASE64, MACOS_INSTALLER_CERTIFICATE_BASE64, APP_STORE_CONNECT_API_KEY_*) not configured. Skipping Mac App Store publish."
+            echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+          else
+            echo "SKIP_PUBLISH=false" >> $GITHUB_ENV
+          fi
+
+      - name: Select Xcode
+        if: env.SKIP_PUBLISH != 'true'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Create .env File
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -z "$ENV_FILE" ]; then
+            echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
+            exit 1
+          fi
+          echo "$ENV_FILE" > .env
+
+      - name: Set up Flutter
+        if: env.SKIP_PUBLISH != 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.44.3'
+          cache: true
+
+      - name: Install Dependencies
+        if: env.SKIP_PUBLISH != 'true'
+        run: flutter pub get --enforce-lockfile
+
+      - name: Import Mac App Store Application Certificate
+        if: env.SKIP_PUBLISH != 'true'
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MACOS_APP_STORE_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.MACOS_APP_STORE_CERTIFICATE_PASSWORD }}
+
+      - name: Import Mac App Store Installer Certificate
+        if: env.SKIP_PUBLISH != 'true'
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MACOS_INSTALLER_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.MACOS_INSTALLER_CERTIFICATE_PASSWORD }}
+
+      - name: Install macOS Provisioning Profile
+        if: env.SKIP_PUBLISH != 'true' && secrets.MACOS_PROVISIONING_PROFILE_BASE64 != ''
+        env:
+          MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$MACOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_appstore.provisionprofile
+
+      - name: Build and Package macOS App Store PKG
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          MACOS_APP_SIGNING_IDENTITY: ${{ secrets.MACOS_APP_STORE_SIGNING_IDENTITY }}
+          MACOS_INSTALLER_SIGNING_IDENTITY: ${{ secrets.MACOS_INSTALLER_SIGNING_IDENTITY }}
+        run: |
+          flutter build macos --release --dart-define=STORE_BUILD=true
+          APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" -maxdepth 1)
+          codesign --deep --force --options runtime --timestamp --sign "$MACOS_APP_SIGNING_IDENTITY" --entitlements macos/Runner/Release.entitlements "$APP_PATH"
+          productbuild --component "$APP_PATH" /Applications --sign "$MACOS_INSTALLER_SIGNING_IDENTITY" build/macos/MangaBaka.pkg
+
+      - name: Upload to App Store Connect
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          if echo "$ASC_KEY" | grep -q "BEGIN PRIVATE KEY"; then
+            echo "$ASC_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          else
+            echo "$ASC_KEY" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          fi
+          xcrun altool --upload-app \
+            -f build/macos/MangaBaka.pkg \
+            -t macos \
+            --apiKey "$ASC_KEY_ID" \
+            --apiIssuer "$ASC_ISSUER_ID"
+
+  publish-windows:
+    name: Deploy to Microsoft Store
+    needs: get-release-info
+    if: ${{ github.event_name == 'release' || github.event.inputs.publish_windows == true }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code at Target Tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.get-release-info.outputs.tag }}
+
+      - name: Check Microsoft Store Credentials
+        shell: pwsh
+        run: |
+          if ("${{ needs.get-release-info.outputs.has_msstore_creds }}" -ne "true") {
+            Write-Host "::warning::Microsoft Store credentials (MSSTORE_APP_ID, MSSTORE_CLIENT_ID, MSSTORE_CLIENT_SECRET, MSSTORE_TENANT_ID) not configured. Skipping Microsoft Store publish."
+            "SKIP_PUBLISH=true" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } else {
+            "SKIP_PUBLISH=false" | Out-File -FilePath $env:GITHUB_ENV -Append
+          }
+
+      - name: Create .env File
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        shell: bash
+        run: |
+          if [ -z "$ENV_FILE" ]; then
+            echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
+            exit 1
+          fi
+          echo "$ENV_FILE" > .env
+
+      - name: Set up Flutter
+        if: env.SKIP_PUBLISH != 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.44.3'
+          cache: true
+
+      - name: Install Dependencies
+        if: env.SKIP_PUBLISH != 'true'
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build Windows Store MSIX
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          MSSTORE_PUBLISHER: ${{ secrets.MSSTORE_PUBLISHER }}
+        run: |
+          flutter build windows --release --dart-define=STORE_BUILD=true
+          if ($env:MSSTORE_PUBLISHER) {
+            dart run msix:create --store --publisher "$env:MSSTORE_PUBLISHER"
+          } else {
+            dart run msix:create --store
+          }
+
+      - name: Publish to Microsoft Store
+        if: env.SKIP_PUBLISH != 'true'
+        env:
+          MSSTORE_APP_ID: ${{ secrets.MSSTORE_APP_ID }}
+          MSSTORE_CLIENT_ID: ${{ secrets.MSSTORE_CLIENT_ID }}
+          MSSTORE_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+          MSSTORE_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
+        shell: pwsh
+        run: |
+          winget install --id Microsoft.StoreCLI --accept-package-agreements --accept-source-agreements
+          $msix = Get-ChildItem -Recurse -Filter *.msix | Select-Object -First 1
+          msstore reconfigure --tenantId $env:MSSTORE_TENANT_ID --clientId $env:MSSTORE_CLIENT_ID --clientSecret $env:MSSTORE_CLIENT_SECRET
+          msstore publish $msix.FullName -id $env:MSSTORE_APP_ID
