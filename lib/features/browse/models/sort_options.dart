@@ -34,6 +34,10 @@ Map<String, String> searchSortOptions(
       'popularity_asc': l10n.translate('popularity_asc'),
       'popularity_desc': l10n.translate('popularity_desc'),
     },
+    if (library) ...{
+      'my_score_desc': l10n.translate('my_rating_desc'),
+      'my_score_asc': l10n.translate('my_rating_asc'),
+    },
     'score_desc': l10n.translate('rating_desc'),
     'score_asc': l10n.translate('rating_asc'),
     'chapters_desc': l10n.translate('chapters_desc'),

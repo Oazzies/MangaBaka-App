@@ -55,6 +55,10 @@ String filterSortLabel(String sortBy, LocalizationService l10n) {
       return l10n.translate('popularity_asc');
     case 'popularity_desc':
       return l10n.translate('popularity_desc');
+    case 'my_score_desc':
+      return l10n.translate('my_rating_desc');
+    case 'my_score_asc':
+      return l10n.translate('my_rating_asc');
     case 'score_desc':
       return l10n.translate('rating_desc');
     case 'score_asc':

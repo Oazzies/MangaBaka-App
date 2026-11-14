@@ -130,6 +130,8 @@
     "title_desc": "タイトル (降順)",
     "popularity_asc": "人気 (低から高)",
     "popularity_desc": "人気 (高から低)",
+    "my_rating_asc": "マイスコア (低から高)",
+    "my_rating_desc": "マイスコア (高から低)",
     "rating_asc": "コミュニティ評価 (低から高)",
     "rating_desc": "コミュニティ評価 (高から低)",
     "chapters_asc": "総チャプター数 (少ない順)",

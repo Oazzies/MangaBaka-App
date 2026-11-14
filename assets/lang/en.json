@@ -155,6 +155,8 @@
     "title_desc": "Title (Z-A)",
     "popularity_asc": "Popularity (Low to High)",
     "popularity_desc": "Popularity (High to Low)",
+    "my_rating_asc": "My Score (Low to High)",
+    "my_rating_desc": "My Score (High to Low)",
     "rating_asc": "Community Rating (Low to High)",
     "rating_desc": "Community Rating (High to Low)",
     "chapters_asc": "Total Chapters (Low to High)",

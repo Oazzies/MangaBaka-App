@@ -130,6 +130,8 @@
     "title_desc": "Titre (Z-A)",
     "popularity_asc": "Popularité (Croissante)",
     "popularity_desc": "Popularité (Décroissante)",
+    "my_rating_asc": "Ma note (Croissante)",
+    "my_rating_desc": "Ma note (Décroissante)",
     "rating_asc": "Note de la communauté (Croissante)",
     "rating_desc": "Note de la communauté (Décroissante)",
     "chapters_asc": "Chapitres totaux (Croissante)",

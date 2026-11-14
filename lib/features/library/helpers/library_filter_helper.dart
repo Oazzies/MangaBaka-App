@@ -162,6 +162,10 @@ class LibraryFilterHelper {
               return _byTitle(a, b);
             case 'name_desc':
               return _byTitle(b, a);
+            case 'my_score_desc':
+              return _byUserScore(a, b, descending: true);
+            case 'my_score_asc':
+              return _byUserScore(a, b, descending: false);
             case 'popularity_desc':
             case 'rating_desc':
             case 'score_desc':
@@ -222,6 +226,22 @@ class LibraryFilterHelper {
       b.series.title.toLowerCase(),
     );
     return byLower != 0 ? byLower : a.series.title.compareTo(b.series.title);
+  }
+
+  /// Orders by the user's own rating (`> 0`), always keeping unrated entries
+  /// (`null` or `<= 0`) after rated ones and breaking ties by title.
+  static int _byUserScore(
+    LibraryEntry a,
+    LibraryEntry b, {
+    required bool descending,
+  }) {
+    final ra = (a.rating != null && a.rating! > 0) ? a.rating! : null;
+    final rb = (b.rating != null && b.rating! > 0) ? b.rating! : null;
+    if (ra == null && rb == null) return _byTitle(a, b);
+    if (ra == null) return 1;
+    if (rb == null) return -1;
+    final cmp = descending ? rb.compareTo(ra) : ra.compareTo(rb);
+    return cmp != 0 ? cmp : _byTitle(a, b);
   }
 
   List<LibraryEntry> getByTab(String tabKey) {

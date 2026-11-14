@@ -154,5 +154,84 @@ void main() {
         );
       }
     });
+
+    LibraryEntry entryWithScore(String id, String title, int? rating) {
+      return LibraryEntry(
+        id: id,
+        state: 'reading',
+        rating: rating,
+        series: Series(
+          id: id,
+          title: title,
+          state: 'reading',
+          nativeTitle: '',
+          romanizedTitle: '',
+          secondaryTitles: const [],
+          coverUrl: '',
+          rawCoverUrl: '',
+          authors: const [],
+          artists: const [],
+          description: '',
+          year: '',
+          status: 'ongoing',
+          isLicensed: 'yes',
+          hasAnime: 'no',
+          contentRating: 'safe',
+          type: 'manga',
+          rating: '50',
+          finalVolume: '',
+          totalChapters: '',
+          links: const [],
+          publishers: const [],
+          genres: const [],
+          tags: const [],
+          lastUpdated: '',
+        ),
+      );
+    }
+
+    test('sorts by user score descending with unrated last', () {
+      final entries = [
+        entryWithScore('1', 'Unrated Null', null),
+        entryWithScore('2', 'Low', 30),
+        entryWithScore('3', 'High B', 90),
+        entryWithScore('4', 'Unrated Zero', 0),
+        entryWithScore('5', 'High A', 90),
+      ];
+
+      final helper = LibraryFilterHelper(
+        allEntries: entries,
+        query: '',
+        contentPreferences: ['safe'],
+        filters: SearchFilters(sortBy: 'my_score_desc'),
+      );
+
+      expect(
+        helper.getFilteredAndSorted().map((e) => e.series.title).toList(),
+        ['High A', 'High B', 'Low', 'Unrated Null', 'Unrated Zero'],
+      );
+    });
+
+    test('sorts by user score ascending with unrated last', () {
+      final entries = [
+        entryWithScore('1', 'Unrated Null', null),
+        entryWithScore('2', 'High', 90),
+        entryWithScore('3', 'Low B', 20),
+        entryWithScore('4', 'Unrated Zero', 0),
+        entryWithScore('5', 'Low A', 20),
+      ];
+
+      final helper = LibraryFilterHelper(
+        allEntries: entries,
+        query: '',
+        contentPreferences: ['safe'],
+        filters: SearchFilters(sortBy: 'my_score_asc'),
+      );
+
+      expect(
+        helper.getFilteredAndSorted().map((e) => e.series.title).toList(),
+        ['Low A', 'Low B', 'High', 'Unrated Null', 'Unrated Zero'],
+      );
+    });
   });
 }

@@ -89,7 +89,11 @@ void main() {
 
       expect(browse.keys, contains('popularity_desc'));
       expect(browse.keys, isNot(contains('unread_desc')));
+      expect(browse.keys, isNot(contains('my_score_desc')));
+      expect(browse.keys, isNot(contains('my_score_asc')));
       expect(library.keys, contains('unread_desc'));
+      expect(library.keys, contains('my_score_desc'));
+      expect(library.keys, contains('my_score_asc'));
       expect(library.keys, isNot(contains('popularity_desc')));
       expect(library.keys.last, 'random');
     });

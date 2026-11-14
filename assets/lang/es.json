@@ -132,6 +132,8 @@
     "title_desc": "Título (Z-A)",
     "popularity_asc": "Popularidad (menor a mayor)",
     "popularity_desc": "Popularidad (mayor a menor)",
+    "my_rating_asc": "Mi puntuación (menor a mayor)",
+    "my_rating_desc": "Mi puntuación (mayor a menor)",
     "rating_asc": "Calificación de la comunidad (menor a mayor)",
     "rating_desc": "Calificación de la comunidad (mayor a menor)",
     "chapters_asc": "Capítulos totales (menor a mayor)",
