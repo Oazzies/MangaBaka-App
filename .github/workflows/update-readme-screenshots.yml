@@ -1,0 +1,79 @@
+name: Update README Screenshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: readme-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-screenshots:
+    name: Generate Framed README Screenshots
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create .env File
+        run: cp .env.example .env
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.44.3'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Capture Raw Screen Captures
+        env:
+          GENERATE_SCREENSHOTS: '1'
+        run: flutter test test/screenshots/generate_readme_screenshots_test.dart
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Pillow
+        run: pip install --quiet pillow
+
+      - name: Frame and Composite Screenshots
+        run: python tool/frame_readme_screenshots.py
+
+      - name: Check for Changes
+        id: diff
+        run: |
+          if git diff --quiet .github/readme-images/screens.png; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open Pull Request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="chore/update-readme-screenshots"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add .github/readme-images/screens.png
+          git commit -m "chore(readme): refresh store preview screenshots"
+          git push origin "$BRANCH" --force-with-lease
+
+          if ! gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "chore(readme): refresh preview screenshots" \
+              --body "Automated refresh of \`.github/readme-images/screens.png\` via the \`Update README Screenshots\` workflow."
+          fi
