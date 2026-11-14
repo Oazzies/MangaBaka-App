@@ -14,6 +14,7 @@ The official, free and open source app for MangaBaka
 
 [![Join us on Discord](https://img.shields.io/badge/Discord-Join%20Server-7389D8?logo=discord&logoColor=white)](https://mangabaka.org/discord)
 [![License: Apache-2.0](https://img.shields.io/github/license/null2264/yokai?labelColor=27303D&color=0877d2)](/LICENSE)
+<a href="https://hosted.weblate.org/engage/mangabaka-app/"><img src="https://hosted.weblate.org/widget/mangabaka-app/mangabaka-app/svg-badge.svg" alt="Translation status"></a>
 
 <img src="./.github/readme-images/screens.png" alt="MangaBaka screenshots" />
 
