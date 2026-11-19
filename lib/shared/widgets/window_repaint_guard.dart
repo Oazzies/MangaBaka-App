@@ -32,15 +32,15 @@ class WindowRepaintGuard extends StatefulWidget {
       await windowManager.setFullScreen(true);
     }
     // Redundant with the metrics observer, but removes any dependence on the engine reporting it.
-    forceFrames();
-  }
-
-  static void forceFrames() {
-    SchedulerBinding.instance.scheduleForcedFrame();
-    for (final delay in _settleDelays) {
-      Timer(delay, SchedulerBinding.instance.scheduleForcedFrame);
+    final guard = _mounted;
+    if (guard != null) {
+      guard._forceFrames();
+    } else {
+      SchedulerBinding.instance.scheduleForcedFrame();
     }
   }
+
+  static _WindowRepaintGuardState? _mounted;
 
   /// Long enough to land after the last native resize step of a fullscreen transition.
   static const List<Duration> _settleDelays = [
@@ -60,26 +60,49 @@ class _WindowRepaintGuardState extends State<WindowRepaintGuard>
   /// Metrics change on every step of a drag-resize; only the last matters.
   static const Duration _debounce = Duration(milliseconds: 80);
 
-  Timer? _timer;
+  Timer? _debounceTimer;
+  final List<Timer> _settleTimers = [];
 
   @override
   void initState() {
     super.initState();
+    WindowRepaintGuard._mounted = this;
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    if (identical(WindowRepaintGuard._mounted, this)) {
+      WindowRepaintGuard._mounted = null;
+    }
     WidgetsBinding.instance.removeObserver(this);
-    _timer?.cancel();
+    _debounceTimer?.cancel();
+    _cancelSettleTimers();
     super.dispose();
+  }
+
+  void _forceFrames() {
+    SchedulerBinding.instance.scheduleForcedFrame();
+    _cancelSettleTimers();
+    for (final delay in WindowRepaintGuard._settleDelays) {
+      _settleTimers.add(
+        Timer(delay, SchedulerBinding.instance.scheduleForcedFrame),
+      );
+    }
+  }
+
+  void _cancelSettleTimers() {
+    for (final timer in _settleTimers) {
+      timer.cancel();
+    }
+    _settleTimers.clear();
   }
 
   @override
   void didChangeMetrics() {
     if (!WindowRepaintGuard._isDesktop) return;
-    _timer?.cancel();
-    _timer = Timer(_debounce, WindowRepaintGuard.forceFrames);
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounce, _forceFrames);
   }
 
   @override

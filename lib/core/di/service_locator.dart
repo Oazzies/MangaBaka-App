@@ -7,6 +7,7 @@ import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
+import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_service.dart';
 
@@ -37,6 +38,10 @@ void setupServiceLocator() {
 
   getIt.registerSingleton<SnapshotService>(
     SnapshotService(auth: getIt<ProfileAuthService>()),
+  );
+
+  getIt.registerLazySingleton<StatisticsService>(
+    () => StatisticsService(getIt<AppDatabase>()),
   );
 
   getIt.registerLazySingleton<SeriesService>(() => SeriesService());

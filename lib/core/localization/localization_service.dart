@@ -121,6 +121,12 @@ class LocalizationService extends ChangeNotifier {
     return fallback is String ? fallback : key;
   }
 
+  /// For keys built from API values, which may have no translation yet.
+  String translateOr(String key, String fallback) {
+    final value = translate(key);
+    return value == key ? fallback : value;
+  }
+
   String formatPossessive(String name) {
     if (name.isEmpty) return name;
 

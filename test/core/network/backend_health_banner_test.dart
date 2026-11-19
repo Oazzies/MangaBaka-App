@@ -21,14 +21,14 @@ void main() {
     return health;
   }
 
-  Widget wrap() => const MaterialApp(
-        home: Scaffold(body: BackendHealthBanner()),
+  Widget wrap(BackendHealthService health) => MaterialApp(
+        home: Scaffold(body: BackendHealthBanner(health: health)),
       );
 
   testWidgets('is invisible while the backend is healthy', (tester) async {
     final health = register();
     health.reportSuccess();
-    await tester.pumpWidget(wrap());
+    await tester.pumpWidget(wrap(health));
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.cloud_off_rounded), findsNothing);
@@ -36,7 +36,7 @@ void main() {
 
   testWidgets('appears when the backend goes down', (tester) async {
     final health = register();
-    await tester.pumpWidget(wrap());
+    await tester.pumpWidget(wrap(health));
 
     health.reportServerFailure(context: 'x', statusCode: 530);
     await tester.pumpAndSettle();
@@ -55,7 +55,7 @@ void main() {
       }),
     );
 
-    await tester.pumpWidget(wrap());
+    await tester.pumpWidget(wrap(health));
     health.reportServerFailure(context: 'x', statusCode: 530);
     await tester.pumpAndSettle();
 

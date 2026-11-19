@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 import 'package:mangabaka_app/core/theme/palette/palette_derivation.dart';
@@ -125,7 +126,9 @@ class MbThemeSpec {
 
   static String _cleanName(String name) {
     final t = name.trim();
-    if (t.isEmpty) return 'Custom';
+    if (t.isEmpty) {
+      return LocalizationService().translate('theme_editor_new_name');
+    }
     return t.length > maxNameLength ? t.substring(0, maxNameLength) : t;
   }
 

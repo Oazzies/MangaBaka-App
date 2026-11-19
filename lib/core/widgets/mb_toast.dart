@@ -5,13 +5,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 enum ToastKind { success, error, warning, info }
 
 extension ToastKindStyle on ToastKind {
-  Color tone(MbPalette c) => switch (this) {
-    ToastKind.success => c.success,
-    ToastKind.error => c.error,
-    ToastKind.warning => c.warning,
-    ToastKind.info => c.accent,
-  };
-
   IconData get icon => switch (this) {
     ToastKind.success => Icons.check_rounded,
     ToastKind.error => Icons.priority_high_rounded,

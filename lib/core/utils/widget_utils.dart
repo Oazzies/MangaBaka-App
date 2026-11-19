@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -145,9 +146,11 @@ class WidgetUtils {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 14),
-          child: _SectionLabel('Links'),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: _SectionLabel(
+            LocalizationService().translate('publisher_links'),
+          ),
         ),
         Wrap(spacing: 12, runSpacing: 12, children: chips),
         const SizedBox(height: 16),
@@ -198,7 +201,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text.toUpperCase(),
-    style: AppTypography.monoLabel(
+    style: AppTypography.displayLabel(
       color: context.colors.textMuted,
       fontSize: 11.5,
     ),

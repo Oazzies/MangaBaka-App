@@ -30,14 +30,14 @@ class MbEntrance extends StatefulWidget {
   final int index;
   final Duration duration;
 
-  final double offset;
+  final double riseDistance;
 
   const MbEntrance({
     super.key,
     required this.child,
     this.index = 0,
     this.duration = AppMotion.base,
-    this.offset = 14,
+    this.riseDistance = 14,
   });
 
   @override
@@ -102,7 +102,7 @@ class _MbEntranceState extends State<MbEntrance>
         return Opacity(
           opacity: _curved.value,
           child: Transform.translate(
-            offset: Offset(0, (1 - _curved.value) * widget.offset),
+            offset: Offset(0, (1 - _curved.value) * widget.riseDistance),
             child: child,
           ),
         );

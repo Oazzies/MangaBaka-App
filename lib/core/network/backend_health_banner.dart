@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/network/backend_health_service.dart';
@@ -8,15 +7,12 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class BackendHealthBanner extends StatelessWidget {
-  const BackendHealthBanner({super.key});
+  final BackendHealthService health;
+
+  const BackendHealthBanner({super.key, required this.health});
 
   @override
   Widget build(BuildContext context) {
-    if (!getIt.isRegistered<BackendHealthService>()) {
-      return const SizedBox.shrink();
-    }
-    final health = getIt<BackendHealthService>();
-
     return ValueListenableBuilder<BackendHealthStatus>(
       valueListenable: health.status,
       builder: (context, status, _) {

@@ -47,7 +47,7 @@ Future<void> showShareChoice(
     return;
   }
 
-  final choice = await showModalBottomSheet<String>(
+  final choice = await showAdaptiveSheet<String>(
     context: context,
     backgroundColor: Colors.transparent,
     elevation: 0,

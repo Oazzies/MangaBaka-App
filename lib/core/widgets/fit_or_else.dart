@@ -19,7 +19,9 @@ class _FitOrElseElement extends MultiChildRenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     final render = renderObject as RenderFitOrElse;
-    if (children.length == 2) visitor(children.elementAt(render.shownIndex));
+    if (children.length == 2) {
+      visitor(render.showsFallback ? children.last : children.first);
+    }
   }
 }
 
@@ -29,9 +31,9 @@ class RenderFitOrElse extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _FitParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _FitParentData> {
-  int shownIndex = 0;
+  bool showsFallback = false;
 
-  RenderBox? get _shown => shownIndex == 0 ? firstChild : lastChild;
+  RenderBox? get _shown => showsFallback ? lastChild : firstChild;
 
   @override
   void setupParentData(RenderBox child) {
@@ -48,9 +50,8 @@ class RenderFitOrElse extends RenderBox
       parentUsesSize: true,
     );
     final fits = primary.size.width <= constraints.maxWidth + 0.5;
-    final index = fits ? 0 : 1;
-    if (index != shownIndex) {
-      shownIndex = index;
+    if (fits == showsFallback) {
+      showsFallback = !fits;
       markNeedsSemanticsUpdate();
     }
     if (fits) {

@@ -95,7 +95,7 @@ class _PhonePill<T> extends StatelessWidget {
             if (!expand)
               Text(
                 '${label.toUpperCase()}: ',
-                style: AppTypography.monoLabel(
+                style: AppTypography.displayLabel(
                   color: colors.textMuted,
                   fontSize: 11,
                 ),

@@ -18,9 +18,9 @@ class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
     with SingleTickerProviderStateMixin {
   static const double _deadZone = 14;
 
-  static const double _speedAt100 = 650;
+  static const double _speedAt100PxPastDeadZone = 650;
 
-  static const double _follow = 12;
+  static const double _speedEasingRate = 12;
 
   Ticker? _ticker;
 
@@ -126,7 +126,9 @@ class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
   double _targetSpeed(double distance) {
     final magnitude = distance.abs() - _deadZone;
     if (magnitude <= 0) return 0;
-    final scaled = (math.pow(magnitude / 100, 1.3) * _speedAt100).toDouble();
+    final scaled =
+        (math.pow(magnitude / 100, 1.3) * _speedAt100PxPastDeadZone)
+            .toDouble();
     return distance.isNegative ? -scaled : scaled;
   }
 
@@ -142,7 +144,7 @@ class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
       _vertical == null ? 0 : _targetSpeed(offset.dy),
     );
     // Exponential approach: frame-rate independent easing toward the target.
-    _speed += (target - _speed) * (1 - math.exp(-dt * _follow));
+    _speed += (target - _speed) * (1 - math.exp(-dt * _speedEasingRate));
 
     _drive(_vertical, _speed.dy * dt);
     _drive(_horizontal, _speed.dx * dt);

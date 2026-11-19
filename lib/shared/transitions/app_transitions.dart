@@ -4,7 +4,7 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 
 abstract final class AppTransitions {
-  static bool _calm(BuildContext context) =>
+  static bool _crossFadeOnly(BuildContext context) =>
       DesktopLayout.isActive(context) ||
       MediaQuery.orientationOf(context) == Orientation.landscape;
 
@@ -51,7 +51,7 @@ abstract final class AppTransitions {
           parent: animation,
           curve: AppMotion.enter,
         );
-        if (_calm(context)) {
+        if (_crossFadeOnly(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return FadeTransition(
@@ -78,7 +78,7 @@ abstract final class AppTransitions {
           reverseCurve: AppMotion.exit,
         );
         // On a wide screen moving up or sideways means nothing, so the page just fades in.
-        if (_calm(context)) {
+        if (_crossFadeOnly(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return SlideTransition(
@@ -107,7 +107,7 @@ abstract final class AppTransitions {
           curve: AppMotion.enter,
           reverseCurve: AppMotion.exit,
         );
-        if (_calm(context)) {
+        if (_crossFadeOnly(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return SlideTransition(

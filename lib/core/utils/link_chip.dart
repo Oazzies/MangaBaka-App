@@ -131,7 +131,7 @@ class HoverableLinkChip extends StatelessWidget {
                       ),
                       child: Text(
                         language!,
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: context.colors.textMuted,
                           fontSize: 10,
                         ),

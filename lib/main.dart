@@ -128,7 +128,10 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
             themeMode: _themes.materialThemeMode,
             builder: (context, child) => DesktopLayoutScope(
               child: DesktopWindowFrame(
-                child: BrowserSignInPrompt(child: AppShortcuts(child: child!)),
+                child: BrowserSignInPrompt(
+                  auth: getIt<ProfileAuthService>(),
+                  child: AppShortcuts(child: child!),
+                ),
               ),
             ),
             home: AnnotatedRegion<SystemUiOverlayStyle>(

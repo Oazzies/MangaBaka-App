@@ -21,7 +21,7 @@ import 'support/viewports.dart';
 void main() {
   setUpAll(loadAppFonts);
 
-  const budget = 150;
+  const maxMedianRebuilds = 150;
 
   const pages = {
     'home': NavTabs.home,
@@ -37,22 +37,23 @@ void main() {
     tearDown(tearDownEnvironment);
 
     for (final MapEntry(key: name, value: index) in pages.entries) {
-      testWidgets('$name stays within $budget rebuilds per resize frame', (
-        tester,
-      ) async {
-        await _pumpApp(tester, index);
-        final cost = await measureDrag(tester, name);
-        await disposeApp(tester);
-        expect(
-          cost.medianRebuilds,
-          lessThanOrEqualTo(budget),
-          reason:
-              'A typical frame of a drag-resize rebuilt '
-              '${cost.medianRebuilds} elements. Run resize_benchmark_test '
-              'with RESIZE_BENCHMARK_DETAIL=1 to see which, and '
-              'lib/desktop/RESPONSIVE.md for the fixes.',
-        );
-      });
+      testWidgets(
+        '$name stays within $maxMedianRebuilds rebuilds per resize frame',
+        (tester) async {
+          await _pumpApp(tester, index);
+          final cost = await measureDrag(tester, name);
+          await disposeApp(tester);
+          expect(
+            cost.medianRebuilds,
+            lessThanOrEqualTo(maxMedianRebuilds),
+            reason:
+                'A typical frame of a drag-resize rebuilt '
+                '${cost.medianRebuilds} elements. Run resize_benchmark_test '
+                'with RESIZE_BENCHMARK_DETAIL=1 to see which; '
+                'responsive_guard_test lists the usual causes.',
+          );
+        },
+      );
     }
   });
 

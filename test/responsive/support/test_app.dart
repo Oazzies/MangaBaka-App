@@ -27,6 +27,7 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
+import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
@@ -134,6 +135,9 @@ Future<FakeBackend> setUpEnvironment(Environment env) async {
     ..registerSingleton<ProfileAuthService>(FakeAuth(signedIn: env.signedIn))
     ..registerSingleton<MetadataService>(MetadataService())
     ..registerSingleton<SnapshotService>(FakeSnapshots(library))
+    ..registerLazySingleton<StatisticsService>(
+      () => StatisticsService(getIt<AppDatabase>()),
+    )
     ..registerLazySingleton<SeriesService>(SeriesService.new)
     ..registerLazySingleton<SeriesSearchService>(SeriesSearchService.new)
     ..registerSingleton<LibraryService>(FakeLibrary(library))

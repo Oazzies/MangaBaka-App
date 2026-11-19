@@ -29,38 +29,36 @@ void main() {
   final lineRules = <String, (RegExp, String)>{
     'IndexedStack/Offstage': (
       RegExp(r'\b(IndexedStack|Offstage)\('),
-      'lays out hidden children every frame — use ActivePageStack (rule 1)',
+      'lays out hidden children every frame — use ActivePageStack',
     ),
     'LayoutBuilder': (
       RegExp(r'\b(LayoutBuilder|SliverLayoutBuilder)\('),
       'rebuilds its subtree on every frame of a resize — use '
-          'DerivedLayoutBuilder for a decision, or layout-time geometry '
-          '(rule 2, 3)',
+          'DerivedLayoutBuilder for a decision, or layout-time geometry',
     ),
     'MediaQuery.of': (
       RegExp(r'MediaQuery\.of\('),
       'depends on every aspect of the window — use sizeOf/textScalerOf/'
-          'devicePixelRatioOf (rule 4)',
+          'devicePixelRatioOf',
     ),
     'live decode width': (
       RegExp(
         r'memCacheWidth:(?!\s*WidgetUtils\.decodeWidth)\s*[^,\n]*[wW]idth',
       ),
       're-decodes the image whenever the width moves — use '
-          'WidgetUtils.decodeWidth or a fixed width (rule 6)',
+          'WidgetUtils.decodeWidth or a fixed width',
     ),
     'runtime blur': (
       RegExp(r'\b(ImageFiltered|BackdropFilter)\('),
-      're-rasterised every frame the area resizes — downsample instead '
-          '(rule 6)',
+      're-rasterised every frame the area resizes — downsample instead',
     ),
     'intrinsic layout': (
       RegExp(r'\b(IntrinsicHeight|IntrinsicWidth)\('),
-      'lays its subtree out twice (rule 7)',
+      'lays its subtree out twice',
     ),
     'shrinkWrap': (
       RegExp(r'shrinkWrap:\s*true'),
-      'lays out every item of the list (rule 7)',
+      'lays out every item of the list',
     ),
   };
 
@@ -106,7 +104,7 @@ void main() {
           offenders.add(
             '$path:${line + 1} (animated size): AnimatedContainer($name: '
             '$value)\n    → animates on every frame the size follows the '
-            'window — size it with a SizedBox outside (rule 5)',
+            'window — size it with a SizedBox outside',
           );
         }
       }
@@ -116,8 +114,9 @@ void main() {
       offenders,
       isEmpty,
       reason:
-          'See lib/desktop/RESPONSIVE.md. Mark a justified exception with '
-          '"// responsive-ok: <why>".\n${offenders.join('\n')}',
+          'Desktop must stay smooth while resizing. Mark a justified '
+          'exception with "// responsive-ok: <why>".\n'
+          '${offenders.join('\n')}',
     );
   });
 }

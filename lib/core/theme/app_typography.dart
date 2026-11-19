@@ -53,7 +53,7 @@ class AppTypography {
     );
   }
 
-  static TextStyle monoLabel({
+  static TextStyle displayLabel({
     Color? color,
     double fontSize = 11,
     FontWeight fontWeight = FontWeight.w400,
