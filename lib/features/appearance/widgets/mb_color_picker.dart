@@ -1,4 +1,3 @@
-import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
@@ -7,8 +6,8 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 import 'package:mangabaka_app/core/theme/presets/theme_presets.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
-import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/appearance/widgets/color_picker_controls.dart';
 
 Future<Color?> showMbColorPicker(
@@ -17,38 +16,17 @@ Future<Color?> showMbColorPicker(
   String? title,
   Color? contrastAgainst,
 }) {
-  final l10n = LocalizationService();
-  final size = MediaQuery.sizeOf(context);
-  final useSheet =
-      !DesktopLayout.isDesktopPlatform &&
-      size.width < 600 &&
-      size.height > size.width;
-
-  Widget body(BuildContext ctx) => _PickerBody(
-    initial: initial,
-    title: title ?? l10n.translate('color_picker_title'),
-    contrastAgainst: contrastAgainst,
-  );
-
-  if (useSheet) {
-    return showAdaptiveSheet<Color>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
-        child: body(ctx),
-      ),
-    );
-  }
-  return showDialog<Color>(
+  final resolvedTitle =
+      title ?? LocalizationService().translate('color_picker_title');
+  return showAdaptiveForm<Color>(
     context: context,
-    builder: (ctx) => Dialog(
-      insetPadding: const EdgeInsets.all(24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 380),
-        child: body(ctx),
-      ),
+    title: resolvedTitle,
+    scrollable: false,
+    constraints: const BoxConstraints(maxWidth: 380),
+    builder: (_) => _PickerBody(
+      initial: initial,
+      title: resolvedTitle,
+      contrastAgainst: contrastAgainst,
     ),
   );
 }
@@ -74,20 +52,23 @@ class _PickerBodyState extends State<_PickerBody> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
+    final isPage = AdaptiveFormPage.isPage(context);
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+      padding: EdgeInsets.fromLTRB(20, isPage ? 8 : 20, 20, 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            widget.title.toUpperCase(),
-            style: AppTypography.display(
-              color: context.colors.text,
-              fontSize: 18,
+          if (!isPage) ...[
+            Text(
+              widget.title.toUpperCase(),
+              style: AppTypography.display(
+                color: context.colors.text,
+                fontSize: 18,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ],
           MbColorPicker(
             color: _color,
             contrastAgainst: widget.contrastAgainst,

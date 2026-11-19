@@ -50,7 +50,7 @@ class StatisticCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label.toUpperCase(),
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.textMuted,
               fontSize: 11,
             ),

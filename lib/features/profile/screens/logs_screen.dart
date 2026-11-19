@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
+import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class LogsScreen extends StatefulWidget {
@@ -60,7 +61,10 @@ class _LogsScreenState extends State<LogsScreen> {
       final file = File('${directory.path}/mangabaka_logs.txt');
       await file.writeAsString(_logsText);
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], subject: 'MangaBaka Logs'),
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: LocalizationService().translate('share_subject_logs'),
+        ),
       );
     } catch (e, st) {
       // File I/O or the share sheet; either way only the export failed.
@@ -73,29 +77,6 @@ class _LogsScreenState extends State<LogsScreen> {
         );
       }
     }
-  }
-
-  Widget _buildActionButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback? onPressed,
-    required Color backgroundColor,
-    required Color foregroundColor,
-  }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-        ),
-      ),
-    );
   }
 
   @override
@@ -113,14 +94,17 @@ class _LogsScreenState extends State<LogsScreen> {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.close, color: context.colors.text),
+          icon: Icon(Icons.close_rounded, color: context.colors.text),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           WidgetUtils.tooltip(
             message: l10n.translate('clear_logs'),
             child: IconButton(
-              icon: Icon(Icons.delete_outline, color: context.colors.text),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: context.colors.text,
+              ),
               onPressed: _clearLogs,
             ),
           ),
@@ -172,22 +156,18 @@ class _LogsScreenState extends State<LogsScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildActionButton(
+                    child: MbSecondaryButton(
                       label: l10n.translate('copy_logs'),
-                      icon: Icons.copy,
+                      icon: Icons.copy_rounded,
                       onPressed: _logs.isEmpty ? null : _copyLogs,
-                      backgroundColor: context.colors.surfaceRaised,
-                      foregroundColor: context.colors.text,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildActionButton(
+                    child: MbPrimaryButton(
                       label: l10n.translate('save_logs'),
-                      icon: Icons.share,
+                      icon: Icons.download_rounded,
                       onPressed: _logs.isEmpty ? null : _saveLogs,
-                      backgroundColor: context.colors.accent,
-                      foregroundColor: context.colors.background,
                     ),
                   ),
                 ],

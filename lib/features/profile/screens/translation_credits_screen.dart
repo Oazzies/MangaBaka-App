@@ -17,7 +17,7 @@ class TranslationCreditsScreen extends StatelessWidget {
       backgroundColor: context.colors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(

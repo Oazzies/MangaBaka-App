@@ -7,19 +7,20 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class SettingsCategoryRow extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final VoidCallback onTap;
 
   const SettingsCategoryRow({
     super.key,
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final subtitle = this.subtitle;
     return MbTappable(
       onTap: onTap,
       pressedScale: 0.985,
@@ -40,15 +41,17 @@ class SettingsCategoryRow extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: AppTypography.sans(
-                      color: context.colors.textMuted,
-                      fontSize: 13,
-                      height: 1.35,
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: AppTypography.sans(
+                        color: context.colors.textMuted,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

@@ -181,7 +181,7 @@ class _Shell extends StatelessWidget {
             children: [
               if (onBack != null) ...[
                 IconButton(
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back_rounded),
                   onPressed: onBack,
                   color: context.colors.textMuted,
                   padding: EdgeInsets.zero,
@@ -201,7 +201,7 @@ class _Shell extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.close_rounded),
                 onPressed: onClose,
                 color: context.colors.textMuted,
                 padding: EdgeInsets.zero,

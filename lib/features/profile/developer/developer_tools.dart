@@ -212,9 +212,9 @@ void showToastPreview(BuildContext context, ToastPreview preview) {
     case ToastPreview.syncInterrupted:
       _showSyncPreview(
         context,
-        const LibrarySyncStatus(
+        LibrarySyncStatus(
           currentEntries: 128,
-          error: 'Connection timed out',
+          error: l10n.translate('error_timeout'),
         ),
       );
   }

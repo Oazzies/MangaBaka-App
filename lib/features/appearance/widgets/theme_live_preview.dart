@@ -9,13 +9,19 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_pill.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 
 /// Real app widgets under a Theme carrying [palette]; a hand-painted copy would drift.
 class ThemeLivePreview extends StatefulWidget {
   final MbPalette palette;
+  final SeriesListDeps deps;
 
-  const ThemeLivePreview({super.key, required this.palette});
+  const ThemeLivePreview({
+    super.key,
+    required this.palette,
+    required this.deps,
+  });
 
   @override
   State<ThemeLivePreview> createState() => _ThemeLivePreviewState();
@@ -110,6 +116,7 @@ class _ThemeLivePreviewState extends State<ThemeLivePreview> {
           showRemainingProgress: settings.showRemainingProgress,
           progressType: settings.libraryProgressType,
           gridColumnCount: settings.resolvedLibraryGridColumnCount,
+          deps: widget.deps,
         ),
         const SizedBox(height: 6),
         Wrap(

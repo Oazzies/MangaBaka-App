@@ -34,7 +34,7 @@ class SettingsCategoryScreen extends StatelessWidget {
       backgroundColor: context.colors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -94,7 +94,7 @@ class _CategoryDialog extends StatelessWidget {
                 children: [
                   if (onBack != null)
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: const Icon(Icons.arrow_back_rounded),
                       onPressed: () {
                         Navigator.pop(context);
                         onBack!();
@@ -108,7 +108,7 @@ class _CategoryDialog extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      title,
+                      title.toUpperCase(),
                       style: AppTypography.display(
                         color: context.colors.text,
                         fontSize: 18,
@@ -116,9 +116,8 @@ class _CategoryDialog extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close_rounded),
                     onPressed: () => Navigator.pop(context),
                     color: context.colors.textMuted,
                     padding: EdgeInsets.zero,

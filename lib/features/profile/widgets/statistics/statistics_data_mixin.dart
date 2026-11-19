@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
 mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
@@ -19,8 +18,8 @@ mixin StatisticsDataMixin<T extends StatefulWidget> on State<T> {
   LibraryEntryWithSeries? mostReread;
   List<({String name, int count})> topPublishers = const [];
 
-  void initStatistics() {
-    statisticsService = StatisticsService(getIt<AppDatabase>());
+  void initStatistics(StatisticsService service) {
+    statisticsService = service;
     fetchStatistics();
   }
 

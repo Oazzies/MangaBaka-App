@@ -10,6 +10,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_editor_controls.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_live_preview.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 class ThemeEditorController extends ChangeNotifier {
   MbThemeSpec _spec;
@@ -20,7 +21,7 @@ class ThemeEditorController extends ChangeNotifier {
   MbThemeSpec get spec => _spec;
   MbPalette get palette => _palette;
 
-  bool get adjusted =>
+  bool get contrastAdjusted =>
       _palette.accent != _spec.accent ||
       (_spec.text != null && _palette.text != _spec.text);
 
@@ -105,7 +106,10 @@ class _EditorScreen extends StatelessWidget {
             final sideBySide = box.maxWidth >= 700;
             final preview = ListenableBuilder(
               listenable: controller,
-              builder: (_, _) => ThemeLivePreview(palette: controller.palette),
+              builder: (_, _) => ThemeLivePreview(
+                palette: controller.palette,
+                deps: SeriesListDeps.fromLocator(),
+              ),
             );
             final controls = ThemeEditorControls(controller: controller);
             if (sideBySide) {
@@ -172,8 +176,10 @@ class _EditorDialogBody extends StatelessWidget {
                   child: SingleChildScrollView(
                     child: ListenableBuilder(
                       listenable: controller,
-                      builder: (_, _) =>
-                          ThemeLivePreview(palette: controller.palette),
+                      builder: (_, _) => ThemeLivePreview(
+                        palette: controller.palette,
+                        deps: SeriesListDeps.fromLocator(),
+                      ),
                     ),
                   ),
                 ),

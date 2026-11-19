@@ -1,5 +1,5 @@
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/my_stacks_entry_card.dart';
-import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     _auth.addListener(_onAuthStateChanged);
     _libraryService = getIt<LibraryService>();
     _libraryService.syncStatus.addListener(_onSyncStatusChanged);
-    _statisticsService = StatisticsService(getIt<AppDatabase>());
+    _statisticsService = getIt<StatisticsService>();
     _snapshotService = getIt<SnapshotService>();
 
     profile = _auth.cachedProfile;
@@ -175,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
               meanScore: meanScore,
             ),
             const SizedBox(height: 16),
-            const MyStacksEntryCard(),
+            MyStacksEntryCard(service: getIt<StackService>()),
             const SizedBox(height: 24),
             ProfileSnapshotSection(
               recentlyChanged: recentlyChanged,

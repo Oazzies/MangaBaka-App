@@ -6,6 +6,7 @@ import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 
 /// Mock entry, not the user's own: it must render on an empty library and show every state.
@@ -17,6 +18,7 @@ class ListStyleLivePreview extends StatelessWidget {
 
   /// 0 means "auto", matching [SettingsManager.gridColumnCount].
   final int gridColumnCount;
+  final SeriesListDeps deps;
 
   static const double _autoColumnExtent = 170;
   static const double _maxCellWidth = 160;
@@ -29,6 +31,7 @@ class ListStyleLivePreview extends StatelessWidget {
     required this.showRemainingProgress,
     required this.progressType,
     required this.gridColumnCount,
+    required this.deps,
   });
 
   static final LibraryEntry _mockEntry = LibraryEntry(
@@ -118,6 +121,7 @@ class ListStyleLivePreview extends StatelessWidget {
 
   Widget _item(int index) => EntryListItem(
     series: mockSeries222,
+    deps: deps,
     isLibrary: true,
     listStyle: style,
     // Unique per cell: duplicate Hero tags would collide with each other and real list items.

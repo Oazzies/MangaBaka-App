@@ -14,6 +14,7 @@ import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_settings.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_style_preview_item.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 class _FakeAuth extends Fake implements ProfileAuthService {
   @override
@@ -47,7 +48,14 @@ Future<void> _pumpPanel(WidgetTester tester) async {
         body: ListenableBuilder(
           listenable: SettingsManager(),
           builder: (context, _) => SingleChildScrollView(
-            child: ListCustomizationSettings(l10n: LocalizationService()),
+            child: ListCustomizationSettings(
+              l10n: LocalizationService(),
+              deps: SeriesListDeps(
+                auth: getIt<ProfileAuthService>(),
+                library: getIt<LibraryService>(),
+                prefetch: (_) {},
+              ),
+            ),
           ),
         ),
       ),

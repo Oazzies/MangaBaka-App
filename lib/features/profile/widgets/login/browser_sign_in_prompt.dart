@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
@@ -9,13 +8,17 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class BrowserSignInPrompt extends StatelessWidget {
+  final ProfileAuthService auth;
   final Widget child;
 
-  const BrowserSignInPrompt({super.key, required this.child});
+  const BrowserSignInPrompt({
+    super.key,
+    required this.auth,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final auth = getIt<ProfileAuthService>();
     return Stack(
       children: [
         child,

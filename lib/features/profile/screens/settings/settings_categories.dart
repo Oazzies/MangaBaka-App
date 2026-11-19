@@ -12,6 +12,7 @@ import 'package:mangabaka_app/features/profile/widgets/dialogs/content_preferenc
 import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_dialogs.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_settings.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 
 class SettingsCategories {
@@ -161,7 +162,12 @@ class SettingsCategories {
       context,
       title: l10n.translate('list_customization'),
       listenable: SettingsManager(),
-      buildChildren: (_) => [ListCustomizationSettings(l10n: l10n)],
+      buildChildren: (_) => [
+        ListCustomizationSettings(
+          l10n: l10n,
+          deps: SeriesListDeps.fromLocator(),
+        ),
+      ],
     );
   }
 

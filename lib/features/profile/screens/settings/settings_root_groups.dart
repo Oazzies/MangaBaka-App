@@ -55,7 +55,6 @@ List<Widget> buildSettingsGroups(
     _category(
       icon: Icons.import_export_rounded,
       title: l10n.translate('import_export_title'),
-      subtitle: l10n.translate('import_export_subtitle'),
       onTap: () => SettingsCategories.importExport(context, l10n),
     ),
     const SizedBox(height: 16),
@@ -63,7 +62,6 @@ List<Widget> buildSettingsGroups(
       _category(
         icon: Icons.person_outline,
         title: l10n.translate('account'),
-        subtitle: l10n.translate('account_settings_subtitle'),
         onTap: () => SettingsCategories.account(context, l10n, auth),
       ),
       const SizedBox(height: 16),
@@ -115,7 +113,7 @@ List<Widget> buildSettingsGroups(
 Widget _category({
   required IconData icon,
   required String title,
-  required String subtitle,
+  String? subtitle,
   required VoidCallback onTap,
 }) {
   return SettingsGroup(
@@ -143,7 +141,11 @@ Widget _externalLink({
         launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
     trailing: Builder(
       builder: (context) =>
-          Icon(Icons.open_in_new, color: context.colors.textMuted, size: 18),
+          Icon(
+            Icons.open_in_new_rounded,
+            color: context.colors.textMuted,
+            size: 18,
+          ),
     ),
     isFirst: isFirst,
   );

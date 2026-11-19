@@ -36,8 +36,6 @@ class AppearanceSettings extends StatelessWidget {
               children: [
                 SettingsSectionHeader(title: l10n.translate('theme_mode')),
                 const ThemeModeSelector(),
-                if (mode == AppThemeMode.system)
-                  _Hint(l10n.translate('theme_mode_system_hint')),
                 const SizedBox(height: 20),
                 if (mode != AppThemeMode.light) ...[
                   SettingsSectionHeader(title: l10n.translate('dark_themes')),
@@ -58,8 +56,6 @@ class AppearanceSettings extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
                 SettingsSectionHeader(title: l10n.translate('accent_color')),
-                _Hint(l10n.translate('accent_color_subtitle'), top: 0),
-                const SizedBox(height: 12),
                 const AccentPicker(),
                 const SizedBox(height: 28),
                 SettingsSectionHeader(title: l10n.translate('my_themes')),
@@ -95,7 +91,7 @@ class CustomThemesSection extends StatelessWidget {
         );
         final import = MbSecondaryButton(
           label: l10n.translate('theme_import'),
-          icon: Icons.download_rounded,
+          icon: Icons.file_download_rounded,
           expand: !compactButtons,
           onPressed: () => ThemeActions.import(context),
         );
@@ -103,7 +99,7 @@ class CustomThemesSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (custom.isEmpty)
-              _Hint(l10n.translate('my_themes_empty'), top: 0)
+              _EmptyText(l10n.translate('my_themes_empty'))
             else
               SettingsGroup(
                 children: [
@@ -160,15 +156,14 @@ class CustomThemesSection extends StatelessWidget {
   }
 }
 
-class _Hint extends StatelessWidget {
+class _EmptyText extends StatelessWidget {
   final String text;
-  final double top;
-  const _Hint(this.text, {this.top = 8});
+  const _EmptyText(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(4, top, 4, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
         text,
         style: AppTypography.sans(

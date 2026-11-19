@@ -36,11 +36,6 @@ class ProfileSnapshotSection extends StatelessWidget {
             fontSize: 20,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.translate('snapshot_desc'),
-          style: AppTypography.sans(color: context.colors.textMuted),
-        ),
         const SizedBox(height: 16),
         SnapshotList(
           title: l10n.translate('recently_changed'),

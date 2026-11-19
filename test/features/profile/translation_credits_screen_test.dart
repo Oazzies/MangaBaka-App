@@ -45,7 +45,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TranslationCreditsScreen), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
     await tester.pumpAndSettle();
     expect(find.byType(TranslationCreditsScreen), findsNothing);
   });

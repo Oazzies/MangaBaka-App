@@ -148,7 +148,7 @@ class CopyToOtherListButton extends StatelessWidget {
         scope.copyToOtherTabs();
         AppSnackBar.show(context, l10n.translate('copied_to_other_lists'));
       },
-      icon: const Icon(Icons.copy_all_outlined),
+      icon: const Icon(Icons.copy_all_rounded),
       label: Text(l10n.translate('copy_to_other_lists')),
       style: OutlinedButton.styleFrom(
         foregroundColor: context.colors.accent,

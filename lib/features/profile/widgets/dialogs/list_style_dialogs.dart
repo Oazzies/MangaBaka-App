@@ -30,7 +30,6 @@ class ListStyleDialogs {
     _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('list_style'),
-      subtitle: l10n.translate('list_style_subtitle'),
       currentValueGetter: () => SettingsManager().currentListStyle,
       onSelected: (style) => SettingsManager().setListStyle(style),
     );
@@ -41,7 +40,6 @@ class ListStyleDialogs {
     _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('library_list_style'),
-      subtitle: l10n.translate('library_list_style_subtitle'),
       currentValueGetter: () => SettingsManager().libraryListStyle,
       onSelected: (style) => SettingsManager().setLibraryListStyle(style),
     );
@@ -52,7 +50,6 @@ class ListStyleDialogs {
     _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('browse_list_style'),
-      subtitle: l10n.translate('browse_list_style_subtitle'),
       currentValueGetter: () => SettingsManager().browseListStyle,
       onSelected: (style) => SettingsManager().setBrowseListStyle(style),
     );
@@ -63,7 +60,6 @@ class ListStyleDialogs {
     _showListStyleSelectionBottomSheet(
       context: context,
       title: l10n.translate('list_style'),
-      subtitle: l10n.translate('list_style_subtitle'),
       currentValueGetter: () => SettingsManager().similarListStyle,
       onSelected: (style) => SettingsManager().setSimilarListStyle(style),
     );
@@ -72,7 +68,6 @@ class ListStyleDialogs {
   static void _showListStyleSelectionBottomSheet({
     required BuildContext context,
     required String title,
-    required String subtitle,
     required AppListStyle Function() currentValueGetter,
     required void Function(AppListStyle) onSelected,
   }) {
@@ -104,21 +99,10 @@ class ListStyleDialogs {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      title,
+                      title.toUpperCase(),
                       style: AppTypography.display(
                         color: context.colors.text,
                         fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      subtitle,
-                      style: AppTypography.sans(
-                        color: context.colors.textMuted,
-                        fontSize: 13,
                       ),
                     ),
                   ),

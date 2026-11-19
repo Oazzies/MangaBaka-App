@@ -10,7 +10,7 @@ class SnapshotListItem extends StatelessWidget {
 
   final String heroScope;
 
-  static const double width = 120;
+  static const double coverWidth = 120;
 
   const SnapshotListItem({
     super.key,
@@ -39,13 +39,13 @@ class SnapshotListItem extends StatelessWidget {
             );
           },
           child: SizedBox(
-            width: width,
+            width: coverWidth,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 MbCover(
                   url: series.coverUrl,
-                  width: width,
+                  width: coverWidth,
                   blurred: WidgetUtils.isRatingBlurred(series.contentRating),
                   memCacheWidth: 240,
                   heroTag: '${heroScope}_${series.id}',

@@ -103,7 +103,7 @@ class _ThemeEditorControlsState extends State<ThemeEditorControls> {
             ),
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
-              child: ctrl.adjusted
+              child: ctrl.contrastAdjusted
                   ? Padding(
                       padding: const EdgeInsets.only(top: 12),
                       child: Row(
@@ -139,7 +139,7 @@ class _ThemeEditorControlsState extends State<ThemeEditorControls> {
     padding: const EdgeInsets.only(left: 4, bottom: 8),
     child: Text(
       text.toUpperCase(),
-      style: AppTypography.monoLabel(
+      style: AppTypography.displayLabel(
         color: context.colors.textMuted,
         fontSize: 11.5,
       ),

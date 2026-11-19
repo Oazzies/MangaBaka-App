@@ -32,13 +32,12 @@ class SettingsAccountAdvanced {
             SettingsItem(
               icon: Icons.manage_accounts_outlined,
               title: l10n.translate('account_settings'),
-              subtitle: l10n.translate('account_settings_subtext'),
               onTap: () => launchUrl(
                 Uri.parse('https://mangabaka.org/my/settings/profile'),
                 mode: LaunchMode.externalApplication,
               ),
               trailing: Icon(
-                Icons.open_in_new,
+                Icons.open_in_new_rounded,
                 color: ctx.colors.textMuted,
                 size: 20,
               ),
@@ -48,7 +47,6 @@ class SettingsAccountAdvanced {
             SettingsItem(
               icon: Icons.logout_outlined,
               title: l10n.translate('logout'),
-              subtitle: l10n.translate('logout_subtext'),
               onTap: () => _confirmAndLogout(ctx, auth),
               isLast: true,
             ),
@@ -94,9 +92,8 @@ class SettingsAccountAdvanced {
         SettingsGroup(
           children: [
             SettingsItem(
-              icon: Icons.restart_alt,
+              icon: Icons.restart_alt_rounded,
               title: l10n.translate('redo_onboarding'),
-              subtitle: l10n.translate('redo_onboarding_subtitle'),
               onTap: () => Navigator.of(ctx, rootNavigator: true).push(
                 MaterialPageRoute(
                   builder: (_) => const OnboardingScreen(isRedoing: true),
@@ -108,7 +105,6 @@ class SettingsAccountAdvanced {
             SettingsItem(
               icon: Icons.list_alt,
               title: l10n.translate('logs'),
-              subtitle: l10n.translate('view_logs_subtitle'),
               onTap: () => Navigator.push(
                 ctx,
                 MaterialPageRoute(builder: (_) => const LogsScreen()),
@@ -128,14 +124,12 @@ class SettingsAccountAdvanced {
             SettingsItem(
               icon: Icons.notifications_active_outlined,
               title: l10n.translate('preview_toasts'),
-              subtitle: l10n.translate('preview_toasts_subtitle'),
               onTap: () => showToastPreviewPicker(ctx),
             ),
             const SettingsDivider(),
             SettingsItem(
               icon: Icons.web_asset_rounded,
               title: l10n.translate('preview_dialogs'),
-              subtitle: l10n.translate('preview_dialogs_subtitle'),
               onTap: () => showDialogPreviewPicker(ctx),
               isLast: true,
             ),

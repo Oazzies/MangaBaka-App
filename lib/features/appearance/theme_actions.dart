@@ -158,7 +158,7 @@ class ThemeActions {
       items: [
         item('edit', Icons.edit_rounded, 'theme_edit'),
         item('duplicate', Icons.copy_all_rounded, 'theme_duplicate'),
-        item('share', Icons.ios_share_rounded, 'theme_share'),
+        item('share', Icons.copy_rounded, 'theme_share'),
         item(
           'delete',
           Icons.delete_outline_rounded,

@@ -27,7 +27,6 @@ class GeneralSettingsDialogs {
     SelectionBottomSheet.showSelectionBottomSheet<AppStartPage>(
       context: context,
       title: l10n.translate('start_page'),
-      subtitle: l10n.translate('start_page_subtitle'),
       options: AppStartPage.values,
       currentValue: SettingsManager().defaultStartPage,
       getLabel: getAppStartPageName,
@@ -43,7 +42,6 @@ class GeneralSettingsDialogs {
     SelectionBottomSheet.showSelectionBottomSheet<RatingSliderStep>(
       context: context,
       title: l10n.translate('rating_step'),
-      subtitle: l10n.translate('rating_step_subtitle'),
       options: RatingSliderStep.values,
       currentValue: SettingsManager().ratingSliderStep,
       getLabel: getRatingSliderStepName,
@@ -60,7 +58,6 @@ class GeneralSettingsDialogs {
     SelectionBottomSheet.showSelectionBottomSheet<String>(
       context: context,
       title: l10n.translate('library_default'),
-      subtitle: l10n.translate('library_default_subtitle'),
       options: const [
         'reading',
         'paused',
@@ -94,7 +91,6 @@ class GeneralSettingsDialogs {
     SelectionBottomSheet.showSelectionBottomSheet<TitleLanguage>(
       context: context,
       title: l10n.translate('title_language'),
-      subtitle: l10n.translate('title_language_subtitle'),
       options: TitleLanguage.values,
       currentValue: SettingsManager().defaultTitleLanguage,
       getLabel: getTitleLanguageName,
@@ -117,7 +113,6 @@ class GeneralSettingsDialogs {
     SelectionBottomSheet.showSelectionBottomSheet<String>(
       context: context,
       title: l10n.translate('language'),
-      subtitle: l10n.translate('language_subtitle'),
       options: languages.map((l) => l['code'] as String).toList(),
       currentValue: l10n.currentLanguage,
       getLabel: (code) =>

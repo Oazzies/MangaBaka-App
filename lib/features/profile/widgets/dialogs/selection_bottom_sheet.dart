@@ -9,7 +9,7 @@ class SelectionBottomSheet {
   static void showSelectionBottomSheet<T>({
     required BuildContext context,
     required String title,
-    required String subtitle,
+    String? subtitle,
     required List<T> options,
     required T currentValue,
     required String Function(T) getLabel,
@@ -44,14 +44,16 @@ class SelectionBottomSheet {
                   fontSize: 19,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: AppTypography.sans(
-                  color: dialogContext.colors.textMuted,
-                  fontSize: 13,
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: AppTypography.sans(
+                    color: dialogContext.colors.textMuted,
+                    fontSize: 13,
+                  ),
                 ),
-              ),
+              ],
               const SizedBox(height: 24),
               Flexible(
                 child: SingleChildScrollView(

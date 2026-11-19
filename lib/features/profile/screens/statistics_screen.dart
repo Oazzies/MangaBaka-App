@@ -7,6 +7,8 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/library/services/mappers/db_to_api_mapper.dart';
 import 'package:mangabaka_app/core/database/database.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
@@ -24,7 +26,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   @override
   void initState() {
     super.initState();
-    initStatistics();
+    initStatistics(getIt<StatisticsService>());
   }
 
   void _openSeriesDetail(LibraryEntryWithSeries entry) {
@@ -49,7 +51,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           backgroundColor: context.colors.background,
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.pop(context),
             ),
             centerTitle: true,
@@ -106,7 +108,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         const SizedBox(height: 16),
                         _buildStatRow([
                           _StatData(
-                            Icons.replay,
+                            Icons.replay_rounded,
                             l10n.translate('total_rereads'),
                             '$totalRereads',
                           ),

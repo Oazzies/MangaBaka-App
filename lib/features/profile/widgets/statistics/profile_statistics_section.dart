@@ -54,11 +54,6 @@ class ProfileStatisticsSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.translate('overview_desc'),
-          style: AppTypography.sans(color: context.colors.textMuted),
-        ),
         const SizedBox(height: 16),
         Row(
           children: [

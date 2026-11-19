@@ -13,14 +13,20 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_group.d
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_section_header.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_stepper_row.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_switch_item.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
 
 class ListCustomizationSettings extends StatefulWidget {
   final LocalizationService l10n;
+  final SeriesListDeps deps;
 
-  const ListCustomizationSettings({super.key, required this.l10n});
+  const ListCustomizationSettings({
+    super.key,
+    required this.l10n,
+    required this.deps,
+  });
 
   @override
   State<ListCustomizationSettings> createState() =>
@@ -233,6 +239,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
             showRemainingProgress: settings.showRemainingProgress,
             progressType: settings.libraryProgressType,
             gridColumnCount: scope.gridColumns,
+            deps: widget.deps,
           ),
         ),
       ),

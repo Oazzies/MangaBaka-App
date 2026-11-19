@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/features/profile/screens/settings/settings_categories.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
@@ -32,7 +33,7 @@ Future<void> showDialogPreviewPicker(BuildContext context) async {
       l10n.translate('dialog_logout'),
     ),
     DialogPreview.deleteFromLibrary: (
-      Icons.delete_sweep_rounded,
+      Icons.delete_outline_rounded,
       l10n.translate('dialog_delete'),
     ),
     DialogPreview.unblurCover: (
@@ -116,20 +117,14 @@ Future<void> showDialogPreview(
         ),
       );
     case DialogPreview.progress:
-      await showAdaptiveSheet<void>(
+      await showAdaptiveForm<void>(
         context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder: (_) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: ProgressUpdateDialog(
-            initialValue: 42,
-            title: l10n.translate('update_chapters'),
-            maxValue: '120',
-            onUpdate: (_) {},
-          ),
+        title: l10n.translate('update_chapters'),
+        builder: (_) => ProgressUpdateDialog(
+          initialValue: 42,
+          title: l10n.translate('update_chapters'),
+          maxValue: '120',
+          onUpdate: (_) {},
         ),
       );
   }
