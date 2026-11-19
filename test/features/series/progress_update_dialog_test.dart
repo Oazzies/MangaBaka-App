@@ -64,9 +64,9 @@ void main() {
   testWidgets('the minus button stops at zero', (tester) async {
     final saved = await pumpDialog(tester, initial: 1);
 
-    await tester.tap(find.byIcon(Icons.remove));
+    await tester.tap(find.byIcon(Icons.remove_rounded));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.remove));
+    await tester.tap(find.byIcon(Icons.remove_rounded));
     await tester.pump();
     await save(tester);
 
@@ -77,7 +77,7 @@ void main() {
     final saved =
         await pumpDialog(tester, initial: ProgressUpdateDialog.maxProgress);
 
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(find.byIcon(Icons.add_rounded));
     await tester.pump();
     await save(tester);
 

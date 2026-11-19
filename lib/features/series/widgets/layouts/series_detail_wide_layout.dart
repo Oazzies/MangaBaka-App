@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
-import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/features/series/widgets/description_section.dart';
@@ -25,6 +24,8 @@ class SeriesDetailWideLayout extends StatelessWidget {
   final ValueChanged<String> onTabChanged;
   final Function(String) onStateChanged;
   final Function(int) onRatingChanged;
+  final bool isLoggedIn;
+  final MetadataService metadata;
   final bool isAdding;
   final VoidCallback onAdd;
   final VoidCallback onUpdateChapter;
@@ -54,6 +55,8 @@ class SeriesDetailWideLayout extends StatelessWidget {
     required this.onTabChanged,
     required this.onStateChanged,
     required this.onRatingChanged,
+    required this.isLoggedIn,
+    required this.metadata,
     required this.isAdding,
     required this.onAdd,
     required this.onUpdateChapter,
@@ -120,8 +123,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
                   onAuthorTap: onAuthorTap,
                   onPublisherTap: onPublisherTap,
                 ),
-                if (entry == null &&
-                    getIt<ProfileAuthService>().isLoggedIn) ...[
+                if (entry == null && isLoggedIn) ...[
                   const SizedBox(height: 18),
                   SeriesAddToLibraryButton(isAdding: isAdding, onAdd: onAdd),
                 ],
@@ -166,7 +168,7 @@ class SeriesDetailWideLayout extends StatelessWidget {
             DescriptionSection(description: series.description),
             const SizedBox(height: 32),
           ],
-          SeriesGenresSection(series: series, l10n: l10n),
+          SeriesGenresSection(series: series, l10n: l10n, metadata: metadata),
         ],
       ),
     );

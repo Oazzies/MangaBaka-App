@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -7,7 +6,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
@@ -15,6 +14,7 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 class SeriesRelatedTab extends StatelessWidget {
   final List<RelatedSeries>? related;
   final LocalizationService l10n;
+  final SeriesListDeps deps;
   final double horizontalPadding;
 
   final String? currentSeriesId;
@@ -24,6 +24,7 @@ class SeriesRelatedTab extends StatelessWidget {
     super.key,
     this.related,
     required this.l10n,
+    required this.deps,
     this.horizontalPadding = 16.0,
     this.currentSeriesId,
     this.heroTagPrefix,
@@ -179,14 +180,9 @@ class SeriesRelatedTab extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(
-    BuildContext context,
-    SeriesService seriesService,
-    Series s,
-    String sectionPrefix,
-  ) {
+  Widget _buildItem(BuildContext context, Series s, String sectionPrefix) {
     return MouseRegion(
-      onEnter: (_) => seriesService.fetchSeries(s.id),
+      onEnter: (_) => deps.prefetch(s.id),
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -195,7 +191,11 @@ class SeriesRelatedTab extends StatelessWidget {
             ),
           );
         },
-        child: EntryListItem(series: s, heroTagPrefix: sectionPrefix),
+        child: EntryListItem(
+          series: s,
+          deps: deps,
+          heroTagPrefix: sectionPrefix,
+        ),
       ),
     );
   }
@@ -205,13 +205,9 @@ class SeriesRelatedTab extends StatelessWidget {
     List<Series> series,
     String sectionPrefix,
   ) {
-    final seriesService = getIt<SeriesService>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final s in series)
-          _buildItem(context, seriesService, s, sectionPrefix),
-      ],
+      children: [for (final s in series) _buildItem(context, s, sectionPrefix)],
     );
   }
 
@@ -223,7 +219,6 @@ class SeriesRelatedTab extends StatelessWidget {
     double maxWidth,
     String sectionPrefix,
   ) {
-    final seriesService = getIt<SeriesService>();
     final columnCount = settings.resolvedBrowseGridColumnCount;
     const spacing = 10.0;
     final cols = columnCount > 0
@@ -240,7 +235,7 @@ class SeriesRelatedTab extends StatelessWidget {
             (s) => SizedBox(
               width: itemWidth,
               height: itemHeight,
-              child: _buildItem(context, seriesService, s, sectionPrefix),
+              child: _buildItem(context, s, sectionPrefix),
             ),
           )
           .toList(),

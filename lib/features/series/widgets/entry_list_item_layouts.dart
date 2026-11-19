@@ -4,6 +4,7 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_progress_overlay.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -53,7 +54,7 @@ class EntryListLayoutHelper {
         height: height ?? double.infinity,
         color: context.colors.surfaceRaised,
         child: Icon(
-          Icons.broken_image,
+          Icons.broken_image_rounded,
           color: context.colors.textMuted,
           size: width > 50 ? 40 : 24,
         ),
@@ -69,6 +70,7 @@ class EntryListLayoutHelper {
     required int? progressOverride,
     required SettingsManager settings,
     required LocalizationService l10n,
+    required LibraryService library,
   }) {
     return EntryProgressOverlay(
       series: series,
@@ -77,6 +79,7 @@ class EntryListLayoutHelper {
       progressOverride: progressOverride,
       settings: settings,
       l10n: l10n,
+      library: library,
     );
   }
 }
@@ -97,10 +100,12 @@ class CoverOnlyGridItem extends StatelessWidget {
   final LibraryEntry? entry;
   final int? progressOverride;
   final bool hovered;
+  final LibraryService library;
 
   const CoverOnlyGridItem({
     super.key,
     required this.series,
+    required this.library,
     this.heroTagPrefix,
     this.entry,
     this.progressOverride,
@@ -137,6 +142,7 @@ class CoverOnlyGridItem extends StatelessWidget {
                 progressOverride: progressOverride,
                 settings: settings,
                 l10n: l10n,
+                library: library,
               ),
             ],
           );
@@ -153,10 +159,12 @@ class CompactGridItem extends StatelessWidget {
   final LibraryEntry? entry;
   final int? progressOverride;
   final bool hovered;
+  final LibraryService library;
 
   const CompactGridItem({
     super.key,
     required this.series,
+    required this.library,
     this.heroTagPrefix,
     required this.displayTitle,
     this.entry,
@@ -201,6 +209,7 @@ class CompactGridItem extends StatelessWidget {
                       progressOverride: progressOverride,
                       settings: settings,
                       l10n: l10n,
+                      library: library,
                     ),
                   ],
                 );

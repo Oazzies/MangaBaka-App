@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -10,11 +9,9 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/related_series.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/tabs/series_related_tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class _FakeSeriesService extends Fake implements SeriesService {}
 
 class _FakeLibraryService extends Fake implements LibraryService {
   @override
@@ -36,6 +33,12 @@ Series _series(String id, String title) => Series.fromJson({
   'content_rating': 'safe',
 });
 
+final _deps = SeriesListDeps(
+  auth: _FakeAuthService(),
+  library: _FakeLibraryService(),
+  prefetch: (_) {},
+);
+
 Widget _wrap(Widget child) {
   return MaterialApp(
     home: Scaffold(body: SingleChildScrollView(child: child)),
@@ -47,19 +50,10 @@ void main() {
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    await resetServiceLocator();
     await SettingsManager().init();
     await SettingsManager().setBrowseListStyle(AppListStyle.comfortable);
     l10n = LocalizationService();
     await l10n.init();
-
-    getIt.registerSingleton<SeriesService>(_FakeSeriesService());
-    getIt.registerSingleton<LibraryService>(_FakeLibraryService());
-    getIt.registerSingleton<ProfileAuthService>(_FakeAuthService());
-  });
-
-  tearDown(() async {
-    await resetServiceLocator();
   });
 
   group('SeriesRelatedTab.formatRelationType', () {
@@ -88,7 +82,7 @@ void main() {
   group('SeriesRelatedTab', () {
     testWidgets('shows spinner while related is null', (tester) async {
       await tester.pumpWidget(
-        _wrap(SeriesRelatedTab(related: null, l10n: l10n)),
+        _wrap(SeriesRelatedTab(related: null, l10n: l10n, deps: _deps)),
       );
       expect(find.byType(MbSpinner), findsOneWidget);
     });
@@ -107,6 +101,7 @@ void main() {
             ],
             currentSeriesId: '100',
             l10n: l10n,
+            deps: _deps,
           ),
         ),
       );
@@ -121,6 +116,7 @@ void main() {
           SeriesRelatedTab(
             currentSeriesId: '1',
             l10n: l10n,
+            deps: _deps,
             related: [
               RelatedSeries(
                 relationType: 'sequel',

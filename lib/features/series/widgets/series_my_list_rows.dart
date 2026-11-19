@@ -39,7 +39,7 @@ class SeriesProgressRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label.toUpperCase(),
-                  style: AppTypography.monoLabel(
+                  style: AppTypography.displayLabel(
                     color: context.colors.textMuted,
                     fontSize: 12,
                   ),
@@ -67,7 +67,11 @@ class SeriesProgressRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.add, size: 16, color: context.colors.textMuted),
+              Icon(
+                Icons.add_rounded,
+                size: 16,
+                color: context.colors.textMuted,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -138,7 +142,7 @@ class SeriesScoreRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label.toUpperCase(),
-                    style: AppTypography.monoLabel(
+                    style: AppTypography.displayLabel(
                       color: context.colors.textMuted,
                       fontSize: 12,
                     ),
@@ -166,7 +170,11 @@ class SeriesScoreRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(Icons.edit, size: 16, color: context.colors.textMuted),
+                Icon(
+                  Icons.edit_rounded,
+                  size: 16,
+                  color: context.colors.textMuted,
+                ),
               ],
             ),
             const SizedBox(height: 8),

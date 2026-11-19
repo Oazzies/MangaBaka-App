@@ -201,7 +201,7 @@ void main() {
 
       expect(find.text('NOTES'), findsOneWidget);
       expect(find.byType(SeriesNoteMarkdown), findsNothing);
-      await tester.tap(find.byIcon(Icons.add).last);
+      await tester.tap(find.byIcon(Icons.add_rounded).last);
       expect(tapped, isTrue);
     });
 

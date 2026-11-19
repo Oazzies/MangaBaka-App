@@ -15,6 +15,10 @@ import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/series_stacks_tab.dart';
 
 class SeriesDetailTabContent extends StatelessWidget {
@@ -30,6 +34,10 @@ class SeriesDetailTabContent extends StatelessWidget {
   final List<SeriesCollection>? collections;
   final List<SeriesWork>? works;
   final List<SeriesLink>? enrichedLinks;
+  final SeriesListDeps deps;
+  final MetadataService metadata;
+  final StackService stackService;
+  final StackStatusController stackStatus;
   final bool isWide;
   final double hPadding;
   final bool wideRightPaddingOnly;
@@ -48,6 +56,10 @@ class SeriesDetailTabContent extends StatelessWidget {
     this.collections,
     this.works,
     this.enrichedLinks,
+    required this.deps,
+    required this.metadata,
+    required this.stackService,
+    required this.stackStatus,
     this.isWide = false,
     this.hPadding = 16.0,
     this.wideRightPaddingOnly = false,
@@ -55,20 +67,19 @@ class SeriesDetailTabContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tabPadding = selectedTab == 'News' ? 0.0 : hPadding;
-
     switch (selectedTab) {
       case 'Covers':
         return SeriesCoversTab(
           covers: covers,
-          horizontalPadding: tabPadding,
+          horizontalPadding: hPadding,
           contentRating: series.contentRating,
         );
       case 'Related':
         return SeriesRelatedTab(
           related: related,
           l10n: l10n,
-          horizontalPadding: tabPadding,
+          deps: deps,
+          horizontalPadding: hPadding,
           currentSeriesId: series.id,
           heroTagPrefix: 'related',
         );
@@ -77,22 +88,28 @@ class SeriesDetailTabContent extends StatelessWidget {
           similar: similar,
           readersAlsoLike: readersAlsoLike,
           l10n: l10n,
-          horizontalPadding: tabPadding,
+          deps: deps,
+          horizontalPadding: hPadding,
           currentSeriesId: series.id,
         );
       case 'Stacks':
-        return SeriesStacksTab(series: series, horizontalPadding: tabPadding);
+        return SeriesStacksTab(
+          series: series,
+          service: stackService,
+          status: stackStatus,
+          horizontalPadding: hPadding,
+        );
       case 'News':
-        return SeriesNewsTab(news: news, horizontalPadding: hPadding);
+        return SeriesNewsTab(news: news, prefetch: deps.prefetch);
       case 'Collections':
         return SeriesCollectionsTab(
           collections: collections,
-          horizontalPadding: tabPadding,
+          horizontalPadding: hPadding,
         );
       case 'Works':
         return SeriesWorksTab(
           works: works,
-          horizontalPadding: tabPadding,
+          horizontalPadding: hPadding,
           fallbackCoverUrl: series.coverUrl,
         );
       case 'Info':
@@ -101,8 +118,9 @@ class SeriesDetailTabContent extends StatelessWidget {
           series: series,
           enrichedLinks: enrichedLinks,
           l10n: l10n,
+          metadata: metadata,
           isWide: isWide,
-          horizontalPadding: tabPadding,
+          horizontalPadding: hPadding,
         );
     }
   }

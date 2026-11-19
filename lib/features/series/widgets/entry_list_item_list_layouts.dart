@@ -4,7 +4,8 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/series/utils/series_labels.dart';
 
 class MinimalListItem extends StatelessWidget {
   final Series series;
@@ -104,7 +105,7 @@ class CompactListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${l10n.translate('type_${series.type.toLowerCase()}')} · ${l10n.translate('status_${series.status.toLowerCase()}')} · ${series.year}',
+                      SeriesLabels.summary(series),
                       style: AppTypography.sans(
                         color: context.colors.textMuted,
                         fontSize: 13,
@@ -176,7 +177,7 @@ class ComfortableListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${l10n.translate('type_${series.type.toLowerCase()}')} · ${l10n.translate('status_${series.status.toLowerCase()}')} · ${series.year}',
+                      SeriesLabels.summary(series),
                       style: AppTypography.sans(
                         color: context.colors.textMuted,
                         fontSize: 13,

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/news/widgets/news_list_item.dart';
-import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SeriesNewsTab extends StatelessWidget {
   final List<News>? news;
-  final double horizontalPadding;
+  final SeriesPrefetch prefetch;
 
-  const SeriesNewsTab({super.key, this.news, this.horizontalPadding = 16.0});
+  const SeriesNewsTab({super.key, this.news, required this.prefetch});
 
   @override
   Widget build(BuildContext context) {
@@ -28,27 +28,19 @@ class SeriesNewsTab extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: SeriesSectionHeader(title: l10n.translate('tab_news')),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: news!.length,
-          itemBuilder: (context, index) {
-            return NewsListItem(
-              key: ValueKey('series_news_${news![index].id}'),
-              news: news![index],
-              showReferencedSeries: false,
-            );
-          },
-        ),
-      ],
+    return ListView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: news!.length,
+      itemBuilder: (context, index) {
+        return NewsListItem(
+          key: ValueKey('series_news_${news![index].id}'),
+          news: news![index],
+          showReferencedSeries: false,
+          prefetch: prefetch,
+        );
+      },
     );
   }
 }

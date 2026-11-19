@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
@@ -14,17 +13,18 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class SeriesGenresSection extends StatelessWidget {
   final Series series;
   final LocalizationService l10n;
+  final MetadataService metadata;
 
   const SeriesGenresSection({
     super.key,
     required this.series,
     required this.l10n,
+    required this.metadata,
   });
 
   @override
   Widget build(BuildContext context) {
     if (series.genres.isEmpty) return const SizedBox.shrink();
-    final metadataService = getIt<MetadataService>();
     final detailState = SeriesDetailScreen.of(context);
     final isSelecting = detailState?.drawerFilters != null;
 
@@ -45,7 +45,7 @@ class SeriesGenresSection extends StatelessWidget {
                       false;
                   return ChipBase(
                     label: Text(
-                      metadataService.getGenreLabel(genre),
+                      metadata.getGenreLabel(genre),
                       style: AppTypography.sans(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,

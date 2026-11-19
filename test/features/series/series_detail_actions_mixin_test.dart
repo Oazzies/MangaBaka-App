@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/constants/mock_series_data.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
+import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
@@ -183,6 +186,65 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(SnackBar), findsOneWidget);
+    });
+  });
+
+  group('SeriesDetailActionsMixin forms with a text field', () {
+    setUp(() async {
+      LocalizationService.resetForTesting();
+      await LocalizationService().init();
+    });
+
+    tearDown(LocalizationService.resetForTesting);
+
+    final entry = LibraryEntry(
+      id: 'entry-1',
+      state: 'reading',
+      progressChapter: 3,
+      note: 'Old note',
+      series: mockSeries222,
+    );
+
+    Future<_TestWidgetState> pumpAt(WidgetTester tester, Size size) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(buildWidget(_FakeLibraryService()));
+      return tester.state<_TestWidgetState>(find.byType(_TestWidget));
+    }
+
+    testWidgets('the note editor is its own page on a phone', (tester) async {
+      final state = await pumpAt(tester, const Size(400, 800));
+
+      state.showUpdateNoteDialog(entry);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveFormPage), findsOneWidget);
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.byIcon(Icons.edit_note_rounded), findsNothing);
+    });
+
+    testWidgets('the progress editor is its own page on a phone',
+        (tester) async {
+      final state = await pumpAt(tester, const Size(400, 800));
+
+      state.showUpdateProgressDialog(entry);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveFormPage), findsOneWidget);
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
+    });
+
+    testWidgets('the progress editor is a dialog in landscape', (tester) async {
+      final state = await pumpAt(tester, const Size(800, 400));
+
+      state.showUpdateProgressDialog(entry);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(AdaptiveFormPage), findsNothing);
     });
   });
 }

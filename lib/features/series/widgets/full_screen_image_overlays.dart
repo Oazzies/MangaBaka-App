@@ -28,7 +28,9 @@ class FullScreenNavArrow extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isLeft ? Icons.arrow_back_ios_new : Icons.arrow_forward_ios,
+              isLeft
+                  ? Icons.arrow_back_ios_new_rounded
+                  : Icons.arrow_forward_ios_rounded,
               color: FixedColors.onImage,
               size: 24,
             ),

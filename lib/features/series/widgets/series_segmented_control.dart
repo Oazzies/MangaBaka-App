@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SeriesSegmentedControl extends StatefulWidget {
@@ -25,6 +26,20 @@ class SeriesSegmentedControl extends StatefulWidget {
     'Collections',
     'Works',
   ];
+
+  static const _labelKeys = {
+    'Info': 'tab_info',
+    'Covers': 'tab_covers',
+    'Related': 'tab_related',
+    'Similar': 'tab_similar',
+    'Stacks': 'stacks',
+    'News': 'tab_news',
+    'Collections': 'tab_collections',
+    'Works': 'tab_works',
+  };
+
+  static String labelFor(String tab) =>
+      LocalizationService().translate(_labelKeys[tab] ?? tab);
 
   @override
   State<SeriesSegmentedControl> createState() => _SeriesSegmentedControlState();
@@ -109,7 +124,7 @@ class _SeriesSegmentedControlState extends State<SeriesSegmentedControl>
                 height: 48,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Text(t.toUpperCase()),
+                  child: Text(SeriesSegmentedControl.labelFor(t).toUpperCase()),
                 ),
               ),
             )

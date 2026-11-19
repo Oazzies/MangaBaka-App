@@ -101,8 +101,8 @@ class _RatingSelectionDialogState extends State<RatingSelectionDialog> {
                 children: [
                   Icon(
                     isUnrated
-                        ? Icons.star_outline
-                        : Icons.star,
+                        ? Icons.star_outline_rounded
+                        : Icons.star_rounded,
                     color: isUnrated
                         ? context.colors.textMuted
                         : context.colors.star,

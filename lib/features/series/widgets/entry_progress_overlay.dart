@@ -1,8 +1,7 @@
-import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -25,6 +24,7 @@ class EntryProgressOverlay extends StatelessWidget {
 
   final SettingsManager settings;
   final LocalizationService l10n;
+  final LibraryService library;
 
   static const double combineBelowWidth = 145;
 
@@ -36,6 +36,7 @@ class EntryProgressOverlay extends StatelessWidget {
     required this.progressOverride,
     required this.settings,
     required this.l10n,
+    required this.library,
   });
 
   static const BoxDecoration _badge = BoxDecoration(
@@ -182,9 +183,9 @@ class EntryProgressOverlay extends StatelessWidget {
   }
 
   Widget _progressText(int total) {
-    final prefix = _isChapter ? 'Ch. ' : 'Vol. ';
+    final prefix = l10n.translate(_isChapter ? 'abbr_chapter' : 'abbr_volume');
     return Text(
-      '$prefix$_progress${total > 0 ? '/$total' : ''}',
+      '$prefix $_progress${total > 0 ? '/$total' : ''}',
       style: AppTypography.sans(
         color: FixedColors.onImage,
         fontWeight: FontWeight.bold,
@@ -205,60 +206,54 @@ class EntryProgressOverlay extends StatelessWidget {
   }
 
   void _openUpdateDialog(BuildContext context) {
-    showAdaptiveSheet(
+    final title = l10n.translate(
+      _isChapter ? 'update_chapters' : 'update_volumes',
+    );
+    showAdaptiveForm(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
-        ),
-        child: ProgressUpdateDialog(
-          initialValue: _progress,
-          title: l10n.translate(
-            _isChapter ? 'update_chapters' : 'update_volumes',
-          ),
-          maxValue: _isChapter ? series.totalChapters : series.finalVolume,
-          isChapter: _isChapter,
-          seriesStatus: series.status,
-          onUpdate: (value) async {
-            final library = getIt<LibraryService>();
-            final currentEntry = entry;
-            try {
-              if (_isChapter) {
-                await library.updateLibraryEntryProgress(
-                  series.id,
-                  progressChapter: value,
-                );
-              } else {
-                await library.updateLibraryEntryProgress(
-                  series.id,
-                  progressVolume: value,
-                );
-              }
-              if (currentEntry != null && context.mounted) {
-                await maybePromptCompleteSeries(
-                  context,
-                  series: series,
-                  entry: currentEntry,
-                  libraryService: library,
-                  previousChapter: _isChapter ? _progress : null,
-                  updatedChapter: _isChapter ? value : null,
-                  previousVolume: _isChapter ? null : _progress,
-                  updatedVolume: _isChapter ? null : value,
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                AppSnackBar.show(
-                  context,
-                  l10n.translate('failed_to_update'),
-                  isError: true,
-                );
-              }
+      title: title,
+      builder: (_) => ProgressUpdateDialog(
+        initialValue: _progress,
+        title: title,
+        maxValue: _isChapter ? series.totalChapters : series.finalVolume,
+        isChapter: _isChapter,
+        seriesStatus: series.status,
+        onUpdate: (value) async {
+          final currentEntry = entry;
+          try {
+            if (_isChapter) {
+              await library.updateLibraryEntryProgress(
+                series.id,
+                progressChapter: value,
+              );
+            } else {
+              await library.updateLibraryEntryProgress(
+                series.id,
+                progressVolume: value,
+              );
             }
-          },
-        ),
+            if (currentEntry != null && context.mounted) {
+              await maybePromptCompleteSeries(
+                context,
+                series: series,
+                entry: currentEntry,
+                libraryService: library,
+                previousChapter: _isChapter ? _progress : null,
+                updatedChapter: _isChapter ? value : null,
+                previousVolume: _isChapter ? null : _progress,
+                updatedVolume: _isChapter ? null : value,
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              AppSnackBar.show(
+                context,
+                l10n.translate('failed_to_update'),
+                isError: true,
+              );
+            }
+          }
+        },
       ),
     );
   }

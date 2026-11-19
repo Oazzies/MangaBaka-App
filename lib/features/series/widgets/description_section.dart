@@ -178,8 +178,8 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                               const SizedBox(width: 4),
                               Icon(
                                 expanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
                                 size: 20,
                                 color: context.colors.accent,
                               ),
@@ -192,7 +192,7 @@ class _DescriptionSectionState extends State<DescriptionSection> {
                 WidgetUtils.tooltip(
                   message: LocalizationService().translate('copy_description'),
                   child: IconButton(
-                    icon: const Icon(Icons.copy_all, size: 20),
+                    icon: const Icon(Icons.copy_rounded, size: 20),
                     padding: const EdgeInsets.all(8),
                     color: context.colors.textMuted,
                     onPressed: () {

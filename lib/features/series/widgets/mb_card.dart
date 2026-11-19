@@ -46,7 +46,7 @@ class MbCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         label!.toUpperCase(),
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: context.colors.textMuted,
                           fontSize: 11,
                         ),

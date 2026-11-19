@@ -68,7 +68,7 @@ void main() {
       await tester.pumpWidget(_buildHost(DescriptionSection(description: desc)));
       await tester.pumpAndSettle();
 
-      final copyButton = find.byIcon(Icons.copy_all);
+      final copyButton = find.byIcon(Icons.copy_rounded);
       expect(copyButton, findsOneWidget);
 
       await tester.tap(copyButton);

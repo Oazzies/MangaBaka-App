@@ -66,7 +66,7 @@ void main() {
       await SettingsManager().setProgressOverflow(ProgressOverflowMode.never);
       final saved = await pumpDialog(tester, initial: 10, maxValue: '10');
 
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pump();
       expect(find.text('10'), findsOneWidget);
 
@@ -84,11 +84,11 @@ void main() {
       await SettingsManager().setProgressOverflow(ProgressOverflowMode.never);
       final saved = await pumpDialog(tester, initial: 15, maxValue: '10');
 
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pump();
       expect(find.text('15'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.remove));
+      await tester.tap(find.byIcon(Icons.remove_rounded));
       await tester.pump();
       expect(find.text('14'), findsOneWidget);
 
@@ -108,7 +108,7 @@ void main() {
         seriesStatus: 'releasing',
       );
 
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pump();
       expect(find.text('11'), findsOneWidget);
 
@@ -144,7 +144,7 @@ void main() {
         seriesStatus: 'completed',
       );
 
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pump();
       await tester.tap(find.text(LocalizationService().translate('save')));
       await tester.pump();
@@ -164,7 +164,7 @@ void main() {
         maxValue: '10',
         seriesStatus: 'releasing',
       );
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pump();
       await tester.tap(find.text(LocalizationService().translate('save')));
       await tester.pump();
@@ -183,7 +183,7 @@ void main() {
         maxValue: '10',
         seriesStatus: 'completed',
       );
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.byIcon(Icons.add_rounded));
       await tester.pump();
       await tester.tap(find.text(LocalizationService().translate('save')));
       await tester.pumpAndSettle();

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/models/related_series.dart';
@@ -24,6 +25,10 @@ import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
+
+class _NoStacks extends Fake implements StackService {}
 
 class MockSeriesService extends Fake implements SeriesService {
   Series? seriesResponse;
@@ -174,6 +179,11 @@ void main() {
     getIt.registerSingleton<ProfileAuthService>(mockAuthService);
     getIt.registerSingleton<MetadataService>(MetadataService());
     getIt.registerSingleton<SeriesSearchService>(SeriesSearchService());
+    final stacks = _NoStacks();
+    getIt.registerSingleton<StackService>(stacks);
+    getIt.registerSingleton<StackStatusController>(
+      StackStatusController(service: stacks, auth: mockAuthService),
+    );
   });
 
   tearDown(() async {
@@ -256,7 +266,9 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
     
-    final coverTabFinder = find.text('COVERS');
+    final coverTabFinder = find.text(
+      LocalizationService().translate('tab_covers').toUpperCase(),
+    );
     await tester.ensureVisible(coverTabFinder);
     await tester.pumpAndSettle();
 

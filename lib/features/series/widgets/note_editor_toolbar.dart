@@ -107,55 +107,56 @@ class NoteMarkdownToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final l10n = LocalizationService();
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           _ToolbarButton(
             icon: Icons.format_bold_rounded,
-            tooltip: 'Bold',
+            tooltip: l10n.translate('series_note_format_bold'),
             onTap: onBold,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.format_italic_rounded,
-            tooltip: 'Italic',
+            tooltip: l10n.translate('series_note_format_italic'),
             onTap: onItalic,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.format_strikethrough_rounded,
-            tooltip: 'Strikethrough',
+            tooltip: l10n.translate('series_note_format_strikethrough'),
             onTap: onStrike,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.title_rounded,
-            tooltip: 'Heading',
+            tooltip: l10n.translate('series_note_format_heading'),
             onTap: onHeading,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.format_list_bulleted_rounded,
-            tooltip: 'List',
+            tooltip: l10n.translate('series_note_format_list'),
             onTap: onBullet,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.format_quote_rounded,
-            tooltip: 'Quote',
+            tooltip: l10n.translate('series_note_format_quote'),
             onTap: onQuote,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.code_rounded,
-            tooltip: 'Code',
+            tooltip: l10n.translate('series_note_format_code'),
             onTap: onCode,
             color: c.textMuted,
           ),
           _ToolbarButton(
             icon: Icons.link_rounded,
-            tooltip: 'Link',
+            tooltip: l10n.translate('series_note_format_link'),
             onTap: onLink,
             color: c.textMuted,
           ),

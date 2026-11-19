@@ -18,7 +18,7 @@ class SeriesSectionHeader extends StatelessWidget {
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Text(
         title.toUpperCase(),
-        style: AppTypography.monoLabel(
+        style: AppTypography.displayLabel(
           color: context.colors.textMuted,
           fontSize: 11.5,
         ),

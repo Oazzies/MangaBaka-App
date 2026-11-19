@@ -14,8 +14,12 @@ import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_c
 import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin.dart';
 import 'package:mangabaka_app/features/series/mixins/series_detail_data_mixin.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_scaffold.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 export 'package:mangabaka_app/core/widgets/dotted_border_painter.dart';
@@ -55,6 +59,18 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
   late final LibraryService _libraryService;
   late final SeriesService _seriesService;
   late final SeriesFilterDrawerController _filterDrawer;
+  late final ProfileAuthService _auth = getIt<ProfileAuthService>();
+
+  late final SeriesListDeps listDeps = SeriesListDeps(
+    auth: _auth,
+    library: _libraryService,
+    prefetch: _seriesService.fetchSeries,
+  );
+
+  bool get isLoggedIn => _auth.isLoggedIn;
+  MetadataService get metadata => getIt<MetadataService>();
+  StackService get stackService => getIt<StackService>();
+  StackStatusController get stackStatus => getIt<StackStatusController>();
 
   Stream<LibraryEntry?>? _entryStream;
   bool _isAdding = false;
@@ -242,7 +258,7 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
     return ListenableBuilder(
       listenable: Listenable.merge([
         LocalizationService(),
-        getIt<ProfileAuthService>(),
+        _auth,
         _filterDrawer,
       ]),
       builder: (context, _) {

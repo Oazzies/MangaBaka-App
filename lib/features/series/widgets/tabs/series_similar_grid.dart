@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
@@ -12,17 +11,18 @@ class SeriesSimilarGrid extends StatelessWidget {
   final List<Series> series;
   final AppListStyle style;
   final String heroTagPrefix;
+  final SeriesListDeps deps;
 
   const SeriesSimilarGrid({
     super.key,
     required this.series,
     required this.style,
     required this.heroTagPrefix,
+    required this.deps,
   });
 
   @override
   Widget build(BuildContext context) {
-    final seriesService = getIt<SeriesService>();
     final isCompactGrid = style == AppListStyle.compactGrid;
 
     return LayoutBuilder(
@@ -39,8 +39,7 @@ class SeriesSimilarGrid extends StatelessWidget {
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             itemCount: series.length,
-            itemBuilder: (context, index) =>
-                _buildCard(context, seriesService, series[index]),
+            itemBuilder: (context, index) => _buildCard(context, series[index]),
           );
         }
 
@@ -55,20 +54,15 @@ class SeriesSimilarGrid extends StatelessWidget {
             childAspectRatio: 0.65,
           ),
           itemCount: series.length,
-          itemBuilder: (context, index) =>
-              _buildCard(context, seriesService, series[index]),
+          itemBuilder: (context, index) => _buildCard(context, series[index]),
         );
       },
     );
   }
 
-  Widget _buildCard(
-    BuildContext context,
-    SeriesService seriesService,
-    Series s,
-  ) {
+  Widget _buildCard(BuildContext context, Series s) {
     return MouseRegion(
-      onEnter: (_) => seriesService.fetchSeries(s.id),
+      onEnter: (_) => deps.prefetch(s.id),
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -79,6 +73,7 @@ class SeriesSimilarGrid extends StatelessWidget {
         },
         child: EntryListItem(
           series: s,
+          deps: deps,
           heroTagPrefix: heroTagPrefix,
           listStyle: style,
         ),

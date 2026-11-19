@@ -36,7 +36,7 @@ class SeriesInfoRow extends StatelessWidget {
           children: [
             Text(
               label.toUpperCase(),
-              style: AppTypography.monoLabel(
+              style: AppTypography.displayLabel(
                 color: context.colors.textMuted,
                 fontSize: 10,
               ),
@@ -81,7 +81,7 @@ class SeriesInfoLinkedRow extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.textMuted,
               fontSize: 10,
             ),
@@ -155,7 +155,7 @@ class SeriesInfoPublisherRefsRow extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.textMuted,
               fontSize: 10,
             ),
@@ -188,7 +188,7 @@ class SeriesInfoPublisherRefsRow extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 1),
                         child: Text(
                           _detail(p)!,
-                          style: AppTypography.monoLabel(
+                          style: AppTypography.displayLabel(
                             color: context.colors.textMuted,
                             fontSize: 10,
                           ),

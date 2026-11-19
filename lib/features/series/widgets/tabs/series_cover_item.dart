@@ -113,7 +113,7 @@ class _HoverableCoverItemState extends State<HoverableCoverItem> {
                         )
                       : Container(
                           color: context.colors.surface,
-                          child: const Icon(Icons.broken_image),
+                          child: const Icon(Icons.broken_image_rounded),
                         ),
                 ),
               ),

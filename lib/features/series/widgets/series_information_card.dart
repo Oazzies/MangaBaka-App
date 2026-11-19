@@ -7,6 +7,7 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
+import 'package:mangabaka_app/features/series/utils/series_labels.dart';
 
 class SeriesInformationCard extends StatelessWidget {
   final Series series;
@@ -24,6 +25,11 @@ class SeriesInformationCard extends StatelessWidget {
 
   String _cap(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1).replaceAll('_', ' ');
+
+  String _label(String key, String raw) {
+    final translated = l10n.translate(key);
+    return translated == key ? _cap(raw) : translated;
+  }
 
   String? _validNum(String raw) => (raw.isEmpty || raw == 'null') ? null : raw;
 
@@ -55,7 +61,7 @@ class SeriesInformationCard extends StatelessWidget {
       if (series.type.isNotEmpty)
         SeriesInfoRow(
           label: l10n.translate('type'),
-          value: _cap(series.type),
+          value: SeriesLabels.type(series.type),
           valueColor: context.colors.forSeriesType(series.type),
           isSelected: isTypeSelected,
           onTap: () {
@@ -71,7 +77,7 @@ class SeriesInformationCard extends StatelessWidget {
       if (series.status.isNotEmpty)
         SeriesInfoRow(
           label: l10n.translate('status'),
-          value: _cap(series.status),
+          value: SeriesLabels.status(series.status),
           valueColor: context.colors.forSeriesStatus(series.status),
           isSelected: isStatusSelected,
           onTap: () {
@@ -199,9 +205,12 @@ class SeriesInformationCard extends StatelessWidget {
       if (series.contentRating.isNotEmpty && series.contentRating != 'null')
         SeriesInfoRow(
           label: l10n.translate('content_rating'),
-          value: _cap(series.contentRating),
+          value: _label(
+            series.contentRating.toLowerCase(),
+            series.contentRating,
+          ),
         ),
-      SeriesInfoRow(label: 'MangaBaka ID', value: series.id),
+      SeriesInfoRow(label: l10n.translate('mangabaka_id'), value: series.id),
     ];
 
     if (rows.isEmpty) return const SizedBox.shrink();

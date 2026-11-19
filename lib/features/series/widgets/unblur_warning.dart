@@ -18,7 +18,7 @@ Future<bool> confirmUnblur(BuildContext context) async {
       actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       title: Row(
         children: [
-          Icon(Icons.blur_off, color: context.colors.accent, size: 24),
+          Icon(Icons.blur_off_rounded, color: context.colors.accent, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

@@ -2,13 +2,11 @@ import 'package:mangabaka_app/features/series/widgets/entry_list_item_content.da
 import 'package:mangabaka_app/features/series/widgets/series_quick_action_button.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
-import 'package:mangabaka_app/features/library/services/library_service.dart';
-import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
@@ -22,10 +20,12 @@ class EntryListItem extends StatefulWidget {
   final String? heroTagPrefix;
   final AppListStyle? listStyle;
   final LibraryEntry? previewEntry;
+  final SeriesListDeps deps;
 
   const EntryListItem({
     super.key,
     required this.series,
+    required this.deps,
     this.ranking,
     this.isLibrary = false,
     this.heroTagPrefix,
@@ -42,23 +42,24 @@ class _EntryListItemState extends State<EntryListItem> {
   bool _hovered = false;
 
   // The DB watch stream is cached: created in build it re-registers a drift watch query every rebuild.
-  late final ProfileAuthService _auth;
-  late final LibraryService _libraryService;
   Stream<LibraryEntry?>? _entryStream;
 
   @override
   void initState() {
     super.initState();
-    _auth = getIt<ProfileAuthService>();
-    _libraryService = getIt<LibraryService>();
-    _auth.addListener(_onAuthChanged);
+    widget.deps.auth.addListener(_onAuthChanged);
     _updateEntryStream();
   }
 
   @override
   void didUpdateWidget(EntryListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.series.id != widget.series.id) {
+    if (oldWidget.deps.auth != widget.deps.auth) {
+      oldWidget.deps.auth.removeListener(_onAuthChanged);
+      widget.deps.auth.addListener(_onAuthChanged);
+    }
+    if (oldWidget.series.id != widget.series.id ||
+        oldWidget.deps.library != widget.deps.library) {
       _updateEntryStream();
     }
     if (oldWidget.listStyle != widget.listStyle) {
@@ -68,7 +69,7 @@ class _EntryListItemState extends State<EntryListItem> {
 
   @override
   void dispose() {
-    _auth.removeListener(_onAuthChanged);
+    widget.deps.auth.removeListener(_onAuthChanged);
     super.dispose();
   }
 
@@ -78,8 +79,8 @@ class _EntryListItemState extends State<EntryListItem> {
   }
 
   void _updateEntryStream() {
-    _entryStream = _auth.isLoggedIn
-        ? _libraryService.watchEntryFromDb(widget.series.id)
+    _entryStream = widget.deps.auth.isLoggedIn
+        ? widget.deps.library.watchEntryFromDb(widget.series.id)
         : Stream<LibraryEntry?>.value(null);
   }
 
@@ -194,6 +195,7 @@ class _EntryListItemState extends State<EntryListItem> {
                   ? SeriesQuickActionButton(
                       series: widget.series,
                       entry: entry,
+                      library: widget.deps.library,
                       onOptimisticProgressChanged: (val) {
                         setState(() {
                           _optimisticProgress = val;
@@ -216,6 +218,7 @@ class _EntryListItemState extends State<EntryListItem> {
           children: [
             EntryListItemContent(
               series: widget.series,
+              library: widget.deps.library,
               style: style,
               l10n: l10n,
               displayTitle: displayTitle,
@@ -251,6 +254,7 @@ class _EntryListItemState extends State<EntryListItem> {
                 child: SeriesQuickActionButton(
                   series: widget.series,
                   entry: entry,
+                  library: widget.deps.library,
                   onOptimisticProgressChanged: (val) {
                     setState(() {
                       _optimisticProgress = val;

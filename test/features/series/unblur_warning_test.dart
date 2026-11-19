@@ -67,7 +67,9 @@ void main() {
 
     Future<void> pump(WidgetTester tester, Series s) => tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: DesktopCoverCard(series: s, width: 140)),
+        home: Scaffold(
+          body: DesktopCoverCard(series: s, width: 140, prefetch: (_) {}),
+        ),
       ),
     );
 

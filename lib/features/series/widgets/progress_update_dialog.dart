@@ -6,8 +6,11 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_overflow_dialog.dart';
+
+part 'progress_update_dialog_parts.dart';
 
 class ProgressUpdateDialog extends StatefulWidget {
   /// Not the series total: it lags for a releasing series, and readers ahead of it must still log progress.
@@ -89,72 +92,51 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
     Navigator.pop(context);
   }
 
+  Widget? _totalLine(LocalizationService l10n) {
+    if (widget.maxValue == 'null' || widget.maxValue.isEmpty) return null;
+    return Text(
+      '${l10n.translate('total')}: ${widget.maxValue}',
+      style: AppTypography.sans(
+        color: context.colors.textMuted,
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
+    final isPage = AdaptiveFormPage.isPage(context);
+    final totalLine = _totalLine(l10n);
 
     return Container(
-      decoration: BoxDecoration(
-        color: context.colors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppConstants.largeRadius),
-        ),
-      ),
+      decoration: isPage
+          ? null
+          : BoxDecoration(
+              color: context.colors.surface,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppConstants.largeRadius),
+              ),
+            ),
       padding: EdgeInsets.fromLTRB(
         24,
-        12,
+        isPage ? 20 : 12,
         24,
-        24 + MediaQuery.of(context).padding.bottom,
+        24 + MediaQuery.paddingOf(context).bottom,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AdaptiveSheetHandle(bottomSpacing: 24),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: context.colors.accent.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.menu_book_rounded,
-                  color: context.colors.accent,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title.toUpperCase(),
-                      style: AppTypography.display(
-                        color: context.colors.text,
-                        fontSize: 18,
-                      ),
-                    ),
-                    if (widget.maxValue != 'null' &&
-                        widget.maxValue.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '${l10n.translate('total')}: ${widget.maxValue}',
-                        style: AppTypography.sans(
-                          color: context.colors.textMuted,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+          if (!isPage) ...[
+            const AdaptiveSheetHandle(bottomSpacing: 24),
+            _ProgressDialogHeader(title: widget.title, totalLine: totalLine),
+            const SizedBox(height: 24),
+          ] else if (totalLine != null) ...[
+            totalLine,
+            const SizedBox(height: 16),
+          ],
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -169,7 +151,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _IconButton(
-                  icon: Icons.remove,
+                  icon: Icons.remove_rounded,
                   onPressed: () => _updateValue(_currentValue - 1),
                 ),
                 Expanded(
@@ -214,7 +196,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                   ),
                 ),
                 _IconButton(
-                  icon: Icons.add,
+                  icon: Icons.add_rounded,
                   onPressed: () => _updateValue(_currentValue + 1),
                 ),
               ],
@@ -265,29 +247,6 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _IconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  const _IconButton({required this.icon, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: context.colors.surfaceRaised,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Icon(icon, color: context.colors.text, size: 20),
-        ),
       ),
     );
   }

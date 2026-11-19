@@ -3,7 +3,7 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-class GlassControl extends StatefulWidget {
+class RaisedControl extends StatefulWidget {
   final VoidCallback onTap;
   final IconData icon;
 
@@ -13,7 +13,7 @@ class GlassControl extends StatefulWidget {
 
   final double iconSize;
 
-  const GlassControl({
+  const RaisedControl({
     super.key,
     required this.onTap,
     required this.icon,
@@ -23,10 +23,10 @@ class GlassControl extends StatefulWidget {
   });
 
   @override
-  State<GlassControl> createState() => _GlassControlState();
+  State<RaisedControl> createState() => _RaisedControlState();
 }
 
-class _GlassControlState extends State<GlassControl> {
+class _RaisedControlState extends State<RaisedControl> {
   static final BorderRadius _radius = BorderRadius.circular(999);
 
   bool _hovered = false;

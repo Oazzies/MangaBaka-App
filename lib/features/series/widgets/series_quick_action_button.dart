@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
@@ -14,11 +13,13 @@ import 'package:mangabaka_app/features/series/widgets/progress_overflow_dialog.d
 class SeriesQuickActionButton extends StatefulWidget {
   final Series series;
   final LibraryEntry? entry;
+  final LibraryService library;
   final ValueChanged<int?>? onOptimisticProgressChanged;
 
   const SeriesQuickActionButton({
     super.key,
     required this.series,
+    required this.library,
     this.entry,
     this.onOptimisticProgressChanged,
   });
@@ -98,7 +99,7 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
   }
 
   Future<void> _handlePress(LibraryEntry entry) async {
-    final libraryService = getIt<LibraryService>();
+    final libraryService = widget.library;
 
     final totalChapters = int.tryParse(widget.series.totalChapters);
     final currentProgress = _optimisticProgress ?? entry.progressChapter ?? 0;

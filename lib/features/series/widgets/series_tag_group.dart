@@ -72,8 +72,8 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
                   ),
                   Icon(
                     _isCollapsed
-                        ? Icons.keyboard_arrow_down
-                        : Icons.keyboard_arrow_up,
+                        ? Icons.keyboard_arrow_down_rounded
+                        : Icons.keyboard_arrow_up_rounded,
                     size: 16,
                     color: context.colors.textMuted.withValues(alpha: 0.7),
                   ),

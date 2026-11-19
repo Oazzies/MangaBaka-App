@@ -115,7 +115,7 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                 scrolledUnderElevation: 0,
                 leading: IconButton(
                   icon: const Icon(
-                    Icons.arrow_back,
+                    Icons.arrow_back_rounded,
                     color: FixedColors.onImage,
                   ),
                   onPressed: () => Navigator.pop(context),

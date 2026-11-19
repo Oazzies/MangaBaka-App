@@ -4,6 +4,7 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_list_layouts.dart';
@@ -81,10 +82,12 @@ class EntryListItemContent extends StatelessWidget {
   final String? heroTagPrefix;
   final int? optimisticProgress;
   final bool hovered;
+  final LibraryService library;
 
   const EntryListItemContent({
     super.key,
     required this.series,
+    required this.library,
     required this.style,
     required this.l10n,
     required this.displayTitle,
@@ -100,6 +103,7 @@ class EntryListItemContent extends StatelessWidget {
       case AppListStyle.coverOnlyGrid:
         return CoverOnlyGridItem(
           series: series,
+          library: library,
           heroTagPrefix: heroTagPrefix,
           entry: entry,
           progressOverride: optimisticProgress,
@@ -108,6 +112,7 @@ class EntryListItemContent extends StatelessWidget {
       case AppListStyle.compactGrid:
         return CompactGridItem(
           series: series,
+          library: library,
           heroTagPrefix: heroTagPrefix,
           displayTitle: displayTitle,
           hovered: hovered,

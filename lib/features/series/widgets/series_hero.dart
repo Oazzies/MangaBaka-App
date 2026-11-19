@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/features/series/utils/series_labels.dart';
 
 class SeriesTitleBlock extends StatelessWidget {
   final Series series;
@@ -20,7 +21,10 @@ class SeriesTitleBlock extends StatelessWidget {
     this.crossAxisAlignment = CrossAxisAlignment.start,
   });
 
-  List<InlineSpan> _buildKicker(BuildContext context) {
+  List<InlineSpan> _buildKicker(
+    BuildContext context,
+    LocalizationService l10n,
+  ) {
     final c = context.colors;
     final spans = <InlineSpan>[];
     void add(String text, Color color) {
@@ -31,10 +35,16 @@ class SeriesTitleBlock extends StatelessWidget {
     }
 
     if (series.type.isNotEmpty && series.type.toLowerCase() != 'null') {
-      add(series.type.toUpperCase(), c.forSeriesType(series.type));
+      add(
+        SeriesLabels.type(series.type).toUpperCase(),
+        c.forSeriesType(series.type),
+      );
     }
     if (series.status.isNotEmpty && series.status.toLowerCase() != 'null') {
-      add(series.status.toUpperCase(), c.forSeriesStatus(series.status));
+      add(
+        SeriesLabels.status(series.status).toUpperCase(),
+        c.forSeriesStatus(series.status),
+      );
     }
     final parsed = double.tryParse(series.rating);
     if (parsed != null && parsed > 0) {
@@ -65,7 +75,7 @@ class SeriesTitleBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    final kicker = _buildKicker(context);
+    final kicker = _buildKicker(context, l10n);
     final byline = _buildByline(l10n);
 
     final otherTitles = <String>[];
@@ -90,7 +100,7 @@ class SeriesTitleBlock extends StatelessWidget {
           Text.rich(
             TextSpan(children: kicker),
             textAlign: textAlign,
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.accent,
               fontSize: isWide ? 12 : 10.5,
             ),

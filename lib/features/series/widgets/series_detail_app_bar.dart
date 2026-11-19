@@ -7,11 +7,11 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/series/widgets/app_bar/glass_control.dart';
+import 'package:mangabaka_app/features/series/widgets/app_bar/raised_control.dart';
 import 'package:mangabaka_app/features/series/widgets/app_bar/series_app_bar_metrics.dart';
 import 'package:mangabaka_app/features/series/widgets/app_bar/series_banner_background.dart';
 
-/// Stateful only to hold the banner blur and backdrop filters until the route transition settles.
+/// Stateful only to hold back the banner blur until the route transition settles.
 class SeriesDetailAppBar extends StatefulWidget {
   final Series series;
   final String title;
@@ -145,9 +145,9 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
         alignment: Alignment.centerLeft,
         child: AppTooltip(
           message: l10n.translate('go_back'),
-          child: GlassControl(
+          child: RaisedControl(
             onTap: widget.onBack,
-            icon: Icons.arrow_back,
+            icon: Icons.arrow_back_rounded,
             label: l10n.translate('back'),
           ).animate().fadeIn(duration: 400.ms),
         ),
@@ -175,7 +175,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
         message: l10n.translate('share_series'),
         child: Builder(
           builder: (buttonContext) => _actionIcon(
-            icon: Icons.share_outlined,
+            icon: Icons.share_rounded,
             onTap: () {
               final box = buttonContext.findRenderObject() as RenderBox?;
               widget.onShare(
@@ -194,7 +194,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
         AppTooltip(
           message: l10n.translate('delete_from_library'),
           child: _actionIcon(
-            icon: Icons.delete_outline,
+            icon: Icons.delete_outline_rounded,
             onTap: widget.onDelete,
             metrics: metrics,
             delay: 160.ms,
@@ -214,7 +214,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
     required SeriesAppBarMetrics metrics,
     required Duration delay,
   }) {
-    return GlassControl(
+    return RaisedControl(
       onTap: onTap,
       icon: icon,
       size: 36,

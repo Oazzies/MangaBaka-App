@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
-import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
@@ -46,22 +45,14 @@ class SeriesCollectionsTab extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: SeriesSectionHeader(
-                      title: l10n.translate('tab_collections'),
-                      bottomPadding: 0,
-                    ),
+              if (MediaQuery.orientationOf(context) == Orientation.landscape)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _buildColumnSwitch(context, settings),
                   ),
-                  if (MediaQuery.of(context).orientation ==
-                      Orientation.landscape)
-                    _buildColumnSwitch(context, settings),
-                ],
-              ),
-              const SizedBox(height: 16),
+                ),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final isLandscape =

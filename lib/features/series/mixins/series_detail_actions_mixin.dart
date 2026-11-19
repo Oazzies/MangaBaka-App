@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,79 +55,69 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   }
 
   void showUpdateNoteDialog(LibraryEntry entry) {
-    showAdaptiveSheet(
+    showNoteEditorForm(
+      context,
+      initialNote: entry.note,
+      onSave: (note) async {
+        try {
+          await libraryService.updateLibraryEntryNote(series.id, note);
+        } catch (e) {
+          if (mounted) {
+            AppSnackBar.show(
+              context,
+              LocalizationService().translate('failed_to_update'),
+              isError: true,
+            );
+          }
+        }
+      },
+    );
+  }
+
+  void showUpdateProgressDialog(LibraryEntry entry, {bool isChapter = true}) {
+    final title = LocalizationService().translate(
+      isChapter ? 'update_chapters' : 'update_volumes',
+    );
+    showAdaptiveForm(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => NoteEditorDialog(
-        initialNote: entry.note,
-        onSave: (note) async {
+      title: title,
+      builder: (_) => ProgressUpdateDialog(
+        initialValue:
+            (isChapter ? entry.progressChapter : entry.progressVolume) ?? 0,
+        title: title,
+        maxValue: isChapter ? series.totalChapters : series.finalVolume,
+        isChapter: isChapter,
+        seriesStatus: series.status,
+        onUpdate: (value) async {
+          // Awaited, or a failure surfaces only as an unhandled async error and the user hears nothing.
           try {
-            await libraryService.updateLibraryEntryNote(series.id, note);
+            await libraryService.updateLibraryEntryProgress(
+              series.id,
+              progressChapter: isChapter ? value : null,
+              progressVolume: isChapter ? null : value,
+            );
+            if (mounted) {
+              await maybePromptCompleteSeries(
+                context,
+                series: series,
+                entry: entry,
+                libraryService: libraryService,
+                previousChapter: isChapter ? entry.progressChapter ?? 0 : null,
+                updatedChapter: isChapter ? value : null,
+                previousVolume: isChapter ? null : entry.progressVolume ?? 0,
+                updatedVolume: isChapter ? null : value,
+              );
+            }
           } catch (e) {
             if (mounted) {
               AppSnackBar.show(
-                this.context,
+                context,
                 LocalizationService().translate('failed_to_update'),
                 isError: true,
               );
             }
           }
         },
-      ),
-    );
-  }
-
-  void showUpdateProgressDialog(LibraryEntry entry, {bool isChapter = true}) {
-    final l10n = LocalizationService();
-    showAdaptiveSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: ProgressUpdateDialog(
-          initialValue:
-              (isChapter ? entry.progressChapter : entry.progressVolume) ?? 0,
-          title: isChapter
-              ? l10n.translate('update_chapters')
-              : l10n.translate('update_volumes'),
-          maxValue: isChapter ? series.totalChapters : series.finalVolume,
-          isChapter: isChapter,
-          seriesStatus: series.status,
-          onUpdate: (value) async {
-            // Awaited, or a failure surfaces only as an unhandled async error and the user hears nothing.
-            try {
-              await libraryService.updateLibraryEntryProgress(
-                series.id,
-                progressChapter: isChapter ? value : null,
-                progressVolume: isChapter ? null : value,
-              );
-              if (mounted) {
-                await maybePromptCompleteSeries(
-                  this.context,
-                  series: series,
-                  entry: entry,
-                  libraryService: libraryService,
-                  previousChapter: isChapter ? entry.progressChapter ?? 0 : null,
-                  updatedChapter: isChapter ? value : null,
-                  previousVolume: isChapter ? null : entry.progressVolume ?? 0,
-                  updatedVolume: isChapter ? null : value,
-                );
-              }
-            } catch (e) {
-              if (mounted) {
-                AppSnackBar.show(
-                  this.context,
-                  LocalizationService().translate('failed_to_update'),
-                  isError: true,
-                );
-              }
-            }
-          },
-        ),
       ),
     );
   }

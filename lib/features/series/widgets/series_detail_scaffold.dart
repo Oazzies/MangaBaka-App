@@ -91,6 +91,7 @@ class SeriesDetailScaffold extends StatelessWidget {
             floatingActionButton: (isWide || embedded)
                 ? null
                 : SeriesDetailFAB(
+                    isLoggedIn: state.isLoggedIn,
                     entryStream: entryStream,
                     isAdding: isAdding,
                     onAdd: onAdd,

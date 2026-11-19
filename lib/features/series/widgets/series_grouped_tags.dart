@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/widgets/series_tags_fade_out.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
@@ -18,11 +17,13 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class SeriesGroupedTags extends StatefulWidget {
   final Series series;
   final LocalizationService l10n;
+  final MetadataService metadata;
 
   const SeriesGroupedTags({
     super.key,
     required this.series,
     required this.l10n,
+    required this.metadata,
   });
 
   @override
@@ -77,10 +78,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
       await SeriesDetailScreen.of(context)?.transitionSettled;
       if (!mounted || _groups != null) return;
       setState(() {
-        _groups = TagGrouping.resolve(
-          widget.series.tags,
-          getIt<MetadataService>(),
-        );
+        _groups = TagGrouping.resolve(widget.series.tags, widget.metadata);
         _totalChips = widget.series.tags.length;
         _cachedContent = null;
       });
@@ -134,7 +132,9 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
     _cachedContent = [
       for (final group in groups)
         SeriesTagGroup(
-          header: group.header,
+          header: group.header == TagGrouping.fallbackHeader
+              ? widget.l10n.translate('tag_group_other')
+              : group.header,
           subGroups: group.subGroups,
           selectedTagIds: selectedTagIds,
           onTagTap: _handleTagTap,
@@ -241,8 +241,8 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
             const SizedBox(width: 4),
             Icon(
               _tagsExpanded
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
+                  ? Icons.keyboard_arrow_up_rounded
+                  : Icons.keyboard_arrow_down_rounded,
               color: context.colors.accent,
               size: 20,
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/features/series/widgets/description_section.dart';
@@ -19,6 +20,7 @@ class SeriesDetailMobileLayout extends StatelessWidget {
   final LocalizationService l10n;
   final bool isDataLoaded;
   final String selectedTab;
+  final MetadataService metadata;
   final ValueChanged<String> onTabChanged;
   final Function(String) onStateChanged;
   final Function(int) onRatingChanged;
@@ -38,6 +40,7 @@ class SeriesDetailMobileLayout extends StatelessWidget {
     required this.l10n,
     required this.isDataLoaded,
     required this.selectedTab,
+    required this.metadata,
     required this.onTabChanged,
     required this.onStateChanged,
     required this.onRatingChanged,
@@ -100,7 +103,11 @@ class SeriesDetailMobileLayout extends StatelessWidget {
                           DescriptionSection(description: series.description),
                           const SizedBox(height: 28),
                         ],
-                        SeriesGenresSection(series: series, l10n: l10n),
+                        SeriesGenresSection(
+                          series: series,
+                          l10n: l10n,
+                          metadata: metadata,
+                        ),
                         const SizedBox(height: 4),
                         SeriesInformationCard(
                           series: series,

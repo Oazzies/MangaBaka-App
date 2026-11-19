@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
 void main() {
@@ -20,9 +21,9 @@ void main() {
       expect(r.id, 7);
     });
 
-    test('fromJson falls back to "Unknown Title" when missing', () {
+    test('fromJson falls back to the unknown title string when missing', () {
       final r = AutocompleteSeriesResult.fromJson({'id': 1});
-      expect(r.title, 'Unknown Title');
+      expect(r.title, LocalizationService().translate('unknown_title'));
     });
 
     test('fromJson collects native + romanized in allTitles', () {

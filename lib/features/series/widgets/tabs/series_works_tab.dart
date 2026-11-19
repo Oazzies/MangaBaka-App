@@ -1,7 +1,6 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
-import 'package:mangabaka_app/features/series/widgets/series_section_header.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -49,19 +48,9 @@ class SeriesWorksTab extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    SeriesSectionHeader(title: l10n.translate('tab_works')),
-                    Positioned(
-                      right: 0,
-                      top: -12,
-                      child: _buildListStyleSwitch(context, settings),
-                    ),
-                  ],
-                ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: _buildListStyleSwitch(context, settings),
               ),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -87,7 +76,7 @@ class SeriesWorksTab extends StatelessWidget {
       message: l10n.translate('toggle_layout'),
       child: IconButton(
         icon: Icon(
-          isGrid ? Icons.view_agenda_outlined : Icons.grid_view_rounded,
+          (isGrid ? AppListStyle.comfortable : AppListStyle.compactGrid).icon,
           color: context.colors.text,
         ),
         onPressed: () {
@@ -219,7 +208,7 @@ class SeriesWorksTab extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Icon(
-                      Icons.label_outline,
+                      Icons.label_outline_rounded,
                       size: 14,
                       color: context.colors.textMuted,
                     ),

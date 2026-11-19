@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_grouped_tags.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
@@ -13,6 +14,7 @@ class SeriesDetailsGrid extends StatelessWidget {
   final List<SeriesLink>? enrichedLinks;
   final bool isWide;
   final LocalizationService l10n;
+  final MetadataService metadata;
   final double horizontalPadding;
 
   const SeriesDetailsGrid({
@@ -21,6 +23,7 @@ class SeriesDetailsGrid extends StatelessWidget {
     this.enrichedLinks,
     this.isWide = false,
     required this.l10n,
+    required this.metadata,
     this.horizontalPadding = 16.0,
   });
 
@@ -42,7 +45,7 @@ class SeriesDetailsGrid extends StatelessWidget {
             children: [
               Text(
                 l10n.translate('anime_start').toUpperCase(),
-                style: AppTypography.monoLabel(
+                style: AppTypography.displayLabel(
                   color: context.colors.textMuted,
                   fontSize: 10,
                 ),
@@ -71,7 +74,7 @@ class SeriesDetailsGrid extends StatelessWidget {
             children: [
               Text(
                 l10n.translate('anime_stop').toUpperCase(),
-                style: AppTypography.monoLabel(
+                style: AppTypography.displayLabel(
                   color: context.colors.textMuted,
                   fontSize: 10,
                 ),
@@ -108,7 +111,7 @@ class SeriesDetailsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = [
       _buildAnimeContainer(context),
-      SeriesGroupedTags(series: series, l10n: l10n),
+      SeriesGroupedTags(series: series, l10n: l10n, metadata: metadata),
       if (enrichedLinks != null || series.links.isNotEmpty) ...[
         const SizedBox(height: 8),
         WidgetUtils.linkList(enrichedLinks ?? series.links),

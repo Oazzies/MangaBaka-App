@@ -10,8 +10,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/widgets/tabs/series_similar_grid.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
@@ -19,6 +18,7 @@ class SeriesSimilarTab extends StatelessWidget {
   final List<Series>? similar;
   final List<Series>? readersAlsoLike;
   final LocalizationService l10n;
+  final SeriesListDeps deps;
   final double horizontalPadding;
   final String? currentSeriesId;
 
@@ -27,6 +27,7 @@ class SeriesSimilarTab extends StatelessWidget {
     required this.similar,
     this.readersAlsoLike,
     required this.l10n,
+    required this.deps,
     this.horizontalPadding = 16.0,
     this.currentSeriesId,
   });
@@ -67,7 +68,7 @@ class SeriesSimilarTab extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: ListStyleSwitchGate(
-        shrink: true,
+        nestedInScrollView: true,
         child: ListenableBuilder(
           listenable: SettingsManager(),
           builder: (context, _) {
@@ -169,6 +170,7 @@ class SeriesSimilarTab extends StatelessWidget {
             series: series,
             style: style,
             heroTagPrefix: heroTagPrefix,
+            deps: deps,
           )
         else
           _buildList(context, series, style, heroTagPrefix),
@@ -183,13 +185,12 @@ class SeriesSimilarTab extends StatelessWidget {
     String heroTagPrefix,
   ) {
     // Not a nested ListView: in the AnimatedSwitcher it can paint before layout ("RenderBox was not laid out").
-    final seriesService = getIt<SeriesService>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final s in series)
           MouseRegion(
-            onEnter: (_) => seriesService.fetchSeries(s.id),
+            onEnter: (_) => deps.prefetch(s.id),
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -200,6 +201,7 @@ class SeriesSimilarTab extends StatelessWidget {
               },
               child: EntryListItem(
                 series: s,
+                deps: deps,
                 heroTagPrefix: heroTagPrefix,
                 listStyle: style,
               ),

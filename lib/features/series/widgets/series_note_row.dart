@@ -51,14 +51,14 @@ class _SeriesNoteRowState extends State<SeriesNoteRow> {
                   Expanded(
                     child: Text(
                       widget.label.toUpperCase(),
-                      style: AppTypography.monoLabel(
+                      style: AppTypography.displayLabel(
                         color: c.textMuted,
                         fontSize: 12,
                       ),
                     ),
                   ),
                   Icon(
-                    hasNote ? Icons.edit : Icons.add,
+                    hasNote ? Icons.edit_rounded : Icons.add_rounded,
                     size: 16,
                     color: c.textMuted,
                   ),

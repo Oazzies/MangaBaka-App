@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -51,12 +49,14 @@ class SeriesAddToLibraryButton extends StatelessWidget {
 }
 
 class SeriesDetailFAB extends StatelessWidget {
+  final bool isLoggedIn;
   final Stream<LibraryEntry?>? entryStream;
   final bool isAdding;
   final VoidCallback onAdd;
 
   const SeriesDetailFAB({
     super.key,
+    required this.isLoggedIn,
     required this.entryStream,
     required this.isAdding,
     required this.onAdd,
@@ -64,7 +64,6 @@ class SeriesDetailFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
     if (!isLoggedIn) return const SizedBox.shrink();
 
     return StreamBuilder<LibraryEntry?>(

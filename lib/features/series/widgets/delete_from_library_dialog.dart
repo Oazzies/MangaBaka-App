@@ -26,7 +26,7 @@ Future<bool?> showDeleteFromLibraryDialog(BuildContext context) {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.delete_sweep_rounded,
+              Icons.delete_outline_rounded,
               color: context.colors.error,
               size: 24,
             ),

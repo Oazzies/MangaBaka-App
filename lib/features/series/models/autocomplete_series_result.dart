@@ -1,3 +1,4 @@
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/utils/json_utils.dart';
 
 class AutocompleteSeriesResult {
@@ -99,7 +100,9 @@ class AutocompleteSeriesResult {
     }
 
     if (displayTitle.isEmpty) {
-      displayTitle = json['title']?.toString() ?? 'Unknown Title';
+      displayTitle =
+          json['title']?.toString() ??
+          LocalizationService().translate('unknown_title');
     }
 
     String thumbnail = '';
