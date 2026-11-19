@@ -13,8 +13,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
 import 'package:mangabaka_app/features/updates/widgets/update_release_notes.dart';
-import 'package:mangabaka_app/core/exceptions/error_messages.dart';
-import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
 class UpdateDialog extends StatefulWidget {
   const UpdateDialog({super.key, required this.release});
@@ -41,7 +39,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
   _Phase _phase = _Phase.idle;
   double _progress = 0;
-  String? _errorMessage;
+  String? _errorReasonKey;
 
   bool get _busy => _phase == _Phase.downloading || _phase == _Phase.installing;
 
@@ -55,7 +53,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
     setState(() {
       _phase = _Phase.downloading;
       _progress = 0;
-      _errorMessage = null;
+      _errorReasonKey = null;
     });
 
     try {
@@ -90,11 +88,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
       if (!mounted) return;
       setState(() {
         _phase = _Phase.error;
-        // Only these two carry wording written for the user.
-        _errorMessage =
-            e is UpdateIntegrityException || e is InstallPermissionException
-            ? (e as AppException).message
-            : ErrorMessages.describe(e);
+        _errorReasonKey = e is UpdateException ? e.l10nKey : null;
       });
     }
   }
@@ -224,9 +218,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   ],
                 ),
               ],
-              if (_phase == _Phase.error && _errorMessage != null) ...[
+              if (_phase == _Phase.error) ...[
                 const SizedBox(height: 16),
-                UpdateErrorBanner(l10n: l10n),
+                UpdateErrorBanner(l10n: l10n, reasonKey: _errorReasonKey),
               ],
             ],
           ),

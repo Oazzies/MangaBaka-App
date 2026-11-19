@@ -15,6 +15,7 @@ import 'package:mangabaka_app/features/publisher/widgets/publisher_metadata_pane
 import 'package:mangabaka_app/features/publisher/widgets/publisher_shelves.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 enum PublisherDetailTab { info, collections, editions }
 
@@ -34,6 +35,7 @@ class PublisherDesktopScaffold extends StatelessWidget {
   final Widget Function(LocalizationService l10n, Publisher publisher)
   buildStatsSection;
   final Widget Function(LocalizationService l10n) buildSimilarSection;
+  final SeriesPrefetch prefetch;
 
   static const double _sidebarWidth = 380;
   static const double _sidebarMinWidth = 1120;
@@ -54,6 +56,7 @@ class PublisherDesktopScaffold extends StatelessWidget {
     required this.onOpenPublisher,
     required this.buildStatsSection,
     required this.buildSimilarSection,
+    required this.prefetch,
   });
 
   @override
@@ -236,6 +239,7 @@ class PublisherDesktopScaffold extends StatelessWidget {
             title: title,
             sort: sort,
             future: shelves[shelf]!,
+            prefetch: prefetch,
           ),
       ],
     );

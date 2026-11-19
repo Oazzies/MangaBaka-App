@@ -21,6 +21,8 @@ class StaffListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LocalizationService();
+    final role = staff.role;
     return Card(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: context.colors.surface,
@@ -60,11 +62,11 @@ class StaffListItem extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-            if (staff.role != null)
+            if (role != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
                 child: Text(
-                  staff.role!,
+                  l10n.translate(role.labelKey),
                   style: AppTypography.sans(
                     color: context.colors.accent,
                     fontSize: 12,
@@ -86,7 +88,7 @@ class StaffListItem extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    LocalizationService().translate('series'),
+                    l10n.translate('series'),
                     style: AppTypography.sans(
                       color: context.colors.textMuted,
                       fontSize: 10,

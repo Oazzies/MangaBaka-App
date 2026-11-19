@@ -136,6 +136,30 @@ void main() {
 
     expect(service.installs, 0);
     expect(find.textContaining('Update failed'), findsOneWidget);
+    expect(
+      find.text(
+        LocalizationService().translate(UpdateIntegrityException().l10nKey),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('an unexplained failure shows only the generic message', (
+    tester,
+  ) async {
+    await openDialog(
+      tester,
+      _FakeUpdateService(
+        asset: _asset(sha: _hex),
+        downloadError: const SocketException('offline'),
+      ),
+    );
+
+    await tester.tap(find.text('Update now'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Update failed'), findsOneWidget);
+    expect(find.textContaining('offline'), findsNothing);
   });
 }

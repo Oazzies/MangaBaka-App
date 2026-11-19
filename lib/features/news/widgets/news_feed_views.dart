@@ -7,17 +7,20 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/news/widgets/news_list_item.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 class NewsFeedGrid extends StatelessWidget {
   final ScrollController scrollController;
   final List<News> newsList;
   final bool isLoading;
+  final SeriesPrefetch prefetch;
 
   const NewsFeedGrid({
     super.key,
     required this.scrollController,
     required this.newsList,
     required this.isLoading,
+    required this.prefetch,
   });
 
   @override
@@ -39,6 +42,7 @@ class NewsFeedGrid extends StatelessWidget {
                       NewsListItem(
                         key: ValueKey('grid_${newsList[i].id}'),
                         news: newsList[i],
+                        prefetch: prefetch,
                       ),
                   ],
                 ),
@@ -52,6 +56,7 @@ class NewsFeedGrid extends StatelessWidget {
                       NewsListItem(
                         key: ValueKey('grid_${newsList[i].id}'),
                         news: newsList[i],
+                        prefetch: prefetch,
                       ),
                   ],
                 ),
@@ -73,12 +78,14 @@ class NewsFeedList extends StatelessWidget {
   final ScrollController scrollController;
   final List<News> newsList;
   final bool isLoading;
+  final SeriesPrefetch prefetch;
 
   const NewsFeedList({
     super.key,
     required this.scrollController,
     required this.newsList,
     required this.isLoading,
+    required this.prefetch,
   });
 
   @override
@@ -98,6 +105,7 @@ class NewsFeedList extends StatelessWidget {
           child: NewsListItem(
             key: ValueKey('list_${newsList[index].id}'),
             news: newsList[index],
+            prefetch: prefetch,
           ),
         );
       },

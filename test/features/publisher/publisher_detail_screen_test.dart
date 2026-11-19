@@ -12,6 +12,7 @@ import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeCollections extends Fake implements CollectionService {
@@ -31,6 +32,22 @@ class _FakeCollections extends Fake implements CollectionService {
     collectionCalls++;
     return const PagedList([], hasNext: false);
   }
+}
+
+class _NoSeries extends Fake implements SeriesService {}
+
+class _RailPublishers extends Fake implements PublisherSearchService {
+  final List<Publisher> found;
+
+  _RailPublishers(this.found);
+
+  @override
+  Future<List<Publisher>> searchPublishers({
+    String? query,
+    int? page,
+    int? limit,
+    String? sortBy,
+  }) async => found;
 }
 
 class _FakePublishers extends Fake implements PublisherSearchService {
@@ -107,6 +124,7 @@ void main() {
     SettingsManager.resetForTesting();
     await SettingsManager().init();
     await resetServiceLocator();
+    getIt.registerSingleton<SeriesService>(_NoSeries());
     LocalizationService.resetForTesting();
     await LocalizationService().init();
   });
@@ -161,9 +179,9 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: HomePublishersRail(
-            loader: () async => [
+            service: _RailPublishers([
               Publisher(id: '35', name: 'Shueisha', seriesCount: 12380),
-            ],
+            ]),
           ),
         ),
       ),
@@ -176,7 +194,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: HomePublishersRail(key: UniqueKey(), loader: () async => []),
+          body: HomePublishersRail(
+            key: UniqueKey(),
+            service: _RailPublishers(const []),
+          ),
         ),
       ),
     );

@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/mock_series_data.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_banner.dart';
+import 'package:mangabaka_app/core/network/backend_health_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_nav.dart';
@@ -13,6 +15,7 @@ import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
 import 'package:mangabaka_app/features/home/screens/home_screen.dart';
 import 'package:mangabaka_app/features/library/screens/library_screen.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/library/widgets/sync_progress_overlay.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/navigation/widgets/main_nav_rail.dart';
@@ -203,7 +206,7 @@ class MainScreenState extends State<MainScreen> {
     return Stack(
       children: [
         IndexedStack(index: _selectedIndex, children: _pages),
-        const SyncProgressOverlay(),
+        SyncProgressOverlay(libraryService: getIt<LibraryService>()),
       ],
     );
   }
@@ -225,7 +228,7 @@ class MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-        const SyncProgressOverlay(),
+        SyncProgressOverlay(libraryService: getIt<LibraryService>()),
       ],
     );
   }
@@ -233,7 +236,7 @@ class MainScreenState extends State<MainScreen> {
   Widget _withHealthBanner(Widget child) {
     return Column(
       children: [
-        const BackendHealthBanner(),
+        BackendHealthBanner(health: getIt<BackendHealthService>()),
         Expanded(child: child),
       ],
     );

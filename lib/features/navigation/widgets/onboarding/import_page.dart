@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
@@ -8,11 +7,12 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 
 /// Import needs an account, and onboarding's Next does not require signing in.
 class ImportPage extends StatelessWidget {
-  const ImportPage({super.key});
+  final ProfileAuthService auth;
+
+  const ImportPage({super.key, required this.auth});
 
   @override
   Widget build(BuildContext context) {
-    final auth = getIt<ProfileAuthService>();
     return ListenableBuilder(
       listenable: Listenable.merge([LocalizationService(), auth]),
       builder: (context, _) {
@@ -21,7 +21,7 @@ class ImportPage extends StatelessWidget {
         return LayoutBuilder(
           builder: (context, constraints) {
             return OnboardingHeroLayout(
-              icon: Icons.cloud_upload_rounded,
+              icon: Icons.file_download_rounded,
               title: l10n.translate('onboarding_import_title'),
               subtitle: l10n.translate(
                 isLoggedIn

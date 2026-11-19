@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 typedef PublisherShelfDef = (PublisherShelf shelf, String title, String? sort);
@@ -46,7 +47,7 @@ void _openShelfBrowse(
         sortBy: sort,
         publisher: publisher.name,
         publisherId: publisher.id,
-        refineLabel: title,
+        titleRefinement: title,
       ),
     ),
   );
@@ -58,6 +59,7 @@ class PublisherDesktopShelf extends StatelessWidget {
   final String title;
   final String? sort;
   final Future<List<Series>> future;
+  final SeriesPrefetch prefetch;
 
   const PublisherDesktopShelf({
     super.key,
@@ -66,6 +68,7 @@ class PublisherDesktopShelf extends StatelessWidget {
     required this.title,
     required this.sort,
     required this.future,
+    required this.prefetch,
   });
 
   @override
@@ -92,6 +95,7 @@ class PublisherDesktopShelf extends StatelessWidget {
                 : () => _openShelfBrowse(context, publisher, title, sort!),
             itemBuilder: (context, i) => DesktopCoverCard(
               series: series[i],
+              prefetch: prefetch,
               heroTag: 'publisher_${publisher.id}_${shelf.name}_$i',
               showRating: false,
             ),

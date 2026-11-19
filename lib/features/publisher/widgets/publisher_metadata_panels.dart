@@ -160,7 +160,7 @@ class PublisherAliasesPanel extends StatelessWidget {
                       width: 32,
                       child: Text(
                         a.language.toUpperCase(),
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: context.colors.textMuted,
                           fontSize: 10,
                         ),

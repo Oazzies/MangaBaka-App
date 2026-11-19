@@ -95,7 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     (
       titleKey: 'onboarding_import_title',
       icon: Icons.import_export_rounded,
-      page: const ImportPage(),
+      page: ImportPage(auth: _authService),
     ),
   ];
 

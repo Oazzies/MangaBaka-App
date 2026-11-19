@@ -8,7 +8,7 @@ void main() {
         'id': 7,
         'name': 'Akira Toriyama',
         'native_name': '鳥山 明',
-        'role': 'mangaka',
+        'role': 'artist',
         'image': 'https://example/img.png',
         'series_count': 14,
         'notes': 'Author',
@@ -16,7 +16,7 @@ void main() {
       expect(s.id, 7);
       expect(s.name, 'Akira Toriyama');
       expect(s.nativeName, '鳥山 明');
-      expect(s.role, 'mangaka');
+      expect(s.role, StaffRole.artist);
       expect(s.image, 'https://example/img.png');
       expect(s.seriesCount, 14);
       expect(s.notes, 'Author');
@@ -40,6 +40,16 @@ void main() {
       expect(json['name'], 'X');
       expect(json['native_name'], isNull);
       expect(json['series_count'], isNull);
+    });
+
+    test('fromJson leaves an unknown role null', () {
+      final s = Staff.fromJson({'id': 1, 'name': 'X', 'role': 'mangaka'});
+      expect(s.role, isNull);
+    });
+
+    test('role survives a JSON round trip', () {
+      final s = Staff(id: 1, name: 'X', role: StaffRole.authorAndArtist);
+      expect(Staff.fromJson(s.toJson()).role, StaffRole.authorAndArtist);
     });
   });
 }

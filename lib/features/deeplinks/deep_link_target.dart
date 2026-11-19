@@ -4,7 +4,7 @@ import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 sealed class DeepLinkTarget {
   const DeepLinkTarget();
 
-  static const _formats = {
+  static const _seriesTypeSegments = {
     'manga',
     'manhwa',
     'manhua',
@@ -31,7 +31,7 @@ sealed class DeepLinkTarget {
     final second = segments.length > 1 ? segments[1] : null;
 
     // /manga/<id>[/slug] — also the older /series/<id>.
-    if (_formats.contains(first) || first == 'series') {
+    if (_seriesTypeSegments.contains(first) || first == 'series') {
       if (second != null && _isId(second)) return SeriesTarget(second);
       if (first == 'series' || first == 'other') {
         return const TabTarget(NavTabs.browse);

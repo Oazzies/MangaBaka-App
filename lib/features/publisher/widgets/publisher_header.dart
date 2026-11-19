@@ -163,7 +163,7 @@ class PublisherDesktopIdentity extends StatelessWidget {
                         for (final fact in facts)
                           Text(
                             fact,
-                            style: AppTypography.monoLabel(
+                            style: AppTypography.displayLabel(
                               color: colors.textMuted,
                               fontSize: 12,
                             ),

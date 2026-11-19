@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
 import 'package:mangabaka_app/features/news/widgets/news_feed_views.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -24,14 +28,16 @@ class NewsScreen extends StatefulWidget {
 class _NewsScreenState extends State<NewsScreen> {
   static final _logger = LoggingService.logger;
   late final NewsService _newsService;
+  late final SeriesService _seriesService = getIt<SeriesService>();
   final List<News> _newsList = [];
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isBackgroundRefresh = false;
   int _currentPage = 1;
-  String? _error;
+  String? _errorKey;
   bool _showBackToTop = false;
+  Timer? _refreshFloor;
 
   @override
   void initState() {
@@ -44,6 +50,7 @@ class _NewsScreenState extends State<NewsScreen> {
 
   @override
   void dispose() {
+    _refreshFloor?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -72,7 +79,7 @@ class _NewsScreenState extends State<NewsScreen> {
       'Fetching news: initial=$initial, isBackground=$isBackground, page=$_currentPage',
     );
     setState(() {
-      _error = null;
+      _errorKey = null;
       if (isBackground) {
         _isBackgroundRefresh = true;
       } else {
@@ -109,7 +116,7 @@ class _NewsScreenState extends State<NewsScreen> {
       setState(() {
         _isLoading = false;
         _isBackgroundRefresh = false;
-        if (!isBackground) _error = 'Failed to load news';
+        if (!isBackground) _errorKey = ErrorMessages.keyFor(e);
       });
     }
   }
@@ -122,10 +129,10 @@ class _NewsScreenState extends State<NewsScreen> {
       _hasMore = true;
     });
 
-    await Future.wait([
-      _fetchNews(initial: true),
-      Future.delayed(const Duration(milliseconds: 800)),
-    ]);
+    final floor = Completer<void>();
+    _refreshFloor?.cancel();
+    _refreshFloor = Timer(const Duration(milliseconds: 800), floor.complete);
+    await Future.wait([_fetchNews(initial: true), floor.future]);
   }
 
   void _onScroll() {
@@ -233,9 +240,7 @@ class _NewsScreenState extends State<NewsScreen> {
     if (_newsList.isEmpty && !_isLoading && !_isBackgroundRefresh) {
       return Center(
         child: Text(
-          _error != null
-              ? '${l10n.translate('failed_to_load')}: $_error'
-              : l10n.translate('no_results'),
+          l10n.translate(_errorKey ?? 'no_results'),
           style: AppTypography.sans(color: context.colors.textMuted),
         ),
       );
@@ -248,11 +253,13 @@ class _NewsScreenState extends State<NewsScreen> {
               scrollController: _scrollController,
               newsList: _newsList,
               isLoading: _isLoading,
+              prefetch: _seriesService.fetchSeries,
             )
           : NewsFeedList(
               scrollController: _scrollController,
               newsList: _newsList,
               isLoading: _isLoading,
+              prefetch: _seriesService.fetchSeries,
             ),
     );
   }

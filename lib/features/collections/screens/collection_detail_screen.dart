@@ -207,7 +207,7 @@ class _WorkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = work.sequenceString.isNotEmpty
-        ? 'Vol. ${work.sequenceString}'
+        ? '${LocalizationService().translate('abbr_volume')} ${work.sequenceString}'
         : (work.subTitle.isNotEmpty ? work.subTitle : work.countType);
     final cover = work.imageUrl;
 

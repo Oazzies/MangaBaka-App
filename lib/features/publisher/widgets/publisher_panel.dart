@@ -55,7 +55,7 @@ class PublisherSubLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text.toUpperCase(),
-    style: AppTypography.monoLabel(
+    style: AppTypography.displayLabel(
       color: context.colors.textMuted,
       fontSize: 10,
     ),
@@ -77,7 +77,7 @@ class PublisherBadge extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: AppTypography.monoLabel(
+        style: AppTypography.displayLabel(
           color: context.colors.accent,
           fontSize: 10,
           fontWeight: FontWeight.bold,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_pill.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
@@ -42,8 +41,8 @@ class PublisherStatsView extends StatelessWidget {
           publisher: publisher.name,
           publisherId: publisher.id,
           genre: genre,
-          tag: tag,
-          refineLabel: refine,
+          tagId: tag,
+          titleRefinement: refine,
         ),
       ),
     );
@@ -232,19 +231,6 @@ class PublisherStatsView extends StatelessWidget {
                     count: t.count,
                     onTap: () => open(t),
                   ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      l10n.translate('publisher_share_legend'),
-                      style: AppTypography.sans(
-                        color: context.colors.textMuted,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             )
           else

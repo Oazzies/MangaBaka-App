@@ -18,6 +18,7 @@ import 'package:mangabaka_app/features/publisher/widgets/publisher_panel.dart';
 import 'package:mangabaka_app/features/publisher/widgets/publisher_stats_panel.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 class PublisherDetailScreen extends StatefulWidget {
@@ -165,6 +166,7 @@ class _PublisherDetailScreenState extends State<PublisherDetailScreen> {
         onOpenPublisher: PublisherDetailScreen.open,
         buildStatsSection: _statsSection,
         buildSimilarSection: _similarSection,
+        prefetch: getIt<SeriesService>().fetchSeries,
       );
     }
 

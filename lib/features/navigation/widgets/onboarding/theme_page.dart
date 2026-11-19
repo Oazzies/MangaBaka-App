@@ -84,7 +84,7 @@ class _Label extends StatelessWidget {
     child: Text(
       text.toUpperCase(),
       textAlign: TextAlign.center,
-      style: AppTypography.monoLabel(
+      style: AppTypography.displayLabel(
         color: context.colors.textMuted,
         fontSize: 11.5,
       ),

@@ -59,7 +59,7 @@ class OnboardingDesktopShell extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             l10n.translate('onboarding').toUpperCase(),
-                            style: AppTypography.monoLabel(
+                            style: AppTypography.displayLabel(
                               color: context.colors.textMuted,
                               fontSize: 11,
                             ),
@@ -156,29 +156,6 @@ class OnboardingDesktopShell extends StatelessWidget {
                   icon: step.icon,
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.tune_rounded,
-                  size: 15,
-                  color: context.colors.textMuted,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.translate('onboarding_settings_hint'),
-                    style: AppTypography.sans(
-                      color: context.colors.textMuted,
-                      fontSize: 11.5,
-                      height: 1.3,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ],

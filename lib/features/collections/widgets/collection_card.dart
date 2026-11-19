@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
@@ -26,6 +27,9 @@ class CollectionCard extends StatelessWidget {
       if (col.editionName.isNotEmpty) col.editionName,
       if (col.languageName.isNotEmpty) col.languageName,
     ].join('  ·  ');
+    final volumesUnit = LocalizationService()
+        .translate(col.countMain == 1 ? 'abbr_volume' : 'abbr_volumes')
+        .toUpperCase();
 
     final card = Container(
       padding: const EdgeInsets.all(16),
@@ -67,8 +71,8 @@ class CollectionCard extends StatelessWidget {
               if (col.countMain > 0) ...[
                 const SizedBox(width: 12),
                 Text(
-                  '${col.countMain} VOLS',
-                  style: AppTypography.monoLabel(
+                  '${col.countMain} $volumesUnit',
+                  style: AppTypography.displayLabel(
                     color: context.colors.accent,
                     fontSize: 11.5,
                   ),

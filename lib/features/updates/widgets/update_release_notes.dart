@@ -88,11 +88,18 @@ class UpdateReleaseNotes extends StatelessWidget {
 
 class UpdateErrorBanner extends StatelessWidget {
   final LocalizationService l10n;
+  final String? reasonKey;
 
-  const UpdateErrorBanner({super.key, required this.l10n});
+  const UpdateErrorBanner({super.key, required this.l10n, this.reasonKey});
 
   @override
   Widget build(BuildContext context) {
+    final style = AppTypography.sans(
+      color: context.colors.error.withValues(alpha: 0.9),
+      fontSize: 13,
+      height: 1.4,
+    );
+    final reason = reasonKey;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -110,13 +117,16 @@ class UpdateErrorBanner extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              l10n.translate('update_failed'),
-              style: AppTypography.sans(
-                color: context.colors.error.withValues(alpha: 0.9),
-                fontSize: 13,
-                height: 1.4,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (reason != null)
+                  Text(
+                    l10n.translate(reason),
+                    style: style.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                Text(l10n.translate('update_failed'), style: style),
+              ],
             ),
           ),
         ],

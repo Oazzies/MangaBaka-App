@@ -6,8 +6,7 @@ import 'package:mangabaka_app/features/news/widgets/referenced_list_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 String _formatDate(String date) {
@@ -22,11 +21,13 @@ String _formatDate(String date) {
 class NewsListItem extends StatelessWidget {
   final News news;
   final bool showReferencedSeries;
+  final SeriesPrefetch prefetch;
 
   const NewsListItem({
     super.key,
     required this.news,
     this.showReferencedSeries = true,
+    required this.prefetch,
   });
 
   @override
@@ -135,8 +136,7 @@ class NewsListItem extends StatelessWidget {
                         return Padding(
                           padding: const EdgeInsets.only(right: 10.0),
                           child: MouseRegion(
-                            onEnter: (_) =>
-                                getIt<SeriesService>().fetchSeries(s.id),
+                            onEnter: (_) => prefetch(s.id),
                             child: ReferencedListItem(
                               key: ValueKey('ref_${news.id}_${s.id}'),
                               series: s,

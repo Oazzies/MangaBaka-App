@@ -77,7 +77,7 @@ class CollectionsPublisherHeaderCard extends StatelessWidget {
                                 ),
                                 child: Text(
                                   publisher.subType.toUpperCase(),
-                                  style: AppTypography.monoLabel(
+                                  style: AppTypography.displayLabel(
                                     color: c.accent,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
