@@ -29,7 +29,7 @@ class LocalizationService extends ChangeNotifier {
   Future<void> init() async {
     try {
       final manifestString = await rootBundle.loadString(
-        'assets/lang/languages.json',
+        'assets/languages.json',
       );
       _manifest = json.decode(manifestString);
 

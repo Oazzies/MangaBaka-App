@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -15,7 +16,7 @@ void main() {
       'flutter/assets',
       (ByteData? message) async {
         final String key = utf8.decode(message!.buffer.asUint8List());
-        if (key == 'assets/lang/languages.json') {
+        if (key == 'assets/languages.json') {
           return ByteData.view(utf8.encode(json.encode({
             'en': {
               'name': 'English',
@@ -103,6 +104,27 @@ void main() {
       expect(languages[0]['code'], 'en');
       expect(languages[1]['code'], 'ja');
       expect(languages[1]['name'], 'Japanese');
+    });
+
+    test('bundled languages manifest and locale files exist', () {
+      final manifestFile = File('assets/languages.json');
+      expect(manifestFile.existsSync(), isTrue);
+
+      final manifest =
+          json.decode(manifestFile.readAsStringSync()) as Map<String, dynamic>;
+      expect(manifest, contains('en'));
+
+      for (final code in manifest.keys) {
+        final localeFile = File('assets/lang/$code.json');
+        expect(
+          localeFile.existsSync(),
+          isTrue,
+          reason: 'Missing locale file for $code',
+        );
+        final data =
+            json.decode(localeFile.readAsStringSync()) as Map<String, dynamic>;
+        expect(data['strings'], isA<Map<String, dynamic>>());
+      }
     });
   });
 }

@@ -62,7 +62,7 @@ Without it, `flutter build`, `flutter run`, and `flutter test` fail with `No fil
 
 # Translations
 
-Translations are currently done done within the app inside the [languages.json](https://github.com/Oazzies/MangaBaka-App/blob/main/assets/lang/languages.json) file. You can copy the english section and add your own language.
+Translations are currently done within the app inside the [languages.json](https://github.com/Oazzies/MangaBaka-App/blob/main/assets/languages.json) file. You can copy the english section and add your own language.
 
 
 # Forks

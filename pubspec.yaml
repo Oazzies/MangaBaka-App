@@ -68,6 +68,7 @@ flutter_native_splash:
 flutter:
   assets:
     - .env
+    - assets/languages.json
     - assets/lang/
     - assets/import/
     - assets/mangabaka512.png
