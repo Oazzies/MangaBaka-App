@@ -25,9 +25,7 @@ class MixResultsHeader extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      // The same list-style toggle Browse carries, so a mix can be read as a
-      // grid or a list without a trip to settings. It writes the Browse style,
-      // which is what the results below already follow.
+      // Writes the Browse list style, which the mix results below already follow.
       child: DesktopLayout.isActive(context)
           ? Row(
               children: [

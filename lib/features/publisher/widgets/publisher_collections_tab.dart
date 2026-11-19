@@ -10,7 +10,6 @@ import 'package:mangabaka_app/features/publisher/controllers/publisher_collectio
 import 'package:mangabaka_app/features/publisher/widgets/publisher_metadata_panels.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 
-/// Builds the list items for the publisher's Collections tab.
 List<Widget> buildPublisherCollectionsItems({
   required BuildContext context,
   required LocalizationService l10n,
@@ -54,7 +53,6 @@ List<Widget> buildPublisherCollectionsItems({
   ];
 }
 
-/// Builds the list items for the publisher's Editions tab.
 List<Widget> buildPublisherEditionsItems({
   required LocalizationService l10n,
   required PublisherCollectionsController controller,

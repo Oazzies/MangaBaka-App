@@ -8,11 +8,6 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// Laid over the whole app while a desktop sign-in waits on the browser.
-///
-/// The browser is another program, so nothing tells the app when its tab was
-/// closed. Without this the only feedback was a button that spun until the
-/// five-minute timeout; here the user is told where to look and can back out.
 class BrowserSignInPrompt extends StatelessWidget {
   final Widget child;
 

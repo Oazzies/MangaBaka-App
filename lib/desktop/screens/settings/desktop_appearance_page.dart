@@ -12,14 +12,7 @@ import 'package:mangabaka_app/features/appearance/widgets/theme_gallery.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_live_preview.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_mode_selector.dart';
 
-/// Appearance settings for the desktop shell: theme grids and controls on the
-/// left, a live preview of the active theme on the right.
-///
-/// Built from the same widgets as the touch page ([ThemeGallery],
-/// [AccentPicker], [CustomThemesSection]); only the arrangement and the
-/// desktop controls (segmented mode switch, compact buttons) differ.
 class DesktopAppearancePage extends StatelessWidget {
-  /// Pane width at which the preview moves beside the controls.
   static const double _splitWidth = 900;
   static const double _gap = 24;
 

@@ -1,23 +1,10 @@
 import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
-/// Ordering and inline-completion rules shared by the Browse and Library
-/// search fields.
-///
-/// Both had their own copy; they had already drifted — Browse ranked
-/// prefix matches above the rest and Library did not, so the same query
-/// produced a different first suggestion in each field.
 class AutocompleteRanking {
   AutocompleteRanking._();
 
-  /// Sorts [results] in place, best match first.
-  ///
-  /// Exact title match, then titles that begin with the query, then shortest
-  /// title — a short title containing the query is almost always the series
-  /// the user means, where a long one is usually a spin-off.
-  ///
-  /// [preferPrefixMatches] can be turned off for a source that has already
-  /// scored matches itself.
+  /// Exact, prefix, then shortest: a long title containing the query is usually a spin-off.
   static void sort(
     List<AutocompleteSeriesResult> results,
     String query, {
@@ -39,13 +26,6 @@ class AutocompleteRanking {
     });
   }
 
-  /// The inline completion for [query]: the remainder of the first title,
-  /// across all results and all their alternate titles, that [query] is a
-  /// strict prefix of.
-  ///
-  /// Alternate titles are searched too, so typing an English title completes
-  /// against a series filed under its romanised one. Returns an empty string
-  /// when nothing extends the query.
   static String ghostSuffix(
     List<AutocompleteSeriesResult> results,
     String query,
@@ -62,9 +42,6 @@ class AutocompleteRanking {
     return '';
   }
 
-  /// The result and full title that produced [ghostSuffix] for [query], so
-  /// accepting the completion can select that result rather than just its
-  /// text. Null when nothing matches — the ghost is stale.
   static ({AutocompleteSeriesResult result, String title})? matchForGhost(
     List<AutocompleteSeriesResult> results,
     String query,

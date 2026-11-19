@@ -16,15 +16,10 @@ import 'package:mangabaka_app/features/publisher/services/publisher_search_servi
 import 'package:mangabaka_app/features/publisher/utils/format_count.dart';
 import 'package:mangabaka_app/features/publisher/widgets/publisher_logo.dart';
 
-/// A Home rail of the biggest publishers, each opening its publisher page.
-///
-/// Loads for itself and disappears if the request fails or comes back empty:
-/// it is a discovery extra, so it never shows an error in the feed.
+/// A discovery extra: it disappears on failure or an empty result rather than showing an error.
 class HomePublishersRail extends StatefulWidget {
-  /// Replaces the service lookup, for tests.
   final Future<List<Publisher>> Function()? loader;
 
-  /// Side inset of the card row; 0 when the parent already insets it.
   final double horizontalPadding;
 
   const HomePublishersRail({
@@ -77,8 +72,6 @@ class _HomePublishersRailState extends State<HomePublishersRail> {
     final l10n = LocalizationService();
 
     if (DesktopLayout.isActive(context)) {
-      // Same rail shape as the other desktop Home rows: a titled carousel with
-      // paging arrows, its slots stretched to fill the row.
       return DesktopCarousel(
         title: l10n.translate('popular_publishers'),
         itemCount: publishers.length,
@@ -174,7 +167,6 @@ class _PublisherCard extends StatelessWidget {
   }
 }
 
-/// A publisher as a hover-lit card: logo beside its name and series count.
 class _DesktopPublisherCard extends StatelessWidget {
   final Publisher publisher;
   final LocalizationService l10n;

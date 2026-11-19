@@ -72,7 +72,6 @@ class LibraryGridList extends StatelessWidget {
     );
   }
 
-  /// Builds a single tappable library item with hover-prefetch for desktop.
   Widget _buildEntryItem(
     LibraryEntry entry,
     SeriesService seriesService,
@@ -82,15 +81,12 @@ class LibraryGridList extends StatelessWidget {
       onEnter: (_) => seriesService.fetchSeries(entry.series.id),
       child: GestureDetector(
         onTap: () => onItemTap(entry.series),
-        // Library-scoped hero tag; the screen opens the detail page with the
-        // same 'library' prefix so the cover flies into place.
+        // heroTagPrefix must match the 'library' prefix the screen opens the detail page with.
         child: EntryListItem(
           key: ValueKey('${activeStyle.name}_${entry.series.id}'),
           series: entry.series,
           isLibrary: true,
-          // The list is already built from the database, so the row need not
-          // open a database watch of its own: one per visible row made
-          // scrolling stutter as rows were created and torn down.
+          // Spares each row its own database watch, which made scrolling stutter.
           previewEntry: entry,
           heroTagPrefix: 'library',
           listStyle: activeStyle,
@@ -153,8 +149,6 @@ class LibraryGridList extends StatelessWidget {
           }
 
           if (columns == 0) {
-            // Rebuilt only when the column count changes; between those a
-            // resize just re-lays the grid out.
             return DerivedLayoutBuilder<int>(
               derive: (constraints) =>
                   ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
@@ -183,7 +177,6 @@ class LibraryGridList extends StatelessWidget {
               _buildEntryItem(items[index], seriesService, activeStyle),
         );
 
-        // On desktop the list styles are tables, so they get column labels.
         if (!DesktopLayout.isActive(context)) return list;
         return Column(
           children: [

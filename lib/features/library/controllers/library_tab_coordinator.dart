@@ -6,12 +6,7 @@ import 'package:mangabaka_app/features/library/constants/library_screen_constant
 import 'package:mangabaka_app/features/library/helpers/library_filter_helper.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 
-/// Decides which library tab should be showing, and counts what is in each.
-///
-/// Both answers come from the same filtered set, which is the point: the count
-/// on a tab's badge has to agree with what opening that tab produces. The
-/// screen used to build a [LibraryFilterHelper] separately for each with
-/// slightly different arguments.
+/// Counts and tab choice share one filtered set, so a tab's badge matches what opening it shows.
 class LibraryTabCoordinator {
   static final _logger = LoggingService.logger;
 
@@ -22,8 +17,6 @@ class LibraryTabCoordinator {
   String _query = '';
   SearchFilters _filters = SearchFilters();
 
-  /// The most recent entries, kept so [autoSwitch] can look across every tab
-  /// without waiting for another stream event.
   List<LibraryEntry> _entries = const [];
 
   void setEntries(List<LibraryEntry> entries) => _entries = entries;
@@ -37,8 +30,6 @@ class LibraryTabCoordinator {
     _filters = SearchFilters();
   }
 
-  /// A helper over [entries] with the current query, filters and content
-  /// preferences applied.
   LibraryFilterHelper filterFor(List<LibraryEntry> entries) =>
       LibraryFilterHelper(
         allEntries: entries,
@@ -47,7 +38,6 @@ class LibraryTabCoordinator {
         filters: _filters,
       );
 
-  /// Entry counts per status, over the same filtered set the list shows.
   Map<String, int> countsFor(List<LibraryEntry> entries) {
     final counts = <String, int>{};
     for (final entry in filterFor(entries).getFilteredAndSorted()) {
@@ -56,13 +46,6 @@ class LibraryTabCoordinator {
     return counts;
   }
 
-  /// Moves to the first tab that has matches when the current one has none.
-  ///
-  /// Searching within a single status is rarely what the user meant: a query
-  /// that matches nothing in "Reading" but three things in "Completed" should
-  /// show those, not an empty tab. Only applies while something is being
-  /// searched for — with no query and no filters, the user's chosen tab is the
-  /// one they want.
   void autoSwitch() {
     if (_query.isEmpty && _filters.isEmpty) return;
     // Mid-swipe the index is in flux; moving it again would fight the gesture.

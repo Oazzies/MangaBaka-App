@@ -14,7 +14,6 @@ class SeriesSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Signature design-system label: uppercase, letter-spaced monospace.
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Text(

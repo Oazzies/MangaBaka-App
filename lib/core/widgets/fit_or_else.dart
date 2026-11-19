@@ -1,16 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// Shows [child] when its natural width fits the space available, and
-/// [fallback] when it doesn't — decided during layout, every frame, with no
-/// rebuild.
-///
-/// For controls whose width depends on data or on the language (a segmented
-/// control over a list of sources, a row of translated labels): rather than
-/// guess a breakpoint that is wrong for some language or some data, this
-/// measures [child] and swaps in a compact [fallback] only when it would
-/// overflow. Both are built; only the one shown is painted, hit-tested and
-/// visible to semantics and tests.
+/// Both are built; only the shown one paints, hit-tests and reaches semantics.
 class FitOrElse extends MultiChildRenderObjectWidget {
   FitOrElse({super.key, required Widget child, required Widget fallback})
     : super(children: [child, fallback]);
@@ -38,7 +29,6 @@ class RenderFitOrElse extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _FitParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _FitParentData> {
-  /// 0 while the child fits, 1 while the fallback is showing.
   int shownIndex = 0;
 
   RenderBox? get _shown => shownIndex == 0 ? firstChild : lastChild;
@@ -53,7 +43,6 @@ class RenderFitOrElse extends RenderBox
   @override
   void performLayout() {
     final primary = firstChild!;
-    // Its natural width: as wide as it wants to be, as tall as allowed.
     primary.layout(
       BoxConstraints(maxHeight: constraints.maxHeight),
       parentUsesSize: true,

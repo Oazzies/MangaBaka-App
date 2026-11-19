@@ -74,24 +74,19 @@ void main() {
     });
 
     test('fetchSeries allows suggestive when preference is updated', () async {
-      // 1. Initial restricted state
       final series = createDummySeries(id: '3', contentRating: 'suggestive');
       seriesService.precacheSeries(series);
       
-      // Should throw and remove from cache
       await expectLater(
         () => seriesService.fetchSeries('3'),
         throwsA(isA<AppException>().having((e) => e.code, 'code', 'CONTENT_FILTERED')),
       );
       expect(seriesService.cache.containsKey('3'), isFalse);
 
-      // 2. Update preferences
       await SettingsManager().setContentPreferences(['safe', 'suggestive']);
       
-      // 3. Re-precache (simulating a fresh fetch or just testing the filtering logic again)
       seriesService.precacheSeries(series);
       
-      // 4. Now it should be allowed
       final result = await seriesService.fetchSeries('3');
       expect(result.id, '3');
     });

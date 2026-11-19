@@ -35,7 +35,6 @@ class MbProfile {
     );
   }
 
-  // For OIDC userinfo response
   factory MbProfile.fromUserInfo(Map<String, dynamic> json) {
     final data = json['data'] is Map<String, dynamic>
         ? json['data'] as Map<String, dynamic>
@@ -164,8 +163,7 @@ class MbProfile {
     return null;
   }
 
-  /// `image.x250.x1` or `image.raw.url`, tolerating either level being a
-  /// string (or anything else) instead of an object.
+  /// `image.x250.x1` or `image.raw.url`; either level may arrive as a string instead of an object.
   static Object? _imageField(Map image) {
     final x250 = image['x250'];
     final raw = image['raw'];

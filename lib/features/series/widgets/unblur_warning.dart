@@ -4,11 +4,6 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Asks before a blurred cover is opened fullscreen, where it is shown clear.
-///
-/// A cover is blurred because the user asked for that rating to be; opening it
-/// fullscreen undoes the blur, and one stray click should not do that
-/// unannounced. Resolves true if they choose to go ahead.
 Future<bool> confirmUnblur(BuildContext context) async {
   final l10n = LocalizationService();
   final confirmed = await showDialog<bool>(

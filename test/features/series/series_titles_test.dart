@@ -135,7 +135,7 @@ void main() {
     });
 
     test('a later v2 payload for the same series agrees with it', () {
-      Series.fromJson(v1()); // e.g. the library sync or the detail page
+      Series.fromJson(v1());
 
       final fromRail = Series.fromJson(
         _v2(

@@ -4,22 +4,12 @@ import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/features/appearance/theme_actions.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_preview_card.dart';
 
-/// How a [ThemeGallery] lays its cards out.
 enum ThemeGalleryLayout {
-  /// One horizontally scrolling row — phones, where vertical space is the
-  /// scarce thing.
   strip,
 
-  /// Wrapping grid — tablets, landscape dialogs and desktop.
   grid,
 }
 
-/// Every theme available for one brightness slot, as preview cards.
-///
-/// Tapping a card selects it for that slot and, unless the app follows the
-/// system, switches the pinned mode to match — picking a light theme while in
-/// dark mode should visibly do something. Custom themes get a menu (long
-/// press / right click) for edit, duplicate, share and delete.
 class ThemeGallery extends StatefulWidget {
   final Brightness brightness;
   final ThemeGalleryLayout layout;
@@ -64,8 +54,6 @@ class _ThemeGalleryState extends State<ThemeGallery> {
     super.dispose();
   }
 
-  /// Brings the selected card to the middle of the strip, so the current
-  /// choice is visible rather than scrolled off to one side.
   void _centreSelected({bool animated = true}) {
     if (!mounted || !_scroll.hasClients) return;
     final choices = _controller.choicesFor(widget.brightness);
@@ -135,7 +123,6 @@ class _ThemeGalleryState extends State<ThemeGallery> {
         }
 
         return SizedBox(
-          // Card, gap, one line of label.
           height: widget.cardWidth * ThemePreviewCard.aspect + 30,
           child: ScrollConfiguration(
             behavior: const ScrollBehavior().copyWith(scrollbars: false),

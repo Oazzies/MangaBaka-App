@@ -19,13 +19,10 @@ class LoggingService {
   static StreamSubscription<LogRecord>? _subscription;
   static Timer? _flushTimer;
 
-  // Lines waiting to be written to disk. They are flushed in batches rather
-  // than once per record (the previous behaviour forced a synchronous disk
-  // flush on every single log call, which was a real performance drain).
+  // Flushed in batches: a synchronous disk flush per record was a real performance drain.
   static final Queue<String> _pendingWrites = Queue<String>();
 
-  // Single-writer chain so concurrent flushes never overlap or interleave on
-  // the same file handle.
+  // Single writer, so concurrent flushes never interleave on the file handle.
   static Future<void> _writeChain = Future<void>.value();
 
   @visibleForTesting
@@ -41,16 +38,13 @@ class LoggingService {
   }
 
   static Future<void> setup() async {
-    // FINE and below trace request-level detail (URLs, watermarks, status
-    // codes of every call). Useful while developing; in a release build it
-    // only bloats a file users are asked to share.
+    // FINE traces every request; in release it only bloats a file users are asked to share.
     Logger.root.level = kReleaseMode ? Level.INFO : Level.ALL;
 
     try {
       final directory = await getApplicationDocumentsDirectory();
       _logFile = File(p.join(directory.path, 'app_logs.txt'));
 
-      // Clear old logs if they get too large (e.g. > 10MB)
       if (await _logFile!.exists() &&
           await _logFile!.length() > _maxLogFileBytes) {
         await _logFile!.writeAsString('');
@@ -66,8 +60,7 @@ class LoggingService {
       }
     }
 
-    // Guard against re-subscribing: calling setup() more than once previously
-    // attached an additional listener each time, duplicating every log line.
+    // setup() can run more than once; re-subscribing duplicated every log line.
     _subscription ??= Logger.root.onRecord.listen(_onRecord);
     _flushTimer ??= Timer.periodic(_flushInterval, (_) => _flush());
   }
@@ -79,14 +72,10 @@ class LoggingService {
     if (record.stackTrace != null) {
       buffer.write('\nStackTrace: ${record.stackTrace}');
     }
-    // Redacted before it reaches the console, the in-app viewer or the file:
-    // all three end up in screenshots and shared bug reports.
+    // Before console, viewer and file alike: all three end up in shared bug reports.
     final logMessage = LogRedactor.redact(buffer.toString());
 
-    // Console output is noise (and an avoidable cost) in release builds, but
-    // profile builds are only ever run from `flutter run` — surfacing logs
-    // there makes field diagnosis (network failures, rate limits) possible
-    // without the in-app viewer.
+    // Profile builds only ever run from `flutter run`, where console logs aid field diagnosis.
     if (kDebugMode || kProfileMode) {
       developer.log(
         logMessage,
@@ -105,7 +94,6 @@ class LoggingService {
     }
   }
 
-  // Writes all currently-buffered lines to disk in a single append.
   static Future<void> _flush() {
     if (_logFile == null || _pendingWrites.isEmpty) return Future<void>.value();
 
@@ -132,19 +120,14 @@ class LoggingService {
   static Logger get logger => _logger;
   static List<String> get logs => List.unmodifiable(_logBuffer);
 
-  /// Forces any buffered log lines to be written to disk. Useful before the
-  /// app terminates or when the persisted log file must be read immediately.
   static Future<void> flush() => _flush();
 
   static Future<void> clearLogs() async {
     _logBuffer.clear();
     _pendingWrites.clear();
-    // Drop any in-flight writes and start a fresh chain — clearing means the
-    // file should end up empty regardless of what was queued.
+    // A fresh chain drops queued writes, so the file ends up empty regardless.
     _writeChain = Future<void>.value();
     try {
-      // Truncate (creating the file if necessary) so the persisted log is
-      // left in a known-empty state.
       await _logFile?.writeAsString('');
     } catch (e, st) {
       if (kDebugMode) {
@@ -159,7 +142,7 @@ class LoggingService {
   }
 
   static Future<String?> getLogFilePath() async {
-    // Make sure any buffered lines are on disk before the caller reads the file.
+    // The caller reads the file next, so buffered lines must be on disk.
     await flush();
     return _logFile?.path;
   }

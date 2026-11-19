@@ -39,7 +39,7 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onCreate: (m) async {
         await m.createAll();
-        // Create custom indices since Drift doesn't automatically detect the custom indexes getter in tables
+        // Drift does not pick up the tables' custom indexes getter, so create them here.
         await m.createIndex(
           Index(
             'series_title_idx',
@@ -60,12 +60,9 @@ class AppDatabase extends _$AppDatabase {
         );
       },
       onUpgrade: (m, from, to) async {
-        // Robust "Self-Healing" Migration Strategy:
-        // Instead of linear version checks, we verify the actual schema state.
-        // This handles skip-upgrades (e.g. v1 -> v4) and potential inconsistencies.
+        // Checks the real schema, not the version, so skip-upgrades (v1 -> v4) and inconsistencies heal.
 
         try {
-          // 1. Check existing tables
           final tables = await customSelect(
             "SELECT name FROM sqlite_master WHERE type='table'",
           ).get();
@@ -73,7 +70,6 @@ class AppDatabase extends _$AppDatabase {
               .map((row) => row.read<String>('name'))
               .toSet();
 
-          // 2. Create tables ONLY if they don't exist
           if (!tableNames.contains('series_table')) {
             await m.createTable(seriesTable);
           }
@@ -81,7 +77,6 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(libraryEntriesTable);
           }
 
-          // 2.5. Create indices
           await m.createIndex(
             Index(
               'series_title_idx',
@@ -101,7 +96,6 @@ class AppDatabase extends _$AppDatabase {
             ),
           );
 
-          // 3. Inspect columns for existing tables
           final seriesColumns = await customSelect(
             'PRAGMA table_info("series_table")',
           ).get();
@@ -183,8 +177,6 @@ class AppDatabase extends _$AppDatabase {
         }
       },
       beforeOpen: (details) async {
-        // WAL mode is enabled in NativeDatabase.createInBackground by default usually,
-        // but we ensure PRAGMAs are set correctly here.
         await customStatement('PRAGMA foreign_keys = ON');
         await customStatement('PRAGMA journal_mode = WAL');
         await customStatement('PRAGMA synchronous = NORMAL');

@@ -7,15 +7,9 @@ import 'package:mangabaka_app/core/utils/number_utils.dart';
 import 'package:mangabaka_app/features/library/constants/library_screen_constants.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The library's status tabs, with the selected pill taking on that status's
-/// colour and interpolating between them as the user swipes.
-///
-/// The colour follows the swipe rather than snapping at the halfway point, so
-/// the pill reads as one object travelling between tabs.
 class LibraryTabBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController controller;
 
-  /// Entry counts per status key. Missing keys read as zero.
   final Map<String, int> counts;
 
   final bool isLandscape;
@@ -39,8 +33,7 @@ class LibraryTabBar extends StatelessWidget implements PreferredSizeWidget {
     final tabs = LibraryScreenConstants.tabs;
 
     return AnimatedBuilder(
-      // The controller's animation drives the colour blend; without it the
-      // pill would only recolour once the swipe had settled.
+      // Animates the colour blend mid-swipe; the controller alone notifies only once it settles.
       animation: controller.animation ?? controller,
       builder: (context, _) {
         final position =
@@ -61,8 +54,6 @@ class LibraryTabBar extends StatelessWidget implements PreferredSizeWidget {
         return TabBar(
           controller: controller,
           isScrollable: true,
-          // Centred in landscape, where the tabs do not fill the width and a
-          // left-aligned row leaves a conspicuous gap.
           tabAlignment: isLandscape ? TabAlignment.center : TabAlignment.start,
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
@@ -83,8 +74,6 @@ class LibraryTabBar extends StatelessWidget implements PreferredSizeWidget {
                 label: l10n.translate(tabs[i].key),
                 stateKey: tabs[i].key,
                 count: showCounts ? (counts[tabs[i].key] ?? 0) : null,
-                // 1.0 when fully selected, 0.0 when fully unselected, and
-                // partway through a swipe for the two tabs either side of it.
                 selectionWeight: (1.0 - (position - i).abs()).clamp(0.0, 1.0),
               ),
           ],
@@ -98,7 +87,6 @@ class _LibraryTab extends StatelessWidget implements PreferredSizeWidget {
   final String label;
   final String stateKey;
 
-  /// Null hides the count entirely.
   final int? count;
 
   final double selectionWeight;
@@ -115,8 +103,6 @@ class _LibraryTab extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The label sits on the coloured pill once selected, so it crosses to that
-    // status's ink as the pill arrives under it.
     final onColor = context.colors.onForState(stateKey);
     final labelColor =
         Color.lerp(context.colors.text, onColor, selectionWeight) ??
@@ -139,8 +125,6 @@ class _LibraryTab extends StatelessWidget implements PreferredSizeWidget {
                 NumberUtils.formatCount(count!),
                 style: AppTypography.display(
                   fontSize: 12,
-                  // Dimmer than the label: a count is secondary information,
-                  // and at full strength it competes with the tab name.
                   color:
                       Color.lerp(
                         context.colors.textMuted,

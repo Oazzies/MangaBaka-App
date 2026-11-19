@@ -23,8 +23,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 part 'desktop_news_aside_part.dart';
 part 'desktop_news_cards_part.dart';
 
-/// News on desktop: a multi-column feed filterable by source, with a side
-/// column ranking the series the loaded stories mention most.
 class DesktopNewsScreen extends StatefulWidget {
   static final GlobalKey<DesktopNewsScreenState> stateKey =
       GlobalKey<DesktopNewsScreenState>();
@@ -39,11 +37,9 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
     implements DesktopRefreshable {
   static final _logger = LoggingService.logger;
 
-  /// Width of the "in the news" column; hidden below [_asideMinWidth].
   static const double _asideWidth = 320;
   static const double _asideMinWidth = 1100;
 
-  /// Narrowest a feed column gets before the feed drops a column.
   static const double _minColumnWidth = 380;
 
   late final NewsService _service;
@@ -125,10 +121,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
       ? _news
       : _news.where((n) => n.source == _source).toList();
 
-  /// Series mentioned across the loaded stories, most-mentioned first.
-  ///
-  /// Keyed by title: separate volumes or editions of one work are separate
-  /// series, but listing the same name three times reads as a bug.
+  /// Keyed by title: editions of one work are separate series, but repeating a name reads as a bug.
   List<(Series, int)> _mentioned() {
     final counts = <String, (Series, int)>{};
     for (final n in _news) {
@@ -186,9 +179,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
         DesktopPageHeader(
           title: l10n.translate('news'),
           subtitle: l10n.translate('news_subtitle'),
-          // With the aside beside it, the window controls float over the
-          // aside, so the header's own actions need not dodge them (as on
-          // Home).
+          // With the aside shown, the window controls float over it, not over this header.
           reserveWindowControls: !showAside,
           actions: [
             DesktopIconButton(

@@ -108,7 +108,6 @@ class SeriesDetailsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = [
       _buildAnimeContainer(context),
-      // Genres moved to SeriesDetailScreen
       SeriesGroupedTags(series: series, l10n: l10n),
       if (enrichedLinks != null || series.links.isNotEmpty) ...[
         const SizedBox(height: 8),

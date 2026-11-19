@@ -16,10 +16,6 @@ import 'package:mangabaka_app/features/updates/widgets/update_release_notes.dart
 import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
-/// Dialog shown when a newer GitHub release is detected. Title is the release
-/// name, body is the release description, with "Later" and "Update now"
-/// actions. "Later" just closes it (no state stored), so it reappears next
-/// launch while the installed version is still behind.
 class UpdateDialog extends StatefulWidget {
   const UpdateDialog({super.key, required this.release});
 
@@ -50,7 +46,6 @@ class _UpdateDialogState extends State<UpdateDialog> {
   bool get _busy => _phase == _Phase.downloading || _phase == _Phase.installing;
 
   Future<void> _onUpdateNow() async {
-    // Platforms that can't self-install just open the release page.
     if (!_service.supportsInAppUpdate) {
       await _openReleasePage();
       if (mounted) Navigator.of(context).pop();
@@ -65,8 +60,6 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
     try {
       final asset = await _service.selectAssetForPlatform(widget.release);
-      // Without a published checksum the installer cannot be verified, so
-      // it is not run from here; the release page lets the user decide.
       if (asset == null || asset.sha256 == null) {
         _logger.warning(
           asset == null
@@ -97,8 +90,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
       if (!mounted) return;
       setState(() {
         _phase = _Phase.error;
-        // These two carry wording written for the user; anything else is
-        // described generically (the cause is in the log above).
+        // Only these two carry wording written for the user.
         _errorMessage =
             e is UpdateIntegrityException || e is InstallPermissionException
             ? (e as AppException).message
@@ -113,7 +105,6 @@ class _UpdateDialogState extends State<UpdateDialog> {
     try {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } on Exception catch (e, st) {
-      // PlatformException from the launcher, FormatException from a bad URL.
       _logger.warning('Failed to open release page', e, st);
     }
   }
@@ -141,7 +132,6 @@ class _UpdateDialogState extends State<UpdateDialog> {
     final l10n = LocalizationService();
 
     return PopScope(
-      // Block back-dismissal while downloading/installing.
       canPop: !_busy,
       child: AlertDialog(
         backgroundColor: context.colors.surface,

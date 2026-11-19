@@ -1,39 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 
-/// Every colour the app paints with, as semantic tokens.
-///
-/// One instance per theme. Widgets read the active one through
-/// `context.colors` (see `theme_context.dart`); widgets that preview a theme
-/// other than the active one (theme cards, the editor) take an [MbPalette]
-/// parameter instead.
-///
-/// Adding a token: add the field here (constructor, [copyWith], [lerp],
-/// [toJson]/[fromJson]), derive it in `palette_derivation.dart`, and the
-/// contrast tests cover it across every preset.
+/// New tokens also go in [copyWith], [lerp], JSON, `palette_derivation.dart`.
 @immutable
 class MbPalette {
   final Brightness brightness;
 
-  /// Page canvas.
   final Color background;
 
-  /// Cards, sheets, dialogs, menus — one step above [background].
   final Color surface;
 
-  /// Inputs, chips, tracks, pressed rows — one step above [surface].
   final Color surfaceRaised;
 
-  /// Hairlines and outlines.
   final Color border;
 
-  /// The one accent: the "on" state of every control and the primary action.
   final Color accent;
 
-  /// Ink on [accent] fills.
   final Color onAccent;
 
-  /// Rating stars.
   final Color star;
 
   final Color success;
@@ -44,10 +28,10 @@ class MbPalette {
   final Color text;
   final Color textMuted;
 
-  /// Drop-shadow colour (already carries its alpha).
+  /// Already carries its alpha.
   final Color shadow;
 
-  /// Modal barrier / dimming over content (already carries its alpha).
+  /// Already carries its alpha.
   final Color scrim;
 
   const MbPalette({
@@ -71,37 +55,25 @@ class MbPalette {
 
   bool get isDark => brightness == Brightness.dark;
 
-  /// The soft elevation shadow used by floating panels and hovered cards.
   List<BoxShadow> get softShadow => [
     BoxShadow(color: shadow, blurRadius: 32, offset: const Offset(0, 8)),
   ];
 
-  /// Legible ink for any [fill] (a status colour, a brand colour, …).
   Color on(Color fill) => ColorMath.onColor(fill);
 
-  /// [c] nudged toward the ink — the hover/pressed step for a filled control.
-  /// Lightens on dark themes and darkens on light ones.
   Color hoverOf(Color c, [double amount = 0.15]) =>
       Color.lerp(c, text, amount)!;
 
-  /// A drop-shadow colour at [alpha] as tuned for the dark themes; light
-  /// themes get a much softer shadow, since the same black on a pale canvas
-  /// reads as a smudge rather than depth.
+  /// Softer on light themes, where the same black reads as a smudge.
   Color shadowAt(double alpha) =>
       const Color(0xFF000000).withValues(alpha: isDark ? alpha : alpha * 0.35);
 
-  /// A canvas one step *below* [background], for chrome that should recede
-  /// behind the page (the desktop sidebar).
   Color get backgroundDeep => isDark
       ? Color.lerp(background, const Color(0xFF000000), 0.3)!
       : Color.lerp(background, text, 0.035)!;
 
-  /// [c] adjusted until it reads as UI on [surface] — for categorical colours
-  /// (content types, publication status) chosen outside the palette.
   Color legibleOnSurface(Color c) => ColorMath.ensureContrast(c, surface, 3.0);
 
-  /// Colour for a library state key (`reading`, `completed`, …): the theme's
-  /// semantic hues, with a fixed purple for the states that have no token.
   Color forState(String state) {
     switch (state) {
       case 'reading':
@@ -120,10 +92,8 @@ class MbPalette {
     }
   }
 
-  /// Ink for a [forState] fill.
   Color onForState(String state) => ColorMath.onColor(forState(state));
 
-  /// Colour for a series publication status (`releasing`, `completed`, …).
   Color forSeriesStatus(String status) {
     switch (status.toLowerCase()) {
       case 'releasing':
@@ -143,8 +113,6 @@ class MbPalette {
     }
   }
 
-  /// Colour for a series type: manga blue, manhwa purple, manhua orange,
-  /// OEL red, novel light blue.
   Color forSeriesType(String type) {
     switch (type.toLowerCase()) {
       case 'manga':
@@ -222,7 +190,6 @@ class MbPalette {
     );
   }
 
-  /// Named-token map, used by the contrast tests and debug tooling.
   Map<String, Color> get tokens => {
     'background': background,
     'surface': surface,
@@ -246,7 +213,6 @@ class MbPalette {
     for (final e in tokens.entries) e.key: e.value.toARGB32(),
   };
 
-  /// Returns null when a token is missing or malformed.
   static MbPalette? fromJson(Map<String, Object?> json) {
     Color? c(String k) {
       final v = json[k];

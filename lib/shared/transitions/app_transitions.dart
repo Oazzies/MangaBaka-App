@@ -3,14 +3,7 @@ import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 
-/// Route transitions for the Ink & Amber system.
-///
-/// Every transition pairs movement with a fade, and pushes the outgoing page
-/// slightly away instead of leaving it static — so a push reads as one surface
-/// replacing another rather than a new screen sliding over a frozen one.
 abstract final class AppTransitions {
-  /// Landscape and desktop have a wide, pointer-friendly screen where pages
-  /// rising or sliding in from an edge look off, so they cross-fade instead.
   static bool _calm(BuildContext context) =>
       DesktopLayout.isActive(context) ||
       MediaQuery.orientationOf(context) == Orientation.landscape;
@@ -19,13 +12,7 @@ abstract final class AppTransitions {
     Animation<double> secondary,
     Widget child,
   ) {
-    // The outgoing page dims and recedes a touch; barely perceptible on its
-    // own, but it is what stops a push from feeling flat.
-    //
-    // The dim is a scrim overlay rather than an `Opacity` on the whole page:
-    // fading a full-screen subtree forces a `saveLayer` every frame of the
-    // transition, which is exactly the kind of cost that makes a push stutter.
-    // A `ColoredBox` painting into the existing layer is effectively free.
+    // A scrim, not an Opacity: fading a full-screen subtree forces a saveLayer every frame.
     final curved = CurvedAnimation(
       parent: secondary,
       curve: AppMotion.emphasized,
@@ -90,15 +77,13 @@ abstract final class AppTransitions {
           curve: AppMotion.enter,
           reverseCurve: AppMotion.exit,
         );
-        // Moving up or sideways means nothing on a wide screen, so there the
-        // page just fades in over the one beneath.
+        // On a wide screen moving up or sideways means nothing, so the page just fades in.
         if (_calm(context)) {
           return FadeTransition(opacity: curved, child: child);
         }
         return SlideTransition(
           position: Tween<Offset>(
-            // A short rise rather than a full-height slide: the page is
-            // already fading in, so it does not need the distance.
+            // A short rise, not a full slide: the page is already fading in.
             begin: const Offset(0, 0.06),
             end: Offset.zero,
           ).animate(curved),

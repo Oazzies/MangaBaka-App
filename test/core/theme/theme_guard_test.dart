@@ -2,12 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Keeps colour on the theme system: outside `lib/core/theme/`, colour comes
-/// from `context.colors` (or `FixedColors` for things drawn over imagery),
-/// never from literals — a literal is invisible to every theme but the one
-/// it was picked on.
+/// A colour literal is invisible to every theme but the one it was picked on.
 void main() {
-  // Files that legitimately draw raw colour and why.
   const allowed = {
     // The picker renders the colour space itself (white→hue, clear→black).
     'lib/features/appearance/widgets/mb_color_picker.dart',

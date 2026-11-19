@@ -20,23 +20,13 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 export 'package:mangabaka_app/core/widgets/dotted_border_painter.dart';
 
-/// The series detail page.
-///
-/// Owns three things and delegates the rest: the route-transition gate that
-/// keeps off-screen work from competing with the push animation, the library
-/// entry stream, and the filter-drawer controller. Layout lives in
-/// [SeriesDetailBody]; filter state lives in [SeriesFilterDrawerController].
 class SeriesDetailScreen extends StatefulWidget {
   final Series series;
   final String? heroTagPrefix;
 
-  /// When true the page is rendered inside another screen (the Discovery
-  /// Queue) rather than pushed as its own route: no back button, no FAB, and
-  /// deleting the entry does not pop the host route.
+  /// Inside the Discovery Queue, not its own route: no back button, no FAB, no pop on delete.
   final bool embedded;
 
-  /// Optional content for a right-hand rail in the wide layout, scrolling with
-  /// the page. Used by the Discovery Queue.
   final Widget? rightRail;
 
   const SeriesDetailScreen({
@@ -47,8 +37,7 @@ class SeriesDetailScreen extends StatefulWidget {
     this.rightRail,
   });
 
-  /// The nearest detail screen's state, so descendant chips can start a filter
-  /// or a search without every layer in between forwarding a callback.
+  /// Lets descendant chips start a filter or search without every layer forwarding a callback.
   static SeriesDetailScreenState? of(BuildContext context) =>
       context.findAncestorStateOfType<SeriesDetailScreenState>();
 
@@ -71,21 +60,13 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
   bool _isAdding = false;
   String _selectedTab = 'Info';
 
-  /// Completes once the route push transition has settled. The body renders
-  /// straight away from the [Series] we were handed, but work the user cannot
-  /// see yet is held until this fires so it never competes with the slide:
-  /// network results, filter metadata, and the below-the-fold tags card.
+  /// Network results, filter metadata and the tags card wait on this so they never compete with the push.
   final Completer<void> _canApplyData = Completer<void>();
   bool _routeAnimListenerAttached = false;
 
   @override
   Future<void> whenReadyToApplyData() => _canApplyData.future;
 
-  /// Completes once the push transition has settled.
-  ///
-  /// The body itself renders immediately, but content below the fold has no
-  /// reason to compete with the slide for frames — it can't be seen yet. The
-  /// tags card uses this to hold its build until the page has landed.
   Future<void> get transitionSettled => _canApplyData.future;
 
   SearchFilters? get drawerFilters => _filterDrawer.filters;
@@ -126,15 +107,11 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
 
     _filterDrawer = SeriesFilterDrawerController(vsync: this);
 
-    // Filter metadata only feeds the drawer, which cannot be open yet. Load it
-    // once the push transition has settled so it never competes with the first
-    // frame.
     _canApplyData.future.then((_) {
       if (mounted) _filterDrawer.loadMetadata();
     });
 
-    // The fetch, by contrast, starts immediately: results that arrive during
-    // the transition mean no skeleton is shown at all.
+    // Not gated: results that arrive during the transition mean no skeleton is shown.
     fetchFullData()
         .then((_) {
           _logger.info(
@@ -158,7 +135,6 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
     if (animation == null ||
         animation.status == AnimationStatus.completed ||
         animation.status == AnimationStatus.dismissed) {
-      // No transition to wait on (already settled, or pushed without one).
       _completeCanApplyData();
       return;
     }
@@ -177,8 +153,7 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
 
   @override
   void dispose() {
-    // Unblock any fetch still awaiting the transition gate so its async
-    // continuation isn't left suspended forever.
+    // Unblocks a fetch still awaiting the gate, or its continuation stays suspended forever.
     _completeCanApplyData();
     _filterDrawer.dispose();
     super.dispose();
@@ -189,14 +164,8 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
     _canApplyData.complete();
   }
 
-  // ─── Chip interactions ───────────────────────────────────────────────────
-  //
-  // Called by descendant widgets through [SeriesDetailScreen.of]. Tap runs the
-  // search straight away; long-press adds to the filter drawer instead.
-
   void handleTagTap(String tagName) {
-    // Fall back to the raw name when the id is not known yet — the search
-    // endpoint accepts either, and the alternative is a dead chip.
+    // The search endpoint accepts a raw tag name too; without the fallback the chip is dead.
     final tagId = _filterDrawer.resolveTagId(tagName) ?? tagName;
     BrowseNavigation.searchByTags(context, [tagId]);
   }

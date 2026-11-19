@@ -10,8 +10,6 @@ import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Parses an ISO-8601 date string into a human-readable "MMM d, yyyy" label.
-/// Returns the raw string on parse failure, or empty string for empty input.
 String _formatDate(String date) {
   if (date.isEmpty) return '';
   try {

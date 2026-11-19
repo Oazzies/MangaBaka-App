@@ -17,9 +17,6 @@ class BrowseShortcuts extends StatelessWidget {
     required this.onDiscoveryQueue,
   });
 
-  /// Builds a [ShortcutSection] for a content type (e.g. 'manga', 'novel').
-  /// [headerKey] is the l10n key for the section header; [typeValue] is the
-  /// API type string sent in the request.
   ShortcutSection _buildTypeSection(
     LocalizationService l10n, {
     required String headerKey,
@@ -52,7 +49,6 @@ class BrowseShortcuts extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
           child: Column(
             children: [
-              // ── General ──────────────────────────────────────────────
               ShortcutSection(
                 header: l10n.translate('general'),
                 customButtons: [
@@ -74,7 +70,6 @@ class BrowseShortcuts extends StatelessWidget {
                   ),
                 ],
               ),
-              // ── Content types ────────────────────────────────────────
               _buildTypeSection(
                 l10n,
                 headerKey: 'type_manga',

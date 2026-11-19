@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 
-/// Left/right navigation arrows shown over [FullScreenImageScreen].
 class FullScreenNavArrow extends StatelessWidget {
   final bool isLeft;
   final VoidCallback onPressed;
@@ -41,7 +40,6 @@ class FullScreenNavArrow extends StatelessWidget {
   }
 }
 
-/// Bottom caption/note banner shown over [FullScreenImageScreen].
 class FullScreenImageNoteBanner extends StatelessWidget {
   final String note;
 

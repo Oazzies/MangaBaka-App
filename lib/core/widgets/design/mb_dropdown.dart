@@ -7,11 +7,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 
-/// A labelled dropdown that suits the layout: on desktop the app's own
-/// [DesktopMenuButton] (a menu under the pointer, as the Browse sort uses); on
-/// a phone a pill that raises a bottom sheet of the options.
-///
-/// [value] is the selected option's key; options are `(key, label)` pairs.
 class MbDropdown<T> extends StatelessWidget {
   final String label;
   final T value;
@@ -19,7 +14,6 @@ class MbDropdown<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final IconData icon;
 
-  /// On a phone, fill the width given (to share a row with a sibling).
   final bool expand;
 
   const MbDropdown({
@@ -97,8 +91,7 @@ class _PhonePill<T> extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: colors.textMuted),
             const SizedBox(width: 8),
-            // A pill sharing a row drops its caption: the icon and the value
-            // read on their own, and the sheet it opens carries the title.
+            // A shared-row pill drops its caption; the sheet carries the title.
             if (!expand)
               Text(
                 '${label.toUpperCase()}: ',
@@ -132,7 +125,6 @@ class _PhonePill<T> extends StatelessWidget {
   }
 }
 
-/// A bottom sheet listing [options], with the [current] one ticked.
 Future<void> showMbOptionSheet<T>(
   BuildContext context, {
   required String title,

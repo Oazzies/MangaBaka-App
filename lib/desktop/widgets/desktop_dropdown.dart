@@ -26,11 +26,7 @@ class DesktopDropdownItem<T> {
   });
 }
 
-/// A desktop dropdown styled around the app's pill-button design system.
-/// The button itself is a clean pill button (with hover, icon, display text, and chevron).
-/// When clicked, a dropdown menu matching the app styling opens below it.
 class DesktopDropdown<T> extends StatefulWidget {
-  /// Optional label prefix. When omitted or empty, only [valueLabel] is shown.
   final String? label;
   final String valueLabel;
   final IconData? icon;
@@ -39,30 +35,21 @@ class DesktopDropdown<T> extends StatefulWidget {
   final T? selected;
   final ValueChanged<T> onSelected;
 
-  /// Custom background color for the button. Defaults to [context.colors.surfaceRaised].
   final Color? backgroundColor;
 
-  /// Custom text & icon color for the button. Defaults to [context.colors.text].
   final Color? foregroundColor;
 
-  /// Custom background color for the dropdown menu. Defaults to [context.colors.surface].
   final Color? menuBackgroundColor;
 
-  /// Optional border for the button itself. Defaults to null.
   final BoxBorder? border;
 
-  /// Exact width for the dropdown button.
   final double? width;
 
-  /// Minimum width for the dropdown menu. Defaults to 160.
   final double minWidth;
 
   final EdgeInsetsGeometry padding;
   final double radius;
 
-  /// Renders each item as a coloured badge row (icon tile in the item's
-  /// [DesktopDropdownItem.iconColor], selected row filled solid) with a rounder
-  /// menu, so the menu reads as an extension of a coloured pill button.
   final bool badgeMenu;
 
   const DesktopDropdown({
@@ -122,7 +109,6 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
     final targetRect = renderBox.localToGlobal(Offset.zero) & targetSize;
     final screenSize = MediaQuery.sizeOf(context);
 
-    // Determine whether to open downward or flip upward if space is tight
     final spaceBelow = screenSize.height - targetRect.bottom;
     final spaceAbove = targetRect.top;
     final openUpward = spaceBelow < 220 && spaceAbove > spaceBelow;
@@ -216,8 +202,6 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
                     ),
                   )
                 else
-                  // Its natural width where there's room; ellipsised rather
-                  // than overflowing when the button is squeezed.
                   Flexible(
                     child: Text(
                       displayText.toUpperCase(),

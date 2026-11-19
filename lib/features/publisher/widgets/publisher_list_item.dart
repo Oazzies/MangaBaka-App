@@ -12,8 +12,6 @@ class PublisherListItem extends StatelessWidget {
   final Publisher publisher;
   final VoidCallback onTap;
 
-  /// Space around the card. The default suits a vertical list; a grid supplies
-  /// its own spacing and passes [EdgeInsets.zero].
   final EdgeInsetsGeometry? margin;
 
   const PublisherListItem({
@@ -47,8 +45,7 @@ class PublisherListItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
-              // Wraps rather than overflows: in a narrow grid cell the
-              // badge and its facts do not fit on one line.
+              // Wrap, not Row: in a narrow grid cell the badge and its facts do not fit on one line.
               Wrap(
                 spacing: 8,
                 runSpacing: 4,

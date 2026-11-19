@@ -35,7 +35,6 @@ void main() {
         },
       );
 
-  /// A server that accepts only [valid] and answers 401 to anything else.
   Future<http.Response> Function(String) acceptOnly(
     String valid, {
     List<String>? seen,
@@ -128,8 +127,7 @@ void main() {
       final responses = await Future.wait(requests);
 
       expect(responses.map((r) => r.statusCode), everyElement(200));
-      // A second refresh would spend the rotated refresh token the first
-      // one just received.
+      // A second refresh would spend the rotated token the first one received.
       expect(refreshCalls, 1);
     });
 
@@ -207,8 +205,7 @@ void main() {
       // Let init's background profile refresh settle before the session changes.
       await Future<void>.delayed(Duration.zero);
 
-      // LibraryService is not registered here; clearing the library is
-      // best-effort and must not stop the logout.
+      // No LibraryService: clearing the library is best-effort, not a logout blocker.
       await auth.logout();
 
       expect(auth.isLoggedIn, isFalse);

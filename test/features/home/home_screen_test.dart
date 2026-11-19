@@ -39,8 +39,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
     await tester.pump();
 
-    // The "Now / Continue Reading" hero was removed — MangaBaka tracks reading
-    // rather than hosting it, so Home leads with discovery instead.
+    // The reading hero is gone: MangaBaka tracks reading, it doesn't host it.
     expect(find.text('NOW'), findsNothing);
     expect(find.text('CONTINUE READING'), findsNothing);
   });

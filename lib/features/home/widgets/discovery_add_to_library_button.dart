@@ -6,9 +6,7 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// Primary "add to library" pill with an attached dropdown for choosing the
-/// target state. The dropdown only changes the button's label; the state is
-/// applied when the main button is pressed.
+/// The dropdown only changes the label; the state applies when the main button is pressed.
 class DiscoveryAddToLibraryButton extends StatelessWidget {
   final String selectedState;
   final List<String> states;

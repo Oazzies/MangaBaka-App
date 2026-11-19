@@ -9,8 +9,6 @@ class MiniBadge extends StatelessWidget {
   final Color? color;
   final Color? backgroundColor;
 
-  /// Override the hover/splash color. Defaults to a neutral light gray that
-  /// matches the default InkWell highlight used by the state-update button.
   final Color? hoverColor;
   final VoidCallback? onTap;
   final String? tooltip;
@@ -30,8 +28,6 @@ class MiniBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final isClickable = onTap != null;
     final bg = backgroundColor ?? context.colors.surface;
-    // Neutral hover a shade toward the ink, matching the default InkWell
-    // highlight on the state-update / progress buttons.
     final effectiveHoverColor =
         hoverColor ?? context.colors.text.withValues(alpha: 0.08);
 

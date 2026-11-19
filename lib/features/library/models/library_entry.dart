@@ -31,9 +31,7 @@ class LibraryEntry {
       throw FormatException('Library entry missing Series payload');
     }
 
-    // The id is the local primary key: entries without one would all collapse
-    // onto the same row. Throwing lets the sync count the entry as skipped
-    // (so it never prunes against an incomplete list) instead of saving it.
+    // The id is the local primary key; a throw makes the sync skip it and not prune a partial list.
     final id = json['id']?.toString() ?? '';
     if (id.isEmpty) {
       throw FormatException('Library entry has no id');
@@ -57,9 +55,7 @@ class LibraryEntry {
     );
   }
 
-  /// Numbers that arrive as strings (`"12"`, `"12.5"`) are read rather than
-  /// thrown on: a throw drops the whole entry, and the full import then
-  /// prunes that entry from the local library as if it had been deleted.
+  /// Lenient: a throw drops the entry, and a full import would then prune it as if deleted.
   static int? _asInt(Object? raw) => switch (raw) {
     final num n => n.toInt(),
     final String s => num.tryParse(s)?.toInt(),

@@ -36,10 +36,7 @@ class ImportInputTab extends StatelessWidget {
     required this.controller,
   });
 
-  /// The theme's default input border is pill-shaped (radius 999), meant for
-  /// short single-line fields — on this tall paste box it renders as a
-  /// wildly exaggerated stadium shape, so it's overridden here to match the
-  /// desktop paste box's rectangular radius.
+  /// Overrides the theme's pill border (radius 999), which turns this tall box into a stadium.
   static final OutlineInputBorder _pasteFieldBorder = OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
     borderSide: BorderSide.none,
@@ -47,10 +44,8 @@ class ImportInputTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Keep the floating button above Android's system navigation area.
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final list = ListView(
-      // Bottom room so the floating Match button never covers the last row.
       padding: EdgeInsets.fromLTRB(16, 12, 16, 96 + safeBottom),
       children: [
         GridView.count(
@@ -133,8 +128,7 @@ class ImportInputTab extends StatelessWidget {
           left: 16,
           right: 16,
           bottom: 16 + safeBottom,
-          // The disabled button is see-through; an opaque well behind it keeps
-          // the content scrolling underneath from showing through.
+          // The disabled button is see-through; this opaque well hides the content under it.
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: context.colors.background,

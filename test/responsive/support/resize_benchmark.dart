@@ -7,14 +7,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'layout_sweep.dart';
 import 'viewports.dart';
 
-/// What one drag-resize cost, per frame.
 class ResizeCost {
   final String label;
 
-  /// Wall time of each frame (build + layout + paint on the UI thread).
   final List<Duration> frames;
 
-  /// Elements rebuilt in each frame.
   final List<int> rebuilds;
 
   ResizeCost(this.label, this.frames, this.rebuilds);
@@ -32,8 +29,7 @@ class ResizeCost {
 
   int get maxRebuilds => rebuilds.reduce(math.max);
 
-  /// The typical frame: breakpoint crossings (which rebuild on purpose) are
-  /// rare in a drag, so they don't move the median.
+  /// The median: deliberate breakpoint rebuilds are rare in a drag.
   int get medianRebuilds {
     final sorted = [...rebuilds]..sort();
     return sorted[sorted.length ~/ 2];
@@ -50,12 +46,7 @@ class ResizeCost {
       'max ${maxRebuilds.toString().padLeft(4)}';
 }
 
-/// Drag-resizes the pumped app along [path] and measures each frame.
-///
-/// Frames are timed in the test's debug build, so absolute numbers run well
-/// above a release build's; they are for comparing layouts and changes, not
-/// for reading as real frame times. The first [warmUp] frames are discarded
-/// (JIT warm-up, image placeholders settling).
+/// Debug-build timings: for comparing changes, never for reading as real frame times.
 Future<ResizeCost> measureDrag(
   WidgetTester tester,
   String label, {
@@ -66,8 +57,6 @@ Future<ResizeCost> measureDrag(
   final frames = <Duration>[];
   final rebuilds = <int>[];
   var count = 0;
-  // RESIZE_BENCHMARK_DETAIL=1: which widgets rebuild, and whose build
-  // (nearest State/Stateless ancestor with a source location) caused it.
   final detail = Platform.environment['RESIZE_BENCHMARK_DETAIL'] == '1';
   final byType = <String, int>{};
   final previous = debugOnRebuildDirtyWidget;

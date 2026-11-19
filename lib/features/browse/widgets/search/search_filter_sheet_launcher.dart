@@ -4,16 +4,11 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_bottom_sheet.dart';
 
-/// Presents [SearchFilterBottomSheet] the way the current layout calls for.
-///
-/// Portrait raises it as a bottom sheet. Landscape shows the same content in a
-/// centred dialog instead: a sheet on a short, wide window ends up a letterbox
-/// strip with almost no room for the filters themselves.
+/// Landscape uses a dialog: a sheet on a short, wide window becomes a letterbox strip.
 class SearchFilterSheetLauncher {
   SearchFilterSheetLauncher._();
 
-  /// Widest the landscape dialog grows. Past this the filter rows stretch into
-  /// unreadably long lines.
+  /// Past this the filter rows stretch into unreadably long lines.
   static const double _maxDialogWidth = 600;
 
   static void show(

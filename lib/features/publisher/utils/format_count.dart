@@ -1,4 +1,3 @@
-/// 12380 → "12,380".
 String formatCount(int n) {
   final digits = n.abs().toString();
   final out = StringBuffer(n < 0 ? '-' : '');

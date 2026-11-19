@@ -79,7 +79,6 @@ void main() {
       await pump(tester, series('erotica'));
       expect(find.byType(ImageFiltered), findsOneWidget);
 
-      // A rating that is not blurred is left alone.
       await pump(tester, series('safe'));
       expect(find.byType(ImageFiltered), findsNothing);
     });

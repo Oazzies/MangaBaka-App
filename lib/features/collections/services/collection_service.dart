@@ -9,11 +9,6 @@ import 'package:mangabaka_app/features/series/models/series_work.dart';
 
 export 'package:mangabaka_app/core/network/paged_list.dart';
 
-/// Reads the collection and edition endpoints.
-///
-/// A *collection* is one publisher's run of a series in one edition (its
-/// volumes, format and medium); its *works* are the individual releases. An
-/// *edition* is the label the collection carries ("Omnibus Edition").
 class CollectionService {
   static const String _base = AppConstants.baseApiUrl;
 
@@ -22,7 +17,7 @@ class CollectionService {
   CollectionService({http.Client? client, ApiClient? api})
     : _api = api ?? ApiClient(healthContext: 'collections', client: client);
 
-  /// Every edition. There are few dozen, so all pages are read up front.
+  /// There are a few dozen editions, so every page is read up front.
   Future<List<Edition>> fetchEditions() async {
     final all = <Edition>[];
     for (var page = 1; page <= 5; page++) {
@@ -40,7 +35,6 @@ class CollectionService {
     return all;
   }
 
-  /// A publisher's collections, [page] at a time.
   Future<PagedList<SeriesCollection>> fetchPublisherCollections(
     String publisherId, {
     int page = 1,
@@ -59,7 +53,6 @@ class CollectionService {
     );
   }
 
-  /// The releases (volumes, boxed sets, extras) in a collection.
   Future<PagedList<SeriesWork>> fetchCollectionWorks(
     String collectionId, {
     int page = 1,

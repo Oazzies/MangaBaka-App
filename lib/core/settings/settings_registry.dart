@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/settings/setting_value.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_keys.dart';
 
-/// Holds every declared [SettingValue] instance for [SettingsManager].
 class SettingsRegistry {
   final currentListStyle = EnumSetting(
     SettingsKeys.listStylePref,

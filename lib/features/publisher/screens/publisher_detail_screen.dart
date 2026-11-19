@@ -20,7 +20,6 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// One publisher: who they are, what they publish, and who they resemble.
 class PublisherDetailScreen extends StatefulWidget {
   final String publisherId;
   final Publisher? initial;

@@ -12,24 +12,11 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 part 'desktop_title_bar_controls_part.dart';
 
-/// A sleek, custom Windows title overlay that integrates directly into the app
-/// header without pushing the app content down.
-///
-/// Features:
-/// - Transparent background: the app content and sidebar hit the very top of
-///   the window (`y = 0`).
-/// - Draggable area across the top header (`DragToMoveArea`), so users can drag
-///   to reposition and double-click to expand/restore.
-/// - Custom-styled window control buttons (minimize, expand/restore, close)
-///   styled to match MangaBaka's design system: solid backgrounds, no borders,
-///   matching the 38px height of dropdown controls, with tooltip support.
-
 final _logger = LoggingService.logger;
 
 class DesktopTitleBar extends StatefulWidget implements PreferredSizeWidget {
   static const double height = 54.0;
 
-  /// Custom callbacks used primarily for testing or custom handling.
   final VoidCallback? onMinimize;
   final VoidCallback? onMaximize;
   final VoidCallback? onClose;
@@ -74,17 +61,13 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Draggable area across the full height of the title strip, so the
-          // window can be grabbed anywhere beside the window controls rather
-          // than only in the few pixels at the very top. DragToMoveArea is
-          // hit-test transparent, so content beneath it still gets its taps.
+          // DragToMoveArea is hit-test transparent, so content beneath it still gets its taps.
           Expanded(
             child: SizedBox(
               height: DesktopTitleBar.height,
               child: const TitleDragArea(),
             ),
           ),
-          // Custom styled window controls
           Padding(
             padding: const EdgeInsets.only(top: 10, right: 12),
             child: DesktopWindowButtons(
@@ -100,7 +83,6 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> with WindowListener {
   }
 }
 
-/// Trio of custom-styled window control buttons: Minimize, Expand/Restore, and Close.
 class DesktopWindowButtons extends StatefulWidget {
   final VoidCallback? onMinimize;
   final VoidCallback? onMaximize;

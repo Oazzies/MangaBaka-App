@@ -75,29 +75,21 @@ void main() {
   }
 
   testWidgets('BrowseScreen renders search bar and shortcuts', (WidgetTester tester) async {
-    // Note: We might need to bypass LocalizationService if it fails to load assets in tests
-    // For now, let's assume it handles missing assets gracefully (it returns the key as the translation)
-
     await tester.pumpWidget(createWidgetUnderTest());
 
-    // Check for BrowseShortcuts (initially visible when search is empty)
     expect(find.byType(BrowseShortcuts), findsOneWidget);
 
-    // Check that MBSearchBar is not visible initially
     expect(find.byType(MBSearchBar), findsNothing);
 
-    // Tap search icon to enter search mode
     await tester.tap(find.byIcon(Icons.search));
     await tester.pump();
 
-    // Check for MBSearchBar
     expect(find.byType(MBSearchBar), findsOneWidget);
   });
 
   testWidgets('Typing in search bar updates state', (WidgetTester tester) async {
     await tester.pumpWidget(createWidgetUnderTest());
 
-    // Tap search icon to enter search mode
     await tester.tap(find.byIcon(Icons.search));
     await tester.pump();
 

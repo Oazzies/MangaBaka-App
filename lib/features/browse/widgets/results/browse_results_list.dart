@@ -143,8 +143,6 @@ class BrowseResultsList extends StatelessWidget {
             }
 
             if (columns == 0) {
-              // Rebuilt only when the column count changes; between those a
-              // resize just re-lays the grid out.
               return DerivedLayoutBuilder<int>(
                 derive: (constraints) =>
                     ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
@@ -196,7 +194,6 @@ class BrowseResultsList extends StatelessWidget {
             },
           );
 
-          // On desktop the list styles are tables, so they get column labels.
           if (!DesktopLayout.isActive(context)) return list;
           return Column(
             children: [

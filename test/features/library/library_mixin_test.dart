@@ -74,8 +74,6 @@ void main() {
     await resetServiceLocator();
   });
 
-  // ─── LibraryCrudMixin ──────────────────────────────────────────────────────
-
   group('LibraryCrudMixin.clearLibrary', () {
     test('removes all library entries from the database', () async {
       await service.saveEntries([_entry('s1'), _entry('s2')]);
@@ -112,8 +110,6 @@ void main() {
     });
   });
 
-  // ─── LibrarySyncMixin ──────────────────────────────────────────────────────
-
   group('LibrarySyncMixin.isLibraryIncomplete', () {
     test('returns false when pref is not set', () async {
       final result = await service.isLibraryIncomplete();
@@ -133,7 +129,6 @@ void main() {
     test('is a no-op when sync is already in progress', () async {
       service.syncStatus.value = service.syncStatus.value.copyWith(isSyncing: true);
 
-      // Should return immediately without throwing or changing status
       await service.syncLibrary();
 
       expect(service.syncStatus.value.isSyncing, isTrue);
@@ -146,7 +141,6 @@ void main() {
 
       service.resetInitialSyncTask();
 
-      // After reset, importFullLibrary returns immediately (isSyncing guard)
       await service.importFullLibrary();
       // No exception means the guard worked and no network call was made
     });

@@ -88,7 +88,6 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-    // Tap option '5'
     await tester.tap(find.text('5'));
     await tester.pumpAndSettle();
 
@@ -117,7 +116,6 @@ void main() {
     expect(slider.divisions, 20);
     expect(slider.value, 85.0);
 
-    // Update sends the snapped value
     await tester.tap(find.text(LocalizationService().translate('update')));
     await tester.pumpAndSettle();
 
@@ -170,7 +168,6 @@ void main() {
     setting.load(prefs);
     expect(setting.value, RatingSliderStep.step5);
 
-    // Should also handle string representation
     await prefs.setString('test_step', 'step10');
     setting.load(prefs);
     expect(setting.value, RatingSliderStep.step10);

@@ -1,7 +1,4 @@
-/// Whether the personalised "For You" rail has anything worth showing yet.
-///
-/// The API reports `cold_start` / `profile_stale` from a cheap probe so the
-/// client can hide the rail instead of rendering an empty one.
+/// The API's cheap `cold_start` / `profile_stale` probe, so the client can hide an empty rail.
 class ForYouReadiness {
   final bool coldStart;
   final bool profileStale;

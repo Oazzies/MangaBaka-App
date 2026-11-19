@@ -17,10 +17,6 @@ import 'package:mangabaka_app/features/stacks/widgets/stack_card.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_cover_fan.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_detail_components.dart';
 
-/// Title, author, counts, actions, description and library progress.
-///
-/// [stacked] lays the fan beside the title (phone portrait); otherwise the
-/// fan sits on top of the side column.
 class StackDetailHeader extends StatelessWidget {
   final StackSummary summary;
   final StackDetail? detail;
@@ -213,8 +209,6 @@ class StackDetailHeader extends StatelessWidget {
       Text('·', style: AppTypography.sans(color: c.textMuted, fontSize: 13));
 }
 
-/// "4 of 10 in your library", from the live status; a sign-in nudge when
-/// signed out.
 class StackLibraryProgress extends StatelessWidget {
   final int stackId;
   final int total;

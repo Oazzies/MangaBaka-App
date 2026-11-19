@@ -5,23 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// Keeps the desktop window's picture in step with its size.
-///
-/// Toggling fullscreen (F11) resizes the native window in several steps inside
-/// one call — maximise, change the frame style, move to the monitor's bounds.
-/// The engine can present a frame made for one of those intermediate sizes and,
-/// with nothing animating, never replace it: the framework has laid out for the
-/// final size (a click lands on what *should* be under the pointer) while the
-/// screen still shows the old picture until something else causes a repaint.
-///
-/// So after every change of window metrics this waits for the resizing to
-/// settle and then forces a couple of frames. Cheap, and idle otherwise.
+/// Toggling fullscreen can leave a frame from an intermediate native size on screen until a repaint.
 class WindowRepaintGuard extends StatefulWidget {
   final Widget child;
 
   const WindowRepaintGuard({super.key, required this.child});
 
-  /// Toggles fullscreen and makes sure the result is drawn.
   static Future<void> toggleFullscreen() async {
     if (!_isDesktop) return;
     final isFull = await windowManager.isFullScreen();
@@ -42,13 +31,10 @@ class WindowRepaintGuard extends StatefulWidget {
     } else {
       await windowManager.setFullScreen(true);
     }
-    // The metrics observer below normally covers this; going through it again
-    // here costs one extra frame and removes any dependence on the engine
-    // having reported the change at all.
+    // Redundant with the metrics observer, but removes any dependence on the engine reporting it.
     forceFrames();
   }
 
-  /// Forces a frame now and again after the delays in [_settleDelays].
   static void forceFrames() {
     SchedulerBinding.instance.scheduleForcedFrame();
     for (final delay in _settleDelays) {
@@ -56,8 +42,7 @@ class WindowRepaintGuard extends StatefulWidget {
     }
   }
 
-  /// Frames after the first, at intervals long enough to land after the last
-  /// native resize step of a fullscreen transition.
+  /// Long enough to land after the last native resize step of a fullscreen transition.
   static const List<Duration> _settleDelays = [
     Duration(milliseconds: 120),
     Duration(milliseconds: 400),

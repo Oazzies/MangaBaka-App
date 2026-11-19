@@ -23,8 +23,6 @@ class _MockMixService extends Fake implements MixService {
   int fetchSeedCalls = 0;
   Map<String, dynamic>? lastFetchMixArgs;
 
-  /// When set, fetchMix returns this future instead of [mixResult] (used to
-  /// simulate a slow request that overlaps a newer one).
   Future<MixResult>? pendingMixResponse;
 
   @override
@@ -210,7 +208,6 @@ void main() {
       mockMix.mixError = Exception('mix down');
       controller.addSeed(_series('1'));
       await Future<void>.delayed(Duration.zero);
-      // User-facing wording, never the raw exception text.
       expect(controller.error, ErrorMessages.describe(Exception('mix down')));
       expect(controller.results, isEmpty);
       expect(controller.isLoading, isFalse);
@@ -253,11 +250,9 @@ void main() {
         final slowResponse = Completer<MixResult>();
         mockMix.pendingMixResponse = slowResponse.future;
 
-        // First fetch hangs.
         controller.addSeed(_series('1'));
         await Future<void>.delayed(Duration.zero);
 
-        // Second fetch resolves immediately with the fresh result.
         mockMix.mixResult = MixResult(
           series: [_series('2', title: 'Fresh')],
           dna: const [],
@@ -267,7 +262,6 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         expect(controller.results.map((s) => s.title), ['Fresh']);
 
-        // The old response arrives late — it must not overwrite the fresh one.
         slowResponse.complete(
           MixResult(
             series: [_series('99', title: 'Stale')],

@@ -36,7 +36,6 @@ void main() {
     });
 
     test('cancelSync resets status', () {
-      // Simulate syncing state
       service.syncStatus.value = service.syncStatus.value.copyWith(isSyncing: true);
       
       service.cancelSync();

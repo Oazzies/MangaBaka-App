@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 class StatusIcons {
   StatusIcons._();
 
-  /// Library state (site: book-check, circle-dashed, trash, pause, book,
-  /// book-open-text, rotate-ccw).
   static IconData forState(String state) => switch (state) {
     'reading' => Icons.auto_stories_outlined,
     'rereading' => Icons.rotate_left,
@@ -17,8 +15,6 @@ class StatusIcons {
     _ => Icons.help_outline,
   };
 
-  /// Series publication status (site: play, circle-check-big, circle-pause,
-  /// trash, circle-dot-dashed, circle-help).
   static IconData forSeriesStatus(String status) =>
       switch (status.toLowerCase()) {
         'releasing' || 'ongoing' => Icons.play_arrow_outlined,

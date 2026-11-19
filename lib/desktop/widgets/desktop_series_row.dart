@@ -12,23 +12,14 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_series_table_part.dart';
 
-/// A series as one row of a table — cover, title, and its facts in aligned
-/// columns.
-///
-/// The phone's list rows are cards sized for a thumb, with the facts run
-/// together on one muted line; on a wide window that wastes the width and makes
-/// a long list hard to scan. Here each fact has its own column, so a list can
-/// be read down as well as across.
 class DesktopSeriesRow extends StatefulWidget {
   final Series series;
   final AppListStyle style;
   final String displayTitle;
   final String? heroTagPrefix;
 
-  /// A thin bar drawn under the title, for a series with library progress.
   final Widget? progress;
 
-  /// The quick-progress control, aligned in the row's right-hand gutter.
   final Widget? trailing;
 
   const DesktopSeriesRow({
@@ -64,8 +55,6 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      // Rebuilt only when a column appears or drops away; between those a
-      // resize just re-lays the row out.
       child: DerivedLayoutBuilder<int>(
         derive: (constraints) => DesktopSeriesTable.columnCount(
           _style,
@@ -185,8 +174,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
     }
   }
 
-  /// The translated value, or the raw one when the API sent something the
-  /// language files do not know.
+  /// Falls back to the raw value when the API sends one the language files do not know.
   String _translated(LocalizationService l10n, String prefix, String value) {
     if (value.isEmpty) return '—';
     final key = '$prefix${value.toLowerCase()}';

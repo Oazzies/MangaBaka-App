@@ -48,10 +48,6 @@ class _NewsScreenState extends State<NewsScreen> {
     super.dispose();
   }
 
-  // -------------------------------------------------------------------------
-  // Data loading
-  // -------------------------------------------------------------------------
-
   Future<void> _loadCachedAndFetch() async {
     _logger.fine('Loading cached news...');
     final cachedNews = await _newsService.getCachedNews();
@@ -120,24 +116,17 @@ class _NewsScreenState extends State<NewsScreen> {
 
   Future<void> _onRefresh() async {
     _logger.info('User triggered manual refresh for news');
-    // Do NOT set _isLoading = true here — _fetchNews guards against concurrent
-    // fetches by checking _isLoading, so pre-setting it would cause the fetch
-    // to return immediately and silently skip the refresh.
+    // Leave _isLoading alone: _fetchNews bails when it is set, skipping the refresh.
     setState(() {
       _currentPage = 1;
       _hasMore = true;
     });
 
-    // Keep the RefreshIndicator visible for at least 800 ms for visual feedback.
     await Future.wait([
       _fetchNews(initial: true),
       Future.delayed(const Duration(milliseconds: 800)),
     ]);
   }
-
-  // -------------------------------------------------------------------------
-  // Scroll handling
-  // -------------------------------------------------------------------------
 
   void _onScroll() {
     _checkPaginationTrigger();
@@ -164,10 +153,6 @@ class _NewsScreenState extends State<NewsScreen> {
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Build
-  // -------------------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -179,7 +164,6 @@ class _NewsScreenState extends State<NewsScreen> {
         final isLandscape =
             MediaQuery.of(context).orientation == Orientation.landscape;
 
-        // 2-column grid only makes sense in landscape on wider screens.
         final isGrid =
             settings.newsListColumns > 1 && screenWidth > 400 && isLandscape;
 

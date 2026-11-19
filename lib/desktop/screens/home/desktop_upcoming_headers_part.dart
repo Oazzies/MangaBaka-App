@@ -7,7 +7,6 @@ class _DateGroup {
   const _DateGroup(this.date, this.works);
 }
 
-/// Day heading: a big "25 SEP" with the weekday and distance beside it.
 class _DateHeader extends StatelessWidget {
   final DateTime? date;
   final bool first;

@@ -3,22 +3,15 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A selectable miniature of the app drawn in [palette] — not the active
-/// theme — so a gallery of these shows every theme side by side.
-///
-/// The frame (selection ring, label) uses the *active* theme, since it is part
-/// of the screen the gallery sits on, not of the theme being previewed.
+/// Drawn in [palette]; only the frame (ring, label) uses the active theme.
 class ThemePreviewCard extends StatelessWidget {
   final MbPalette palette;
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
-  /// Long-press on touch, right-click on desktop. Used for custom themes'
-  /// edit/share/delete menu.
   final void Function(Offset globalPosition)? onMenu;
 
-  /// Small marker in the corner, e.g. a pencil on custom themes.
   final IconData? badge;
 
   final double width;
@@ -133,9 +126,6 @@ class _Marker extends StatelessWidget {
   }
 }
 
-/// The mock screen inside a [ThemePreviewCard]: a header, a pill strip, a
-/// row of covers and a nav bar — the four things that define how the app
-/// looks, reduced to blocks. Scales to whatever box it is given.
 class ThemeMiniature extends StatelessWidget {
   final MbPalette palette;
 
@@ -163,7 +153,6 @@ class ThemeMiniature extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header: title caps + an avatar dot.
                 Row(
                   children: [
                     bar(40, 7, p.text, 2),
@@ -172,7 +161,6 @@ class ThemeMiniature extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 8 * u),
-                // Pill strip: the accent "on" state next to a quiet one.
                 Row(
                   children: [
                     bar(24, 9, p.accent),
@@ -183,7 +171,6 @@ class ThemeMiniature extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 8 * u),
-                // Covers with title lines.
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,7 +208,6 @@ class ThemeMiniature extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Nav bar with the active destination in accent.
                 Container(
                   margin: EdgeInsets.only(bottom: 6 * u),
                   padding: EdgeInsets.symmetric(

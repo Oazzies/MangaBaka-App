@@ -24,7 +24,6 @@ void main() {
     await resetServiceLocator();
     setupServiceLocator();
     
-    // Replace auth with mock to avoid real login logic in tests
     getIt.unregister<ProfileAuthService>();
     getIt.registerSingleton<ProfileAuthService>(MockProfileAuthService());
     
@@ -42,10 +41,8 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Verify BrowseScreen is visible
     expect(find.byType(BrowseScreen), findsOneWidget);
     
-    // Verify the bottom nav has Browse selected (index 2)
     final navBar = tester.widget<MbBottomNav>(find.byType(MbBottomNav));
     expect(navBar.selectedIndex, 2);
   });

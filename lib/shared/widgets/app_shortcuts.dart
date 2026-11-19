@@ -60,7 +60,6 @@ class AppShortcuts extends StatelessWidget {
         LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyR):
             const RefreshIntent(),
 
-        // Tab switching
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1):
             const TabIntent(0),
         LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.digit1):
@@ -101,8 +100,7 @@ class AppShortcuts extends StatelessWidget {
                 });
                 return null;
               }
-              // Dialogs and full-window routes sit on the root navigator and
-              // close first; after that, desktop unwinds its content area.
+              // Root navigator first (dialogs, full-window routes), then the desktop content area.
               final navigator = AppConstants.navigatorKey.currentState;
               if (navigator != null && navigator.canPop()) {
                 navigator.maybePop();
@@ -131,8 +129,6 @@ class AppShortcuts extends StatelessWidget {
               return null;
             },
           ),
-          // Search and Refresh are context-dependent and will be handled in specific screens if needed
-          // or we can try to find a way to dispatch them.
         },
         child: WindowRepaintGuard(
           child: MouseNavigationListener(

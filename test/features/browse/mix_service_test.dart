@@ -109,7 +109,7 @@ void main() {
     test('returns empty list when seed count is below 2', () async {
       final r = await service.fetchSeedSuggestions([1]);
       expect(r, isEmpty);
-      expect(client.lastUri, isNull); // no request made
+      expect(client.lastUri, isNull);
     });
 
     test('returns parsed suggestions on success', () async {

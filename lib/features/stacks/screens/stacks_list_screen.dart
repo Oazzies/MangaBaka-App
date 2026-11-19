@@ -11,7 +11,6 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 export 'package:mangabaka_app/features/stacks/models/stacks_list_source.dart';
 export 'package:mangabaka_app/features/stacks/widgets/stacks_paged_view.dart';
 
-/// Pages through one [StacksListSource] as a full screen.
 class StacksListScreen extends StatelessWidget {
   final StacksListSource source;
 

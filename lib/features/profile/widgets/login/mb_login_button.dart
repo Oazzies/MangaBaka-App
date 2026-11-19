@@ -12,9 +12,6 @@ class MBLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
 
-    // The old button painted white on amber, which barely cleared contrast;
-    // the shared primary button carries the correct ink-on-amber pairing and
-    // the system's press feedback.
     return MbPrimaryButton(
       label: l10n.translate('login_with'),
       onPressed: onPressed,

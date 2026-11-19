@@ -60,8 +60,6 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
   @override
   Widget build(BuildContext context) {
     final menuRadius = BorderRadius.circular(widget.badgeMenu ? 22 : 14);
-    // Wide enough for the longest option, so labels are not ellipsised while
-    // the screen has room.
     final screenWidth = MediaQuery.sizeOf(context).width;
     var widest = 0.0;
     for (final item in widget.items) {
@@ -104,14 +102,12 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
 
     return Stack(
       children: [
-        // Transparent barrier to capture clicks outside and close
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: widget.onDismiss,
           ),
         ),
-        // Dropdown menu positioned just below/above the button with matching styling
         Positioned(
           left: math.max(12.0, menuLeft),
           top: widget.openUpward ? null : widget.targetRect.bottom + 4,
@@ -129,16 +125,12 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
                     : Alignment.topCenter,
                 child: Container(
                   width: menuWidth,
-                  // Tall enough to show every option when the window has the
-                  // room, so no scroll bar is needed.
                   constraints: BoxConstraints(maxHeight: maxMenuHeight),
                   padding: EdgeInsets.all(widget.badgeMenu ? 8 : 6),
                   decoration: BoxDecoration(
                     color: widget.backgroundColor,
                     borderRadius: menuRadius,
-                    // No drop shadow: SizeTransition clips to a rectangle,
-                    // which turned the shadow into a dim box with square
-                    // edges around the rounded menu.
+                    // No shadow: SizeTransition clips it to a square-edged box around the rounded menu.
                     border: Border.all(color: context.colors.border, width: 1),
                   ),
                   child: ClipRRect(
@@ -174,10 +166,7 @@ class _DesktopDropdownOverlayState<T> extends State<_DesktopDropdownOverlay<T>>
   }
 }
 
-/// Opens the app's dropdown menu under [anchor] (a rect in global
-/// coordinates) for a button that is not itself a [DesktopDropdown], with the
-/// menu's right edge on the anchor's. The same light overlay the dropdowns
-/// use, so it opens as quickly as they do.
+/// [anchor] is a rect in global coordinates.
 void showDropdownMenuAt<T>(
   BuildContext context, {
   required Rect anchor,

@@ -26,12 +26,6 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 
-/// The user's library, tabbed by reading status.
-///
-/// Holds the search and filter state and the widgets that display it.
-/// [LibrarySession] owns the account connection — the entries stream, the
-/// sync, sign-in — and [LibraryTabCoordinator] decides which tab should be
-/// showing and what each one's badge reads.
 class LibraryScreen extends StatefulWidget {
   static final GlobalKey<LibraryScreenState> libraryScreenKey =
       GlobalKey<LibraryScreenState>();
@@ -46,9 +40,7 @@ class LibraryScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
   static final _logger = LoggingService.logger;
 
-  /// Widest the list grows before it is centred. Grids are left unbounded —
-  /// they use the extra width for more columns, where a list would just get
-  /// unreadably long lines.
+  /// Lists only: grids use the extra width for more columns instead.
   static const double _maxListWidth = 800;
 
   late final LibraryService _libraryService;
@@ -62,8 +54,6 @@ class LibraryScreenState extends State<LibraryScreen>
   String _query = '';
   SearchFilters _filters = SearchFilters();
   bool _isSearching = false;
-
-  // ─── Public surface ──────────────────────────────────────────────────────
 
   FocusNode get searchFocusNode => _searchFocusNode;
   Stream<List<LibraryEntry>>? get entriesStream => _session.entriesStream;
@@ -91,8 +81,6 @@ class LibraryScreenState extends State<LibraryScreen>
     _logger.info('Library autocomplete result selected: ${result.title}');
     _navigateToSeriesDetail(BrowseHelpers.convertAutocompleteToSeries(result));
   }
-
-  // ─── Lifecycle ───────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -155,8 +143,6 @@ class LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  // ─── Search ──────────────────────────────────────────────────────────────
-
   void _exitSearch() {
     setState(() {
       _isSearching = false;
@@ -174,8 +160,6 @@ class LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  // ─── Build ───────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -184,7 +168,6 @@ class LibraryScreenState extends State<LibraryScreen>
         final isGrid = SettingsManager().resolvedLibraryListStyle.isGrid;
 
         return PopScope(
-          // Back leaves search before it leaves the tab.
           canPop: !_isSearching,
           onPopInvokedWithResult: (didPop, _) {
             if (didPop) return;

@@ -14,22 +14,18 @@ class MixController extends ChangeNotifier {
   static final _logger = LoggingService.logger;
   final MixService _mixService = getIt<MixService>();
 
-  // ─── Seeds ───────────────────────────────────────────────────────────────
   final List<Series> _seeds = [];
   List<Series> get seeds => List.unmodifiable(_seeds);
 
-  // ─── Results ─────────────────────────────────────────────────────────────
   List<Series> _results = [];
   List<Series> get results => _results;
 
   List<MixDnaTag> _dna = [];
   List<MixDnaTag> get dna => _dna;
 
-  // ─── Seed Suggestions ────────────────────────────────────────────────────
   List<AutocompleteSeriesResult> _seedSuggestions = [];
   List<AutocompleteSeriesResult> get seedSuggestions => _seedSuggestions;
 
-  // ─── Options ─────────────────────────────────────────────────────────────
   bool _strictMode = false;
   bool get strictMode => _strictMode;
   void setStrictMode(bool v) {
@@ -54,7 +50,6 @@ class MixController extends ChangeNotifier {
     if (hasSeeds) _fetchMix();
   }
 
-  // ─── State ───────────────────────────────────────────────────────────────
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -66,12 +61,9 @@ class MixController extends ChangeNotifier {
 
   bool get hasSeeds => _seeds.isNotEmpty;
 
-  /// Generation guards: rapid seed/option changes fire overlapping requests;
-  /// a response only applies if it still belongs to the newest request.
+  /// Rapid seed/option changes overlap requests; only the newest generation's response applies.
   int _mixGeneration = 0;
   int _suggestionsGeneration = 0;
-
-  // ─── Seed Management ─────────────────────────────────────────────────────
 
   bool isSeed(int seriesId) => _seeds.any((s) => s.id == seriesId.toString());
 
@@ -107,8 +99,7 @@ class MixController extends ChangeNotifier {
       if (_seeds.length >= 2) {
         _fetchSeedSuggestions();
       } else {
-        // Invalidate a suggestions request still in flight for the old seed
-        // set, or its response would repopulate the list just cleared.
+        // Stales a suggestions request for the old seeds, or it would refill the list just cleared.
         _suggestionsGeneration++;
         _isSuggestionsLoading = false;
         _seedSuggestions = [];
@@ -130,8 +121,6 @@ class MixController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Fetch Mix ───────────────────────────────────────────────────────────
-
   Future<void> _fetchMix() async {
     if (_seeds.isEmpty) return;
 
@@ -152,7 +141,6 @@ class MixController extends ChangeNotifier {
       final result = await _mixService.fetchMix(
         seriesIds: ids,
         limit: 24,
-        // The deny-list form: what the user has chosen not to see.
         notContentRating: ContentRatingFilter.excluded(contentPrefs),
         strict: _strictMode,
         blendUserId: (_blendUser && userId.isNotEmpty) ? userId : null,
@@ -189,8 +177,6 @@ class MixController extends ChangeNotifier {
     super.dispose();
   }
 
-  // ─── Fetch Seed Suggestions ──────────────────────────────────────────────
-
   Future<void> _fetchSeedSuggestions() async {
     if (_seeds.length < 2) return;
 
@@ -206,7 +192,6 @@ class MixController extends ChangeNotifier {
       final suggestions = await _mixService.fetchSeedSuggestions(ids);
 
       if (generation != _suggestionsGeneration) return;
-      // Filter out series already added as seeds
       _seedSuggestions = suggestions.where((sug) => !isSeed(sug.id)).toList();
       _logger.info(
         'MixController: got ${_seedSuggestions.length} seed suggestions',

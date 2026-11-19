@@ -96,7 +96,6 @@ void main() {
   });
 
   test('reportApiOutcome is a no-op when the service is not registered', () {
-    // getIt has nothing registered in this test — must not throw.
     reportApiOutcome(ok: false, context: 'x', statusCode: 500);
     reportApiOutcome(ok: true, context: 'x', statusCode: 200);
   });

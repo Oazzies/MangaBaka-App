@@ -4,8 +4,6 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_pill.dart';
 
-/// Label and icon for each mode, shared by the touch selector here and the
-/// desktop segmented control.
 extension AppThemeModeLabels on AppThemeMode {
   String label(LocalizationService l10n) => l10n.translate(switch (this) {
     AppThemeMode.system => 'theme_mode_system',
@@ -20,7 +18,6 @@ extension AppThemeModeLabels on AppThemeMode {
   };
 }
 
-/// System / Light / Dark as three equal pills — the touch-sized control.
 class ThemeModeSelector extends StatelessWidget {
   const ThemeModeSelector({super.key});
 

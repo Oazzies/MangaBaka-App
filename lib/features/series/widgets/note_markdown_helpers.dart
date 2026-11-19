@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Markdown text-editing helpers and keyboard shortcuts for [NoteEditorDialog].
 class NoteMarkdownHelper {
   static void wrapSelection(
     TextEditingController controller,
@@ -76,9 +75,6 @@ class NoteMarkdownHelper {
     focusNode.requestFocus();
   }
 
-  /// Keyboard-shortcut wrapper: wraps the active selection, exits an existing
-  /// closing delimiter if the cursor sits right before it, or inserts empty
-  /// delimiters with the cursor placed inside for immediate typing.
   static void applyWrapShortcut(
     TextEditingController controller,
     String prefix,

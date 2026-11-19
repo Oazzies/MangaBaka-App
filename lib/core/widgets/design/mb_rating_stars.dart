@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Single amber star followed by the numeric score, matching the reference's
-/// compact "★ 5.0" treatment rather than a five-star row.
 class MbRatingStars extends StatelessWidget {
-  /// Score on the source's own scale; [outOf] is used only to decide how many
-  /// decimals to show.
+  /// On the source's own scale; [outOf] only picks how many decimals to show.
   final double? rating;
   final double outOf;
   final double fontSize;

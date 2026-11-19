@@ -14,13 +14,10 @@ import 'package:win32_registry/win32_registry.dart';
 class DesktopAuthHandler {
   static final _logger = LoggingService.logger;
 
-  /// The sign-in currently waiting on the browser, if any. The browser is a
-  /// separate app: closing its tab tells this one nothing, so the wait needs a
-  /// way to be ended from our own UI.
+  /// Closing the browser tab tells the app nothing, so our own UI must be able to end the wait.
   static Completer<String?>? _pending;
   static Uri? _pendingAuthUri;
 
-  /// Ends a pending sign-in as cancelled. No-op when none is waiting.
   static void cancelPending() {
     final pending = _pending;
     if (pending != null && !pending.isCompleted) {
@@ -28,7 +25,6 @@ class DesktopAuthHandler {
     }
   }
 
-  /// Opens the authorization page again, for a user who closed the tab.
   static Future<void> reopenBrowser() async {
     final uri = _pendingAuthUri;
     if (uri != null) {
@@ -36,7 +32,6 @@ class DesktopAuthHandler {
     }
   }
 
-  /// Registers the custom protocol on desktop platforms (Windows registry or Linux desktop entry).
   static Future<void> registerProtocol(String scheme) async {
     if (Platform.isWindows) {
       await _registerWindowsProtocol(scheme);
@@ -45,7 +40,6 @@ class DesktopAuthHandler {
     }
   }
 
-  /// Registers the custom protocol in the Windows Registry.
   static Future<void> _registerWindowsProtocol(String scheme) async {
     try {
       final appPath = Platform.resolvedExecutable;
@@ -66,14 +60,11 @@ class DesktopAuthHandler {
 
       _logger.info('Protocol registration successful on Windows');
     } on Exception catch (e, st) {
-      // Registry writes (WindowsException) only; sign-in then falls back to
-      // whatever handler is registered already.
+      // Registry writes throw WindowsException; sign-in then falls back to the existing handler.
       _logger.severe('Failed to register protocol $scheme on Windows', e, st);
     }
   }
 
-  /// Registers the custom protocol on Linux via a .desktop file in
-  /// ~/.local/share/applications and xdg-mime.
   static Future<void> _registerLinuxProtocol(String scheme) async {
     try {
       final homeDir = Platform.environment['HOME'];
@@ -118,7 +109,6 @@ StartupWMClass=dev.oazzies.mangabaka_app
     }
   }
 
-  /// Performs the OAuth2 authorization and code exchange flow on desktop.
   static Future<TokenResponse?> authorizeAndExchangeCode({
     required String clientId,
     required String redirectUri,
@@ -127,7 +117,6 @@ StartupWMClass=dev.oazzies.mangabaka_app
     required List<String> scopes,
     VoidCallback? onBrowserOpened,
   }) async {
-    // Extract scheme and register it
     final scheme = Uri.parse(redirectUri).scheme;
     if (scheme.isNotEmpty) {
       await registerProtocol(scheme);
@@ -135,12 +124,10 @@ StartupWMClass=dev.oazzies.mangabaka_app
 
     final appLinks = AppLinks();
 
-    // 1. Generate PKCE
     final codeVerifier = DesktopAuthTokens.generateCodeVerifier();
     final codeChallenge = DesktopAuthTokens.generateCodeChallenge(codeVerifier);
     final state = DesktopAuthTokens.generateRandomString(16);
 
-    // 2. Prepare Auth URI
     final authUri = Uri.parse(authorizationEndpoint).replace(
       queryParameters: {
         'response_type': 'code',
@@ -156,8 +143,7 @@ StartupWMClass=dev.oazzies.mangabaka_app
 
     _logger.info('Opening browser for desktop OAuth sign-in');
 
-    // 3. Listen for redirect before launching. A sign-in already waiting is
-    // abandoned first, so its cleanup cannot clobber this one's state.
+    // Listen before launching; abandon any waiting sign-in so its cleanup cannot clobber this one.
     cancelPending();
     final completer = Completer<String?>();
     _pending = completer;
@@ -204,9 +190,7 @@ StartupWMClass=dev.oazzies.mangabaka_app
     );
 
     try {
-      // 4. Launch browser. Inside the try so a launcher that throws (rather
-      // than returning false) still cancels the subscription and clears the
-      // pending state.
+      // Inside the try so a throwing launcher still cancels the subscription and pending state.
       if (!await launchUrl(authUri, mode: LaunchMode.externalApplication)) {
         throw AuthException(
           message: 'Could not launch the browser for sign-in',
@@ -215,7 +199,6 @@ StartupWMClass=dev.oazzies.mangabaka_app
       }
       onBrowserOpened?.call();
 
-      // 5. Wait for code (with timeout)
       final code = await completer.future.timeout(const Duration(minutes: 5));
       await sub.cancel();
 
@@ -223,7 +206,6 @@ StartupWMClass=dev.oazzies.mangabaka_app
 
       _logger.info('OAuth code received, exchanging for tokens...');
 
-      // 6. Exchange code for tokens
       final response = await http
           .post(
             Uri.parse(tokenEndpoint),
@@ -242,7 +224,6 @@ StartupWMClass=dev.oazzies.mangabaka_app
         final data = DesktopAuthTokens.tokenBody(response.body);
         _logger.info('Token exchange successful on desktop');
 
-        // Map to TokenResponse for compatibility with ProfileAuthService
         return TokenResponse(
           data['access_token'] as String,
           data['refresh_token'] as String?,
@@ -278,7 +259,6 @@ StartupWMClass=dev.oazzies.mangabaka_app
     }
   }
 
-  /// Performs a token refresh on desktop.
   static Future<TokenResponse?> refresh({
     required String clientId,
     required String redirectUri,

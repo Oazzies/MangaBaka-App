@@ -6,7 +6,6 @@ import 'package:mangabaka_app/core/widgets/fit_or_else.dart';
 import 'package:mangabaka_app/desktop/shell/active_page_stack.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_carousel.dart';
 
-/// The building blocks the resize rules (lib/desktop/RESPONSIVE.md) rely on.
 void main() {
   Widget boxOf(double width, Widget child) => Directionality(
     textDirection: TextDirection.ltr,
@@ -36,14 +35,12 @@ void main() {
       );
       expect(builds, 1);
 
-      // A drag-resize within the band: every frame lays out, none rebuilds.
       for (var w = 301.0; w < 500; w += 7) {
         tester.view.physicalSize = Size(w, 200);
         await tester.pump();
       }
       expect(builds, 1);
 
-      // Crossing the threshold rebuilds once.
       tester.view.physicalSize = const Size(640, 200);
       await tester.pump();
       expect(builds, 2);
@@ -93,7 +90,6 @@ void main() {
       keys[0].currentState!.increment();
       await tester.pump();
       expect(find.text('a1'), findsOneWidget);
-      // The hidden page is offstage to finders and never laid out.
       expect(find.text('b0'), findsNothing);
       final hidden = keys[1].currentContext!.findRenderObject()! as RenderBox;
       expect(hidden.hasSize, isFalse);
@@ -102,11 +98,9 @@ void main() {
       expect(find.text('b0'), findsOneWidget);
       final shownSize = hidden.size;
 
-      // Back to the first page: its state survived being hidden.
       await tester.pumpWidget(stack(0, pages));
       expect(find.text('a1'), findsOneWidget);
 
-      // A resize doesn't touch the hidden page's layout.
       tester.view.physicalSize = const Size(1234, 777);
       addTearDown(tester.view.reset);
       await tester.pump();
@@ -179,7 +173,6 @@ void main() {
       await tester.pumpWidget(at(299));
       expect(find.text('small'), findsOneWidget);
       expect(find.text('wide'), findsNothing);
-      // Only what's shown takes the pointer.
       expect(tester.getSize(find.byType(FitOrElse)), const Size(40, 20));
 
       await tester.pumpWidget(at(300));

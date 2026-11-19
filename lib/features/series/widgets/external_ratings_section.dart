@@ -47,7 +47,6 @@ class ExternalRatingsSection extends StatelessWidget {
     final items = <Widget>[];
     final l10n = LocalizationService();
 
-    // Add Combined Average first if available
     final avg = series.combinedAverage;
     if (avg != null) {
       items.add(
@@ -183,7 +182,6 @@ class ExternalRatingsSection extends StatelessWidget {
       }
     }
 
-    // Fallback to series links
     final domain = _getDomain(key);
     if (domain.isNotEmpty) {
       for (var link in series.links) {

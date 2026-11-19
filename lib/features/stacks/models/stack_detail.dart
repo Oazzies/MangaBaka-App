@@ -2,21 +2,14 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 
-/// Why an entry no longer shows its series.
 enum StackEntryIssue {
-  /// Merged into another series ([StackEntry.mergedWith]).
   merged,
 
-  /// Removed from MangaBaka.
   deleted,
 }
 
-/// One ranked place in a stack.
-///
-/// The public endpoint replaces a merged or deleted series with a bare
-/// placeholder (`{kind: merged|deleted, rank}`); the owner's endpoint keeps
-/// the series and reports the problem in `issue`. Both read into this shape:
-/// [series] is null exactly when there is nothing left to show.
+/// The public endpoint replaces a merged or deleted series with `{kind, rank}`;
+/// the owner's endpoint keeps the series and reports the problem in `issue`.
 class StackEntry {
   final int rank;
   final String? note;
@@ -24,8 +17,7 @@ class StackEntry {
   final StackEntryIssue? issue;
   final String? mergedWith;
 
-  /// Series id, kept even when [series] could not be read so the owner's
-  /// editor can still send the entry back.
+  /// Kept when [series] is unreadable so the owner's editor can still send the entry back.
   final String? seriesId;
 
   const StackEntry({
@@ -72,22 +64,18 @@ class StackEntry {
     );
   }
 
-  /// A placeholder: nothing to show but the rank.
   bool get isPlaceholder => series == null;
 }
 
-/// A stack with its description and entries.
-///
-/// The owner-only fields ([token], [isHidden], [isDelisted],
-/// [minContentRating], [isSpoilerLocked]) are only filled by
-/// `GET /v2/my/stacks/{id}` and the write endpoints.
+/// [token], [isHidden], [isDelisted], [minContentRating] and [isSpoilerLocked] are
+/// only filled by `GET /v2/my/stacks/{id}` and the write endpoints.
 class StackDetail {
   final StackSummary summary;
   final String? description;
   final bool isCommentsEnabled;
   final List<StackEntry> entries;
 
-  /// The concurrency token the next `PUT` needs. Null on public reads.
+  /// The concurrency token the next `PUT` needs.
   final String? token;
   final bool isHidden;
   final bool isDelisted;
@@ -140,7 +128,6 @@ class StackDetail {
   int get id => summary.id;
   String get title => summary.title;
 
-  /// Entries that still show a series.
   Iterable<StackEntry> get liveEntries =>
       entries.where((e) => !e.isPlaceholder);
 

@@ -8,21 +8,12 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 
-/// Owns the library's connection to the signed-in account: the entries stream,
-/// the initial sync, and tearing both down on sign-out.
-///
-/// The screen used to hold all of this inline, with the stream set up inside a
-/// `setState` callback that also kicked off an async sync. Here the state
-/// transitions are explicit and the screen just listens.
 class LibrarySession extends ChangeNotifier {
   static final _logger = LoggingService.logger;
 
   final ProfileAuthService _auth;
   final LibraryService _library;
 
-  /// Called with each new batch of entries, for whatever the screen needs to
-  /// recompute — the stream itself is also exposed for widgets that want to
-  /// build from it directly.
   final ValueChanged<List<LibraryEntry>> onEntries;
 
   LibrarySession({
@@ -45,8 +36,6 @@ class LibrarySession extends ChangeNotifier {
 
   StreamSubscription<List<LibraryEntry>>? _subscription;
 
-  /// True when the local copy is known to be missing entries — the initial
-  /// import hit its page limit and never finished.
   bool _isIncomplete = false;
   bool get isIncomplete => _isIncomplete;
 
@@ -62,9 +51,7 @@ class LibrarySession extends ChangeNotifier {
 
   void _onAuthStateChanged() {
     if (_disposed) return;
-    // The auth service also notifies on every profile refresh. Only a real
-    // sign-in/sign-out should rebuild the stream and re-run the sync —
-    // otherwise each refresh resubscribes and re-emits the whole library.
+    // The auth service also notifies on profile refreshes; only a real sign-in/out resubscribes.
     if (_auth.isLoggedIn == _loggedIn) return;
     _logger.info(
       'Auth state changed in LibraryScreen. LoggedIn: ${_auth.isLoggedIn}',
@@ -83,7 +70,6 @@ class LibrarySession extends ChangeNotifier {
     _entriesStream = _library.watchEntriesFromDb();
     _subscription?.cancel();
     _subscription = _entriesStream?.listen(onEntries);
-    // Full import only on first load; later calls do an incremental catch-up.
     _runInitialSync();
   }
 
@@ -103,17 +89,12 @@ class LibrarySession extends ChangeNotifier {
       _isIncomplete = incomplete;
       _safeNotify();
     } catch (e, st) {
-      // The local copy is still usable; the banner and a manual retry cover
-      // it, so a failed sync must not take the screen down.
+      // The local copy stays usable and the banner offers a retry, so this must not throw.
       _logger.severe('Initial sync task failed', e, st);
     }
   }
 
-  /// Signs in and opens the library.
-  ///
-  /// Returns null on success or when the user cancelled, and an error message
-  /// key when the attempt genuinely failed — a cancelled login is a choice,
-  /// not something to report back.
+  /// Returns an error message key on failure; null on success or cancel (a choice, not an error).
   Future<String?> login() async {
     _logger.info('User attempting login from library screen');
     try {
@@ -137,9 +118,6 @@ class LibrarySession extends ChangeNotifier {
     return null;
   }
 
-  /// A manual refresh. Failures are reported through
-  /// [LibraryService.syncStatus], which raises the banner, so nothing is
-  /// thrown back to the caller.
   Future<void> refresh() async {
     _logger.info('User triggered manual library refresh from screen');
     try {

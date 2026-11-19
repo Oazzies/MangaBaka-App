@@ -12,25 +12,13 @@ import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/series/models/series_link.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 
-/// The optional sub-resources of a series: links, covers, related titles,
-/// news, collections, works and similar titles.
-///
-/// These populate the tabs of the series detail screen and are all *additive*:
-/// each one fills a section that is simply absent when the fetch fails. So
-/// every method here degrades to an empty list and logs, rather than
-/// propagating — a failed "similar titles" call must not take down a detail
-/// page whose main content already loaded.
-///
-/// The seven methods were previously seven copies of the same request block
-/// differing only in path and model; they now share [_fetchList].
+/// Every fetch degrades to an empty list: a failed sub-resource must not take down a loaded detail page.
 mixin SeriesMetadataMixin {
   final _logger = LoggingService.logger;
 
-  /// Overridable so a test can inject a client; defaults to the shared one.
+  /// Overridden in tests to inject a client.
   ApiClient get metadataApi => _defaultApi;
 
-  /// Overridable like [metadataApi]; resolves the canonical titles of the
-  /// v2 lists ("similar", "readers also like").
   SeriesTitleEnricher get titleEnricher => SeriesTitleEnricher.shared;
   static final ApiClient _defaultApi = ApiClient(healthContext: 'series-meta');
 
@@ -49,10 +37,7 @@ mixin SeriesMetadataMixin {
   Future<List<SeriesWork>> fetchSeriesWorks(String id) =>
       _fetchList(id, 'works', SeriesWork.fromJson);
 
-  /// Uses `/relationships`: the older `/related` is deprecated and answers
-  /// with an object of relation buckets rather than a `data` array, which
-  /// [_fetchList] would read as empty. Each item wraps the series alongside
-  /// its `relation_type`.
+  /// Not `/related`: it is deprecated and returns relation buckets, not a `data` array.
   Future<List<RelatedSeries>> fetchSeriesRelated(String id) async =>
       _filterByContentRating(
         await _fetchList(
@@ -64,8 +49,7 @@ mixin SeriesMetadataMixin {
         (r) => r.series,
       );
 
-  /// Similar titles come back wrapped (`{series: {...}, score: …}`) and in the
-  /// lean v2 shape, hence the different unwrap and constructor.
+  /// Items arrive wrapped (`{series: {...}, score: …}`) in the lean v2 shape.
   Future<List<Series>> fetchSeriesSimilar(String id) async =>
       _allowedByContentRating(
         await titleEnricher.canonicalize(
@@ -77,14 +61,6 @@ mixin SeriesMetadataMixin {
         ),
       );
 
-  /// Collaborative-filtering recommendations: titles that readers of this one
-  /// also have in their libraries.
-  ///
-  /// Unlike [fetchSeriesSimilar], which ranks by shared tags and creators,
-  /// this ranks by shared *readers*, so the two lists surface different
-  /// titles. v2-only; the lean shape (titles as an array) is the one
-  /// [Series.fromSimilarJson] already normalises. Ordered best-first by the
-  /// server.
   Future<List<Series>> fetchSeriesReadersAlsoLike(String id) async {
     final prefs = SettingsManager().contentPreferences;
     return _allowedByContentRating(
@@ -104,8 +80,6 @@ mixin SeriesMetadataMixin {
     );
   }
 
-  /// Fetches `/series/{id}/{path}` and maps its `data` array through
-  /// [fromJson], skipping items that fail to parse.
   Future<List<T>> _fetchList<T>(
     String id,
     String path,
@@ -132,8 +106,6 @@ mixin SeriesMetadataMixin {
     }
   }
 
-  /// Drops series the user has chosen not to see. An empty preference list
-  /// means no preference has been recorded, which permits everything.
   List<Series> _allowedByContentRating(List<Series> series) =>
       _filterByContentRating(series, (s) => s);
 

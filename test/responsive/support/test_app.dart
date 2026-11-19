@@ -39,11 +39,9 @@ import 'fake_backend.dart';
 import 'fake_services.dart';
 import 'fixtures.dart';
 
-/// The state of the world a sweep runs in.
 class Environment {
   final bool signedIn;
 
-  /// Whether the backend (and the signed-in library) hold data.
   final bool populated;
 
   /// `en`, or `de` — the language whose strings run longest.
@@ -66,8 +64,7 @@ class Environment {
   ].join(', ');
 }
 
-/// Loads the fonts the app bundles, so text measures as it does for users
-/// rather than in the test font, where every glyph is a 1em square.
+/// The test font draws every glyph as a 1em square, so text would mismeasure.
 Future<void> loadAppFonts() async {
   AppTypography.setTestMode(false);
   const fonts = {
@@ -88,8 +85,7 @@ Future<void> loadAppFonts() async {
     }
     await loader.load();
   }
-  // Icons measure the same either way (a square the icon's size), but load
-  // the real glyphs when the SDK has them, for faithful screenshots.
+  // Icons measure the same either way; real glyphs just make screenshots faithful.
   final flutterRoot = Platform.environment['FLUTTER_ROOT'];
   if (flutterRoot != null) {
     final icons = File(
@@ -103,9 +99,7 @@ Future<void> loadAppFonts() async {
   }
 }
 
-/// Sets up [env]: preferences, translations, the fake backend and every
-/// service the desktop pages reach for. Call from `setUp` (real async — the
-/// translation files are large enough to be decoded on an isolate).
+/// Call from `setUp`: the translations decode on an isolate, which needs real async.
 Future<FakeBackend> setUpEnvironment(Environment env) async {
   SharedPreferences.setMockInitialValues({});
   SettingsManager.resetForTesting();
@@ -164,9 +158,6 @@ Future<void> tearDownEnvironment() async {
   DesktopLayout.debugOverride = null;
 }
 
-/// The app as `main.dart` assembles it for a desktop window: the custom
-/// window frame (title bar and window buttons over the content) around the
-/// desktop shell open at [destination].
 Widget desktopApp({int destination = 0}) => MaterialApp(
   debugShowCheckedModeBanner: false,
   theme: AppTheme.build(inkPalette, showTooltips: true),
@@ -176,8 +167,7 @@ Widget desktopApp({int destination = 0}) => MaterialApp(
   home: DesktopShell(initialIndex: destination),
 );
 
-/// Lets the app's loading finish: real async for isolate work (JSON decoding,
-/// the database) interleaved with frames for everything scheduled on them.
+/// Real async for isolate work (JSON, the database), interleaved with frames.
 Future<void> settle(WidgetTester tester) async {
   for (var i = 0; i < 6; i++) {
     await tester.runAsync(
@@ -187,8 +177,7 @@ Future<void> settle(WidgetTester tester) async {
   }
 }
 
-/// Tears the app down and flushes timers it left behind (debounces, entrance
-/// animations), so the test ends clean.
+/// Flushes leftover timers (debounces, entrance animations) so the test ends clean.
 Future<void> disposeApp(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox());
   await tester.pump(const Duration(seconds: 5));

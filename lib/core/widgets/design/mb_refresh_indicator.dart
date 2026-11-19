@@ -12,8 +12,6 @@ const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 
 enum _MbRefreshStatus { drag, armed, snap, refresh, done, canceled }
 
-/// A refresh indicator that displays MangaBaka's custom [MbSpinner] instead
-/// of the standard Material [RefreshProgressIndicator].
 class MbRefreshIndicator extends StatefulWidget {
   final Widget child;
   final RefreshCallback onRefresh;
@@ -217,7 +215,6 @@ class MbRefreshIndicatorState extends State<MbRefreshIndicator>
     }
   }
 
-  /// Programmatically trigger the refresh indicator.
   Future<void> show({bool atTop = true}) async {
     if (_status != _MbRefreshStatus.refresh &&
         _status != _MbRefreshStatus.snap) {

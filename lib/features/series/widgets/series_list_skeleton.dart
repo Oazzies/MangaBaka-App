@@ -5,7 +5,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class SeriesListSkeleton extends StatelessWidget {
   final bool isGrid;
 
-  /// Side inset; 0 when the parent already insets its content.
   final double horizontalPadding;
 
   const SeriesListSkeleton({

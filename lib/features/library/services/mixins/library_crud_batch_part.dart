@@ -135,9 +135,7 @@ Future<void> _createLibraryEntryImpl(
       self.logger.info(
         'Successfully created library entry for $seriesId. Syncing local DB...',
       );
-      // The entry exists on the server now. A failed follow-up sync must
-      // not be reported as a failed create — the caller would retry and
-      // the UI would claim the series was not added when it was.
+      // The entry exists now; reporting a failed sync as a failed create would invite a retry.
       try {
         await self.syncLibrary();
       } catch (e) {
@@ -202,8 +200,7 @@ Future<int> _createLibraryEntriesBatchImpl(
         );
       }
       anyAccepted = true;
-      // The chunk is already accepted; an unexpected body only costs the
-      // count, not the remaining chunks.
+      // The chunk is already accepted; a bad body only costs the count, not the remaining chunks.
       Object? data;
       try {
         final decoded = jsonDecode(response.body);
@@ -235,7 +232,6 @@ Future<void> _deleteEntryImpl(LibraryCrudMixin self, String seriesId) async {
   self.logger.info('Deleting library entry for $seriesId');
   final url = Uri.parse('${LibraryConstants.baseUrl}/$seriesId');
   try {
-    // Headers without Content-Type — DELETE has no body.
     final response = await self._sendAuthorized(
       'Delete entry',
       (headers) => http.delete(url, headers: headers),
@@ -243,7 +239,6 @@ Future<void> _deleteEntryImpl(LibraryCrudMixin self, String seriesId) async {
     );
 
     if (response.statusCode == 200 || response.statusCode == 404) {
-      // 404 means already deleted on the server — still clean up locally.
       self.logger.info(
         'Entry $seriesId deleted from server (or already gone). Updating DB...',
       );
@@ -269,8 +264,7 @@ Future<void> _clearLibraryImpl(LibraryCrudMixin self) async {
   try {
     self.setIsSyncCancelled(true);
     self.resetInitialSyncTask();
-    // The invalidated sync loop exits without updating the status, so the
-    // syncing flag has to be dropped here or the next sync would be refused.
+    // The invalidated sync loop leaves isSyncing set, which would refuse the next sync.
     self.syncStatus.value = self.syncStatus.value.copyWith(
       isSyncing: false,
       clearError: true,

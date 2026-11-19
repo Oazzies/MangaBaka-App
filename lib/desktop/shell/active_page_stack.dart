@@ -1,22 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// Keeps every page alive — state, scroll positions, loaded data — while only
-/// the page at [index] costs anything.
-///
-/// An [IndexedStack] keeps pages alive too, but it still lays out every one
-/// of them on every frame the window changes size, and every hidden page
-/// still rebuilds whatever depends on the window size. Resizing the desktop
-/// app was paying for all six destinations to show one.
-///
-/// Here the hidden pages:
-/// * are neither laid out, painted nor hit-tested;
-/// * see the window as it was when they were last shown (a frozen
-///   [MediaQuery]), so a resize doesn't rebuild them;
-/// * have their animations paused ([TickerMode]) and are left out of focus
-///   traversal.
-///
-/// A page catches up with the window in one frame when it becomes active.
+/// Unlike [IndexedStack], hidden pages skip layout on resize and see a frozen [MediaQuery].
 class ActivePageStack extends StatelessWidget {
   final int index;
   final List<Widget> children;
@@ -57,8 +42,7 @@ class _PageSlotState extends State<_PageSlot> {
     // responsive-ok: the whole data is what's frozen for hidden pages.
     final live = MediaQuery.of(context);
     if (widget.active || _shown == null) _shown = live;
-    // The same widget structure whether active or not, so switching pages
-    // never remounts one.
+    // Same structure active or not, so switching pages never remounts one.
     return ExcludeFocus(
       excluding: !widget.active,
       child: TickerMode(
@@ -106,11 +90,6 @@ class _ActivePageStackElement extends MultiChildRenderObjectElement {
 
 class _PageParentData extends ContainerBoxParentData<RenderBox> {}
 
-/// Fills its (bounded) constraints with the child at [index] and ignores the
-/// rest: they are never laid out, painted or hit-tested while hidden.
-///
-/// A hidden child that was shown before keeps its last layout; one that was
-/// never shown is laid out the first time it becomes active.
 class RenderActivePageStack extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _PageParentData>,

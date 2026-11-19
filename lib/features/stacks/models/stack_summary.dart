@@ -5,7 +5,6 @@ int _int(Object? v) => (v is num) ? v.toInt() : int.tryParse('$v') ?? 0;
 
 DateTime? _date(Object? v) => v == null ? null : DateTime.tryParse('$v');
 
-/// The person a stack belongs to.
 class StackOwner {
   final String name;
 
@@ -24,11 +23,9 @@ class StackOwner {
     );
   }
 
-  /// What to print as the author: the display name, else the username.
   String get display => name.isNotEmpty ? name : (username ?? '');
 }
 
-/// One of the covers a stack listing shows as its preview.
 class StackCover {
   final String seriesId;
   final String url;
@@ -50,11 +47,7 @@ class StackCover {
   }
 }
 
-/// A stack as listings return it: everything but the description and the
-/// entries.
-///
-/// Counts in listings can be up to an hour old; the live figures come from
-/// `GET /v2/my/stacks/status` (see `StackStatus`).
+/// Listing counts can be up to an hour old; live ones come from `GET /v2/my/stacks/status`.
 class StackSummary {
   final int id;
   final String title;
@@ -62,14 +55,13 @@ class StackSummary {
   final StackKind kind;
   final StackVisibility visibility;
 
-  /// `safe` / `suggestive` / `erotica` / `pornographic`. At most 10% of the
-  /// stack's series may be rated higher.
+  /// `safe` / `suggestive` / `erotica` / `pornographic`.
   final String contentRating;
   final bool isSpoiler;
   final bool isFeatured;
   final StackOwner owner;
 
-  /// Entries, placeholders for merged or deleted series included.
+  /// Includes placeholders for merged or deleted series.
   final int entryCount;
   final int voteCount;
   final int saveCount;
@@ -151,6 +143,5 @@ class StackSummary {
   );
 }
 
-/// Shared parsing for the int helpers, for sibling model files.
 int stackInt(Object? v) => _int(v);
 DateTime? stackDate(Object? v) => _date(v);

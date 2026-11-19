@@ -5,8 +5,6 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/onboarding_hero_layout.dart';
 
-/// Onboarding step that explains and enables the "open MangaBaka links in app"
-/// feature. Only shown on Android where intent filters are meaningful.
 class OpenLinksPage extends StatelessWidget {
   const OpenLinksPage({super.key});
 

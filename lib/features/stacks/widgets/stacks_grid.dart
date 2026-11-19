@@ -12,17 +12,12 @@ import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_card.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_cover_fan.dart';
 
-/// Lays stack cards out in as many columns of at most [maxTileWidth] as fit,
-/// each row exactly as tall as a card at that width.
-///
-/// The row height is worked out at layout time from the tile width, so a
-/// window resize relayouts the grid without rebuilding it.
+/// Row height is derived at layout time, so a window resize never rebuilds the grid.
 class StackGridDelegate extends SliverGridDelegate {
   final double maxTileWidth;
   final double spacing;
   final double runSpacing;
 
-  /// Height of the text under each card's covers.
   final double textHeight;
 
   const StackGridDelegate({
@@ -59,8 +54,6 @@ class StackGridDelegate extends SliverGridDelegate {
       oldDelegate.textHeight != textHeight;
 }
 
-/// A sliver grid of stack cards, with skeleton tiles while [loading] and
-/// nothing yet loaded.
 class SliverStackGrid extends StatelessWidget {
   final List<StackSummary> stacks;
   final bool loading;
@@ -99,9 +92,6 @@ class SliverStackGrid extends StatelessWidget {
   }
 }
 
-/// A titled horizontal row of stacks: the desktop carousel with paging
-/// buttons on desktop, a swipe rail elsewhere. Drops out when it resolved to
-/// nothing.
 class StacksRail extends StatelessWidget {
   final String title;
   final List<StackSummary> stacks;
@@ -110,10 +100,8 @@ class StacksRail extends StatelessWidget {
   final bool showVisibility;
   final Widget? trailing;
 
-  /// Card width on a phone.
   final double cardWidth;
 
-  /// Side inset of the phone rail; zero when the parent already pads it.
   final double gutter;
 
   const StacksRail({
@@ -178,7 +166,6 @@ class StacksRail extends StatelessWidget {
   }
 }
 
-/// A grey placeholder in a card's shape, while stacks load.
 class StackCardSkeleton extends StatelessWidget {
   const StackCardSkeleton({super.key});
 

@@ -226,7 +226,6 @@ void main() {
 
       final button = find.byIcon(Icons.keyboard_double_arrow_right_rounded);
       expect(button, findsOneWidget);
-      // Inside the sidebar, halfway down it.
       final bar = tester.getRect(find.byType(DesktopSidebar));
       final centre = tester.getCenter(button);
       expect(bar.contains(centre), isTrue);

@@ -8,11 +8,6 @@ import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
-/// A Home rail of stacks: staff picks when there are any, otherwise the
-/// newest. Its arrow opens the Stacks hub.
-///
-/// Like the other discovery extras it loads for itself and drops out when
-/// the request fails or comes back empty.
 class HomeStacksRail extends StatefulWidget {
   /// Replaces the service lookup, for tests.
   final Future<List<StackSummary>> Function()? loader;

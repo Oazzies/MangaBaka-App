@@ -19,11 +19,9 @@ class ContentPreferencesDialogs {
     return prefs.map((s) => l10n.translate(s)).join(', ');
   }
 
-  /// Toggles [option] in [currentPrefs], enforcing a minimum of one selection.
   static List<String> toggleOption(String option, List<String> currentPrefs) {
     final updated = List<String>.from(currentPrefs);
     if (currentPrefs.contains(option)) {
-      // Always keep at least one rating selected.
       if (updated.length > 1) updated.remove(option);
     } else {
       updated.add(option);
@@ -93,8 +91,6 @@ class ContentPreferencesDialogs {
   }
 }
 
-/// A single row representing one content rating filter option, with selection
-/// indicator and an optional cover-blur switch when enabled.
 class ContentRatingRow extends StatelessWidget {
   final String option;
   final String label;

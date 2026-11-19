@@ -35,11 +35,6 @@ import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 part 'desktop_profile_sections_part.dart';
 part 'desktop_profile_cards_part.dart';
 
-/// The profile on desktop: an identity card beside a statistics dashboard.
-///
-/// The phone splits this over two screens â€” a four-number summary with a
-/// "full statistics" push â€” because it has no room. Here every statistic, the
-/// standout picks and both recent-activity rows fit on one page.
 class DesktopProfileScreen extends StatefulWidget {
   static final GlobalKey<DesktopProfileScreenState> stateKey =
       GlobalKey<DesktopProfileScreenState>();
@@ -62,7 +57,6 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
 
   bool _wasSyncing = false;
 
-  // The statistics the phone keeps on its separate statistics screen.
   double _completionRate = 0;
   int _totalRereads = 0;
   double _finishRate = 0;
@@ -204,8 +198,6 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
     }
   }
 
-  // â”€â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -251,8 +243,6 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
                   constraints: const BoxConstraints(
                     maxWidth: DesktopTokens.maxPageWidth,
                   ),
-                  // The overview needs a column of its own only if the main
-                  // column keeps a useful width beside it.
                   child: DerivedLayoutBuilder<bool>(
                     derive: (constraints) =>
                         constraints.maxWidth >= _sidebarMinWidth,

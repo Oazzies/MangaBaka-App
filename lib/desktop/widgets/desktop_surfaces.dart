@@ -13,26 +13,17 @@ export 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
 part 'desktop_surface_buttons_part.dart';
 part 'desktop_surface_controls_part.dart';
 
-/// The title block every desktop page opens with: a large display-caps title,
-/// an optional muted subtitle, and right-aligned actions on the same line.
-///
-/// Replaces the phone's centred app bar, which on a wide window left a title
-/// floating in the middle of an empty strip.
 class DesktopPageHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
   final List<Widget> actions;
 
-  /// Shown before the title â€” a back button on pushed pages.
   final Widget? leading;
 
   final EdgeInsetsGeometry padding;
 
-  /// False when something at least [DesktopTokens.windowControlsClearance]
-  /// wide (e.g. a trailing sidebar) already sits to this header's right, up
-  /// to the window's real right edge â€” the custom window controls then
-  /// float over that, not over the header, so it doesn't need its own
-  /// clearance padding pushing its actions away from its own right edge.
+  /// False when something at least [DesktopTokens.windowControlsClearance] wide, such as a
+  /// trailing sidebar, already sits under the window controls.
   final bool reserveWindowControls;
 
   const DesktopPageHeader({
@@ -105,9 +96,6 @@ class DesktopPageHeader extends StatelessWidget {
       padding: effectivePadding,
       child: actions.isEmpty
           ? heading
-          // The actions beside the title while it keeps its room, beneath
-          // it â€” wrapping as needed â€” when a narrow window, a long
-          // translation or a large text size wouldn't leave it any.
           : BesideOrBelow(
               minBodyWidth: 220,
               // Top-aligned: the actions line up with the window buttons.
@@ -125,7 +113,6 @@ class DesktopPageHeader extends StatelessWidget {
   }
 }
 
-/// A rounded, flat panel â€” the desktop's one card surface.
 class DesktopCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -154,7 +141,6 @@ class DesktopCard extends StatelessWidget {
   }
 }
 
-/// Small caps label over a block of content, with optional trailing controls.
 class DesktopSectionTitle extends StatelessWidget {
   final String title;
   final Widget? trailing;
@@ -198,10 +184,7 @@ class DesktopSectionTitle extends StatelessWidget {
   }
 }
 
-/// A clickable surface that lightens under the pointer.
-///
-/// Phone screens rely on ink splashes, which a mouse user only sees after
-/// committing to a click; on desktop the hover state is the affordance.
+/// Ink splashes show only after a click commits, so on desktop the hover state is the affordance.
 class DesktopHoverSurface extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -210,7 +193,6 @@ class DesktopHoverSurface extends StatefulWidget {
   final BorderRadius borderRadius;
   final EdgeInsetsGeometry padding;
 
-  /// Fill when neither hovered nor selected.
   final Color? idleColor;
   final Color? hoverColor;
   final Color? selectedColor;

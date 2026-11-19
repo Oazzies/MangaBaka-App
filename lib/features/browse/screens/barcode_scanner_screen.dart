@@ -75,11 +75,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                 controller: _scannerController,
                 onDetect: _onDetect,
               ),
-              // Scanner overlay
               Center(
                 child: Container(
                   width: 300,
-                  height: 150, // Typical proportion for 1D barcodes like ISBN
+                  height: 150, // 1D barcode proportions
                   decoration: BoxDecoration(
                     border: Border.all(color: context.colors.accent, width: 2),
                     borderRadius: BorderRadius.circular(12),

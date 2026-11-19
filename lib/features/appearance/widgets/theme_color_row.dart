@@ -5,8 +5,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// One editable colour: swatch, name, hex, and an optional "auto" reset for
-/// the tokens that are derived unless the user overrides them.
 class ThemeColorRow extends StatelessWidget {
   final String label;
   final Color color;
@@ -29,8 +27,7 @@ class ThemeColorRow extends StatelessWidget {
     final l10n = LocalizationService();
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      // Outlined rather than filled: the rows sit on the page background on
-      // phones but on a surface-coloured dialog on desktop.
+      // Outlined: rows sit on the page on phones but on a surface dialog on desktop.
       child: Material(
         color: Colors.transparent,
         shape: RoundedRectangleBorder(

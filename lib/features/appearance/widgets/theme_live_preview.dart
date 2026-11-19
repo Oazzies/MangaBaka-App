@@ -11,15 +11,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_pill.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 
-/// A slice of the Library screen — header, status pills, a real series item in
-/// the user's own list style, genre chips, buttons and a switch — painted in
-/// [palette].
-///
-/// Built from the app's own widgets. They read `context.colors` from the theme
-/// above them, so the slice is wrapped in a theme carrying [palette] instead of
-/// the active one; that is how it can show a theme that is not active yet (the
-/// editor's draft) without a second, hand-painted copy of the components that
-/// would drift from the real ones.
+/// Real app widgets under a Theme carrying [palette]; a hand-painted copy would drift.
 class ThemeLivePreview extends StatefulWidget {
   final MbPalette palette;
 
@@ -43,15 +35,13 @@ class _ThemeLivePreviewState extends State<ThemeLivePreview> {
   @override
   void didUpdateWidget(ThemeLivePreview oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // ThemeData is costly to build, and the editor republishes the same palette
-    // on every unrelated rebuild.
+    // ThemeData is costly, and the editor resends the same palette on every rebuild.
     if (oldWidget.palette != widget.palette) _theme = _buildTheme();
   }
 
   @override
   Widget build(BuildContext context) {
-    // The frame follows the active theme so it stays legible whatever the
-    // previewed palette is; everything inside follows the previewed one.
+    // The frame keeps the active theme so it stays legible whatever the palette.
     final frameBorder = context.colors.border;
     return AnimatedTheme(
       data: _theme,

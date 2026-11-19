@@ -27,8 +27,6 @@ class ProfileAuthService extends ChangeNotifier {
   final AuthStorage _storage;
   final AuthNetworkClient _network;
 
-  /// Exchanges a refresh token for new tokens. Injected by tests; defaults to
-  /// the platform flow ([DesktopAuthHandler] on Windows/Linux, AppAuth elsewhere).
   final Future<TokenResponse?> Function(String refreshToken)? _refresher;
 
   ProfileAuthService({
@@ -43,15 +41,10 @@ class ProfileAuthService extends ChangeNotifier {
   MbProfile? _cachedProfile;
   bool _hasSessionCache = false;
 
-  /// Scopes the stored session was granted, or null for a session from
-  /// before they were recorded (which never asked for Stacks).
+  /// Null for a session from before scopes were recorded, which never asked for Stacks.
   List<String>? _grantedScopes;
 
-  /// True while a desktop sign-in is waiting on the user in their browser.
-  ///
-  /// Drives the "check your browser" prompt. Only desktop flows can be
-  /// stranded this way; on mobile the system's auth sheet reports its own
-  /// dismissal.
+  /// Only desktop sign-in can strand the user in a browser; mobile's auth sheet reports dismissal.
   final ValueNotifier<bool> awaitingBrowser = ValueNotifier(false);
 
   void cancelLogin() => DesktopAuthHandler.cancelPending();
@@ -61,8 +54,6 @@ class ProfileAuthService extends ChangeNotifier {
   bool get isLoggedIn => _hasSessionCache;
   MbProfile? get cachedProfile => _cachedProfile;
 
-  /// Whether the session may read and write Stacks. A session signed in
-  /// before Stacks existed lacks the scopes; the user has to sign in again.
   bool get hasStackScopes {
     if (!_hasSessionCache) return false;
     bool covers(List<String>? scopes) =>
@@ -70,9 +61,7 @@ class ProfileAuthService extends ChangeNotifier {
     return covers(_grantedScopes) || covers(_cachedProfile?.scopes);
   }
 
-  /// What a refresh asks for. Asking for more than the original grant is an
-  /// `invalid_scope` error, which would end the session, so a session from
-  /// before Stacks keeps refreshing with the scopes it was granted.
+  /// Never asks a refresh for more than the grant: `invalid_scope` would end the session.
   List<String> get _refreshScopes =>
       _grantedScopes ?? AppConstants.baseOauthScopes;
 
@@ -101,7 +90,6 @@ class ProfileAuthService extends ChangeNotifier {
             'Loaded cached profile for: ${_cachedProfile!.preferredUsername ?? _cachedProfile!.id}',
           );
         }
-        // Background refresh profile so avatar and details are up-to-date
         fetchProfile(forceRefresh: true).then(
           (_) {},
           onError: (e) {
@@ -168,13 +156,11 @@ class ProfileAuthService extends ChangeNotifier {
       await _persistGrantedScopes(response);
       _hasSessionCache = true;
       try {
-        // Not fetchProfile(): its notification would open the library (and
-        // start a sync) before a previous account's entries are cleared.
+        // Not fetchProfile(): it notifies, starting a sync before the old account's entries clear.
         await _loadProfile();
         await _reconcileLibraryOwner();
       } finally {
-        // The tokens are persisted, so the session exists whether or not the
-        // profile could be read; listeners must hear about it either way.
+        // The tokens are persisted, so listeners hear of the session even if the profile failed.
         notifyListeners();
       }
       _logger.info(
@@ -207,16 +193,11 @@ class ProfileAuthService extends ChangeNotifier {
     }
   }
 
-  /// Pref key remembering whose entries the local library database holds.
   static const _libraryOwnerKey =
       '${AppConstants.prefixStorageKey}library_owner_id';
 
-  /// Clears the local library when a *different* account signs in.
-  ///
-  /// An expired session deliberately leaves the library in place (the same
-  /// user usually signs straight back in). But the sync watermark outlives it:
-  /// a second account would only receive an incremental catch-up, and its
-  /// library would be shown merged with the first account's entries.
+  /// An expired session keeps the library, but the sync watermark outlives it: a different account
+  /// would get only an incremental catch-up, merged with the previous account's entries.
   Future<void> _reconcileLibraryOwner() async {
     final id = _cachedProfile?.id ?? '';
     if (id.isEmpty) return;
@@ -244,10 +225,7 @@ class ProfileAuthService extends ChangeNotifier {
   Future<void> _persistTokens(TokenResponse response) =>
       _persistTokensImpl(this, response);
 
-  /// Guards against concurrent refreshes. With rotating refresh tokens, two
-  /// parallel refreshes would race: the first invalidates the token the second
-  /// is still using, permanently breaking the session. Callers share one
-  /// in-flight refresh instead.
+  /// Rotating refresh tokens: a parallel refresh would reuse a revoked token and kill the session.
   Future<void>? _refreshInFlight;
 
   Future<void> _refreshIfNeeded({bool force = false}) {
@@ -264,11 +242,7 @@ class ProfileAuthService extends ChangeNotifier {
   Future<TokenResponse?> _platformRefresh(String refreshToken) =>
       _platformRefreshImpl(this, refreshToken);
 
-  /// Sends a request that needs the user's bearer token, recovering once
-  /// from an HTTP 401.
-  ///
-  /// Never returns a 401; clears the session and throws
-  /// [SessionExpiredException] if recovery fails.
+  /// Recovers once from a 401; never returns one, throwing [SessionExpiredException] instead.
   Future<http.Response> sendAuthorized(
     Future<http.Response> Function(String token) send,
   ) => _sendAuthorizedImpl(this, send);
@@ -278,7 +252,7 @@ class ProfileAuthService extends ChangeNotifier {
   Future<MbProfile> fetchProfile({bool forceRefresh = false}) =>
       _fetchProfileImpl(this, forceRefresh: forceRefresh);
 
-  /// Fetches and caches the profile without notifying listeners.
+  /// Unlike [fetchProfile], does not notify listeners.
   Future<MbProfile> _loadProfile() => _loadProfileImpl(this);
 
   Future<String> getValidAccessToken() => _getValidAccessTokenImpl(this);

@@ -11,18 +11,13 @@ class JsonUtils {
     return value as T?;
   }
 
-  /// [value] as a double when it is a number or a numeric string, else null.
-  ///
-  /// For fields the API documents as numbers: a hard `as num` cast would turn
-  /// one oddly-typed value into a failure of the whole payload around it.
+  /// A hard `as num` cast would fail the whole payload over one oddly-typed value.
   static double? toDouble(Object? value) => switch (value) {
     final num n => n.toDouble(),
     final String s => double.tryParse(s.trim()),
     _ => null,
   };
 
-  /// The `rating_normalized` of one entry of a series' `source` map, or null
-  /// when the entry is not a map or carries no usable rating.
   static double? normalizedRating(Object? sourceEntry) {
     if (sourceEntry is! Map) return null;
     final value = toDouble(sourceEntry['rating_normalized']);
@@ -30,24 +25,16 @@ class JsonUtils {
     return value != null && value.isFinite ? value : null;
   }
 
-  /// The string elements of [value] when it is a list, else an empty list.
-  ///
-  /// Replaces `(x as List?)?.cast<String>()`: `cast` is lazy, so one null or
-  /// numeric element passes parsing and only throws later, when the list is
-  /// encoded for the database or iterated by a widget — long after the
-  /// `try`/`catch` that was meant to contain a malformed payload.
+  /// Not `cast<String>()`: it is lazy, so a bad element throws later, outside the parse's try/catch.
   static List<String> stringList(Object? value) =>
       value is List ? value.whereType<String>().toList() : <String>[];
 
-  /// [value] as a string, or [fallback] when it is null. Unlike an implicit
-  /// `String x = json['k'] ?? ''`, a number or bool is stringified rather than
-  /// throwing a TypeError.
+  /// Stringifies a number or bool where `json['k'] ?? ''` would throw a TypeError.
   static String stringOr(Object? value, [String fallback = '']) =>
       value?.toString() ?? fallback;
 
-  /// v1 nests each cover size as `{x1, x2}` or `{url, ...}` and the original
-  /// as `raw: {url, ...}`; the v2 endpoints flatten both to plain URL strings.
-  /// Both `cover` and `cover_image` shapes are accepted.
+  /// v1 nests each size as `{x1, x2}` or `{url, ...}` and the original as `raw: {url, ...}`;
+  /// v2 flattens both to URL strings. Takes both `cover` and `cover_image`.
   static String getCover(Map<String, dynamic> map) {
     final cover = map['cover'] ?? map['cover_image'];
     if (cover is! Map) return '';

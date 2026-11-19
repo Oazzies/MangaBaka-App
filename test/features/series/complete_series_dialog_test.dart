@@ -35,7 +35,6 @@ void main() {
       expect(find.byType(Checkbox), findsOneWidget);
       expect(find.text('2 → 16'), findsOneWidget);
 
-      // Uncheck volumes, then tap confirm.
       await tester.tap(find.byType(Checkbox));
       await tester.pump();
       await tester.tap(find.byType(FilledButton));

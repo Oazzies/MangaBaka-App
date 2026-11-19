@@ -1,17 +1,8 @@
-/// Parsed application version following the project's `X.Y.Z[-pre-release-N]`
-/// scheme. Used to compare the installed version against GitHub releases.
-///
-/// Comparison rules (semver-ish):
-///   * Numeric `major.minor.patch` are compared first.
-///   * A stable version (no pre-release suffix) is newer than any pre-release
-///     of the same `major.minor.patch`.
-///   * Two pre-releases of the same base are ordered by their trailing number.
 class AppVersion implements Comparable<AppVersion> {
   final int major;
   final int minor;
   final int patch;
 
-  /// `null` means a stable release (no pre-release suffix).
   final int? preRelease;
 
   const AppVersion({
@@ -26,7 +17,6 @@ class AppVersion implements Comparable<AppVersion> {
     if (s.isNotEmpty && (s[0] == 'v' || s[0] == 'V')) {
       s = s.substring(1);
     }
-    // Strip any build metadata (e.g. "+8").
     final plus = s.indexOf('+');
     if (plus != -1) s = s.substring(0, plus);
 
@@ -37,7 +27,6 @@ class AppVersion implements Comparable<AppVersion> {
       base = s.substring(0, dash);
       final suffix = s.substring(dash + 1);
       final match = RegExp(r'(\d+)\s*$').firstMatch(suffix);
-      // A pre-release with no trailing number ranks as 0.
       pre = match != null ? int.tryParse(match.group(1)!) ?? 0 : 0;
     }
 
@@ -76,15 +65,12 @@ class AppVersion implements Comparable<AppVersion> {
   }
 }
 
-/// A downloadable file attached to a GitHub release.
 class ReleaseAsset {
   final String name;
   final String downloadUrl;
   final int size;
 
-  /// Lower-case hex SHA-256 of the file, from GitHub's `digest` field
-  /// (`sha256:<hex>`). Null for assets uploaded before GitHub started
-  /// publishing digests, or when the field is in another algorithm.
+  /// From GitHub's `digest` (`sha256:<hex>`); null on older assets or another algorithm.
   final String? sha256;
 
   const ReleaseAsset({
@@ -112,7 +98,6 @@ class ReleaseAsset {
   }
 }
 
-/// A single GitHub release entry.
 class AppRelease {
   final String tagName;
   final String name;
@@ -150,6 +135,5 @@ class AppRelease {
 
   AppVersion get version => AppVersion.parse(tagName);
 
-  /// Human-friendly title for the dialog; falls back to the tag.
   String get displayName => name.trim().isNotEmpty ? name.trim() : tagName;
 }

@@ -20,19 +20,12 @@ import 'package:mangabaka_app/features/news/screens/news_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/profile_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The app shell: the five top-level tabs and whichever navigation chrome the
-/// window shape and the user's preference call for.
-///
-/// Pages are built once and kept in an [IndexedStack], so switching tabs
-/// preserves each one's scroll position and in-flight work.
 class MainScreen extends StatefulWidget {
   static final GlobalKey<MainScreenState> mainScreenKey =
       GlobalKey<MainScreenState>();
 
   MainScreen({Key? key}) : super(key: key ?? mainScreenKey);
 
-  /// Switches tabs from anywhere — used when a chip on one screen starts a
-  /// search that belongs on another.
   static void setTabIndex(int index) {
     final desktop = DesktopShell.current;
     if (desktop != null) {
@@ -49,8 +42,6 @@ class MainScreen extends StatefulWidget {
 class MainScreenState extends State<MainScreen> {
   static final _logger = LoggingService.logger;
 
-  /// Above this width the tablet layouts apply, with the rail or bottom bar
-  /// the user has chosen; below it, the phone layout's bottom bar.
   static const double _tabletWidth = 600;
 
   late int _selectedIndex;
@@ -58,13 +49,11 @@ class MainScreenState extends State<MainScreen> {
   /// Cached once so [IndexedStack] never recreates its children.
   late final List<Widget> _pages;
 
-  /// Nested navigator for non-bottom landscape layouts, so the navbar stays
-  /// visible while series detail (or any pushed route) is open.
+  /// Nested so the navbar stays visible while a pushed route is open.
   final GlobalKey<NavigatorState> _contentNavigatorKey =
       GlobalKey<NavigatorState>();
 
-  /// Drives the nested navigator's [IndexedStack] without rebuilding the route
-  /// itself, which would drop the pushed stack on every tab change.
+  /// Rebuilding the nested route on a tab change would drop its pushed stack.
   late final ValueNotifier<int> _selectedIndexNotifier;
 
   @override
@@ -90,9 +79,7 @@ class MainScreenState extends State<MainScreen> {
     super.didChangeDependencies();
     if (_precached) return;
     _precached = true;
-    // The list-style preview in settings shows a bundled sample cover. Decoding
-    // it on first paint is what made the preview pop in, so decode it now and
-    // let the preview hit the image cache synchronously.
+    // Decoded now: decoding on first paint made the settings preview pop in.
     precacheImage(
       AssetImage(mockSeries222.coverUrl),
       context,
@@ -105,8 +92,7 @@ class MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
-  /// BrowseScreen needs ExcludeSemantics on Windows to suppress a platform
-  /// accessibility warning triggered by the web-view component.
+  /// ExcludeSemantics on Windows: the web view triggers an accessibility warning.
   Widget _browsePage() {
     final browse = BrowseScreen(key: BrowseScreen.browseScreenKey);
     if (!Platform.isWindows) return browse;
@@ -118,14 +104,10 @@ class MainScreenState extends State<MainScreen> {
     _logger.info('Tab switched to: $index');
     setState(() => _selectedIndex = index);
     _selectedIndexNotifier.value = index;
-    // Pop series detail (or any nested route) so switching tabs always
-    // returns to the tab root within the nested navigator.
     _contentNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     if (index == NavTabs.browse) _autoFocusBrowseSearch();
   }
 
-  /// Opens Browse's search field when the user has asked for it, once the
-  /// tab is actually showing.
   void _autoFocusBrowseSearch() {
     if (!SettingsManager().autoFocusBrowseSearch) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -140,8 +122,6 @@ class MainScreenState extends State<MainScreen> {
       builder: (context, _) {
         final l10n = LocalizationService();
 
-        // A wide desktop window gets the desktop presentation layer; the
-        // phone and tablet layouts below are for everything else.
         if (DesktopLayout.isActive(context)) {
           return DesktopShell(
             initialIndex: _selectedIndex,
@@ -164,8 +144,6 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  // ─── Layouts ─────────────────────────────────────────────────────────────
-
   Widget _phoneLayout(LocalizationService l10n) {
     return Scaffold(
       backgroundColor: context.colors.background,
@@ -181,9 +159,7 @@ class MainScreenState extends State<MainScreen> {
   ) {
     switch (position) {
       case LandscapeAppBarPosition.bottom:
-        // The bottom bar is the one position that keeps full-screen pushes:
-        // it already sits out of the way, so a nested navigator would only
-        // cost the pushed route its full height.
+        // Full-screen pushes: a nested navigator would only cost them height here.
         return Scaffold(
           backgroundColor: context.colors.background,
           body: _withHealthBanner(_flatContent()),
@@ -223,10 +199,6 @@ class MainScreenState extends State<MainScreen> {
     destinations: navDestinations(l10n),
   );
 
-  // ─── Content ─────────────────────────────────────────────────────────────
-
-  /// The pages with no navigator of their own — routes pushed from here cover
-  /// the whole window, including the navigation chrome.
   Widget _flatContent() {
     return Stack(
       children: [
@@ -236,9 +208,6 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  /// The pages inside a nested [Navigator], so routes pushed from within (for
-  /// example series detail) stay in the content area and the rail or top bar
-  /// remains visible beside them.
   Widget _nestedContent() {
     return Stack(
       children: [
@@ -252,8 +221,6 @@ class MainScreenState extends State<MainScreen> {
                 builder: (_, index, __) =>
                     IndexedStack(index: index, children: _pages),
               ),
-              // The tab root never animates in; only routes pushed on top of
-              // it do.
               transitionsBuilder: (_, __, ___, child) => child,
             ),
           ],
@@ -263,9 +230,6 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  /// The backend-health bar sits above whatever page is showing — and above
-  /// the nested navigator, so it stays put while series detail is open —
-  /// without pushing the bottom nav off screen.
   Widget _withHealthBanner(Widget child) {
     return Column(
       children: [

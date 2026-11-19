@@ -29,7 +29,6 @@ void main() {
       for (final w in widths) {
         expect(w % 64, 0);
       }
-      // Never below what the display needs.
       expect(WidgetUtils.decodeWidth(context, 200), greaterThanOrEqualTo(250));
     });
   });

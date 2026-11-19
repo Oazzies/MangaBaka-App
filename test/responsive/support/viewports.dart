@@ -2,12 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
-/// One window configuration: the physical client size the OS reports, the
-/// display scale, and the OS text scale.
-///
-/// The physical size is what's fixed; the logical size Flutter lays out in is
-/// derived from it, so at a fractional scale it is fractional too — which is
-/// where sub-pixel overflows come from.
+/// The physical size is fixed, so fractional scales give fractional logical sizes.
 class WindowSize {
   final Size physical;
   final double dpr;
@@ -15,9 +10,7 @@ class WindowSize {
 
   const WindowSize(this.physical, this.dpr, {this.textScale = 1});
 
-  /// The window at [logical] size (rounded to whole physical pixels, as the
-  /// OS would), shifted by [jitter] physical pixels to land between logical
-  /// ones.
+  /// Rounded to physical pixels as the OS would; [jitter] lands between logical ones.
   factory WindowSize.logical(
     double width,
     double height, {
@@ -46,16 +39,8 @@ class WindowSize {
   String toString() => label;
 }
 
-/// The windows the sweeps cover.
-///
-/// The Windows runner clamps the client area to at least 1000×700 logical
-/// pixels (windows/runner/flutter_window.cpp), so that is the floor; the
-/// ceiling is a 4K display at 100%. Widths straddle every layout breakpoint
-/// in the desktop layer (1100 the home rail, 1180 the sidebar collapse) by a
-/// pixel either side.
-///
-/// Set `RESPONSIVE_EXHAUSTIVE=1` to sweep a dense grid instead — every ~37px
-/// of width at every height, display scale and a raised OS text size.
+/// Floor: the runner's 1000×700 minimum (windows/runner/flutter_window.cpp).
+/// Widths straddle each desktop breakpoint (1100 home rail, 1180 sidebar) by a pixel.
 abstract final class WindowSizes {
   static const double minWidth = 1000;
   static const double minHeight = 700;
@@ -73,9 +58,6 @@ abstract final class WindowSizes {
 
   static const _scales = <double>[1.25, 1.5, 1.75, 2];
 
-  /// The default sweep: every breakpoint and common monitor at the shortest
-  /// and a typical height, then fractional display scales, then a raised
-  /// OS text size.
   static List<WindowSize> desktop() {
     if (exhaustive) return _exhaustive();
     return [
@@ -110,8 +92,7 @@ abstract final class WindowSizes {
     ];
   }
 
-  /// A drag-resize: wide to narrow in small, uneven steps and back, at a
-  /// fractional scale so most frames land on fractional logical sizes.
+  /// At a fractional scale, so most frames land on fractional logical sizes.
   static List<WindowSize> drag({double from = 2400, double to = minWidth}) {
     final steps = <WindowSize>[];
     var w = from;

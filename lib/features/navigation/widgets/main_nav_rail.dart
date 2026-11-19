@@ -7,18 +7,11 @@ import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The vertical navigation rail used on tablet-width landscape windows,
-/// complete with its logo and settings button.
-///
-/// Takes [side] so the left and right placements are one widget: the two
-/// differ only in which edge is bordered and which safe-area inset applies,
-/// and keeping them separate meant two copies of the rail's contents.
 class MainNavRail extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final LocalizationService l10n;
 
-  /// Which edge of the window the rail sits against.
   final NavRailSide side;
 
   static const double _width = 88;
@@ -39,8 +32,7 @@ class MainNavRail extends StatelessWidget {
       width: _width,
       color: context.colors.background,
       child: SafeArea(
-        // Only the outward edge needs the inset; the inward one meets the
-        // content divider, not the screen edge.
+        // Only the outward edge meets the screen edge.
         left: !isLeft,
         right: isLeft,
         child: MbNavRail(
@@ -57,7 +49,6 @@ class MainNavRail extends StatelessWidget {
 
 enum NavRailSide { left, right }
 
-/// The hairline between the rail and the content area.
 class NavRailDivider extends StatelessWidget {
   const NavRailDivider({super.key});
 

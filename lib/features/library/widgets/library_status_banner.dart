@@ -3,10 +3,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/mb_toast.dart';
 
-/// An inline status card above the library list: a solid glyph disc in the
-/// status colour, the message, and an optional action or close button. The
-/// same visual language as the toasts, but sitting in the page rather than
-/// floating over it.
 class LibraryStatusBanner extends StatelessWidget {
   final String message;
   final IconData icon;

@@ -1,10 +1,5 @@
 class UriUtils {
-  /// Normalizes a map of dynamic query values into the shape accepted by
-  /// [Uri.replace]'s `queryParameters`, where each value must be a `String`
-  /// or an `Iterable<String>`.
-  ///
-  /// `List` values are preserved as repeated query parameters (each element
-  /// stringified); any other value is converted with `toString()`.
+  /// `Uri.replace` queryParameters only take `String` or `Iterable<String>`; lists become repeated params.
   static Map<String, dynamic> encodeQueryParameters(
     Map<String, dynamic> params,
   ) {

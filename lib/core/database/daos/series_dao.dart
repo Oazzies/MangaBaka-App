@@ -26,7 +26,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
     }
   }
 
-  /// Which of [ids] already have a stored series row.
   Future<Set<String>> existingIds(Iterable<String> ids) async {
     final list = ids.toList();
     if (list.isEmpty) return {};
@@ -209,7 +208,6 @@ class SeriesDao extends DatabaseAccessor<AppDatabase> with _$SeriesDaoMixin {
           .subtract(const Duration(days: 7))
           .toIso8601String();
 
-      // Select series that are NOT in the library and were last updated > 7 days ago
       final librarySeriesIds = selectOnly(db.libraryEntriesTable)
         ..addColumns([db.libraryEntriesTable.seriesId]);
 

@@ -6,9 +6,6 @@ import 'package:open_filex/open_filex.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class UpdateInstaller {
-  /// Applies a downloaded update file. On Android this launches the system
-  /// package installer; on Windows it runs the installer and quits the app so
-  /// it can replace the running files.
   static Future<void> installDownloaded(File file) async {
     if (Platform.isAndroid) {
       var status = await Permission.requestInstallPackages.status;
@@ -32,8 +29,7 @@ class UpdateInstaller {
 
     if (Platform.isWindows) {
       await Process.start(file.path, const [], mode: ProcessStartMode.detached);
-      // Give the installer a moment to spawn, then quit so it can overwrite
-      // the running executable.
+      // Let the installer spawn, then quit so it can overwrite the running executable.
       await Future.delayed(const Duration(milliseconds: 500));
       exit(0);
     }

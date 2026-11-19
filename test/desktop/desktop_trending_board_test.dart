@@ -32,9 +32,7 @@ void main() {
     await SettingsManager().init();
   });
 
-  // The default test surface is 800x600 — narrower than several widths this
-  // suite checks — so a SizedBox wider than that would silently be clamped
-  // by the surface itself rather than actually exercising that width.
+  // The 800x600 test surface would silently clamp a wider SizedBox.
   void useWideSurface(WidgetTester tester) {
     tester.view.physicalSize = const Size(2200, 1400);
     tester.view.devicePixelRatio = 1.0;
@@ -66,9 +64,6 @@ void main() {
     );
   }
 
-  // From well below DesktopLayout.minWidth's tightest realistic content
-  // column up through a very wide monitor — the whole range the desktop
-  // shell can actually hand this section.
   const widths = [360.0, 460.0, 530.0, 700.0, 820.0, 900.0, 1200.0, 1900.0];
 
   group('DesktopTrendingBoard renders without overflow', () {

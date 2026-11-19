@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The signed-out state of an account-backed page, as a centred card.
 class DesktopSignInPrompt extends StatelessWidget {
   final String title;
   final String message;

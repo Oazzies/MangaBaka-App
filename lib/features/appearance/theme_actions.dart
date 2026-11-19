@@ -8,16 +8,12 @@ import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/features/appearance/screens/theme_editor.dart';
 
-/// Everything the user can do to custom themes, shared by the phone, tablet
-/// and desktop appearance pages so the three cannot drift apart.
 class ThemeActions {
   ThemeActions._();
 
   static LocalizationService get _l10n => LocalizationService();
   static ThemeController get _themes => ThemeController();
 
-  /// Opens the editor on a new theme seeded from what is on screen now, so
-  /// "create" starts from something that already looks right.
   static Future<void> create(BuildContext context) {
     final current = context.colors;
     final count = _themes.customThemes.length + 1;
@@ -74,7 +70,6 @@ class ThemeActions {
     if (confirmed == true) await _themes.deleteCustom(spec.id);
   }
 
-  /// Asks for a theme code, prefilled from the clipboard when it holds one.
   static Future<void> import(BuildContext context) async {
     final clip = await Clipboard.getData(Clipboard.kTextPlain);
     final prefill = (clip?.text ?? '').trim().startsWith('mbtheme1:')
@@ -130,7 +125,6 @@ class ThemeActions {
     }
   }
 
-  /// Edit / duplicate / share / delete, anchored at [position].
   static Future<void> showCustomMenu(
     BuildContext context,
     MbThemeSpec spec,

@@ -72,7 +72,6 @@ void main() {
     expect(requests, hasLength(1));
     expect(requests.single.url.path, '/v1/series/batch');
     expect(requests.single.url.queryParametersAll['id'], ['1', '2']);
-    // Everything but the titles is untouched.
     expect(out.first.coverUrl, list.first.coverUrl);
   });
 
@@ -154,12 +153,10 @@ void main() {
       expect(out.single.title, 'Romaji 1');
       expect(requests, hasLength(1));
 
-      // Still paused: the next list does not touch the API.
       requests.clear();
       await e.canonicalize([_guessed(2, 'a')]);
       expect(requests, isEmpty);
 
-      // After the pause it tries again, and recovers.
       clock = clock.add(const Duration(seconds: 31));
       handler = canonical;
       final recovered = await e.canonicalize([_guessed(3, 'a')]);

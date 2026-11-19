@@ -11,30 +11,23 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// One horizontally scrolling discovery rail on the Home feed: a display-caps
-/// section header over a row of cover cards.
 class HomeRail extends StatelessWidget {
   final String title;
   final List<Series> series;
   final bool loading;
   final double coverWidth;
 
-  /// Optional trailing arrow on the section header (e.g. "see the full list").
   final VoidCallback? onViewAll;
 
-  /// When false the section header is omitted — for callers (like the Trending
-  /// section) that render their own header and controls above the row.
   final bool showHeader;
 
-  /// Overrides the Hero scope for rails outside the Home feed, whose titles
-  /// would otherwise collide with the Home rails of the same name.
+  /// For rails outside Home, whose titles would otherwise collide with same-named Home rails.
   final String? heroScopeId;
 
   /// Unique per rail, so a series in two rails never shares a Hero tag.
   String get heroScope =>
       heroScopeId ?? 'home_${title.isEmpty ? 'trending' : title}';
 
-  /// Placeholder count shown while [loading] is true.
   static const int _skeletonCount = 5;
 
   const HomeRail({
@@ -50,7 +43,6 @@ class HomeRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A rail that resolved to nothing is dropped rather than shown empty.
     if (!loading && series.isEmpty) return const SizedBox.shrink();
 
     final itemCount = loading ? _skeletonCount : series.length;

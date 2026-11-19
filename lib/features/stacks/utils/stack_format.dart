@@ -1,7 +1,6 @@
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/publisher/utils/format_count.dart';
 
-/// "3h ago", "2d ago", "just now": how long ago [when] was, coarsely.
 String stackTimeAgo(DateTime? when, LocalizationService l10n, {DateTime? now}) {
   if (when == null) return '';
   final diff = (now ?? DateTime.now()).difference(when.toLocal());
@@ -14,16 +13,12 @@ String stackTimeAgo(DateTime? when, LocalizationService l10n, {DateTime? now}) {
   return unit('stacks_time_years', diff.inDays ~/ 365);
 }
 
-/// "6 entries", "1 entry" and friends: [count] with the singular or plural
-/// form of the `stacks_count_<noun>` key.
 String stackCount(String noun, int count, LocalizationService l10n) {
   final key = count == 1 ? 'stacks_count_${noun}_one' : 'stacks_count_$noun';
   return l10n.translate(key).replaceAll('{n}', formatCount(count));
 }
 
-/// Turns the block-level markdown stack descriptions and notes use into the
-/// inline markdown [MarkdownUtils] renders: headings become bold lines,
-/// rules a divider, list items bullets, quotes plain lines.
+/// [MarkdownUtils] renders inline markdown only; descriptions and notes use block-level syntax.
 String stackMarkdown(String raw) {
   final lines = raw.replaceAll('\r\n', '\n').split('\n');
   final out = <String>[];

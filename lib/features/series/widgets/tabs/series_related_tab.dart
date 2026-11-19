@@ -53,8 +53,6 @@ class SeriesRelatedTab extends StatelessWidget {
   static String _normalizeRelationType(String raw) =>
       raw.trim().toLowerCase().replaceAll(RegExp(r'[\s-]+'), '_');
 
-  /// Resolves a localized label for [relationType], falling back to a
-  /// title-cased form when the API introduces an unmapped relation type.
   static String formatRelationType(
     LocalizationService l10n,
     String relationType,
@@ -232,8 +230,6 @@ class SeriesRelatedTab extends StatelessWidget {
         ? columnCount
         : (maxWidth / 160).floor().clamp(2, 6);
     final itemWidth = (maxWidth - spacing * (cols - 1)) / cols;
-    // Compact grid needs room for the title rows under the cover, so take the
-    // ratio from the style rather than assuming a bare cover.
     final itemHeight = itemWidth / style.childAspectRatio;
 
     return Wrap(

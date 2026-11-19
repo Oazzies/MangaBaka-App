@@ -5,9 +5,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 
-/// Series / publishers / staff switcher, styled like the library's status
-/// tabs: display-caps labels on a row of pills, the selected one filled with
-/// the accent.
 class BrowseTypeTabs extends StatelessWidget {
   final BrowseType selectedType;
   final Function(BrowseType) onTypeChanged;
@@ -22,7 +19,6 @@ class BrowseTypeTabs extends StatelessWidget {
     BrowseType.series,
     BrowseType.publishers,
     BrowseType.staff,
-    // BrowseType.characters,
   ];
 
   @override

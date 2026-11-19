@@ -23,16 +23,13 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
   await AppBootstrap.run();
-  // The default image cache (100 images) is smaller than one screen of a
-  // cover grid, so scrolling back re-decoded covers it had just shown.
+  // The default 100-image cache is smaller than one screen of covers; scrolling back re-decoded them.
   PaintingBinding.instance.imageCache
     ..maximumSize = 1200
     ..maximumSizeBytes = 300 << 20;
   runApp(const MangaBakaApp());
 }
 
-/// The app root: chooses between onboarding and the main shell, holds the
-/// splash overlay until it finishes, and owns the theme.
 class MangaBakaApp extends StatefulWidget {
   const MangaBakaApp({super.key});
 
@@ -43,10 +40,7 @@ class MangaBakaApp extends StatefulWidget {
 class _MangaBakaAppState extends State<MangaBakaApp> {
   final ThemeController _themes = ThemeController();
 
-  /// Themes are rebuilt only when their inputs change — the palette and
-  /// [SettingsManager.showTooltips], which is baked into the tooltip theme —
-  /// rather than on every notification from the merged listenable, which
-  /// fires for every setting there is.
+  /// The merged listenable fires for every setting; rebuild only on palette or showTooltips changes.
   final Map<Brightness, (MbPalette, bool, ThemeData)> _cache = {};
 
   bool _showSplash = true;
@@ -85,15 +79,12 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
     _syncWindowBackground(palette);
   }
 
-  /// Keeps the native desktop window's own background in step, so a resize
-  /// never flashes the previous theme's colour behind the first frame.
+  /// Without it a resize flashes the previous theme's colour behind the first frame.
   void _syncWindowBackground(MbPalette palette) {
     if (!(Platform.isWindows || Platform.isMacOS || Platform.isLinux)) return;
     windowManager.setBackgroundColor(palette.background).ignore();
   }
 
-  /// Checks GitHub for a newer release and, if found, shows the update dialog.
-  /// Runs at most once per app launch.
   Future<void> _checkForAppUpdate() async {
     final service = getIt<UpdateService>();
     if (!service.shouldPrompt()) return;
@@ -106,9 +97,7 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
 
   void _onSplashComplete({required bool isPastOnboarding}) {
     setState(() => _showSplash = false);
-    // Only once the splash has cleared, and only for a user who is actually
-    // in the app — an update prompt over onboarding is the wrong first thing
-    // to see.
+    // Never over onboarding: an update prompt is the wrong first thing to see.
     if (isPastOnboarding) _checkForAppUpdate();
   }
 
@@ -122,15 +111,13 @@ class _MangaBakaAppState extends State<MangaBakaApp> {
       ]),
       builder: (context, _) {
         final settings = SettingsManager();
-        // Signing in implies onboarding is done, so a returning user who
-        // cleared their settings does not get sent back through it.
+        // Signed in implies onboarded, so a returning user who cleared settings skips onboarding.
         final isPastOnboarding =
             settings.hasCompletedOnboarding ||
             getIt<ProfileAuthService>().isLoggedIn;
 
         return ExcludeSemantics(
-          // The Windows web-view component emits a platform accessibility
-          // warning that has no fix at the widget level.
+          // The Windows web-view emits an accessibility warning with no widget-level fix.
           excluding: Platform.isWindows,
           child: MaterialApp(
             navigatorKey: AppConstants.navigatorKey,

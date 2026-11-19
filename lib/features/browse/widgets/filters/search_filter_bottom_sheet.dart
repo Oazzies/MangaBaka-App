@@ -140,8 +140,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                             fontSize: 18,
                           ),
                         ),
-                        // Active-filter count as an amber badge: countable
-                        // state gets the accent everywhere in the system.
+                        // Countable state takes the accent everywhere in the design system.
                         if (_filters.activeFiltersCount > 0) ...[
                           const SizedBox(width: 8),
                           MbBadge.accent(

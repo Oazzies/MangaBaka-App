@@ -1,15 +1,12 @@
 part of 'desktop_profile_screen.dart';
 
 extension _DesktopProfileSections on DesktopProfileScreenState {
-  /// Everything but the overview: identity, standout picks, recent activity.
-  /// With [inline] the overview is included too, after the identity card.
   Widget _mainColumn(LocalizationService l10n, {required bool inline}) {
     return ListView(
       padding: EdgeInsets.fromLTRB(
         DesktopTokens.pagePadding,
         0,
-        // Beside the sidebar the gutter between the two is the sidebar's; on
-        // its own the column keeps the page's right gutter.
+        // Beside the overview sidebar, the gutter between the two is the sidebar's.
         inline ? DesktopTokens.pagePadding : DesktopTokens.pagePadding * 0.75,
         48,
       ),
@@ -61,7 +58,6 @@ extension _DesktopProfileSections on DesktopProfileScreenState {
     return l10n.translate('your_profile');
   }
 
-  /// The reading overview as one card of labelled figures.
   Widget _overview(LocalizationService l10n, {bool twoColumns = false}) {
     final rows = [
       (
@@ -143,8 +139,6 @@ extension _DesktopProfileSections on DesktopProfileScreenState {
     );
   }
 
-  /// The publishers behind most of the library, as hover rows with a bar
-  /// scaled to the biggest. Tapping one opens its publisher page.
   Widget _publishersCard(LocalizationService l10n) {
     final max = _topPublishers.first.count;
     return DesktopCard(

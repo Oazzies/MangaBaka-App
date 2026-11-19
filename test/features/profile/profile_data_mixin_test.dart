@@ -12,8 +12,6 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 
-// ─── Fakes ───────────────────────────────────────────────────────────────────
-
 MbProfile _profile() => MbProfile(
       id: 'u1',
       role: 'user',
@@ -53,8 +51,6 @@ class _FakeSnapshotService extends Fake implements SnapshotService {
       const [];
 }
 
-// ─── Host widget ─────────────────────────────────────────────────────────────
-
 class _TestWidget extends StatefulWidget {
   final ProfileAuthService auth;
   final StatisticsService stats;
@@ -89,8 +85,6 @@ class _TestWidgetState extends State<_TestWidget>
   @override
   Widget build(BuildContext context) => Container();
 }
-
-// ─── Tests ───────────────────────────────────────────────────────────────────
 
 void main() {
   late AppDatabase db;

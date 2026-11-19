@@ -4,11 +4,6 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Uppercase pill — the design system's single selectable-chip shape.
-///
-/// Selected reads as a solid amber fill with ink-black caps; unselected is a
-/// flat dark well with white caps. Used for browse type tabs, filter chips and
-/// any other one-of-many choice.
 class MbPill extends StatelessWidget {
   final String label;
   final bool selected;
@@ -16,13 +11,8 @@ class MbPill extends StatelessWidget {
   final VoidCallback? onLongPress;
   final IconData? icon;
 
-  /// Shown as a small count/qualifier after the label (e.g. an active filter
-  /// count). Rendered in the same ink as the label at reduced opacity.
   final String? trailingText;
 
-  /// Fills the available width with the content centred — for a row of
-  /// equal-width segments. Tightens the padding and ellipsises the label so
-  /// three segments still fit a phone.
   final bool expand;
 
   const MbPill({
@@ -75,8 +65,7 @@ class MbPill extends StatelessWidget {
                 Icon(icon, size: 15, color: fg),
                 const SizedBox(width: 7),
               ],
-              // Flexible only when expanding: pills also sit in horizontal
-              // scroll strips, where the width is unbounded.
+              // Only when expanding: in scroll strips the width is unbounded.
               if (expand) Flexible(child: labelText) else labelText,
               if (trailingText != null) ...[
                 const SizedBox(width: 6),
@@ -96,8 +85,6 @@ class MbPill extends StatelessWidget {
   }
 }
 
-/// Horizontally scrolling row of [MbPill]s, matching the reference's genre
-/// tab strip. Bleeds to the screen edge so the strip reads as scrollable.
 class MbPillStrip extends StatelessWidget {
   final List<Widget> pills;
   final EdgeInsetsGeometry padding;

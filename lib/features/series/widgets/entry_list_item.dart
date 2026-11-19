@@ -41,10 +41,7 @@ class _EntryListItemState extends State<EntryListItem> {
   int? _optimisticProgress;
   bool _hovered = false;
 
-  // The DB watch stream is created once and cached. Creating it inline in
-  // build() would tear down and re-register a drift watch query on every
-  // rebuild of every visible list item — a real cost while scrolling,
-  // especially on older devices.
+  // The DB watch stream is cached: created in build it re-registers a drift watch query every rebuild.
   late final ProfileAuthService _auth;
   late final LibraryService _libraryService;
   Stream<LibraryEntry?>? _entryStream;
@@ -115,7 +112,6 @@ class _EntryListItemState extends State<EntryListItem> {
       builder: (context, snapshot) {
         final entry = snapshot.data;
 
-        // Reset optimistic progress if the DB entry catches up
         if (entry != null &&
             _optimisticProgress != null &&
             entry.progressChapter == _optimisticProgress) {
@@ -144,7 +140,6 @@ class _EntryListItemState extends State<EntryListItem> {
       entry,
     );
     if (widget.ranking == null || style.isGrid) return item;
-    // Lists carry their rank as a number in front of the row.
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -175,9 +170,6 @@ class _EntryListItemState extends State<EntryListItem> {
     final isInLibrary = entry != null;
     final showBadge = widget.ranking != null && style.isGrid;
 
-    // On desktop the list styles are table rows, not the phone's cards: the
-    // row lays out its own progress bar and quick-progress control in columns
-    // instead of having them stacked over it.
     if (!style.isGrid && DesktopLayout.isActive(context)) {
       return SeriesHoverPreview(
         series: widget.series,

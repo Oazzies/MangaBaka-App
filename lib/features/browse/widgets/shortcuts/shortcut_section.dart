@@ -7,7 +7,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Describes a custom button entry for [ShortcutSection.customButtons].
 class ShortcutButtonEntry {
   final String label;
   final VoidCallback onPressed;
@@ -26,8 +25,6 @@ class ShortcutSection extends StatelessWidget {
   final VoidCallback? onTopRated;
   final VoidCallback? onRandom;
 
-  /// When provided, overrides the default Most Popular / Top Rated / Random buttons.
-  /// Use this to render any custom set of buttons (e.g. a single "Mix" button).
   final List<ShortcutButtonEntry>? customButtons;
 
   const ShortcutSection({
@@ -49,7 +46,6 @@ class ShortcutSection extends StatelessWidget {
       builder: (context, _) {
         final l10n = LocalizationService();
 
-        // Build the list of buttons to display
         final List<ShortcutButton> buttons;
         if (customButtons != null) {
           buttons = customButtons!

@@ -11,9 +11,6 @@ import 'package:mangabaka_app/features/stacks/screens/my_stacks_screen.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
-/// The Profile's stacks: a rail of the reader's own, like Home's. Until there
-/// are some to show (none yet, or the request failed) it is a single row card
-/// that opens My Stacks, where they can make their first.
 class MyStacksEntryCard extends StatefulWidget {
   /// Replaces the service lookup, for tests.
   final Future<List<StackSummary>> Function()? loader;
@@ -74,8 +71,6 @@ class _LinkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    // Built like the Profile's other blocks: a surface card with a caps
-    // heading, a muted line under it, and one accent action on the end.
     return MbTappable(
       pressedScale: 0.98,
       onTap: () => MyStacksScreen.open(context),

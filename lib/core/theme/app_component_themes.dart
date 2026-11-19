@@ -3,7 +3,6 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 
-/// Component [ThemeData] builders derived from an [MbPalette].
 abstract final class AppComponentThemes {
   static TooltipThemeData tooltip(MbPalette p, bool showTooltips) =>
       TooltipThemeData(

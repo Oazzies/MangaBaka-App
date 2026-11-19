@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Write / Preview segmented toggle for the note editor header.
 class NoteEditorModeSwitch extends StatelessWidget {
   final bool previewMode;
   final String writeLabel;
@@ -83,7 +82,6 @@ class _ModeTab extends StatelessWidget {
   }
 }
 
-/// Horizontal Markdown formatting toolbar for the note editor.
 class NoteMarkdownToolbar extends StatelessWidget {
   final VoidCallback onBold;
   final VoidCallback onItalic;
@@ -196,7 +194,6 @@ class _ToolbarButton extends StatelessWidget {
   }
 }
 
-/// Bottom action row (Clear, Cancel, Save) for [NoteEditorDialog].
 class NoteEditorActionsRow extends StatelessWidget {
   final TextEditingController controller;
   final bool hasInitial;

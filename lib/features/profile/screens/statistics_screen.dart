@@ -215,8 +215,6 @@ class _StatData {
   const _StatData(this.icon, this.label, this.value);
 }
 
-/// One publisher in "Your publishers": its name, how many library series it
-/// accounts for, and a bar scaled against the biggest publisher.
 class _PublisherStatRow extends StatelessWidget {
   final String name;
   final int count;

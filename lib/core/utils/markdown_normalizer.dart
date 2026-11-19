@@ -1,4 +1,3 @@
-/// Cleans, normalizes, and strips Markdown/HTML in series descriptions.
 abstract final class MarkdownNormalizer {
   static const Map<String, String> _htmlEntities = {
     '&quot;': '"',
@@ -118,8 +117,7 @@ abstract final class MarkdownNormalizer {
     return text.trim();
   }
 
-  /// Rejects out-of-range or surrogate code points so untrusted HTML entities
-  /// cannot crash text rendering.
+  /// Out-of-range or surrogate code points from untrusted HTML entities crash text rendering.
   static bool _isValidCodePoint(int? code) =>
       code != null &&
       code >= 0 &&

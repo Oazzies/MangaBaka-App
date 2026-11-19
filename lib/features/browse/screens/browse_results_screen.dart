@@ -23,18 +23,13 @@ class BrowseResultsScreen extends StatefulWidget {
   final String? staff;
   final String? publisher;
 
-  /// Restricts to one publisher by id — exact, unlike [publisher], which
-  /// matches by name. [publisher] is still what titles the screen.
+  /// Exact, unlike [publisher], which matches by name and still titles the screen.
   final String? publisherId;
 
-  /// A genre name to restrict results to.
   final String? genre;
 
-  /// What the publisher's results were narrowed to (a genre, an audience...),
-  /// named in the title: Kodansha Works of Seinen.
   final String? refineLabel;
 
-  /// A tag id to restrict results to (e.g. a "Top in {genre}" rail's genre).
   final String? tag;
   final double? randomSeed;
 
@@ -171,7 +166,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
         _incrementPageIfNeeded();
       });
 
-      // If we have more but they might fit on screen, check if we need to load more
+      // A page that fits on screen fires no scroll event, so check for the next one now.
       if (_hasMore) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) _onScroll();
@@ -212,8 +207,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   }
 
   void _incrementPageIfNeeded() {
-    // We increment page for all sorts except random,
-    // as random usually handles its own shuffling/seed logic
+    // Random pages by reseeding (see _buildRequestParams), not by page number.
     if (widget.sortBy != 'random') {
       _currentPage++;
     }

@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/features/stacks/utils/stack_format.dart';
 
-/// The mark on a grid cover that says it carries a curator's note.
 class StackNoteMark extends StatelessWidget {
   final String note;
   final bool hover;

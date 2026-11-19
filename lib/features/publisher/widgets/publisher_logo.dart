@@ -4,11 +4,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 
-/// A publisher's logo in a rounded square, or its initial when it has none or
-/// it fails to load.
-///
-/// Logos come in arbitrary aspect ratios, often with transparent backgrounds, so they are contained (never cropped) on a
-/// raised surface.
+/// Logos vary in aspect ratio and are often transparent: contain them on a raised surface.
 class PublisherLogoView extends StatelessWidget {
   final Publisher publisher;
   final double size;
@@ -34,8 +30,7 @@ class PublisherLogoView extends StatelessWidget {
 
   Widget _image(BuildContext context, String url) {
     final inner = size - 8;
-    // Centred at the box's own size: an error or placeholder widget is laid
-    // out at the top-left of whatever it is given otherwise.
+    // Sized to the box: error and placeholder widgets otherwise lay out at the top-left.
     Widget fill(Widget child) => SizedBox(
       width: inner,
       height: inner,

@@ -37,8 +37,7 @@ class DynamicRowHeightGrid extends StatelessWidget {
       physics: physics,
       padding: padding,
       shrinkWrap: shrinkWrap,
-      // Build rows well ahead of the scroll so covers are decoded by the time
-      // they arrive.
+      // Build rows well ahead so covers are decoded before they scroll in.
       scrollCacheExtent: shrinkWrap
           ? null
           : const ScrollCacheExtent.pixels(500),
@@ -51,8 +50,7 @@ class DynamicRowHeightGrid extends StatelessWidget {
           padding: EdgeInsets.only(
             bottom: rowIndex == rowCount - 1 ? 0 : mainAxisSpacing,
           ),
-          // responsive-ok: a row is as tall as its tallest cell; the extra
-          // pass covers one row of a few cells, only for rows on screen.
+          // responsive-ok: row sized to its tallest cell; on-screen rows only.
           child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,

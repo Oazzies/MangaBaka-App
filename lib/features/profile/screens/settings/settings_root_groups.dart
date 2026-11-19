@@ -11,17 +11,12 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// The top level of settings: one row per category, then the external links.
-///
-/// Shared by the portrait screen and the landscape dialog so the two cannot
-/// drift apart on which categories exist or what order they are in.
 List<Widget> buildSettingsGroups(
   BuildContext context,
   LocalizationService l10n,
   ProfileAuthService auth,
 ) {
-  // The general category's subtitle is abbreviated on a phone, so the row
-  // chooses its wording from the same breakpoint the category itself uses.
+  // Must match SettingsCategories._smallDeviceWidth, the breakpoint the general category uses.
   final isSmallDevice = MediaQuery.sizeOf(context).width < 600;
 
   return [
@@ -64,8 +59,6 @@ List<Widget> buildSettingsGroups(
       onTap: () => SettingsCategories.importExport(context, l10n),
     ),
     const SizedBox(height: 16),
-    // Account settings only exist for a signed-in user; there is nothing
-    // behind this row when logged out.
     if (auth.isLoggedIn) ...[
       _category(
         icon: Icons.person_outline,
@@ -75,8 +68,6 @@ List<Widget> buildSettingsGroups(
       ),
       const SizedBox(height: 16),
     ],
-    // Developer Tools only exist once developer mode has been switched on
-    // (ten quick taps on the logo).
     if (SettingsManager().developerMode) ...[
       _category(
         icon: Icons.code,
@@ -121,8 +112,6 @@ List<Widget> buildSettingsGroups(
   ];
 }
 
-/// A category row. Each sits alone in its own group, which is what gives the
-/// settings root its card-per-category rhythm.
 Widget _category({
   required IconData icon,
   required String title,
@@ -141,7 +130,6 @@ Widget _category({
   );
 }
 
-/// A row that leaves the app, marked with the standard external-link glyph.
 Widget _externalLink({
   required Widget leading,
   required String title,
@@ -161,10 +149,6 @@ Widget _externalLink({
   );
 }
 
-/// Wraps a built settings list so its cards fade and rise in sequence.
-///
-/// Spacers pass through untouched and do not consume an index, so the stagger
-/// tracks visible cards rather than list positions.
 List<Widget> staggered(List<Widget> children) {
   var index = 0;
   return [

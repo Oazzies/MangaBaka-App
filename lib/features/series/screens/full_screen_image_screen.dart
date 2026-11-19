@@ -104,7 +104,7 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
 
     return PopScope(
       canPop:
-          !_isMacOS, // Disable system back gesture on macOS to prevent interference with cover swiping
+          !_isMacOS, // macOS back swipe fights cover swiping
       child: Scaffold(
         backgroundColor: FixedColors.imageScrim,
         extendBodyBehindAppBar: true,
@@ -169,7 +169,6 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                             : const BouncingScrollPhysics()),
                   itemCount: widget.imageUrls.length,
                   onPageChanged: (index) {
-                    // Remove listener from old page
                     _transformationControllers[_currentIndex].removeListener(
                       _handleTransformationChanged,
                     );
@@ -179,12 +178,10 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                       _isZoomed = false;
                     });
 
-                    // Add listener to new page
                     _transformationControllers[index].addListener(
                       _handleTransformationChanged,
                     );
 
-                    // Reset zoom of other pages
                     for (
                       int i = 0;
                       i < _transformationControllers.length;
@@ -205,7 +202,6 @@ class _FullScreenImageScreenState extends State<FullScreenImageScreen> {
                           controller.value = Matrix4.identity();
                         } else {
                           final position = _doubleTapDetails!.localPosition;
-                          // Zoom in to 3x at the tapped position
                           controller.value = Matrix4.identity()
                             ..translateByVector3(
                               Vector3(-position.dx * 2, -position.dy * 2, 0.0),

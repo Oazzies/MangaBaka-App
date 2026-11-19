@@ -7,8 +7,6 @@ import 'package:mangabaka_app/features/series/models/series_cover.dart';
 import 'package:mangabaka_app/features/series/screens/full_screen_image_screen.dart';
 import 'package:mangabaka_app/features/series/widgets/unblur_warning.dart';
 
-/// A cover grid item that shows an accent border on hover and opens
-/// [FullScreenImageScreen] on tap.
 class HoverableCoverItem extends StatefulWidget {
   final SeriesCover cover;
   final List<SeriesCover> allCovers;
@@ -48,7 +46,6 @@ class _HoverableCoverItemState extends State<HoverableCoverItem> {
         onTap: () async {
           if (widget.url != null) {
             final rating = widget.contentRating;
-            // Fullscreen shows the cover clear, so a blurred one asks first.
             if (rating != null &&
                 WidgetUtils.isRatingBlurred(rating) &&
                 !await confirmUnblur(context)) {

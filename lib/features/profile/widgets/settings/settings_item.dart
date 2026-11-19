@@ -4,11 +4,6 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A single settings row.
-///
-/// Layout follows the design system's list idiom: a bare muted glyph anchors
-/// the left edge, the title is set in display caps, and the value/summary sits
-/// beneath it in muted sans.
 class SettingsItem extends StatelessWidget {
   final IconData? icon;
   final String title;
@@ -18,8 +13,6 @@ class SettingsItem extends StatelessWidget {
   final bool isFirst;
   final bool isLast;
 
-  /// Overrides the muted glyph built from [icon] — for brand marks (GitHub,
-  /// Discord) that need their own color or aren't in Material's icon set.
   final Widget? leadingIcon;
 
   const SettingsItem({
@@ -90,8 +83,6 @@ class SettingsItem extends StatelessWidget {
       ),
     );
 
-    // A row with a switch/other control in its trailing slot is not itself
-    // tappable, so it must not get press feedback.
     if (onTap == null) return row;
 
     return MbTappable(

@@ -41,7 +41,6 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    // Only show for series already in the library
     if (widget.entry == null) return const SizedBox.shrink();
 
     final totalChapters = int.tryParse(widget.series.totalChapters) ?? 0;
@@ -52,7 +51,6 @@ class _SeriesQuickActionButtonState extends State<SeriesQuickActionButton> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Gives way to the button in a narrow cell or at a large text size.
         Flexible(
           child: Text(
             '$currentProgress${totalChapters > 0 ? ' / $totalChapters' : ''}',

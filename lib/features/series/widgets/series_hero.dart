@@ -6,8 +6,6 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Kicker (mono) + serif title + alternate titles + byline. Sits beside the
-/// cover in the banner hero.
 class SeriesTitleBlock extends StatelessWidget {
   final Series series;
   final String title;
@@ -49,7 +47,6 @@ class SeriesTitleBlock extends StatelessWidget {
     final authors = series.authors.where((a) => a.trim().isNotEmpty).toList();
     final artists = series.artists.where((a) => a.trim().isNotEmpty).toList();
     if (authors.isEmpty && artists.isEmpty) return '';
-    // Same person wrote & drew it → single "Story & Art by" credit.
     if (artists.isEmpty ||
         (authors.length == artists.length &&
             authors.toSet().containsAll(artists))) {
@@ -146,7 +143,6 @@ class SeriesTitleBlock extends StatelessWidget {
   }
 }
 
-/// Small helper so callers don't depend on WidgetUtils directly for the banner.
 Widget seriesBannerImage(Series series, {required int memCacheWidth}) {
   return WidgetUtils.networkImage(
     url: series.coverUrl,

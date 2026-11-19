@@ -4,8 +4,6 @@ mixin _StatisticsQueriesMixin {
   AppDatabase get _db;
   Logger get _logger;
 
-  /// The publishers behind the most series in the library, biggest first.
-  ///
   /// Counted by name: the local database stores publisher names only, not ids.
   Future<List<({String name, int count})>> getTopPublishers({
     List<String>? contentPreferences,
@@ -38,8 +36,7 @@ mixin _StatisticsQueriesMixin {
           continue;
         }
         if (decoded is! List) continue;
-        // A series listing the same publisher twice (two regional editions)
-        // still counts once toward that publisher.
+        // A publisher listed twice on one series (two regional editions) counts once.
         for (final name in {for (final p in decoded) p.toString()}) {
           if (name.isNotEmpty) counts[name] = (counts[name] ?? 0) + 1;
         }

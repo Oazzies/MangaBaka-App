@@ -13,11 +13,9 @@ class RatingChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Treat 0 as unrated
     final userRatingValue = entry?.rating ?? 0;
     final int? userRating = userRatingValue > 0 ? userRatingValue : null;
 
-    // The badge is only present when the user has personally rated the series
     if (userRating == null) return const SizedBox.shrink();
 
     return MiniBadge(

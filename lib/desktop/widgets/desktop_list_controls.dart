@@ -7,12 +7,8 @@ import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/models/sort_options.dart';
 
-/// Which list a [DesktopListStyleToggle] controls.
 enum DesktopListScope { library, browse, stacks }
 
-/// Every list style as a row of icons, written to whichever setting the list
-/// reads from — the phone hides this in settings or cycles it one step per
-/// tap, which is a poor fit when all five fit in the toolbar.
 class DesktopListStyleToggle extends StatefulWidget {
   final DesktopListScope scope;
 
@@ -31,7 +27,6 @@ class DesktopListStyleToggle extends StatefulWidget {
 }
 
 class _DesktopListStyleToggleState extends State<DesktopListStyleToggle> {
-  /// The style just tapped, shown selected before the list has caught up.
   AppListStyle? _pending;
 
   void _apply(AppListStyle style) {
@@ -82,7 +77,6 @@ class _DesktopListStyleToggleState extends State<DesktopListStyleToggle> {
   }
 }
 
-/// The sort dropdown for a filtered list.
 class DesktopSortMenu extends StatelessWidget {
   final SearchFilters filters;
   final ValueChanged<SearchFilters> onChanged;

@@ -59,12 +59,6 @@ void _shareStack(BuildContext context, StackSummary stack) {
   );
 }
 
-/// Upvote and follow a stack, and open its comments on the website.
-///
-/// Save and share live in the top bar ([StackBarActions]). State comes from
-/// [StackStatusController], so the counts agree with every other place the
-/// stack is shown. Signed-out readers see the listing's counts and are asked
-/// to sign in when they press one.
 class StackActionBar extends StatelessWidget {
   final StackSummary stack;
   final bool commentsEnabled;
@@ -118,18 +112,7 @@ class StackActionBar extends StatelessWidget {
                   ? null
                   : () => _toggleReaction(context, stack, StackReaction.follow),
             ),
-            // Comments open the website for now; the API has no comments
-            // endpoint yet. Re-enable when it does and build them in-app.
-            // if (commentsEnabled)
-            //   StackActionButton(
-            //     icon: Icons.chat_bubble_outline_rounded,
-            //     label: l10n.translate('stacks_action_comments_short'),
-            //     tooltip: l10n.translate('stacks_action_comments'),
-            //     onTap: () => launchUrl(
-            //       Uri.parse('${stack.canonicalUrl}#comments'),
-            //       mode: LaunchMode.externalApplication,
-            //     ),
-            //   ),
+            // No comments button until the API has a comments endpoint.
           ],
         );
       },
@@ -137,8 +120,6 @@ class StackActionBar extends StatelessWidget {
   }
 }
 
-/// Save and share, as icon buttons for the top bar ([desktop] picks the
-/// desktop header's style). Long-pressing share copies the link.
 List<Widget> stackBarActions(
   BuildContext context,
   StackSummary stack, {
@@ -202,8 +183,6 @@ List<Widget> stackBarActions(
   ];
 }
 
-/// A rounded action button: an icon with an optional label, filled with the
-/// accent while [active], and lighter under the pointer.
 class StackActionButton extends StatefulWidget {
   final IconData icon;
   final String? label;

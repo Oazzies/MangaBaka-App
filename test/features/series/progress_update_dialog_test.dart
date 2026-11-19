@@ -14,7 +14,6 @@ void main() {
     await LocalizationService().init();
   });
 
-  /// Pumps the dialog and returns a getter for the value it last saved.
   Future<int? Function()> pumpDialog(
     WidgetTester tester, {
     int initial = 5,

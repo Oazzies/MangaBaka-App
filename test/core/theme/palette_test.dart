@@ -8,8 +8,7 @@ import 'package:mangabaka_app/core/theme/palette/mb_theme_spec.dart';
 import 'package:mangabaka_app/core/theme/palette/palette_derivation.dart';
 import 'package:mangabaka_app/core/theme/presets/theme_presets.dart';
 
-/// The legibility bar every palette — preset, accent-overridden or custom —
-/// has to clear. A new token that carries text or UI state belongs here.
+/// A new token that carries text or UI state belongs here.
 void expectLegible(MbPalette p, String name) {
   double c(Color a, Color b) => ColorMath.contrast(a, b);
   final surfaces = {
@@ -38,7 +37,6 @@ void expectLegible(MbPalette p, String name) {
     expect(c(t.value, p.surface), greaterThanOrEqualTo(PaletteContrast.ui - 0.01),
         reason: '$name: ${t.key} on surface');
   }
-  // Layers must be distinguishable from each other, however subtly.
   expect(p.surfaceRaised, isNot(p.background), reason: '$name: layers');
   expect(p.border, isNot(p.surface), reason: '$name: border');
   for (final state in const [

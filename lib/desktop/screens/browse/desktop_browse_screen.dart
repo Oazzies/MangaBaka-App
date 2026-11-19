@@ -29,11 +29,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_browse_controls_part.dart';
 
-/// Browse on desktop: filters in a permanent left panel, the search field and
-/// result controls across the top, and results filling the rest.
-///
-/// Built on the same [BrowseController] as the phone screen — only the
-/// arrangement differs. Every filter change applies immediately.
 class DesktopBrowseScreen extends StatefulWidget {
   static final GlobalKey<DesktopBrowseScreenState> stateKey =
       GlobalKey<DesktopBrowseScreenState>();
@@ -51,8 +46,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
   late final BrowseController _controller;
   final FocusNode _searchFocus = FocusNode();
 
-  /// The controller `BrowseNavigation` seeds when a chip elsewhere starts a
-  /// search.
+  /// Seeded by `BrowseNavigation` when a chip elsewhere starts a search.
   BrowseController get controller => _controller;
 
   void focusSearch() => _searchFocus.requestFocus();
@@ -72,8 +66,6 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
     _searchFocus.dispose();
     super.dispose();
   }
-
-  // ─── Navigation ──────────────────────────────────────────────────────────
 
   void _openDetail(Series series) {
     _logger.info('Opening series ${series.id} from desktop browse');
@@ -122,8 +114,6 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
     _controller.resetSearchState();
   }
 
-  // ─── Build ───────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -139,8 +129,6 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // The panel holds series filters, so it is shown for series only;
-            // publishers sort from the menu above the results instead.
             if (isSeries)
               DesktopSidePanel(
                 child: DesktopFilterPanel(
@@ -211,7 +199,6 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
             ),
           )
         else
-          // BrowseContent is itself an Expanded.
           _padded(
             BrowseContent(
               searchResults: c.searchResults,
@@ -231,8 +218,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
     );
   }
 
-  /// Insets [content] — whose build returns an [Expanded] — horizontally,
-  /// giving it a column of its own to expand in.
+  /// [content]'s build returns an [Expanded], so it needs a column of its own to expand in.
   Widget _padded(Widget content) {
     return Expanded(
       child: Padding(

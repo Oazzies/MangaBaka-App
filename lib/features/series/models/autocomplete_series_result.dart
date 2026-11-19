@@ -1,8 +1,5 @@
 import 'package:mangabaka_app/core/utils/json_utils.dart';
 
-/// Lightweight model for autocomplete search results.
-/// Only parses the fields needed for the dropdown display (thumbnail + title),
-/// keeping it separate from the full [Series] model to avoid unnecessary parsing.
 class AutocompleteSeriesResult {
   final int id;
   final String title;
@@ -26,7 +23,6 @@ class AutocompleteSeriesResult {
     String displayTitle = '';
     final List<String> allTitlesList = [];
 
-    // Handle 'titles' array if present
     final titles = json['titles'];
     if (titles is List && titles.isNotEmpty) {
       for (var t in titles) {
@@ -35,7 +31,6 @@ class AutocompleteSeriesResult {
         }
       }
 
-      // Try to find an English one in the array, then any primary, then first
       String langOf(dynamic t) =>
           (t is Map ? t['language']?.toString() : null)?.toLowerCase() ?? '';
       bool isRomanized(dynamic t) {
@@ -90,7 +85,6 @@ class AutocompleteSeriesResult {
       }
     }
 
-    // Handle 'secondary_titles' map if present
     final secondaryTitles = json['secondary_titles'];
     if (secondaryTitles is Map) {
       secondaryTitles.forEach((key, value) {
@@ -108,7 +102,6 @@ class AutocompleteSeriesResult {
       displayTitle = json['title']?.toString() ?? 'Unknown Title';
     }
 
-    // Extract thumbnail: use x150 cover variant for small display
     String thumbnail = '';
     final cover = json['cover'];
     if (cover is Map) {
@@ -116,7 +109,6 @@ class AutocompleteSeriesResult {
       if (x150 is Map && x150['x1'] is String) {
         thumbnail = x150['x1'];
       }
-      // Fallback to x350 if x150 is not available
       if (thumbnail.isEmpty) {
         final x350 = cover['x350'];
         if (x350 is Map && x350['x1'] is String) {
@@ -125,7 +117,6 @@ class AutocompleteSeriesResult {
       }
     }
 
-    // Extract genres from genres list (legacy field), max 3
     final genresList = <String>[];
     final genres = json['genres'];
     if (genres is List) {
@@ -134,7 +125,6 @@ class AutocompleteSeriesResult {
       }
     }
 
-    // Extract year from published field
     int? year;
     final published = json['published'];
     if (published is Map) {
@@ -157,11 +147,10 @@ class AutocompleteSeriesResult {
       allTitles: allTitlesList
           .where((t) => t.isNotEmpty)
           .toSet()
-          .toList(), // Deduplicate
+          .toList(),
     );
   }
 
-  /// Create from a LibraryEntry-like data structure for local search
   factory AutocompleteSeriesResult.fromLibraryData({
     required int id,
     required String title,

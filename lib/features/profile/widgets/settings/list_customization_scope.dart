@@ -2,7 +2,6 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
-/// Which list the customization panel is currently editing.
 enum ListScopeTab {
   library,
   browse,
@@ -11,29 +10,15 @@ enum ListScopeTab {
   bool get isLibrary => this == ListScopeTab.library;
 }
 
-/// Resolves "what does the active tab actually read and write?".
-///
-/// Library, Browse and Stacks can each keep their own list style and grid column
-/// count, or share one of each — and the two are separate switches, so a user
-/// can have separate styles but a shared column count. That produced the same
-/// nested ternary in half a dozen places (once per read, once per write, once
-/// per label), and a missed branch showed up as a control that edited the
-/// wrong list.
-///
-/// This resolves it once. It holds no state: build one per frame from the
-/// current [SettingsManager] and tab.
+/// Style and column-count separation are independent switches; resolve them here, never inline.
 class ListCustomizationScope {
   final SettingsManager settings;
   final ListScopeTab tab;
 
   const ListCustomizationScope({required this.settings, required this.tab});
 
-  /// True when either switch is on, which is the only time the tab selector
-  /// and the copy-across button mean anything.
   bool get hasAnySeparation =>
       settings.separateListStyles || settings.separateGridColumnCounts;
-
-  // ─── List style ──────────────────────────────────────────────────────────
 
   AppListStyle get style {
     if (!settings.separateListStyles) return settings.currentListStyle;
@@ -68,9 +53,7 @@ class ListCustomizationScope {
     });
   }
 
-  // ─── Grid columns ────────────────────────────────────────────────────────
-
-  /// The column count, where 0 means "auto — fit as many as the width allows".
+  /// 0 means auto: fit as many columns as the width allows.
   int get gridColumns {
     if (!settings.separateGridColumnCounts) return settings.gridColumnCount;
     return switch (tab) {
@@ -106,15 +89,10 @@ class ListCustomizationScope {
     });
   }
 
-  /// Only the grid styles have a column count to configure.
   bool get showsGridColumns =>
       style == AppListStyle.coverOnlyGrid || style == AppListStyle.compactGrid;
 
-  // ─── Switching the separation on and off ─────────────────────────────────
-
-  /// Turning separation on seeds both lists with the style already in use, and
-  /// turning it off adopts the active tab's — so the toggle itself never
-  /// changes how anything looks.
+  /// Seeds or adopts the current style so the toggle itself never changes how anything looks.
   void setSeparateStyles(bool separate) {
     if (separate) {
       final shared = settings.currentListStyle;
@@ -127,8 +105,6 @@ class ListCustomizationScope {
     settings.setSeparateListStyles(separate);
   }
 
-  /// The column-count counterpart of [setSeparateStyles], with the same
-  /// carry-the-current-value-across behaviour.
   void setSeparateGridColumns(bool separate) {
     if (separate) {
       final shared = settings.gridColumnCount;
@@ -141,8 +117,6 @@ class ListCustomizationScope {
     settings.setSeparateGridColumnCounts(separate);
   }
 
-  /// Copies whatever is configured independently from the active tab's list to
-  /// the other lists. Shared settings are left alone — there is nothing to copy.
   void copyToOtherTabs() {
     final style = this.style;
     final columns = gridColumns;

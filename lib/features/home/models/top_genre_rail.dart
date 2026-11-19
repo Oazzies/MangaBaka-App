@@ -1,9 +1,6 @@
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// One of the user's top genres, from their taste profile.
-///
-/// [tagId] is what `/v2/series/search?tag=` takes; [affinity] orders the
-/// genres (higher is a stronger fit) and is not shown to the user.
+/// [tagId] is what `/v2/series/search?tag=` takes; [affinity] only orders genres, higher first.
 class TopGenre {
   final int tagId;
   final String name;
@@ -15,8 +12,6 @@ class TopGenre {
     required this.affinity,
   });
 
-  /// Parses an item of the `results` array. Null when the item is unusable,
-  /// so one bad row does not drop the rest.
   static TopGenre? tryParse(Object? item) {
     if (item is! Map) return null;
     final id = item['tag_id'];
@@ -30,7 +25,6 @@ class TopGenre {
   }
 }
 
-/// A "Top in {genre}" rail: the genre and its best-rated series.
 class TopGenreRail {
   final TopGenre genre;
   final List<Series> series;

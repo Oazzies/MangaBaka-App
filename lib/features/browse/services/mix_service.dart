@@ -8,10 +8,6 @@ import 'package:mangabaka_app/features/browse/services/mix_series_json.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// Reads the `/series/mix` recommendation endpoints.
-///
-/// Request plumbing lives in [ApiClient]; the mix-specific JSON shape is
-/// handled by [normalizeMixSeriesJson].
 class MixService {
   static const String _mixUrl = '${AppConstants.baseApiUrl}/series/mix';
   static const String _seedsUrl = '${AppConstants.baseApiUrl}/series/mix/seeds';
@@ -22,7 +18,6 @@ class MixService {
   MixService({http.Client? client, ApiClient? api})
     : _api = api ?? ApiClient(healthContext: 'mix', client: client);
 
-  /// Fetch mix recommendations based on seed series IDs.
   Future<MixResult> fetchMix({
     required List<int> seriesIds,
     int limit = 24,
@@ -55,13 +50,7 @@ class MixService {
     return result;
   }
 
-  /// Fetch suggested additional seeds given 2+ existing seed IDs.
-  ///
-  /// Suggestions are an optional enhancement to the seed picker, so any
-  /// failure degrades to "no suggestions" rather than propagating: the user
-  /// can still search for seeds by hand, and an error banner here would
-  /// interrupt a flow that is otherwise working. The failure is logged so it
-  /// is still visible in diagnostics.
+  /// Failures degrade to no suggestions: seeds can still be searched for by hand.
   Future<List<AutocompleteSeriesResult>> fetchSeedSuggestions(
     List<int> seriesIds,
   ) async {
@@ -103,8 +92,7 @@ class MixService {
             .whereType<MixDnaTag>()
             .where((d) => d.name.isNotEmpty)
             .toList()
-          // Heaviest traits first: the DNA strip is a summary, and the tail is
-          // truncated on narrow screens.
+          // Heaviest first: the DNA strip truncates its tail on narrow screens.
           ..sort((a, b) => b.weight.compareTo(a.weight));
 
     final rawSeedCount = json is Map ? json['seed_count'] : null;
@@ -112,11 +100,7 @@ class MixService {
     return MixResult(series: series, dna: dna, seedCount: seedCount);
   }
 
-  /// Mix items wrap the series one level deep (`{series: {...}, ...}`).
-  ///
-  /// A single unparseable item yields null and is skipped by
-  /// [parseDataList] — one malformed recommendation should not empty the
-  /// whole rail.
+  /// Mix items nest the series (`{series: {...}}`); a malformed one yields null and is skipped.
   T? _mapNestedSeries<T>(
     Map<String, dynamic> item,
     T Function(Map<String, dynamic> json) fromJson,

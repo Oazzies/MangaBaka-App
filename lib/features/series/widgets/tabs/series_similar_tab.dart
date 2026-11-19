@@ -15,11 +15,6 @@ import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// The Similar tab: titles alike by tags and creators, then — as a second
-/// section — titles that readers of this series also keep in their libraries.
-///
-/// The two lists load independently. The readers list is a separate beta
-/// endpoint, so it appears when (and only if) it has something to show.
 class SeriesSimilarTab extends StatelessWidget {
   final List<Series>? similar;
   final List<Series>? readersAlsoLike;
@@ -57,8 +52,6 @@ class SeriesSimilarTab extends StatelessWidget {
     final readersList = _dedupe(readersAlsoLike ?? const []);
 
     if (similarList.isEmpty && readersList.isEmpty) {
-      // Readers-also-like may still be on its way; do not declare the tab
-      // empty until it has answered.
       if (readersAlsoLike == null) {
         return const Padding(
           padding: EdgeInsets.all(32.0),
@@ -90,10 +83,8 @@ class SeriesSimilarTab extends StatelessWidget {
                     title: l10n.translate('tab_similar'),
                     series: similarList,
                     style: style,
-                    // Distinct per section: the same series can appear in both
-                    // lists, and a Hero tag must be unique within a route.
+                    // The same series can be in both lists, and a Hero tag must be unique within a route.
                     heroTagPrefix: 'similar',
-                    // One layout switch for the whole tab, on the first header.
                     toggle: IconButton(
                       icon: Icon(style.next.icon, color: context.colors.text),
                       onPressed: () => ListStyleSwitch.run(
@@ -148,8 +139,7 @@ class SeriesSimilarTab extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               ConstrainedBox(
-                // Tall enough to hold the toggle, so its hover highlight
-                // stays inside the header instead of under the list below.
+                // Holds the toggle, so its hover highlight stays inside the header.
                 constraints: const BoxConstraints(minHeight: 44),
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -192,10 +182,7 @@ class SeriesSimilarTab extends StatelessWidget {
     AppListStyle style,
     String heroTagPrefix,
   ) {
-    // Lay out items directly in a Column rather than a nested non-scrolling
-    // ListView: inside the detail screen's AnimatedSwitcher transition the
-    // ListView's overscroll viewport can be painted before layout completes,
-    // throwing "RenderBox was not laid out" / "Cannot hit test ... no size".
+    // Not a nested ListView: in the AnimatedSwitcher it can paint before layout ("RenderBox was not laid out").
     final seriesService = getIt<SeriesService>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

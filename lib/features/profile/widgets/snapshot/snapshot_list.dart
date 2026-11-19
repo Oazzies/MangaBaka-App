@@ -60,8 +60,7 @@ class _SnapshotListState extends State<SnapshotList> {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          // Cover width (120) at the standard 2:3 ratio (180) plus the
-          // caption row below it (4 spacing + 16 text).
+          // 2:3 cover plus the caption row (4 spacing + 16 text).
           height: SnapshotListItem.width * 1.5 + 20,
           child: ListView.separated(
             controller: _scrollController,

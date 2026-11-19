@@ -3,10 +3,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_scope.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The Library / Browse / Stacks switch at the top of the list customization panel.
-///
-/// A sliding pill rather than two buttons, so the selected side is legible at
-/// a glance and the transition matches the panel sliding beneath it.
 class ListScopeTabSelector extends StatelessWidget {
   final ListScopeTab active;
   final String libraryLabel;
@@ -42,7 +38,6 @@ class ListScopeTabSelector extends StatelessWidget {
             alignment: Alignment(active.index - 1.0, 0),
             duration: _pillDuration,
             curve: Curves.easeOutCubic,
-            // A third of the bar, worked out at layout.
             child: FractionallySizedBox(
               widthFactor: 1 / 3,
               heightFactor: 1,
@@ -94,7 +89,6 @@ class _Tab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        // Opaque so the whole half is tappable, not just the text.
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
         child: Center(
@@ -102,8 +96,6 @@ class _Tab extends StatelessWidget {
             duration: ListScopeTabSelector._labelDuration,
             curve: Curves.easeInOut,
             style: AppTypography.sans(
-              // The active label sits on the accent pill, so it inverts to the
-              // page background colour to stay readable.
               color: isActive ? context.colors.background : context.colors.text,
               fontWeight: FontWeight.bold,
               fontSize: 14,

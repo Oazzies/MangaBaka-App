@@ -6,19 +6,15 @@ import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 
 import 'viewports.dart';
 
-/// One problem the sweep found, with the window it first appeared at.
 class LayoutIssue {
   final String scenario;
   final WindowSize viewport;
 
-  /// What went wrong, with anything size-specific (overflow amounts,
-  /// constraint values) normalised so repeats of one bug group together.
+  /// Size-specific values normalised out, so repeats of one bug group together.
   final String key;
 
-  /// Where in `lib/` it came from, when the error says.
   final String? location;
 
-  /// The full error text, for the first occurrence.
   final String detail;
 
   LayoutIssue({
@@ -30,12 +26,7 @@ class LayoutIssue {
   });
 }
 
-/// Collects every [LayoutIssue] of a run and renders them as one report.
-///
-/// [attach] routes framework errors here from then on — call it before the
-/// app is first pumped, so errors while a page loads are caught with their
-/// full detail like the rest. [scenario] and [viewport] label whatever is
-/// recorded next.
+/// Call [attach] before the first pump, so load-time errors keep their full detail.
 class IssueLog {
   final List<LayoutIssue> issues = [];
 
@@ -60,9 +51,7 @@ class IssueLog {
 
   void addAll(Iterable<LayoutIssue> more) => issues.addAll(more);
 
-  /// Fails the test with every distinct issue found, grouped, instead of
-  /// stopping at the first — a responsive bug usually shows up at a whole
-  /// band of sizes, and the band is what makes it diagnosable.
+  /// Reports every issue grouped: a bug spans a band of sizes, which diagnoses it.
   void expectClean() {
     if (issues.isEmpty) return;
     final groups = <String, List<LayoutIssue>>{};
@@ -98,24 +87,18 @@ class IssueLog {
       s.split('\n').map((l) => '      $l').join('\n');
 }
 
-/// Applies [v] to the test window.
 void applyViewport(WidgetTester tester, WindowSize v) {
   tester.view.devicePixelRatio = v.dpr;
   tester.view.physicalSize = v.physical;
   tester.platformDispatcher.textScaleFactorTestValue = v.textScale;
 }
 
-/// Restores the test window to its defaults.
 void resetViewport(WidgetTester tester) {
   tester.view.reset();
   tester.platformDispatcher.clearTextScaleFactorTestValue();
 }
 
-/// Resizes the live app through [viewports] in order — the way a user drags
-/// a window, not a fresh start at each size — recording every framework
-/// error (overflow, unbounded constraints, exceptions in build/layout/paint)
-/// and every on-screen control that can't be clicked. [log] must be
-/// attached.
+/// Resizes in order, as a drag does, not fresh per size. [log] must be attached.
 Future<void> sweep(
   WidgetTester tester,
   IssueLog log, {
@@ -127,14 +110,11 @@ Future<void> sweep(
   for (final v in viewports) {
     log.viewport = v;
     applyViewport(tester, v);
-    // Two frames: the resize itself, then whatever it scheduled after
-    // layout (scroll realignment, post-frame measurement).
+    // Two frames: the resize, then what it scheduled after layout.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
     if (checkControls) {
-      // Let transitions a resize started (a breakpoint flipping a layout,
-      // the sidebar sliding) finish first: a control covered mid-animation
-      // is not one the user is stuck with.
+      // Let transitions finish: a control covered mid-animation isn't stuck.
       await tester.pump(const Duration(milliseconds: 600));
       log.addAll(unreachableControls(tester, scenario: scenario, viewport: v));
     }
@@ -160,7 +140,6 @@ String _normalise(String s) => s
     .replaceAll(RegExp(r'\d+(\.\d+)?'), 'N')
     .replaceAll(RegExp(r'#[0-9a-f]{5}'), '');
 
-/// The interactive widgets whose reachability is checked.
 bool _isControl(Widget w) =>
     w is DesktopIconButton ||
     w is DesktopPillButton ||
@@ -186,12 +165,7 @@ String _describe(Widget w) {
   return '${w.runtimeType}${what.isEmpty ? '' : ' "$what"'}';
 }
 
-/// Every control on screen that a pointer can't reach: cut off by the window
-/// edge, or covered at its centre by something else (the window buttons, an
-/// overlay, a sibling that grew over it).
-///
-/// Controls scrolled out of their scroll view, or outside the window
-/// vertically on a page that scrolls, are skipped — that's not a layout bug.
+/// Skips controls merely scrolled out of view: that is not a layout bug.
 List<LayoutIssue> unreachableControls(
   WidgetTester tester, {
   required String scenario,
@@ -210,8 +184,6 @@ List<LayoutIssue> unreachableControls(
       Offset.zero & box.size,
     );
 
-    // The area the control can legitimately be shown in: the window,
-    // narrowed by every scroll view around it.
     var visible = window;
     var horizontallyScrolled = false;
     element.visitAncestorElements((ancestor) {
@@ -255,7 +227,6 @@ List<LayoutIssue> unreachableControls(
       rect.center,
       tester.view.viewId,
     );
-    // Reached if the hit lands on the control or anything inside it.
     final own = <Object>{};
     void collect(Element e) {
       final r = e.renderObject;
@@ -283,8 +254,6 @@ List<LayoutIssue> unreachableControls(
   return issues;
 }
 
-/// A readable name for whatever took the hit instead: the nearest widget of
-/// the topmost render object hit.
 String _coveringWidget(HitTestResult result) {
   for (final entry in result.path) {
     final target = entry.target;

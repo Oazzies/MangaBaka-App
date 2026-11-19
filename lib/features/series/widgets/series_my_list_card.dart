@@ -8,10 +8,6 @@ import 'package:mangabaka_app/features/series/widgets/series_my_list_rows.dart';
 import 'package:mangabaka_app/features/series/widgets/state_selection_section.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The "My List" tracking card from the design: a full-width status selector,
-/// chapter/volume progress bars, and a 5-star score (mapped from the app's
-/// 0–100 scale). Mirrors the design's tracking widget while reusing the app's
-/// existing state/progress/rating plumbing.
 class SeriesMyListCard extends StatelessWidget {
   final Series series;
   final LibraryEntry entry;

@@ -26,11 +26,10 @@ class _TrackpadNavigationListenerState
 
   @override
   Widget build(BuildContext context) {
-    // Only enable on macOS
     try {
       if (!Platform.isMacOS) return widget.child;
     } on UnsupportedError {
-      // In web, Platform.isMacOS might throw or be false
+      // Platform.isMacOS can throw on web.
       return widget.child;
     }
 
@@ -40,7 +39,6 @@ class _TrackpadNavigationListenerState
         final dx = event.panDelta.dx;
         final dy = event.panDelta.dy;
 
-        // Only accumulate if the movement is primarily horizontal
         if (dx.abs() > dy.abs()) {
           _cumulativeDelta += dx;
 
@@ -65,17 +63,14 @@ class _TrackpadNavigationListenerState
               }
             }
           } else if (_cumulativeDelta < -_threshold) {
-            // Forward navigation could be here, but we focus on back
             _cumulativeDelta = 0;
           }
         } else if (dy.abs() > dx.abs() * 2) {
-          // If the movement is clearly vertical, reset cumulative horizontal delta
-          // to prevent accidental triggers from diagonal scrolling
+          // Clearly vertical movement resets the total so diagonal scrolling never triggers Back.
           _cumulativeDelta = 0;
         }
       },
       onPointerPanZoomEnd: (event) {
-        // Reset when the gesture ends
         _cumulativeDelta = 0;
       },
       child: widget.child,

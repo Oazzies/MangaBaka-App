@@ -19,7 +19,6 @@ class _AnimatedSplashOverlayState extends State<AnimatedSplashOverlay> {
   @override
   void initState() {
     super.initState();
-    // Remove native splash as soon as we start our Flutter animation
     _logger.fine('Removing native splash, starting animated overlay');
     FlutterNativeSplash.remove();
   }

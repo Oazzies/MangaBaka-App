@@ -15,8 +15,6 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_compone
 import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Account and advanced settings category builders extracted from
-/// [SettingsCategories] to keep each file focused and under 300 lines.
 class SettingsAccountAdvanced {
   SettingsAccountAdvanced._();
 

@@ -14,28 +14,18 @@ import 'package:mangabaka_app/features/series/widgets/complete_series_dialog.dar
 import 'package:mangabaka_app/features/series/widgets/progress_update_dialog.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The badges laid over a grid cover: how far the reader has got, and how much
-/// is left.
-///
-/// Renders nothing unless the series is in the library and at least one of the
-/// two settings is on. The progress badge is tappable and opens the update
-/// sheet; the remaining count is informational.
 class EntryProgressOverlay extends StatelessWidget {
   final Series series;
   final LibraryEntry? entry;
 
-  /// Whether the cell is too narrow for the two badges side by side (under
-  /// [combineBelowWidth]), so they merge into one pill.
   final bool combineBadges;
 
-  /// Progress to display instead of the entry's own — used while an optimistic
-  /// update is in flight.
+  /// Shown while an optimistic update is in flight.
   final int? progressOverride;
 
   final SettingsManager settings;
   final LocalizationService l10n;
 
-  /// Below this cell width the two badges would collide.
   static const double combineBelowWidth = 145;
 
   const EntryProgressOverlay({
@@ -48,8 +38,6 @@ class EntryProgressOverlay extends StatelessWidget {
     required this.l10n,
   });
 
-  /// Solid dark pill with a subtle drop shadow. Const, so it is not
-  /// reallocated on every rebuild of every cell in a grid.
   static const BoxDecoration _badge = BoxDecoration(
     color: FixedColors.imageBadge,
     borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -91,8 +79,6 @@ class EntryProgressOverlay extends StatelessWidget {
     final remaining = total > 0 ? total - _progress : 0;
 
     final showProgress = settings.showLibraryProgress;
-    // Nothing useful to say about what is left when the total is unknown, or
-    // when there is none left.
     final showRemaining =
         settings.showRemainingProgress && total > 0 && remaining > 0;
 
@@ -110,7 +96,6 @@ class EntryProgressOverlay extends StatelessWidget {
     );
   }
 
-  /// One pill spanning the cell, remaining and progress divided by a hairline.
   Widget _combined(
     BuildContext context, {
     required int remaining,
@@ -125,7 +110,6 @@ class EntryProgressOverlay extends StatelessWidget {
         child: Container(
           padding: _badgePadding,
           decoration: _badge,
-          // Scales down rather than overflowing on a very narrow cell.
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: Row(
@@ -150,7 +134,6 @@ class EntryProgressOverlay extends StatelessWidget {
     );
   }
 
-  /// Remaining on the left, progress on the right.
   Widget _separate(
     BuildContext context, {
     required bool showProgress,
@@ -227,7 +210,6 @@ class EntryProgressOverlay extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetContext) => Padding(
-        // Lifts the sheet above the keyboard when the field is focused.
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),

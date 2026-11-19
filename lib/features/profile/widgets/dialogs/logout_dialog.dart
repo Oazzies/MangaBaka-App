@@ -53,8 +53,6 @@ class LogoutDialog {
               ),
             ),
             const SizedBox(height: 16),
-            // A solid raised block with a solid icon tile, in the app's own
-            // surfaces rather than a tinted, outlined box.
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

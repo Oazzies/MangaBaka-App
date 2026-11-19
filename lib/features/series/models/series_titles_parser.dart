@@ -13,8 +13,7 @@ class _Entry {
 
   String get base => SeriesTitles._baseLanguage(language);
 
-  /// Latin-script entry: `ja-Latn`, and the older spellings `ja-ro`,
-  /// `ja-hepburn`, `ja-romaji` or an explicit `romanized` trait.
+  /// `-latn` is current; `-ro`, `hepburn` and `romaji` are older API spellings.
   bool get isLatin =>
       language.endsWith('-latn') ||
       language.endsWith('-ro') ||

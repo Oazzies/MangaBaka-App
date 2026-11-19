@@ -5,7 +5,6 @@ class DesktopSegmented<T> extends StatelessWidget {
   final T value;
   final ValueChanged<T> onChanged;
 
-  /// Tooltip per segment, for icon-only segments.
   final String Function(T value)? tooltipFor;
 
   const DesktopSegmented({
@@ -39,10 +38,8 @@ class DesktopSegmented<T> extends StatelessWidget {
       ),
     );
 
-    // The segments' width depends on their labels — translated, sometimes
-    // data (news sources) — so no breakpoint fits every language. When they
-    // don't fit, the same choice becomes a dropdown instead of overflowing.
-    // Icon-only bars are narrow and have no labels to list; they stay.
+    // Labels are translated or data, so no breakpoint fits: an overflowing bar becomes a dropdown.
+    // Icon-only bars are narrow and have no labels to list, so they stay.
     if (segments.any((s) => s.$2 == null)) return bar;
     final selected = segments.where((s) => s.$1 == value).firstOrNull;
     return FitOrElse(
@@ -102,7 +99,6 @@ class _Segment extends StatelessWidget {
   }
 }
 
-/// A dropdown shown as an expanding pill that seamlessly opens into the menu.
 class DesktopMenuButton<T> extends StatelessWidget {
   final String? label;
   final String valueLabel;
@@ -137,7 +133,6 @@ class DesktopMenuButton<T> extends StatelessWidget {
   }
 }
 
-/// Centered icon + message, for empty and error states.
 class DesktopEmptyState extends StatelessWidget {
   final IconData icon;
   final String message;
@@ -183,8 +178,6 @@ class DesktopEmptyState extends StatelessWidget {
   }
 }
 
-/// The left-hand panel of a two-pane page: fixed width, its own scroll, and a
-/// hairline against the content.
 class DesktopSidePanel extends StatelessWidget {
   final Widget child;
   final double width;
@@ -208,8 +201,6 @@ class DesktopSidePanel extends StatelessWidget {
   }
 }
 
-/// One row of a desktop settings card: a muted glyph, a display-caps title with
-/// its explanation beneath, and the control on the right.
 class DesktopSettingRow extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -252,8 +243,6 @@ class DesktopSettingRow extends StatelessWidget {
           ),
         ],
       ),
-      // Beside the text while it keeps a readable width, beneath it when a
-      // wide control (a long translated dropdown value) wouldn't leave one.
       trailing: control,
     );
   }

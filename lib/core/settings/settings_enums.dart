@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 
-/// How a publisher page draws its catalog stats: a chart suited to each kind
-/// of data, or plain labelled rows.
 enum PublisherStatsStyle { charts, list }
 
 enum AppListStyle {
@@ -68,11 +66,8 @@ enum LibraryProgressType { chapters, volumes }
 
 enum LandscapeAppBarPosition { bottom, left, right }
 
-/// Which palette slot the app shows: follow the OS, or pin light or dark.
 enum AppThemeMode { system, light, dark }
 
-/// Behavior for chapter and volume progress when marking a series as completed.
 enum AutoCompleteProgressMode { prompt, always, never }
 
-/// Behavior when chapter or volume progress exceeds the series' known total.
 enum ProgressOverflowMode { never, prompt, always, promptCompletedOnly }

@@ -12,8 +12,6 @@ import 'package:mangabaka_app/features/publisher/services/publisher_search_servi
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Serves [pages] pages of [perPage] collections each and records which pages
-/// were asked for.
 class _FakeCollections extends Fake implements CollectionService {
   final int pages;
   final int perPage;
@@ -119,8 +117,6 @@ void main() {
 
     testWidgets('keeps loading while a short page leaves the window unfilled',
         (tester) async {
-      // One card per page never fills the window, so with nothing to scroll
-      // the list must fetch on its own until it does — or runs out.
       await pumpScreen(tester, pages: 4, perPage: 1);
       await tester.pumpAndSettle();
 
@@ -157,10 +153,8 @@ void main() {
         size: const Size(1300, 800),
       );
 
-      // No sideways page view on desktop.
       expect(find.byType(TabBarView), findsNothing);
       expect(find.text('Collection 1-0'), findsOneWidget);
-      // The Editions tab exists but is invisible and inert.
       final editions = find.text('STANDARD EDITION');
       expect(editions, findsOneWidget);
       final hiddenOpacity = tester
@@ -168,10 +162,8 @@ void main() {
           .map((o) => o.opacity);
       expect(hiddenOpacity, contains(0));
 
-      // Click the Editions segment (last one in the header).
       await tester.tap(find.text('EDITIONS'));
       await tester.pump(const Duration(milliseconds: 100));
-      // Mid-fade the tabs are not yet in their final state.
       final midOpacity = tester
           .widgetList<AnimatedOpacity>(find.byType(AnimatedOpacity))
           .map((o) => o.opacity)
@@ -179,7 +171,6 @@ void main() {
       expect(midOpacity, containsAll([0, 1]));
 
       await tester.pumpAndSettle();
-      // The Collections tab no longer takes clicks; Editions does.
       final blocked = tester
           .widgetList<IgnorePointer>(find.byType(IgnorePointer))
           .where((p) => p.ignoring)

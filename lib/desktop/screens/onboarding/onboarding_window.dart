@@ -2,17 +2,10 @@ import 'package:flutter/painting.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 
-/// Pins the desktop window to a fixed, centred size while onboarding is open.
-///
-/// Onboarding is a single composed screen, not a responsive page: stretched
-/// across a 4K monitor it stops reading as a step-by-step flow. So it gets a
-/// window of its own shape, and the user's previous window is put back when it
-/// closes.
 class OnboardingWindow {
   OnboardingWindow._();
 
-  /// Tall enough for the app's minimum window height, wide enough for the
-  /// brand panel plus a comfortable content column.
+  /// Tall enough for the app's minimum window height.
   static const Size size = Size(1040, 720);
 
   static Size? _previousSize;

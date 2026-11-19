@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// The GitHub mark (the Octicons `mark-github` glyph, MIT).
-///
-/// Material's icon set has no brand marks, and the bundled Phosphor font is
-/// subset to the navigation glyphs, so the mark is drawn from its SVG path
-/// rather than pulling in an SVG package for one icon.
+/// Octicons `mark-github` (MIT), drawn from its path to avoid an SVG package.
 class GithubLogo extends StatelessWidget {
   final double size;
   final Color color;
@@ -22,7 +18,6 @@ class _GithubPainter extends CustomPainter {
 
   _GithubPainter(this.color);
 
-  /// The 16x16 path data.
   static const String _data =
       'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 '
       '0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 '
@@ -52,12 +47,7 @@ class _GithubPainter extends CustomPainter {
   bool shouldRepaint(_GithubPainter old) => old.color != color;
 }
 
-/// Builds a [Path] from SVG path data.
-///
-/// Supports the commands icon paths use — M, L, H, V, C, S, A and Z, absolute
-/// and relative — not quadratic curves or anything else. An unsupported command
-/// ends the path at that point rather than throwing, which for a fixed icon
-/// would show up immediately as a truncated glyph.
+/// M L H V C S A Z only; anything else ends the path rather than throwing.
 Path parseSvgPath(String data) {
   final tokens = RegExp(
     r'[a-zA-Z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?',
@@ -65,7 +55,7 @@ Path parseSvgPath(String data) {
 
   final path = Path();
   var i = 0;
-  var x = 0.0, y = 0.0; // current point
+  var x = 0.0, y = 0.0;
   var startX = 0.0, startY = 0.0; // subpath start, for Z
   var lastCx = 0.0, lastCy = 0.0; // previous cubic control point, for S
   var lastWasCubic = false;

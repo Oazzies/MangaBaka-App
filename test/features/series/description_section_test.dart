@@ -33,7 +33,6 @@ void main() {
       expect(find.byType(DescriptionSection), findsOneWidget);
       expect(find.byType(RichText), findsWidgets);
 
-      // Verify that rich text contains Original Webtoon and KakaoPage
       final richTexts = tester.widgetList<RichText>(find.byType(RichText));
       final hasKakao = richTexts.any((rt) => rt.text.toPlainText().contains('KakaoPage'));
       final hasBold = richTexts.any((rt) => rt.text.toPlainText().contains('Original Webtoon:'));
@@ -47,19 +46,15 @@ void main() {
       await tester.pumpWidget(_buildHost(DescriptionSection(description: longDesc)));
       await tester.pumpAndSettle();
 
-      // Show more should be visible
       final showMoreFinder = find.text(LocalizationService().translate('show_more'));
       expect(showMoreFinder, findsOneWidget);
 
-      // Tap show more
       await tester.tap(showMoreFinder);
       await tester.pumpAndSettle();
 
-      // Now show less should be visible
       final showLessFinder = find.text(LocalizationService().translate('show_less'));
       expect(showLessFinder, findsOneWidget);
 
-      // Scroll to ensure visible if needed and tap show less
       await tester.ensureVisible(showLessFinder);
       await tester.tap(showLessFinder);
       await tester.pumpAndSettle();

@@ -1,6 +1,5 @@
 part of 'search_utils.dart';
 
-/// A pre-normalized search query for matching against candidate strings.
 class PreparedQuery {
   final String rawLower;
   final bool keepApostrophes;
@@ -28,10 +27,8 @@ class PreparedQuery {
   static List<String> _splitWords(String normalized) =>
       normalized.isEmpty ? const [] : normalized.split(' ');
 
-  /// True when the query has no non-whitespace characters.
   bool get isEmpty => rawLower.isEmpty;
 
-  /// True when [candidate] matches this query.
   bool matches(String candidate) {
     if (isEmpty) return true;
     if (candidate.isEmpty) return false;
@@ -51,7 +48,6 @@ class PreparedQuery {
         norm.replaceAll(' ', '').contains(compact);
   }
 
-  /// True when [candidate] starts with this query after normalization.
   bool startsWith(String candidate) {
     if (isEmpty) return true;
     if (candidate.isEmpty) return false;
@@ -67,7 +63,6 @@ class PreparedQuery {
         norm.replaceAll(' ', '').startsWith(compact);
   }
 
-  /// True when [candidate] is an exact match for this query after normalization.
   bool exactMatch(String candidate) {
     if (isEmpty) return candidate.trim().isEmpty;
     if (candidate.isEmpty) return false;

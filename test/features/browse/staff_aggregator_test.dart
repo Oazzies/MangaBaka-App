@@ -63,8 +63,7 @@ void main() {
     });
 
     test('filters collaborators the query did not ask for', () {
-      // Searching a series by staff returns everyone credited on it, most of
-      // whom the user did not search for.
+      // A staff search returns everyone credited, not just who was searched for.
       final staff = StaffAggregator.fromSeries(
         [
           _series(authors: ['Kentaro Miura'], artists: ['Studio Gaga']),

@@ -17,17 +17,10 @@ import 'support/resize_benchmark.dart';
 import 'support/test_app.dart';
 import 'support/viewports.dart';
 
-/// Holds the resize work per frame to a budget, so a change that brings back
-/// per-frame rebuilding fails here instead of quietly making resizing lag.
-///
-/// Rebuild counts, unlike frame times, are deterministic, so they can be
-/// asserted. Before lib/desktop/RESPONSIVE.md's rules every page rebuilt
-/// ~2,500 elements per resize frame; within its breakpoints a page now
-/// rebuilds under a hundred, most of them the shell's own bookkeeping.
+/// Asserts rebuild counts, not frame times: counts are deterministic.
 void main() {
   setUpAll(loadAppFonts);
 
-  /// Elements rebuilt on a typical frame of a drag-resize, per page.
   const budget = 150;
 
   const pages = {
@@ -69,7 +62,6 @@ void main() {
 
     testWidgets('rebuild nothing while the window is resized', (tester) async {
       await _pumpApp(tester, NavTabs.home);
-      // Show every page once, so each is built and laid out, then go home.
       for (final index in pages.values) {
         DesktopShell.current!.select(index);
         await settle(tester);
@@ -84,7 +76,6 @@ void main() {
         DesktopProfileScreen,
         DesktopSettingsScreen,
       };
-      // Their layout as it stood when last shown; a resize must not redo it.
       final sizes = {
         for (final type in hidden)
           type:
@@ -133,8 +124,7 @@ void main() {
 }
 
 Future<void> _pumpApp(WidgetTester tester, int destination) async {
-  // Layout errors are the sweeps' business; here they'd only obscure the
-  // count.
+  // Layout errors are the sweeps' business; here they'd only obscure the count.
   final log = IssueLog();
   final start = WindowSizes.drag().first;
   applyViewport(tester, start);

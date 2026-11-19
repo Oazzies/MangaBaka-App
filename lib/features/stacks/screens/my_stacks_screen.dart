@@ -15,8 +15,6 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 enum _MyTab { mine, saved, followed }
 
-/// The reader's stacks: the ones they made (drafts included), and the ones
-/// they saved or follow.
 class MyStacksScreen extends StatefulWidget {
   const MyStacksScreen({super.key});
 

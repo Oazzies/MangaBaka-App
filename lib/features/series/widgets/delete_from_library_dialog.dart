@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Asks before a series is removed from the library. Resolves true on confirm.
 Future<bool?> showDeleteFromLibraryDialog(BuildContext context) {
   final l10n = LocalizationService();
   return showDialog<bool>(

@@ -19,18 +19,13 @@ const String _isIncompleteKey =
     '${AppConstants.prefixStorageKey}library_is_incomplete';
 
 mixin LibraryCrudMixin on LibraryServiceBase {
-  // ── Shared HTTP helpers ───────────────────────────────────────────────────
-
-  /// Standard headers for every library API request.
   Map<String, String> _buildAuthHeaders(String token, {bool json = true}) => {
     'Authorization': 'Bearer $token',
     'User-Agent': LibraryConstants.userAgent,
     if (json) 'Content-Type': 'application/json',
   };
 
-  /// Sends an authenticated library request with the standard timeout. A 401
-  /// never comes back from here: [ProfileAuthService.sendAuthorized] refreshes
-  /// the session and retries, or throws [SessionExpiredException].
+  /// Never returns a 401: [ProfileAuthService.sendAuthorized] refreshes and retries, or throws.
   Future<http.Response> _sendAuthorized(
     String description,
     Future<http.Response> Function(Map<String, String> headers) request, {
@@ -45,8 +40,6 @@ mixin LibraryCrudMixin on LibraryServiceBase {
     );
   }
 
-  /// Re-throws [e] as an appropriate [AppException] subtype.
-  /// Call this from the catch block of every CRUD operation.
   Never _rethrowAsAppException(
     Object e,
     StackTrace st,
@@ -77,8 +70,6 @@ mixin LibraryCrudMixin on LibraryServiceBase {
       stackTrace: st,
     );
   }
-
-  // ── CRUD operations ───────────────────────────────────────────────────────
 
   Future<void> updateLibraryEntryState(
     String seriesId,
@@ -166,18 +157,10 @@ mixin LibraryCrudMixin on LibraryServiceBase {
   Future<void> updateLibraryEntryRating(String seriesId, int rating) =>
       _updateLibraryEntryRatingImpl(this, seriesId, rating);
 
-  /// Updates the user's personal note on a library entry.
-  ///
-  /// Blank or whitespace-only strings are normalized to `null` so the server
-  /// and local database clear the note consistently.
   Future<void> updateLibraryEntryNote(String seriesId, String? note) =>
       _updateLibraryEntryNoteImpl(this, seriesId, note);
 
-  /// Restores local progress to the values captured before an optimistic update.
-  ///
-  /// Skipped when the row no longer holds what this update wrote: a later
-  /// update has landed since (rapid +1 taps), and rolling back to this
-  /// update's snapshot would overwrite that newer, possibly successful value.
+  /// Skipped once a later update (rapid +1 taps) has overwritten this one's write.
   Future<void> _rollbackProgress(
     String seriesId,
     db.LibraryEntryWithSeries? snapshot, {
@@ -210,15 +193,8 @@ mixin LibraryCrudMixin on LibraryServiceBase {
   /// Most entries the batch endpoint takes in one request.
   static const int batchLimit = 100;
 
-  /// Adds many series to the library at once, each in [state].
-  ///
-  /// Uses `POST /my/library/batch`, which creates missing entries but *patches*
-  /// existing ones - so callers should leave out series already in the library,
-  /// or their state would be overwritten. Each request is atomic (one bad
-  /// series fails its whole chunk of up to [batchLimit]); chunks already
-  /// accepted stay accepted, and the local database is re-synced either way.
-  ///
-  /// Returns how many entries the server reports as newly created.
+  /// `POST /my/library/batch` *patches* existing entries: leave out series already in the library.
+  /// Each chunk of up to [batchLimit] is atomic; returns how many the server reports as created.
   Future<int> createLibraryEntriesBatch(
     List<String> seriesIds,
     String state,

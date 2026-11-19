@@ -26,7 +26,6 @@ class FilterChipsRow extends StatelessWidget {
         final metadata = getIt<MetadataService>();
         final chips = <Widget>[];
 
-        // Sort By
         if (filters.sortBy != null && filters.sortBy!.isNotEmpty) {
           final label = filterSortLabel(filters.sortBy!, l10n);
           chips.add(
@@ -36,7 +35,6 @@ class FilterChipsRow extends StatelessWidget {
           );
         }
 
-        // Types
         chips.addAll(
           _buildFilterPairChips(
             context,
@@ -56,7 +54,6 @@ class FilterChipsRow extends StatelessWidget {
           ),
         );
 
-        // Status
         chips.addAll(
           _buildFilterPairChips(
             context,
@@ -76,7 +73,6 @@ class FilterChipsRow extends StatelessWidget {
           ),
         );
 
-        // Genres
         chips.addAll(
           _buildFilterPairChips(
             context,
@@ -96,7 +92,6 @@ class FilterChipsRow extends StatelessWidget {
           ),
         );
 
-        // Tags
         chips.addAll(
           _buildFilterPairChips(
             context,
@@ -118,7 +113,6 @@ class FilterChipsRow extends StatelessWidget {
           ),
         );
 
-        // Staff / Authors / Artists
         if (filters.staff.isNotEmpty) {
           chips.addAll(
             filters.staff.map(
@@ -135,7 +129,6 @@ class FilterChipsRow extends StatelessWidget {
           );
         }
 
-        // Publisher
         if (filters.publisher.isNotEmpty) {
           chips.addAll(
             filters.publisher.map(
@@ -152,7 +145,6 @@ class FilterChipsRow extends StatelessWidget {
           );
         }
 
-        // Rating
         if (filters.ratingLower > 0 || filters.ratingUpper < 100) {
           chips.add(
             _buildChip(
@@ -167,7 +159,6 @@ class FilterChipsRow extends StatelessWidget {
           );
         }
 
-        // Licensed Status
         if (filters.isLicensed != null) {
           chips.add(
             _buildChip(
@@ -180,7 +171,6 @@ class FilterChipsRow extends StatelessWidget {
           );
         }
 
-        // Anime adaptation
         if (filters.hasAnime != null) {
           chips.add(
             _buildChip(
@@ -193,7 +183,6 @@ class FilterChipsRow extends StatelessWidget {
           );
         }
 
-        // Year
         if (filters.publishedYearLower != null ||
             filters.publishedYearUpper != null) {
           final yearText =

@@ -15,17 +15,10 @@ import 'package:mangabaka_app/features/home/widgets/discovery_queue_states.dart'
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 
-/// Interactive Discovery Queue screen.
-///
-/// Steps through personalised series recommendations one-by-one, showing the
-/// full series detail page for each and a pinned control bar with quick add,
-/// skip and "not interested".
 class DiscoveryQueueScreen extends StatefulWidget {
   final DiscoveryQueueController? controller;
 
-  /// Overrides the embedded series preview. Defaults to the live series detail
-  /// page; tests inject a light placeholder so the queue can be exercised
-  /// without standing up the whole detail screen.
+  /// Tests inject a light placeholder instead of standing up the whole detail screen.
   final Widget Function(BuildContext context, Series series)? previewBuilder;
 
   const DiscoveryQueueScreen({super.key, this.controller, this.previewBuilder});
@@ -38,9 +31,6 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
   late final DiscoveryQueueController _controller;
   bool _ownsController = false;
 
-  /// Library state the add button currently targets. Changed only via the
-  /// dropdown attached to the button — never applied until the button is
-  /// pressed.
   late String _selectedState;
 
   static const List<String> _libraryStates = [
@@ -52,8 +42,6 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
     'dropped',
   ];
 
-  /// Above this width the controls are placed in the detail page's wide-layout
-  /// right rail (scrolling with the page) instead of the floating top card.
   static const double _sidebarBreakpoint = 1200;
 
   @override
@@ -218,9 +206,6 @@ class _DiscoveryQueueScreenState extends State<DiscoveryQueueScreen> {
                   : null,
             );
 
-        // With the rail, the controls live inside the detail page's scrolling
-        // wide layout; otherwise they float over the preview — at the bottom on
-        // phones, at the top on narrow desktop windows.
         final atBottom = !isDesktop;
         final content = showRail
             ? preview

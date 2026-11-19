@@ -15,7 +15,6 @@ import 'package:mangabaka_app/features/publisher/services/publisher_search_servi
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Browse collections and editions.
 class CollectionsBrowseScreen extends StatefulWidget {
   final Publisher? initialPublisher;
 

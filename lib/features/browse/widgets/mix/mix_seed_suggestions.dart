@@ -8,11 +8,6 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// The API's suggested additional seeds, shown once the user has picked two.
-///
-/// Suggestions are best-effort — [MixService.fetchSeedSuggestions] degrades to
-/// an empty list on failure — so this renders nothing rather than an error
-/// when there is nothing to show.
 class MixSeedSuggestions extends StatelessWidget {
   final MixController controller;
   final LocalizationService l10n;

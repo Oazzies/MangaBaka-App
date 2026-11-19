@@ -69,7 +69,6 @@ class _SeriesPreviewCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Blown-up Cover with realistic drop shadow
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
@@ -117,7 +116,6 @@ class _SeriesPreviewCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Info Card beneath the cover - solid background (no semi-transparency)
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(

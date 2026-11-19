@@ -1,26 +1,15 @@
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// The result filtering the search endpoint cannot do for us.
-///
-/// Two things have to be re-checked on the client: content ratings, because a
-/// stale or partial `content_rating` filter server-side would otherwise leak a
-/// rating the user has hidden, and score bounds, because the app displays a
-/// *combined* average that the backend does not sort or filter on.
-///
-/// Extracted from `SeriesSearchService` so the rules are testable on their own
-/// and cannot drift from the ones the browse screen applies.
+/// A stale server `content_rating` filter can leak hidden ratings, and the backend
+/// does not filter on the combined score the app displays, so both are re-checked here.
 class SeriesSearchFilter {
-  /// Ratings the user allows. Empty means "no preference recorded" — which
-  /// permits everything rather than nothing.
   final List<String> contentPreferences;
 
-  /// Inclusive score bounds on the app's 0–100 scale, or null for unbounded.
+  /// Inclusive, on the app's 0–100 scale.
   final double? ratingLower;
   final double? ratingUpper;
 
-  /// The active sort. When sorting by score, unrated series are dropped: a
-  /// rating of 0 means "no rating", and letting those sit at one end of the
-  /// list reads as a bug.
+  /// Sorting by score drops unrated (0) series, which otherwise pile up at one end and read as a bug.
   final String? sortBy;
 
   const SeriesSearchFilter({
@@ -52,11 +41,7 @@ class SeriesSearchFilter {
     return true;
   }
 
-  /// The series' score on a 0–100 scale.
-  ///
-  /// The API has returned both scales over time; a value at or below 10 is
-  /// read as the 0–10 form and scaled up. An unparseable rating counts as
-  /// unrated (0) rather than failing the whole result set.
+  /// The API has returned both 0–10 and 0–100 scores over time; anything at or below 10 is scaled up.
   static double normalizedRating(Series series) {
     final raw = double.tryParse(series.rating) ?? 0.0;
     return raw <= 10.0 ? raw * 10 : raw;

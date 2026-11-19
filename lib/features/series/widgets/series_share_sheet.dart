@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 
-/// Bottom sheet offering native share and copy-link actions for a series URL.
 void showSeriesShareSheet({
   required BuildContext context,
   required String link,

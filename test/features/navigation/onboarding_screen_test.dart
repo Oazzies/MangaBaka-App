@@ -47,17 +47,14 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    // Check for "app_name" which is the first thing on WelcomePage
     expect(find.text('APP_NAME'), findsOneWidget);
 
-    // Check for Next button (translated key)
     final nextButton = find.text('ONBOARDING_NEXT');
     expect(nextButton, findsOneWidget);
 
     await tester.tap(nextButton);
     await tester.pumpAndSettle();
 
-    // Should be on LanguagePage now (translated key 'onboarding_language_title')
     expect(find.text('ONBOARDING_LANGUAGE_TITLE'), findsOneWidget);
   });
 
@@ -68,7 +65,6 @@ void main() {
     final skipButton = find.text('onboarding_skip');
     expect(skipButton, findsOneWidget);
 
-    // Tapping skip should call _finishOnboarding
     await tester.tap(skipButton);
     await tester.pump();
     
@@ -99,10 +95,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
 
-    // Initially on Welcome page
     expect(find.text('APP_NAME'), findsOneWidget);
 
-    // Tap on Language step in the sidebar
     final languageStep = find.text('ONBOARDING_LANGUAGE_TITLE');
     expect(languageStep, findsOneWidget);
     await tester.tap(languageStep);

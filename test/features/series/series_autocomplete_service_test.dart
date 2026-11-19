@@ -31,13 +31,7 @@ void main() {
     });
 
     test('cache hit returns cached results', () {
-      // NOTE: Testing the full executeSearch would require refactoring to inject a client factory.
-      // Given the complexity of the current implementation (creating a new client per request),
-      // I'll skip deep network testing for now and focus on the logic I can test.
+      // executeSearch builds its own client per request; untestable without a factory.
     });
-
-    // NOTE: Testing the full executeSearch would require refactoring to inject a client factory.
-    // Given the complexity of the current implementation (creating a new client per request),
-    // I'll skip deep network testing for now and focus on the logic I can test.
   });
 }

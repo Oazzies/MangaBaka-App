@@ -1,12 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Stroke icons from Lucide (ISC, https://lucide.dev) — the set mangabaka.org
-/// uses for its feature shortcuts — drawn straight from their SVG path data
-/// so they match the site exactly, without an SVG package.
-///
-/// Each icon is a list of path strings on Lucide's 24×24 grid, stroked 2 wide
-/// with round caps and joins and no fill.
+/// Lucide icons (ISC), as on mangabaka.org, drawn without an SVG package.
 @immutable
 class LucideGlyph {
   final List<String> paths;
@@ -28,7 +23,6 @@ class LucideGlyph {
   ]);
 
   static const dices = LucideGlyph([
-    // The front die (a rounded 12×12 square at 2,10).
     'M4 10h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z',
     'm17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6',
     'M6 18h.01',
@@ -38,8 +32,6 @@ class LucideGlyph {
   ]);
 }
 
-/// A [LucideGlyph] at [size], in [color] — both default to the surrounding
-/// [IconTheme], like a Material [Icon].
 class MbLucideIcon extends StatelessWidget {
   final LucideGlyph glyph;
   final double? size;
@@ -62,7 +54,6 @@ class MbLucideIcon extends StatelessWidget {
     );
   }
 
-  /// Parsed once per glyph; the same few icons are drawn over and over.
   static final Map<LucideGlyph, List<Path>> _cache = {};
 
   static List<Path> _parsed(LucideGlyph glyph) =>
@@ -101,12 +92,11 @@ final RegExp _token = RegExp(
   r'[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?',
 );
 
-/// Reads SVG path data: M L H V C S Q A Z, absolute and relative.
 Path _parse(String d) {
   final tokens = _token.allMatches(d).map((m) => m.group(0)!).toList();
   final path = Path();
   var i = 0;
-  var x = 0.0, y = 0.0; // current point
+  var x = 0.0, y = 0.0;
   var startX = 0.0, startY = 0.0; // subpath start, for Z
   var lastCtrlX = 0.0, lastCtrlY = 0.0; // last cubic control, for S
   var lastCmd = '';

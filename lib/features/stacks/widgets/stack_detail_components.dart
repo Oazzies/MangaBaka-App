@@ -5,7 +5,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 
-/// Asks before deleting a stack. Returns whether to go ahead.
 Future<bool> confirmStackDelete(BuildContext context, String title) async {
   final l10n = LocalizationService();
   final ok = await showDialog<bool>(
@@ -118,7 +117,6 @@ class StackSpoilerGate extends StatelessWidget {
   }
 }
 
-/// An entry whose series was merged away or removed: it keeps its rank.
 class StackPlaceholderTile extends StatelessWidget {
   final StackEntry entry;
   final bool compact;

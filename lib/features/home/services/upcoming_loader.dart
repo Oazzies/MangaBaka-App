@@ -5,26 +5,17 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 
-/// Upcoming releases plus what the phone UI needs to dress them: which of
-/// them are in the user's library, and a cover for works that have none of
-/// their own.
-///
-/// The releases arrive first; the library marks follow ([withLibrary]) and are
-/// not there until [libraryReady]. Callers showing a library-only view wait for
-/// that rather than presenting a half-known list as the answer.
+/// Library marks arrive later ([withLibrary]); a library-only view must wait for [libraryReady].
 class UpcomingData {
   final List<SeriesWork> works;
   final Set<String> librarySeriesIds;
   final Map<String, String> libraryCovers;
 
-  /// Whether [librarySeriesIds] has been worked out for every work in [works].
   final bool libraryReady;
 
-  /// The last page of releases loaded; the API pages from today onward, so
-  /// each further page reaches later into the future.
+  /// The API pages from today onward, so each further page reaches later into the future.
   final int page;
 
-  /// False once a page came back short: nothing further is scheduled.
   final bool hasMore;
 
   const UpcomingData({
@@ -45,8 +36,6 @@ class UpcomingData {
   /// The API's fixed page size; a shorter page is the last one.
   static const int pageSize = 25;
 
-  /// This data with the next page of releases appended. The new works' library
-  /// marks are not known yet: see [withLibrary].
   Future<UpcomingData> loadMore(HomeService home) async {
     final next = await home.fetchUpcomingWorks(page: page + 1);
     final known = {for (final w in works) w.id};
@@ -73,14 +62,12 @@ class UpcomingData {
     return work.seriesId == null ? null : libraryCovers['${work.seriesId}'];
   }
 
-  /// The first page of releases, without library marks yet.
   static Future<UpcomingData> load(HomeService home) async {
     final works = await home.fetchUpcomingWorks(page: 1);
     return UpcomingData(
       works: works,
       librarySeriesIds: const {},
       libraryCovers: const {},
-      // Signed out means no library to mark.
       libraryReady: !_signedIn,
       hasMore: works.length >= pageSize,
     );
@@ -88,8 +75,7 @@ class UpcomingData {
 
   static bool get _signedIn => getIt<ProfileAuthService>().isLoggedIn;
 
-  /// This data with the library marks filled in for every work. The database is
-  /// asked only about these works' series, never for the whole library.
+  /// Asks the database only about these works' series, never for the whole library.
   Future<UpcomingData> withLibrary() async {
     if (libraryReady) return this;
     final ids = {
@@ -116,7 +102,6 @@ class UpcomingData {
     );
   }
 
-  /// The calendar day of a work's release, or null when it has none.
   static DateTime? dayOf(SeriesWork work) {
     final raw = work.releaseDate;
     if (raw.length < 10) return null;

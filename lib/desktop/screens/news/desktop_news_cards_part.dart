@@ -15,8 +15,6 @@ class _NewsMasonrySliver extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: DesktopTokens.pagePadding,
       ),
-      // Rebuilt only when the column count changes; between
-      // those a resize just re-lays the cards out.
       sliver: DerivedSliverLayoutBuilder<int>(
         derive: (constraints) =>
             (constraints.crossAxisExtent / minColumnWidth).floor().clamp(1, 3),
@@ -151,15 +149,12 @@ class _NewsCard extends StatelessWidget {
                 DerivedLayoutBuilder<int>(
                   derive: (constraints) {
                     final total = news.series.length;
-                    // How many cover-sized slots actually fit on one row.
                     final perRow =
                         ((constraints.maxWidth + _coverSpacing) /
                                 (_coverWidth + _coverSpacing))
                             .floor()
                             .clamp(1, total);
-                    // If everything fits, no overflow tile is needed; otherwise
-                    // the last slot on the row becomes the "+x" tile instead of
-                    // wrapping it alone onto a second row.
+                    // Leaves the last slot for the "+x" tile rather than wrapping it onto a second row.
                     return total <= perRow ? total : perRow - 1;
                   },
                   builder: (context, showCount) {

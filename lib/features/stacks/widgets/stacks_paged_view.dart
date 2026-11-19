@@ -15,13 +15,9 @@ import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_paged_filter_bar.dart';
 
-/// A grid of the stacks from [source], loading the next page as the end
-/// comes near, with pull-to-refresh, filters for a series' stacks, and the
-/// empty, error and loading states.
 class StacksPagedView extends StatefulWidget {
   final StacksListSource source;
 
-  /// Slivers above the grid (a create button on "My stacks").
   final List<Widget> leading;
 
   const StacksPagedView({
@@ -71,7 +67,6 @@ class StacksPagedViewState extends State<StacksPagedView> {
     super.dispose();
   }
 
-  /// Starts again from the first page.
   void reload() {
     if (!mounted) return;
     setState(() {

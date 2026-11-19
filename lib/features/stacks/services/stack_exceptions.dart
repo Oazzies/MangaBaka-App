@@ -4,11 +4,7 @@ import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 
-/// A stack endpoint refused the request.
-///
-/// [code] carries the API's machine-readable reason (see [StackErrorCode])
-/// when it gave one; [serverMessage] is its human-readable `message`, which
-/// the API documents as safe to show.
+/// [serverMessage] is the API's `message`, which the API documents as safe to show.
 class StackApiException extends ApiException {
   final String? serverMessage;
 
@@ -22,7 +18,6 @@ class StackApiException extends ApiException {
     super.stackTrace,
   });
 
-  /// Reads the `code` and `message` out of an error body.
   factory StackApiException.fromResponse(
     int statusCode,
     String body, {
@@ -63,7 +58,6 @@ class StackApiException extends ApiException {
   bool get isMissingScope => statusCode == 403 && code == null;
 }
 
-/// The message to show the user for [error] from a stack operation.
 String stackErrorMessage(Object error, LocalizationService l10n) {
   if (error is StackApiException) {
     final code = error.code;

@@ -7,9 +7,6 @@ import 'package:mangabaka_app/core/network/backend_health_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A slim bar that appears at the top of the app while the MangaBaka backend is
-/// unreachable, so a screen full of "Failed to load" states reads as an outage
-/// rather than a broken app. Collapses to nothing when the backend is healthy.
 class BackendHealthBanner extends StatelessWidget {
   const BackendHealthBanner({super.key});
 

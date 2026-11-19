@@ -20,8 +20,6 @@ Route<dynamic>? _replicaRoute(Route<dynamic> route) {
   return null;
 }
 
-/// Feeds the shell's Back/Forward history: remembers what was popped so
-/// Forward can reopen it, and forgets that as soon as something new opens.
 class _HistoryObserver extends NavigatorObserver {
   final DesktopShellState _shell;
 

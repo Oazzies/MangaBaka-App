@@ -8,8 +8,6 @@ import 'package:mangabaka_app/features/series/widgets/note_editor_toolbar.dart';
 import 'package:mangabaka_app/features/series/widgets/note_markdown_helpers.dart';
 import 'package:mangabaka_app/features/series/widgets/series_note_markdown.dart';
 
-/// Adaptive bottom-sheet / dialog editor for a series' personal library note,
-/// with a Markdown formatting toolbar and live Markdown preview.
 class NoteEditorDialog extends StatefulWidget {
   final String? initialNote;
   final ValueChanged<String> onSave;

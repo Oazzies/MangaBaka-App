@@ -10,8 +10,6 @@ class StaffListItem extends StatelessWidget {
   final Staff staff;
   final VoidCallback? onTap;
 
-  /// Space around the card. The default suits a vertical list; a grid supplies
-  /// its own spacing and passes [EdgeInsets.zero].
   final EdgeInsetsGeometry? margin;
 
   const StaffListItem({
@@ -32,8 +30,7 @@ class StaffListItem extends StatelessWidget {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
-        // A person with no photo gets no stand-in glyph: a grey tile with a
-        // silhouette says nothing and costs the name its room.
+        // No placeholder glyph: a silhouette says nothing and costs the name its room.
         leading: staff.image == null
             ? null
             : ClipRRect(

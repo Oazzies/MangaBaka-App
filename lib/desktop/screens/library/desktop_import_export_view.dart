@@ -17,15 +17,11 @@ part 'desktop_import_section_part.dart';
 part 'desktop_export_review_part.dart';
 part 'desktop_import_export_cards_part.dart';
 
-/// The hub's two halves: bringing a list in, or writing the library out.
 enum ImportExportTab { import, export }
 
-/// One tracker or file the importer can read from, shown as its own card in
-/// the source picker rather than folded into a generic "open a file" button.
 class ImportSource {
   final IconData icon;
 
-  /// Bundled brand logo; shown instead of [icon] when set.
   final String? logoAsset;
   final String labelKey;
   final String hintKey;
@@ -40,7 +36,6 @@ class ImportSource {
   });
 }
 
-/// A source's brand logo, or its generic icon when it has none.
 class ImportSourceIcon extends StatelessWidget {
   final ImportSource source;
   final double size;
@@ -67,16 +62,7 @@ class ImportSourceIcon extends StatelessWidget {
   }
 }
 
-/// The import/export hub on desktop.
-///
-/// The phone's version is one narrow column: a tab toggle over a source grid
-/// or a paste box over a state dropdown over a button. On a wide window that
-/// is a lot of empty space and stock Material controls, so here the source
-/// sits beside its options, and everything is built from the desktop's own
-/// controls.
-///
-/// Stateless on purpose: the screen that owns the controller and the text also
-/// serves the phone, so it keeps the state and hands this view what to show.
+/// Stateless on purpose: the owning screen also serves the phone, so it keeps the state.
 class DesktopImportExportView extends StatelessWidget {
   final ImportExportTab tab;
   final ValueChanged<ImportExportTab> onTabChanged;
@@ -90,7 +76,6 @@ class DesktopImportExportView extends StatelessWidget {
   final bool useStates;
   final ValueChanged<bool> onUseStatesChanged;
 
-  /// The source the text was loaded from, shown beside the source grid.
   final String? sourceLabel;
 
   final VoidCallback onBack;

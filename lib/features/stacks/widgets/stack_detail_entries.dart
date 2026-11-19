@@ -23,8 +23,6 @@ import 'package:mangabaka_app/features/stacks/widgets/stack_note_mark.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_note_text.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Builds the ranked entry slivers (loading, error, spoiler gate, grid/list)
-/// for [StackDetailScreen].
 List<Widget> buildStackDetailEntrySlivers(
   BuildContext context, {
   required StackSummary summary,

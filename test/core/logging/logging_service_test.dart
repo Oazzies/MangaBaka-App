@@ -49,7 +49,6 @@ void main() {
       
       LoggingService.logger.info('Test log message');
       
-      // Wait for the async listener to process the log
       await Future.delayed(const Duration(milliseconds: 100));
       
       expect(LoggingService.logs.any((l) => l.contains('Test log message')), true);

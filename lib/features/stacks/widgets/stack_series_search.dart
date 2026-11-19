@@ -12,11 +12,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 
-/// Search MangaBaka for series to put in a stack.
-///
-/// [isAdded] says which results are already in; tapping one calls [onToggle]
-/// and the row's check follows. Used inline (the desktop editor's side
-/// panel) or in [showStackSeriesPicker].
 class StackSeriesSearch extends StatefulWidget {
   final bool Function(String seriesId) isAdded;
   final void Function(Series series) onToggle;

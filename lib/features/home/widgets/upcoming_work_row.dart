@@ -7,7 +7,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 
-/// Day section header for [UpcomingWorksScreen].
 class UpcomingDayHeader extends StatelessWidget {
   final DateTime? day;
   final bool first;
@@ -68,7 +67,6 @@ class UpcomingDayHeader extends StatelessWidget {
   }
 }
 
-/// Single release row in [UpcomingWorksScreen].
 class UpcomingWorkRow extends StatelessWidget {
   final SeriesWork work;
   final String? cover;

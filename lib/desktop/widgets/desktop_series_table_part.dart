@@ -1,6 +1,5 @@
 part of 'desktop_series_row.dart';
 
-/// A column of the desktop series table.
 enum DesktopSeriesColumn {
   type(96, 'type'),
   status(112, 'status'),
@@ -14,23 +13,16 @@ enum DesktopSeriesColumn {
   const DesktopSeriesColumn(this.width, this.labelKey);
 }
 
-/// Sizing shared by [DesktopSeriesRow] and [DesktopSeriesListHeader], so the
-/// header's labels sit exactly over the rows' cells.
+/// Shared by [DesktopSeriesRow] and [DesktopSeriesListHeader] so labels sit over their cells.
 abstract final class DesktopSeriesTable {
-  /// Horizontal inset of a row's content.
   static const double sidePadding = 12;
 
-  /// Gap between the cover and the title.
   static const double coverGap = 14;
 
-  /// Room at the right edge for the "12 / 200  +1" quick-progress control.
   static const double actionWidth = 148;
 
-  /// The narrowest a title may get before columns start being dropped.
   static const double minTitleWidth = 220;
 
-  /// A row's height for [style], grown with the OS text size so the title
-  /// and its subtitle still fit when text is scaled up.
   static double rowHeight(
     AppListStyle style, [
     TextScaler textScaler = TextScaler.noScaling,
@@ -50,14 +42,10 @@ abstract final class DesktopSeriesTable {
     _ => 28,
   };
 
-  /// Left edge of the title cell, from the row's own left edge.
   static double titleLeft(AppListStyle style) =>
       sidePadding + coverWidth(style) + coverGap;
 
-  /// The columns a table of [width] shows for [style], most important first.
-  ///
-  /// Denser styles carry fewer facts; and whatever the style, columns are
-  /// dropped from the right as the window narrows so the title keeps its room.
+  /// Most important first: columns drop from the right as the window narrows.
   static List<DesktopSeriesColumn> columns(
     AppListStyle style,
     double width, {
@@ -79,15 +67,13 @@ abstract final class DesktopSeriesTable {
     return shown;
   }
 
-  /// How many of [style]'s columns a table of [width] shows — the only thing
-  /// about the width a row or header needs to rebuild for.
+  /// The only thing about the width a row or header needs to rebuild for.
   static int columnCount(
     AppListStyle style,
     double width, {
     required bool reserveAction,
   }) => columns(style, width, reserveAction: reserveAction).length;
 
-  /// The first [count] of [style]'s columns.
   static List<DesktopSeriesColumn> firstColumns(
     AppListStyle style,
     int count,
@@ -111,10 +97,7 @@ abstract final class DesktopSeriesTable {
   }
 }
 
-/// The label row above a desktop series table.
-///
-/// Uses the same [DesktopSeriesTable] sizing as the rows, so each label sits
-/// over its column. Hosts place it in the same horizontal inset as the list.
+/// Hosts place it in the same horizontal inset as the list.
 class DesktopSeriesListHeader extends StatelessWidget {
   final AppListStyle style;
 

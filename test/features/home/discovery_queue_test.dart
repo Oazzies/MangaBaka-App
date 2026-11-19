@@ -153,7 +153,6 @@ void main() {
       expect(controller.remainingCount, 2);
       expect(controller.isCompleted, isFalse);
 
-      // Skip first
       controller.skip();
       expect(controller.currentIndex, 1);
       expect(controller.reviewedCount, 1);
@@ -161,7 +160,6 @@ void main() {
       expect(controller.remainingCount, 1);
       expect(controller.isCompleted, isFalse);
 
-      // Add second
       final added = await controller.addToLibrary('reading');
       expect(added, isTrue);
       expect(library.added, ['s2:reading']);
@@ -195,7 +193,6 @@ void main() {
       expect(find.text('DISCOVERY_QUEUE_SKIP'), findsOneWidget);
       expect(find.text('DISCOVERY_QUEUE_NOT_INTERESTED'), findsOneWidget);
 
-      // Tap skip
       await tester.tap(find.text('DISCOVERY_QUEUE_SKIP'));
       await tester.pump();
 
@@ -236,7 +233,6 @@ void main() {
       await tester.pumpWidget(buildScreen(controller));
       await tester.pump();
 
-      // Skip both items
       controller.skip();
       controller.skip();
       await tester.pump();

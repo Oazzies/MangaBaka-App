@@ -6,7 +6,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
 import 'package:mangabaka_app/features/stacks/utils/stack_format.dart';
 
-/// A single stack row inside [showAddToStackSheet].
 class AddToStackRow extends StatelessWidget {
   final MySeriesStack stack;
   final bool busy;

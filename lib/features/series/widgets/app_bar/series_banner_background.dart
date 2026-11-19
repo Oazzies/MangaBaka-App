@@ -6,9 +6,6 @@ import 'package:mangabaka_app/features/series/widgets/series_hero.dart';
 import 'package:mangabaka_app/features/series/widgets/series_hero_cover.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The full-bleed banner behind the series title: a heavily blurred cover,
-/// a gradient that dissolves into the page background, and the cover artwork
-/// and title block floating at its base.
 class SeriesBannerBackground extends StatelessWidget {
   final Series series;
   final String title;
@@ -20,16 +17,10 @@ class SeriesBannerBackground extends StatelessWidget {
   final double coverWidth;
   final String? heroTagPrefix;
 
-  /// Whether the route transition has settled.
-  ///
-  /// The blurred cover is held back until it has: an [ImageFiltered] blur over
-  /// a full-width image is the most expensive thing on this page, and running
-  /// it during the slide costs frames on exactly the devices that can least
-  /// afford them.
+  /// Holds back the [ImageFiltered] blur, the most expensive thing on this page, until the slide is over.
   final bool transitionComplete;
 
-  /// Content stops widening here, matching the page body beneath it, so the
-  /// cover stays aligned with the cards below on a desktop window.
+  /// Must match the page body's max content width.
   static const double _maxContentWidth = 1400;
 
   const SeriesBannerBackground({
@@ -70,8 +61,7 @@ class SeriesBannerBackground extends StatelessWidget {
         imageFilter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
         child: seriesBannerImage(
           series,
-          // Decoded well under full size: it is blurred past recognition
-          // anyway, and a full-resolution banner is real memory.
+          // Decoded small: it is blurred past recognition, and a full-resolution banner is real memory.
           memCacheWidth: isWide ? 1200 : 800,
         ),
       ),
@@ -117,8 +107,6 @@ class SeriesBannerBackground extends StatelessWidget {
   }
 }
 
-/// Dissolves the banner into the page background toward its base, so the
-/// content below reads as continuing from it rather than butting against it.
 class _BottomFade extends StatelessWidget {
   const _BottomFade();
 
@@ -136,8 +124,6 @@ class _BottomFade extends StatelessWidget {
             background.withValues(alpha: 0.92),
             background,
           ],
-          // Weighted late: the artwork stays legible through the top three
-          // quarters and only then gives way.
           stops: const [0.25, 0.55, 0.85, 1.0],
         ),
       ),

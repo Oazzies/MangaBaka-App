@@ -4,14 +4,7 @@ import 'dart:io';
 
 import 'fixtures.dart';
 
-/// A canned MangaBaka API for the responsive sweeps, installed through
-/// [HttpOverrides] so every `http.Client` the app creates — including the
-/// ones services construct for themselves — talks to it instead of the
-/// network.
-///
-/// [populated] serves worst-case fixture data from every endpoint the desktop
-/// pages read; when false, every endpoint answers with an empty list, which
-/// sweeps the empty states instead.
+/// Installed via [HttpOverrides], so even clients services build themselves hit it.
 class FakeBackend extends HttpOverrides {
   final bool populated;
 

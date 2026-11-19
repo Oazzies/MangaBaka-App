@@ -2,17 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 
-/// Whether panels should open as a centred dialog rather than rising from the
-/// bottom edge: a bottom sheet is a phone-in-the-hand gesture, and in
-/// landscape or on desktop it is a long way from the pointer and stretches
-/// across the whole window.
 bool prefersDialogSheet(BuildContext context) =>
     DesktopLayout.isActive(context) ||
     MediaQuery.orientationOf(context) == Orientation.landscape;
 
-/// [showModalBottomSheet] in portrait; a centred, width-limited dialog (fade
-/// and scale) in landscape and on desktop. Takes the sheet's arguments so a
-/// call site only changes its name.
 Future<T?> showAdaptiveSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -70,8 +63,6 @@ Future<T?> showAdaptiveSheet<T>({
   );
 }
 
-/// A bottom-sheet drag handle that hides itself when [showAdaptiveSheet]
-/// presents as a centred dialog (landscape or desktop).
 class AdaptiveSheetHandle extends StatelessWidget {
   final double width;
   final Color? color;

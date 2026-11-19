@@ -17,7 +17,6 @@ import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 
-/// Shared HTTP guard and authorized request helper for [StackService].
 class StackAuthedClient {
   static final _logger = LoggingService.logger;
 
@@ -127,7 +126,6 @@ class StackAuthedClient {
     return out;
   }
 
-  /// Runs a public read, turning a refused request into a [StackApiException].
   Future<T> guard<T>(Future<T> Function() run) async {
     try {
       return await run();
@@ -138,10 +136,7 @@ class StackAuthedClient {
     }
   }
 
-  /// Sends a request that needs the user's token and returns the body of an
-  /// accepted response. A 401 is recovered from by [ProfileAuthService]
-  /// (or ends in [SessionExpiredException]); any other refusal becomes a
-  /// [StackApiException].
+  /// A 401 is recovered by [ProfileAuthService] or ends in [SessionExpiredException].
   Future<String> send(
     String operation,
     Future<http.Response> Function(Map<String, String> headers) request, {

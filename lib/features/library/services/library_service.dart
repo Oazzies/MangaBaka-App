@@ -139,8 +139,6 @@ class LibraryService extends LibraryServiceBase
         }, test: (error) => true);
   }
 
-  /// How many times a rate-limited (429) page fetch is retried before giving
-  /// up. Without a cap, a persistently rate-limited sync would retry forever.
   static const int _maxRateLimitRetries = 3;
 
   Future<FetchPageResult> _fetchPage(
@@ -229,8 +227,7 @@ class LibraryService extends LibraryServiceBase
     } on AppException {
       rethrow;
     } on TimeoutException catch (e, st) {
-      // Mapped like every other library call, so callers that catch
-      // NetworkException (the initial sync, the retry banner) see it.
+      // Callers that catch NetworkException (initial sync, retry banner) must see timeouts too.
       _logger.severe('Timed out fetching library page $page', e, st);
       throw NetworkException(
         message: 'Request timed out.',
@@ -257,8 +254,7 @@ class LibraryService extends LibraryServiceBase
     } on FormatException catch (e, st) {
       throw _pageParseFailure(page, e, st);
     } on TypeError catch (e, st) {
-      // A field of an unexpected type in the payload, not a bug in this
-      // client: the server shape drifted.
+      // A TypeError here means the server's payload shape drifted, not a client bug.
       throw _pageParseFailure(page, e, st);
     }
   }
@@ -272,21 +268,15 @@ class LibraryService extends LibraryServiceBase
     );
   }
 
-  /// Largest page the feed allows; a full scan of 15,000 series is 15 calls.
+  /// Largest page the feed allows.
   static const int _changesLimit = 1000;
 
-  /// One page of `GET /v2/my/library/changes`.
   Future<LibraryChangesPage> _fetchChanges(
     String? cursor, {
     int retryCount = 0,
   }) => _fetchChangesImpl(this, cursor, retryCount: retryCount);
 
-  /// Catalog data for [ids] from `GET /v1/series/batch`, 50 per request.
-  ///
-  /// v1, not v2: only v1 carries the server's canonical `title` /
-  /// `native_title` / `romanized_title` (v2 has just the per-language list, so
-  /// the title would have to be guessed and then disagree with the detail
-  /// page), and the genres, tags, year and links the library filters on.
+  /// v1, not v2: only v1 has canonical titles plus the genres, tags, year and links filters use.
   Future<List<api_series.Series>> _fetchSeriesBatch(List<String> ids) =>
       _fetchSeriesBatchImpl(this, ids);
 

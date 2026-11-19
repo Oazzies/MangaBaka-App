@@ -7,14 +7,6 @@ import 'package:mangabaka_app/core/network/api_client.dart';
 import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/features/series/services/metadata_cache.dart';
 
-/// The genre and tag vocabularies, used to turn the raw keys on a series into
-/// display labels and to resolve a tag name back to the id the search endpoint
-/// expects.
-///
-/// Cache-first: the persisted copy is loaded synchronously into memory at
-/// startup so the first frame can label chips, and a refresh is fired in the
-/// background. A failed refresh is never fatal — [getGenreLabel] falls back to
-/// title-casing the key.
 class MetadataService {
   static final _logger = LoggingService.logger;
 
@@ -31,14 +23,9 @@ class MetadataService {
   Map<String, String> _genreMap = const {};
   Map<String, Map<String, dynamic>> _tagMap = const {};
 
-  /// Case-insensitive index over [_tagMap]. Tag lookups used to fall back to a
-  /// linear scan of every known tag (thousands of entries, lowercasing each
-  /// key), which a series detail page pays once per tag chip — enough to stall
-  /// the first frame by ~a second. Built once alongside [_tagMap] instead.
+  /// Replaces a per-chip linear scan over thousands of tags that stalled the first frame by ~1s.
   Map<String, Map<String, dynamic>> _tagLowerMap = const {};
 
-  /// Index from tag id to name, so [getTagName] is a map lookup rather than a
-  /// linear `firstWhere` with a parse-and-throw per element.
   Map<int, String> _tagNameById = const {};
 
   bool _isInitialized = false;
@@ -47,11 +34,7 @@ class MetadataService {
   List<Map<String, dynamic>> get tags => _tagsList;
   bool get isInitialized => _isInitialized;
 
-  /// Loads the cached vocabularies, then refreshes them in the background.
-  ///
-  /// Returns as soon as the cache is in memory: callers are gated on having
-  /// *some* labels, not the freshest ones, and blocking startup on two network
-  /// round-trips would delay the first frame for no user-visible gain.
+  /// Returns once the cache is loaded: awaiting the refresh would delay the first frame for no visible gain.
   Future<void> init() async {
     if (_isInitialized) return;
     _logger.info('Initializing MetadataService...');
@@ -63,8 +46,7 @@ class MetadataService {
     unawaitedRefresh();
   }
 
-  /// Fires the background refresh without blocking the caller. Failures are
-  /// contained inside [fetchGenres]/[fetchTags] and only logged.
+  /// Safe unawaited: [fetchGenres] and [fetchTags] catch and log their own failures.
   void unawaitedRefresh() {
     Future.wait([
       fetchGenres(),
@@ -102,17 +84,8 @@ class MetadataService {
     apply: _applyTags,
   );
 
-  /// Shared refresh path for both vocabularies.
-  ///
-  /// A refresh failure is swallowed by design: the cached vocabulary stays in
-  /// place and the UI keeps working. Surfacing it would produce an error for
-  /// something the user did not ask for and cannot act on.
-  ///
-  /// The write is skipped when the payload is byte-identical to what is
-  /// already held — these lists run to thousands of entries, and re-encoding
-  /// plus a `SharedPreferences` write on every launch is real I/O on the
-  /// devices that can least afford it. (The previous length-only comparison
-  /// missed renames and re-parented tags entirely.)
+  /// Failures are swallowed on purpose: the cached vocabulary stays and the user cannot act on them.
+  /// Compares full encodings (lengths missed renames) to skip a SharedPreferences write per launch.
   Future<void> _refresh({
     required String endpoint,
     required String operation,
@@ -167,8 +140,6 @@ class MetadataService {
   Map<String, dynamic>? _lookupTag(String tagName) =>
       _tagMap[tagName] ?? _tagLowerMap[tagName.toLowerCase()];
 
-  /// The display label for a genre key, falling back to title-casing the key
-  /// itself so an unknown or not-yet-loaded genre still reads correctly.
   String getGenreLabel(String value) {
     final label = _genreMap[value];
     if (label != null && label.isNotEmpty) return label;

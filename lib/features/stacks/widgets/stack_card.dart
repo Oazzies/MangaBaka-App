@@ -9,10 +9,6 @@ import 'package:mangabaka_app/features/stacks/screens/stack_detail_screen.dart';
 import 'package:mangabaka_app/features/stacks/utils/stack_format.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_cover_fan.dart';
 
-/// A stack in a grid or rail: its fanned covers, title, author and counts.
-///
-/// Fills its parent's width. [showVisibility] adds the owner's view of the
-/// stack (draft / unlisted) for the user's own stacks.
 class StackCard extends StatefulWidget {
   final StackSummary stack;
   final VoidCallback? onTap;
@@ -25,11 +21,9 @@ class StackCard extends StatefulWidget {
     this.showVisibility = false,
   });
 
-  /// Space under the fan taken by the text, at the current text scale.
   static double textHeight(BuildContext context) =>
       MediaQuery.textScalerOf(context).scale(1) * 64 + 10;
 
-  /// The card's full height at [width].
   static double heightFor(BuildContext context, double width) =>
       StackCoverFan.heightFor(width) + textHeight(context);
 
@@ -38,14 +32,11 @@ class StackCard extends StatefulWidget {
 }
 
 class _StackCardState extends State<StackCard> {
-  /// How far the covers grow while hovered.
   static const double _hoverScale = 1.03;
 
   bool _hovered = false;
 
-  // The grown covers are drawn in the app's overlay, following the card, so
-  // they sit over neighbours, headers and clipped rails instead of being cut
-  // off behind them. The in-place covers are hidden while the copy shows.
+  // Grown covers draw in the overlay so neighbours, headers and clipped rails cannot cut them off.
   final LayerLink _link = LayerLink();
   final OverlayPortalController _portal = OverlayPortalController();
   final GlobalKey _fanKey = GlobalKey();
@@ -179,8 +170,6 @@ class _StackCardState extends State<StackCard> {
   }
 }
 
-/// The little flags over the covers: staff pick, official, spoilers, and the
-/// owner's visibility.
 class _Badges extends StatelessWidget {
   final StackSummary stack;
   final bool showVisibility;
@@ -227,7 +216,6 @@ class _Badges extends StatelessWidget {
   }
 }
 
-/// One small pill-shaped flag: an icon and a label on a dark well.
 class StackBadge extends StatelessWidget {
   final IconData icon;
   final String label;

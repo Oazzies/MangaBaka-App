@@ -4,18 +4,9 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 
 export 'package:mangabaka_app/core/widgets/mb_toast.dart' show ToastKind;
 
-/// Centralized SnackBar and Toast presenter.
-///
-/// Every message is an [MbToastCard] — a raised card with a tinted glyph badge
-/// and, if given, an action pill. On desktop it floats in the bottom-right
-/// corner of the window; on a phone it floats full-width above the bottom edge.
 class AppSnackBar {
   AppSnackBar._();
 
-  /// Displays a message toast or snackbar.
-  ///
-  /// [kind] picks the colour and glyph; [isError] is shorthand for
-  /// [ToastKind.error]. [detail] adds a quieter second line under [message].
   static void show(
     BuildContext context,
     String message, {

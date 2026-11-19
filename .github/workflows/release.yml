@@ -58,8 +58,7 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         shell: bash
         run: |
-          # A build without the OAuth client ID compiles fine but cannot sign
-          # anyone in, so a missing secret fails the job instead.
+          # Without the OAuth client ID the build compiles but can't sign anyone in.
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
             exit 1
@@ -88,8 +87,7 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          # Never skipped: without the upload key a release build must fail,
-          # not fall back to another key (see android/app/build.gradle.kts).
+          # Never skipped: without the upload key a release must fail, not fall back.
           if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
             echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing; release APKs cannot be signed."
             exit 1
@@ -146,8 +144,7 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         shell: bash
         run: |
-          # A build without the OAuth client ID compiles fine but cannot sign
-          # anyone in, so a missing secret fails the job instead.
+          # Without the OAuth client ID the build compiles but can't sign anyone in.
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is missing; the build would ship without OAuth configuration."
             exit 1
@@ -171,12 +168,10 @@ jobs:
       - name: Build Inno Setup Installer
         shell: pwsh
         run: |
-          # Extract clean version from pubspec.yaml
           $versionLine = Get-Content pubspec.yaml | Select-String "^version:"
           $versionFull = ($versionLine -split " ")[1].Trim()
           $versionClean = ($versionFull -split "\+")[0]
 
-          # Compile Inno Setup Script
           iscc /DAppVersion=$versionClean windows_installer.iss
 
       - name: Upload Artifact
@@ -193,8 +188,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Match the iOS job on Xcode 26.x so both Apple builds use a current SDK
-      # (Apple mandates Xcode 26 for App Store submissions as of 2026).
+      # Apple requires Xcode 26 for App Store submissions (2026); matches the iOS job.
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -310,9 +304,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # device_info_plus 13.1.0 references the iOS 26.1 selector `isiOSAppOnVision`,
-      # which is only declared in the iOS 26.1+ SDK. The macos-latest default Xcode
-      # (16.x, iOS 18 SDK) can't compile it, so pin to the latest stable Xcode 26.x.
+      # device_info_plus 13.1.0 needs the iOS 26.1 SDK (isiOSAppOnVision); default Xcode 16 can't build it.
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -530,20 +522,16 @@ jobs:
           VERSION_FULL=$(echo "$VERSION_LINE" | cut -d' ' -f2)
           VERSION_CLEAN=$(echo "$VERSION_FULL" | cut -d'+' -f1)
 
-          # Create AppDir structure
           rm -rf AppDir && mkdir -p AppDir/usr/{bin,share/icons/hicolor/512x512/apps,share/applications,lib}
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
           
-          # Copy icon
           cp assets/mangabaka512.png AppDir/usr/share/icons/hicolor/512x512/apps/mangabaka.png
           cp assets/mangabaka512.png AppDir/mangabaka.png
           cp assets/mangabaka512.png AppDir/.DirIcon
 
-          # Copy desktop file
           cp linux/mangabaka.desktop AppDir/mangabaka.desktop
           cp linux/mangabaka.desktop AppDir/usr/share/applications/mangabaka.desktop
 
-          # Create AppRun script
           printf '%s\n' \
             '#!/bin/sh' \
             'SELF=$(readlink -f "$0")' \
@@ -554,7 +542,6 @@ jobs:
             > AppDir/AppRun
           chmod +x AppDir/AppRun
 
-          # Build AppImage
           ARCH=x86_64 /usr/local/bin/appimagetool --appimage-extract-and-run AppDir "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.AppImage"
 
       - name: Package Tarball

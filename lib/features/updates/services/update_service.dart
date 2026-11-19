@@ -18,12 +18,7 @@ import 'package:mangabaka_app/features/updates/services/update_installer.dart';
 
 export 'package:mangabaka_app/features/updates/services/update_exceptions.dart';
 
-/// Handles checking GitHub for a newer release, downloading the right asset
-/// for the current platform, and applying the update.
-///
-/// The update prompt is shown once per app launch and is *not* persisted as
-/// "dismissed": tapping "Later" simply closes it, so it reappears on the next
-/// launch as long as the installed version is still behind the latest release.
+/// "Later" is deliberately not persisted: the prompt returns each launch while behind.
 class UpdateService {
   UpdateService({http.Client? client}) : _client = client ?? http.Client();
 
@@ -32,21 +27,15 @@ class UpdateService {
 
   bool _promptedThisLaunch = false;
 
-  /// Set via `--dart-define=STORE_BUILD=true` for app store builds (Google Play,
-  /// Apple App Store, Mac App Store, Microsoft Store) where the store itself
-  /// manages updates and in-app self-update prompts/installers are disallowed.
+  /// Store builds leave updates to the store, whose policy forbids self-update.
   static const bool isStoreBuild = bool.fromEnvironment('STORE_BUILD');
 
-  /// Longest silence tolerated between chunks of an update download.
   static const _downloadStallTimeout = Duration(seconds: 30);
 
-  /// Whether this platform can download and apply an update in-app. Other
-  /// platforms fall back to opening the release page in a browser.
   bool get supportsInAppUpdate =>
       !isStoreBuild &&
       (Platform.isAndroid || Platform.isWindows || Platform.isLinux);
 
-  /// Returns the newest non-draft release (including pre-releases), or `null` on failure.
   Future<AppRelease?> fetchLatestRelease() async {
     final url = '${AppConstants.githubReleasesApi}?per_page=5';
     try {
@@ -81,8 +70,6 @@ class UpdateService {
     }
   }
 
-  /// Returns the latest release if it is newer than the installed version,
-  /// otherwise `null`.
   Future<AppRelease?> checkForUpdate() async {
     final latest = await fetchLatestRelease();
     if (latest == null) return null;
@@ -98,9 +85,6 @@ class UpdateService {
     return null;
   }
 
-  /// Returns `true` once per launch if an update check should be performed.
-  /// Marks the launch as prompted so callers don't re-trigger on rebuilds.
-  /// Store builds always return `false` because the store handles updates.
   bool shouldPrompt() {
     if (isStoreBuild) return false;
     if (_promptedThisLaunch) return false;
@@ -108,7 +92,6 @@ class UpdateService {
     return true;
   }
 
-  /// Picks the asset matching the current platform, or `null` if none fits.
   Future<ReleaseAsset?> selectAssetForPlatform(AppRelease release) async {
     if (release.assets.isEmpty) return null;
 
@@ -128,10 +111,8 @@ class UpdateService {
           if (match.isNotEmpty) return match.first;
         }
       } on Exception catch (e) {
-        // PlatformException from device_info; fall back to name matching.
         _logger.warning('Could not resolve device ABI: $e');
       }
-      // Prefer a universal apk (no abi token) if present, else the first.
       const abiTokens = ['arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'];
       final universal = apks.where(
         (a) => !abiTokens.any((t) => a.name.toLowerCase().contains(t)),
@@ -141,7 +122,6 @@ class UpdateService {
 
     if (Platform.isWindows) {
       String lower(ReleaseAsset a) => a.name.toLowerCase();
-      // The Inno Setup installer is the preferred Windows artifact.
       final setup = release.assets.where(
         (a) => lower(a).contains('windows') && lower(a).endsWith('.exe'),
       );
@@ -152,7 +132,6 @@ class UpdateService {
 
     if (Platform.isLinux) {
       String lower(ReleaseAsset a) => a.name.toLowerCase();
-      // AppImage is the primary standalone Linux executable
       final appImage = release.assets.where(
         (a) => lower(a).contains('linux') && lower(a).endsWith('.appimage'),
       );
@@ -172,12 +151,7 @@ class UpdateService {
     return null;
   }
 
-  /// Downloads [asset] to a temporary file, reporting progress in `[0, 1]`.
-  ///
-  /// Throws [UpdateIntegrityException] before downloading anything when the
-  /// release publishes no sha256 for the asset: the file is run as an
-  /// installer, and without a digest there is nothing to verify it against.
-  /// Callers should send the user to the release page instead.
+  /// No sha256, no download: the file runs as an installer and must be verifiable.
   Future<File> downloadAsset(
     ReleaseAsset asset, {
     void Function(double progress)? onProgress,
@@ -191,8 +165,7 @@ class UpdateService {
     }
 
     final dir = await getTemporaryDirectory();
-    // The name comes from the release feed: only its last path segment is
-    // used, so it can never place the file outside the temp directory.
+    // Feed-supplied name: basename keeps the file inside the temp directory.
     final safeName = p.basename(asset.name);
     if (safeName.isEmpty || safeName == '.' || safeName == '..') {
       throw NetworkException(
@@ -224,8 +197,7 @@ class UpdateService {
     final hasher = sha256.startChunkedConversion(digestSink);
     var complete = false;
     try {
-      // A connection that stalls mid-transfer would otherwise leave the
-      // progress dialog hanging forever.
+      // A stalled connection would otherwise hang the progress dialog forever.
       await for (final chunk in response.stream.timeout(
         _downloadStallTimeout,
       )) {
@@ -243,9 +215,7 @@ class UpdateService {
       if (!complete && await file.exists()) await file.delete();
     }
 
-    // A connection dropped cleanly mid-body ends the stream without an error.
-    // The caller runs this file as an installer, so a truncated one must
-    // never be returned.
+    // A cleanly dropped connection ends the stream without an error.
     if (total > 0 && received != total) {
       await file.delete();
       throw NetworkException(
@@ -253,9 +223,6 @@ class UpdateService {
       );
     }
 
-    // The file is executed as an installer. A digest that does not match
-    // means corruption or tampering between GitHub and here, so it is deleted
-    // rather than run.
     hasher.close();
     final actual = digestSink.value.toString();
     if (actual != expected) {
@@ -271,9 +238,6 @@ class UpdateService {
     return file;
   }
 
-  /// Applies a downloaded update file. On Android this launches the system
-  /// package installer; on Windows it runs the installer and quits the app so
-  /// it can replace the running files.
   Future<void> installDownloaded(File file) =>
       UpdateInstaller.installDownloaded(file);
 
@@ -281,7 +245,6 @@ class UpdateService {
   void dispose() => _client.close();
 }
 
-/// Receives the single [Digest] a chunked hash conversion produces.
 class _DigestSink implements Sink<Digest> {
   Digest? _value;
 

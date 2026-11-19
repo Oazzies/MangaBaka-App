@@ -101,8 +101,7 @@ void main() {
     await openDialog(tester, _FakeUpdateService(asset: _asset()));
 
     await tester.tap(find.text('Update now'));
-    // Opening the release page goes through a real platform channel, whose
-    // (unhandled) reply only arrives outside the fake-async zone.
+    // The release page's platform-channel reply only arrives outside fake async.
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 50)),
     );

@@ -1,7 +1,5 @@
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 
-/// The series types and publication statuses the filters offer, in display
-/// order. Shared by the phone filter sheet and the desktop filter panel.
 const List<String> filterSeriesTypes = [
   'manga',
   'manhwa',
@@ -18,11 +16,7 @@ const List<String> filterPublicationStatuses = [
   'cancelled',
 ];
 
-/// Sort keys and their labels, in menu order.
-///
-/// [library] swaps the network-only popularity sorts for the library-only
-/// unread-count ones: the library is sorted locally, where popularity is not
-/// known but progress is.
+/// [library] swaps popularity sorts for unread-count ones: the local library lacks popularity.
 Map<String, String> searchSortOptions(
   LocalizationService l10n, {
   bool library = false,

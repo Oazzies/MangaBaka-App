@@ -5,7 +5,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/markdown_normalizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Utility for cleaning, normalizing, and rendering Markdown descriptions.
 class MarkdownUtils {
   static final _logger = LoggingService.logger;
 
@@ -41,8 +40,6 @@ class MarkdownUtils {
     }
   }
 
-  /// Builds [InlineSpan]s from a Markdown string.
-  ///
   /// Pass [registerRecognizer] to track gesture recognizers for disposal.
   static List<InlineSpan> buildTextSpans({
     required String text,

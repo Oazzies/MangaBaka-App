@@ -42,9 +42,7 @@ Future<void> _runRefreshImpl(
     response = await (self._refresher ?? self._platformRefresh)(refreshToken);
   } catch (e, st) {
     self._logger.severe('Token refresh failed', e, st);
-    // An invalid_grant (HTTP 400/401) means the refresh token is dead and no
-    // amount of retrying will help — clear the session and force re-login.
-    // Anything else (network, 5xx) stays retryable.
+    // invalid_grant (HTTP 400/401) means the refresh token is dead; anything else stays retryable.
     if (_isInvalidGrantError(e)) {
       await self._clearSession();
       throw SessionExpiredException(originalError: e, stackTrace: st);
@@ -192,14 +190,12 @@ Future<String> _getValidAccessTokenImpl(ProfileAuthService self) async {
 
 Future<void> _logoutImpl(ProfileAuthService self) async {
   try {
-    // A refresh still in flight would write fresh tokens back after the
-    // delete below and silently resurrect the session.
+    // An in-flight refresh would write tokens back after the delete and resurrect the session.
     final inFlight = self._refreshInFlight;
     if (inFlight != null) {
       try {
         await inFlight;
       } catch (e) {
-        // Its failure is irrelevant: the session is being dropped anyway.
         self._logger.fine('Ignoring in-flight refresh error during logout: $e');
       }
     }

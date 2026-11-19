@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// What a toast is telling the user; picks its glyph and, for errors, its fill.
 enum ToastKind { success, error, warning, info }
 
 extension ToastKindStyle on ToastKind {
-  /// The colour of the glyph disc.
   Color tone(MbPalette c) => switch (this) {
     ToastKind.success => c.success,
     ToastKind.error => c.error,
@@ -22,23 +20,16 @@ extension ToastKindStyle on ToastKind {
   };
 }
 
-/// The solid colours a toast is drawn in. Nothing here is translucent: the
-/// card is filled with the theme's accent, so it belongs to whichever theme is
-/// active and stands clear of what it floats over. Errors take the error
-/// colour instead.
+/// Never translucent, so the toast stands clear of what it floats over.
 class ToastColors {
   final Color fill;
   final Color ink;
 
-  /// A quieter ink for the detail line, blended into the fill rather than
-  /// made see-through.
   final Color inkMuted;
 
-  /// The glyph disc, and the ink drawn on it.
   final Color disc;
   final Color onDisc;
 
-  /// The action pill and its label.
   final Color action;
   final Color onAction;
 
@@ -60,17 +51,12 @@ class ToastColors {
         fill: fill,
         ink: ink,
         inkMuted: Color.lerp(fill, ink, 0.82)!,
-        // Inverted on the red: a light disc carrying a red glyph.
         disc: ink,
         onDisc: fill,
         action: ink,
         onAction: fill,
       );
     }
-    // The theme's accent as the fill (orange in Tako, green in the default
-    // theme, ...) with its own on-accent ink. The glyph disc and the action
-    // pill are the inverse — ink-coloured, carrying fill-coloured marks — so
-    // they stand out from the fill.
     final fill = c.accent;
     final ink = c.onAccent;
     return ToastColors._(
@@ -85,23 +71,16 @@ class ToastColors {
   }
 }
 
-/// The app's one floating-notification surface: a solid pill with a glyph disc,
-/// a title (and optional detail line), an optional action, and an optional
-/// strip beneath (a progress bar). Snackbars and the library sync card are both
-/// built from it so every transient message looks like the same component.
 class MbToastCard extends StatelessWidget {
   final ToastKind kind;
 
-  /// Replaces the default glyph disc — e.g. with a spinner while syncing.
   final Widget? leading;
   final IconData? icon;
   final String title;
   final String? detail;
 
-  /// Trailing controls: an action pill, a close button.
   final List<Widget> trailing;
 
-  /// Full-width content under the text row, such as a progress bar.
   final Widget? footer;
 
   final VoidCallback? onTap;
@@ -157,8 +136,6 @@ class MbToastCard extends StatelessWidget {
                     onDisc: t.onDisc,
                   ),
               const SizedBox(width: 12),
-              // Expanded when there is something trailing, so it sits at the
-              // card's right edge rather than hugging the text.
               _fit(
                 expand: trailing.isNotEmpty,
                 child: Column(
@@ -217,8 +194,6 @@ class MbToastCard extends StatelessWidget {
 Widget _fit({required bool expand, required Widget child}) =>
     expand ? Expanded(child: child) : Flexible(child: child);
 
-/// The round glyph disc at a toast's leading edge — a solid colour with the
-/// glyph in legible ink on it.
 class ToastBadge extends StatelessWidget {
   final IconData icon;
   final Color disc;
@@ -244,8 +219,6 @@ class ToastBadge extends StatelessWidget {
   }
 }
 
-/// A compact solid pill for a toast's action ("Undo", "Settings", "Stop").
-/// Pass the toast's [kind] so the pill is drawn in colours that read on it.
 class ToastActionPill extends StatelessWidget {
   final String label;
   final ToastKind kind;

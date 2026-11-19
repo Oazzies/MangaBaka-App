@@ -35,7 +35,6 @@ void main() {
         ),
       );
 
-      // Check constraints on the parent ConstrainedBox
       final constrainedBox = tester.widget<ConstrainedBox>(
         find.ancestor(of: find.byType(Container), matching: find.byType(ConstrainedBox)).first
       );

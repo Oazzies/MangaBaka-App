@@ -34,8 +34,7 @@ class Series {
   final List<dynamic> links;
   final List<String> publishers;
 
-  /// Publishers with ids, from the API. Not persisted in the local database,
-  /// so empty for series rebuilt from the library cache.
+  /// Not persisted locally, so empty for series rebuilt from the library cache.
   final List<SeriesPublisher> publisherRefs;
   final List<String> genres;
   final List<String> tags;
@@ -77,7 +76,6 @@ class Series {
     this.source,
   });
 
-  /// This series with its title fields replaced by [t].
   Series copyWithTitles(SeriesTitles t) => Series(
     id: id,
     state: state,
@@ -112,7 +110,6 @@ class Series {
     source: source,
   );
 
-  /// All titles of this series as one value; see [SeriesTitles].
   SeriesTitles get titles => SeriesTitles.stored(
     main: title,
     native: nativeTitle,
@@ -120,8 +117,6 @@ class Series {
     secondary: secondaryTitles,
   );
 
-  /// The title to show for [lang]. Falls back across the other kinds rather
-  /// than ever returning an empty string while any title is known.
   String getDisplayTitle(TitleLanguage lang) {
     final t = SeriesTitles.choose(
       lang,
@@ -133,26 +128,21 @@ class Series {
     return secondaryTitles.isNotEmpty ? secondaryTitles.first : '';
   }
 
-  /// The title in the user's chosen title language.
   String get displayTitle =>
       getDisplayTitle(SettingsManager().defaultTitleLanguage);
 
   factory Series.fromSimilarJson(Map<String, dynamic> json) {
-    // The /similar endpoint uses genres_v2, tags_v2, links_v2, and a titles array
-    // instead of the flat title/native_title/romanized_title fields.
+    // /similar sends genres_v2, tags_v2, links_v2 and titles[] instead of the flat fields.
     final patched = Map<String, dynamic>.from(json);
 
-    // Genres
     if (patched['genres_v2'] != null) {
       patched['genres'] = _namesOf(patched['genres_v2']);
     }
 
-    // Tags
     if (patched['tags_v2'] != null) {
       patched['tags'] = _namesOf(patched['tags_v2']);
     }
 
-    // Links
     if (patched['links'] == null) {
       patched['links'] = patched['links_v2'] ?? [];
     }
@@ -160,7 +150,6 @@ class Series {
     return Series.fromJson(patched);
   }
 
-  /// Parses an item from `/my/series/recommendations` (`results` array).
   factory Series.fromRecommendationJson(Map<String, dynamic> json) {
     final patched = Map<String, dynamic>.from(json);
     if (patched['cover'] == null && patched['cover_image'] != null) {
@@ -189,8 +178,6 @@ class Series {
     return Series.fromSimilarJson(patched);
   }
 
-  /// The non-empty `name`s in a list of `{name: …}` objects (or bare strings),
-  /// skipping anything else instead of throwing on it.
   static List<String> _namesOf(Object? raw) {
     if (raw is! List) return <String>[];
     return [
@@ -201,11 +188,9 @@ class Series {
     ];
   }
 
-  //Thanks GPT4.1
   factory Series.fromJson(Map<String, dynamic> json) {
     final source = (json['source'] as Map?)?.cast<String, dynamic>();
 
-    // Calculate combined average if source data is available
     String rating = json['rating']?.toString() ?? '';
     if (source != null && source.isNotEmpty) {
       final normalizedRatings = source.values

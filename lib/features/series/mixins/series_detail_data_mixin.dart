@@ -26,9 +26,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   bool isDataLoaded = false;
   bool fetchError = false;
 
-  /// Hook the host screen can override to hold freshly-fetched data until it is
-  /// safe to rebuild — e.g. until the route push transition has finished — so a
-  /// mid-transition `setState` never drops frames. Defaults to no delay.
+  /// Override to hold fetched data until the push transition is over, so a setState never drops frames.
   @protected
   Future<void> whenReadyToApplyData() async {}
 
@@ -69,9 +67,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
           }
           break;
         case 'Similar':
-          // The two lists are independent requests: readers-also-like is a
-          // separate (beta) endpoint and must never hold up, or take down,
-          // the tag-based list that has always been here.
+          // Not awaited: the beta readers-also-like endpoint must never hold up or take down the similar list.
           if (readersAlsoLike == null) {
             seriesService
                 .fetchSeriesReadersAlsoLike(id)
@@ -98,10 +94,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> fetchFullData() async {
-    // Started together, awaited separately. Links are an enrichment: when
-    // they fail the screen keeps the series' own links instead of showing
-    // the whole page as failed (Future.wait used to reject both on either
-    // error). Only a failed series fetch is a page error.
+    // Not Future.wait: a links failure must not fail the page; only a failed series fetch does.
     final linksFuture = seriesService
         .fetchSeriesLinks(series.id)
         .then<List<SeriesLink>?>((links) => links)
@@ -112,8 +105,7 @@ mixin SeriesDetailDataMixin<T extends StatefulWidget> on State<T> {
     final seriesFuture = seriesService.fetchSeries(series.id);
 
     try {
-      // Series first: linksFuture cannot fail, but a series error arriving
-      // while nothing awaited it yet would be reported as unhandled.
+      // Series first: its error, arriving while nothing awaited it yet, would be reported as unhandled.
       final full = await seriesFuture;
       final links = await linksFuture;
 

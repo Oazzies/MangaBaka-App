@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/features/series/models/tag_group.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 
-/// Resolves tag paths from a fixed map, standing in for the network-backed
-/// vocabulary.
 class _FakeMetadata implements MetadataService {
   final Map<String, String> paths;
 

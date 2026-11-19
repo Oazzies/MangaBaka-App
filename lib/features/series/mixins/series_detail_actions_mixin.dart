@@ -22,8 +22,6 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
   bool get isAdding;
   set isAdding(bool value);
 
-  /// Whether deleting the entry should also pop the enclosing route. A detail
-  /// page embedded in another screen (the Discovery Queue) must not.
   bool get popAfterDelete => true;
 
   void showUpdateRatingDialog(LibraryEntry entry) {
@@ -99,9 +97,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
           isChapter: isChapter,
           seriesStatus: series.status,
           onUpdate: (value) async {
-            // Not fire-and-forget: a failed request (already rolled back
-            // locally) would otherwise surface only as an unhandled async
-            // error, with the user told nothing.
+            // Awaited, or a failure surfaces only as an unhandled async error and the user hears nothing.
             try {
               await libraryService.updateLibraryEntryProgress(
                 series.id,
@@ -147,8 +143,7 @@ mixin SeriesDetailActionsMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
-  /// Share / copy-link choices as a dropdown hanging off the button at
-  /// [anchor], used in landscape where a bottom sheet is a long way from it.
+  /// A dropdown for landscape, where a bottom sheet is a long way from the button.
   void _showShareMenu(String link, Rect anchor) {
     final l10n = LocalizationService();
     showDropdownMenuAt<String>(

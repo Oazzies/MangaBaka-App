@@ -36,8 +36,7 @@ class BrowseContent extends StatelessWidget {
   final VoidCallback onNavigateToMix;
   final VoidCallback onNavigateToDiscoveryQueue;
 
-  /// Side inset of the grid layouts: 12 to match the Library when the parent
-  /// adds none, 0 when the parent already insets its content.
+  /// 12 matches the Library when the parent adds no inset; pass 0 when it already does.
   final double horizontalInset;
 
   const BrowseContent({
@@ -86,7 +85,6 @@ class BrowseContent extends StatelessWidget {
     };
   }
 
-  /// Builds a single tappable series item with hover-prefetch for desktop.
   Widget _buildSeriesItem(Series series, {required AppListStyle activeStyle}) {
     final seriesService = getIt<SeriesService>();
     return MouseRegion(
@@ -172,8 +170,6 @@ class BrowseContent extends StatelessWidget {
           }
 
           if (columns == 0) {
-            // Rebuilt only when the column count changes; between those a
-            // resize just re-lays the grid out.
             return DerivedLayoutBuilder<int>(
               derive: (constraints) =>
                   ((constraints.maxWidth + 10) / 170).ceil().clamp(1, 12),
@@ -211,7 +207,6 @@ class BrowseContent extends StatelessWidget {
           },
         );
 
-        // On desktop the list styles are tables, so they get column labels.
         if (!DesktopLayout.isActive(context)) return list;
         return Column(
           children: [

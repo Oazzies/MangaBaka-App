@@ -207,7 +207,6 @@ void main() {
   testWidgets('SeriesDetailScreen allows adding to library when logged in (wide: sidebar button, no FAB)', (WidgetTester tester) async {
     mockAuthService.isLoggedIn = true;
     
-    // Set a large viewport for widget tests
     tester.view.physicalSize = const Size(1200, 1600);
     tester.view.devicePixelRatio = 1.0;
     await tester.pump();
@@ -220,7 +219,6 @@ void main() {
     expect(find.byKey(const Key('add_to_library_fab')), findsNothing);
     expect(fabFinder, findsOneWidget);
     
-    // Use standard tap instead of tapAt to be more robust
     await tester.tap(fabFinder);
     await tester.pump();
     await tester.pumpAndSettle();
@@ -231,7 +229,6 @@ void main() {
   testWidgets('SeriesDetailScreen allows adding to library when logged in (phone: FAB)', (WidgetTester tester) async {
     mockAuthService.isLoggedIn = true;
     
-    // Set a large viewport for widget tests
     tester.view.physicalSize = const Size(500, 1600);
     tester.view.devicePixelRatio = 1.0;
     await tester.pump();
@@ -244,7 +241,6 @@ void main() {
     expect(fabFinder, findsOneWidget);
     expect(tester.widget<FloatingActionButton>(fabFinder).onPressed, isNotNull);
     
-    // Use standard tap instead of tapAt to be more robust
     await tester.tap(fabFinder);
     await tester.pump();
     await tester.pumpAndSettle();

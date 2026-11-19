@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Small uppercase badge — the reference's amber "TOP" tag.
-///
-/// [MbBadge.accent] is the loud amber-on-ink variant; the default constructor
-/// is the quiet dark-well variant used for neutral metadata (type, status).
 class MbBadge extends StatelessWidget {
   final String label;
   final Color? background;

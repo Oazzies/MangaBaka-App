@@ -19,7 +19,6 @@ import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 
-/// Opens the series a release belongs to, if it has one.
 Future<void> openUpcomingSeries(BuildContext context, SeriesWork work) async {
   if (work.seriesId == null) return;
   try {
@@ -44,14 +43,9 @@ Future<void> openUpcomingSeries(BuildContext context, SeriesWork work) async {
   }
 }
 
-/// Releases coming up, grouped by day, with a switch to show only the ones
-/// from the user's library. The phone's counterpart of the desktop Home's
-/// upcoming sidebar.
 class UpcomingWorksScreen extends StatefulWidget {
-  /// Data the Home rail already loaded, shown immediately while a refresh runs.
   final UpcomingData? initial;
 
-  /// Replaces the network and database load.
   @visibleForTesting
   final Future<UpcomingData> Function()? loader;
 
@@ -95,7 +89,6 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
     _resolveLibrary();
   }
 
-  /// Fills in the library marks in the background; the list is usable meanwhile.
   Future<void> _resolveLibrary() async {
     final resolved = await _data.withLibrary();
     if (!mounted) return;
@@ -104,7 +97,6 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
 
   bool _loadingMore = false;
 
-  /// Reaches one page further into the future.
   Future<void> _loadMore() async {
     if (_loadingMore) return;
     setState(() => _loadingMore = true);
@@ -117,7 +109,6 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
     _resolveLibrary();
   }
 
-  /// Chronological days; works with no parseable date collect at the end.
   List<({DateTime? day, List<SeriesWork> works})> _groups(
     List<SeriesWork> works,
   ) {
@@ -141,8 +132,6 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    // Until the library marks are in, a library-only list would be wrong, so
-    // it waits behind the spinner instead.
     final waitingForLibrary = _onlyLibrary && !_data.libraryReady;
     final works = _onlyLibrary
         ? _data.works.where(_data.isInLibrary).toList()
@@ -254,7 +243,6 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
         AppConstants.horizontalPadding,
         0,
         AppConstants.horizontalPadding,
-        // Clear of Android's system navigation area.
         24 + MediaQuery.paddingOf(context).bottom,
       ),
       children: rows,

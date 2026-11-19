@@ -78,8 +78,7 @@ flutter:
     - family: BakbakOne
       fonts:
         - asset: assets/fonts/BakbakOne-Regular.ttf
-    # Phosphor Icons (MIT, phosphoricons.com) — subset to only the glyphs the
-    # bottom nav uses, so two 490KB families become ~3KB.
+    # Phosphor Icons (MIT), hand-subset to the nav glyphs: 2×490KB -> ~3KB.
     - family: PhosphorRegular
       fonts:
         - asset: assets/fonts/Phosphor-Regular.ttf

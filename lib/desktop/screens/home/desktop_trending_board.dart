@@ -20,8 +20,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 part 'desktop_trending_featured_part.dart';
 part 'desktop_trending_rows_part.dart';
 
-/// Trending as a chart: the #1 series featured large, the next places ranked
-/// beside it, with the type and time-window controls in the header.
 class DesktopTrendingBoard extends StatelessWidget {
   final List<Series> series;
   final bool loading;
@@ -31,39 +29,18 @@ class DesktopTrendingBoard extends StatelessWidget {
   final ValueChanged<int> onWindowChanged;
   final VoidCallback onViewAll;
 
-  /// Ranked places shown beside the featured one.
   static const int _rankedCount = 8;
 
-  /// Below this available width, the featured card and the ranked list
-  /// stack vertically instead of sitting side by side â€” side by side, a
-  /// narrow window left too little horizontal room for either half and
-  /// they'd overflow rather than shrink.
   static const double _stackBreakpoint = 820;
 
-  /// Below this, the stacked ranked list drops from two columns to one â€”
-  /// two columns of title/meta text need more room than a narrow window
-  /// has once the stacked layout is already using the full section width.
   static const double _twoColumnBreakpoint = 460;
 
-  /// Height of the featured card and, separately, of the side-by-side
-  /// layout as a whole.
   static const double _cardHeight = 420;
 
-  /// Height of the featured card when it's stacked full-width above the
-  /// ranked list instead of sitting in a narrower column beside it. Full
-  /// width needs less height for the same content, and reusing
-  /// [_cardHeight] there made the #1 card balloon to dominate the section
-  /// â€” most of its visible "surface" â€” instead of reading as one entry
-  /// above a list of others. Kept a real margin above the measured worst
-  /// case (badge + 3-line title + meta + rating + a genre row, all at the
-  /// narrowest text column this layout allows) rather than an exact fit â€”
-  /// the description's leading gap is still reserved even when there's no
-  /// room left to show any of it, and real font metrics vary slightly by
-  /// platform, so a tight budget kept overflowing by a pixel or so.
+  /// Reusing [_cardHeight] here made the #1 card dominate; kept above the measured worst case
+  /// because font metrics vary by platform and a tight budget overflowed by a pixel.
   static const double _stackedCardHeight = 340;
 
-  /// How much taller the fixed-height cards get with the OS text size: their
-  /// heights are budgets for text, so a larger text size needs a larger one.
   static double _textGrowth(BuildContext context) =>
       (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1.0, 3.0);
 
@@ -98,9 +75,6 @@ class DesktopTrendingBoard extends StatelessWidget {
           derive: (constraints) => constraints.maxWidth < _stackBreakpoint,
           builder: (context, stacked) => _header(context, l10n, stacked),
         ),
-        // Rebuilt only when the layout changes shape (stacked or side by
-        // side, one or two ranked columns); in between, a resize just
-        // re-lays out what's built.
         DerivedLayoutBuilder<(bool, int)>(
           derive: (constraints) => (
             constraints.maxWidth < _stackBreakpoint,
@@ -151,15 +125,8 @@ class DesktopTrendingBoard extends StatelessWidget {
     );
   }
 
-  /// The title plus the type/window/view-all controls. Below
-  /// [_stackBreakpoint] the controls move onto their own line, wrapping
-  /// onto a second row if even that isn't wide enough â€” [DesktopSectionTitle]
-  /// lays out its title and trailing as a single [Wrap], which sizes each
-  /// of the two as if it had unlimited width before deciding whether it
-  /// fits; a trailing this wide reports that unlimited-width size back and
-  /// overflows rather than actually shrinking. Giving it a line of its own
-  /// inside a plain [Column] instead means the [Wrap] around the controls
-  /// gets this section's real width to reflow within.
+  /// Stacked, the controls get their own line: [DesktopSectionTitle]'s single [Wrap] sizes a
+  /// trailing this wide as if unbounded and overflows instead of shrinking it.
   Widget _header(BuildContext context, LocalizationService l10n, bool stacked) {
     final windowAndViewAll = [
       DesktopSegmented<int>(
@@ -196,10 +163,7 @@ class DesktopTrendingBoard extends StatelessWidget {
       );
     }
 
-    // The 5-way type segmented control is, on its own, wider than a narrow
-    // section â€” a Wrap can move it onto its own line but can't shrink a
-    // single child to fit one, so unlike the other controls it needs an
-    // actually-compact stand-in here rather than just room to reflow into.
+    // A Wrap can't shrink one child, and the 5-way type control alone outgrows a narrow section.
     final typeLabel = l10n.translate(
       _types
           .firstWhere((t) => t.$1 == selectedType, orElse: () => _types.first)
@@ -244,10 +208,7 @@ class DesktopTrendingBoard extends StatelessWidget {
     );
   }
 
-  /// The ranked places as one or two columns, each sized to its own
-  /// natural content height rather than stretched to fill a fixed height â€”
-  /// the stacked layout doesn't hand this a bounded height to stretch
-  /// into, unlike [_rankedGridStretched]'s side-by-side layout.
+  /// Natural height: unlike [_rankedGridStretched], the stacked layout gives no bounded height.
   Widget _rankedList({required int columns}) {
     final ranked = series.skip(1).take(_rankedCount).toList();
     if (columns == 1) {

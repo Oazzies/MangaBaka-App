@@ -14,17 +14,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_list_customization_widgets_part.dart';
 
-/// The "List customization" settings page, laid out for a wide pane.
-///
-/// The phone's version is one long column — preview, a sideways-scrolling style
-/// picker, then every toggle. Stretched across a desktop pane that leaves a
-/// narrow strip of content in a sea of empty space, so here the pane is split:
-/// what the list looks like (preview and style) on the left, how it behaves
-/// (columns, separation, progress) on the right. Below [_splitWidth] the two
-/// stack.
-///
-/// Reads and writes through the same [ListCustomizationScope] the phone
-/// version uses, so which list a control edits is resolved in one place.
 class DesktopListCustomization extends StatefulWidget {
   final LocalizationService l10n;
 
@@ -36,7 +25,6 @@ class DesktopListCustomization extends StatefulWidget {
 }
 
 class _DesktopListCustomizationState extends State<DesktopListCustomization> {
-  /// Pane width at which the two columns sit side by side.
   static const double _splitWidth = 860;
 
   static const double _columnGap = 24;
@@ -81,16 +69,13 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
     );
   }
 
-  // ─── Left: what the list looks like ──────────────────────────────────────
-
   Widget _appearance(ListCustomizationScope scope) {
     final settings = scope.settings;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Hidden while both lists share their style and column count: every
-        // control would then be identical on either tab.
+        // Hidden while both lists share style and columns: the tabs would show identical controls.
         if (scope.hasAnySeparation)
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -131,8 +116,7 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 220),
                     child: ListStyleLivePreview(
-                      // Every input that changes the sample is in the key, so
-                      // the switcher cross-fades on any of them.
+                      // Every sample-changing input is in the key, so any of them cross-fades.
                       key: ValueKey(
                         '${scope.style.name}_${settings.showLibraryProgress}_'
                         '${settings.showRemainingProgress}_'
@@ -212,8 +196,6 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
       ],
     );
   }
-
-  // ─── Right: how it behaves ───────────────────────────────────────────────
 
   Widget _behaviour(ListCustomizationScope scope) {
     final settings = scope.settings;

@@ -7,11 +7,7 @@ import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The three switches that shape a mix.
-///
-/// Two of them need an account — they are rendered dimmed with a "Requires
-/// login" subtitle rather than hidden, so the feature is discoverable to a
-/// logged-out user instead of silently absent.
+/// Login-only switches are dimmed, not hidden, so logged-out users can discover them.
 class MixOptionsSection extends StatelessWidget {
   final MixController controller;
   final LocalizationService l10n;
@@ -84,21 +80,18 @@ class _OptionDivider extends StatelessWidget {
   }
 }
 
-/// A single labelled switch inside the options card.
 class MixToggleRow extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final bool value;
 
-  /// Null disables the switch — pass null together with [requiresLogin] so the
-  /// row explains why it is inert.
+  /// Pass null together with [requiresLogin] so the row explains why it is inert.
   final ValueChanged<bool>? onChanged;
 
   final bool isFirst;
   final bool isLast;
 
-  /// Dims the row and replaces [subtitle] with "Requires login".
   final bool requiresLogin;
 
   const MixToggleRow({

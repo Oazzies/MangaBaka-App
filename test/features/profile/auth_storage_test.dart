@@ -17,8 +17,7 @@ void main() {
     await resetServiceLocator();
     getIt.registerSingleton<LoggingService>(LoggingService());
 
-    // Force FlutterSecureStorage to fail with a PlatformException so the
-    // SharedPreferences fallback path is exercised.
+    // Fail FlutterSecureStorage so the SharedPreferences fallback is exercised.
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),

@@ -8,14 +8,8 @@ import 'package:mangabaka_app/core/utils/content_rating_filter.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// The series shelves on a publisher's page, mirroring the web page.
 enum PublisherShelf { newest, popular, highestRated, trending, hiddenGems }
 
-/// Reads the v2 `/publishers` endpoints.
-///
-/// Request plumbing — timeout, User-Agent, status handling, backend-health
-/// reporting and failure translation — lives in [ApiClient]; what remains here
-/// is the parameter shaping and JSON mapping specific to publishers.
 class PublisherSearchService {
   static final String _base = '${AppConstants.baseApiUrlV2}/publishers';
 
@@ -26,9 +20,7 @@ class PublisherSearchService {
   static const String sortSeriesCountAsc = 'series_count_asc';
   static const String sortNewest = 'created_at_desc';
 
-  /// Parameters the list endpoint understands. Anything else in a caller's
-  /// map is dropped rather than forwarded, so a stray UI-only key cannot turn
-  /// into a 400 (v2 rejects unknown parameters).
+  /// v2 answers unknown parameters with a 400, so anything else in a caller's map is dropped.
   static const Set<String> _allowedSearchKeys = {
     'q',
     'page',
@@ -78,7 +70,6 @@ class PublisherSearchService {
     );
   }
 
-  /// Full record: aliases, links, parent, imprints, description.
   Future<Publisher> getPublisher(String id) {
     return _api.getJson(
       ApiClient.uri('$_base/$id'),
@@ -115,8 +106,6 @@ class PublisherSearchService {
     );
   }
 
-  /// One shelf of a publisher's series. Content-rating preferences apply, as
-  /// on every other discovery surface.
   Future<List<Series>> getShelf(
     String publisherId,
     PublisherShelf shelf, {

@@ -11,9 +11,6 @@ import 'support/layout_sweep.dart';
 import 'support/test_app.dart';
 import 'support/viewports.dart';
 
-/// Every desktop destination, inside the real shell and window frame, resized
-/// through every window the app can be given — signed in and out, with data
-/// and empty, in English and German, with the sidebar pinned open and shut.
 void main() {
   setUpAll(loadAppFonts);
 
@@ -46,7 +43,6 @@ void main() {
     });
   }
 
-  // Every settings page, not just the one the screen opens on.
   group('settings pages', () {
     final env = const Environment(language: 'de');
     setUp(() => setUpEnvironment(env));
@@ -65,9 +61,6 @@ void main() {
     }
   });
 
-  // A continuous drag-resize, both ways, in small uneven steps: catches what
-  // only goes wrong mid-transition (realigning scroll positions, sizes that
-  // lag behind their slot, breakpoints flipping back and forth).
   group('drag-resize', () {
     setUp(() => setUpEnvironment(const Environment()));
     tearDown(tearDownEnvironment);
@@ -85,8 +78,6 @@ void main() {
     }
   });
 
-  // The library and browse lists render as tables on desktop, one layout per
-  // list style; each gets its own sweep with the library full.
   for (final style in AppListStyle.values) {
     group('list style ${style.name}', () {
       final env = Environment(listStyle: style, language: 'de');

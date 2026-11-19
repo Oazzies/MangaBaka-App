@@ -21,20 +21,16 @@ void main() {
         (tester) async {
       await tester.pumpWidget(_host(const DesktopTitleBar()));
 
-      // Verify height
       final titleBarFinder = find.byType(DesktopTitleBar);
       expect(titleBarFinder, findsOneWidget);
       final size = tester.getSize(titleBarFinder);
       expect(size.height, DesktopTitleBar.height);
 
-      // Verify DragToMoveArea exists for window dragging and double-click maximize
       expect(find.byType(TitleDragArea), findsOneWidget);
 
-      // Verify there is no redundant app name text on the title bar
       expect(find.text('MangaBaka'), findsNothing);
       expect(find.text('MANGABAKA'), findsNothing);
 
-      // Verify window control buttons are present
       expect(find.byType(DesktopWindowButtons), findsOneWidget);
     });
 
@@ -54,7 +50,6 @@ void main() {
         ),
       );
 
-      // Find window buttons by semantics label
       final minFinder = find.bySemanticsLabel('Minimize');
       final expandFinder = find.bySemanticsLabel('Expand');
       final closeFinder = find.bySemanticsLabel('Close');
@@ -63,22 +58,18 @@ void main() {
       expect(expandFinder, findsOneWidget);
       expect(closeFinder, findsOneWidget);
 
-      // Tap minimize
       await tester.tap(minFinder);
       await tester.pumpAndSettle();
       expect(minimized, isTrue);
 
-      // Tap expand
       await tester.tap(expandFinder);
       await tester.pumpAndSettle();
       expect(maximized, isTrue);
 
-      // Verify Tooltip widgets are rendered for all buttons
       expect(find.byTooltip('Minimize'), findsOneWidget);
       expect(find.byTooltip('Expand'), findsOneWidget);
       expect(find.byTooltip('Close'), findsOneWidget);
 
-      // Tap close
       await tester.tap(closeFinder);
       await tester.pumpAndSettle();
       expect(closed, isTrue);
@@ -92,7 +83,6 @@ void main() {
         ),
       );
 
-      // Initially not expanded: finds crop_square_rounded
       expect(find.byIcon(Icons.crop_square_rounded), findsOneWidget);
       expect(find.byType(FloatingWindowRestoreIcon), findsNothing);
     });

@@ -16,8 +16,6 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// A collection opened into its works: the collection's summary, then every
-/// release in it (volumes, boxed sets, extras) as a cover grid.
 class CollectionDetailScreen extends StatefulWidget {
   final SeriesCollection collection;
 
@@ -104,8 +102,6 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
         context,
       ).push(AppTransitions.slideRight(SeriesDetailScreen(series: series)));
     } catch (e, st) {
-      // The series page is a convenience here; the works are the point —
-      // but the tap must not silently do nothing.
       _logger.warning('Opening series $id failed', e, st);
       if (mounted) {
         AppSnackBar.show(

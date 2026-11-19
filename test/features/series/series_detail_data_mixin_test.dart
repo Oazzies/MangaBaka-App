@@ -107,7 +107,6 @@ void main() {
       await state.fetchTabData('Covers');
       await state.fetchTabData('Covers');
       await tester.pump();
-      // covers is set after first call and stays non-null — no re-fetch
       expect(state.covers, isNotNull);
     });
 

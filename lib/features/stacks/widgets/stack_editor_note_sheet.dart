@@ -8,8 +8,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_editor_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 
-/// The note editor: a sheet headed by the entry it is for, with a roomy field
-/// and a running count against [StackLimits.noteMax]. Pops the new text.
 class StackEditorNoteSheet extends StatefulWidget {
   final EditableStackEntry entry;
 

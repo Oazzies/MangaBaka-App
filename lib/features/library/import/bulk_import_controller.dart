@@ -9,19 +9,14 @@ import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/features/library/import/import_parser.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// Resolves a pasted title to canonical series via `/v2/series/match`.
-///
-/// Match is deliberately strict: it returns nothing rather than guessing when a
-/// title is not close to exact, which is what a bulk import wants - a wrong
-/// series silently added to a library is worse than a line left unmatched.
+/// Uses the strict /v2/series/match: an unmatched line beats a wrong series silently added.
 class SeriesMatchService {
   final ApiClient _api;
 
   SeriesMatchService({http.Client? client, ApiClient? api})
     : _api = api ?? ApiClient(healthContext: 'series-match', client: client);
 
-  /// Candidates for [title], best first. Not filtered by the user's content
-  /// preference: they named this title, and dropping it would look like a bug.
+  /// Not filtered by content preference: dropping a title the user named looks like a bug.
   Future<List<Series>> match(String title, {int limit = 5}) {
     return _api.getJson(
       ApiClient.uri('${AppConstants.baseApiUrlV2}/series/match', {
@@ -40,29 +35,21 @@ class SeriesMatchService {
 }
 
 enum ImportRowStatus {
-  /// Waiting for its turn to be matched.
   pending,
 
-  /// A series was found and the row can be added.
   matched,
 
-  /// Nothing matched the title.
   notFound,
 
-  /// The series is already in the user's library, so it is left alone (adding
-  /// it again would overwrite its state).
+  /// Left alone: adding it again would overwrite its library state.
   inLibrary,
 
-  /// The lookup itself failed.
   failed,
 }
 
-/// One line of the pasted list and what it resolved to.
 class ImportRow {
   final String query;
 
-  /// The state this row's source asked for (a MyAnimeList "On-Hold", a CSV
-  /// status column), or null to use the state chosen for the whole import.
   final String? sourceState;
   ImportRowStatus status = ImportRowStatus.pending;
   List<Series> candidates = const [];
@@ -76,17 +63,12 @@ class ImportRow {
   bool get canSelect => status == ImportRowStatus.matched;
 }
 
-/// State behind the bulk-import screen: parse a pasted list, match every line,
-/// let the user prune, then add the chosen series in one batch.
 class BulkImportController extends ChangeNotifier {
   static final _logger = LoggingService.logger;
 
-  /// Longest list accepted. Each line is a request, so an accidental paste of a
-  /// whole document should not become hundreds of them.
   static const int maxTitles = ImportParser.maxTitles;
 
-  /// Matches in flight at once - enough to be quick, few enough to stay under
-  /// the API's rate limit.
+  /// Kept low to stay under the API's rate limit.
   static const int _concurrency = 4;
 
   final Future<List<Series>> Function(String title) _match;
@@ -117,7 +99,6 @@ class BulkImportController extends ChangeNotifier {
   bool get isAdding => _adding;
   bool get hasRows => _rows.isNotEmpty;
 
-  /// Progress through matching, 0..1.
   double get progress => _rows.isEmpty ? 0 : _matchedCount / _rows.length;
 
   int get selectedCount => _rows.where((r) => r.selected).length;
@@ -129,18 +110,11 @@ class BulkImportController extends ChangeNotifier {
     _notify();
   }
 
-  /// Splits pasted text into titles: one per line, list markers ("1.", "-",
-  /// "*") and surrounding whitespace removed, blanks and repeats dropped.
   static List<String> parseTitles(String text) => [
     for (final e in ImportParser.parse(text, format: ImportFormat.plain))
       e.title,
   ];
 
-  /// Reads [text] as [format], then matches every title.
-  ///
-  /// With [useStates], a state the source gave a title (a MyAnimeList status,
-  /// a CSV column) overrides the state chosen for the whole import for that
-  /// row.
   Future<void> start(
     String text, {
     ImportFormat format = ImportFormat.auto,
@@ -160,10 +134,7 @@ class BulkImportController extends ChangeNotifier {
     if (entries.isEmpty) return;
 
     final rows = _rows;
-    // A later start() or reset() replaces _rows. This run's workers then stop
-    // and leave the shared counters and flags to the run that replaced it;
-    // otherwise they keep bumping _matchedCount (progress past 100%) and
-    // clear _matching while the new run is still going.
+    // After a later start() or reset(), stale workers would overrun progress and clear _matching.
     bool superseded() => _disposed || !identical(_rows, rows);
     var next = 0;
     Future<void> worker() async {
@@ -185,7 +156,6 @@ class BulkImportController extends ChangeNotifier {
     _notify();
   }
 
-  /// Returns to the input step, keeping nothing of the last match.
   void reset() {
     _rows = [];
     _matching = false;
@@ -226,8 +196,6 @@ class BulkImportController extends ChangeNotifier {
     _notify();
   }
 
-  /// Switches [row] to another candidate the match returned. The new pick may
-  /// already be in the library, in which case the row cannot be added.
   Future<void> choose(ImportRow row, int index) async {
     if (index < 0 || index >= row.candidates.length) return;
     row.chosen = index;
@@ -235,9 +203,7 @@ class BulkImportController extends ChangeNotifier {
     try {
       inLibrary = await _isInLibrary(row.candidates[index].id);
     } catch (e) {
-      // Called from a tap handler, so a throw would surface as an unhandled
-      // error. Leave the row unselectable rather than risk overwriting an
-      // existing library entry's state.
+      // Tap handler, so never throw; fail closed rather than risk overwriting an entry's state.
       _logger.warning('Library check failed for "${row.query}": $e');
       if (row.chosen != index) return;
       row.status = ImportRowStatus.failed;
@@ -245,7 +211,6 @@ class BulkImportController extends ChangeNotifier {
       _notify();
       return;
     }
-    // The user may have picked another candidate while this one was checked.
     if (row.chosen != index) return;
     row.status = inLibrary
         ? ImportRowStatus.inLibrary
@@ -254,18 +219,11 @@ class BulkImportController extends ChangeNotifier {
     _notify();
   }
 
-  /// Adds every selected row, one batch per state (rows whose source named a
-  /// state go in that state, the rest in the chosen one). Returns how many were
-  /// newly created; throws whatever a batch call throws, leaving the rows intact
-  /// so the user can retry.
   Future<int> addSelected() async {
-    // A double tap would send every batch twice: the second pass patches the
-    // entries the first just created, and the created count is wrong.
+    // A double tap would resend every batch, patching the entries just created.
     if (_adding) return 0;
     final byState = <String, List<String>>{};
-    // Two titles can resolve to the same series. Sending it twice makes the
-    // batch patch it (overwriting the first row's state with the second's),
-    // or fails the atomic chunk outright; the first row wins.
+    // Duplicate ids make the batch patch the entry or fail its atomic chunk; first row wins.
     final seen = <String>{};
     for (final row in _rows) {
       final match = row.match;

@@ -11,13 +11,6 @@ import 'package:mangabaka_app/features/series/services/series_service.dart';
 
 export 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.dart';
 
-/// The Browse search field.
-///
-/// Everything the field *does* — inline completion, arrow-key navigation, the
-/// suggestion overlay, the filter sheet — lives in [SearchBarShell], which the
-/// Library field shares. What this adds is the Browse-specific source:
-/// suggestions from the network, gated behind the "auto-suggest" setting, with
-/// a hover prefetch of the detail page.
 class MBSearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -31,9 +24,6 @@ class MBSearchBar extends StatefulWidget {
   final bool showFilterButton;
   final VoidCallback? onFilterTapOverride;
 
-  /// False while the field searches something autocomplete cannot suggest —
-  /// staff and publishers. Suggestions here are series titles, so offering them
-  /// for a staff search would be noise.
   final bool suggestionsAllowed;
 
   const MBSearchBar({
@@ -65,9 +55,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
     super.dispose();
   }
 
-  /// The shell needs a [GhostTextEditingController] to paint the inline
-  /// completion. A caller that passes a plain controller gets a fresh one
-  /// instead — the field still works, it just cannot show a ghost.
+  /// Null for a plain controller: the field still works, it just cannot show a ghost.
   GhostTextEditingController? get _ghostController =>
       widget.controller is GhostTextEditingController
       ? widget.controller as GhostTextEditingController
@@ -77,9 +65,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
     String query,
     ValueChanged<List<AutocompleteSeriesResult>> onResults,
   ) {
-    // Below the service's minimum the request would be refused anyway; answer
-    // with nothing so the overlay closes immediately rather than lingering on
-    // the previous query's results.
+    // Answer short queries with nothing so the overlay closes instead of showing stale results.
     if (query.trim().length < SeriesAutocompleteService.minQueryLength) {
       onResults(const []);
       return;
@@ -90,9 +76,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
         AutocompleteRanking.sort(results, query);
         onResults(results);
       },
-      // Rate limiting and transport errors are reported to the caller by the
-      // service and are not worth an error state in a search field: the
-      // suggestions already on screen stay put.
+      // The service already reports errors, and the suggestions on screen stay put.
       onError: (_) {},
     );
   }
@@ -105,8 +89,6 @@ class _MBSearchBarState extends State<MBSearchBar> {
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       onResultSelected: widget.onResultSelected,
-      // Warm the detail page while the pointer is still on the row, so opening
-      // it lands on content instead of a skeleton.
       onResultHovered: (result) =>
           getIt<SeriesService>().fetchSeries(result.id.toString()),
       onBackTap: widget.onBackTap,

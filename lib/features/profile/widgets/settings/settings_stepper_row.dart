@@ -2,22 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A labelled -/+ counter for a bounded integer setting.
-///
-/// Replaces two copies that differed only in their bounds and in whether the
-/// minimum reads as a word: the grid-column counter treats 0 as "auto", the
-/// title-rows counter starts at 1.
 class SettingsStepperRow extends StatelessWidget {
   final String label;
   final int value;
 
-  /// Inclusive bounds. The corresponding button is disabled at each end rather
-  /// than wrapping or silently clamping.
   final int min;
   final int max;
 
-  /// Shown in place of [min] when the value is at the minimum — used for the
-  /// grid's "auto" column count, where 0 is not a meaningful number to read.
   final String? minLabel;
 
   final ValueChanged<int> onChanged;
@@ -60,8 +51,6 @@ class SettingsStepperRow extends StatelessWidget {
                 onPressed: value > min ? () => onChanged(value - 1) : null,
               ),
               Container(
-                // Fixed width so the row does not shift as the number's width
-                // changes between 9 and 10, or into the "auto" label.
                 constraints: const BoxConstraints(minWidth: 50),
                 alignment: Alignment.center,
                 child: Text(

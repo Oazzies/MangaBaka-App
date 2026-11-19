@@ -15,7 +15,6 @@ class SnapshotService {
   final _logger = LoggingService.logger;
   final ProfileAuthService _auth;
 
-  // Simple in-memory cache for the "Activity" list
   List<LibraryEntry>? _cachedActivities;
   List<LibraryEntry>? get cachedActivities => _cachedActivities;
 
@@ -30,11 +29,8 @@ class SnapshotService {
     _cachedActivities = null;
   }
 
-  // Lock to prevent concurrent requests to the same endpoint
   static Future<void>? _requestLock;
 
-  /// When the last request released the lock; the cool-down is measured from
-  /// here rather than paid in full by every caller.
   static DateTime? _lastRelease;
   static const _cooldown = Duration(milliseconds: 300);
 
@@ -43,15 +39,12 @@ class SnapshotService {
     int page = 1,
     int limit = 10,
   }) async {
-    // Wait for the previous request to finish
     final previousLock = _requestLock;
     final completer = Completer<void>();
     _requestLock = completer.future;
 
     if (previousLock != null) {
       await previousLock;
-      // Small cool-down between requests, counted from the previous release:
-      // a request that long finished has nothing to wait for.
       final released = _lastRelease;
       if (released != null) {
         final remaining = _cooldown - DateTime.now().difference(released);
@@ -106,7 +99,6 @@ class SnapshotService {
       final data = body is Map && body['data'] is List
           ? body['data'] as List
           : const [];
-      // One malformed entry costs that entry, not the whole snapshot.
       final results = <LibraryEntry>[];
       for (final item in data) {
         try {

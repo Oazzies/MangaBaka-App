@@ -2,8 +2,6 @@ import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
-/// Instant, local-DB backed autocomplete for the Library screen.
-/// No network calls, no debounce — results are immediate.
 class LibraryAutocompleteService {
   static const int maxResults = 6;
 
@@ -15,7 +13,6 @@ class LibraryAutocompleteService {
 
     final prepared = SearchUtils.prepare(query);
 
-    // Score and sort: title-start matches rank higher than contains matches
     final scored = <_ScoredMatch>[];
 
     for (final entry in allEntries) {
@@ -23,7 +20,7 @@ class LibraryAutocompleteService {
 
       int score = 0;
       if (prepared.startsWith(series.title)) {
-        score = 100; // Strongest match
+        score = 100;
       } else if (prepared.startsWith(series.nativeTitle) ||
           prepared.startsWith(series.romanizedTitle)) {
         score = 90;
@@ -43,7 +40,6 @@ class LibraryAutocompleteService {
       }
     }
 
-    // Secondary sort by title length (prefer shorter matches if scores are equal)
     scored.sort((a, b) {
       if (b.score != a.score) return b.score.compareTo(a.score);
       return a.entry.series.title.length.compareTo(b.entry.series.title.length);

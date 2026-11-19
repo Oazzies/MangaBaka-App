@@ -8,16 +8,12 @@ import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The Trending block on Home: the "Rising the fastest" rail plus the content
-/// -type and time-window controls the web `/discover` page carries.
 class HomeTrendingSection extends StatelessWidget {
   final List<Series> series;
   final bool loading;
 
-  /// API `type` value, or null for every type.
   final String? selectedType;
 
-  /// Trending window in days — 7 or 30.
   final int window;
 
   final ValueChanged<String?> onTypeChanged;
@@ -35,7 +31,6 @@ class HomeTrendingSection extends StatelessWidget {
     this.onViewAll,
   });
 
-  /// (API value, l10n key) — null value is the "all types" chip.
   static const List<(String?, String)> _types = [
     (null, 'any'),
     ('manga', 'type_manga'),

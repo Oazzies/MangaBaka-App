@@ -36,7 +36,6 @@ void main() {
       expect(find.text('10 → 83'), findsOneWidget);
       expect(find.text('2 → 16'), findsOneWidget);
 
-      // Uncheck volumes, then tap Update.
       await tester.tap(find.byType(Checkbox).last);
       await tester.pump();
       await tester.tap(find.byType(FilledButton));

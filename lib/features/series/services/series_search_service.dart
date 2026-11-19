@@ -10,11 +10,6 @@ import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/series/services/series_search_filter.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 
-/// Reads `/series/search` and exposes the genre/tag vocabularies the search
-/// filters are built from.
-///
-/// Request plumbing lives in [ApiClient]; the client-side result filtering
-/// that the backend cannot express lives in [SeriesSearchFilter].
 class SeriesSearchService {
   static final String _baseUrl = '${AppConstants.baseApiUrl}/series/search';
 
@@ -99,12 +94,7 @@ class SeriesSearchService {
     return result;
   }
 
-  /// Assembles the query string.
-  ///
-  /// `sort_by` is stripped whenever a text query is present: the backend
-  /// ignores it in that case, and leaving it in would imply the results were
-  /// server-sorted when the locally-applied sort in `BrowseController` is
-  /// actually the source of truth.
+  /// The backend ignores `sort_by` with a text query; the local sort in `BrowseController` rules there.
   Map<String, dynamic> _buildParams({
     required String query,
     required String? sortBy,
@@ -120,8 +110,7 @@ class SeriesSearchService {
       'content_rating': contentPrefs,
       ...?extraParams,
     };
-    // A content-rating filter narrows what the user's preference allows; it
-    // must never widen it, so the two are intersected.
+    // A picked content rating may narrow the user's preference, never widen it.
     final picked = extraParams?['content_rating'];
     if (picked is List && picked.isNotEmpty) {
       final allowed = contentPrefs.toSet();

@@ -3,16 +3,12 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Surface card from the MangaBaka design system: flat dark fill, soft radius,
-/// with an optional uppercase display label header and an optional trailing
-/// accent widget (e.g. a progress percentage).
 class MbCard extends StatelessWidget {
   final String? label;
   final Widget? trailing;
   final Widget child;
   final EdgeInsetsGeometry padding;
 
-  /// A tap on the header row. There is no visual cue; it is a shortcut.
   final VoidCallback? onHeaderTap;
 
   const MbCard({
@@ -41,7 +37,6 @@ class MbCard extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               onTap: onHeaderTap,
               child: Padding(
-                // Taller than the text so the shortcut is easy to hit.
                 padding: EdgeInsets.only(
                   top: onHeaderTap == null ? 0 : 4,
                   bottom: onHeaderTap == null ? 14 : 18,

@@ -23,12 +23,8 @@ android {
         manifestPlaceholders["appAuthRedirectScheme"] = "dev.oazzies.mangabaka-app"
     }
 
-    // A release build must be signed with the upload key. Falling back to the
-    // debug key silently used to produce "release" APKs that no properly
-    // signed update can ever install over (Android rejects a signature
-    // change), stranding whoever installed one. So without the key the
-    // release build fails, unless a local build opts in to debug signing
-    // with MANGABAKA_ALLOW_DEBUG_SIGNING=true (never set this in CI).
+    // Debug-signed "release" APKs can never be updated by a signed build, stranding users.
+    // MANGABAKA_ALLOW_DEBUG_SIGNING=true is for local test builds only, never CI.
     val releaseKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
     val allowDebugSigning = System.getenv("MANGABAKA_ALLOW_DEBUG_SIGNING") == "true"
 
@@ -61,8 +57,7 @@ android {
         }
     }
 
-    // Store AAB builds set STORE_BUILD=true so REQUEST_INSTALL_PACKAGES is
-    // stripped from the merged release manifest (Google Play policy).
+    // Google Play policy: store builds drop REQUEST_INSTALL_PACKAGES from the manifest.
     val isStoreBuild =
         System.getenv("STORE_BUILD") == "true" || project.hasProperty("storeBuild")
     if (isStoreBuild) {
@@ -74,9 +69,7 @@ flutter {
     source = "../.."
 }
 
-// Fails a release build without the upload key up front, with an actionable
-// message (AGP would otherwise stop at packaging with "SigningConfig release
-// is missing required property storeFile").
+// Fails early; AGP would otherwise stop at packaging with an unhelpful storeFile error.
 gradle.taskGraph.whenReady {
     val buildsRelease = allTasks.any { it.project == project && it.name.contains("Release") }
     if (!buildsRelease) return@whenReady

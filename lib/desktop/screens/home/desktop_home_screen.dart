@@ -18,10 +18,6 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Home on desktop: Trending as a ranked board — a featured #1 beside the
-/// rest of the top ten — then the discovery rails as paged carousels.
-///
-/// Loads through the same [HomeService] as the phone feed.
 class DesktopHomeScreen extends StatefulWidget {
   static final GlobalKey<DesktopHomeScreenState> stateKey =
       GlobalKey<DesktopHomeScreenState>();
@@ -51,8 +47,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
   bool _loadingTrending = true;
   bool _showForYou = false;
 
-  /// Whether the upcoming sidebar is open over the feed. Only used when the
-  /// window is too narrow to dock it beside the feed.
+  /// Only used when the window is too narrow to dock the rail beside the feed.
   bool _upcomingOpen = false;
 
   /// Built the first time it opens, so a closed sidebar costs no request.
@@ -159,8 +154,6 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
       builder: (context, _) {
         final l10n = LocalizationService();
 
-        // Rebuilt only when the rail appears or disappears; between those
-        // a resize just re-lays the feed out.
         return DerivedLayoutBuilder<bool>(
           derive: (constraints) => constraints.maxWidth >= _railMinWidth,
           builder: (context, showRail) {
@@ -170,10 +163,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                 DesktopPageHeader(
                   title: l10n.translate('home'),
                   subtitle: l10n.translate('home_subtitle'),
-                  // The upcoming rail, when shown, already sits between
-                  // this header and the window's real right edge — the
-                  // custom window controls float over the rail, not over
-                  // this header, so it doesn't need to dodge them.
+                  // With the rail shown, the window controls float over it, not over this header.
                   reserveWindowControls: !showRail,
                   actions: [
                     if (!showRail)

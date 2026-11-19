@@ -4,7 +4,6 @@ import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 
-/// Which stacks a [StacksListScreen] pages through.
 sealed class StacksListSource {
   const StacksListSource();
 
@@ -19,17 +18,13 @@ sealed class StacksListSource {
 
   String title(LocalizationService l10n);
 
-  /// Shown above the grid, when there is something to say.
   String? subtitle(LocalizationService l10n) => null;
 
-  /// Whether the series sort and spoiler filters apply.
   bool get filterable => false;
 
-  /// Whether cards show the owner's view (draft / unlisted).
   bool get ownerView => false;
 
-  /// Whether the list is the reader's own (mine, saved, followed), and so
-  /// reloads when [StackStatusController.listsRevision] moves.
+  /// Reloads when [StackStatusController.listsRevision] moves.
   bool get personal => false;
 
   Future<PagedList<StackSummary>> load(

@@ -28,16 +28,11 @@ import 'package:url_launcher/url_launcher.dart';
 export 'package:mangabaka_app/features/stacks/widgets/stack_detail_components.dart'
     show confirmStackDelete;
 
-/// One stack: what it is about, who made it, and its ranked series.
-///
-/// Paints at once from a listing's [initial] summary, then loads the entries.
-/// The owner sees their own drafts and hidden stacks too (read through the
-/// owner endpoint), with Edit, visibility and Delete.
 class StackDetailScreen extends StatefulWidget {
   final int stackId;
   final StackSummary? initial;
 
-  /// Read through the owner endpoint first (opened from "My stacks").
+  /// Read through the owner endpoint first, which also returns drafts and hidden stacks.
   final bool asOwner;
 
   const StackDetailScreen({

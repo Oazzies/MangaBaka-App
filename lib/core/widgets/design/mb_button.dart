@@ -5,14 +5,11 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// Solid amber pill CTA with ink-black uppercase caps — the reference's
-/// "CONTINUE READING" button. The app's single primary action shape.
 class MbPrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
 
-  /// Trailing icon instead of leading (e.g. an arrow on a "go" action).
   final IconData? trailingIcon;
   final bool expand;
   final bool busy;
@@ -78,8 +75,6 @@ class MbPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Quiet counterpart to [MbPrimaryButton]: same pill, dark well, white caps.
-/// For secondary actions that sit beside a primary one.
 class MbSecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;

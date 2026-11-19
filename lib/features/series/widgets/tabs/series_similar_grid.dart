@@ -8,7 +8,6 @@ import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Responsive grid for series cards inside [SeriesSimilarTab].
 class SeriesSimilarGrid extends StatelessWidget {
   final List<Series> series;
   final AppListStyle style;

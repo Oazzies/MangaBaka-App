@@ -1,5 +1,4 @@
 tags:
-  # Window-size sweeps (test/responsive/). Slower than unit tests: each one
-  # resizes a whole page through dozens of window configurations.
+  # test/responsive sweeps resize whole pages through dozens of window sizes.
   responsive:
     timeout: 10x

@@ -6,21 +6,15 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Outcome of checking whether a progress update that exceeds the known total
-/// is allowed.
 enum ProgressOverflowDecision {
-  /// No overflow or the current setting allows it without prompting.
   allowed,
 
-  /// The current setting forbids exceeding the known total.
   blocked,
 
-  /// The user should be prompted before proceeding.
   prompt,
 }
 
-/// Evaluates [mode] for a proposed [newValue] against [total] and
-/// [seriesStatus] (the series' publication status, not the library entry state).
+/// [seriesStatus] is the publication status, not the library entry state.
 ProgressOverflowDecision evaluateProgressOverflow({
   required ProgressOverflowMode mode,
   required int newValue,
@@ -45,10 +39,6 @@ ProgressOverflowDecision evaluateProgressOverflow({
   }
 }
 
-/// Checks whether [newValue] exceeds [total] under the active
-/// [SettingsManager.progressOverflow] setting, prompting the user when needed.
-///
-/// Returns `true` if the update should proceed, `false` if blocked or declined.
 Future<bool> confirmProgressOverflow(
   BuildContext context, {
   required int newValue,
@@ -79,7 +69,6 @@ Future<bool> confirmProgressOverflow(
   }
 }
 
-/// Prompts the user to confirm setting progress past the series' known total.
 Future<bool?> showProgressOverflowDialog(
   BuildContext context, {
   required int newValue,

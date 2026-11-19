@@ -85,7 +85,6 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
     const double previewWidth = 230.0;
     const double cursorOffset = 18.0;
 
-    // Dynamically measure the exact height of the preview card after layout
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final ro = _cardKey.currentContext?.findRenderObject() as RenderBox?;
@@ -107,7 +106,6 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
           final double x = mousePos.dx;
           final double y = mousePos.dy;
 
-          // Flip to left of cursor if nearing the right screen edge
           final bool flipLeft =
               (x + cursorOffset + previewWidth) > (screenSize.width - 20.0);
           final double left = flipLeft
@@ -120,7 +118,6 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
                   screenSize.width - previewWidth - 12.0,
                 );
 
-          // Ensure preview never spawns or overflows offscreen at the bottom or top
           final double effectiveHeight = _measuredHeight;
           const double bottomMargin = 16.0;
           final double maxTop =

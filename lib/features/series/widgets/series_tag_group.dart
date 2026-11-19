@@ -79,11 +79,7 @@ class _SeriesTagGroupState extends State<SeriesTagGroup> {
                   ),
                 ],
               ),
-              // The height animates with the content pinned to the top and
-              // clipped, so expanding reveals the tags downward from the header
-              // and collapsing draws them up from the bottom. Both states are
-              // full width: a width that changed with the content made the tags
-              // sweep in from the right.
+              // Full width in both states: a content-sized width made the tags sweep in from the right.
               ClipRect(
                 child: AnimatedSize(
                   duration: const Duration(milliseconds: 220),

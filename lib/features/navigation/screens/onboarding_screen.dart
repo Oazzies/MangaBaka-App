@@ -43,17 +43,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool _isLoggingIn = false;
   bool _isLoggedIn = false;
 
-  /// Desktop gets its own composition and a pinned window; the phone flow is
-  /// left exactly as it was.
   final bool _isDesktop =
       // ignore: invalid_use_of_visible_for_testing_member
       DesktopLayout.debugOverride ?? DesktopLayout.isDesktopPlatform;
 
-  /// Built on demand rather than cached: the login step reads live state
-  /// ([_isLoggingIn], [_isLoggedIn]) and must see it change.
-  ///
-  /// Desktop has no barcode scanner to grant access to, so that step is
-  /// dropped there.
+  /// A getter, not cached: the login step reads live [_isLoggingIn] and [_isLoggedIn].
   List<OnboardingStep> get _steps => [
     (
       titleKey: 'onboarding_welcome_title',
@@ -177,8 +171,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _requestCameraPermission() async {
     _logger.info('Requesting camera permission during onboarding');
-    // permission_handler does not support macOS — camera access is controlled
-    // via the entitlements file and system dialog on first use.
+    // permission_handler has no macOS support; entitlements gate the camera there.
     if (!Platform.isAndroid && !Platform.isIOS) {
       _logger.info(
         'Platform does not use permission_handler; skipping request',

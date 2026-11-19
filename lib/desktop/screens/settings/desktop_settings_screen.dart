@@ -34,8 +34,6 @@ part 'desktop_settings_general_content_part.dart';
 part 'desktop_settings_account_advanced_part.dart';
 part 'desktop_settings_widgets_part.dart';
 
-/// Settings as a real page on desktop: categories down the left,
-/// inline desktop-native controls (dropdowns, switches, chips) on the right.
 class DesktopSettingsScreen extends StatefulWidget {
   static final GlobalKey<DesktopSettingsScreenState> stateKey =
       GlobalKey<DesktopSettingsScreenState>();
@@ -46,8 +44,7 @@ class DesktopSettingsScreen extends StatefulWidget {
   State<DesktopSettingsScreen> createState() => DesktopSettingsScreenState();
 }
 
-/// In the order the pages sit "down the page": switching to a later one
-/// scrolls down to it, to an earlier one scrolls up.
+/// Order matters: switching to a later page scrolls down to it, to an earlier one up.
 enum _Category {
   appearance,
   general,
@@ -88,9 +85,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
     }
   }
 
-  /// The settings pages, by name, for tests that visit each one. Excludes
-  /// [_Category.importExport], which never actually renders as a pane â€” its
-  /// nav item navigates to [ImportExportScreen] instead.
+  /// Excludes [_Category.importExport]: its nav item pushes [ImportExportScreen] instead of a pane.
   @visibleForTesting
   static List<String> get debugCategories => [
     for (final c in _Category.values)
@@ -108,8 +103,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
     });
   }
 
-  /// The nav entry that stands for the page on screen: Logs is opened from
-  /// Advanced and has no entry of its own.
+  /// Logs opens from Advanced and has no nav entry of its own.
   _Category get _navSelected =>
       _selected == _Category.logs ? _Category.advanced : _selected;
 
@@ -176,8 +170,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       listenable: Listenable.merge([LocalizationService(), SettingsManager()]),
       builder: (context, _) {
         final l10n = LocalizationService();
-        // Switching developer mode off while on its pages would strand the
-        // user on a category the nav no longer lists.
+        // Switching developer mode off on its pages would strand the user on an unlisted category.
         if (!SettingsManager().developerMode &&
             (_selected == _Category.advanced || _selected == _Category.logs)) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -203,7 +196,6 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       _Category.content,
       _Category.importExport,
       if (_auth.isLoggedIn) _Category.account,
-      // Developer Tools stay hidden until developer mode is switched on.
       if (SettingsManager().developerMode) _Category.advanced,
     ];
 

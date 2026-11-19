@@ -1,6 +1,5 @@
 part of 'desktop_surfaces.dart';
 
-/// A round icon button with a hover fill, sized for a pointer.
 class DesktopIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
@@ -40,21 +39,16 @@ class DesktopIconButton extends StatelessWidget {
   }
 }
 
-/// A pill-shaped labelled button — the desktop toolbar's secondary action.
 class DesktopPillButton extends StatelessWidget {
   final String label;
   final IconData? icon;
   final VoidCallback? onPressed;
   final bool primary;
 
-  /// A destructive action (sign out, delete): tinted and lettered in the app's
-  /// error red instead of neutral, so it reads as one without shouting.
   final bool danger;
   final Widget? trailing;
   final String? tooltip;
 
-  /// The fill of a [danger] button, and its hover: the error red at low
-  /// strength, on the same footing as the neutral pill it replaces.
   static Color dangerColor(MbPalette c) => c.error.withValues(alpha: 0.16);
   static Color dangerHoverColor(MbPalette c) => c.error.withValues(alpha: 0.28);
 
@@ -98,9 +92,6 @@ class DesktopPillButton extends StatelessWidget {
             Icon(icon, size: 17, color: fg),
             const SizedBox(width: 8),
           ],
-          // Flexible: its natural width wherever there's room, but a pill
-          // squeezed narrower than its (translated, text-scaled) label
-          // ellipsises instead of overflowing.
           Flexible(
             child: Text(
               label.toUpperCase(),

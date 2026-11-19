@@ -9,8 +9,6 @@ import 'package:mangabaka_app/features/stacks/widgets/stack_series_search.dart';
 
 export 'package:mangabaka_app/features/stacks/widgets/stack_series_search.dart';
 
-/// [StackSeriesSearch] in a tall bottom sheet on a phone, a dialog on
-/// desktop.
 Future<void> showStackSeriesPicker(
   BuildContext context, {
   required bool Function(String seriesId) isAdded,

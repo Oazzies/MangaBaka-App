@@ -50,8 +50,7 @@ void main() {
     });
 
     test('bounds take precedence over the sort-by-score rule', () {
-      // An explicit range means the caller asked for exactly that range, even
-      // when it includes unrated series.
+      // An explicit range is honoured even when it includes unrated series.
       const filter = SeriesSearchFilter(ratingLower: 0, sortBy: 'score_desc');
       expect(filter.allows(_series(rating: '0')), isTrue);
     });

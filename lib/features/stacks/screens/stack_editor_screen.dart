@@ -19,18 +19,9 @@ import 'package:mangabaka_app/features/stacks/widgets/stack_editor_note_sheet.da
 import 'package:mangabaka_app/features/stacks/widgets/stack_series_picker.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Create a stack, or edit one the reader owns: its details, its ranked
-/// series with notes, who can see it, and deleting it.
-///
-/// A phone shows Details and Series as two tabs. From [_splitWidth] up the
-/// details sit beside the series list, and on a wide desktop window the
-/// series search stays open in a third column.
-///
-/// Pops with true when something was saved or deleted.
 class StackEditorScreen extends StatefulWidget {
   final int? stackId;
 
-  /// Series to start a new stack with (from "New stack" on a series page).
   final Series? initialSeries;
 
   const StackEditorScreen({super.key, this.stackId, this.initialSeries});
@@ -54,8 +45,7 @@ class _StackEditorScreenState extends State<StackEditorScreen>
   late final StackEditorController _c = StackEditorController(
     stackId: widget.stackId,
   );
-  // Made up front: created lazily, a wide layout that never shows the tabs
-  // would first build it in dispose(), when vsync can no longer be read.
+  // Not lazy: a wide layout would first build it in dispose(), when vsync can no longer be read.
   late final TabController _tabs;
   final LocalizationService _l10n = LocalizationService();
   bool _showErrors = false;

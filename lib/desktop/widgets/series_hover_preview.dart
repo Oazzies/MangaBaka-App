@@ -14,8 +14,6 @@ import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 part 'series_hover_preview_overlay_part.dart';
 part 'series_hover_preview_card_part.dart';
 
-/// Central controller managing the series hover preview overlay.
-/// Tracks cursor coordinates so the preview smoothly follows the mouse.
 class SeriesHoverPreviewController {
   static final SeriesHoverPreviewController instance =
       SeriesHoverPreviewController._();
@@ -25,7 +23,6 @@ class SeriesHoverPreviewController {
   Timer? _dwellTimer;
   String? _activeSeriesId;
 
-  /// Global pointer position updated as the cursor moves over a previewable element.
   final ValueNotifier<Offset> mousePosition = ValueNotifier<Offset>(
     Offset.zero,
   );
@@ -34,7 +31,6 @@ class SeriesHoverPreviewController {
     mousePosition.value = globalPos;
   }
 
-  /// Request to show a preview following cursor coordinates near-instantly.
   void show({
     required BuildContext context,
     Series? series,
@@ -58,7 +54,6 @@ class SeriesHoverPreviewController {
     });
   }
 
-  /// Dismiss the active preview overlay immediately.
   void hide() {
     _dwellTimer?.cancel();
     _dwellTimer = null;
@@ -88,7 +83,6 @@ class SeriesHoverPreviewController {
   }
 }
 
-/// A wrapper widget that displays a hover preview following the cursor.
 class SeriesHoverPreview extends StatefulWidget {
   final Widget child;
   final Series? series;

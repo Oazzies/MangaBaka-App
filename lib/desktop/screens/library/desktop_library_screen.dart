@@ -37,15 +37,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_library_rail_part.dart';
 
-/// The library on desktop.
-///
-/// The phone's swipeable status tabs become a status list in the left panel —
-/// with an "All" view the tabs never had — and the filter sheet becomes the
-/// always-visible filters beneath it. Search, sort, layout and sync sit in a
-/// toolbar over the grid.
-///
-/// Account wiring is the shared [LibrarySession]; filtering is the shared
-/// [LibraryFilterHelper].
 class DesktopLibraryScreen extends StatefulWidget {
   static final GlobalKey<DesktopLibraryScreenState> stateKey =
       GlobalKey<DesktopLibraryScreenState>();
@@ -60,7 +51,6 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
     implements DesktopRefreshable {
   static final _logger = LoggingService.logger;
 
-  /// The status key for the unfiltered "everything" view.
   static const String allKey = 'all';
 
   late final LibraryService _libraryService;
@@ -133,8 +123,6 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
     _openDetail(BrowseHelpers.convertAutocompleteToSeries(result));
   }
 
-  // ─── Filtering ───────────────────────────────────────────────────────────
-
   LibraryFilterHelper _helper(List<LibraryEntry> entries) =>
       LibraryFilterHelper(
         allEntries: entries,
@@ -143,7 +131,6 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
         contentPreferences: SettingsManager().contentPreferences,
       );
 
-  /// Counts per status, over the same filtered set the grid shows.
   Map<String, int> _counts(LibraryFilterHelper helper) {
     final counts = <String, int>{};
     for (final entry in helper.getFilteredAndSorted()) {
@@ -166,8 +153,7 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
     _followMatches();
   }
 
-  /// While searching, an empty status with matches elsewhere switches to
-  /// "All" — the status the user was on is rarely what a search meant.
+  /// The status the user was on is rarely what a search meant, so an empty one switches to All.
   void _followMatches() {
     final entries = _entries;
     if (entries == null || _status == allKey) return;
@@ -177,8 +163,6 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
     if (helper.getFilteredAndSorted().isEmpty) return;
     setState(() => _status = allKey);
   }
-
-  // ─── Build ───────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {

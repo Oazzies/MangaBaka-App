@@ -1,7 +1,6 @@
 name: CI
 
-# The quality gate for every change: release.yml only runs when a release is
-# cut by hand, so without this nothing checks main or a pull request.
+# release.yml only runs on a hand-cut release, so this is the only check on main and PRs.
 on:
   push:
     branches: [main]
@@ -40,8 +39,7 @@ jobs:
             libgtk-3-dev libblkid-dev liblzma-dev libsecret-1-dev libjsoncpp-dev
 
       - name: Install Dependencies
-        # Fails if pubspec.lock is out of date with pubspec.yaml, so CI tests
-        # exactly the dependency versions that are committed.
+        # Fails on a stale pubspec.lock, so CI tests exactly the committed versions.
         run: flutter pub get --enforce-lockfile
 
       - name: Flutter Analyze

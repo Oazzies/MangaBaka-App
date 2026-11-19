@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 
-/// Carries the active [MbPalette] inside [ThemeData], so reading it through
-/// `Theme.of` subscribes a widget to theme changes and MaterialApp's theme
-/// animation cross-fades every token when the user switches theme.
+/// Lives in [ThemeData] so MaterialApp's theme animation cross-fades tokens.
 @immutable
 class MbColors extends ThemeExtension<MbColors> {
   final MbPalette palette;

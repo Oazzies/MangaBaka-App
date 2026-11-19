@@ -6,8 +6,6 @@ import 'package:win32_registry/win32_registry.dart';
 class DeepLinkRegistrar {
   static final _logger = LoggingService.logger;
 
-  /// Registers [scheme]`://` in HKCU\Software\Classes so Windows launches
-  /// this executable when the scheme is opened.
   static Future<void> registerWindows(String scheme) async {
     try {
       final appPath = Platform.resolvedExecutable;
@@ -51,7 +49,6 @@ class DeepLinkRegistrar {
     }
   }
 
-  /// Registers [scheme]`://` on Linux via a .desktop file and `xdg-mime`.
   static Future<void> registerLinux(String scheme) async {
     try {
       final homeDir = Platform.environment['HOME'];

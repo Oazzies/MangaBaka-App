@@ -7,7 +7,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// A link chip with favicon, domain title, and optional language badge.
 class HoverableLinkChip extends StatelessWidget {
   final Uri uri;
   final String faviconUrl;

@@ -8,8 +8,6 @@ import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
 
-/// The "Information" metadata card: a vertical list of label / value rows with
-/// hairline dividers, matching the design's metadata sidebar.
 class SeriesInformationCard extends StatelessWidget {
   final Series series;
   final LocalizationService l10n;

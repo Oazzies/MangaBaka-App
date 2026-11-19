@@ -17,26 +17,14 @@ import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/features/deeplinks/deep_link_service.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// Everything that has to happen before the first frame.
-///
-/// Kept apart from `main.dart` so the entry point reads as a sequence rather
-/// than as three hundred lines of setup, and so the order — which genuinely
-/// matters, since error handling has to be installed before anything that can
-/// throw — is visible in one place.
+/// Order matters: error handlers go in before anything that can throw.
 class AppBootstrap {
   AppBootstrap._();
 
-  /// The OS window manager applies [WindowOptions.minimumSize] to the whole
-  /// window, including its native frame, while Flutter measures only the
-  /// client area inside that frame. This margin absorbs the frame so the
-  /// client width stays at or above [DesktopLayout.minWidth] even at the
-  /// smallest size and on scaled displays.
+  /// minimumSize includes the native frame; this keeps the client area >= [DesktopLayout.minWidth].
   static const double _windowFrameMargin = 64;
 
-  /// Smallest the macOS and Linux window may be dragged to. Pinned to the
-  /// width the desktop (sidebar) layout needs, so the window can never shrink
-  /// into the mobile layouts — the desktop app is always the sidebar
-  /// presentation. Windows gets the same limit from its runner.
+  /// Never below the desktop layout's width, so the window can't shrink into the mobile layouts.
   static const Size _minWindowSize = Size(
     DesktopLayout.minWidth + _windowFrameMargin,
     700,
@@ -47,15 +35,13 @@ class AppBootstrap {
 
     await _configureDesktopWindow();
 
-    // Hold the native splash until the app's own splash overlay takes over,
-    // so there is no bare frame between them.
+    // Held until the app's own splash overlay takes over, so no bare frame shows between them.
     FlutterNativeSplash.preserve(widgetsBinding: binding);
 
     await LoggingService.setup();
     _installErrorHandlers();
 
-    // Optional: a missing .env must leave the app running (sign-in then
-    // reports MISSING_CONFIG) rather than abort before the first frame.
+    // A missing .env must not abort startup; sign-in then reports MISSING_CONFIG.
     try {
       await dotenv.load(isOptional: true);
     } catch (e, st) {
@@ -63,14 +49,11 @@ class AppBootstrap {
     }
     setupServiceLocator();
 
-    // Auth first: the metadata fetch and the initial library sync both read
-    // the session it restores.
+    // Auth first: the metadata fetch and initial library sync read the session it restores.
     await getIt<ProfileAuthService>().init();
     await getIt<MetadataService>().init();
 
-    // Independent of each other, so they overlap.
-    // Each guarded: a failure here (unreadable preferences, a bad language
-    // pack) falls back to defaults instead of leaving a blank window.
+    // Each guarded so bad preferences or a bad language pack fall back instead of a blank window.
     await Future.wait([
       SettingsManager().init().catchError((Object e, StackTrace st) {
         LoggingService.logger.severe('Settings failed to load', e, st);
@@ -83,8 +66,7 @@ class AppBootstrap {
     ThemeController().init();
     AppTheme.applySystemOverlay(ThemeController().current);
 
-    // Deep links need settings (for the toggle) and services (to fetch series)
-    // to be ready — init last.
+    // Last: deep links need settings (for the toggle) and services (to fetch series).
     await getIt<DeepLinkService>().init();
   }
 
@@ -92,11 +74,8 @@ class AppBootstrap {
     if (!Platform.isWindows && !Platform.isMacOS && !Platform.isLinux) return;
     await windowManager.ensureInitialized();
 
-    // On Windows, hide the native title bar so the app can draw its own
-    // custom styled title bar and window control buttons.
     final windowOptions = WindowOptions(
-      // The Windows runner enforces its own, DPI-exact minimum (see
-      // windows/runner/flutter_window.cpp).
+      // The Windows runner enforces its own DPI-exact minimum (windows/runner/flutter_window.cpp).
       minimumSize: Platform.isWindows ? null : _minWindowSize,
       titleBarStyle: Platform.isWindows
           ? TitleBarStyle.hidden
@@ -104,22 +83,14 @@ class AppBootstrap {
       windowButtonVisibility: !Platform.isWindows,
     );
 
-    // Deliberately not awaited: it resolves only once the window is shown,
-    // which happens after the first frame.
+    // Not awaited: it resolves only once the window is shown, after the first frame.
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
     });
   }
 
-  /// Routes both error channels into the log.
-  ///
-  /// Without these, an error in a callback or an unawaited future is printed
-  /// to the console and lost — the log is the only diagnostic available from
-  /// a user's device.
   static void _installErrorHandlers() {
-    // A widget that throws in build is replaced with a contained tile instead
-    // of release mode's full-bleed grey box.
     BuildErrorFallback.install();
 
     FlutterError.onError = (details) {
@@ -133,7 +104,6 @@ class AppBootstrap {
 
     PlatformDispatcher.instance.onError = (error, stack) {
       LoggingService.logger.severe('Unhandled Platform Error', error, stack);
-      // Handled: reported to the log rather than crashing the app.
       return true;
     };
   }

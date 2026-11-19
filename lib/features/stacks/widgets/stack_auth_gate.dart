@@ -9,12 +9,9 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 
-/// Where the reader stands for the parts of Stacks that need an account.
 enum StackAccess {
-  /// Signed in with the stack scopes.
   ready,
 
-  /// Not signed in.
   signedOut,
 
   /// Signed in from before Stacks existed: the token lacks the scopes.
@@ -27,8 +24,6 @@ StackAccess stackAccess([ProfileAuthService? auth]) {
   return a.hasStackScopes ? StackAccess.ready : StackAccess.needsReconnect;
 }
 
-/// Runs the sign-in flow, reporting a failure (not a cancel) as a toast.
-/// Returns whether the session can now use Stacks.
 Future<bool> signInForStacks(BuildContext context) async {
   final auth = getIt<ProfileAuthService>();
   final l10n = LocalizationService();
@@ -50,11 +45,6 @@ Future<bool> signInForStacks(BuildContext context) async {
   return auth.hasStackScopes;
 }
 
-/// Makes sure the reader can act on stacks before an action that needs it.
-///
-/// When they cannot, a dialog explains why (signed out, or a session from
-/// before Stacks) and offers to sign in. Returns true only when the action
-/// can go ahead.
 Future<bool> ensureStackAccess(BuildContext context) async {
   final access = stackAccess();
   if (access == StackAccess.ready) return true;
@@ -101,15 +91,11 @@ Future<bool> ensureStackAccess(BuildContext context) async {
   return signInForStacks(context);
 }
 
-/// An inline card for sections that need an account: asks the reader to sign
-/// in, or to sign in again when their session predates Stacks.
 class StackAccessPrompt extends StatelessWidget {
   final StackAccess access;
 
-  /// Called after a sign-in that left the session able to use Stacks.
   final VoidCallback? onReady;
 
-  /// Overrides the body text for a signed-out reader.
   final String? signedOutMessage;
 
   const StackAccessPrompt({

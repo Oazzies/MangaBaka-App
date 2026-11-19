@@ -75,7 +75,6 @@ void main() {
     });
 
     test('clamps a stale out-of-range stored value on load', () async {
-      // A value written by an older build with different bounds.
       SharedPreferences.setMockInitialValues({'k': 500});
       final setting = IntSetting('k', 1, min: 1, max: 99)..load(await prefs());
       expect(setting.value, 99);
@@ -101,7 +100,6 @@ void main() {
     });
 
     test('ignores an out-of-range ordinal rather than throwing', () async {
-      // What a shortened or reordered enum leaves behind between releases.
       SharedPreferences.setMockInitialValues({'k': 99});
       final setting = EnumSetting('k', _Colour.green, _Colour.values)
         ..load(await prefs());

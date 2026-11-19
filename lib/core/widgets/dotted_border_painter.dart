@@ -2,20 +2,12 @@ import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
 
-/// A dashed rectangle border whose dashes can be animated to crawl —
-/// "marching ants" — by driving [phase] from an [AnimationController].
-///
-/// Used to frame the screen while the series detail filter drawer is open, so
-/// it reads as a temporary mode rather than a normal sheet.
 class DottedBorderPainter extends CustomPainter {
   final Color color;
   final double strokeWidth;
 
-  /// Length of a gap. Dashes are drawn at twice this, giving a 2:1 rhythm.
   final double gap;
 
-  /// Offset into the dash pattern, in logical pixels. Animating it upward
-  /// makes the dashes travel; it repeats every `gap * 3`.
   final double phase;
 
   DottedBorderPainter({
@@ -32,8 +24,6 @@ class DottedBorderPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
-    // Inset by half the stroke so the border sits fully inside the bounds
-    // instead of being clipped along its outer edge.
     final path = Path()
       ..addRect(
         Rect.fromLTWH(

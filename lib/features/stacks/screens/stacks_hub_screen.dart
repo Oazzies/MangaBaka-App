@@ -20,8 +20,6 @@ import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_hub_newest_slivers.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// The front door to Stacks: staff picks, the reader's own, saved and
-/// followed stacks, and the newest from the community.
 class StacksHubScreen extends StatefulWidget {
   const StacksHubScreen({super.key});
 

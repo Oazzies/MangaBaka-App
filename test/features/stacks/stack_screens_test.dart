@@ -75,7 +75,7 @@ void main() {
 
   String t(String key) => LocalizationService().translate(key);
 
-  /// Text matching [label] in any case (pills and headers set display caps).
+  /// Any case: pills and headers render in display caps.
   Finder label(String text) => find.byWidgetPredicate(
     (w) => w is Text && (w.data ?? '').toLowerCase() == text.toLowerCase(),
   );
@@ -213,8 +213,6 @@ void main() {
     expect(label(t('stacks_field_title')), findsOneWidget);
   });
 
-  // Phone portrait, phone landscape, tablet portrait and landscape: every
-  // Stacks screen must lay out without overflow or exceptions.
   const phoneAndTablet = [
     Size(360, 740),
     Size(740, 360),

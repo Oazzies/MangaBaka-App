@@ -8,29 +8,7 @@ import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/models/series_titles.dart';
 
-/// Gives series from the v2 endpoints their canonical (v1) titles.
-///
-/// v2 lists (Home rails, publisher shelves, "similar", "readers also like")
-/// carry no server-chosen title, only a per-language list, so the title shown
-/// there is a guess that can differ from the detail page. [canonicalize]
-/// replaces the guesses with the real titles from `/v1/series/batch`.
-///
-/// Written to be gentle on the API:
-///
-/// * Only series whose canonical title is **not yet known** are requested.
-///   Anything from a v1 payload, the library database, or an earlier lookup
-///   costs nothing (see [SeriesTitles.remember]).
-/// * Requests from different callers within [window] are **merged** into
-///   shared batches of up to [batchSize] ids, so a Home screen with six rails
-///   makes a couple of requests, not six.
-/// * An id already being fetched is **awaited, not asked for again**; ids the
-///   server did not return (merged or deleted) are not asked for again.
-/// * Batches are **spaced** by [batchGap].
-/// * After a failure (including a 429) enrichment **pauses** with exponential
-///   backoff. Callers then keep the guessed titles; nothing retries in a
-///   loop and nothing throws.
-/// * Callers wait at most [waitBudget]; the fetch carries on in the
-///   background so the next list benefits.
+/// Replaces v2 title guesses with `/v1/series/batch` titles, batching callers and backing off on failure.
 class SeriesTitleEnricher {
   SeriesTitleEnricher({
     ApiClient? api,
@@ -43,10 +21,8 @@ class SeriesTitleEnricher {
   }) : _apiOrNull = api,
        _now = now ?? DateTime.now;
 
-  /// The instance the app's services use.
   static SeriesTitleEnricher shared = SeriesTitleEnricher();
 
-  /// An enricher that never touches the network, for tests and previews.
   factory SeriesTitleEnricher.disabled() = _DisabledEnricher;
 
   static final _logger = LoggingService.logger;
@@ -82,8 +58,6 @@ class SeriesTitleEnricher {
     return until != null && _now().isBefore(until);
   }
 
-  /// [series] with canonical titles wherever they could be obtained; the
-  /// input is returned as is for the rest. Never throws.
   Future<List<Series>> canonicalize(List<Series> series) async {
     if (series.isEmpty) return series;
     final wanted = <String>{

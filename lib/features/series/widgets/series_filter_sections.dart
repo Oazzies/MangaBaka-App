@@ -8,8 +8,6 @@ import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_type
 import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_controller.dart';
 import 'package:mangabaka_app/features/series/widgets/series_filter_drawer.dart';
 
-/// Filter sections body shared between [SeriesFilterDrawer] and the desktop
-/// filter panel.
 class SeriesFilterSections extends StatelessWidget {
   final SeriesFilterDrawerController controller;
 

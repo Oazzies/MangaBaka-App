@@ -9,30 +9,17 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_carousel_layout_part.dart';
 
-/// Where the items of a carousel row fall at a given row width.
-///
-/// Worked out at layout time — by the row itself, by the list's item
-/// extents, and by paging — never at build time, so resizing the window
-/// re-lays the row out without rebuilding a single item.
+/// Worked out at layout time, never build time, so a resize never rebuilds an item.
 class CarouselGeometry {
-  /// Whole items visible at once.
   final int count;
 
-  /// Width of each item.
   final double itemWidth;
 
-  /// Width the row occupies — narrower than the space available when items
-  /// aren't stretched, so the row ends on an item boundary instead of
-  /// cutting its last visible item in half.
+  /// Narrower than the space when items aren't stretched, so the row ends on an item boundary.
   final double rowWidth;
 
   const CarouselGeometry._(this.count, this.itemWidth, this.rowWidth);
 
-  /// Items of [targetWidth] spaced by [spacing] across [available].
-  ///
-  /// With [stretch] the items grow so that a whole number of them exactly
-  /// fills [available]: the first item's left edge and the last visible
-  /// item's right edge line up with whatever sits above and below the row.
   factory CarouselGeometry.resolve(
     double available, {
     required double targetWidth,
@@ -40,8 +27,7 @@ class CarouselGeometry {
     required bool stretch,
   }) {
     final step = targetWidth + spacing;
-    // The epsilon: an available width that fits n items exactly can land a
-    // hair under n in floating point, and floor() would drop one.
+    // Epsilon: a width fitting n items exactly can land a hair under n, and floor() would drop one.
     final count = ((available + spacing) / step + 1e-6).floor().clamp(
       1,
       1 << 30,
@@ -61,27 +47,18 @@ class CarouselGeometry {
   }
 }
 
-/// A titled horizontal row with previous/next buttons.
-///
-/// A mouse wheel scrolls vertically, so a phone-style swipe rail is close to
-/// unusable on desktop: the only ways along it were a trackpad or dragging the
-/// scrollbar. The arrow buttons page by whole items.
-///
-/// Items are given their slot — [CarouselGeometry.itemWidth] wide,
-/// [itemHeight] of that tall — and must fill it rather than size themselves.
+/// A mouse wheel scrolls vertically, so a swipe rail is close to unusable on desktop.
+/// Items must fill their [CarouselGeometry.itemWidth] by [itemHeight] slot, not size themselves.
 class DesktopCarousel extends StatefulWidget {
   final String title;
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
 
-  /// The width an item aims for; see [stretch].
   final double itemWidth;
 
-  /// Grow items so a whole number of them fills the row exactly, rather than
-  /// narrowing the row to a whole number of [itemWidth] items.
+  /// Grow items to fill the row with a whole number, edges aligned with what sits above and below.
   final bool stretch;
 
-  /// An item's height for a given item width (a cover plus its caption).
   final double Function(double itemWidth) itemHeight;
 
   final double spacing;
@@ -89,7 +66,6 @@ class DesktopCarousel extends StatefulWidget {
   final VoidCallback? onViewAll;
   final bool loading;
 
-  /// Called when the row is scrolled near its end, for paging in more.
   final VoidCallback? onNearEnd;
 
   const DesktopCarousel({
@@ -107,10 +83,7 @@ class DesktopCarousel extends StatefulWidget {
     this.onNearEnd,
   });
 
-  /// Room reserved above each item, inside the row's clipped viewport, so a
-  /// hovered cover's lift has somewhere to go without its top edge being
-  /// clipped off. Sized to [DesktopCoverCard.hoverLift] plus a little slack
-  /// for the hover shadow's own soft bleed above the card.
+  /// Room inside the clipped row so a hovered cover's lift and shadow are not clipped off.
   static const double liftRoom = DesktopCoverCard.hoverLift + 3;
 
   @override
@@ -150,9 +123,7 @@ class _DesktopCarouselState extends State<DesktopCarousel> {
     final viewport = _scroll.position.viewportDimension;
     if (viewport != _lastViewport) {
       _lastViewport = viewport;
-      // Stretched items change width with the row, which moves every item
-      // boundary under a scroll position that hasn't moved: a row scrolled
-      // in would sit mid-item until realigned.
+      // Stretching moves item boundaries under an unmoved scroll offset, leaving the row mid-item.
       if (widget.stretch) _realign();
     }
     _update();
@@ -193,9 +164,7 @@ class _DesktopCarouselState extends State<DesktopCarousel> {
     final p = _scroll.position;
     final g = _geometry(p.viewportDimension);
     final step = g.itemWidth + widget.spacing;
-    // Page by whole items so the row always lands on an item boundary, from
-    // the boundary at-or-before the current position — rounding to the
-    // nearest would sometimes snap forward past a clamped partial last page.
+    // Floor, not round: rounding could snap forward past a clamped partial last page.
     final aligned = (p.pixels / step).floor() * step;
     final target = (aligned + direction * g.count * step).clamp(
       0.0,
@@ -219,9 +188,7 @@ class _DesktopCarouselState extends State<DesktopCarousel> {
       children: [
         DesktopSectionTitle(
           title: widget.title,
-          // Tighter than the default 14px — this title sits right above
-          // its own row rather than a block of unrelated content. Safe to
-          // shrink because the row's hover-lift reserve lives inside the row.
+          // Tighter than the default 14px; safe because the hover-lift reserve lives inside the row.
           padding: const EdgeInsets.only(bottom: 4),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -264,12 +231,9 @@ class _DesktopCarouselState extends State<DesktopCarousel> {
             child: ListView.builder(
               controller: _scroll,
               scrollDirection: Axis.horizontal,
-              // Clip.none let cards paint outside this row's own width — on
-              // the profile page, scrolled-in covers spilled over the sidebar.
+              // Not Clip.none: on the profile page, scrolled-in covers spilled over the sidebar.
               clipBehavior: Clip.hardEdge,
               itemCount: count,
-              // Each item's extent includes the gap after it (the last has
-              // none), resolved from the row's width during layout.
               itemExtentBuilder: (index, dimensions) {
                 if (index >= count) return null;
                 final width = _geometry(
@@ -278,8 +242,6 @@ class _DesktopCarouselState extends State<DesktopCarousel> {
                 return index == count - 1 ? width : width + spacing;
               },
               itemBuilder: (context, i) => Padding(
-                // The row clips at its top edge, flush against a resting
-                // cover; the lift reserve pads every item down from it.
                 padding: EdgeInsets.only(
                   top: DesktopCarousel.liftRoom,
                   right: i == count - 1 ? 0 : spacing,

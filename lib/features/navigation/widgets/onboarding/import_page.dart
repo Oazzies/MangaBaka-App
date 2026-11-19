@@ -6,11 +6,7 @@ import 'package:mangabaka_app/features/library/import/import_export_screen.dart'
 import 'package:mangabaka_app/features/navigation/widgets/onboarding/onboarding_hero_layout.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 
-/// Onboarding step: bring an existing list in from a tracker or file.
-///
-/// Import needs an account, same rule [ImportExportScreen] itself follows —
-/// a user who skipped the login step (the generic "Next" button doesn't
-/// require it to succeed first) sees a muted note instead of the button.
+/// Import needs an account, and onboarding's Next does not require signing in.
 class ImportPage extends StatelessWidget {
   const ImportPage({super.key});
 

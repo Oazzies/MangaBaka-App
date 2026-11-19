@@ -41,7 +41,6 @@ void main() {
       home: NewsScreen(),
     ));
 
-    // Wait for fetch to complete
     await tester.pump(); // initState trigger
     await tester.pump(); // first fetch trigger
 

@@ -11,12 +11,6 @@ import 'package:mangabaka_app/features/appearance/widgets/theme_gallery.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_mode_selector.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
 
-/// The Appearance settings category for phones, tablets and the landscape
-/// settings dialog. (The desktop shell has its own two-column page built from
-/// the same widgets: `DesktopAppearancePage`.)
-///
-/// Narrow widths get horizontally scrolling theme strips so the page stays
-/// short; from [gridBreakpoint] up the themes wrap into a grid.
 class AppearanceSettings extends StatelessWidget {
   static const double gridBreakpoint = 560;
 
@@ -45,8 +39,6 @@ class AppearanceSettings extends StatelessWidget {
                 if (mode == AppThemeMode.system)
                   _Hint(l10n.translate('theme_mode_system_hint')),
                 const SizedBox(height: 20),
-                // In a pinned mode only that mode's themes are relevant; the
-                // other slot is still reachable by switching mode.
                 if (mode != AppThemeMode.light) ...[
                   SettingsSectionHeader(title: l10n.translate('dark_themes')),
                   ThemeGallery(
@@ -81,11 +73,7 @@ class AppearanceSettings extends StatelessWidget {
   }
 }
 
-/// The user's own themes as rows with their actions, plus create/import.
-/// Shared with the desktop page.
 class CustomThemesSection extends StatelessWidget {
-  /// Desktop shows compact buttons in a row; touch layouts stack them full
-  /// width.
   final bool compactButtons;
 
   const CustomThemesSection({super.key, this.compactButtons = false});
@@ -155,8 +143,7 @@ class CustomThemesSection extends StatelessWidget {
               ),
             const SizedBox(height: 14),
             if (compactButtons)
-              // Wrap, not Row: the buttons' labels are Flexible and need a
-              // bounded width, which a Row does not give its children.
+              // Wrap, not Row: the Mb buttons' Flexible labels need a bounded width.
               Wrap(spacing: 10, runSpacing: 10, children: [create, import])
             else
               Row(

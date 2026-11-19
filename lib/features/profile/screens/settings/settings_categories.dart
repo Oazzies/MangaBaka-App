@@ -14,22 +14,12 @@ import 'package:mangabaka_app/features/profile/widgets/settings/list_customizati
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 
-/// The contents of each settings category.
-///
-/// Every entry point here hands its rows to [showOrNavigate], which decides
-/// between pushing a screen and pushing a page onto the landscape dialog. The
-/// categories are grouped in this one file because they are all the same kind
-/// of thing — a list of [SettingsItem]s — and splitting them further would
-/// leave five files of a dozen lines each.
 class SettingsCategories {
   SettingsCategories._();
 
-  /// Below this width the general category hides the tooltip toggle: tooltips
-  /// are a pointer affordance and there is no hover on a phone.
+  /// Tooltips need hover, which phones lack, so the tooltip toggle hides below this width.
   static const double _smallDeviceWidth = 600;
 
-  /// Fake release fed to [UpdateDialog] from the "trigger update widget" row —
-  /// styling/QA only, never a real check against GitHub.
   static const AppRelease debugRelease = AppRelease(
     tagName: 'v9.9.9',
     name: 'MangaBaka 9.9.9',
@@ -76,8 +66,7 @@ class SettingsCategories {
                 onTap: () =>
                     GeneralSettingsDialogs.showAppStartPageSelectionDialog(ctx),
               ),
-              // The desktop shell has its own sidebar; where the phone and
-              // tablet bar sits does not apply to it.
+              // The desktop shell has its own sidebar, so the nav bar position does not apply.
               if (!DesktopLayout.isActive(ctx)) ...[
                 const SettingsDivider(),
                 SettingsItem(
@@ -155,8 +144,7 @@ class SettingsCategories {
     );
   }
 
-  /// Themes, mode and accent. The page listens to the theme controller
-  /// itself, so no listenable is threaded through here.
+  /// No listenable: the page listens to the theme controller itself.
   static void appearance(BuildContext context, LocalizationService l10n) {
     showOrNavigate(
       context,
@@ -275,8 +263,6 @@ class SettingsCategories {
     );
   }
 
-  /// Unlike the other categories, this isn't a list of settings — it's the
-  /// import/export hub screen itself, pushed straight away.
   static void importExport(BuildContext context, LocalizationService l10n) =>
       ImportExportScreen.open(context);
 

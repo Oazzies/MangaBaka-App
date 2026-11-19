@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/features/series/widgets/series_note_row.dart';
 
-/// Chapter / volume progress bar row inside [SeriesMyListCard].
 class SeriesProgressRow extends StatelessWidget {
   final String label;
   final int value;
@@ -104,7 +103,6 @@ class SeriesProgressRow extends StatelessWidget {
   }
 }
 
-/// 0-100 rating row inside [SeriesMyListCard].
 class SeriesScoreRow extends StatelessWidget {
   final String label;
   final int rating;

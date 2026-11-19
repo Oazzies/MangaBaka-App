@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Thin amber progress track, as used under the reference's "NOW" hero.
 class MbProgressBar extends StatelessWidget {
-  /// Clamped to 0..1. Null renders an empty track (unknown progress).
   final double? value;
   final double height;
 

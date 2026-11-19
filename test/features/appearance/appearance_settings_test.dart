@@ -32,7 +32,6 @@ class _Host extends StatelessWidget {
   }
 }
 
-/// Records the background it was last built with.
 class _Probe extends StatelessWidget {
   static Color? seen;
   const _Probe();
@@ -130,7 +129,6 @@ void main() {
     await pump(tester, width: 900);
     expect(find.widgetWithText(ThemePreviewCard, 'Sunset'), findsOne);
     expect(find.text('SUNSET'), findsOne); // the My themes row
-    // Grid layout: no horizontal list.
     expect(
       find.byWidgetPredicate(
         (w) => w is ListView && w.scrollDirection == Axis.horizontal,

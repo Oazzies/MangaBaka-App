@@ -6,45 +6,26 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 
 part 'search_bar_navigation_part.dart';
 
-/// Asks for suggestions for [query] and delivers them to [onResults].
-///
-/// Deliberately callback-shaped rather than a `Future`: the Browse source is
-/// debounced and cancellable and may answer more than once or not at all,
-/// while the Library source answers synchronously from memory.
+/// Not a Future: Browse may answer twice or never, while Library answers synchronously.
 typedef SuggestionRequest =
     void Function(
       String query,
       ValueChanged<List<AutocompleteSeriesResult>> onResults,
     );
 
-/// The state machine behind the search field: what suggestions exist, which
-/// one is highlighted, what the inline completion is, and when suggestions are
-/// suppressed.
-///
-/// Separate from the widget because none of it is layout — it is a small set
-/// of rules about typing that were previously duplicated between the Browse
-/// and Library fields and had drifted apart. Notifies listeners on every
-/// change; the widget rebuilds and repositions its overlay from that.
 class SearchBarController extends ChangeNotifier {
-  /// How long the overlay lingers after focus is lost, so a tap *on* a
-  /// suggestion is not cancelled by the blur that precedes it.
+  /// Lets a tap on a suggestion land before the blur that precedes it hides the overlay.
   static const Duration blurDismissDelay = Duration(milliseconds: 150);
 
   final GhostTextEditingController text;
   final FocusNode focusNode;
 
-  /// Where suggestions come from.
   final SuggestionRequest requestSuggestions;
 
-  /// Consulted before every request and before re-showing on focus, so a user
-  /// who has turned suggestions off never sees them.
   final bool Function() suggestionsEnabled;
 
-  /// Fires on every keystroke, on clear with an empty string, and when a
-  /// suggestion is chosen.
   final ValueChanged<String> onQueryChanged;
 
-  /// Fires when a suggestion is chosen by any means.
   final ValueChanged<AutocompleteSeriesResult>? onResultSelected;
 
   SearchBarController({
@@ -73,11 +54,8 @@ class SearchBarController extends ChangeNotifier {
 
   List<AutocompleteSeriesResult> get results => _results;
 
-  /// Index of the row highlighted by the arrow keys, or -1 for none.
   int get selectedIndex => _selectedIndex;
 
-  /// True when the overlay should be on screen. A query the user has rejected
-  /// keeps it closed even while results for it are still held.
   bool get isOverlayVisible =>
       _showSuggestions && _originalQuery != _suppressedQuery;
 
@@ -88,11 +66,7 @@ class SearchBarController extends ChangeNotifier {
     super.dispose();
   }
 
-  // ─── Query flow ──────────────────────────────────────────────────────────
-
   void onTextChanged(String query) {
-    // Arrow-key navigation and completion write to the field; that is not the
-    // user typing and must not trigger a new search.
     if (_isProgrammaticEdit) return;
 
     _originalQuery = query;
@@ -103,8 +77,7 @@ class SearchBarController extends ChangeNotifier {
       _suppressedQuery = '';
       _selectedIndex = -1;
     }
-    // The suppression covers the rejected query and what it grows into;
-    // typing something that diverges from it lifts the block.
+    // Suppression covers the rejected query and what it grows into; diverging lifts it.
     if (!_suppressedQuery.startsWith(query)) _suppressedQuery = '';
 
     if (!suggestionsEnabled()) {
@@ -126,9 +99,7 @@ class SearchBarController extends ChangeNotifier {
     _notify();
   }
 
-  /// Recomputes the inline completion. Suppressed while the user has rejected
-  /// one, and while a row is highlighted — the field already holds that row's
-  /// title, so there is nothing left to complete.
+  /// No ghost while a row is highlighted: the field already holds that row's title.
   void _applyGhost(List<AutocompleteSeriesResult> results) {
     final query = text.text;
     final blocked =
@@ -148,8 +119,6 @@ class SearchBarController extends ChangeNotifier {
     text.clearGhost();
   }
 
-  // ─── Keyboard ────────────────────────────────────────────────────────────
-
   KeyEventResult handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
@@ -160,8 +129,7 @@ class SearchBarController extends ChangeNotifier {
       if (handled != null) return handled;
     }
 
-    // Enter falls through to the field's own onSubmitted, which knows whether
-    // a row is highlighted.
+    // Falls through to the field's onSubmitted, which knows whether a row is highlighted.
     if (event.logicalKey == LogicalKeyboardKey.enter ||
         event.logicalKey == LogicalKeyboardKey.numpadEnter) {
       return KeyEventResult.ignored;
@@ -208,7 +176,6 @@ class SearchBarController extends ChangeNotifier {
     onResultSelected?.call(result);
   }
 
-  /// Puts [title] in the field as the settled query and closes the overlay.
   void _commit(String title) {
     _isProgrammaticEdit = true;
     _setFieldText(title);
@@ -234,11 +201,7 @@ class SearchBarController extends ChangeNotifier {
     onQueryChanged('');
   }
 
-  /// Resolves what submitting the field means: accept the inline completion,
-  /// take the highlighted row, or fall through to a plain search.
-  ///
-  /// Returns the chosen result, or null when the caller should run the query
-  /// itself.
+  /// Null means the caller should run the query itself.
   AutocompleteSeriesResult? resolveSubmission() {
     final match = AutocompleteRanking.matchForGhost(
       _results,
@@ -260,8 +223,6 @@ class SearchBarController extends ChangeNotifier {
 
   void _onFocusChange() {
     if (focusNode.hasFocus) {
-      // Refocusing is a fresh start: whatever was rejected before no longer
-      // applies.
       _isSuppressed = false;
       if (_results.isNotEmpty && suggestionsEnabled()) _showSuggestions = true;
       _notify();
@@ -269,7 +230,6 @@ class SearchBarController extends ChangeNotifier {
     }
 
     Future.delayed(blurDismissDelay, () {
-      // Focus may have returned during the delay.
       if (_disposed || focusNode.hasFocus) return;
       _showSuggestions = false;
       _clearGhost();

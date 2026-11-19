@@ -5,12 +5,9 @@ import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 import 'package:mangabaka_app/core/theme/palette/palette_derivation.dart';
 
-/// A user-made theme: a name plus the few seeds a person actually picks. The
-/// full palette is always derived, so custom themes pick up new tokens and
-/// contrast fixes for free and can never be saved in an illegible state.
+/// Seeds only: the derived palette picks up new tokens and contrast fixes.
 @immutable
 class MbThemeSpec {
-  /// Stable id, prefixed `custom:` so it can share the id space with presets.
   final String id;
   final String name;
   final Color background;
@@ -31,9 +28,7 @@ class MbThemeSpec {
   static const String _exportPrefix = 'mbtheme1:';
   static const int maxNameLength = 32;
 
-  /// Follows the background, so a theme can never be a "dark" theme with a
-  /// pale canvas (which would flip status-bar icons and Material defaults the
-  /// wrong way).
+  /// Follows the background: a pale "dark" theme would flip status-bar icons.
   Brightness get brightness =>
       ColorMath.isDark(background) ? Brightness.dark : Brightness.light;
 
@@ -77,8 +72,6 @@ class MbThemeSpec {
     if (text != null) 'text': text!.toARGB32(),
   };
 
-  /// Returns null for anything malformed — stored or imported data is never
-  /// trusted to be well-formed.
   static MbThemeSpec? fromJson(Object? raw) {
     if (raw is! Map) return null;
     final id = raw['id'];
@@ -111,13 +104,10 @@ class MbThemeSpec {
     }
   }
 
-  /// Shareable one-line code: `mbtheme1:<base64url json>`.
   String toShareCode() =>
       '$_exportPrefix${base64Url.encode(utf8.encode(encode()))}';
 
-  /// Parses a share code. The imported theme gets a fresh id so importing the
-  /// same code twice, or a code made from one of your own themes, never
-  /// overwrites anything.
+  /// Gets a fresh id, so re-importing a code never overwrites a theme.
   static MbThemeSpec? fromShareCode(String code) {
     final trimmed = code.trim();
     if (!trimmed.startsWith(_exportPrefix)) return null;
@@ -129,7 +119,6 @@ class MbThemeSpec {
       );
       return decode(json)?.copyWith(id: newId());
     } on FormatException {
-      // Bad base64 or bad UTF-8: not a share code.
       return null;
     }
   }

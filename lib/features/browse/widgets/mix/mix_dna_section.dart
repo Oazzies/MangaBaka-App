@@ -6,25 +6,14 @@ import 'package:mangabaka_app/features/browse/models/mix_result.dart';
 import 'package:mangabaka_app/features/browse/widgets/mix/mix_section_header.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The "DNA" readout: which traits the recommendations were actually drawn
-/// from, weighted.
-///
-/// The top few get a labelled bar; the rest are listed as plain chips, because
-/// past the leading traits the exact weight stops being informative and the
-/// bars just add visual noise.
 class MixDnaSection extends StatelessWidget {
-  /// Weight-descending. [MixService] sorts on the way in, so this widget does
-  /// no sorting of its own — it used to copy and re-sort the whole list on
-  /// every rebuild, which a settings change or a keystroke was enough to
-  /// trigger.
+  /// Weight-descending: [MixService] sorts it once, so rebuilds do not re-sort.
   final List<MixDnaTag> dna;
   final LocalizationService l10n;
 
-  /// How many traits get a weighted bar before the rest become chips.
   static const int _barCount = 5;
 
-  /// Cap on the chip tail — a long DNA list would otherwise push the results
-  /// off the first screen.
+  /// A long DNA list would otherwise push the results off the first screen.
   static const int _chipCount = 10;
 
   const MixDnaSection({super.key, required this.dna, required this.l10n});
@@ -33,8 +22,6 @@ class MixDnaSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (dna.isEmpty) return const SizedBox.shrink();
 
-    // Bars are drawn relative to the strongest trait, so the leading bar is
-    // always full and the rest read as a share of it.
     final maxWeight = dna.first.weight;
     final tail = dna.skip(_barCount).take(_chipCount).toList();
 
@@ -100,7 +87,6 @@ class MixDnaSection extends StatelessWidget {
 class _DnaBar extends StatelessWidget {
   final MixDnaTag tag;
 
-  /// This trait's weight as a share of the strongest one, 0–1.
   final double fraction;
 
   const _DnaBar({required this.tag, required this.fraction});
@@ -144,8 +130,7 @@ class _DnaBar extends StatelessWidget {
                 ),
               ),
               FractionallySizedBox(
-                // Floor of 2% so a very weak trait is still a visible sliver
-                // rather than an empty track.
+                // A 2% floor keeps a very weak trait a visible sliver.
                 widthFactor: fraction.clamp(0.02, 1.0),
                 child: Container(
                   height: 8,

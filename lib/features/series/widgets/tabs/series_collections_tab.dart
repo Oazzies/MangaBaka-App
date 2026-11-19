@@ -69,9 +69,6 @@ class SeriesCollectionsTab extends StatelessWidget {
                       Orientation.landscape;
                   final prefColumns = settings.collectionsListColumns;
 
-                  // Double column support is only for landscape mode.
-                  // In portrait, we always use 1 column.
-                  // In landscape, we use 2 unless the user specifically chose 1.
                   final columns = isLandscape ? (prefColumns == 1 ? 1 : 2) : 1;
 
                   final spacing = 12.0;

@@ -12,11 +12,6 @@ import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
 
 part 'desktop_browse_landing_cards_part.dart';
 
-/// What Browse shows before anything is searched: Mix as a feature card, then
-/// one card per content type with its three ready-made lists.
-///
-/// The phone stacks these as fifteen full-width buttons; here each type is a
-/// card and the cards sit side by side.
 class DesktopBrowseLanding extends StatelessWidget {
   final void Function(String header, String sortBy, {String? type}) onNavigate;
   final VoidCallback onMix;
@@ -29,7 +24,6 @@ class DesktopBrowseLanding extends StatelessWidget {
     required this.onDiscoveryQueue,
   });
 
-  /// (API type, l10n key for the card title).
   static const List<(String, String)> _types = [
     ('manga', 'type_manga'),
     ('manhwa', 'type_manhwa'),
@@ -89,8 +83,6 @@ class DesktopBrowseLanding extends StatelessWidget {
         _StacksCard(onTap: () => StacksHubScreen.open(context)),
         const SizedBox(height: DesktopTokens.sectionGap),
         DesktopSectionTitle(title: l10n.translate('discover')),
-        // Columns are a whole number decided per breakpoint; their width
-        // comes from the Row at layout, so a resize never rebuilds a card.
         DerivedLayoutBuilder<int>(
           derive: (constraints) =>
               (constraints.maxWidth / 250).floor().clamp(2, 5),

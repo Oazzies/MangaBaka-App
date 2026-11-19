@@ -6,9 +6,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/features/appearance/widgets/mb_color_picker.dart';
 
-/// Row of accent swatches: "theme default", the curated accents, and a custom
-/// colour. The override applies on top of whichever theme is active, and is
-/// contrast-adjusted per theme by the controller.
 class AccentPicker extends StatelessWidget {
   final double swatchSize;
 
@@ -133,8 +130,6 @@ class _AccentSwatch extends StatelessWidget {
   }
 }
 
-/// Half the active theme's own accent, half a diagonal slash — "whatever the
-/// theme uses".
 class _DefaultGlyph extends StatelessWidget {
   final double size;
   const _DefaultGlyph({required this.size});

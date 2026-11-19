@@ -6,12 +6,9 @@ Future<void> _updateLibraryEntryProgressImpl(
   int? progressChapter,
   int? progressVolume,
 }) async {
-  // Progress is a count; a negative value from a stepper or a typed field
-  // would be written locally and sent to the server as-is.
   if (progressChapter != null && progressChapter < 0) progressChapter = 0;
   if (progressVolume != null && progressVolume < 0) progressVolume = 0;
 
-  // Capture state for rollback and auto-completion checks.
   final snapshot = await self.database.libraryEntriesDao.getEntryBySeriesId(
     seriesId,
   );
@@ -114,7 +111,6 @@ Future<void> _updateLibraryEntryProgressImpl(
         wroteState: autoState,
       );
     } catch (rollbackError, rollbackStack) {
-      // Logged, not thrown: the original failure is the one to report.
       self.logger.severe(
         'Progress rollback failed for $seriesId',
         rollbackError,

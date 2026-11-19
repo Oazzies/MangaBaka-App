@@ -10,12 +10,7 @@ import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Reads the `/news` feed, with the first page mirrored to disk so the news
-/// tab has something to show before the network answers.
-///
-/// Parsing runs on a background isolate via [compute]: a page of news carries
-/// long HTML bodies, and decoding them on the UI thread dropped frames on
-/// low-end devices.
+/// Parsed via [compute]: long HTML bodies dropped frames on low-end devices.
 class NewsService {
   static final _logger = LoggingService.logger;
   static final String _baseUrl = '${AppConstants.baseApiUrl}/news';
@@ -23,17 +18,12 @@ class NewsService {
 
   final ApiClient _api;
 
-  /// Guards against overlapping fetches — the news tab can fire a refresh and
-  /// a pagination request at nearly the same moment.
   bool _isFetching = false;
 
   NewsService({http.Client? client, ApiClient? api})
     : _api = api ?? ApiClient(healthContext: 'news', client: client);
 
-  /// The last cached first page, or an empty list when there is none.
-  ///
-  /// Never throws: this runs on the way to showing the screen, and a corrupt
-  /// cache should cost the placeholder, not the tab.
+  /// Never throws: a corrupt cache should cost the placeholder, not the tab.
   Future<List<News>> getCachedNews() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -46,11 +36,6 @@ class NewsService {
     }
   }
 
-  /// Fetches a page of news.
-  ///
-  /// Returns an empty list when a fetch is already in flight rather than
-  /// queueing a duplicate. Failures propagate as [ApiException] /
-  /// [NetworkException] so the caller can show a retry affordance.
   Future<List<News>> fetchNews({int page = 1, int limit = 10}) async {
     if (_isFetching) {
       _logger.info('Already fetching news, skipping this request.');
@@ -76,9 +61,7 @@ class NewsService {
     }
   }
 
-  /// Mirrors the first page to disk. A write failure only costs the offline
-  /// placeholder on the next launch, so it must not fail the fetch that
-  /// already succeeded.
+  /// A write failure only costs next launch's placeholder, not the successful fetch.
   Future<void> _cacheFirstPage(String body) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -92,8 +75,7 @@ class NewsService {
   Future<List<News>> _parse(dynamic json) =>
       compute(_parseNewsList, dataList(json));
 
-  /// Runs on a background isolate — must stay a top-level/static function
-  /// operating only on data that can cross the isolate boundary.
+  /// Runs on an isolate: must stay static and take only sendable data.
   static List<News> _parseNewsList(List<Map<String, dynamic>> data) {
     final out = <News>[];
     for (final item in data) {

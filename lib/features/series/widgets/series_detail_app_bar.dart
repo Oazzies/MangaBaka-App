@@ -11,14 +11,7 @@ import 'package:mangabaka_app/features/series/widgets/app_bar/glass_control.dart
 import 'package:mangabaka_app/features/series/widgets/app_bar/series_app_bar_metrics.dart';
 import 'package:mangabaka_app/features/series/widgets/app_bar/series_banner_background.dart';
 
-/// Banner hero for the series detail page: a full-bleed blurred cover that
-/// fades into the page background, with the cover artwork and serif title
-/// block floating at its base, plus a glass "Back" pill and share / delete
-/// controls. The remaining content (tabs, cards, synopsis) lives below.
-///
-/// Stateful only to know when the route transition has settled — both the
-/// banner blur and the controls' backdrop filters are held off until then, so
-/// they never compete with the slide for frames.
+/// Stateful only to hold the banner blur and backdrop filters until the route transition settles.
 class SeriesDetailAppBar extends StatefulWidget {
   final Series series;
   final String title;
@@ -69,7 +62,6 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
     _routeAnimation = ModalRoute.of(context)?.animation;
     final animation = _routeAnimation;
     if (animation == null || animation.isCompleted) {
-      // Pushed without a transition, or it has already finished.
       _transitionComplete = true;
       return;
     }
@@ -156,7 +148,6 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
           child: GlassControl(
             onTap: widget.onBack,
             icon: Icons.arrow_back,
-            // Labelled in both orientations, per the design.
             label: l10n.translate('back'),
           ).animate().fadeIn(duration: 400.ms),
         ),
@@ -165,12 +156,10 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
   }
 
   List<Widget> _buildActions(SeriesAppBarMetrics metrics) {
-    // Embedded in a host that floats its own controls over the banner, so the
-    // banner carries only the blurred background.
+    // The embedding host floats its own controls over the banner.
     if (widget.embedded) return const [];
 
-    // Wide portrait puts share and delete in the layout below instead, so the
-    // banner carries only the trailing inset that keeps the title clear.
+    // Share and delete sit in the layout below; only the inset that clears the title stays.
     if (!metrics.showsBannerActions) {
       return [
         Padding(
@@ -196,13 +185,10 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
               );
             },
             metrics: metrics,
-            // Staggered behind the back pill so the controls arrive in reading
-            // order rather than all at once.
             delay: 80.ms,
           ),
         ),
       ),
-      // Nothing to delete unless the series is in the library.
       if (widget.entry != null) ...[
         const SizedBox(width: 8),
         AppTooltip(
@@ -238,8 +224,7 @@ class _SeriesDetailAppBarState extends State<SeriesDetailAppBar> {
 
   Widget _buildCollapsedTitle(SeriesAppBarMetrics metrics) {
     return IgnorePointer(
-      // Fully faded out it is still laid out, and would otherwise swallow taps
-      // meant for the banner beneath it.
+      // Faded out it is still laid out, and would swallow taps meant for the banner.
       ignoring: metrics.titleOpacity == 0,
       child: Opacity(
         opacity: metrics.titleOpacity,

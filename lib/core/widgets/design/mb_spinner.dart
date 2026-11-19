@@ -4,16 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// MangaBaka's signature progress spinner: a kinetic rotating rounded square.
-///
-/// Distinctive Manga Design:
-/// - A stylized rounded square reflecting MangaBaka's rounded card and cover
-///   geometry.
-/// - In indeterminate mode, it rotates with kinetic momentum while its stroke
-///   sweeps dynamically around the rounded square perimeter.
-/// - In determinate mode, an elegant solid track in [surfaceRaised] fills
-///   progress precisely from 0% to 100% along the rounded square contour.
-/// - Uses 100% solid theme colors with no washed-out transparencies.
 class MbSpinner extends StatefulWidget {
   final double size;
   final double? strokeWidth;
@@ -122,7 +112,6 @@ class _MbSpinnerPainter extends CustomPainter {
     final metric = metrics.first;
     final totalLength = metric.length;
 
-    // 1. Optional solid track (rendered in determinate mode or when explicitly set)
     if (trackColor != null) {
       final trackPaint = Paint()
         ..color = trackColor!
@@ -138,11 +127,9 @@ class _MbSpinnerPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..strokeWidth = strokeWidth;
 
-    // 2. Determinate mode: progress fills along rounded square perimeter
     if (isDeterminate) {
       final clampedProgress = progress.clamp(0.0, 1.0);
       if (clampedProgress > 0.0) {
-        // Start from top-center
         final straightTopHalf = (rect.width - 2 * cornerRadius) / 2.0;
         final startOffset = straightTopHalf.clamp(0.0, totalLength);
         final sweepLength = clampedProgress * totalLength;
@@ -157,9 +144,7 @@ class _MbSpinnerPainter extends CustomPainter {
       return;
     }
 
-    // 3. Indeterminate mode: kinetic rotating rounded square
     final t = progress;
-    // Rotation around center
     final rotation = t * 2 * math.pi;
 
     canvas.save();
@@ -167,8 +152,6 @@ class _MbSpinnerPainter extends CustomPainter {
     canvas.rotate(rotation);
     canvas.translate(-center.dx, -center.dy);
 
-    // Dynamic sweeping stroke along the rounded square perimeter:
-    // Expands and contracts between ~30% and ~85% of total perimeter
     final sweepSine = (math.sin(t * 2 * math.pi - (math.pi / 2)) + 1.0) / 2.0;
     final sweepLength = totalLength * (0.30 + 0.55 * sweepSine);
     final startOffset = (t * 1.35 * totalLength) % totalLength;

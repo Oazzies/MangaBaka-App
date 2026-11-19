@@ -11,8 +11,6 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/complete_progress_dialog.dart';
 
-/// User's choice from [showCompleteSeriesDialog] about marking the series as
-/// completed and optionally maxing out the remaining progress field.
 class CompleteSeriesChoice {
   final bool markCompleted;
   final bool updateOtherProgress;
@@ -23,9 +21,6 @@ class CompleteSeriesChoice {
   });
 }
 
-/// Checks whether reaching the final chapter or volume of a completed series
-/// should prompt the user to mark it as Completed (and max out the other
-/// progress field), and performs the update if confirmed.
 Future<void> maybePromptCompleteSeries(
   BuildContext context, {
   required Series series,
@@ -117,8 +112,6 @@ Future<void> maybePromptCompleteSeries(
   }
 }
 
-/// Prompts whether to mark a series as Completed and optionally max out the
-/// remaining progress field (chapters or volumes).
 Future<CompleteSeriesChoice?> showCompleteSeriesDialog(
   BuildContext context, {
   required String currentState,

@@ -64,7 +64,7 @@ void main() {
     testWidgets('discovery queue and mix cards match in height when stacked at intermediate width', (
       tester,
     ) async {
-      // At width 850px, each card is in a row but cardWidth < 580, so both stack buttons below.
+      // At 850px the cards share a row but cardWidth < 580, so the buttons stack.
       await tester.pumpWidget(
         _host(
           DesktopBrowseLanding(
@@ -140,7 +140,6 @@ void main() {
           reason: 'Discovery Queue title should not be cut off at width $width',
         );
 
-        // Ensure the two cards still match in height when side-by-side
         final queueFinder = find.byWidgetPredicate(
           (w) => w.runtimeType.toString() == '_DiscoveryQueueCard',
         );

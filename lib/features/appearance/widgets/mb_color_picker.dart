@@ -11,12 +11,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/appearance/widgets/color_picker_controls.dart';
 
-/// Opens a colour picker suited to the platform: a bottom sheet on phones,
-/// a dialog on tablets, landscape and desktop. Resolves the chosen colour, or
-/// null if dismissed.
-///
-/// [contrastAgainst], when given, shows a live contrast-ratio readout — the
-/// editor passes the background so the user sees legibility as they drag.
 Future<Color?> showMbColorPicker(
   BuildContext context, {
   required Color initial,
@@ -125,10 +119,6 @@ class _PickerBodyState extends State<_PickerBody> {
   }
 }
 
-/// Saturation/value square, hue slider, hex field and swatches.
-///
-/// Stateless about the colour itself: the caller owns [color] and gets every
-/// change through [onChanged], so the editor can preview live.
 class MbColorPicker extends StatefulWidget {
   final Color color;
   final ValueChanged<Color> onChanged;
@@ -146,9 +136,7 @@ class MbColorPicker extends StatefulWidget {
 }
 
 class _MbColorPickerState extends State<MbColorPicker> {
-  /// Kept separately from the incoming colour: converting a greyscale colour
-  /// to HSV loses its hue, which would snap the hue slider to red while the
-  /// user drags value toward black.
+  /// Not re-derived from widget.color: a grey's HSV loses its hue and snaps to red.
   late HSVColor _hsv = HSVColor.fromColor(widget.color);
   late final TextEditingController _hex = TextEditingController(
     text: _hexOf(widget.color),

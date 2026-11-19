@@ -16,8 +16,6 @@ class MockSeriesSearchService extends Fake implements SeriesSearchService {
   List<Series> mockResults = [];
   bool throwError = false;
 
-  /// When set, takes over responses entirely (used to simulate slow/overlapping
-  /// requests).
   Future<SeriesSearchResult> Function(String query)? onSearch;
 
   @override
@@ -77,9 +75,6 @@ void main() {
       MockPublisherSearchService(),
     );
 
-    // We need to initialize SettingsManager if needed, but it's a singleton.
-    // In a real test we might want to mock SharedPreferences.
-
     controller = BrowseController();
   });
 
@@ -135,7 +130,6 @@ void main() {
       await controller.searchSeries();
 
       expect(controller.searchResults, isEmpty);
-      // User-facing wording, never the raw exception text.
       expect(controller.error, ErrorMessages.describe(Exception('any')));
       expect(controller.isLoading, isFalse);
     });
@@ -197,16 +191,13 @@ void main() {
         );
       };
 
-      // Kick off a search whose response hangs...
       controller.updateSearchQuery('first');
       final firstSearch = controller.searchSeries();
 
-      // ...then start a newer search that completes immediately.
       controller.updateSearchQuery('second');
       await controller.searchSeries();
       expect(controller.searchResults.map((s) => s.title), ['Second']);
 
-      // The old response finally arrives — it must not touch the results.
       slowResponse.complete(
         SeriesSearchResult(series: [makeSeries('1', 'First')], total: 1),
       );

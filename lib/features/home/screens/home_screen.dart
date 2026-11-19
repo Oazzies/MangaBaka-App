@@ -20,9 +20,7 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The Home feed: a rotating spotlight of what's hot, then progressively broader
-/// discovery — personalised, then trending, then the long tail. Mirrors the
-/// sections of the web `/discover` page.
+/// Mirrors the sections of the web `/discover` page.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -44,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<TopGenreRail> _genreRails = const [];
   UpcomingData _upcoming = UpcomingData.empty;
 
-  /// API `type` filter for the Trending rail; null means every type.
   String? _trendingType;
 
   /// Trending window in days — 7 or 30.
@@ -83,8 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-    // The public rails always load; "For You" is gated on the readiness probe
-    // so a cold profile shows nothing rather than an empty rail.
     final readiness = await _homeService.fetchForYouReadiness();
     final wantsForYou = readiness?.isReady ?? false;
 
@@ -114,14 +109,12 @@ class _HomeScreenState extends State<HomeScreen> {
       _loadingRails = false;
       _loadingTrending = false;
     });
-    // Library marks and fallback covers for the upcoming rail.
     final resolved = await _upcoming.withLibrary();
     if (!mounted) return;
     setState(() => _upcoming = resolved);
   }
 
-  /// Re-fetch only the Trending rail after a type / window change. The old
-  /// results stay on screen (behind a skeleton) so the spotlight doesn't blink.
+  /// Keeps the old results on screen while reloading so the spotlight does not blink.
   Future<void> _reloadTrending() async {
     setState(() => _loadingTrending = true);
     final list = await _homeService.fetchTrending(

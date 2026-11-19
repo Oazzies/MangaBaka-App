@@ -17,11 +17,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 export 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
 
-/// The "List customization" settings category.
-///
-/// Library, Browse and Stacks can be configured together or apart;
-/// [ListCustomizationScope] resolves which of the two the visible controls are
-/// editing, so nothing here has to re-derive it.
 class ListCustomizationSettings extends StatefulWidget {
   final LocalizationService l10n;
 
@@ -34,8 +29,6 @@ class ListCustomizationSettings extends StatefulWidget {
 
 class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
     with SingleTickerProviderStateMixin {
-  /// Width of one style card plus its separator, used to centre the selected
-  /// card in the horizontal picker.
   static const double _styleCardWidth = 108.0;
   static const double _styleCardStride = 116.0;
 
@@ -45,9 +38,6 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
 
   late final ScrollController _scrollController;
 
-  /// Drives the horizontal slide of the whole panel below the tab selector.
-  /// Sits at 1.0 when settled; [_switchTab] restarts it from 0.0 so the new
-  /// tab's content slides in from [_slideSign] * panel width.
   late final AnimationController _slideController;
   double _slideSign = 1.0;
 
@@ -76,11 +66,9 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
   ListCustomizationScope get _scope =>
       ListCustomizationScope(settings: SettingsManager(), tab: _tab);
 
-  /// Switches to [tab] and plays the slide-in. No-op if already there.
   void _switchTab(ListScopeTab tab) {
     if (tab == _tab) return;
     setState(() {
-      // Slide in from the side the new tab sits on.
       _slideSign = tab.index > _tab.index ? 1.0 : -1.0;
       _tab = tab;
     });
@@ -90,8 +78,6 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
     });
   }
 
-  /// Brings the selected style card to the centre of the picker, so the
-  /// current choice is visible rather than scrolled off to one side.
   void _scrollToSelected({bool animated = true}) {
     if (!_scrollController.hasClients) return;
 
@@ -122,9 +108,6 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // The tab selector is hidden while both lists share their style and
-        // column count, since every control below would then be identical on
-        // either tab.
         if (scope.hasAnySeparation)
           ListScopeTabSelector(
             active: _tab,
@@ -134,9 +117,6 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
             onChanged: _switchTab,
           ),
 
-        // Everything below the tab selector slides in horizontally whenever
-        // the active tab changes, so it reads as a different list even when
-        // Library and Browse are configured to look identical.
         ClipRect(
           child: AnimatedBuilder(
             animation: _slideController,
@@ -228,9 +208,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
     );
   }
 
-  /// Cross-fades when the style or a progress toggle changes within a tab; the
-  /// panel-level slide handles tab switches, so this one deliberately does not
-  /// move horizontally.
+  /// Cross-fade only: the panel-level slide already handles tab switches.
   Widget _buildPreview(ListCustomizationScope scope) {
     final settings = scope.settings;
     return AnimatedSize(
@@ -243,8 +221,7 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
           switchInCurve: Curves.easeOutCubic,
           switchOutCurve: Curves.easeInCubic,
           child: ListStyleLivePreview(
-            // Every input that changes what the preview looks like is in the
-            // key, so the switcher animates on any of them.
+            // Every input that changes the preview's look must be in the key, or it won't animate.
             key: ValueKey(
               '${scope.style.name}_${settings.showLibraryProgress}_'
               '${settings.showRemainingProgress}_'
@@ -281,7 +258,6 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
               label: ListStyleDialogs.getListStyleName(style),
               onTap: () {
                 scope.setStyle(style);
-                // Re-centre after the change has been applied and laid out.
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _scrollToSelected(animated: true);
                 });
@@ -292,7 +268,4 @@ class _ListCustomizationSettingsState extends State<ListCustomizationSettings>
       ),
     );
   }
-
-  /// Copies the active tab's independent settings onto the other list. Only
-  /// meaningful while at least one of the two is configured separately.
 }

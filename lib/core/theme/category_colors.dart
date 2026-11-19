@@ -1,9 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 
-/// Fixed categorical hues for data that is not part of the palette (series
-/// types). Always read through [forSeriesType], which adjusts the hue to stay
-/// legible on the active theme's surfaces.
 class CategoryColors {
   const CategoryColors._();
 

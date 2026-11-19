@@ -127,7 +127,6 @@ void main() {
 
     expect(find.byType(BrowseResultsError), findsOneWidget);
     
-    // Test retry
     mockSearchService.shouldFail = false;
     mockSearchService.response = [Series.fromJson({'id': '1', 'title': 'Result 1'})];
     

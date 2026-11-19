@@ -32,8 +32,7 @@ class _FakeLibraryService extends Fake implements LibraryService {
       Stream<LibraryEntry?>.value(null);
 }
 
-/// Pumps the List Customization panel on a canvas tall enough that the whole
-/// column lays out, so every control is hit-testable without scrolling.
+/// A 4000px canvas lays the whole column out, so every control is hit-testable.
 Future<void> _pumpPanel(WidgetTester tester) async {
   tester.view.physicalSize = const Size(800, 4000);
   tester.view.devicePixelRatio = 1.0;
@@ -57,7 +56,6 @@ Future<void> _pumpPanel(WidgetTester tester) async {
   await tester.pump();
 }
 
-/// Taps the horizontal style picker entry for [style].
 Future<void> _tapStyle(WidgetTester tester, AppListStyle style) async {
   final item = find.byWidgetPredicate(
     (w) => w is ListStylePreviewItem && w.style == style,

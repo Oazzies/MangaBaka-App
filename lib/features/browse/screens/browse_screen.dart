@@ -22,8 +22,6 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Search and discovery. Owns the [BrowseController] and the search-mode
-/// state; the results themselves live in [BrowseContent].
 class BrowseScreen extends StatefulWidget {
   static final GlobalKey<BrowseScreenState> browseScreenKey =
       GlobalKey<BrowseScreenState>();
@@ -40,8 +38,6 @@ class BrowseScreenState extends State<BrowseScreen> {
   late final BrowseController _controller;
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
-
-  // ─── Public surface ──────────────────────────────────────────────────────
 
   FocusNode get searchFocusNode => _searchFocusNode;
   BrowseController get controller => _controller;
@@ -62,8 +58,6 @@ class BrowseScreenState extends State<BrowseScreen> {
     _navigateToDetail(BrowseHelpers.convertAutocompleteToSeries(result));
   }
 
-  // ─── Lifecycle ───────────────────────────────────────────────────────────
-
   @override
   void initState() {
     super.initState();
@@ -77,10 +71,7 @@ class BrowseScreenState extends State<BrowseScreen> {
     super.dispose();
   }
 
-  // ─── Search ──────────────────────────────────────────────────────────────
-
-  /// Leaves search mode and clears everything it set. Reached from the search
-  /// bar's back button and from a system back gesture, which must agree.
+  /// Shared by the search bar's back button and the system back gesture, which must agree.
   void _exitSearch() {
     setState(() => _isSearching = false);
     _controller.searchController.clear();
@@ -89,8 +80,6 @@ class BrowseScreenState extends State<BrowseScreen> {
     _controller.resetSearchState();
   }
 
-  /// Runs a scanned ISBN through the controller and acts on the outcome:
-  /// straight to the series when one was found, a snack bar when not.
   Future<void> _resolveScannedIsbn(String isbn) async {
     final errorKey = await _controller.handleBarcodeScan(isbn);
     if (!mounted) return;
@@ -106,7 +95,6 @@ class BrowseScreenState extends State<BrowseScreen> {
 
     _logger.warning('Barcode scan handling failed with error key: $errorKey');
     var message = LocalizationService().translate(errorKey);
-    // This one message names the title that was searched for.
     if (errorKey == 'no_series_found_for') {
       message = message.replaceAll(
         '{title}',
@@ -115,8 +103,6 @@ class BrowseScreenState extends State<BrowseScreen> {
     }
     AppSnackBar.show(context, message, isError: true);
   }
-
-  // ─── Navigation ──────────────────────────────────────────────────────────
 
   void _navigateToBrowseResults(
     String header,
@@ -138,8 +124,7 @@ class BrowseScreenState extends State<BrowseScreen> {
           type: type,
           staff: staff,
           publisher: publisher,
-          // A random sort needs a seed fixed up front, so paging through the
-          // results does not reshuffle them between pages.
+          // Fixed up front so paging through a random sort does not reshuffle it.
           randomSeed: sortBy == 'random'
               ? BrowseController.generateRandomSeed()
               : null,
@@ -170,8 +155,6 @@ class BrowseScreenState extends State<BrowseScreen> {
       AppTransitions.slideRight(const DiscoveryQueueScreen()),
     );
   }
-
-  // ─── Build ───────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -211,9 +194,7 @@ class BrowseScreenState extends State<BrowseScreen> {
                 onResultSelected: handleResultSelected,
               ),
               body: NotificationListener<ScrollMetricsNotification>(
-                // A change in scroll extent — results arriving, or the window
-                // resizing — can leave the list short enough that no scroll
-                // event will ever fire to request the next page.
+                // Arriving results or a resize can leave the list too short to ever scroll.
                 onNotification: (_) {
                   _controller.checkScroll();
                   return false;
@@ -239,8 +220,7 @@ class BrowseScreenState extends State<BrowseScreen> {
       ),
       child: Column(
         children: [
-          // The type tabs are hidden while filters are set: filters only apply
-          // to series, so the other tabs have nothing to offer.
+          // Filters only apply to series, so the other tabs are hidden while any are set.
           if (_controller.isSearchMode && _controller.currentFilters.isEmpty)
             BrowseTypeTabs(
               selectedType: _controller.currentType,

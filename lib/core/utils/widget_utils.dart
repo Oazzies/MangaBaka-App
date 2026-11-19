@@ -29,8 +29,7 @@ class WidgetUtils {
       .blurredContentRatings
       .contains(contentRating.toLowerCase());
 
-  /// Rounds up to a 64px step at display density so window resizes do not
-  /// re-decode every cover on every frame.
+  /// Rounded up to a 64px step so a window resize doesn't re-decode every cover each frame.
   static int decodeWidth(BuildContext context, double logicalWidth) {
     const step = 64;
     final px = (logicalWidth * MediaQuery.devicePixelRatioOf(context)).ceil();
@@ -157,7 +156,6 @@ class WidgetUtils {
   }
 }
 
-/// A reactive tooltip that listens to [SettingsManager] to show or hide itself.
 class AppTooltip extends StatelessWidget {
   final String message;
   final Widget child;

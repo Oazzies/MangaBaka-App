@@ -13,14 +13,8 @@ import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_authed_client.dart';
-import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 
-/// Reads and writes MangaBaka Stacks (`/v2/stacks`, `/v2/my/stacks`).
-///
-/// Listings and stack pages are public; everything under `/v2/my` needs the
-/// `stack.read` / `stack.write` scopes (see
-/// [ProfileAuthService.hasStackScopes]). Every refusal is thrown as a
-/// [StackApiException] carrying the API's reason code.
+/// Everything under `/v2/my` needs the `stack.read` / `stack.write` scopes.
 class StackService {
   static const String _base = AppConstants.baseApiUrlV2;
   static const int defaultLimit = 24;
@@ -36,9 +30,6 @@ class StackService {
       _ownsHttp = client == null,
       _client = StackAuthedClient(auth: auth);
 
-  // ── Public reads ──────────────────────────────────────────────────────────
-
-  /// Public stacks, newest first. [featured] keeps only staff picks.
   Future<PagedList<StackSummary>> browse({
     int page = 1,
     int limit = defaultLimit,
@@ -51,7 +42,6 @@ class StackService {
     operation: featured ? 'fetch featured stacks' : 'fetch stacks',
   );
 
-  /// Public stacks that include a series.
   Future<PagedList<StackSummary>> forSeries(
     String seriesId, {
     int page = 1,
@@ -66,7 +56,6 @@ class StackService {
     operation: 'fetch stacks for series',
   );
 
-  /// A user's public and unlisted stacks.
   Future<PagedList<StackSummary>> byUser(
     String username, {
     int page = 1,
@@ -79,8 +68,7 @@ class StackService {
     operation: 'fetch user stacks',
   );
 
-  /// A public or unlisted stack with its entries. Every entry comes back
-  /// whatever its rating; the UI blurs per the user's settings.
+  /// Entries come back whatever their rating; the UI blurs per the user's settings.
   Future<StackDetail> fetch(int id) => _guard(
     () => _api.getJson(
       ApiClient.uri('$_base/stacks/$id'),
@@ -89,9 +77,6 @@ class StackService {
     ),
   );
 
-  // ── The signed-in user's stacks ───────────────────────────────────────────
-
-  /// The user's own stacks, drafts and hidden ones included.
   Future<PagedList<StackSummary>> mine({
     int page = 1,
     int limit = defaultLimit,
@@ -112,7 +97,6 @@ class StackService {
     'fetch followed stacks',
   );
 
-  /// One of the user's stacks, with the `token` the next update needs.
   Future<StackDetail> fetchForEdit(int id) async {
     final body = await _authed(
       'fetch stack for editing',
@@ -125,7 +109,6 @@ class StackService {
     );
   }
 
-  /// Every stack the user owns, and where [seriesId] sits in each.
   Future<List<MySeriesStack>> myStacksForSeries(String seriesId) async {
     final body = await _authed(
       'fetch my stacks for series',
@@ -139,14 +122,9 @@ class StackService {
     );
   }
 
-  /// The user's vote / save / follow state and live counts for [ids].
   Future<Map<int, StackStatus>> status(Iterable<int> ids) =>
       _client.fetchStatus(_http, _base, ids);
 
-  // ── Writes ────────────────────────────────────────────────────────────────
-
-  /// Creates a draft. It can be published once it has
-  /// [StackLimits.publishMin] series.
   Future<StackDetail> create(StackDraft draft) async {
     final body = await _authed(
       'create stack',
@@ -160,9 +138,7 @@ class StackService {
     return ApiClient.decode(body, operation: 'create stack', parse: _detail);
   }
 
-  /// Replaces the stack's details and its whole entry list. [token] is the
-  /// one from the last read or update; a stale one throws with
-  /// [StackErrorCode.staleToken].
+  /// Replaces the whole entry list; a stale [token] throws [StackErrorCode.staleToken].
   Future<StackDetail> update(int id, StackDraft draft, String token) async {
     final body = await _authed(
       'update stack',
@@ -175,7 +151,6 @@ class StackService {
     return ApiClient.decode(body, operation: 'update stack', parse: _detail);
   }
 
-  /// Deletes the stack. The user cannot undo it.
   Future<void> delete(int id) async {
     await _authed(
       'delete stack',
@@ -184,7 +159,6 @@ class StackService {
     );
   }
 
-  /// Changes only who can see the stack.
   Future<StackVisibility> setVisibility(
     int id,
     StackVisibility visibility,
@@ -204,9 +178,7 @@ class StackService {
     );
   }
 
-  /// Adds one series at [rank] (null: the end). [contentRating] raises the
-  /// stack's rating when the series is rated above what it allows.
-  /// Returns the rank it landed at.
+  /// [contentRating] raises the stack's rating when the series is rated above what it allows.
   Future<int> addEntry(
     int stackId,
     String seriesId, {
@@ -244,8 +216,6 @@ class StackService {
 
   Future<StackStatus> _toggle(String what, int id, {required bool add}) =>
       _client.toggle(_http, _base, what, id, add: add);
-
-  // ── Plumbing ──────────────────────────────────────────────────────────────
 
   static StackDetail _detail(dynamic json) =>
       StackAuthedClient.decodeDetail(json);

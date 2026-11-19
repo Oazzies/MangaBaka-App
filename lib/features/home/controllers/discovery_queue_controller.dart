@@ -8,10 +8,6 @@ import 'package:mangabaka_app/features/profile/services/profile_auth_service.dar
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
-/// Manages an interactive Discovery Queue session.
-///
-/// Steps through personalised recommendations one-by-one, allowing the user to
-/// add series to their library in a chosen state or skip to the next.
 class DiscoveryQueueController extends ChangeNotifier {
   final HomeService _homeService;
   final LibraryService _libraryService;
@@ -65,15 +61,13 @@ class DiscoveryQueueController extends ChangeNotifier {
 
   bool _disposed = false;
 
-  /// Bumped per [loadQueue]; a load that a newer one (restart) superseded
-  /// drops its result instead of replacing the newer queue.
+  /// Bumped per [loadQueue]; a load superseded by a newer one (restart) drops its result.
   int _loadGeneration = 0;
 
   void _notify() {
     if (!_disposed) notifyListeners();
   }
 
-  /// Loads or reloads the discovery queue.
   Future<void> loadQueue({int limit = 20}) async {
     final generation = ++_loadGeneration;
     _isLoading = true;
@@ -120,7 +114,6 @@ class DiscoveryQueueController extends ChangeNotifier {
     _notify();
   }
 
-  /// Adds the current series to the library with [state], then moves to the next.
   Future<bool> addToLibrary(String state) async {
     final series = currentSeries;
     if (series == null || _isActionInProgress) return false;
@@ -146,7 +139,6 @@ class DiscoveryQueueController extends ChangeNotifier {
     }
   }
 
-  /// Skips the current series without adding it, moving to the next.
   void skip() {
     if (currentSeries == null || _isActionInProgress) return;
     _reviewedCount++;
@@ -157,7 +149,6 @@ class DiscoveryQueueController extends ChangeNotifier {
     _notify();
   }
 
-  /// Dismisses the current series from future recommendations, then moves on.
   Future<void> markNotInterested() async {
     final series = currentSeries;
     if (series == null || _isActionInProgress) return;
@@ -178,7 +169,6 @@ class DiscoveryQueueController extends ChangeNotifier {
     }
   }
 
-  /// Restarts the queue with a fresh batch of recommendations.
   void restart() {
     loadQueue();
   }

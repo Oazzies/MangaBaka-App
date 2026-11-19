@@ -5,7 +5,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/content_preferences_dialog.dart';
 
-/// Ordered content-rating options, from least to most explicit.
 const _kContentOptions = ['safe', 'suggestive', 'erotica', 'pornographic'];
 
 class ContentPreferencesPage extends StatelessWidget {

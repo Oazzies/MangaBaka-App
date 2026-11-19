@@ -26,7 +26,7 @@ void main() {
       expect(updated.type, ['manga']);
       expect(updated.sortBy, 'popularity_desc');
       expect(updated.ratingLower, 50);
-      expect(updated.ratingUpper, 100); // Should remain same
+      expect(updated.ratingUpper, 100);
     });
 
     test('toMap generates correct query parameters', () {

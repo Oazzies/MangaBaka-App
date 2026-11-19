@@ -5,20 +5,15 @@ import 'package:mangabaka_app/features/publisher/utils/format_count.dart';
 
 export 'package:mangabaka_app/features/publisher/widgets/share_bar_row.dart';
 
-/// One labelled value in a chart.
 class ChartEntry {
   final String label;
   final int count;
 
-  /// Overrides the chart's colour for this entry (stacked bars).
   final Color? color;
 
   const ChartEntry(this.label, this.count, {this.color});
 }
 
-/// Vertical columns for ordered, time-like data (releases per decade): the
-/// eye reads left to right as time, so the bars keep their order and share a
-/// baseline. The tallest column carries the accent colour.
 class ColumnChart extends StatelessWidget {
   final List<ChartEntry> entries;
   final double height;
@@ -83,8 +78,6 @@ class ColumnChart extends StatelessWidget {
   }
 }
 
-/// One horizontal bar per category, scaled to the largest — for unordered
-/// categories where the comparison between them is the point (media types).
 class BarChartRows extends StatelessWidget {
   final List<ChartEntry> entries;
 
@@ -146,8 +139,6 @@ class BarChartRows extends StatelessWidget {
   }
 }
 
-/// A single bar divided into segments with a legend — for a few categories
-/// that make up a whole (publication status, content rating).
 class StackedBarChart extends StatelessWidget {
   final List<ChartEntry> entries;
 

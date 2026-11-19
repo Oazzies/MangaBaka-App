@@ -8,7 +8,6 @@ import 'package:mangabaka_app/features/profile/screens/settings/settings_root_gr
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// One page on the dialog's internal stack.
 class SettingsDialogPage {
   final String title;
   final Widget content;
@@ -16,17 +15,10 @@ class SettingsDialogPage {
   const SettingsDialogPage({required this.title, required this.content});
 }
 
-/// Settings as a dialog, used in landscape where a full-screen push would
-/// waste the width and lose the user's place.
-///
-/// Carries its own page stack rather than using the [Navigator]: pushing a
-/// route would cover the dialog with a full-screen page. Categories are pushed
-/// through [SettingsDialogState.pushCategory], which
-/// `showOrNavigate` reaches via [SettingsDialog.of].
+/// Own page stack: a pushed [Navigator] route would cover the dialog with a full-screen page.
 class SettingsDialog extends StatefulWidget {
   const SettingsDialog({super.key});
 
-  /// The enclosing dialog's state, or null when not inside one.
   static SettingsDialogState? of(BuildContext context) =>
       context.findAncestorStateOfType<SettingsDialogState>();
 
@@ -37,13 +29,10 @@ class SettingsDialog extends StatefulWidget {
 class SettingsDialogState extends State<SettingsDialog> {
   static const Duration _pageTransition = Duration(milliseconds: 300);
 
-  /// Vertical room left around the dialog so it never meets the screen edges.
   static const double _verticalInset = 64;
 
   final List<SettingsDialogPage> _stack = [];
 
-  /// Direction of the last stack change, so the transition slides the right
-  /// way: pushes come up from below, pops drop back down.
   bool _isPushing = true;
 
   void pushCategory(String title, Widget content) {
@@ -77,7 +66,6 @@ class SettingsDialogState extends State<SettingsDialog> {
             : ValueKey(page.title);
 
         return PopScope(
-          // Back unwinds this dialog's own stack before closing the dialog.
           canPop: _stack.isEmpty,
           onPopInvokedWithResult: (didPop, _) {
             if (didPop) return;
@@ -121,8 +109,6 @@ class SettingsDialogState extends State<SettingsDialog> {
     );
   }
 
-  /// The entering page comes from the direction the stack is moving; the
-  /// leaving page exits the opposite way, so the pair reads as one motion.
   Widget _slide({
     required Widget child,
     required Animation<double> animation,
@@ -167,10 +153,6 @@ class SettingsDialogState extends State<SettingsDialog> {
   }
 }
 
-/// The header-plus-scrolling-body frame both dialog pages sit in.
-///
-/// The root and a category differ only by a back button, so they share this
-/// rather than keeping two copies of the same header row.
 class _Shell extends StatelessWidget {
   final String title;
   final double titleFontSize;

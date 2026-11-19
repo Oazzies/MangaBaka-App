@@ -22,8 +22,7 @@ part 'desktop_upcoming_headers_part.dart';
 part 'desktop_upcoming_cards_part.dart';
 
 class DesktopUpcomingRail extends StatefulWidget {
-  /// Space above the title; the docked rail leaves room for the window
-  /// controls floating over it, the overlay version sits below the header.
+  /// The docked rail clears the window controls floating over it; the overlay sits below the header.
   final double topPadding;
 
   const DesktopUpcomingRail({super.key, this.topPadding = 56});
@@ -67,8 +66,6 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     await _resolveLibrary();
   }
 
-  /// Works out which releases are in the library, asking the database only
-  /// about their series. Until it answers, a library-only view shows a spinner.
   Future<void> _resolveLibrary() async {
     final works = _works;
     final ids = {
@@ -94,8 +91,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     });
   }
 
-  /// Reaches one page further into the future. The API only lists releases
-  /// from today onward, so there is no way to page back into the past.
+  /// The API only lists releases from today onward, so paging only reaches further ahead.
   Future<void> _loadMore() async {
     if (_loadingMore) return;
     setState(() => _loadingMore = true);
@@ -116,8 +112,6 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     await _resolveLibrary();
   }
 
-  /// One header per release day, then that day's releases â€” the date is what
-  /// this rail is for, so it leads instead of trailing each card in small text.
   Widget _groupedList(List<SeriesWork> works, LocalizationService l10n) {
     final groups = _groupByDate(works);
     final rows = <Widget>[];
@@ -187,7 +181,6 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     return '${date.year}-${date.month}-${date.day}';
   }
 
-  /// Chronological groups; works with no parseable date collect at the end.
   List<_DateGroup> _groupByDate(List<SeriesWork> works) {
     final byDay = <DateTime, List<SeriesWork>>{};
     final undated = <SeriesWork>[];

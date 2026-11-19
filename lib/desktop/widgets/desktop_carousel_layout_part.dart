@@ -1,9 +1,6 @@
 part of 'desktop_carousel.dart';
 
-/// Sizes the carousel's scroll view from the width it's given: the row's
-/// width from [geometry], its height from [itemHeight] at that geometry's
-/// item width, plus the lift reserve. At layout time, so a change of width
-/// never rebuilds anything.
+/// Sizes at layout time, so a change of width never rebuilds anything.
 class _CarouselRow extends SingleChildRenderObjectWidget {
   final CarouselGeometry Function(double width) geometry;
   final double Function(double itemWidth) itemHeight;

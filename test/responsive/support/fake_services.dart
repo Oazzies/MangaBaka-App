@@ -10,7 +10,6 @@ import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 
 import 'fixtures.dart';
 
-/// A signed-in (or signed-out) account with no real OAuth behind it.
 class FakeAuth extends ChangeNotifier with Fake implements ProfileAuthService {
   final bool signedIn;
   final MbProfile _profile = Fixtures.profile();
@@ -44,7 +43,6 @@ class FakeAuth extends ChangeNotifier with Fake implements ProfileAuthService {
   Future<void> logout() async {}
 }
 
-/// A library that already holds [entries], with syncing as a no-op.
 class FakeLibrary extends Fake implements LibraryService {
   final List<LibraryEntry> entries;
 
@@ -80,7 +78,6 @@ class FakeLibrary extends Fake implements LibraryService {
   Future<void> importFullLibrary() async {}
 }
 
-/// Profile activity rails, served from the fixture library.
 class FakeSnapshots extends Fake implements SnapshotService {
   final List<LibraryEntry> entries;
 

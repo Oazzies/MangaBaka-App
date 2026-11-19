@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Bottom fade-out gradient for clipped tag/metadata sections.
 class SeriesTagsFadeOut extends StatelessWidget {
   const SeriesTagsFadeOut({super.key});
 

@@ -2,11 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Enforces the rules in lib/desktop/RESPONSIVE.md that can be read off the
-/// source: the patterns that made resizing the desktop app lag, or overflow.
-///
-/// A justified exception carries `// responsive-ok: <why>` on the offending
-/// line or in the comment block right above it.
 void main() {
   // Shared widgets desktop pages render inside resizing lists and grids.
   const sharedRenderedOnDesktop = [
@@ -69,8 +64,7 @@ void main() {
     ),
   };
 
-  /// Whether line [i], or the comment block right above it (up to three code
-  /// lines up, to reach past a line break in the call), carries the marker.
+  /// Looks up to three code lines up, to reach past a line break in the call.
   bool excused(List<String> lines, int i) {
     var codeLines = 0;
     for (var j = i; j >= 0; j--) {
@@ -100,7 +94,6 @@ void main() {
         }
       }
 
-      // Rule 5: an AnimatedContainer animating a size that isn't a constant.
       for (final match in RegExp(r'\bAnimatedContainer\(').allMatches(source)) {
         final args = _topLevelArguments(source, match.end);
         for (final MapEntry(key: name, value: value) in args.entries) {
@@ -129,8 +122,7 @@ void main() {
   });
 }
 
-/// The top-level named arguments of the call whose argument list starts at
-/// [start] (just after its opening parenthesis), as name → source text.
+/// [start] is just after the call's opening parenthesis.
 Map<String, String> _topLevelArguments(String source, int start) {
   final args = <String, String>{};
   var depth = 1;

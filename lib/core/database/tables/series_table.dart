@@ -8,12 +8,12 @@ class SeriesTable extends Table {
   TextColumn get nativeTitle => text().nullable()();
   TextColumn get romanizedTitle => text().nullable()();
   TextColumn get secondaryTitles =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get coverUrl => text()();
   TextColumn get authors =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get artists =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get description => text()();
   TextColumn get year => text().nullable()();
   TextColumn get published => text().nullable()(); // JSON
@@ -27,13 +27,13 @@ class SeriesTable extends Table {
   TextColumn get finalVolume => text().nullable()();
   TextColumn get totalChapters => text().nullable()();
   TextColumn get links =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get publishers =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get genres =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get tags =>
-      text().withDefault(const Constant('[]'))(); // JSON array
+      text().withDefault(const Constant('[]'))();
   TextColumn get lastUpdated => text().nullable()();
   TextColumn get relationships => text().nullable()(); // JSON
   TextColumn get source => text().nullable()(); // JSON

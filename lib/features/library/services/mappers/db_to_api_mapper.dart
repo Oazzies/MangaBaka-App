@@ -7,8 +7,6 @@ import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/models/series_titles.dart';
 
 class DbToApiMapper {
-  // ── JSON decode helpers ───────────────────────────────────────────────────
-
   static List<String> _decodeStringArray(String? jsonStr) {
     if (jsonStr == null || jsonStr.isEmpty) return [];
     try {
@@ -42,8 +40,6 @@ class DbToApiMapper {
     return [];
   }
 
-  // ── Mapping ───────────────────────────────────────────────────────────────
-
   static api.LibraryEntry libraryEntryFromDb(
     db.LibraryEntryWithSeries dbEntry,
   ) {
@@ -59,13 +55,10 @@ class DbToApiMapper {
     );
   }
 
-  /// Mapped series by id, with the row they were mapped from. The library
-  /// stream re-emits every row on any change (one progress tap), and mapping
-  /// decodes ~10 JSON columns per series on the UI isolate; an unchanged row
-  /// (drift data classes compare by value) reuses its earlier mapping.
+  /// The library stream re-emits every row on any change; an unchanged row (Drift compares by
+  /// value) reuses its mapping instead of decoding ~10 JSON columns on the UI isolate.
   static final Map<String, (db.SeriesTableData, api.Series)> _seriesCache = {};
 
-  /// Upper bound on [_seriesCache]; past it the cache starts over.
   static const int _seriesCacheLimit = 20000;
 
   static api.Series seriesFromDb(db.SeriesTableData dbSeries) {
@@ -81,8 +74,7 @@ class DbToApiMapper {
     return series;
   }
 
-  /// Stored rows hold the server's canonical titles; remember them so a
-  /// later, less exact payload for the same series (a v2 rail) agrees.
+  /// Stored rows hold canonical titles; remembering them keeps a later v2 payload in agreement.
   static void _rememberTitles(
     db.SeriesTableData dbSeries,
     List<String> secondaryTitles,
@@ -103,7 +95,6 @@ class DbToApiMapper {
   static api.Series _mapSeries(db.SeriesTableData dbSeries) {
     final source = _decodeJsonObject(dbSeries.source);
 
-    // Calculate combined average if source data is available
     String rating = dbSeries.rating ?? '';
     if (source != null && source.isNotEmpty) {
       final normalizedRatings = source.values

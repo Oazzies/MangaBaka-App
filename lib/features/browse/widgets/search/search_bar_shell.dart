@@ -11,60 +11,31 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 export 'package:mangabaka_app/features/browse/widgets/search/search_bar_controller.dart'
     show SuggestionRequest;
 
-/// The search field shared by Browse and Library.
-///
-/// Both screens used to carry their own copy — ~1150 lines between them,
-/// differing only in where suggestions come from and a handful of flags.
-/// Everything fiddly was duplicated: the inline ghost completion, arrow-key
-/// navigation, the suppress-after-backspace rule, the overlay lifecycle and
-/// the filter sheet. They had already drifted apart on ranking and on what
-/// submitting does.
-///
-/// This widget is the presentation; [SearchBarController] holds the rules.
-/// What stays screen-specific is passed in: [requestSuggestions] supplies the
-/// results, [suggestionsEnabled] gates them behind a setting, and the
-/// remaining flags control the scan button and the filter sheet's contents.
 class SearchBarShell extends StatefulWidget {
-  /// The field's controller. When null the shell owns (and disposes) one; when
-  /// provided, the caller keeps ownership.
+  /// Null: the shell owns and disposes one; otherwise the caller keeps ownership.
   final GhostTextEditingController? controller;
   final FocusNode? focusNode;
 
-  /// Fires on every keystroke, on clear with an empty string, and when a
-  /// suggestion is chosen.
   final ValueChanged<String> onChanged;
 
-  /// Fires when the field is submitted without a suggestion being chosen.
   /// Falls back to [onChanged] when null.
   final ValueChanged<String>? onSubmitted;
 
-  /// Fires when a suggestion is chosen — by tap, by Enter on a highlighted
-  /// row, or by accepting the inline completion.
   final ValueChanged<AutocompleteSeriesResult>? onResultSelected;
 
-  /// Fires as a suggestion is hovered, for prefetching its detail page.
   final ValueChanged<AutocompleteSeriesResult>? onResultHovered;
 
-  /// Replaces the leading search glyph with a back button that also clears the
-  /// field. Null leaves the glyph.
   final VoidCallback? onBackTap;
 
-  /// Adds a barcode-scan button to the trailing controls.
   final VoidCallback? onScanTap;
 
   final SearchFilters? initialFilters;
   final ValueChanged<SearchFilters>? onFilterApplied;
 
-  /// Adds the library-only sort options to the filter sheet.
   final bool showLibrarySorts;
 
-  /// Whether the trailing filter button (which opens the filter sheet) is
-  /// shown. Desktop layouts turn it off: their filters sit in a permanent
-  /// panel beside the results instead.
   final bool showFilterButton;
 
-  /// Replaces the filter sheet the filter button opens — for result types with
-  /// their own options (publishers' sort), which the series filters don't fit.
   final VoidCallback? onFilterTapOverride;
 
   final SuggestionRequest requestSuggestions;
@@ -72,8 +43,7 @@ class SearchBarShell extends StatefulWidget {
   /// Null means suggestions are always enabled.
   final bool Function()? suggestionsEnabled;
 
-  /// Rebuilt alongside [LocalizationService] — pass the setting that
-  /// [suggestionsEnabled] reads, so toggling it takes effect immediately.
+  /// Pass the setting [suggestionsEnabled] reads, so toggling it takes effect immediately.
   final Listenable? rebuildOn;
 
   const SearchBarShell({
@@ -101,7 +71,6 @@ class SearchBarShell extends StatefulWidget {
 }
 
 class _SearchBarShellState extends State<SearchBarShell> {
-  /// Gap between the field and the overlay panel.
   static const double _overlayGap = 6.0;
 
   late final GhostTextEditingController _text;
@@ -129,8 +98,7 @@ class _SearchBarShellState extends State<SearchBarShell> {
     );
 
     _controller.addListener(_onStateChanged);
-    // The field's own text is part of what it renders (the clear button
-    // appears with it), so every controller change repaints.
+    // The clear button follows the text, so every text change repaints.
     _text.addListener(_onStateChanged);
   }
 
@@ -159,8 +127,6 @@ class _SearchBarShellState extends State<SearchBarShell> {
     setState(() {});
     _updateOverlay();
   }
-
-  // ─── Overlay ─────────────────────────────────────────────────────────────
 
   void _updateOverlay() {
     if (!_controller.isOverlayVisible) {
@@ -205,8 +171,6 @@ class _SearchBarShellState extends State<SearchBarShell> {
       ),
     );
   }
-
-  // ─── Build ───────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {

@@ -106,7 +106,6 @@ void main() {
       () async {
         final rawDb = sqlite3.openInMemory();
 
-        // Create v1 schema
         rawDb.execute('''
         CREATE TABLE series_table (
           id TEXT PRIMARY KEY,
@@ -123,7 +122,6 @@ void main() {
         );
       ''');
 
-        // Insert mock data
         rawDb.execute('''
         INSERT INTO series_table (id, title, cover_url, description)
         VALUES ('1', 'Series 1', 'https://example.com/1.jpg', 'Desc 1');
@@ -133,16 +131,12 @@ void main() {
         VALUES ('entry_1', '1', 'reading');
       ''');
 
-        // Set user_version to 1 to simulate a v1 database
         rawDb.execute('PRAGMA user_version = 1;');
 
-        // Wrap it in Drift NativeDatabase
         final upgradeDb = AppDatabase.forTesting(NativeDatabase.opened(rawDb));
 
-        // Verify schema version is 3
         expect(upgradeDb.schemaVersion, 3);
 
-        // Let's verify our v1 data is still there!
         final retrievedSeries = await (upgradeDb.select(
           upgradeDb.seriesTable,
         )..where((t) => t.id.equals('1'))).getSingle();
@@ -150,9 +144,8 @@ void main() {
         expect(retrievedSeries.coverUrl, 'https://example.com/1.jpg');
         expect(retrievedSeries.description, 'Desc 1');
 
-        // Verify new columns exist and have correct defaults/nullability
         expect(retrievedSeries.mergedWith, isNull);
-        expect(retrievedSeries.secondaryTitles, '[]'); // default value
+        expect(retrievedSeries.secondaryTitles, '[]');
 
         final retrievedEntry = await (upgradeDb.select(
           upgradeDb.libraryEntriesTable,
@@ -161,9 +154,8 @@ void main() {
         expect(
           retrievedEntry.progressChapter,
           isNull,
-        ); // newly added column, should be null
+        );
 
-        // Verify indices were created
         final indexNames = await upgradeDb
             .customSelect("SELECT name FROM sqlite_master WHERE type='index'")
             .get();

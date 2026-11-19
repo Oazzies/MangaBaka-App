@@ -34,9 +34,6 @@ class SeriesDetailWideLayout extends StatelessWidget {
   final Function(String)? onAuthorTap;
   final Function(String)? onPublisherTap;
 
-  /// Optional content for a right-hand rail, sitting in the same scrolling row
-  /// as the left sidebar. Used by the Discovery Queue to put its controls
-  /// opposite the Information card.
   final Widget? rightRail;
 
   final Widget Function(
@@ -99,7 +96,6 @@ class SeriesDetailWideLayout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left sidebar: overlapping cover + My List + Information.
           SizedBox(
             width: _sidebarWidth,
             child: Column(
@@ -124,8 +120,6 @@ class SeriesDetailWideLayout extends StatelessWidget {
                   onAuthorTap: onAuthorTap,
                   onPublisherTap: onPublisherTap,
                 ),
-                // Only a signed-in user can add, and only what is not yet in
-                // their library — the same gate the phone's FAB applies.
                 if (entry == null &&
                     getIt<ProfileAuthService>().isLoggedIn) ...[
                   const SizedBox(height: 18),
@@ -135,7 +129,6 @@ class SeriesDetailWideLayout extends StatelessWidget {
             ),
           ),
           const SizedBox(width: _columnGap),
-          // Main column: title block + tabs + content.
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

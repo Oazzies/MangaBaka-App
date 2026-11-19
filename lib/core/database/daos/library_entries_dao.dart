@@ -32,7 +32,6 @@ class LibraryEntriesDao extends DatabaseAccessor<AppDatabase>
     }
   }
 
-  /// Which of [seriesIds] are in the library, with their covers.
   Future<Map<String, String>> libraryCoversFor(
     Iterable<String> seriesIds,
   ) => _guard('Failed to look up library series', () async {

@@ -14,41 +14,11 @@ import 'package:mangabaka_app/core/network/api_result.dart';
 
 export 'package:mangabaka_app/core/network/api_result.dart';
 
-/// The single place where an HTTP call to a MangaBaka backend is made.
-///
-/// Every service used to repeat the same block around `http.get`: attach the
-/// User-Agent, apply the network timeout, report the outcome to
-/// [BackendHealthService], branch on the status code, decode the body, and
-/// translate several transport failure modes into the app's [AppException]
-/// hierarchy. That boilerplate had drifted — most services skipped the health
-/// report entirely, so an outage reached through them without the banner ever
-/// appearing — and it accounted for much of the length of the service files.
-///
-/// The exception types thrown here are deliberately identical to the ones the
-/// hand-written blocks threw, so existing `catch` clauses at call sites keep
-/// working unchanged:
-///
-/// * [NetworkException] — transport failure or timeout (`NETWORK_ERROR` /
-///   `TIMEOUT`).
-/// * [ApiException] — a response arrived but its status was not accepted.
-/// * [ParseException] — the body was not the JSON shape the caller expected.
-/// * [AppError] — anything else, so no bug escapes as a raw error.
-///
-/// Rate limiting: a 429 (or a 503 carrying `Retry-After`) is retried up to
-/// [maxRateLimitRetries] times, honouring the server's `Retry-After` when it
-/// is sane and falling back to exponential backoff otherwise. Only GETs go
-/// through this client, so a retry can never duplicate a write.
+/// GET only, so a rate-limit retry can never duplicate a write.
 class ApiClient {
-  /// Label this client's requests report under in [BackendHealthService].
-  ///
-  /// A null context opts out of health reporting entirely — used by the health
-  /// probe itself and by non-MangaBaka hosts (e.g. the GitHub releases feed),
-  /// whose availability says nothing about the MangaBaka backend.
+  /// Null skips health reporting: the probe itself and non-MangaBaka hosts.
   final String? healthContext;
 
-  /// How many times a rate-limited request is retried before the 429 is
-  /// surfaced as an [ApiException]. Zero disables retrying — for callers that
-  /// run their own backoff and must see the first 429.
   final int maxRateLimitRetries;
 
   final http.Client _client;
@@ -58,9 +28,6 @@ class ApiClient {
 
   static final _logger = LoggingService.logger;
 
-  /// Creates a client.
-  ///
-  /// [delay] exists for tests, which pass a no-op so retries run instantly.
   ApiClient({
     this.healthContext,
     http.Client? client,
@@ -85,8 +52,7 @@ class ApiClient {
        _timeout = timeout,
        _delay = delay;
 
-  /// Derives a client sharing this one's connection pool but reporting under a
-  /// different [context]. Closing the derived client leaves the pool open.
+  /// Closing the derived client leaves the shared pool open.
   ApiClient withContext(String context) => ApiClient._shared(
     healthContext: context,
     client: _client,
@@ -95,8 +61,6 @@ class ApiClient {
     delay: _delay,
   );
 
-  /// Builds a request URI from [base] and [params], dropping null and empty
-  /// values and stringifying the rest (lists become repeated parameters).
   static Uri uri(String base, [Map<String, dynamic>? params]) {
     final parsed = Uri.parse(base);
     if (params == null || params.isEmpty) return parsed;
@@ -120,13 +84,6 @@ class ApiClient {
     );
   }
 
-  /// Performs a GET and hands the decoded JSON body to [parse].
-  ///
-  /// [operation] names the call in log lines and error messages (e.g.
-  /// `'search series'`). [acceptedStatuses] lets a caller treat a non-200 as
-  /// success — pass `{200, 404}` when a missing resource is an expected
-  /// outcome rather than a failure, and branch on [ApiResult.statusCode] via
-  /// [send] if the distinction matters.
   Future<T> getJson<T>(
     Uri url, {
     required String operation,
@@ -145,8 +102,6 @@ class ApiClient {
     return decode(result.body, operation: operation, parse: parse);
   }
 
-  /// Performs a GET and returns the raw body, having applied the timeout,
-  /// rate-limit retries, health reporting and status check.
   Future<ApiResult> send(
     Uri url, {
     required String operation,
@@ -178,8 +133,7 @@ class ApiClient {
       );
 
       if (!acceptedStatuses.contains(response.statusCode)) {
-        // The body stays out of the log: logs are exported and shared, and
-        // an error body can echo back user data. It is kept on the exception.
+        // No body in the log: logs get shared and bodies can echo user data.
         _logger.severe('$operation failed. Status: ${response.statusCode}');
         throw ApiException(
           message: 'Failed to $operation',
@@ -238,9 +192,6 @@ class ApiClient {
     }
   }
 
-  /// Decodes [body] and runs [parse] over it, converting any failure into a
-  /// [ParseException] naming the [operation], so a malformed payload never
-  /// surfaces to the UI as a bare `FormatException` or cast error.
   static T decode<T>(
     String body, {
     required String operation,

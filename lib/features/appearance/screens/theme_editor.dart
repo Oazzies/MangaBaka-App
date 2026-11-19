@@ -11,8 +11,6 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_editor_controls.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_live_preview.dart';
 
-/// The draft being edited: the seeds the user picks, and the palette derived
-/// from them on every change.
 class ThemeEditorController extends ChangeNotifier {
   MbThemeSpec _spec;
   late MbPalette _palette = _spec.palette;
@@ -22,8 +20,6 @@ class ThemeEditorController extends ChangeNotifier {
   MbThemeSpec get spec => _spec;
   MbPalette get palette => _palette;
 
-  /// True when derivation had to nudge a picked colour for legibility, so the
-  /// editor can say why the preview differs slightly from the swatch.
   bool get adjusted =>
       _palette.accent != _spec.accent ||
       (_spec.text != null && _palette.text != _spec.text);
@@ -45,11 +41,6 @@ class ThemeEditorController extends ChangeNotifier {
   );
 }
 
-/// Creates or edits a custom theme.
-///
-/// Opens as a large two-pane dialog in the desktop shell, and as a full
-/// screen elsewhere — side by side on tablets and in landscape, stacked on
-/// phones.
 class ThemeEditor {
   ThemeEditor._();
 
@@ -82,8 +73,7 @@ class ThemeEditor {
       final themes = ThemeController();
       final s = controller.spec;
       await themes.saveCustom(s);
-      // A new theme is applied straight away — that is what "create" means.
-      // An edit to the theme already in use shows up by itself.
+      // Edits to the active theme show up by themselves; only a new one needs applying.
       if (isNew) await themes.apply(s.id, s.brightness);
     }
     controller.dispose();
@@ -198,8 +188,7 @@ class _EditorDialogBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          // Fixed widths: the Mb buttons fill their slot, and a bare Row
-          // would give them unbounded width.
+          // Fixed widths: Mb buttons fill their slot, and a bare Row gives unbounded width.
           Row(
             children: [
               const Spacer(),

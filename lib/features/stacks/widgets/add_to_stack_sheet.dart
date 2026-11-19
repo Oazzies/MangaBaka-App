@@ -18,8 +18,6 @@ import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/add_to_stack_row.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_auth_gate.dart';
 
-/// Puts [series] into one of the reader's stacks, or takes it out, or starts
-/// a new stack with it. A bottom sheet on a phone, a dialog on desktop.
 Future<void> showAddToStackSheet(BuildContext context, Series series) async {
   if (!await ensureStackAccess(context)) return;
   if (!context.mounted) return;
@@ -143,8 +141,7 @@ class _AddToStackState extends State<_AddToStack> {
     }
   }
 
-  /// There is no remove-one endpoint: the stack is read and written back
-  /// without the series.
+  /// No remove-one endpoint: the stack is read and written back without the series.
   Future<void> _remove(MySeriesStack stack) async {
     final detail = await _service.fetchForEdit(stack.id);
     final draft = StackDraft.fromDetail(detail);
@@ -154,8 +151,7 @@ class _AddToStackState extends State<_AddToStack> {
       contentRating: draft.contentRating,
       isSpoiler: draft.isSpoiler,
       isCommentsEnabled: draft.isCommentsEnabled,
-      // Taking a public stack under the minimum would be refused; drop it to
-      // a draft rather than fail.
+      // A public stack under the minimum would be refused, so drop it to a draft rather than fail.
       visibility:
           draft.visibility.isListed &&
               draft.entries.length - 1 < StackLimits.publishMin

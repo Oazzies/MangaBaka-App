@@ -74,7 +74,7 @@ void main() {
       final helper = LibraryFilterHelper(
         allEntries: [mockEntry],
         query: '',
-        contentPreferences: ['erotica'], // Only erotica
+        contentPreferences: ['erotica'],
       );
 
       expect(helper.getFilteredAndSorted(), isEmpty);

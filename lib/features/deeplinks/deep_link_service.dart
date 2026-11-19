@@ -26,33 +26,15 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Listens to incoming `https://mangabaka.org` and `mangabaka://` links,
-/// then routes the user to the matching screen inside the app. What each URL
-/// shape maps to lives in [DeepLinkTarget.parse].
-///
-/// Platform registration:
-///   Android  — intent filters in AndroidManifest.xml
-///   iOS      — CFBundleURLSchemes in ios/Runner/Info.plist
-///   macOS    — CFBundleURLTypes in macos/Runner/Info.plist
-///   Windows  — `mangabaka://` registered in HKCU\Software\Classes at init
-///   Linux    — `mangabaka://` registered via a .desktop file at init
-///
-/// Only Android claims `https://mangabaka.org` links (and only once the site
-/// serves a matching assetlinks.json); every other platform receives just the
-/// `mangabaka://` scheme.
-///
-/// The service respects the [SettingsManager.openLinksInApp] toggle; links
-/// that arrive while the toggle is off are silently ignored. A link that lands
-/// before the app shell is on screen (a cold start) waits for it.
+/// Schemes: AndroidManifest.xml and both Info.plists; Windows and Linux register at init.
+/// Only Android claims https://mangabaka.org links, once the site serves assetlinks.json.
 class DeepLinkService {
   static final _logger = LoggingService.logger;
   static const _scheme = 'mangabaka';
 
-  /// How long a link waits for the app shell before it is dropped.
   static const _readyPoll = Duration(milliseconds: 500);
   static const _readyAttempts = 60;
 
-  /// The settings string describing what the toggle covers on this platform.
   static String get subtextKey =>
       Platform.isAndroid ? 'open_links_subtext' : 'open_links_subtext_scheme';
 
@@ -60,14 +42,10 @@ class DeepLinkService {
   StreamSubscription<Uri>? _sub;
   Timer? _readyTimer;
 
-  // ─── Lifecycle ────────────────────────────────────────────────────────────
-
   Future<void> init() async {
-    // Register the custom protocol with the OS on platforms that need it.
     if (Platform.isWindows) await DeepLinkRegistrar.registerWindows(_scheme);
     if (Platform.isLinux) await DeepLinkRegistrar.registerLinux(_scheme);
 
-    // Handle the link that cold-started the app (if any).
     try {
       final initial = await _appLinks.getInitialLink();
       if (initial != null) _handle(initial);
@@ -75,7 +53,6 @@ class DeepLinkService {
       _logger.warning('DeepLinkService: failed to read initial link: $e');
     }
 
-    // Handle subsequent links while the app is running.
     _sub = _appLinks.uriLinkStream.listen(
       _handle,
       onError: (e) => _logger.warning('DeepLinkService: link stream error: $e'),
@@ -88,8 +65,6 @@ class DeepLinkService {
     _readyTimer?.cancel();
     _readyTimer = null;
   }
-
-  // ─── Routing ─────────────────────────────────────────────────────────────
 
   void _handle(Uri uri) {
     if (!SettingsManager().openLinksInApp) {
@@ -117,9 +92,7 @@ class DeepLinkService {
       MainScreen.mainScreenKey.currentState != null ||
       DesktopShell.current != null;
 
-  /// Runs [action] once the tab shell is mounted. A cold start delivers the
-  /// link while the splash or onboarding is still up, when the navigator
-  /// exists but there is no shell to land in.
+  /// Cold-start links arrive before the shell exists, though the navigator does.
   void _whenReady(void Function(BuildContext context) action) {
     var attempts = 0;
     void attempt() {
@@ -142,8 +115,6 @@ class DeepLinkService {
     _readyTimer?.cancel(); // a newer link replaces one still waiting
     attempt();
   }
-
-  // ─── Navigation ──────────────────────────────────────────────────────────
 
   void _open(BuildContext context, DeepLinkTarget target) {
     switch (target) {

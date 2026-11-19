@@ -1,6 +1,5 @@
 part of 'desktop_sidebar.dart';
 
-/// The signed-in account at the foot of the sidebar, or a sign-in prompt.
 class _AccountChip extends StatelessWidget {
   final bool collapsed;
   final VoidCallback onTap;

@@ -209,7 +209,6 @@ void main() {
         },
         (row) => row['n'] as int?,
       );
-      // The bad row costs itself, not the whole page.
       expect(parsed, [1, 3]);
     });
   });

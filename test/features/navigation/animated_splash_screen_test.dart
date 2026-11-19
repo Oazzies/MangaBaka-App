@@ -20,7 +20,6 @@ void main() {
       ),
     ));
 
-    // Initial state
     expect(find.byType(AnimatedSplashOverlay), findsOneWidget);
     expect(completed, isFalse);
 

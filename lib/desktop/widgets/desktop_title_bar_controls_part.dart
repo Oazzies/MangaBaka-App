@@ -1,11 +1,5 @@
 part of 'desktop_title_bar.dart';
 
-/// A custom-styled circular window button matching MangaBaka's button design language:
-/// - 38px height (same as sort by dropdown)
-/// - Solid background colors (no semi-transparent)
-/// - No border
-/// - MbTappable tactile scale feedback
-/// - Tooltip support
 class _AppWindowButton extends StatefulWidget {
   final String tooltip;
   final Widget Function(Color color, Color bgColor) buildIcon;
@@ -96,7 +90,6 @@ class _AppWindowButtonState extends State<_AppWindowButton> {
   }
 }
 
-/// A crisp floating-window icon representing "Restore from expanded to a floating window".
 class FloatingWindowRestoreIcon extends StatelessWidget {
   final Color color;
   final Color fillColor;
@@ -163,8 +156,6 @@ class _FloatingWindowPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.fillColor != fillColor;
 }
 
-/// The draggable strip of the title bar: press and move to drag the window,
-/// double-click to maximize or restore.
 class TitleDragArea extends StatefulWidget {
   const TitleDragArea({super.key});
 

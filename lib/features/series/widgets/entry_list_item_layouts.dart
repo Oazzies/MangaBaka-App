@@ -61,10 +61,6 @@ class EntryListLayoutHelper {
     );
   }
 
-  /// The progress badges laid over a grid cover.
-  ///
-  /// Kept as a delegate so the grid layouts below read the same as they did;
-  /// the badges themselves are [EntryProgressOverlay].
   static Widget buildTopOverlays({
     required BuildContext context,
     required bool combineBadges,
@@ -85,7 +81,6 @@ class EntryListLayoutHelper {
   }
 }
 
-/// The grid card's outline: an accent ring while hovered, none otherwise.
 ShapeBorder _gridCardShape(BuildContext context, bool hovered) {
   return RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(8),
@@ -118,7 +113,6 @@ class CoverOnlyGridItem extends StatelessWidget {
       color: context.colors.surface,
       clipBehavior: Clip.antiAlias,
       shape: _gridCardShape(context, hovered),
-      // Rebuilt only when the card crosses the badge-merging width.
       child: DerivedLayoutBuilder<bool>(
         derive: (constraints) =>
             constraints.maxWidth < EntryProgressOverlay.combineBelowWidth,

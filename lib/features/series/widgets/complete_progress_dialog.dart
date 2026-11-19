@@ -4,8 +4,6 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// User's choice from [showCompleteProgressDialog] about which progress fields
-/// to set to the series's latest totals.
 class CompleteProgressChoice {
   final bool updateChapters;
   final bool updateVolumes;
@@ -16,8 +14,6 @@ class CompleteProgressChoice {
   });
 }
 
-/// Prompts whether to set chapter and/or volume progress to the latest totals
-/// when marking a series as completed.
 Future<CompleteProgressChoice?> showCompleteProgressDialog(
   BuildContext context, {
   required int currentChapter,
@@ -192,7 +188,6 @@ class _CompleteProgressDialogState extends State<_CompleteProgressDialog> {
   }
 }
 
-/// A row displaying a `from → to` change, with an optional checkbox.
 class CompleteDialogChangeRow extends StatelessWidget {
   final String label;
   final String fromText;

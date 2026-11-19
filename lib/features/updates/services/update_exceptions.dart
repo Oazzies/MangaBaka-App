@@ -1,8 +1,5 @@
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 
-/// Thrown when a downloaded update does not match the checksum GitHub
-/// published for it (the file has already been deleted), or when no checksum
-/// was published at all and the update was not downloaded.
 class UpdateIntegrityException extends AppException {
   UpdateIntegrityException()
     : super(
@@ -19,8 +16,6 @@ class UpdateIntegrityException extends AppException {
       );
 }
 
-/// Thrown when the user denies the "install unknown apps" permission required
-/// to apply an Android update.
 class InstallPermissionException extends AppException {
   InstallPermissionException()
     : super(message: 'Install permission was denied.');

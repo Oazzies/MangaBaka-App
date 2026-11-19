@@ -25,8 +25,6 @@ void main() {
   });
 
   group('GithubLogo mark', () {
-    // The mark is a disc with the cat cut out of it: the rim is filled, the
-    // centre of the cat's head is not, and nothing lies outside the 16x16 box.
     final mark = parseSvgPath(
       'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 '
       '0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 '

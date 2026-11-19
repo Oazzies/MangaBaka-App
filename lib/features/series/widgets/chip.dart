@@ -3,9 +3,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A pill-shaped chip. When it is tappable it answers a pointer: on hover its
-/// border takes the accent — nothing grows or tints, so a row of tags reads as
-/// clickable without the row shifting.
 class ChipBase extends StatefulWidget {
   final Widget label;
   final Color? backgroundColor;
@@ -17,10 +14,8 @@ class ChipBase extends StatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
-  /// Right-click on desktop — the pointer counterpart of [onLongPress].
   final VoidCallback? onSecondaryTap;
 
-  /// Shown on hover, e.g. what a right-click does.
   final String? tooltip;
 
   const ChipBase({
@@ -79,8 +74,7 @@ class _ChipBaseState extends State<ChipBase> {
     );
 
     if (_interactive) {
-      // Laid over the chip so a chip without a border can gain one on hover
-      // without changing size. Same quick fade as a series row's hover.
+      // Overlaid so a borderless chip gains a hover border without changing size.
       chip = Stack(
         children: [
           chip,

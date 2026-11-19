@@ -6,23 +6,13 @@ import 'package:mangabaka_app/core/network/api_envelope.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// Fetching a single series by id, with a bounded in-memory cache.
-///
-/// Transport concerns (timeout, health reporting, failure translation) belong
-/// to [ApiClient]; what stays here is the part specific to series: the cache,
-/// the content-rating gate, and the status codes this endpoint gives distinct
-/// meanings to.
 mixin SeriesFetchMixin {
   final logger = LoggingService.logger;
 
   final Map<String, Series> _cache = {};
 
-  /// Insertion-ordered, so `keys.first` is the oldest entry. 200 series is a
-  /// few hundred KB at most and comfortably covers a browsing session without
-  /// growing without bound on a long-lived process.
   static const int _maxCacheSize = 200;
 
-  /// Overridable so a test can inject a client; defaults to the shared one.
   ApiClient get seriesApi => _defaultApi;
   static final ApiClient _defaultApi = ApiClient(healthContext: 'series');
 
@@ -33,8 +23,7 @@ mixin SeriesFetchMixin {
   Future<Series> fetchSeries(String id) async {
     final cached = _cache[id];
     if (cached != null) {
-      // Preferences can change after a series was cached, so the gate is
-      // re-applied on the way out rather than only at fetch time.
+      // Preferences may have changed since this was cached.
       _assertAllowedByContentRating(cached, evictOnBlock: id);
       logger.fine('Returning cached series data for ID: $id');
       return cached;
@@ -43,8 +32,6 @@ mixin SeriesFetchMixin {
     final response = await seriesApi.send(
       ApiClient.uri('${AppConstants.baseApiUrl}/series/$id'),
       operation: 'fetch series',
-      // 404 and 429 are meaningful answers from this endpoint rather than
-      // generic failures, so they are handled here with their own messages.
       acceptedStatuses: const {200, 404, 429},
     );
 
@@ -87,9 +74,7 @@ mixin SeriesFetchMixin {
   }
 
   void _store(String id, Series series) {
-    // Re-inserting refreshes recency, and replacing an existing id must not
-    // evict an unrelated entry. Search results are precached by the page, so
-    // this is also what keeps the cache bounded while browsing.
+    // Remove first: re-inserting refreshes recency, and replacing an id must not evict another.
     _cache.remove(id);
     while (_cache.length >= _maxCacheSize) {
       _cache.remove(_cache.keys.first);
@@ -97,11 +82,7 @@ mixin SeriesFetchMixin {
     _cache[id] = series;
   }
 
-  /// Blocks a series whose rating the user has chosen not to see.
-  ///
-  /// Modelled as a 403 so the UI treats it as "you may not view this" rather
-  /// than a transport error worth retrying. An empty preference list means no
-  /// preference has been recorded, which permits everything.
+  /// A 403, so the UI treats it as "you may not view this" rather than a retryable transport error.
   void _assertAllowedByContentRating(Series series, {String? evictOnBlock}) {
     final prefs = SettingsManager().contentPreferences;
     if (prefs.isEmpty) return;

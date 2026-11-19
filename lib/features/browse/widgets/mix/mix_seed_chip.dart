@@ -4,10 +4,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// One seed in the Mix seed row: cover thumbnail, title, and a remove button.
-///
-/// Tapping the chip body opens the series; only the trailing circle removes
-/// it, so a mis-tap costs a navigation rather than losing a seed.
+/// Only the trailing circle removes, so a mis-tap costs a navigation rather than a seed.
 class MixSeedChip extends StatelessWidget {
   final Series seed;
   final VoidCallback onTap;
@@ -74,9 +71,7 @@ class _Thumbnail extends StatelessWidget {
         width: 36,
         height: 50,
         child: url.isNotEmpty
-            // Decoded at 80px rather than full size: the chip is 36px wide, and
-            // full-resolution covers in a horizontal row is real memory on a
-            // low-end device.
+            // 80px decode for a 36px chip: full-res covers in a row cost memory on low-end devices.
             ? WidgetUtils.networkImage(
                 url: url,
                 fit: BoxFit.cover,

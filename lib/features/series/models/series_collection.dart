@@ -1,7 +1,7 @@
 class SeriesCollection {
   final String id;
 
-  /// The series this collection belongs to; empty when the response omitted it.
+  /// Empty when the response omitted it.
   final String seriesId;
   final String title;
   final String format;
@@ -10,7 +10,6 @@ class SeriesCollection {
   final String medium;
   final String publisherName;
 
-  /// The publisher's id, for fetching more of its collections.
   final String publisherId;
   final String editionName;
   final String languageName;

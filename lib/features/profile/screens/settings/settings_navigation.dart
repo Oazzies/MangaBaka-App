@@ -4,7 +4,6 @@ import 'package:mangabaka_app/features/profile/screens/settings/settings_dialog.
 import 'package:mangabaka_app/features/profile/screens/settings_category_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 
-/// A settings category's content, for a host that shows categories inline.
 class SettingsCategoryContent {
   final String title;
   final Widget content;
@@ -12,12 +11,7 @@ class SettingsCategoryContent {
   const SettingsCategoryContent({required this.title, required this.content});
 }
 
-/// Placed above a settings page that shows categories inline rather than
-/// navigating to them — the desktop settings page, whose categories open in
-/// its right-hand pane.
-///
-/// [showOrNavigate] hands categories to the nearest host instead of pushing a
-/// screen or a dialog page.
+/// Lets [showOrNavigate] hand categories to the desktop settings page's right-hand pane.
 class InlineSettingsHost extends InheritedWidget {
   final ValueChanged<SettingsCategoryContent> onOpen;
 
@@ -34,15 +28,7 @@ class InlineSettingsHost extends InheritedWidget {
   bool updateShouldNotify(InlineSettingsHost oldWidget) => false;
 }
 
-/// Opens a settings category the way the current layout calls for.
-///
-/// Portrait pushes a full screen. Landscape keeps the user inside the settings
-/// dialog and slides the category in as a new page on the dialog's own stack —
-/// pushing a route there would put a full-screen page on top of a dialog,
-/// which reads as the dialog having vanished.
-///
-/// [listenable] rebuilds the category when the settings it displays change;
-/// pass null for a category whose rows are all static.
+/// Landscape pages inside the settings dialog: a pushed route would cover it as if it vanished.
 void showOrNavigate(
   BuildContext context, {
   required String title,
@@ -56,8 +42,7 @@ void showOrNavigate(
 
   Widget buildInner(BuildContext ctx) {
     final children = buildChildren(ctx);
-    // In the dialog the category is already inside a scrolling shell with its
-    // own header, so it contributes just the rows.
+    // The dialog and desktop pane already scroll and carry a header, so only the rows go in.
     return isLandscape || host != null
         ? Column(mainAxisSize: MainAxisSize.min, children: children)
         : SettingsCategoryScreen(title: title, children: children);
@@ -89,12 +74,7 @@ void showOrNavigate(
   _showAsStandaloneDialog(context, title: title, content: content);
 }
 
-/// Fallback for a landscape category opened from outside the settings dialog.
-///
-/// The current dialog is dismissed first and the replacement is deferred to
-/// the next frame, so the two do not overlap during the pop animation. Going
-/// "back" from it reopens the settings root, since there is no dialog stack to
-/// return to.
+/// Deferred a frame so the replacement does not overlap the dialog being popped.
 void _showAsStandaloneDialog(
   BuildContext context, {
   required String title,

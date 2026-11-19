@@ -14,17 +14,7 @@ import 'package:mangabaka_app/features/series/widgets/series_tag_group.dart';
 import 'package:mangabaka_app/features/series/widgets/tags_placeholder.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The tags card on the series detail page.
-///
-/// Tags are the heaviest part of that page — a well-tagged series carries a
-/// couple of hundred chips, each of which has to be resolved through
-/// [MetadataService] and laid out as rich text. Doing that in the same frame
-/// as the rest of the page is what made opening a series feel like a stall of
-/// up to a second, while untagged series opened instantly.
-///
-/// So this widget draws in two passes: the first frame gets a cheap
-/// placeholder card, and the tags themselves are resolved and built on the
-/// following frame. The page is on screen before any tag work starts.
+/// Placeholder first, tags a frame later: hundreds of chips in the opening frame stalled it up to 1s.
 class SeriesGroupedTags extends StatefulWidget {
   final Series series;
   final LocalizationService l10n;
@@ -40,21 +30,16 @@ class SeriesGroupedTags extends StatefulWidget {
 }
 
 class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
-  /// How many chips the collapsed card is allowed to build. Comfortably more
-  /// than fills [_collapsedMaxHeight] — see [TagGrouping.trimTo].
+  /// Must comfortably overfill [_collapsedMaxHeight].
   static const int _collapsedChipBudget = 60;
 
-  /// Height the collapsed card clips to, about a dozen rows of chips.
   static const double _collapsedMaxHeight = 400.0;
 
   bool _tagsExpanded = false;
 
-  /// Resolved tag data. Null until the deferred second pass has run.
   List<TagGroup>? _groups;
   int _totalChips = 0;
 
-  /// Built chip groups, rebuilt only when the selection or the expanded state
-  /// actually changes — not on every parent rebuild.
   List<Widget>? _cachedContent;
   bool _cachedExpanded = false;
   SearchFilters? _lastDrawerFilters;
@@ -63,8 +48,6 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
   bool _needsShowMore = false;
   double _contentHeight = 0.0;
 
-  /// True when the collapsed card cannot show everything — either because the
-  /// budget trimmed it, or because what did fit still overflows the clip.
   bool get _hasMore => _totalChips > _collapsedChipBudget || _needsShowMore;
 
   @override
@@ -76,9 +59,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
   @override
   void didUpdateWidget(SeriesGroupedTags oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Compare contents, not list identity: the network `fullSeries` swaps in a
-    // fresh Series a moment after open, and its tags are almost always the
-    // same ones we already resolved.
+    // Compare contents: the network `fullSeries` swaps in a new Series with the same tags just after open.
     if (listEquals(widget.series.tags, oldWidget.series.tags)) return;
     _groups = null;
     _totalChips = 0;
@@ -88,11 +69,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
     _scheduleResolve();
   }
 
-  /// Hands the current frame back to the framework, then resolves the tags.
-  ///
-  /// On a phone this card starts below the fold, so it also waits out the push
-  /// transition: the page is fully readable while it slides, and the tag build
-  /// lands on a frame where nothing is animating.
+  /// Also waits out the push transition so the tag build lands on a frame where nothing animates.
   void _scheduleResolve() {
     if (widget.series.tags.isEmpty) return;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -111,9 +88,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
     });
   }
 
-  /// Measures the built chips to find out whether they overflow the collapsed
-  /// clip — the budget bounds the count, but chip widths vary, so whether the
-  /// result actually overflows can only be known after layout.
+  /// Chip widths vary, so overflowing the collapsed clip is only known after layout.
   void _measureContent() {
     if (!mounted) return;
     final box = _contentKey.currentContext?.findRenderObject() as RenderBox?;
@@ -128,9 +103,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
     });
   }
 
-  /// Tapping a chip normally runs a search for it — but while the filter
-  /// drawer is open it toggles the tag in the drawer instead, so building a
-  /// filter set does not keep navigating away.
+  /// While the filter drawer is open a tap toggles the tag instead of navigating away to a search.
   void _handleTagTap(String tag) {
     final state = SeriesDetailScreen.of(context);
     if (state == null) return;
@@ -166,8 +139,6 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
           selectedTagIds: selectedTagIds,
           onTagTap: _handleTagTap,
           onTagLongPress: _handleTagLongPress,
-          // Expanding a subgroup changes the height, so the overflow check has
-          // to run again.
           onToggle: () => WidgetsBinding.instance.addPostFrameCallback(
             (_) => _measureContent(),
           ),
@@ -179,7 +150,6 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
   Widget build(BuildContext context) {
     if (widget.series.tags.isEmpty) return const SizedBox.shrink();
 
-    // First pass: the page draws without paying for any tag work.
     if (_groups == null) {
       return _card(const TagsPlaceholder());
     }
@@ -210,7 +180,6 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
     padding: const EdgeInsets.only(bottom: 24),
     child: MbCard(
       label: widget.l10n.translate('tags'),
-      // Tapping the header folds or unfolds the card, same as the button.
       onHeaderTap: _groups != null && (_hasMore || _tagsExpanded)
           ? () => setState(() => _tagsExpanded = !_tagsExpanded)
           : null,
@@ -233,8 +202,7 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                // Not scrollable: the scroll view is here only so the content
-                // can exceed the clip without overflowing.
+                // Never scrolls: it only lets the content exceed the clip without an overflow error.
                 physics: const NeverScrollableScrollPhysics(),
                 child: Column(
                   key: _contentKey,
@@ -242,8 +210,6 @@ class _SeriesGroupedTagsState extends State<SeriesGroupedTags> {
                   children: _cachedContent!,
                 ),
               ),
-              // Fades the cut-off row out rather than slicing it, so the clip
-              // reads as "there is more" instead of as a rendering fault.
               if (isClipped) const SeriesTagsFadeOut(),
             ],
           ),

@@ -68,10 +68,7 @@ class SyncProgressOverlay extends StatelessWidget {
   }
 }
 
-/// The card the library sync shows while it runs (or after it is interrupted).
-///
-/// Separate from the overlay that positions it so it can be shown with sample
-/// status from Developer Tools.
+/// Split from its overlay so Developer Tools can show it with sample status.
 class SyncStatusCard extends StatelessWidget {
   final LibrarySyncStatus status;
   final bool isDesktop;
@@ -94,9 +91,6 @@ class SyncStatusCard extends StatelessWidget {
     final kind = hasError ? ToastKind.error : ToastKind.info;
     final t = ToastColors.of(colors, kind);
 
-    // The same solid pill the snackbars use. While entries arrive it is a
-    // compact progress strip — a small spinner, what has synced so far, and a
-    // slim bar along the bottom; once interrupted it turns into an error pill.
     final card = MbToastCard(
       kind: kind,
       radius: isDesktop ? 14 : 16,

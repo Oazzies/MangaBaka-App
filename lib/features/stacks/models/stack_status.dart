@@ -1,18 +1,12 @@
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 
-/// The signed-in reader's standing with one stack, and its live counts.
-///
-/// Returned by `GET /v2/my/stacks/status` and by every vote / save / follow
-/// call. These counts are always current; the ones in listings can be up to
-/// an hour old.
 class StackStatus {
   final int id;
   final bool hasVoted;
   final bool hasSaved;
   final bool hasFollowed;
 
-  /// How many of the stack's series are in the reader's library.
   final int libraryCount;
   final int voteCount;
   final int saveCount;
@@ -58,8 +52,6 @@ class StackStatus {
     followCount: followCount ?? this.followCount,
   );
 
-  /// What the server will answer after the reader toggles their vote, so
-  /// the button can move before it does.
   StackStatus toggledVote() => copyWith(
     hasVoted: !hasVoted,
     voteCount: (voteCount + (hasVoted ? -1 : 1)).clamp(0, 1 << 31),
@@ -95,18 +87,14 @@ class StackStatus {
   }
 }
 
-/// One of the reader's own stacks, seen from a series: whether the series is
-/// in it, and whether it can be added.
 class MySeriesStack {
   final int id;
   final String title;
   final StackVisibility visibility;
   final int entryCount;
 
-  /// Where the series sits in this stack; null when it is not in it.
   final int? rank;
 
-  /// False when the series is already in it, it is full, or it is locked.
   final bool canAdd;
 
   const MySeriesStack({

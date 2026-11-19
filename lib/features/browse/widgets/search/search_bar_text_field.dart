@@ -36,8 +36,7 @@ class SearchBarTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
 
-    // Kerning is disabled so the ghost span lines up exactly with the typed
-    // text; with it on, the completion visibly shifts as it is accepted.
+    // Kerning off so the ghost span lines up with the typed text instead of shifting on accept.
     const features = [FontFeature.disable('kern')];
     final baseStyle =
         Theme.of(context).textTheme.bodyLarge?.copyWith(

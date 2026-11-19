@@ -3,8 +3,6 @@ import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/features/profile/services/auth/auth_network_client.dart';
 import 'package:mangabaka_app/features/profile/services/auth/auth_storage.dart';
 
-/// Token storage kept in memory, so the service's session logic can be
-/// exercised without the secure-storage plugin.
 class MemoryAuthStorage extends AuthStorage {
   MemoryAuthStorage() : super(allowInsecureFallback: false);
 
@@ -50,7 +48,6 @@ TokenResponse tokens(
       null,
     );
 
-/// Stores a signed-in session whose access token is valid for another hour.
 void seedSession(
   MemoryAuthStorage storage, {
   String access = 'old',

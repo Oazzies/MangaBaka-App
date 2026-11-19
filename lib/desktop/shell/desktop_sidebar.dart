@@ -13,12 +13,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_sidebar_account_part.dart';
 
-/// The desktop app's permanent left sidebar: brand, a search shortcut, the
-/// five destinations with their labels, and settings and the account pinned
-/// to the bottom.
-///
-/// Labels are always shown when expanded — a mouse user scans text, and the
-/// phone's icon-only bar only made sense because it had no room.
 class DesktopSidebar extends StatelessWidget {
   /// 0–4 are [navItems]; [settingsIndex] is the settings page.
   final int selectedIndex;
@@ -45,10 +39,7 @@ class DesktopSidebar extends StatelessWidget {
         ? DesktopTokens.sidebarCollapsedWidth
         : DesktopTokens.sidebarWidth;
 
-    // responsive-ok: the collapse animation itself. The width changes only
-    // on a toggle or when the window crosses the auto-collapse width, not
-    // with every frame of a resize, and the content beside it doesn't move
-    // while it plays (see DesktopShell).
+    // responsive-ok: animates only on a toggle or auto-collapse crossing, never per resize frame.
     return AnimatedContainer(
       duration: AppMotion.base,
       curve: AppMotion.emphasized,
@@ -59,8 +50,7 @@ class DesktopSidebar extends StatelessWidget {
       ),
       child: ClipRect(
         child: OverflowBox(
-          // Lay out at the target width immediately so the labels do not
-          // reflow through every frame of the collapse animation.
+          // Laid out at the target width at once so labels don't reflow through the collapse animation.
           alignment: Alignment.topLeft,
           minWidth: width,
           maxWidth: width,
@@ -109,8 +99,7 @@ class DesktopSidebar extends StatelessWidget {
                     const SizedBox(height: 14),
                   ],
                 ),
-                // Halfway down the collapsed bar, where its edge would open from:
-                // the logo at the top also expands it, but nothing says so.
+                // The logo also expands the bar, but nothing says so; this handle sits where its edge opens from.
                 if (collapsed)
                   Align(
                     alignment: Alignment.center,

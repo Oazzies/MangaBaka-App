@@ -43,7 +43,6 @@ class _SeriesHeroCoverState extends State<SeriesHeroCover> {
                 ? widget.series.rawCoverUrl
                 : widget.series.coverUrl;
             if (imageUrl.isNotEmpty) {
-              // Fullscreen shows the cover clear, so a blurred one asks first.
               if (WidgetUtils.isRatingBlurred(widget.series.contentRating) &&
                   !await confirmUnblur(context)) {
                 return;

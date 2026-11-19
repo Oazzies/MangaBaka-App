@@ -2,24 +2,14 @@ import 'dart:convert';
 
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 
-/// The shapes [ExportService] can write a library out as.
 enum ExportFormat {
-  /// A MangaBaka backup — the only format that round-trips losslessly, since
-  /// [ImportParser] already reads this exact shape back in.
   mangaBaka,
 
-  /// One row per entry, for spreadsheets.
   csv,
 
-  /// One title per line.
   plain,
 }
 
-/// Writes the local library out to a file, the other half of the importer.
-///
-/// A build never throws: an entry with nothing worth writing (no title) is
-/// skipped rather than failing the whole export, the same philosophy
-/// [ImportParser] uses when reading one back in.
 abstract final class ExportService {
   static String build(List<LibraryEntry> entries, ExportFormat format) {
     return switch (format) {
@@ -38,8 +28,6 @@ abstract final class ExportService {
     };
     return 'mangabaka-library-$date.$extension';
   }
-
-  // ─── MangaBaka backup ───────────────────────────────────────────────────
 
   static String _buildMangaBaka(List<LibraryEntry> entries) {
     final out = {
@@ -71,8 +59,6 @@ abstract final class ExportService {
     return const JsonEncoder.withIndent('  ').convert(out);
   }
 
-  // ─── CSV ─────────────────────────────────────────────────────────────────
-
   static String _buildCsv(List<LibraryEntry> entries) {
     final rows = StringBuffer(
       'title,state,progress_chapter,progress_volume,rating,note\n',
@@ -95,14 +81,11 @@ abstract final class ExportService {
     return rows.toString();
   }
 
-  /// Quotes a cell when it holds a comma, quote or newline, doubling any
-  /// quotes inside — the inverse of `ImportParser._splitCsvLine`.
+  /// The inverse of `ImportParser._splitCsvLine`.
   static String _cell(String value) {
     if (!value.contains(RegExp(r'[,"\n]'))) return value;
     return '"${value.replaceAll('"', '""')}"';
   }
-
-  // ─── Plain ───────────────────────────────────────────────────────────────
 
   static String _buildPlain(List<LibraryEntry> entries) {
     return entries

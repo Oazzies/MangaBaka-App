@@ -6,7 +6,6 @@ import 'package:mangabaka_app/core/settings/settings_keys.dart';
 import 'package:mangabaka_app/core/settings/settings_registry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Process-wide user preferences store and [ChangeNotifier].
 class SettingsManager extends ChangeNotifier {
   static final SettingsManager _instance = SettingsManager._internal();
   factory SettingsManager() => _instance;
@@ -62,8 +61,6 @@ class SettingsManager extends ChangeNotifier {
     }
   }
 
-  // ─── List styles ─────────────────────────────────────────────────────────
-
   AppListStyle get currentListStyle => _s.currentListStyle.value;
   Future<void> setListStyle(AppListStyle style) =>
       _apply(_s.currentListStyle, style);
@@ -104,8 +101,6 @@ class SettingsManager extends ChangeNotifier {
 
   AppListStyle get resolvedStacksListStyle =>
       separateListStyles ? stacksListStyle : currentListStyle;
-
-  // ─── Grid columns ────────────────────────────────────────────────────────
 
   bool get separateGridColumnCounts => _s.separateGridColumnCounts.value;
   Future<void> setSeparateGridColumnCounts(bool value) =>
@@ -148,8 +143,6 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setCompactGridTitleRows(int value) =>
       _apply(_s.compactGridTitleRows, value);
 
-  // ─── Content ─────────────────────────────────────────────────────────────
-
   List<String> get contentPreferences => _s.contentPreferences.value;
   Future<void> setContentPreferences(List<String> prefsList) =>
       _apply(_s.contentPreferences, prefsList);
@@ -161,8 +154,6 @@ class SettingsManager extends ChangeNotifier {
   bool get hideLibrarySeriesInBrowse => _s.hideLibrarySeriesInBrowse.value;
   Future<void> setHideLibrarySeriesInBrowse(bool value) =>
       _apply(_s.hideLibrarySeriesInBrowse, value);
-
-  // ─── Progress ────────────────────────────────────────────────────────────
 
   bool get showQuickProgress => _s.showQuickProgress.value;
   Future<void> setShowQuickProgress(bool value) =>
@@ -206,8 +197,6 @@ class SettingsManager extends ChangeNotifier {
   Future<void> setProgressOverflow(ProgressOverflowMode mode) =>
       _apply(_s.progressOverflow, mode);
 
-  // ─── Recommendations ─────────────────────────────────────────────────────
-
   List<String> get dismissedRecommendations =>
       _s.dismissedRecommendations.value;
 
@@ -219,8 +208,6 @@ class SettingsManager extends ChangeNotifier {
 
   Future<void> restoreRecommendations() =>
       _apply(_s.dismissedRecommendations, const []);
-
-  // ─── App ─────────────────────────────────────────────────────────────────
 
   bool get hasCompletedOnboarding => _s.hasCompletedOnboarding.value;
   Future<void> setHasCompletedOnboarding(bool value) =>
@@ -265,8 +252,6 @@ class SettingsManager extends ChangeNotifier {
 
   bool get showTooltips => _s.showTooltips.value;
   Future<void> setShowTooltips(bool value) => _apply(_s.showTooltips, value);
-
-  // ─── Appearance ──────────────────────────────────────────────────────────
 
   AppThemeMode get themeMode => _s.themeMode.value;
   Future<void> setThemeMode(AppThemeMode mode) => _apply(_s.themeMode, mode);

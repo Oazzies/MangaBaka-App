@@ -112,7 +112,6 @@ class _ProgressTrackingCards extends StatelessWidget {
   }
 }
 
-/// One list style as a tile: its icon over its name.
 class _StyleTile extends StatelessWidget {
   final AppListStyle style;
   final String label;
@@ -161,7 +160,6 @@ class _StyleTile extends StatelessWidget {
   }
 }
 
-/// A labelled -/+ counter for a bounded integer setting.
 class _StepperRow extends StatelessWidget {
   final IconData icon;
   final String label;

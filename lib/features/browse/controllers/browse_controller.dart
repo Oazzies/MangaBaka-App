@@ -15,18 +15,9 @@ import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 
 part 'browse_fetch_part.dart';
 
-/// Drives the Browse screen: the query, the filters, the active result type,
-/// and the loading lifecycle.
-///
-/// Fetching belongs to [BrowseSearchGateway] and the accumulated pages to
-/// [BrowseResults]; what stays here is the state binding them together — what
-/// is being searched for, whether a request is in flight, and the generation
-/// guard that keeps a slow response from an abandoned search out of the
-/// current results.
 class BrowseController extends ChangeNotifier {
   static final _logger = LoggingService.logger;
 
-  /// Scroll offset past which the back-to-top button appears.
   static const double _backToTopOffset = 500;
 
   final BrowseSearchGateway _gateway;
@@ -49,8 +40,6 @@ class BrowseController extends ChangeNotifier {
   List<Publisher> get publisherResults => _results.publishers;
   List<Staff> get staffResults => _results.staff;
 
-  /// The results for whichever type is active, for callers that do not care
-  /// which it is.
   List<dynamic> get searchResults => _results.forType(_currentType);
 
   int get totalResults => _results.total;
@@ -71,10 +60,7 @@ class BrowseController extends ChangeNotifier {
   SearchFilters _currentFilters = SearchFilters();
   SearchFilters get currentFilters => _currentFilters;
 
-  /// Incremented whenever the search context changes (new query, reset, tab
-  /// switch). In-flight responses compare their captured generation against
-  /// this before touching state, so a slow page from an old search can never
-  /// be appended to the results of a newer one.
+  /// Bumped on every context change; an in-flight page from an older generation is dropped.
   int _requestGeneration = 0;
 
   bool get isSearchMode =>
@@ -87,16 +73,13 @@ class BrowseController extends ChangeNotifier {
   bool _showBackToTop = false;
   bool get showBackToTop => _showBackToTop;
 
-  /// Publishers are browsable without a query (most-published first), so the
-  /// tab always counts as having a search context.
+  /// Publishers are browsable without a query, so that tab always has a search context.
   bool get _hasSearchContext =>
       _currentType == BrowseType.publishers ||
       _currentSearchQuery.isNotEmpty ||
       _currentFilters.toMap().isNotEmpty;
 
-  /// The Publishers tab's chosen order, one of the `PublisherSearchService`
-  /// sort constants; null means "relevance when searching, most series when
-  /// browsing".
+  /// A `PublisherSearchService` sort; null is relevance when searching, most series when browsing.
   String? _publisherSort;
   String? get publisherSort => _publisherSort;
 
@@ -112,8 +95,7 @@ class BrowseController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    // Marks every in-flight page stale, so none of them touches state (or
-    // calls notifyListeners) after disposal.
+    // Stales in-flight pages so none touches state or notifies after disposal.
     _requestGeneration++;
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
@@ -121,11 +103,8 @@ class BrowseController extends ChangeNotifier {
     super.dispose();
   }
 
-  // ─── Scrolling ───────────────────────────────────────────────────────────
-
   void _onScroll() {
-    // Two attached positions means the list is mid-rebuild between routes;
-    // reading `position` would throw.
+    // Two attached positions means a mid-route rebuild; reading `position` would throw.
     if (!scrollController.hasClients ||
         scrollController.positions.length != 1) {
       return;
@@ -160,8 +139,6 @@ class BrowseController extends ChangeNotifier {
     );
   }
 
-  // ─── Search context ──────────────────────────────────────────────────────
-
   void resetSearchState() {
     _logger.fine('Resetting search state');
     _requestGeneration++;
@@ -177,7 +154,6 @@ class BrowseController extends ChangeNotifier {
     if (_currentType == type) return;
     _logger.info('Switching browse type to: $type');
     _currentType = type;
-    // Carry an active search across the tab switch rather than dropping it.
     if (_hasSearchContext) {
       searchSeries();
     } else {
@@ -188,7 +164,6 @@ class BrowseController extends ChangeNotifier {
   void updateSearchQuery(String text) {
     _currentSearchQuery = text;
     if (text.isEmpty && _currentFilters.toMap().isEmpty) {
-      // Clearing the box on the Publishers tab goes back to browsing them.
       _currentType == BrowseType.publishers
           ? searchSeries()
           : resetSearchState();
@@ -198,8 +173,7 @@ class BrowseController extends ChangeNotifier {
   void updateFilters(SearchFilters filters) {
     _logger.info('Filters updated: ${filters.toMap()}');
     _currentFilters = filters;
-    // Filters only apply to series; the Publishers and Staff tabs are hidden
-    // while any are set, so an active one has to fall back.
+    // Publishers and Staff tabs are hidden while filters are set, so an active one falls back.
     if (!filters.isEmpty &&
         (_currentType == BrowseType.publishers ||
             _currentType == BrowseType.staff)) {
@@ -223,7 +197,6 @@ class BrowseController extends ChangeNotifier {
     _startFilteredSearch(filters);
   }
 
-  /// Runs [query] with [filters] as a fresh series search.
   void startQuerySearch(String query, SearchFilters filters) {
     searchController.text = query;
     _currentSearchQuery = query;
@@ -232,9 +205,7 @@ class BrowseController extends ChangeNotifier {
     searchSeries();
   }
 
-  /// Replaces the whole search context with [filters] and runs it. The text
-  /// query is cleared: these entry points come from tapping a chip elsewhere
-  /// in the app, where a leftover query would silently narrow the results.
+  /// Clears the query: these come from chip taps, where a leftover query would narrow results.
   void _startFilteredSearch(SearchFilters filters) {
     searchController.clear();
     _currentSearchQuery = '';
@@ -242,8 +213,6 @@ class BrowseController extends ChangeNotifier {
     _currentFilters = filters;
     searchSeries();
   }
-
-  // ─── Fetching & Barcode ──────────────────────────────────────────────────
 
   void _notify() => notifyListeners();
 
@@ -253,10 +222,7 @@ class BrowseController extends ChangeNotifier {
 
   static double generateRandomSeed() => Random().nextDouble();
 
-  /// Looks a scanned ISBN up and searches for the title it resolves to.
-  ///
-  /// Returns null on success, or a localisation key naming what went wrong —
-  /// the caller shows it, since only the UI knows how.
+  /// Returns null on success, or the localisation key of the error for the UI to show.
   Future<String?> handleBarcodeScan(String isbn) =>
       _handleBarcodeScanImpl(this, isbn);
 }

@@ -6,7 +6,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/mb_colors.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 
-/// Builds [ThemeData] from an [MbPalette].
 class AppTheme {
   AppTheme._();
 
@@ -112,7 +111,6 @@ class AppTheme {
   );
 }
 
-/// A page transition that only fades — no slide, no scale.
 class FadeOnlyPageTransitionsBuilder extends PageTransitionsBuilder {
   const FadeOnlyPageTransitionsBuilder();
 

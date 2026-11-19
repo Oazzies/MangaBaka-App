@@ -85,7 +85,6 @@ void main() {
     });
 
     test('returns null when same as installed', () async {
-      // AppConstants.appVersion is '0.2.4', so a lower version returns null
       final client = _clientWith(200, [_releaseJson(tag: 'v0.1.0')]);
       final svc = UpdateService(client: client);
       final result = await svc.checkForUpdate();

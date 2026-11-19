@@ -8,7 +8,6 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_layouts.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item_list_layouts.dart';
 
-/// Top-left ranking badge shown on grid cards in [EntryListItem].
 class EntryRankingBadge extends StatelessWidget {
   final int ranking;
 
@@ -41,7 +40,6 @@ class EntryRankingBadge extends StatelessWidget {
   }
 }
 
-/// Thin progress bar shown below/inside [EntryListItem] rows.
 class EntryProgressBar extends StatelessWidget {
   final Series series;
   final LibraryEntry entry;
@@ -74,7 +72,6 @@ class EntryProgressBar extends StatelessWidget {
   }
 }
 
-/// Switches between grid and list layout widgets for [EntryListItem].
 class EntryListItemContent extends StatelessWidget {
   final Series series;
   final AppListStyle style;

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A tag's share of the publisher's catalog against its share of the whole
-/// site. The bar is the publisher's share; the tick marks the site-wide share.
 class ShareBarRow extends StatelessWidget {
   final String label;
   final double share;

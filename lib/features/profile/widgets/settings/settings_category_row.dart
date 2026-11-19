@@ -3,12 +3,7 @@ import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// A top-level settings category.
-///
-/// Deliberately not a [SettingsItem]: categories are the app's table of
-/// contents, so they get a quieter treatment than the rows inside them — a
-/// bare muted glyph instead of a filled, coloured well, the title in display
-/// caps, and a accent arrow to say "opens a page".
+/// Deliberately not a [SettingsItem]: categories get a quieter, table-of-contents treatment.
 class SettingsCategoryRow extends StatelessWidget {
   final IconData icon;
   final String title;

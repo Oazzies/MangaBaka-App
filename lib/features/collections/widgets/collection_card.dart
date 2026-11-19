@@ -5,17 +5,10 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/series/models/series_collection.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// One collection: its title, who published it as which edition, and the
-/// format/medium/status badges. Tapping opens the collection's works.
-///
-/// Shared by the series' Collections tab and the collections browser so a
-/// collection looks the same wherever it turns up.
 class CollectionCard extends StatelessWidget {
   final SeriesCollection collection;
   final VoidCallback? onTap;
 
-  /// Names the publisher in the byline; the browser turns it off because the
-  /// publisher is already the page's subject.
   final bool showPublisher;
 
   const CollectionCard({

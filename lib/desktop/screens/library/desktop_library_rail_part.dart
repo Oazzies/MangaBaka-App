@@ -64,7 +64,6 @@ extension on LibraryFilterHelper {
       : getByTab(key);
 }
 
-/// The status list at the top of the library panel.
 class _StatusList extends StatelessWidget {
   final String selected;
   final Map<String, int> counts;

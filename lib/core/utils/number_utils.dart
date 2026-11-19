@@ -1,5 +1,4 @@
 class NumberUtils {
-  /// Formats a count into a human-readable string (e.g., 1100 -> 1.1k).
   static String formatCount(int count) {
     if (count < 1000) return count.toString();
 

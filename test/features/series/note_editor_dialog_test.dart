@@ -37,7 +37,6 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('# Arc 1\n**Great** start'), findsOneWidget);
 
-      // Switch to Preview tab and verify MarkdownBody renders.
       await tester.tap(find.text('Preview'));
       await tester.pumpAndSettle();
 
@@ -45,7 +44,6 @@ void main() {
       expect(find.byType(SeriesNoteMarkdown), findsOneWidget);
       expect(find.byType(MarkdownBody), findsOneWidget);
 
-      // Switch back to Write, update text, and save.
       await tester.tap(find.text('Write'));
       await tester.pumpAndSettle();
 
@@ -116,7 +114,6 @@ void main() {
       );
 
       final field = tester.widget<TextField>(find.byType(TextField));
-      // 1. Selected text: "hello" -> "**hello**"
       field.controller!.selection = const TextSelection(
         baseOffset: 0,
         extentOffset: 5,
@@ -132,7 +129,6 @@ void main() {
         const TextSelection(baseOffset: 2, extentOffset: 7),
       );
 
-      // 2. Collapsed cursor at end: inserts "****" with cursor in the middle.
       field.controller!.selection = TextSelection.collapsed(
         offset: field.controller!.text.length,
       );

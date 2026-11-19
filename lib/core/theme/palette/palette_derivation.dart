@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/palette/color_math.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 
-/// Contrast floors every derived palette is held to. The theme tests assert
-/// the same numbers, so a preset that would read badly cannot ship.
+/// The theme tests assert the same numbers.
 class PaletteContrast {
   const PaletteContrast._();
 
@@ -11,16 +10,10 @@ class PaletteContrast {
   static const double textMuted = 4.5;
   static const double onAccent = 4.5;
 
-  /// Accent and status colours are used as icon/indicator/label colours on
-  /// surfaces — WCAG's non-text (3:1) floor.
+  /// WCAG's non-text floor: accents and statuses are icon and label colours.
   static const double ui = 3.0;
 }
 
-/// Builds complete palettes from a handful of seeds.
-///
-/// Presets, the accent override and user-made custom themes all go through
-/// [derivePalette], so a token added later only needs deriving here to exist
-/// in every theme.
 MbPalette derivePalette({
   required Brightness brightness,
   required Color background,
@@ -46,9 +39,7 @@ MbPalette derivePalette({
     PaletteContrast.text,
   );
 
-  // Dark themes step surfaces up toward the ink; light themes lift cards to
-  // near-white and sink raised controls slightly toward the ink, which is how
-  // light UIs read as layered.
+  // Light UIs read as layered: near-white cards, controls sunk toward the ink.
   final s1 =
       surface ??
       (dark
@@ -61,7 +52,6 @@ MbPalette derivePalette({
       border ??
       (dark ? ColorMath.mix(bg, ink, 0.11) : ColorMath.mix(bg, ink, 0.14));
 
-  // Muted text must stay legible on the lowest-contrast surface it sits on.
   final darkestSurface = _leastContrasting(ink, [bg, s1, s2]);
   final muted = ColorMath.ensureContrast(
     textMuted ?? ColorMath.mix(ink, bg, 0.42),
@@ -111,7 +101,6 @@ MbPalette derivePalette({
   );
 }
 
-/// Re-derives [base] around a different accent, keeping everything else.
 MbPalette withAccent(MbPalette base, Color accent) {
   final acc = ColorMath.ensureContrast(
     ColorMath.ensureContrast(accent, base.surface, PaletteContrast.ui),

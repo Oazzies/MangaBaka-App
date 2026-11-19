@@ -13,15 +13,11 @@ class AuthStorage {
   static const kAccessTokenExp = 'mb_access_token_exp';
   static const kProfileCache = 'mb_profile_cache';
 
-  /// Space-separated scopes the current session was granted at sign-in.
-  /// Absent for sessions from before it was recorded.
+  /// Space-separated; absent for sessions from before it was recorded.
   static const kGrantedScopes = 'mb_granted_scopes';
 
-  /// Whether a secure-storage failure may fall back to plain
-  /// SharedPreferences. That file is readable by anything running as the
-  /// user, so the fallback exists only for development (e.g. an unsigned
-  /// macOS build, which has no keychain access). A release build refuses to
-  /// store the value instead, and sign-in reports the failure.
+  /// Dev only (an unsigned macOS build has no keychain): plain SharedPreferences is readable by
+  /// anything running as the user, so a release build refuses to store instead.
   final bool allowInsecureFallback;
 
   AuthStorage({bool? allowInsecureFallback})
@@ -31,8 +27,7 @@ class AuthStorage {
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
       resetOnError: true,
-      // Keep the existing SharedPreferences file name so upgrading from
-      // flutter_secure_storage v8 preserves stored tokens for Android users.
+      // Keeps the flutter_secure_storage v8 file name so Android upgrades keep their tokens.
       // ignore: deprecated_member_use
       sharedPreferencesName: 'mangabaka_app_secure_storage_v3',
     ),
@@ -49,8 +44,7 @@ class AuthStorage {
     } on PlatformException catch (e) {
       if (!allowInsecureFallback) {
         _logger.warning('Secure storage read error for key $key: $e');
-        // A plaintext copy left by an older build cannot be moved anywhere
-        // safe while secure storage is failing; it is not left on disk.
+        // A plaintext copy from an older build cannot be moved anywhere safe now, so drop it.
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove(key);
         return null;
@@ -68,9 +62,6 @@ class AuthStorage {
     return _migrateToSecure(prefs, key, plain);
   }
 
-  /// Moves a value an older build left in plain SharedPreferences into
-  /// secure storage. The plaintext copy is removed either way; if secure
-  /// storage cannot take it, the value is dropped and the user signs in again.
   Future<String?> _migrateToSecure(
     SharedPreferences prefs,
     String key,
@@ -117,9 +108,7 @@ class AuthStorage {
     kGrantedScopes,
   ];
 
-  /// Deletes [key] from secure storage *and* from the SharedPreferences
-  /// fallback — [read] consults the fallback whenever secure storage has no
-  /// value, so a copy left there would resurrect a deleted token.
+  /// Also clears the prefs fallback: [read] consults it and would resurrect a deleted token.
   Future<void> delete(String key) async {
     try {
       await _storage.delete(key: key);
@@ -130,8 +119,7 @@ class AuthStorage {
     await prefs.remove(key);
   }
 
-  /// Removes every auth value. Only this class's keys are touched in the
-  /// fallback store: SharedPreferences also holds every app setting.
+  /// Only this class's keys leave the fallback store: SharedPreferences also holds every setting.
   Future<void> deleteAll() async {
     try {
       await _storage.deleteAll();

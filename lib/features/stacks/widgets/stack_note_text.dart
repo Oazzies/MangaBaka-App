@@ -6,8 +6,6 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/markdown_utils.dart';
 import 'package:mangabaka_app/features/stacks/utils/stack_format.dart';
 
-/// A curator's note on an entry: markdown, clamped to a few lines with a
-/// "More" toggle, set as a pull-quote beside an accent rule.
 class StackNoteText extends StatefulWidget {
   final String note;
   final int collapsedLines;
@@ -52,7 +50,6 @@ class _StackNoteTextState extends State<StackNoteText> {
     );
     final long =
         widget.note.length > 180 || '\n'.allMatches(widget.note).length > 2;
-    // Set like a pull-quote: an accent rule down the side, no box.
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,

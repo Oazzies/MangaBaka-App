@@ -9,21 +9,12 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_autocomplete_service.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 
-/// The Library search field.
-///
-/// Shares all of its behaviour with the Browse field through
-/// [SearchBarShell]; what differs is the source. Suggestions come from the
-/// entries already in memory rather than the network, so they resolve
-/// synchronously and there is nothing to debounce, rate-limit or fail.
 class LibrarySearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final SearchFilters? initialFilters;
   final ValueChanged<SearchFilters>? onFilterApplied;
   final FocusNode? focusNode;
 
-  /// The library's current entries. Suggestions are matched against whatever
-  /// this last delivered, so the field can only ever suggest something the
-  /// user actually has.
   final Stream<List<LibraryEntry>>? entriesStream;
 
   final ValueChanged<AutocompleteSeriesResult>? onResultSelected;
@@ -70,8 +61,6 @@ class _LibrarySearchBarState extends State<LibrarySearchBar> {
     super.dispose();
   }
 
-  /// Held as a subscription rather than a bare `listen`, so a rebuilt stream
-  /// or a disposed field does not leave a listener writing into dead state.
   void _subscribe() {
     _entriesSubscription?.cancel();
     _entriesSubscription = widget.entriesStream?.listen((entries) {
@@ -88,8 +77,7 @@ class _LibrarySearchBarState extends State<LibrarySearchBar> {
       return;
     }
     final results = _autocomplete.search(query, _entries);
-    // The library matcher already scores prefixes, so re-ranking on them here
-    // would fight its ordering; exact match and title length still apply.
+    // The library matcher already scores prefixes; re-ranking on them would fight its order.
     AutocompleteRanking.sort(results, query, preferPrefixMatches: false);
     onResults(results);
   }

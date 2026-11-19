@@ -69,7 +69,6 @@ class _SectionState extends State<_Section> {
   }
 }
 
-/// A compact include/exclude chip for pointer use.
 class DesktopTriChip extends StatelessWidget {
   final String label;
   final TriState state;

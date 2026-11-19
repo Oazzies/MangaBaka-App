@@ -1,7 +1,5 @@
 part of 'desktop_browse_landing.dart';
 
-/// Stacks: hand-picked lists from the community, as a full-width feature
-/// card under Mix and the queue.
 class _StacksCard extends StatelessWidget {
   final VoidCallback onTap;
 

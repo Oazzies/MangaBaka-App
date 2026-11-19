@@ -11,13 +11,10 @@ import 'package:mangabaka_app/features/home/screens/upcoming_works_screen.dart';
 import 'package:mangabaka_app/features/home/services/upcoming_loader.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 
-/// The next few releases as a Home rail, each card dated, with an arrow into
-/// the full [UpcomingWorksScreen]. Dropped when nothing is coming up.
 class HomeUpcomingRail extends StatelessWidget {
   final UpcomingData data;
   final double coverWidth;
 
-  /// How many releases the rail shows before deferring to the full screen.
   static const int _maxCards = 12;
 
   const HomeUpcomingRail({
@@ -56,7 +53,6 @@ class HomeUpcomingRail extends StatelessWidget {
                 work: works[i],
                 cover: data.coverFor(works[i])!,
                 width: coverWidth,
-                // The card is the series; the arrow on the header is the list.
                 onTap: () => works[i].seriesId == null
                     ? UpcomingWorksScreen.open(context, initial: data)
                     : openUpcomingSeries(context, works[i]),

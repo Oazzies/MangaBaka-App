@@ -12,19 +12,14 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 
-/// One page of browse results.
 class BrowsePage<T> {
   final List<T> items;
 
-  /// Total matches, as far as the server reports or the client can infer.
   final int total;
 
-  /// True when [total] is a placeholder rather than a real count — the server
-  /// returned none and the page was full, so all that is known is "at least
-  /// this many". The UI shows it as "1000+".
+  /// [total] is a floor, not a count: the server gave none and the page was full ("1000+").
   final bool isTotalCapped;
 
-  /// True when a further page is worth requesting.
   final bool hasMore;
 
   const BrowsePage({
@@ -35,22 +30,10 @@ class BrowsePage<T> {
   });
 }
 
-/// Turns a browse query into a page of results, per result type.
-///
-/// The three types share a query and a page number but almost nothing else:
-/// series come from the search endpoint, publishers from their own, and staff
-/// are derived from series credits because there is no staff endpoint. Each
-/// used to be a `_fetch…Results` method on `BrowseController` that reached
-/// into its state and wrote back to it directly.
-///
-/// Everything here is stateless: hand it a query and get a page. The
-/// controller keeps the accumulated results, the loading flags and the
-/// generation guard.
 class BrowseSearchGateway {
   static final _logger = LoggingService.logger;
 
-  /// Placeholder total for an uncapped result set. The API stops reporting
-  /// real totals past a point, and an honest "lots" beats a wrong number.
+  /// The API stops reporting real totals past a point; an honest "lots" beats a wrong number.
   static const int cappedTotal = 1000;
 
   final SeriesSearchService _series;
@@ -84,8 +67,7 @@ class BrowseSearchGateway {
 
     final items = result.series;
 
-    // The API prioritises relevance whenever a query is present and ignores
-    // the requested sort, so it is reapplied per page.
+    // With a query the API sorts by relevance and ignores `sort_by`, so sort each page locally.
     if (query.isNotEmpty) {
       SeriesLocalSort.apply(items, filters.sortBy);
     }
@@ -120,8 +102,6 @@ class BrowseSearchGateway {
       if (trimmed.isNotEmpty) 'q': trimmed,
       'page': page,
       'limit': AppConstants.defaultPageLimit,
-      // Browsing with no query lists the biggest publishers first; a search
-      // keeps the API's relevance order unless the user picked another.
       if (sortBy != null)
         'sort_by': sortBy
       else if (trimmed.isEmpty)
@@ -138,12 +118,7 @@ class BrowseSearchGateway {
     );
   }
 
-  /// Staff are derived from the credits on series matching [query].
-  ///
-  /// The page size therefore describes *series* fetched, not people found —
-  /// which is why [BrowsePage.hasMore] is judged on the underlying series page
-  /// and the total is left to the caller, who knows how many unique people
-  /// have accumulated across pages.
+  /// There is no staff endpoint: staff come from series credits, so page size counts series.
   Future<BrowsePage<Staff>> fetchStaff({
     required String query,
     required int page,
@@ -172,11 +147,7 @@ class BrowseSearchGateway {
     );
   }
 
-  /// Reconciles the server's total with what the page actually contained.
-  ///
-  /// The endpoint sometimes reports 0 alongside real data. A short page means
-  /// the end has been reached and the true total can be counted; a full page
-  /// means there is more, and only a floor can be given.
+  /// The endpoint sometimes reports 0 alongside real data; a full page can then only give a floor.
   static ({int value, bool isCapped}) _resolveTotal({
     required int reported,
     required int pageSize,
@@ -189,9 +160,6 @@ class BrowseSearchGateway {
     return (value: cappedTotal, isCapped: true);
   }
 
-  /// The current user's id when "hide library series" is on, for the API's
-  /// `exclude_user_library` filter. Null whenever the setting is off, the user
-  /// is logged out, or no profile has been cached yet.
   String? _excludeUserId() {
     if (!SettingsManager().hideLibrarySeriesInBrowse) return null;
     final auth = getIt<ProfileAuthService>();

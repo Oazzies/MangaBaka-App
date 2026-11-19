@@ -147,7 +147,6 @@ void main() {
       expect(find.text('Sequel Title'), findsOneWidget);
       expect(find.text('Spin-off Title'), findsOneWidget);
 
-      // Canonical order: Prequel before Sequel before Spin-off
       final prequelY = tester.getTopLeft(find.text('PREQUEL')).dy;
       final sequelY = tester.getTopLeft(find.text('SEQUEL')).dy;
       final spinOffY = tester.getTopLeft(find.text('SPIN-OFF')).dy;

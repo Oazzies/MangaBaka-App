@@ -17,13 +17,6 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Bring a list in from a tracker or file, or write the local library back
-/// out.
-///
-/// Import: paste, match, prune, add — each line is matched against the
-/// catalogue (strictly - see [SeriesMatchService]), the user reviews what
-/// matched, and the chosen series go in with a single batch request.
-/// Export: pick a scope and a format, then share or save the file.
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({super.key});
 
@@ -46,15 +39,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
   ImportFormat _format = ImportFormat.auto;
   bool _useStates = true;
 
-  /// The source the text was loaded from, if it wasn't just pasted.
   String? _sourceLabel;
 
   ExportFormat _exportFormat = ExportFormat.mangaBaka;
   final Set<String> _exportStates = {...DesktopImportExportView.states};
   bool _exporting = false;
 
-  /// Extensions the generic file picker offers, one per [ImportFormat] that
-  /// reads a file.
   static const List<String> _fileExtensions = [
     'txt',
     'csv',
@@ -76,7 +66,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       addBatch: _library.createLibraryEntriesBatch,
       state: SettingsManager().addLibraryDefaultTab,
     );
-    // The title count and detected format follow the text as it is edited.
     _text.addListener(_onTextChanged);
   }
 
@@ -100,8 +89,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     fileName: _sourceLabel,
   );
 
-  // ─── Import sources ──────────────────────────────────────────────────────
-
   List<ImportSource> _sources(LocalizationService l10n) => buildImportSources(
     onAniList: _fromAniList,
     onKitsu: _fromKitsu,
@@ -120,9 +107,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
 
   Future<void> _openFile() => _pickFile(allowedExtensions: _fileExtensions);
 
-  /// Opens a file for a named tracker source, prefixing [_sourceLabel] with
-  /// its name so the picker step (and the review step after it) reads
-  /// "Manga-Updates · export.json" rather than a bare filename.
   Future<void> _openFileAs({
     required List<String> extensions,
     required String labelKey,
@@ -164,11 +148,9 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     );
   }
 
-  /// Loads a public AniList manga list by username into the text box.
   Future<void> _fromAniList() =>
       _runTrackerFetch(() => fetchAniListImportList(context));
 
-  /// Loads a public Kitsu manga library by username into the text box.
   Future<void> _fromKitsu() =>
       _runTrackerFetch(() => fetchKitsuImportList(context));
 
@@ -189,8 +171,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     _text.clear();
   }
 
-  /// Back from the review step returns to the paste step; back from the
-  /// paste step leaves the screen.
   void _back() {
     if (_controller.hasRows) {
       _controller.reset();
@@ -215,8 +195,6 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       AppSnackBar.show(context, l10n.translate('failed_to_add'), isError: true);
     }
   }
-
-  // ─── Export ──────────────────────────────────────────────────────────────
 
   void _toggleExportState(String state) {
     setState(() {

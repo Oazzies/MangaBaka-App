@@ -2,8 +2,7 @@ import 'dart:convert';
 
 export 'package:mangabaka_app/features/publisher/models/publisher_stats.dart';
 
-/// Logo variants served by the v2 publisher endpoints. Any of them may be
-/// missing, and the whole object is null for publishers without artwork.
+/// Any variant may be missing; the whole object is null for publishers without artwork.
 class PublisherLogo {
   final String? raw;
   final String? x150;
@@ -31,17 +30,14 @@ class PublisherLogo {
   static bool _isSvg(String url) =>
       (Uri.tryParse(url)?.path ?? url).toLowerCase().endsWith('.svg');
 
-  /// SVG logos are served as-is for every size, and parsing them on the UI
-  /// thread janks scrolling. The image CDN renders any source URL to a webp at
-  /// a given size (`plain/<size>/<base64url of the source>.webp`), so SVGs are
-  /// requested that way and take the ordinary raster path.
+  /// SVG logos are served as-is at every size and parsing them janks scrolling, so the image CDN
+  /// renders them to webp at a given size (`plain/<size>/<base64url of the source>.webp`).
   static String _rasterised(String url, String size) {
     if (!_isSvg(url)) return url;
     final encoded = base64Url.encode(utf8.encode(url)).replaceAll('=', '');
     return 'https://cdn.mangabaka.dev/imgproxy/plain/$size/$encoded.webp';
   }
 
-  /// Best variant for a thumbnail of roughly [size] logical pixels.
   String? forSize(double size) {
     final String? url;
     final String proxy;
@@ -73,7 +69,6 @@ class Publisher {
   final String? description;
   final String? note;
 
-  /// v2 fields.
   final String? canonicalUrl;
   final PublisherLogo? logo;
   final List<String> languages;
@@ -105,9 +100,7 @@ class Publisher {
 
   static final RegExp _isoYear = RegExp(r'^(\d{4})-');
 
-  /// The API sends years as numbers, as strings ("1990"), as ISO dates
-  /// ("1926-08-08", v2) and sometimes as an empty string for "unknown";
-  /// anything unreadable is null.
+  /// The API sends years as ints, strings ("1990"), ISO dates ("1926-08-08", v2) or "" for unknown.
   static int? _asInt(Object? value) {
     if (value is int) return value;
     if (value is num) return value.toInt();
@@ -232,7 +225,6 @@ class PublisherAlias {
   }
 }
 
-/// A publisher suggested by `/publishers/{id}/similar`.
 class SimilarPublisher {
   final String id;
   final String name;

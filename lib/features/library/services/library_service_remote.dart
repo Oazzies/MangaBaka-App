@@ -131,8 +131,7 @@ Future<List<api_series.Series>> _fetchSeriesBatchImpl(
   final result = <api_series.Series>[];
   for (var i = 0; i < ids.length; i += 50) {
     if (i > 0) {
-      // A full scan of a big library is hundreds of these; spread them out
-      // rather than trip the rate limit.
+      // A full scan makes hundreds of these; spacing them keeps under the rate limit.
       await Future<void>.delayed(const Duration(milliseconds: 150));
     }
     final chunk = ids.sublist(i, i + 50 > ids.length ? ids.length : i + 50);
@@ -224,15 +223,12 @@ Future<List<api_series.Series>> _fetchSeriesChunkImpl(
   }
 }
 
-/// One page of the library change feed.
 class LibraryChangesPage {
   final List<Map<String, dynamic>> items;
 
-  /// Opaque position to send back for the next page; save it once applied.
   final String? cursor;
   final bool more;
 
-  /// The server refused the cursor (or request): scan from the start.
   final bool invalidCursor;
 
   const LibraryChangesPage({
@@ -247,8 +243,6 @@ class FetchPageResult {
   final List<api.LibraryEntry> entries;
   final bool isError;
 
-  /// Entries on the page that could not be parsed and were left out. When
-  /// non-zero the page is not a complete picture of the server's library.
   final int skipped;
   FetchPageResult({
     required this.entries,
@@ -261,8 +255,7 @@ FetchPageResult _parseLibraryPage(String responseBody) {
   final body = jsonDecode(responseBody);
   final data = body is Map ? body['data'] : null;
   if (data is! List) return FetchPageResult(entries: []);
-  // One malformed entry must cost that entry, not the page: a throw here
-  // fails the whole sync, and it would fail identically on every retry.
+  // A throw would fail the whole sync, identically on every retry, so bad entries are skipped.
   final entries = <api.LibraryEntry>[];
   var skipped = 0;
   for (final item in data) {

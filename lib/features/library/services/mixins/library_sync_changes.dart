@@ -2,9 +2,7 @@ import 'package:logging/logging.dart';
 import 'package:mangabaka_app/core/database/database.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// Applies one page of `/v2/my/library/changes` feed items into the local
-/// Drift database. Returns the number of entries written, or `null` when
-/// [isStale] becomes true mid-flight.
+/// Returns entries written, or null once [isStale] turns true mid-page.
 Future<int?> applyLibraryFeedChanges({
   required List<Map<String, dynamic>> items,
   required Set<String>? seen,

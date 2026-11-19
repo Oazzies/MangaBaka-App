@@ -74,8 +74,6 @@ class _SeriesSegmentedControlState extends State<SeriesSegmentedControl>
 
   @override
   Widget build(BuildContext context) {
-    // Same pill strip as the library tabs, so a "one of many" choice looks
-    // identical wherever it appears.
     return SelectionContainer.disabled(
       child: TabBar(
         controller: _controller,
@@ -84,9 +82,7 @@ class _SeriesSegmentedControlState extends State<SeriesSegmentedControl>
         onTap: (index) {
           widget.onTabChanged(SeriesSegmentedControl.tabs[index]);
         },
-        // The strip's own indicatorPadding already insets each pill by 5, so
-        // the outer padding is reduced to match — clamped, because callers
-        // (the wide layout) legitimately pass 0.
+        // indicatorPadding already insets each pill by 5; clamped because the wide layout passes 0.
         padding: EdgeInsets.symmetric(
           horizontal: (widget.horizontalPadding - 5).clamp(0.0, 64.0),
         ),

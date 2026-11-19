@@ -68,7 +68,6 @@ class _FilterListDialogState extends State<FilterListDialog> {
       return preparedQuery.isEmpty || preparedQuery.matches(name);
     }).toList();
 
-    // Sort included/excluded items to the top
     filteredItems.sort((a, b) {
       final idA = a[widget.idKey]?.toString() ?? '';
       final idB = b[widget.idKey]?.toString() ?? '';
@@ -84,7 +83,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
       } else if (!isSelectedA && isSelectedB) {
         return 1;
       }
-      return 0; // maintain original sorting for others
+      return 0;
     });
 
     final bottomPadding = MediaQuery.of(context).padding.bottom;

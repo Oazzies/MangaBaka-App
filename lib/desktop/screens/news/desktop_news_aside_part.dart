@@ -8,8 +8,6 @@ class _NewsAsidePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    // Laid out like the Upcoming Releases rail: a header that starts below the
-    // window controls, a hairline, then the scrolling list.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

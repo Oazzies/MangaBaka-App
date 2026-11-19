@@ -11,12 +11,6 @@ import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 
 export 'package:mangabaka_app/features/stacks/models/stack_editor_types.dart';
 
-/// The working copy behind the stack editor: creates a stack, or loads one
-/// for editing and saves it back as a single full replace.
-///
-/// The API's `token` guards against overwriting a change made elsewhere: a
-/// save with a stale one is refused ([StackErrorCode.staleToken]), and
-/// [save] with `overwrite` re-reads the token and sends this copy anyway.
 class StackEditorController extends ChangeNotifier {
   final int? stackId;
   final StackService _service;
@@ -58,7 +52,6 @@ class StackEditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Reads the stack for editing. A no-op for a new stack.
   Future<void> load() async {
     final id = stackId;
     if (id == null) return;
@@ -103,10 +96,6 @@ class StackEditorController extends ChangeNotifier {
     _dirty = false;
   }
 
-  // ── Edits ─────────────────────────────────────────────────────────────────
-
-  /// Adds [series] at the end. Returns false when it is already in the stack
-  /// or the stack is full.
   bool add(Series series) {
     if (containsSeries(series.id) || entries.length >= StackLimits.entriesMax) {
       return false;
@@ -121,8 +110,7 @@ class StackEditorController extends ChangeNotifier {
     _touch();
   }
 
-  /// Moves the entry at [oldIndex] so it ends up at [newIndex] (the
-  /// `onReorderItem` convention: indices in the list after the move).
+  /// [newIndex] follows the `onReorderItem` convention: the index after the move.
   void reorder(int oldIndex, int newIndex) {
     if (oldIndex == newIndex) return;
     final e = entries.removeAt(oldIndex);
@@ -143,7 +131,6 @@ class StackEditorController extends ChangeNotifier {
     _touch();
   }
 
-  /// Replaces a merged entry with the series it was merged into.
   void replace(int index, Series series) {
     final old = entries[index];
     entries[index] = EditableStackEntry(
@@ -175,11 +162,8 @@ class StackEditorController extends ChangeNotifier {
     _touch();
   }
 
-  // ── Validation ────────────────────────────────────────────────────────────
-
   static int _ratingIndex(String r) => ContentRatingFilter.all.indexOf(r);
 
-  /// Everything currently stopping a save.
   List<StackEditorProblem> get problems {
     final t = title.text.trim();
     final min = minContentRating;
@@ -201,8 +185,7 @@ class StackEditorController extends ChangeNotifier {
 
   bool get canSave => !saving && problems.isEmpty;
 
-  /// Whether more than 10% of the series are rated above the stack: the API
-  /// refuses that (`rating_below_floor`), so the editor warns first.
+  /// The API refuses a stack with over 10% of its series rated above it (`rating_below_floor`).
   bool get ratingTooLow {
     final rated = entries.where((e) => e.series != null).toList();
     if (rated.isEmpty) return false;
@@ -215,7 +198,6 @@ class StackEditorController extends ChangeNotifier {
     return above > rated.length * 0.1;
   }
 
-  /// The lowest rating the stack could take with its current series.
   String get suggestedRating {
     final ratings =
         entries
@@ -226,7 +208,6 @@ class StackEditorController extends ChangeNotifier {
             .toList()
           ..sort();
     if (ratings.isEmpty) return contentRating;
-    // Allow the top 10% to sit above.
     final allowedAbove = (ratings.length * 0.1).floor();
     final idx = ratings[ratings.length - 1 - allowedAbove];
     return ContentRatingFilter.all[idx];
@@ -245,12 +226,7 @@ class StackEditorController extends ChangeNotifier {
     ],
   );
 
-  // ── Saving ────────────────────────────────────────────────────────────────
-
-  /// Creates or updates the stack and returns what the server now holds.
-  ///
-  /// [overwrite] is for after a stale-token refusal: it reads the current
-  /// token and sends this copy over the other change.
+  /// [overwrite] follows a stale-token refusal: it re-reads the token and sends this copy anyway.
   Future<StackDetail> save({bool overwrite = false}) async {
     saving = true;
     notifyListeners();
@@ -283,7 +259,6 @@ class StackEditorController extends ChangeNotifier {
     }
   }
 
-  /// Throws away local edits and reads the stack again.
   Future<void> reload() => load();
 
   @override

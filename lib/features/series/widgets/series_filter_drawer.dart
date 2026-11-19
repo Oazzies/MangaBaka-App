@@ -10,15 +10,9 @@ import 'package:mangabaka_app/features/series/widgets/series_filter_sections.dar
 
 export 'package:mangabaka_app/features/series/widgets/series_filter_sections.dart';
 
-/// The filter sheet that long-pressing a chip on the series detail screen
-/// raises, together with the marching-ants frame that marks the mode.
-///
-/// Renders nothing when the controller is closed, so the caller can include it
-/// unconditionally.
 class SeriesFilterDrawer extends StatelessWidget {
   final SeriesFilterDrawerController controller;
 
-  /// Runs the assembled filters as a Browse search.
   final ValueChanged<SearchFilters> onSearch;
 
   static const List<String> types = [
@@ -72,8 +66,7 @@ class SeriesFilterDrawer extends StatelessWidget {
                     color: context.colors.accent,
                     strokeWidth: 3,
                     gap: 6,
-                    // One full 4s lap advances the dashes by 24px — four
-                    // pattern repeats at gap 6.
+                    // One 4s lap advances the dashes 24px: four pattern repeats at gap 6.
                     phase: controller.marchingAnts.value * 24.0,
                   ),
                 ),
@@ -85,8 +78,6 @@ class SeriesFilterDrawer extends StatelessWidget {
           child: SlideTransition(
             position: controller.drawerSlide,
             child: FadeTransition(
-              // Fades in over the first half of the slide so the sheet is
-              // legible before it has finished travelling.
               opacity: CurvedAnimation(
                 parent: controller.drawerAnimation,
                 curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
@@ -104,7 +95,6 @@ class _Sheet extends StatelessWidget {
   final SeriesFilterDrawerController controller;
   final ValueChanged<SearchFilters> onSearch;
 
-  /// Height of the collapsed sheet — just the header — above the system inset.
   static const double _headerHeight = 84.0;
 
   const _Sheet({required this.controller, required this.onSearch});
@@ -114,8 +104,6 @@ class _Sheet extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
 
-    // Collapsed, the sheet should still clear the system navigation bar and
-    // leave its header reachable.
     final minSize = screenHeight > 0
         ? ((_headerHeight + mediaQuery.padding.bottom) / screenHeight).clamp(
             0.05,

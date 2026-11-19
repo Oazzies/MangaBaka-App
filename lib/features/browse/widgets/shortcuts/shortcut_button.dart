@@ -8,7 +8,6 @@ class ShortcutButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
 
-  /// Drawn before the label, in the accent colour.
   final Widget? icon;
 
   const ShortcutButton({

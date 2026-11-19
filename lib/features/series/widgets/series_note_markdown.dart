@@ -4,8 +4,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Renders a series note using full Markdown (CommonMark / GFM) styled to
-/// match the active MangaBaka theme.
 class SeriesNoteMarkdown extends StatelessWidget {
   final String data;
   final bool selectable;

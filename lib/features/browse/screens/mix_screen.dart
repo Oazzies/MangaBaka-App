@@ -15,13 +15,6 @@ import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart'
 import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// "Mix": pick a few series as seeds, get recommendations drawn from what they
-/// have in common.
-///
-/// This screen owns the seed search field's state and the controller's
-/// lifecycle; each section of the page is its own widget under
-/// `widgets/mix/`. Portrait stacks the sections in one scroll view; landscape
-/// puts the controls in a fixed left panel beside a scrolling results pane.
 class MixScreen extends StatefulWidget {
   const MixScreen({super.key});
 
@@ -30,8 +23,7 @@ class MixScreen extends StatefulWidget {
 }
 
 class _MixScreenState extends State<MixScreen> {
-  /// How long the suggestions panel lingers after the field loses focus, so a
-  /// tap *on* a suggestion is not cancelled by the blur that precedes it.
+  /// Lets a tap on a suggestion land before the blur that precedes it hides the panel.
   static const Duration _suggestionDismissDelay = Duration(milliseconds: 150);
 
   late final MixController _controller;
@@ -67,7 +59,6 @@ class _MixScreenState extends State<MixScreen> {
   void _onFocusChanged() {
     if (_searchFocus.hasFocus) return;
     Future.delayed(_suggestionDismissDelay, () {
-      // Re-check focus: it may have returned during the delay.
       if (!mounted || _searchFocus.hasFocus) return;
       setState(() => _showSuggestions = false);
     });
@@ -122,7 +113,6 @@ class _MixScreenState extends State<MixScreen> {
     );
   }
 
-  /// True only once there is a generated, non-empty result set to label.
   bool get _showResultsHeader =>
       _controller.hasSeeds &&
       !_controller.isLoading &&
@@ -133,9 +123,7 @@ class _MixScreenState extends State<MixScreen> {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
     return ListenableBuilder(
-      // SettingsManager is deliberately absent: only the results sliver reads
-      // it, and it subscribes on its own so a settings change does not rebuild
-      // the seed picker and DNA bars too.
+      // SettingsManager left out on purpose: the results sliver subscribes on its own.
       listenable: Listenable.merge([_controller, l10n]),
       builder: (context, _) {
         final isLandscape =
@@ -174,8 +162,7 @@ class _MixScreenState extends State<MixScreen> {
   }
 
   Widget _buildLandscape(LocalizationService l10n) {
-    // The control panel is proportional but bounded: below ~280px the seed
-    // chips wrap badly, above ~360px it steals width the results need.
+    // Below ~280px the seed chips wrap badly; above ~360px it steals width from results.
     final leftWidth = (MediaQuery.sizeOf(context).width * 0.38).clamp(
       280.0,
       360.0,

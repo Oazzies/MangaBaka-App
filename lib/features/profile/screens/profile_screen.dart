@@ -65,7 +65,6 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
         'Using cached profile for username: ${profile!.preferredUsername ?? profile!.id}',
       );
       loading = false;
-      // Fire all data fetches in parallel while showing cached data immediately.
       fetchStatistics();
       fetchRecentlyChanged(initial: true);
       fetchRecentlyAdded(initial: true);
@@ -104,7 +103,6 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     if (!mounted) return;
     final isSyncing = _libraryService.syncStatus.value.isSyncing;
 
-    // Only trigger refresh when sync transitions from active → idle.
     if (_wasSyncing && !isSyncing && _auth.isLoggedIn) {
       _logger.info('Library sync completed. Refreshing profile statistics.');
       fetchStatistics();
@@ -140,12 +138,6 @@ class _ProfileScreenState extends State<ProfileScreen> with ProfileDataMixin {
     });
   }
 
-  // -------------------------------------------------------------------------
-  // Build helpers
-  // -------------------------------------------------------------------------
-
-  /// Builds the localised AppBar title, handling anonymous / named / language-
-  /// specific possessive forms.
   String _buildProfileTitle(String? username, LocalizationService l10n) {
     if (profile == null) return l10n.translate('profile');
     if (username == null) return l10n.translate('your_profile');

@@ -10,7 +10,6 @@ import 'package:mangabaka_app/features/stacks/screens/stacks_list_screen.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
-/// Builds the "Newest stacks" header and grid slivers for [StacksHubScreen].
 List<Widget> buildStacksHubNewestSlivers(
   BuildContext context, {
   required bool desktop,

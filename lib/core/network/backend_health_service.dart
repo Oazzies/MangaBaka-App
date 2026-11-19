@@ -7,28 +7,15 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 
-/// Coarse view of whether the MangaBaka backend is currently usable.
 enum BackendHealthStatus {
-  /// A request has succeeded recently — assume the backend is fine.
   healthy,
 
-  /// Nothing conclusive yet (app just started, no request has finished).
   unknown,
 
-  /// Several server-side failures in a row — the backend is treated as down
-  /// until a request (or the recovery probe) succeeds.
   down,
 }
 
-/// Tracks the health of `api.mangabaka.org` from the outcomes of the requests
-/// the app already makes, flips to [BackendHealthStatus.down] after a run of
-/// server-side failures, and then actively probes until the origin recovers.
-///
-/// This is deliberately passive at the call sites: a service reports the
-/// outcome of a request it was going to make anyway via [reportSuccess] /
-/// [reportServerFailure] (or the [reportApiOutcome] free function), and the
-/// UI listens to [status]. Client-side conditions (404, 403, 429) are **not**
-/// treated as the backend being down — only 5xx, transport errors and timeouts.
+/// Only 5xx, transport errors and timeouts count as down; 404, 403, 429 do not.
 class BackendHealthService {
   BackendHealthService({
     http.Client? client,
@@ -43,7 +30,6 @@ class BackendHealthService {
   final http.Client _client;
   final Duration _probeInterval;
 
-  /// Consecutive server-side failures needed before the backend is called down.
   final int _failureThreshold;
 
   final ValueNotifier<BackendHealthStatus> status =
@@ -57,12 +43,8 @@ class BackendHealthService {
 
   bool get isDown => status.value == BackendHealthStatus.down;
 
-  /// Report that a backend request completed normally (any 2xx/3xx, or a
-  /// deliberate 4xx like "not found"). Clears the failure streak and, if the
-  /// backend was considered down, brings it back up.
   void reportSuccess() {
-    // A probe or request can finish after disposal; touching the disposed
-    // notifier would throw.
+    // A probe or request can finish after dispose; the notifier would throw.
     if (_disposed) return;
     _consecutiveFailures = 0;
     _probeAttempt = 0;
@@ -79,12 +61,6 @@ class BackendHealthService {
     }
   }
 
-  /// Report a server-side failure: a 5xx status, a transport error or a
-  /// timeout. [context] is a short tag for the log (e.g. `series-search`).
-  ///
-  /// Pass the HTTP [statusCode] when there was a response. A 429 is logged but
-  /// does not count toward the backend being down — it means the client is
-  /// sending too fast, not that the origin is unreachable.
   void reportServerFailure({
     required String context,
     int? statusCode,
@@ -120,7 +96,6 @@ class BackendHealthService {
     }
   }
 
-  /// Force an immediate recovery check (e.g. the user tapped "Retry").
   Future<void> checkNow() async {
     _logger.info('Backend health: manual recovery check requested');
     await _probeOnce();
@@ -141,9 +116,7 @@ class BackendHealthService {
     _probing = true;
     _probeAttempt++;
     try {
-      // Any HTTP response below 500 means the origin behind Cloudflare is
-      // answering — even a 404 proves the backend is reachable. 5xx, a
-      // transport error or a timeout means it is still down.
+      // Any status under 500, even 404, means the origin behind Cloudflare is up.
       final response = await _client
           .get(
             Uri.parse(AppConstants.baseApiUrl),
@@ -181,13 +154,7 @@ class BackendHealthService {
   }
 }
 
-/// Route the outcome of a backend request to [BackendHealthService] without the
-/// call site needing to resolve the service itself. A no-op when the service
-/// is not registered (e.g. in unit tests that don't need it).
-///
-/// [ok] is true for any response the app can act on (2xx/3xx and deliberate
-/// 4xx such as 404/403). Pass [statusCode] when there was an HTTP response and
-/// [error] for transport failures/timeouts.
+/// [ok] includes deliberate 4xx such as 404/403: anything the app can act on.
 void reportApiOutcome({
   required bool ok,
   required String context,
@@ -207,6 +174,4 @@ void reportApiOutcome({
   }
 }
 
-/// True when [statusCode] indicates the server itself failed (5xx). 429 and
-/// other 4xx are client-side conditions and are handled separately.
 bool isServerErrorStatus(int statusCode) => statusCode >= 500;

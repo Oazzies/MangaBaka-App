@@ -5,17 +5,11 @@ export 'package:mangabaka_app/features/library/import/import_models.dart';
 
 part 'import_parser_formats.dart';
 
-/// Reads import text in any [ImportFormat] into titles.
-///
-/// Parsing never throws: text that does not fit the chosen format yields
-/// whatever titles could be read, usually none, and the caller shows "0 titles
-/// found". A wrong guess is better shown than raised.
+/// Never throws: text that does not fit the format yields what it can, usually no titles.
 abstract final class ImportParser {
-  /// Longest list accepted. Each title is a request, so an accidental paste of
-  /// a whole document should not become hundreds of them.
+  /// Each title costs a match request, so a pasted document must not become hundreds.
   static const int maxTitles = 200;
 
-  /// Guesses the format of [text].
   static ImportFormat detect(String text, {String? fileName}) {
     final trimmed = text.trimLeft();
     if (trimmed.isEmpty) return ImportFormat.plain;
@@ -50,8 +44,7 @@ abstract final class ImportParser {
       }
     }
 
-    // CSV only when the first line looks like a header naming a title column;
-    // a plain list whose titles happen to contain commas must stay plain.
+    // CSV needs a title header: a plain list whose titles contain commas must stay plain.
     final header = _splitCsvLine(
       trimmed.split(RegExp(r'\r?\n')).first,
     ).map((c) => c.trim().toLowerCase()).toList();
@@ -61,7 +54,6 @@ abstract final class ImportParser {
     return ImportFormat.plain;
   }
 
-  /// Whether [format] can carry a per-title state.
   static bool carriesStates(ImportFormat format) =>
       format != ImportFormat.plain;
 
@@ -85,8 +77,6 @@ abstract final class ImportParser {
     return _clean(entries, useStates: useStates);
   }
 
-  /// Drops blanks and repeats (case-insensitively, keeping the first), strips
-  /// the states when they are not wanted, and applies [maxTitles].
   static List<ImportEntry> _clean(
     List<ImportEntry> entries, {
     required bool useStates,
@@ -103,9 +93,6 @@ abstract final class ImportParser {
     return result;
   }
 
-  // ─── Plain ───────────────────────────────────────────────────────────────
-
-  /// One per line, list markers ("1.", "-", "*") removed.
   static List<ImportEntry> _parsePlain(String text) {
     final marker = RegExp(r'^\s*(?:[-*•]+|\d+[.)])\s+');
     return [
@@ -113,8 +100,6 @@ abstract final class ImportParser {
         ImportEntry(line.replaceFirst(marker, '')),
     ];
   }
-
-  // ─── CSV ─────────────────────────────────────────────────────────────────
 
   static const _titleColumns = {
     'title',
@@ -138,7 +123,6 @@ abstract final class ImportParser {
     var titleIndex = header.indexWhere(_titleColumns.contains);
     final stateIndex = header.indexWhere(_stateColumns.contains);
 
-    // No recognisable header: the whole file is data, titles in column one.
     final hasHeader = titleIndex != -1;
     if (!hasHeader) titleIndex = 0;
 
@@ -158,9 +142,7 @@ abstract final class ImportParser {
     return entries;
   }
 
-  /// Splits [text] into records at line breaks that are not inside a quoted
-  /// cell, so a note containing a newline (which the exporter quotes) stays
-  /// part of its own row instead of becoming bogus extra titles.
+  /// Quoted cells can hold newlines (the exporter quotes notes), so records are not lines.
   static List<String> _splitCsvRecords(String text) {
     final records = <String>[];
     final buffer = StringBuffer();
@@ -183,7 +165,6 @@ abstract final class ImportParser {
     return records;
   }
 
-  /// Splits one CSV line, honouring double-quoted cells and `""` escapes.
   static List<String> _splitCsvLine(String line) {
     final cells = <String>[];
     final buffer = StringBuffer();
@@ -214,8 +195,6 @@ abstract final class ImportParser {
     return cells;
   }
 
-  // ─── JSON ────────────────────────────────────────────────────────────────
-
   static const _jsonTitleKeys = [
     'title',
     'name',
@@ -233,7 +212,6 @@ abstract final class ImportParser {
       return const [];
     }
 
-    // An object wrapping the list: {"list": [...]}, {"entries": [...]}.
     final Object? root = decoded is Map
         ? decoded.values.firstWhere((v) => v is List, orElse: () => null)
         : decoded;
@@ -263,25 +241,14 @@ abstract final class ImportParser {
     return null;
   }
 
-  // ─── Manga-Updates ───────────────────────────────────────────────────────
-
   static List<ImportEntry> _parseMangaUpdates(String text, {String? fileName}) =>
       _parseMangaUpdatesEntries(text, fileName: fileName);
-
-  // ─── MangaBaka Backup ─────────────────────────────────────────────────────
 
   static List<ImportEntry> _parseMangaBaka(String text) =>
       _parseMangaBakaEntries(text);
 
-  // ─── MyAnimeList ─────────────────────────────────────────────────────────
-
   static List<ImportEntry> _parseMyAnimeList(String text) =>
       _parseMyAnimeListEntries(text);
 
-  // ─── Status mapping ──────────────────────────────────────────────────────
-
-  /// Maps a status as other trackers write it to a MangaBaka library state, or
-  /// null when it is not one we recognise (the row then takes the state the
-  /// user picked).
   static String? mapStatus(String status) => _mapImportStatus(status);
 }

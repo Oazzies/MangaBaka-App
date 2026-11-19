@@ -4,37 +4,17 @@ import 'package:mangabaka_app/core/settings/settings_enums.dart';
 
 part 'series_titles_parser.dart';
 
-/// Every title a series goes by, and the one rule for which to show.
-///
-/// This is the single place that understands the API's title payloads:
-///
-/// * **v1** (`/v1/series/{id}`, `/v1/series/batch`, v1 search/library) sends
-///   the server-chosen `title` / `native_title` / `romanized_title` and a
-///   `secondary_titles` map. That `title` is *canonical*: it is an editorial
-///   choice that cannot be rebuilt from the per-language list.
-/// * **v2** (`/v2/series/search`, `/v2/series/batch`, discover rails,
-///   `/similar`) sends only `titles[]` (`language`, `traits`, `title`), with
-///   every entry flagged `is_primary`. The best that can be done is an
-///   approximation of the server's choice, see [_deriveMain].
-///
-/// Because a v2 guess can disagree with the canonical v1 title, every
-/// canonical title that is seen is remembered ([remember]) and wins over a
-/// later v2 guess for the same series. Without that, a series would show one
-/// title in a rail and another once its detail page (v1) loaded.
+/// v1 sends an editorial (canonical) `title`; v2 sends only `titles[]`, all `is_primary`, so main is guessed.
+/// Canonical titles are remembered ([remember]) so a v2 guess never contradicts a v1 title seen earlier.
 class SeriesTitles {
-  /// The default title (usually English, else the romanized original).
   final String main;
 
-  /// The title in the original script (Japanese, Korean, Chinese).
   final String native;
 
-  /// The original title in Latin script (romaji and friends).
   final String romanized;
 
-  /// Every other known title, deduplicated and without the three above.
   final List<String> secondary;
 
-  /// Whether [main] came from the server's own `title` rather than a guess.
   final bool canonical;
 
   const SeriesTitles({
@@ -47,11 +27,6 @@ class SeriesTitles {
 
   static const SeriesTitles empty = SeriesTitles();
 
-  // ── Display ──────────────────────────────────────────────────────────────
-
-  /// The title to show for [preference]. Never falls through to an empty
-  /// string while any title is known: the preferred kind is tried first, then
-  /// the closest alternatives.
   String display(TitleLanguage preference) {
     final t = choose(
       preference,
@@ -63,8 +38,7 @@ class SeriesTitles {
     return secondary.isNotEmpty ? secondary.first : '';
   }
 
-  /// [display] without building a [SeriesTitles]: list rows call this on
-  /// every build.
+  /// [display] without building a [SeriesTitles]: list rows call this on every build.
   static String choose(
     TitleLanguage preference, {
     required String main,
@@ -82,9 +56,6 @@ class SeriesTitles {
     return '';
   }
 
-  /// The titles worth listing next to the displayed one: main, native and
-  /// romanized, minus whatever [display] already shows, compared without
-  /// regard to case or surrounding space.
   List<String> alternatives(TitleLanguage preference) {
     final shown = display(preference);
     final seen = <String>{_key(shown)};
@@ -96,13 +67,6 @@ class SeriesTitles {
     return out;
   }
 
-  // ── Parsing ──────────────────────────────────────────────────────────────
-
-  /// Reads the title fields of any series payload (v1, v2, `/similar`).
-  ///
-  /// A canonical v1 `title` is kept as is and remembered. Otherwise the main
-  /// title is derived from `titles[]`, unless a canonical one for the same
-  /// series id was seen before.
   factory SeriesTitles.fromJson(Map<String, dynamic> json) {
     final id = json['id']?.toString() ?? '';
     final flatMain = _str(json['title']);
@@ -116,8 +80,7 @@ class SeriesTitles {
     if (flatMain.isNotEmpty) {
       var native = flatNative;
       var romanized = flatRomanized;
-      // A v1 payload may carry `titles[]` too (the batch does); it only fills
-      // what the flat fields leave out.
+      // The v1 batch also sends `titles[]`; it only fills what the flat fields leave out.
       if (entries.isNotEmpty) {
         if (native.isEmpty) {
           native = _deriveNative(entries, originalLanguage);
@@ -137,7 +100,6 @@ class SeriesTitles {
       return titles;
     }
 
-    // No canonical title in this payload.
     final known = lookup(id);
     final derivedNative = flatNative.isNotEmpty
         ? flatNative
@@ -167,9 +129,7 @@ class SeriesTitles {
     );
   }
 
-  /// Builds titles from already-stored values (database rows, exports).
-  /// Canonical, because stored rows come from a v1 payload or were repaired
-  /// by the refresh that replaced the old guesses.
+  /// Canonical: stored rows come from v1 or were repaired by the refresh that replaced old guesses.
   factory SeriesTitles.stored({
     required String main,
     String native = '',
@@ -193,11 +153,9 @@ class SeriesTitles {
     required bool canonical,
   }) {
     var m = main;
-    // A series always has something to show.
     if (m.isEmpty) m = romanized.isNotEmpty ? romanized : native;
 
-    // Only the main title is excluded: native and romanized stay listed as
-    // secondary titles too, for search and for the hero's title chips.
+    // native and romanized stay in secondary on purpose: search and the hero's title chips use them.
     final taken = <String>{if (m.isNotEmpty) _key(m)};
     final secondary = <String>[];
     for (final t in extra) {
@@ -214,8 +172,6 @@ class SeriesTitles {
     );
   }
 
-  // ── Derivation from titles[] (v2) ────────────────────────────────────────
-
   static String _deriveMain(List<_Entry> entries, String originalLanguage) =>
       _deriveMainTitle(entries, originalLanguage);
 
@@ -227,32 +183,23 @@ class SeriesTitles {
     String originalLanguage,
   ) => _deriveRomanizedTitle(entries, originalLanguage);
 
-  // ── Payload helpers ──────────────────────────────────────────────────────
-
   static String _str(Object? v) => v?.toString().trim() ?? '';
 
-  /// Case- and whitespace-insensitive identity of a title.
   static String _key(String t) => t.trim().toLowerCase();
 
-  /// `ja-Latn` → `ja`, `zh-Hans-CN` → `zh`.
   static String _baseLanguage(String language) =>
       language.toLowerCase().split(RegExp('[-_]')).first;
 
   static List<_Entry> _entries(Object? raw) => _parseTitleEntries(raw, _str);
 
-  /// v1 sends `secondary_titles` as `{type: [{title, note, type}, …]}`; other
-  /// endpoints send a plain list of strings or of such objects.
+  /// v1 sends `{type: [{title, note, type}, …]}`; other endpoints a list of strings or such objects.
   static List<String> _flattenSecondary(Object? raw) =>
       _flattenSecondaryTitles(raw, _str);
-
-  // ── Canonical memory ─────────────────────────────────────────────────────
 
   static const int _maxRemembered = 6000;
   static final LinkedHashMap<String, SeriesTitles> _canonical =
       LinkedHashMap<String, SeriesTitles>();
 
-  /// Notes the canonical titles of series [id] so later, less reliable
-  /// payloads for it agree with them. Non-canonical titles are ignored.
   static void remember(String id, SeriesTitles titles) {
     if (id.isEmpty || !titles.canonical || titles.main.isEmpty) return;
     _canonical.remove(id); // re-insert to refresh recency
@@ -262,9 +209,8 @@ class SeriesTitles {
     }
   }
 
-  /// The canonical titles last seen for [id], if any.
   static SeriesTitles? lookup(String id) => _canonical[id];
 
-  /// For tests: forget everything remembered.
+  /// Tests only.
   static void clearRemembered() => _canonical.clear();
 }

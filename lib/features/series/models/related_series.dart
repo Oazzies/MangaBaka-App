@@ -1,6 +1,5 @@
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// A related series entry returned by `/v1/series/{id}/relationships`.
 class RelatedSeries {
   final String relationType;
   final Series series;

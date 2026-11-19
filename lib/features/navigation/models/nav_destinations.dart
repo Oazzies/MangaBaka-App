@@ -3,8 +3,6 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_icons.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_nav.dart';
 
-/// One top-level destination: its outline and filled glyphs, and the key its
-/// label is translated from.
 @immutable
 class NavItem {
   final IconData icon;
@@ -18,16 +16,7 @@ class NavItem {
   });
 }
 
-/// The app's five top-level destinations, in tab order.
-///
-/// The index into this list *is* the tab index — `MainScreen.setTabIndex(2)`
-/// means Browse — so reordering it changes what deep links and cross-screen
-/// jumps land on.
-///
-/// Phosphor rather than Material: the reference's nav is a thin, rounded,
-/// geometric family with a matched solid weight for the active state, which
-/// Material's icons do not provide. Compass and user match the reference
-/// directly; the bookmark stands in for the library. See [MbIcons].
+/// The index is the tab index: reordering moves where deep links and tab jumps land.
 const List<NavItem> navItems = [
   NavItem(
     icon: MbIcons.house,
@@ -56,8 +45,6 @@ const List<NavItem> navItems = [
   ),
 ];
 
-/// Tab indices referred to by name, so a cross-screen jump reads as a
-/// destination rather than a magic number.
 class NavTabs {
   NavTabs._();
 
@@ -68,8 +55,6 @@ class NavTabs {
   static const int profile = 4;
 }
 
-/// [navItems] as the destinations the rail and bottom bar take, with labels
-/// resolved through [l10n].
 List<MbNavDestination> navDestinations(LocalizationService l10n) => [
   for (final item in navItems)
     MbNavDestination(

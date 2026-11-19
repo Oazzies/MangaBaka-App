@@ -10,8 +10,7 @@ class SearchFilters {
   final List<String> staff;
   final List<String> publisher;
 
-  /// Content ratings to include / exclude, within what the user's content
-  /// preference already allows.
+  /// Narrows within what the user's content preference already allows.
   final List<String> contentRating;
   final List<String> contentRatingNot;
   final String? sortBy;
@@ -21,7 +20,6 @@ class SearchFilters {
   final int? publishedYearUpper;
   final bool? isLicensed;
 
-  /// Restrict to series with (true) or without (false) an anime adaptation.
   final bool? hasAnime;
   final String tagMode;
 
@@ -140,7 +138,6 @@ class SearchFilters {
     );
   }
 
-  /// Convenience wrapper — clears or sets [sortBy] without touching other fields.
   SearchFilters copyWithSortBy(String? sortBy) => SearchFilters(
     type: type,
     typeNot: typeNot,
@@ -164,7 +161,6 @@ class SearchFilters {
     tagMode: tagMode,
   );
 
-  /// Convenience wrapper — replaces publication-year bounds without touching other fields.
   SearchFilters copyWithYear({
     int? publishedYearLower,
     int? publishedYearUpper,
@@ -191,7 +187,6 @@ class SearchFilters {
     tagMode: tagMode,
   );
 
-  /// Convenience wrapper — sets or clears [isLicensed] without touching other fields.
   SearchFilters copyWithIsLicensed(bool? isLicensed) => SearchFilters(
     type: type,
     typeNot: typeNot,
@@ -215,7 +210,6 @@ class SearchFilters {
     tagMode: tagMode,
   );
 
-  /// Convenience wrapper - sets or clears [hasAnime] without touching other fields.
   SearchFilters copyWithHasAnime(bool? hasAnime) => SearchFilters(
     type: type,
     typeNot: typeNot,
@@ -259,7 +253,7 @@ class SearchFilters {
 
     if (sortBy != null && sortBy!.isNotEmpty) {
       map['sort_by'] = sortBy;
-      // Automatically exclude unrated series when sorting by community rating
+      // Excludes unrated series when sorting by community rating.
       if (sortBy!.startsWith('score_') && ratingLower == 0) {
         map['rating_lower'] = 1;
       }

@@ -1,4 +1,3 @@
-/// One bucket of a [PublisherStats] distribution (`media_type`, `status`, ...).
 class StatBucket {
   final String key;
   final int count;
@@ -6,7 +5,6 @@ class StatBucket {
   const StatBucket({required this.key, required this.count});
 }
 
-/// A named entry in the `known_for` / `genres` / `audience` lists.
 class StatTag {
   final String id;
   final String name;
@@ -25,7 +23,6 @@ class StatTag {
   double get lift => catalogShare > 0 ? share / catalogShare : 0;
 }
 
-/// A publisher that shares series with the one the stats belong to.
 class SharedPublisher {
   final String id;
   final String name;
@@ -38,7 +35,6 @@ class SharedPublisher {
   });
 }
 
-/// Catalog statistics from `/publishers/{id}/stats`.
 class PublisherStats {
   final int seriesCount;
   final int taggedCount;

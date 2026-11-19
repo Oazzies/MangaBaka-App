@@ -95,7 +95,6 @@ class SearchSuggestionsPanel extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: SizedBox(
@@ -109,7 +108,6 @@ class SearchSuggestionsPanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // Title + metadata
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

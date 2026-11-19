@@ -6,8 +6,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/publisher/utils/publisher_sort.dart';
 
-/// The Publishers tab's own "filter": a sheet with its sort orders, opened from
-/// the search bar's filter button in place of the series filter sheet.
 Future<void> showPublisherSortSheet(
   BuildContext context, {
   required String? current,

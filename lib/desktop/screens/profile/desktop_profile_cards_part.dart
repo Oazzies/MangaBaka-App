@@ -21,8 +21,6 @@ class _IdentityCard extends StatelessWidget {
     return DesktopCard(
       showBorder: false,
       padding: const EdgeInsets.all(28),
-      // The account buttons beside the name while it keeps its room,
-      // beneath it in a narrow window or at a large text size.
       child: BesideOrBelow(
         gap: 24,
         minBodyWidth: 220,
@@ -78,8 +76,7 @@ class _IdentityCard extends StatelessWidget {
             Row(
               children: [
                 if (username != null && username != name) ...[
-                  // Usernames have no length limit; the role pill keeps
-                  // its place and the name gives way.
+                  // Usernames have no length limit, so the name gives way and the role pill keeps its place.
                   Flexible(
                     child: Text(
                       '@$username',

@@ -1,23 +1,12 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// [body] with [trailing] beside it while [body] keeps at least
-/// [minBodyWidth], and [trailing] beneath it when it wouldn't — decided at
-/// layout time, so a resize never rebuilds it.
-///
-/// For text next to a control (a setting and its switch or dropdown, a card
-/// and its button): the control's width depends on its label, the language
-/// and the text size, so no single breakpoint fits every case. This measures
-/// it instead.
-///
-/// An optional [leading] (an icon) sits before [body]; a [trailing] moved
-/// beneath lines up with [body], not with [leading].
+/// Measures instead of a breakpoint: label, language and text size all vary.
 class BesideOrBelow extends MultiChildRenderObjectWidget {
   final double minBodyWidth;
   final double gap;
   final double stackGap;
 
-  /// Beside each other, top-align the children rather than centring them.
   final bool alignTop;
 
   BesideOrBelow({
@@ -111,7 +100,6 @@ class RenderBesideOrBelow extends RenderBox
     markNeedsLayout();
   }
 
-  /// Whether [trailing] is currently beside [body] (false: beneath it).
   bool beside = true;
 
   @override

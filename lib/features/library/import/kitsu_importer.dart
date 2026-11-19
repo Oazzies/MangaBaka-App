@@ -4,9 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/library/import/import_sources.dart';
 
-/// Fetches a public Kitsu manga library by username, via Kitsu's own public
-/// JSON:API (`kitsu.io/api/edge`) — no key needed, unlike a MyAnimeList list,
-/// which has no public read API of its own to fetch this way.
+/// Kitsu's public JSON:API needs no key; MyAnimeList has no public read API to do the same.
 class KitsuImporter {
   static final Uri _usersEndpoint = Uri.parse(
     'https://kitsu.io/api/edge/users',
@@ -15,9 +13,7 @@ class KitsuImporter {
     'https://kitsu.io/api/edge/library-entries',
   );
 
-  /// Entries read before giving up on a very large public library. The
-  /// parser trims to `ImportParser.maxTitles` anyway; this just bounds how
-  /// many pages a single import fetches.
+  /// Only bounds the fetch; the parser trims to ImportParser.maxTitles anyway.
   static const int _maxEntries = 300;
   static const int _maxPages = 10;
 
@@ -50,9 +46,7 @@ class KitsuImporter {
       },
     );
 
-    // Bounded on pages as well as entries: pages whose rows all lack a title
-    // add nothing to [entries], so a feed that keeps linking to a "next" page
-    // would otherwise loop forever.
+    // Pages are bounded too: title-less pages add no entries, so a looping "next" never ends.
     var pages = 0;
     while (next != null &&
         entries.length < _maxEntries &&
@@ -133,7 +127,6 @@ class KitsuImporter {
     throw const ImportSourceException('import_source_unreachable');
   }
 
-  /// Kitsu's own computed display title, falling back to an English one.
   static String? _titleOf(Object? mangaAttrs) {
     if (mangaAttrs is! Map) return null;
     final canonical = mangaAttrs['canonicalTitle'];

@@ -17,7 +17,6 @@ class AuthNetworkClient {
       MbProfile? userInfoProfile;
       Object? lastError;
 
-      // 1. Fetch userinfo from OIDC endpoint
       try {
         final res = await http
             .get(
@@ -41,7 +40,6 @@ class AuthNetworkClient {
         _logger.warning('Failed to fetch from /userinfo: $e');
       }
 
-      // 2. Fetch profile from MangaBaka API (/v1/my/profile)
       try {
         final meRes = await http
             .get(

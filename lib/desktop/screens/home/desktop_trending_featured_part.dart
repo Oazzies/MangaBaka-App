@@ -195,8 +195,6 @@ class _FeaturedCard extends StatelessWidget {
 
 enum _FeaturedSlot { cover, info }
 
-/// Cover on the left at a clamped share of the width, the details filling
-/// the rest.
 class _FeaturedLayout extends MultiChildLayoutDelegate {
   static const double _gap = 24;
 

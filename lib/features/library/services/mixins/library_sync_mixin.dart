@@ -12,12 +12,8 @@ const String _cursorKey = AppConstants.libraryCursorKey;
 const String _isIncompleteKey =
     '${AppConstants.prefixStorageKey}library_is_incomplete';
 
-/// Which generation of series data the local database holds. Raised whenever
-/// stored series rows are known to be wrong or incomplete, so the next sync
-/// re-fetches every one of them once.
-///
-/// 2: rows used to be built from the lean v2 batch, whose guessed titles
-///    disagreed with the detail page and which lacked genres, tags and year.
+/// Bump to make the next sync re-fetch every stored series row once.
+/// 2: rows built from the lean v2 batch had guessed titles and lacked genres, tags and year.
 const String librarySeriesDataKey =
     '${AppConstants.prefixStorageKey}library_series_data_version';
 const int librarySeriesDataVersion = 2;
@@ -26,13 +22,8 @@ mixin LibrarySyncMixin on LibraryServiceBase {
   bool _hasPerformedInitialSync = false;
   Future<void>? _initialSyncTask;
 
-  /// Bumped whenever a running sync is invalidated (cancel, library clear,
-  /// logout) and whenever a new sync starts. A sync loop compares the value
-  /// it started with after every await: the boolean cancel flag alone is not
-  /// enough, because the next sync resets it to false and would revive a
-  /// cancelled loop — two loops then write the same rows and the watermark,
-  /// and a loop outliving a logout writes the old account's entries into the
-  /// freshly cleared database.
+  /// The cancel flag alone is not enough: the next sync resets it and revives a cancelled loop,
+  /// which then double-writes rows or writes the old account's entries after logout.
   int _syncGeneration = 0;
 
   bool _isStale(int generation) =>
@@ -85,25 +76,14 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     }
   }
 
-  /// A full scan: the feed read from the start, then anything the server no
-  /// longer lists is dropped locally.
   Future<void> importFullLibrary() async {
     if (syncStatus.value.isSyncing) return;
     await _runSync(deep: true);
   }
 
-  /// The running [_runSync], so a [deep] request can wait for it instead of
-  /// being dropped.
   Future<void>? _activeSync;
 
-  /// Catches the local library up with the server through the dedicated
-  /// change feed (`GET /v2/my/library/changes`).
-  ///
-  /// The first run (no stored cursor) scans the whole library; later runs
-  /// send the stored cursor and receive only what changed, deletions
-  /// included. A [deep] sync discards the cursor and scans everything again,
-  /// for an explicit user refresh. The feed has no state filter, so [state]
-  /// is accepted for compatibility and ignored.
+  /// The change feed has no state filter, so [state] is ignored.
   @override
   Future<void> syncLibrary({String? state, bool deep = false}) async {
     final running = _activeSync;
@@ -147,15 +127,13 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     try {
       await auth.getValidAccessToken();
       final prefs = await SharedPreferences.getInstance();
-      // Stored series from an older data generation are re-fetched in full,
-      // which needs a scan from the start of the feed.
+      // Re-fetching old-generation series rows needs a scan from the start of the feed.
       final refreshSeries =
           (prefs.getInt(librarySeriesDataKey) ?? 0) < librarySeriesDataVersion;
       var cursor = (deep || refreshSeries) ? null : prefs.getString(_cursorKey);
       var restarted = false;
       var totalFetched = 0;
-      // Entry ids seen by a scan that began at the start of the feed. Only
-      // such a scan can prune: a resumed one has not seen the earlier pages.
+      // Only a scan from the start can prune; a resumed one has not seen the earlier pages.
       Set<String>? seen = cursor == null ? <String>{} : null;
       logger.info(
         'Starting library sync (${cursor == null ? 'full scan' : 'from cursor'})',
@@ -192,8 +170,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         if (applied == null || _isStale(generation)) return;
         totalFetched += applied;
         syncStatus.value = syncStatus.value.copyWith(
-          // Distinct entries on a full scan (the feed may repeat one);
-          // otherwise just what this run wrote.
+          // The feed may repeat an entry, so a full scan counts distinct ids.
           currentEntries: seen?.length ?? totalFetched,
           error: null,
         );
@@ -231,7 +208,6 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       if (generation == _syncGeneration) {
         syncStatus.value = syncStatus.value.copyWith(
           isSyncing: false,
-          // Shown in the sync banner and card: wording, not a stack dump.
           error: ErrorMessages.describe(e),
         );
       }
@@ -239,8 +215,6 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     }
   }
 
-  /// Applies one feed page. Returns how many entries were written, or null
-  /// when the sync was invalidated part way through.
   Future<int?> _applyChanges(
     List<Map<String, dynamic>> items,
     Set<String>? seen,
@@ -256,9 +230,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
     isStale: () => _isStale(generation),
   );
 
-  /// Also invalidates any sync in flight (see [_syncGeneration]). The
-  /// invalidated loop exits without touching [syncStatus] again, so callers
-  /// that abandon a running sync must clear its syncing flag themselves.
+  /// The invalidated loop exits without touching [syncStatus], so callers clear isSyncing.
   @override
   void resetInitialSyncTask() {
     _hasPerformedInitialSync = false;

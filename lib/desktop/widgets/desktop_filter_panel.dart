@@ -22,29 +22,16 @@ part 'desktop_filter_taxonomy_part.dart';
 part 'desktop_filter_controls_part.dart';
 part 'desktop_filter_inputs_part.dart';
 
-/// Every search filter laid out inline, applied the moment it changes.
-///
-/// The phone hides filters behind a sheet because there is no room for them
-/// beside the results; a desktop window has that room, so the filters sit in a
-/// permanent column and the results update as they are toggled â€” no Apply
-/// step, no popup covering what is being filtered.
-///
-/// Sliders commit when released rather than on every tick, since each change
-/// may start a network search.
+/// Sliders commit on release, not every tick, since each change may start a network search.
 class DesktopFilterPanel extends StatefulWidget {
   final SearchFilters filters;
   final ValueChanged<SearchFilters> onChanged;
 
-  /// Whether tags are filtered by name rather than id. The library filters
-  /// locally against the tag names stored on each series; the search API
-  /// takes ids.
+  /// The library filters locally by tag name; the search API takes ids.
   final bool tagsByName;
 
-  /// Shown above the filters (the library's status list goes here).
   final Widget? header;
 
-  /// When false the filters are shown disabled with [disabledMessage] â€” for
-  /// result types the filters do not apply to.
   final bool enabled;
   final String? disabledMessage;
 
@@ -73,7 +60,6 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
   String _tagQuery = '';
   final TextEditingController _tagSearch = TextEditingController();
 
-  /// Slider positions while being dragged, before they are committed.
   RangeValues? _draggingRating;
   RangeValues? _draggingYear;
 
@@ -107,8 +93,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
         _tags = results[1];
       });
     } catch (e, st) {
-      // The panel still works without the vocabularies: types, statuses and
-      // ranges need none, and the lists simply stay empty.
+      // The panel works without the vocabularies; their lists just stay empty.
       LoggingService.logger.fine(
         'Failed to load filter metadata vocabularies',
         e,
@@ -120,8 +105,6 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
   void _emit(SearchFilters next) => widget.onChanged(next);
 
   void _updateState(VoidCallback fn) => setState(fn);
-
-  // â”€â”€â”€ Tri-state helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   TriState _stateOf(String value, List<String> inc, List<String> exc) {
     if (inc.contains(value)) return TriState.include;
@@ -141,8 +124,6 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
     if (next == TriState.exclude) newExc.add(value);
     return (newInc, newExc);
   }
-
-  // â”€â”€â”€ Build â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   @override
   Widget build(BuildContext context) {

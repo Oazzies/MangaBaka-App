@@ -1,8 +1,4 @@
-/// Who can open a stack.
-///
-/// `draft`: only the owner. `unlisted`: anyone with the link, and listed on
-/// the owner's profile, but never in browse or on series pages. `public`:
-/// listed everywhere.
+/// `unlisted`: anyone with the link; listed on the owner's profile, never in browse or on series pages.
 enum StackVisibility {
   draft,
   unlisted,
@@ -16,13 +12,12 @@ enum StackVisibility {
 
   String get apiValue => name;
 
-  /// Translation key of the label.
   String get labelKey => 'stacks_visibility_$name';
 
   bool get isListed => this != StackVisibility.draft;
 }
 
-/// Who runs a stack. `community` is reserved by the API and not in use yet.
+/// `community` is reserved by the API and not in use yet.
 enum StackKind {
   personal,
   community,
@@ -35,7 +30,6 @@ enum StackKind {
   };
 }
 
-/// The order `GET /v2/series/{id}/stacks` lists stacks in.
 enum StackSort {
   mostVoted('vote_count_desc', 'stacks_sort_most_voted'),
   mostSaved('save_count_desc', 'stacks_sort_most_saved'),
@@ -48,7 +42,6 @@ enum StackSort {
   const StackSort(this.apiValue, this.labelKey);
 }
 
-/// How spoiler-marked stacks are treated in a series' stack listing.
 enum StackSpoilerFilter {
   exclude,
   include,
@@ -58,7 +51,6 @@ enum StackSpoilerFilter {
   String get labelKey => 'stacks_spoilers_$name';
 }
 
-/// Client-side order of the entries on a stack page, as on the website.
 enum StackEntrySort {
   stackFirst('stacks_entry_sort_first'),
   stackLast('stacks_entry_sort_last'),
@@ -70,8 +62,7 @@ enum StackEntrySort {
   const StackEntrySort(this.labelKey);
 }
 
-/// Machine-readable reasons the stack endpoints refuse a request, from the
-/// error body's `code`.
+/// Values of the error body's `code` when a stack endpoint refuses a request.
 abstract final class StackErrorCode {
   static const tooFewEntries = 'too_few_entries';
   static const seriesUnavailable = 'series_unavailable';
@@ -101,14 +92,13 @@ abstract final class StackErrorCode {
   };
 }
 
-/// Limits the API enforces, mirrored so the editor can say so before saving.
+/// Mirrors the API's limits so the editor can warn before saving.
 abstract final class StackLimits {
   static const int titleMax = 200;
   static const int descriptionMax = 10000;
   static const int noteMax = 5000;
   static const int entriesMax = 100;
 
-  /// Series a stack needs before it can be public or unlisted.
   static const int publishMin = 5;
 
   /// Most stacks `GET /v2/my/stacks/status` takes in one request.

@@ -28,13 +28,11 @@ class LocalizationService extends ChangeNotifier {
 
   Future<void> init() async {
     try {
-      // Load manifest
       final manifestString = await rootBundle.loadString(
         'assets/lang/languages.json',
       );
       _manifest = json.decode(manifestString);
 
-      // Load English fallback strings
       try {
         final enString = await rootBundle.loadString('assets/lang/en.json');
         final enData = json.decode(enString);
@@ -53,7 +51,6 @@ class LocalizationService extends ChangeNotifier {
       if (savedLang != null && _manifest.containsKey(savedLang)) {
         _currentLanguage = savedLang;
       } else {
-        // Set to English by default if not set
         _currentLanguage = _manifest.containsKey('en')
             ? 'en'
             : _manifest.keys.first;
@@ -92,8 +89,7 @@ class LocalizationService extends ChangeNotifier {
     if (_manifest.containsKey(langCode)) {
       _currentLanguage = langCode;
       await _loadLanguageStrings(langCode);
-      // Another language was picked while this one loaded; applying these
-      // strings now would leave the text and the selected code disagreeing.
+      // Another language was picked meanwhile; applying these would mismatch text and selected code.
       if (_currentLanguage != langCode) return;
       notifyListeners();
 
@@ -128,20 +124,16 @@ class LocalizationService extends ChangeNotifier {
   String formatPossessive(String name) {
     if (name.isEmpty) return name;
 
-    // In Spanish and French, we use "de [name]" which is handled in the translation string
+    // Spanish and French use "de [name]" in the translation string.
     if (_currentLanguage == 'es' || _currentLanguage == 'fr') {
       return name;
     }
 
-    // English/German/Japanese/etc. rules
+    // ja puts "の" in the translation string.
     if (_currentLanguage == 'ja') {
-      return name; // Japanese uses "の" which is handled in the translation string
+      return name;
     }
 
-    // Default English-style possessive
-    // Rule: if ends in 's', add only '. Otherwise add 's.
-    // NOTE: The user requested "Oazzies's" specifically, but usually names ending in 's' can take either.
-    // We will use the 's only if it doesn't end in s.
     if (name.toLowerCase().endsWith('s')) {
       return "$name'";
     }

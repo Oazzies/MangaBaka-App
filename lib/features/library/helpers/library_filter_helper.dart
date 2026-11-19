@@ -22,8 +22,7 @@ class LibraryFilterHelper {
   List<LibraryEntry> getFilteredAndSorted() {
     if (_cachedFiltered != null) return _cachedFiltered!;
 
-    // Prepare the query and lowercase filter lists once, not per entry — this
-    // runs on every keystroke against the whole library.
+    // Runs on every keystroke against the whole library, so inputs are prepared once.
     final preparedQuery = SearchUtils.prepare(query);
     final f = filters;
     final typeLower =
@@ -44,7 +43,6 @@ class LibraryFilterHelper {
         f?.tagNot.map((t) => t.toLowerCase()).toList() ?? const <String>[];
 
     List<LibraryEntry> filtered = allEntries.where((entry) {
-      // 1. Query Search
       final matchesQuery =
           preparedQuery.isEmpty ||
           preparedQuery.matches(entry.series.title) ||
@@ -53,14 +51,12 @@ class LibraryFilterHelper {
           entry.series.secondaryTitles.any(preparedQuery.matches);
       if (!matchesQuery) return false;
 
-      // 2. Content Rating (Settings)
       final matchesRating =
           contentPreferences.isEmpty ||
           contentPreferences.contains(entry.series.contentRating.toLowerCase());
       if (!matchesRating) return false;
 
       if (f != null) {
-        // 3. Series Type
         if (typeLower.isNotEmpty &&
             !typeLower.contains(entry.series.type.toLowerCase())) {
           return false;
@@ -70,7 +66,6 @@ class LibraryFilterHelper {
           return false;
         }
 
-        // 4. Series Status
         if (statusLower.isNotEmpty &&
             !statusLower.contains(entry.series.status.toLowerCase())) {
           return false;
@@ -80,7 +75,6 @@ class LibraryFilterHelper {
           return false;
         }
 
-        // 5. Genres
         if (genreLower.isNotEmpty || genreNotLower.isNotEmpty) {
           final entryGenres = entry.series.genres
               .map((g) => g.toLowerCase())
@@ -95,7 +89,6 @@ class LibraryFilterHelper {
           }
         }
 
-        // 5b. Tags
         if (tagLower.isNotEmpty || tagNotLower.isNotEmpty) {
           final entryTags = entry.series.tags
               .map((t) => t.toLowerCase())
@@ -112,14 +105,12 @@ class LibraryFilterHelper {
           }
         }
 
-        // 6. Rating (0-100)
         final rawRating = double.tryParse(entry.series.rating) ?? 0.0;
         final seriesRating = rawRating <= 10.0 ? rawRating * 10 : rawRating;
         if (seriesRating < f.ratingLower || seriesRating > f.ratingUpper) {
           return false;
         }
 
-        // 7. Year
         if (f.publishedYearLower != null || f.publishedYearUpper != null) {
           final seriesYear = int.tryParse(entry.series.year);
           if (seriesYear != null) {
@@ -137,7 +128,6 @@ class LibraryFilterHelper {
           }
         }
 
-        // 7b. Licensed Status
         if (f.isLicensed != null) {
           final isLicensed =
               entry.series.isLicensed.toLowerCase() == 'yes' ||
@@ -150,7 +140,6 @@ class LibraryFilterHelper {
       return true;
     }).toList();
 
-    // 8. Sorting
     if (filters?.sortBy != null && filters!.sortBy!.isNotEmpty) {
       final sortBy = filters!.sortBy!;
       if (sortBy == 'random') {
@@ -219,8 +208,6 @@ class LibraryFilterHelper {
     return filtered;
   }
 
-  /// Case-insensitive: a plain `compareTo` puts every capitalised title
-  /// before any lower-case one ("Zebra" ahead of "apple").
   static int _byTitle(LibraryEntry a, LibraryEntry b) {
     final byLower = a.series.title.toLowerCase().compareTo(
       b.series.title.toLowerCase(),
@@ -228,8 +215,6 @@ class LibraryFilterHelper {
     return byLower != 0 ? byLower : a.series.title.compareTo(b.series.title);
   }
 
-  /// Orders by the user's own rating (`> 0`), always keeping unrated entries
-  /// (`null` or `<= 0`) after rated ones and breaking ties by title.
   static int _byUserScore(
     LibraryEntry a,
     LibraryEntry b, {

@@ -100,12 +100,11 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getInt(SettingsKeys.compactGridTitleRows), 5);
 
-      // Test clamping/limits
       await manager.setCompactGridTitleRows(100);
-      expect(manager.compactGridTitleRows, 99); // Clamped to 99
+      expect(manager.compactGridTitleRows, 99);
 
       await manager.setCompactGridTitleRows(0);
-      expect(manager.compactGridTitleRows, 1); // Clamped to 1
+      expect(manager.compactGridTitleRows, 1);
     });
 
     test('autoCompleteChapterProgress defaults to prompt and persists', () async {

@@ -6,24 +6,16 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
 
-/// A stack's preview: up to four covers laid over one another like a fanned
-/// pile, the first on top. Empty slots show as wells so every card in a row
-/// has the same silhouette.
-///
-/// Sized by its parent's width; the height follows from the cover ratio.
+/// Empty slots show as wells so every card in a row has the same silhouette.
 class StackCoverFan extends StatelessWidget {
   final List<StackCover> covers;
 
-  /// The stack's rating; covers are blurred when the user blurs it.
   final String contentRating;
 
-  /// Slots drawn, filled or not.
   static const int slots = 4;
 
-  /// Share of the width each further cover is shifted right by.
   static const double _step = 0.16;
 
-  /// Height of the fan for a given width.
   static double heightFor(double width) {
     final coverWidth = width / (1 + _step * (slots - 1));
     return coverWidth * 1.5;

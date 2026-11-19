@@ -10,15 +10,10 @@ import 'package:mangabaka_app/features/profile/widgets/settings/settings_item.da
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_switch_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The two switches that decide whether Library, Browse and Stacks are configured
-/// together or apart.
 class ListSeparationSwitches extends StatelessWidget {
   final ListCustomizationScope scope;
   final LocalizationService l10n;
 
-  /// Called after a switch turns off and nothing is configured separately any
-  /// more, so the panel can return to the Library tab — the selector it was
-  /// using has just disappeared.
   final VoidCallback onSeparationEnded;
 
   const ListSeparationSwitches({
@@ -66,8 +61,7 @@ class ListSeparationSwitches extends StatelessWidget {
   }
 }
 
-/// The progress-tracking group. These apply to both lists, so they sit outside
-/// [ListCustomizationScope].
+/// Applies to both lists, so it sits outside [ListCustomizationScope].
 class ProgressTrackingSwitches extends StatelessWidget {
   final SettingsManager settings;
   final LocalizationService l10n;
@@ -90,8 +84,6 @@ class ProgressTrackingSwitches extends StatelessWidget {
           onChanged: settings.setShowLibraryProgress,
           isFirst: true,
         ),
-        // The progress-type row only applies when progress is shown, so it
-        // collapses in and out rather than sitting there inert.
         ClipRect(
           child: AnimatedSize(
             duration: const Duration(milliseconds: 250),
@@ -139,8 +131,6 @@ class ProgressTrackingSwitches extends StatelessWidget {
   }
 }
 
-/// Copies the active tab's independently-configured settings onto the other
-/// list. Only meaningful while at least one of the two is separate.
 class CopyToOtherListButton extends StatelessWidget {
   final ListCustomizationScope scope;
   final LocalizationService l10n;

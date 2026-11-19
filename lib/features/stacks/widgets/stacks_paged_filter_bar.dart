@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/widgets/design/mb_dropdown.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 
-/// Sort and spoiler filter controls for [StacksPagedView].
 class StacksPagedFilterBar extends StatelessWidget {
   final LocalizationService l10n;
   final StackSort sort;
@@ -23,7 +22,6 @@ class StacksPagedFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Side by side on a phone, each taking half; wrapping chips on desktop.
     final phone =
         MediaQuery.sizeOf(context).width < 600 &&
         !DesktopLayout.isActive(context);

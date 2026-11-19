@@ -4,7 +4,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/series/widgets/series_note_markdown.dart';
 
-/// Expandable Markdown note row inside [SeriesMyListCard].
 class SeriesNoteRow extends StatefulWidget {
   final String label;
   final String? note;

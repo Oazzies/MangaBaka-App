@@ -8,11 +8,8 @@ import 'package:mangabaka_app/core/widgets/design/mb_cover.dart';
 class SnapshotListItem extends StatelessWidget {
   final Series series;
 
-  /// Distinguishes this list's cover Hero tags from other lists on the page.
   final String heroScope;
 
-  /// The cover's width — height follows the standard 2:3 cover ratio via
-  /// [MbCover], rather than being stretched to whatever height the row has.
   static const double width = 120;
 
   const SnapshotListItem({
@@ -55,7 +52,7 @@ class SnapshotListItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 SizedBox(
-                  height: 16, // Fixed height for title area
+                  height: 16,
                   child: Text(
                     displayTitle,
                     style: Theme.of(context).textTheme.bodySmall,

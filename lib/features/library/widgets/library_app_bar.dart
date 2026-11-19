@@ -12,11 +12,7 @@ import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The library's app bar, in its two states: the title with its actions, and
-/// the search field that replaces them.
-///
-/// Both keep the same [bottom], so switching into search does not make the
-/// tabs jump.
+/// Both states share one [bottom], so entering search does not make the tabs jump.
 class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isSearching;
   final bool isLandscape;
@@ -31,11 +27,8 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<SearchFilters> onFiltersChanged;
   final ValueChanged<AutocompleteSeriesResult> onResultSelected;
 
-  /// The tab bar, shared by both states.
   final PreferredSizeWidget bottom;
 
-  /// Caps the search field on a wide window; a full-width field over a centred
-  /// list looks detached from it.
   static const double _maxSearchWidth = 800;
 
   const LibraryAppBar({
@@ -64,8 +57,7 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildSearching(BuildContext context) {
     return AppBar(
-      // The search bar carries its own back button, which also clears the
-      // query — an implied leading arrow would do neither.
+      // The search bar has its own back button, which also clears the query.
       automaticallyImplyLeading: false,
       centerTitle: true,
       title: ConstrainedBox(
@@ -100,8 +92,6 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
         style: AppTypography.display(color: context.colors.text, fontSize: 20),
       ),
       actions: [
-        // Landscape has the width for a layout toggle; in portrait the same
-        // control lives in settings rather than crowding the bar.
         if (isLandscape) ...[
           WidgetUtils.tooltip(
             message: l10n.translate('toggle_layout'),
@@ -129,8 +119,6 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  /// Advances to the next list style, writing to whichever setting the library
-  /// is currently reading from.
   void _cycleStyle(SettingsManager settings, AppListStyle current) {
     final next = current.next;
     if (settings.separateListStyles) {

@@ -5,12 +5,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
-/// The placeholder views the Mix results area shows instead of a list.
-///
-/// Kept together because they are variations on one centred column and are
-/// only ever chosen between in [MixResultsSliver].
-
-/// No seeds picked yet — explains what the screen is for.
 class MixEmptyState extends StatelessWidget {
   final LocalizationService l10n;
 
@@ -51,7 +45,6 @@ class MixEmptyState extends StatelessWidget {
   }
 }
 
-/// The mix is being generated.
 class MixLoadingState extends StatelessWidget {
   final LocalizationService l10n;
 
@@ -79,8 +72,6 @@ class MixLoadingState extends StatelessWidget {
   }
 }
 
-/// The request failed. Offers a retry, since the seeds are still in place and
-/// a retry costs the user nothing.
 class MixErrorState extends StatelessWidget {
   final LocalizationService l10n;
   final VoidCallback onRetry;
@@ -130,8 +121,6 @@ class MixErrorState extends StatelessWidget {
   }
 }
 
-/// The request succeeded but matched nothing — a real answer, not a failure,
-/// so there is no retry here.
 class MixNoResultsState extends StatelessWidget {
   final LocalizationService l10n;
 

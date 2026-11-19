@@ -95,8 +95,7 @@ Future<void> _pump(WidgetTester tester, _FakePublishers fake) async {
   await tester.pumpWidget(
     const MaterialApp(home: PublisherDetailScreen(publisherId: '35')),
   );
-  // The stats and similar sections appear together once both have settled,
-  // which takes a few more microtask turns than either future alone.
+  // Stats and similar appear together, a few microtask turns after either alone.
   for (var i = 0; i < 5; i++) {
     await tester.pump();
   }
@@ -229,7 +228,6 @@ void main() {
         await tester.pump();
         await tester.pump();
 
-        // Info is the default tab; collections have not been requested.
         expect(find.text('The largest publisher in Japan.'), findsOneWidget);
         expect(collections.collectionCalls, 0);
 

@@ -26,8 +26,6 @@ class StatisticCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // The number leads, the label sits under it as a caps kicker — a
-          // statistic is read value-first. The glyph is a quiet corner mark.
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

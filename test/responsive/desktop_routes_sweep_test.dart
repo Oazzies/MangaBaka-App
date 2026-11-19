@@ -19,13 +19,10 @@ import 'support/layout_sweep.dart';
 import 'support/test_app.dart';
 import 'support/viewports.dart';
 
-/// Screens pushed over a destination inside the desktop content area, swept
-/// like the destinations themselves.
 void main() {
   setUpAll(loadAppFonts);
 
   final routes = <String, Widget Function()>{
-    // A long-titled series with every field filled, and one with almost none.
     'series detail (full)': () =>
         SeriesDetailScreen(series: Fixtures.series(2)),
     'series detail (sparse)': () =>

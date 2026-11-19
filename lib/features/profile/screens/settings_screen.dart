@@ -13,17 +13,10 @@ import 'package:mangabaka_app/features/profile/screens/settings/settings_root_gr
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Settings, full-screen.
-///
-/// [show] is the entry point everything else uses: landscape gets
-/// [SettingsDialog] instead, which keeps the app visible behind it and holds
-/// its own page stack. The rows themselves come from [buildSettingsGroups] so
-/// both presentations list the same categories.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   static void show(BuildContext context) {
-    // Desktop has settings as a page in its sidebar, not a pushed screen.
     final desktop = DesktopShell.current;
     if (desktop != null) {
       desktop.openSettings();
@@ -95,10 +88,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-/// App icon, name and version.
-///
-/// A horizontal lockup rather than a centred stack, so the eye starts at the
-/// same left edge as every settings row beneath it.
 class _BrandHeader extends StatelessWidget {
   const _BrandHeader();
 

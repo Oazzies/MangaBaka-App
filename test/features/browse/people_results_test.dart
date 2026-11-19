@@ -97,8 +97,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(GridView), findsOneWidget);
-      // Cards sit side by side rather than one per row, and none is stretched
-      // across the whole window.
       final first = tester.getRect(find.byType(PublisherListItem).at(0));
       final second = tester.getRect(find.byType(PublisherListItem).at(1));
       expect(second.top, first.top);

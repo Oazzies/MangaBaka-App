@@ -6,10 +6,7 @@ import 'package:mangabaka_app/core/theme/presets/theme_preset.dart';
 export 'package:mangabaka_app/core/theme/presets/default_palette.dart'
     show inkPalette;
 
-/// Every built-in theme, in display order.
-///
-/// Adding one: append an entry here and its `nameKey` to `assets/lang/en.json`.
-/// The theme tests hold every palette to the [PaletteContrast] floors.
+/// A new preset also needs its `nameKey` in `assets/lang/en.json`.
 class ThemePresets {
   const ThemePresets._();
 
@@ -33,8 +30,7 @@ class ThemePresets {
         brightness: Brightness.light,
         background: const Color(0xFFF4F3EF),
         surface: const Color(0xFFFFFFFF),
-        // Deep enough that white ink wins on it; mid greens pick near-black
-        // ink, which reads muddy on a light canvas.
+        // Deep enough for white ink; near-black ink on mid greens reads muddy.
         accent: const Color(0xFF16713A),
         text: const Color(0xFF141414),
       ),
@@ -71,7 +67,6 @@ class ThemePresets {
     MbThemePreset(
       id: 'catppuccin',
       nameKey: 'theme_preset_catppuccin',
-      // Mocha / Latte.
       dark: derivePalette(
         brightness: Brightness.dark,
         background: const Color(0xFF1E1E2E),

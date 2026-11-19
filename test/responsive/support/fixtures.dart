@@ -2,13 +2,7 @@ import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// Worst-case content for the responsive sweeps.
-///
-/// Every shape the real API can plausibly send is represented: very long and
-/// unbreakable titles, non-Latin titles, empty fields, many genres, long
-/// descriptions, every type/status/rating. Covers are deliberately absent —
-/// image loading needs platform plugins the test host lacks, and a missing
-/// cover takes the same fixed-size box as a loaded one.
+/// No covers, deliberately: image loading needs plugins the test host lacks.
 abstract final class Fixtures {
   static const _titles = [
     'Frieren',
@@ -122,8 +116,6 @@ abstract final class Fixtures {
 
   static Series series(int i) => Series.fromSimilarJson(seriesJson(i));
 
-  /// A stack, cycling through long titles, every visibility, spoilers and
-  /// staff picks, and from zero to four preview covers.
   static Map<String, dynamic> stackJson(int i) => {
     'id': 500 + i,
     'title': _titles[(i + 2) % _titles.length],
@@ -155,7 +147,6 @@ abstract final class Fixtures {
     for (var i = 0; i < count; i++) stackJson(i),
   ];
 
-  /// A stack with [count] entries: long notes, no notes, and placeholders.
   static Map<String, dynamic> stackDetailJson(int i, {int count = 14}) => {
     ...stackJson(i),
     'description': _longDescription,

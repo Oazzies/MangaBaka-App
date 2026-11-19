@@ -13,7 +13,6 @@ class MixResult {
   });
 }
 
-/// A single weighted tag from the DNA array in the mix response
 class MixDnaTag {
   final int tagId;
   final String name;

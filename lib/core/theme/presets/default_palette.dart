@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/palette/mb_palette.dart';
 
-/// The app's original dark palette, spelled out token by token.
 const MbPalette inkPalette = MbPalette(
   brightness: Brightness.dark,
   background: Color(0xFF0B0B0B),
@@ -21,7 +20,6 @@ const MbPalette inkPalette = MbPalette(
   scrim: Color(0x99000000),
 );
 
-/// Accent swatches offered by the accent picker, on top of "theme default".
 const List<Color> presetAccentSwatches = [
   Color(0xFF5BBD74),
   Color(0xFFFBD24B),

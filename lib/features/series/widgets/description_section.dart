@@ -11,8 +11,6 @@ import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 class DescriptionSection extends StatefulWidget {
   final String description;
 
-  /// Start expanded when the whole text fits on the screen from where it
-  /// sits down to the bottom (nothing is below it to push out of view).
   final bool expandIfFits;
 
   const DescriptionSection({
@@ -31,12 +29,9 @@ class _DescriptionSectionState extends State<DescriptionSection> {
   final GlobalKey _key = GlobalKey();
   bool _fitChecked = false;
 
-  /// Bumped to remount the size animation, so the automatic expansion lands
-  /// at its final size without animating.
+  /// Bumped to remount the size animation so the automatic expansion does not animate.
   int _epoch = 0;
 
-  /// Expands once, after layout, when the full text ends above the screen's
-  /// bottom edge.
   void _expandIfItFits() {
     if (!widget.expandIfFits || _fitChecked) return;
     _fitChecked = true;

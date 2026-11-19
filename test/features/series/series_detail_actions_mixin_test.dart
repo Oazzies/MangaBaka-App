@@ -7,8 +7,6 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-// ─── Fake ────────────────────────────────────────────────────────────────────
-
 class _FakeLibraryService extends Fake implements LibraryService {
   bool throwOnCreate = false;
   bool throwOnDelete = false;
@@ -38,8 +36,6 @@ class _FakeLibraryService extends Fake implements LibraryService {
   }) async {}
 }
 
-// ─── Host widget ─────────────────────────────────────────────────────────────
-
 class _TestWidget extends StatefulWidget {
   final LibraryService libraryService;
   final Series? seriesOverride;
@@ -63,8 +59,6 @@ class _TestWidgetState extends State<_TestWidget>
   @override
   Widget build(BuildContext context) => Scaffold(body: Container());
 }
-
-// ─── Tests ───────────────────────────────────────────────────────────────────
 
 void main() {
   setUpAll(() async {
@@ -159,7 +153,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AlertDialog), findsOneWidget);
-      // LocalizationService not initialised; translate returns the key
       expect(find.text('cancel'), findsOneWidget);
       expect(find.text('confirm'), findsOneWidget);
     });

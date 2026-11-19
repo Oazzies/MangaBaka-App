@@ -12,9 +12,9 @@ void main() {
     test('formats thousands with k suffix', () {
       expect(NumberUtils.formatCount(1000), '1k');
       expect(NumberUtils.formatCount(1100), '1.1k');
-      expect(NumberUtils.formatCount(1550), '1.6k'); // rounding to 1 decimal
+      expect(NumberUtils.formatCount(1550), '1.6k');
       expect(NumberUtils.formatCount(5000), '5k');
-      expect(NumberUtils.formatCount(9999), '10k'); // rounding up
+      expect(NumberUtils.formatCount(9999), '10k');
     });
 
     test('avoids decimals for values >= 10k', () {

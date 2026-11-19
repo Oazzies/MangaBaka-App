@@ -11,7 +11,6 @@ void main() {
     LocalizationService.resetForTesting();
     SharedPreferences.setMockInitialValues({});
     
-    // Mock assets
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
       'flutter/assets',
       (ByteData? message) async {
@@ -92,7 +91,6 @@ void main() {
       final service = LocalizationService();
       await service.init();
 
-      // 'only_in_english' is not in Japanese, so it should fall back to English
       expect(service.translate('only_in_english'), 'Only in English');
     });
 

@@ -2,13 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// Coordinates a list-style change so the control answers at once.
-///
-/// Rebuilding a long list in a new style takes a moment. Applying the setting
-/// straight from the tap makes the selector wait for that rebuild. [run]
-/// flips [switching] first — the selector moves and [ListStyleSwitchGate]
-/// swaps the list for a cheap skeleton on the next frame — and only then
-/// writes the setting, so the heavy build happens behind the skeleton.
+/// [run] flips [switching] first so the heavy rebuild runs behind a skeleton.
 abstract final class ListStyleSwitch {
   static final ValueNotifier<bool> switching = ValueNotifier(false);
 
@@ -21,11 +15,9 @@ abstract final class ListStyleSwitch {
   }
 }
 
-/// Shows [child], or a placeholder grid while a style switch is running.
 class ListStyleSwitchGate extends StatelessWidget {
   final Widget child;
 
-  /// For a list nested in a scroll view: a short skeleton that sizes itself.
   final bool shrink;
 
   const ListStyleSwitchGate({

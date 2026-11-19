@@ -8,12 +8,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 
-/// A live sample of the chosen list style, built from the same
-/// [EntryListItem] the real lists use so the preview cannot drift from them.
-///
-/// The entry is mock data rather than one of the user's own: the preview must
-/// look the same on an empty library, and it renders states (progress, rating)
-/// a given user may not have any example of.
+/// Mock entry, not the user's own: it must render on an empty library and show every state.
 class ListStyleLivePreview extends StatelessWidget {
   final AppListStyle style;
   final bool showLibraryProgress;
@@ -23,8 +18,6 @@ class ListStyleLivePreview extends StatelessWidget {
   /// 0 means "auto", matching [SettingsManager.gridColumnCount].
   final int gridColumnCount;
 
-  /// Width of one auto-sized grid cell plus its spacing, used to work out how
-  /// many columns the available width fits.
   static const double _autoColumnExtent = 170;
   static const double _maxCellWidth = 160;
   static const double _cellSpacing = 10;
@@ -50,8 +43,6 @@ class ListStyleLivePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!style.isGrid) {
       if (!DesktopLayout.isActive(context)) return _item(0);
-      // On desktop the list styles are tables: show the column labels and a
-      // few rows, so the density of the chosen style is actually visible.
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -71,9 +62,7 @@ class ListStyleLivePreview extends StatelessWidget {
       );
     }
 
-    // With a fixed column count, cap the preview at the width those columns
-    // would actually occupy — otherwise two columns stretch across a desktop
-    // window and look nothing like the real list.
+    // Capped to the columns' real width, or two columns stretch across a desktop window.
     final width =
         gridColumnCount * _maxCellWidth +
         (gridColumnCount - 1) * _cellSpacing +
@@ -87,13 +76,9 @@ class ListStyleLivePreview extends StatelessWidget {
     );
   }
 
-  /// One row of sample cells — enough to show the column rhythm without
-  /// turning the preview into a page of its own.
   Widget _grid(int columns) {
     final itemCount = columns > 0 ? columns : 3;
 
-    // The compact grid sizes rows to their tallest cell, so it needs the
-    // dynamic-height grid rather than a fixed aspect ratio.
     if (style == AppListStyle.compactGrid) {
       return DynamicRowHeightGrid(
         // responsive-ok: a preview of at most a row of items.
@@ -135,8 +120,7 @@ class ListStyleLivePreview extends StatelessWidget {
     series: mockSeries222,
     isLibrary: true,
     listStyle: style,
-    // Distinct per cell so the previews never collide with each other or
-    // with a real list item in a Hero transition.
+    // Unique per cell: duplicate Hero tags would collide with each other and real list items.
     heroTagPrefix: 'preview_${style.name}_$index',
     previewEntry: _mockEntry,
   );

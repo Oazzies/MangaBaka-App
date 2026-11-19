@@ -7,7 +7,6 @@ import 'package:mangabaka_app/core/logging/logging_service.dart';
 
 export 'package:mangabaka_app/features/library/import/kitsu_importer.dart';
 
-/// Something went wrong reading an import source. [key] is a localization key.
 class ImportSourceException implements Exception {
   final String key;
 
@@ -17,16 +16,9 @@ class ImportSourceException implements Exception {
   String toString() => 'ImportSourceException($key)';
 }
 
-/// Turns the bytes of an import file into the text the parser reads.
-///
-/// Most sources are already text. Two are not: a MyAnimeList export is usually
-/// downloaded gzipped (`.xml.gz`), and a Mihon backup (`.tachibk`, or
-/// `.proto.gz`) is a gzipped protobuf. Both are unwrapped here, so the text box
-/// always shows what will be imported — for a Mihon backup, its titles.
+/// MyAnimeList exports are often .xml.gz and Mihon backups gzipped protobuf; both unwrap here.
 abstract final class ImportFileReader {
-  /// Largest file read, and largest size a gzip file may expand to. Far above
-  /// any real list; below what a hostile or accidental file could use to
-  /// exhaust memory (a small .gz can inflate a thousand-fold).
+  /// Also caps gzip expansion: a small .gz can inflate a thousand-fold and exhaust memory.
   static const int maxBytes = 50 * 1024 * 1024;
 
   static String readText(Uint8List bytes) {
@@ -43,8 +35,6 @@ abstract final class ImportFileReader {
       }
     }
 
-    // Text if it decodes strictly as UTF-8 and holds no control bytes;
-    // otherwise it can only be a protobuf backup.
     try {
       final text = utf8.decode(data);
       if (!text.codeUnits.any((c) => c == 0)) return text;
@@ -67,7 +57,6 @@ Uint8List _gunzipBounded(Uint8List data) {
   return out.takeBytes();
 }
 
-/// Collects decoded chunks, failing as soon as the total passes [limit].
 class _LimitedSink implements Sink<List<int>> {
   final BytesBuilder _out;
   final int _limit;
@@ -86,13 +75,7 @@ class _LimitedSink implements Sink<List<int>> {
   void close() {}
 }
 
-/// Reads the manga titles out of a Mihon (or Tachiyomi) backup.
-///
-/// A backup is a protobuf `Backup` whose repeated field 1 is a `BackupManga`,
-/// and a `BackupManga`'s field 3 is its title. Only that path is read, by hand:
-/// it is two field numbers, not worth a protobuf dependency, and unknown fields
-/// (of which a backup has many, and more with every release) are skipped by
-/// their wire type.
+/// Hand-parsed: two field numbers do not justify a protobuf dependency.
 abstract final class MihonBackup {
   static const int _backupMangaField = 1;
   static const int _titleField = 3;
@@ -162,17 +145,12 @@ abstract final class MihonBackup {
 class _Field {
   final int number;
 
-  /// The payload of a length-delimited field; null for the fixed-size kinds.
   final Uint8List? bytes;
 
   const _Field(this.number, this.bytes);
 }
 
-/// Fetches a public AniList manga list by username.
-///
-/// AniList's API needs no key for public lists. The result is JSON text in the
-/// shape the importer already reads (`[{"title": …, "status": …}]`), so it goes
-/// through the same review as any other source.
+/// AniList needs no key for public lists; the result is importer JSON, reviewed like any source.
 class AniListImporter {
   static final Uri _endpoint = Uri.parse('https://graphql.anilist.co');
 
@@ -220,7 +198,6 @@ query ($user: String) {
     return entriesJson(response.body);
   }
 
-  /// Converts an AniList response body into importer JSON.
   static String entriesJson(String body) {
     final Object? decoded;
     try {

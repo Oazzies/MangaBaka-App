@@ -12,7 +12,6 @@ import 'package:mangabaka_app/features/series/widgets/series_detail_body.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
 import 'package:mangabaka_app/features/series/widgets/series_filter_drawer.dart';
 
-/// Responsive scaffold + filter drawer overlay for [SeriesDetailScreen].
 class SeriesDetailScaffold extends StatelessWidget {
   final SeriesDetailScreenState state;
   final SeriesFilterDrawerController filterDrawer;
@@ -46,16 +45,12 @@ class SeriesDetailScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      // Back closes the filter drawer before it leaves the page.
       canPop: !filterDrawer.isOpen,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (filterDrawer.isOpen) filterDrawer.close();
       },
-      // The wide layout carries its own add button in the sidebar; the FAB
-      // is the phone/tablet-portrait affordance only. Measured from the
-      // page's own constraints, as the body does, so the two always agree
-      // on which layout is showing (the desktop sidebar takes width too).
+      // Page constraints, as the body uses, so the FAB and the body agree on which layout shows.
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide =
@@ -78,13 +73,9 @@ class SeriesDetailScaffold extends StatelessWidget {
                     onPublisherTap: onPublisherTap,
                   ),
                 ),
-                // Positioned, like the body: a non-positioned child would
-                // make the Stack size itself to that child instead of to the
-                // incoming constraints, collapsing the page.
+                // Must stay Positioned: a non-positioned child sizes the Stack to itself, collapsing the page.
                 if (filterDrawer.isOpen)
                   Positioned.fill(
-                    // A pointer gets a panel docked beside the page; a
-                    // thumb gets the bottom sheet.
                     child: DesktopLayout.isActive(context)
                         ? DesktopSeriesFilterPanel(
                             controller: filterDrawer,

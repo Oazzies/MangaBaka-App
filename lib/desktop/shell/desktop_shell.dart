@@ -20,39 +20,25 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_shell_history_part.dart';
 
-/// Implemented by desktop pages that can reload their content, so Ctrl+R
-/// works wherever keyboard focus happens to be.
 abstract interface class DesktopRefreshable {
   Future<void> refresh();
 }
 
-/// The desktop app frame: a permanent sidebar and a content area with its own
-/// navigator.
-///
-/// Pushed routes — series detail, results lists, logs — open inside the
-/// content area, so the sidebar stays put and one click on it returns to a
-/// destination. Pages are built once and kept alive, as on mobile, so each
-/// keeps its scroll position and loaded data — in an [ActivePageStack], so
-/// only the one showing costs anything when the window is resized.
 class DesktopShell extends StatefulWidget {
   static final GlobalKey<DesktopShellState> shellKey =
       GlobalKey<DesktopShellState>();
 
   final int initialIndex;
 
-  /// Reports destination changes back to the owner, which keeps the index
-  /// across a switch to the mobile layout and back.
+  /// The owner keeps the index across a switch to the mobile layout and back.
   final ValueChanged<int>? onIndexChanged;
 
   DesktopShell({required this.initialIndex, this.onIndexChanged})
     : super(key: shellKey);
 
-  /// The mounted shell, or null when the mobile layout is showing.
   static DesktopShellState? get current => shellKey.currentState;
 
-  /// Current width of the permanent sidebar, or 0 when no shell is mounted
-  /// (onboarding, sign-in). [DesktopWindowFrame] reads this so its floating
-  /// title bar never overlaps the sidebar.
+  /// 0 when no shell is mounted; [DesktopWindowFrame] keeps its title bar clear of it.
   static final ValueNotifier<double> sidebarInset = ValueNotifier<double>(0);
 
   @override
@@ -105,14 +91,9 @@ class DesktopShellState extends State<DesktopShell> {
     super.dispose();
   }
 
-  // ─── Public surface ──────────────────────────────────────────────────────
-
-  /// Shows destination [index] (0–4 for the tabs, [settingsIndex] for
-  /// settings), unwinding anything pushed over the current one.
   void select(int index) => _switchTo(index, record: true);
 
-  /// Shows [index]. [record] is false when history navigation is doing the
-  /// switch, so Back and Forward do not rewrite the history they walk.
+  /// [record] is false for Back/Forward, so they don't rewrite the history they walk.
   void _switchTo(int index, {required bool record}) {
     _suppressHistory = true;
     _contentNavigatorKey.currentState?.popUntil((route) => route.isFirst);
@@ -135,13 +116,10 @@ class DesktopShellState extends State<DesktopShell> {
 
   void openSettings() => select(settingsIndex);
 
-  /// Pins the sidebar open or closed at every width (null: follow the width).
   @visibleForTesting
   set debugSidebarCollapsed(bool? value) =>
       setState(() => _collapsedOverride = value);
 
-  /// Jumps to search: the library's own field when the library is showing,
-  /// Browse's otherwise.
   void focusSearch() {
     if (_index.value == NavTabs.library &&
         _contentNavigatorKey.currentState?.canPop() != true) {
@@ -154,13 +132,10 @@ class DesktopShellState extends State<DesktopShell> {
     });
   }
 
-  // ─── Back / forward history ──────────────────────────────────────────────
-
-  /// Destinations visited before and after the current one.
   final List<int> _tabBack = [];
   final List<int> _tabForward = [];
 
-  /// Routes popped by Back, newest last, as ready-to-push copies.
+  /// Ready-to-push copies of routes popped by Back, newest last.
   final List<Route<dynamic>> _routeForward = [];
 
   bool _suppressHistory = false;
@@ -173,8 +148,6 @@ class DesktopShellState extends State<DesktopShell> {
   bool goForward() => _goForwardImpl(this);
 
   bool popContent() => _popContentImpl(this);
-
-  // ─── Build ───────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -200,13 +173,7 @@ class DesktopShellState extends State<DesktopShell> {
         },
         child: Scaffold(
           backgroundColor: context.colors.background,
-          // The content is laid out once, at its final position, while the
-          // sidebar animates across the top of it. Animating the sidebar in a
-          // Row instead resized the content area on every frame of the
-          // transition, re-laying out whole grids and carousels ~20 times per
-          // toggle — that was the lag.
-          // Rebuilt only when the window crosses the auto-collapse width;
-          // any other resize just re-lays out what's already here.
+          // The sidebar animates over content laid out once; in a Row it re-laid out grids ~20x a toggle.
           body: DerivedLayoutBuilder<bool>(
             derive: (constraints) =>
                 constraints.maxWidth < DesktopTokens.sidebarAutoCollapseWidth,
@@ -259,8 +226,7 @@ class DesktopShellState extends State<DesktopShell> {
     );
   }
 
-  /// Built once: the navigator and its pages never need rebuilding for a
-  /// change of the shell around them.
+  /// Built once: the navigator and its pages never rebuild for changes to the shell around them.
   late final Widget _content = _buildContent();
 
   Widget _buildContent() {

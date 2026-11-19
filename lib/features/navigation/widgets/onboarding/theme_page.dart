@@ -7,8 +7,7 @@ import 'package:mangabaka_app/core/theme/theme_controller.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_gallery.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_mode_selector.dart';
 
-/// Onboarding step: pick light/dark/system and a theme. Deliberately just the
-/// presets — accents and custom themes live in Settings › Appearance.
+/// Presets only: accents and custom themes deliberately live in Settings › Appearance.
 class ThemePage extends StatelessWidget {
   const ThemePage({super.key});
 
@@ -22,9 +21,7 @@ class ThemePage extends StatelessWidget {
         final mode = controller.mode;
         return LayoutBuilder(
           builder: (context, box) {
-            // Always a wrapping grid (2-3 columns on a phone) rather than a
-            // single horizontally scrolling strip — with a dozen-plus themes
-            // a strip hides most of them off-screen.
+            // Always a grid: a strip would hide most of the dozen-plus themes off-screen.
             const layout = ThemeGalleryLayout.grid;
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),

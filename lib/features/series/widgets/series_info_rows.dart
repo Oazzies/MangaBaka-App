@@ -3,7 +3,6 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 
-/// Single key/value metadata row in [SeriesInformationCard].
 class SeriesInfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -59,7 +58,6 @@ class SeriesInfoRow extends StatelessWidget {
   }
 }
 
-/// Comma-separated tappable items row in [SeriesInformationCard].
 class SeriesInfoLinkedRow extends StatelessWidget {
   final String label;
   final List<String> items;
@@ -134,9 +132,6 @@ class SeriesInfoLinkedRow extends StatelessWidget {
   }
 }
 
-/// Publishers as one tappable block each — the name, with the edition's
-/// language and role (e.g. "EN · English") beneath it so regional editions of
-/// the same series can be told apart.
 class SeriesInfoPublisherRefsRow extends StatelessWidget {
   final String label;
   final List<SeriesPublisher> publishers;

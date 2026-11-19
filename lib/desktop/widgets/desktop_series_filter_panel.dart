@@ -7,17 +7,9 @@ import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_controller.dart';
 import 'package:mangabaka_app/features/series/widgets/series_filter_drawer.dart';
 
-/// The desktop counterpart of the phone's filter sheet: a panel docked to the
-/// right edge of a series page, opened by right-clicking a tag, genre or other
-/// chip and then fed by clicking more of them.
-///
-/// A bottom sheet with a drag handle and a marching border suits a thumb; here
-/// the page stays fully visible and clickable beside a fixed-width panel, so
-/// chips can be picked on the page while the filters take shape next to it.
 class DesktopSeriesFilterPanel extends StatelessWidget {
   final SeriesFilterDrawerController controller;
 
-  /// Runs the assembled filters as a Browse search.
   final ValueChanged<SearchFilters> onSearch;
 
   static const double width = 380;
@@ -39,9 +31,7 @@ class DesktopSeriesFilterPanel extends StatelessWidget {
       ).chain(CurveTween(curve: Curves.easeOutCubic)),
     );
 
-    // A full-height sidebar, laid out like the Upcoming Releases rail: its
-    // content starts below the window controls rather than the panel itself
-    // being inset.
+    // Like the Upcoming Releases rail: full height, content starting below the window controls.
     return Align(
       alignment: Alignment.centerRight,
       child: SlideTransition(
@@ -98,8 +88,7 @@ class _PanelHeader extends StatelessWidget {
     final count = filters?.activeFiltersCount ?? 0;
 
     return Padding(
-      // Same inset as the Upcoming Releases header: clear of the window
-      // controls.
+      // Same inset as the Upcoming Releases header: clear of the window controls.
       padding: const EdgeInsets.fromLTRB(20, 56, 14, 16),
       child: Row(
         children: [

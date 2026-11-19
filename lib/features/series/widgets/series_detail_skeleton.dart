@@ -54,7 +54,6 @@ class _SeriesDetailSkeletonState extends State<SeriesDetailSkeleton>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Metadata Chips placeholder
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -65,10 +64,8 @@ class _SeriesDetailSkeletonState extends State<SeriesDetailSkeleton>
             ],
           ),
           const SizedBox(height: 16),
-          // Action Bar placeholder
           _skeletonBox(width: double.infinity, height: 50),
           const SizedBox(height: 20),
-          // Description placeholder
           _skeletonBox(width: 150, height: 22),
           const SizedBox(height: 16),
           _skeletonBox(width: double.infinity, height: 14),
@@ -77,7 +74,6 @@ class _SeriesDetailSkeletonState extends State<SeriesDetailSkeleton>
           const SizedBox(height: 8),
           _skeletonBox(width: 200, height: 14),
           const SizedBox(height: 32),
-          // Grid items
           _skeletonBox(width: 120, height: 22),
           const SizedBox(height: 16),
           Wrap(

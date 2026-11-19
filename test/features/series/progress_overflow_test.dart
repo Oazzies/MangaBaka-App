@@ -28,7 +28,6 @@ void main() {
       await SettingsManager().setProgressOverflow(ProgressOverflowMode.never);
       expect(SettingsManager().progressOverflow, ProgressOverflowMode.never);
 
-      // Re-init from SharedPreferences to verify persistence.
       SettingsManager.resetForTesting();
       await SettingsManager().init();
       expect(SettingsManager().progressOverflow, ProgressOverflowMode.never);
@@ -116,7 +115,6 @@ void main() {
       await tester.tap(find.text(LocalizationService().translate('save')));
       await tester.pumpAndSettle();
 
-      // Overflow prompt should be visible with volume message.
       expect(
         find.text(
           LocalizationService().translate('progress_overflow_title').toUpperCase(),
@@ -124,12 +122,10 @@ void main() {
         findsOneWidget,
       );
 
-      // Cancel keeps dialog open without saving.
       await tester.tap(find.text(LocalizationService().translate('cancel')).last);
       await tester.pumpAndSettle();
       expect(saved(), isNull);
 
-      // Save again and confirm.
       await tester.tap(find.text(LocalizationService().translate('save')));
       await tester.pumpAndSettle();
       await tester.tap(

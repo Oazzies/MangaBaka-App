@@ -13,21 +13,12 @@ import 'package:mangabaka_app/features/library/widgets/sync_progress_overlay.dar
 export 'developer_dialog_previews.dart'
     show DialogPreview, showDialogPreviewPicker;
 
-/// Wraps the logo on the Settings screen: tapping it ten times in quick
-/// succession flips developer mode.
-///
-/// Turning it on shows a snackbar and reveals the Developer Tools category;
-/// doing the same while it is on asks first, then hides the category again.
-/// The count restarts if the taps slow down, so ordinary tapping never gets
-/// there by accident.
 class DeveloperModeTapTarget extends StatefulWidget {
   final Widget child;
 
-  /// The time source; tests supply their own, since widget tests do not
-  /// advance the real clock.
+  /// Injectable because widget tests do not advance the real clock.
   final DateTime Function() clock;
 
-  /// Taps needed, and the longest pause between two of them.
   static const int tapsRequired = 10;
   static const Duration maxGap = Duration(milliseconds: 700);
 
@@ -123,7 +114,6 @@ class _DeveloperModeTapTargetState extends State<DeveloperModeTapTarget> {
   }
 }
 
-/// Every snackbar or toast Developer Tools can show.
 enum ToastPreview {
   general,
   generalError,
@@ -132,8 +122,6 @@ enum ToastPreview {
   syncInterrupted,
 }
 
-/// Lets the developer pick a [ToastPreview] and shows it with sample content.
-/// Purely visual: nothing is synced, and no action does anything.
 Future<void> showToastPreviewPicker(BuildContext context) async {
   final l10n = LocalizationService();
   final labels = {
@@ -191,7 +179,6 @@ Future<void> showToastPreviewPicker(BuildContext context) async {
   showToastPreview(context, picked);
 }
 
-/// Shows [preview] the way the app would.
 void showToastPreview(BuildContext context, ToastPreview preview) {
   final l10n = LocalizationService();
   switch (preview) {
@@ -233,8 +220,6 @@ void showToastPreview(BuildContext context, ToastPreview preview) {
   }
 }
 
-/// Places a sample [SyncStatusCard] where the real sync overlay sits, for a few
-/// seconds (or until tapped).
 void _showSyncPreview(BuildContext context, LibrarySyncStatus status) {
   final overlay = Overlay.maybeOf(context, rootOverlay: true);
   if (overlay == null) return;

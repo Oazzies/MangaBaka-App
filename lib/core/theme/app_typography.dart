@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// MangaBaka type system — "Ink & Amber".
-///   • Bakbak One — heavy squarish display caps for titles, headers and labels
-///   • Outfit     — geometric sans for UI & body text
-///
-/// The reference design sets every header in uppercase display caps and every
-/// body string in a geometric sans; there is no third (serif or mono) voice.
-///
-/// Both faces are bundled as assets rather than fetched at runtime: the whole
-/// design language rests on the display face, and a network-fetched font falls
-/// back to a generic grotesque on first launch (or on any offline start),
-/// which visibly breaks the design.
+/// Bundled, not fetched: a fetched font falls back on first or offline launch.
 class AppTypography {
   const AppTypography._();
 
@@ -19,12 +9,10 @@ class AppTypography {
 
   static bool _testMode = false;
 
-  /// Enable in tests to skip font resolution.
   @visibleForTesting
   static void setTestMode(bool value) => _testMode = value;
 
-  /// Heavy display caps (Bakbak One). Used for screen headers, section rails
-  /// and series titles. Callers pass already-uppercased text.
+  /// Callers pass already-uppercased text.
   static TextStyle display({
     Color? color,
     double? fontSize,
@@ -33,8 +21,6 @@ class AppTypography {
     double? height,
     List<Shadow>? shadows,
   }) {
-    // Bakbak One ships a single weight; tracking opens up slightly at display
-    // sizes and tightens at label sizes so caps stay readable either way.
     final tracking =
         letterSpacing ??
         (fontSize != null ? (fontSize >= 20 ? 0.5 : fontSize * 0.06) : null);
@@ -49,9 +35,7 @@ class AppTypography {
     );
   }
 
-  /// UI / body sans (Outfit), bundled as static 400/500/600/700 instances so
-  /// [fontWeight] resolves natively — including through `copyWith` on styles
-  /// that came from the [TextTheme].
+  /// Outfit ships as static 400/500/600/700 so [fontWeight] resolves natively.
   static TextStyle sans({
     Color? color,
     double? fontSize,
@@ -69,8 +53,6 @@ class AppTypography {
     );
   }
 
-  /// Uppercase, letter-spaced display label — the signature section/metadata
-  /// label of the design system (e.g. "ALL BOOKS", "MY LIST").
   static TextStyle monoLabel({
     Color? color,
     double fontSize = 11,
@@ -85,8 +67,6 @@ class AppTypography {
     );
   }
 
-  /// Builds the global [TextTheme]: Outfit everywhere, with Bakbak One
-  /// promoted onto the display / headline / title roles.
   static TextTheme textTheme(TextTheme base) {
     if (_testMode) return base;
 

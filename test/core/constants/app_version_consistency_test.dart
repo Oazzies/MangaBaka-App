@@ -3,10 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 
-/// The in-app updater compares [AppConstants.appVersion] against the latest
-/// GitHub release, while builds are numbered from pubspec.yaml. If the two
-/// drift apart, installed builds either never see an update or are offered
-/// the one they already run on every launch.
+/// Drift makes the updater miss updates or re-offer the installed one every launch.
 void main() {
   test('AppConstants.appVersion matches the pubspec version', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();

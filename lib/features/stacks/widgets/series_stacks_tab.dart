@@ -18,13 +18,10 @@ import 'package:mangabaka_app/features/stacks/widgets/add_to_stack_sheet.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_card.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
-/// The series page's Stacks tab: the most-voted public stacks that include
-/// the series, and a way to put it in one of the reader's own.
 class SeriesStacksTab extends StatefulWidget {
   final Series series;
   final double horizontalPadding;
 
-  /// How many stacks the tab shows before "See all".
   static const int previewCount = 12;
 
   const SeriesStacksTab({
@@ -140,8 +137,7 @@ class _SeriesStacksTabState extends State<SeriesStacksTab> {
     );
   }
 
-  /// A plain wrap of fixed-width cards: the tab sits inside the page's own
-  /// scroll view, so it must not scroll itself.
+  /// A plain wrap: the tab sits inside the page's own scroll view, so it must not scroll itself.
   Widget _grid(BuildContext context, List<StackSummary> stacks, bool loading) {
     final desktop = DesktopLayout.isActive(context);
     const spacing = 14.0;

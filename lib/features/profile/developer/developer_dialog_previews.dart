@@ -11,7 +11,6 @@ import 'package:mangabaka_app/features/series/widgets/rating_selection_dialog.da
 import 'package:mangabaka_app/features/series/widgets/unblur_warning.dart';
 import 'package:mangabaka_app/features/updates/widgets/update_dialog.dart';
 
-/// Every dialog or sheet Developer Tools can open.
 enum DialogPreview {
   update,
   logout,
@@ -21,8 +20,6 @@ enum DialogPreview {
   progress,
 }
 
-/// Lets the developer pick a [DialogPreview] and opens it with sample content.
-/// Purely visual: confirming or changing anything has no effect.
 Future<void> showDialogPreviewPicker(BuildContext context) async {
   final l10n = LocalizationService();
   final entries = <DialogPreview, (IconData, String)>{
@@ -89,7 +86,6 @@ Future<void> showDialogPreviewPicker(BuildContext context) async {
   await showDialogPreview(context, picked);
 }
 
-/// Opens [preview] the way the app would, with nothing wired to real data.
 Future<void> showDialogPreview(
   BuildContext context,
   DialogPreview preview,

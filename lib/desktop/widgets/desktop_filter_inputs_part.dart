@@ -86,7 +86,6 @@ class _TextAction extends StatelessWidget {
   }
 }
 
-/// A small filled search field used inside panels.
 class _SearchBox extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -150,7 +149,6 @@ class _SearchBox extends StatelessWidget {
   }
 }
 
-/// A one-line field that hands back the trimmed text on submit and clears.
 class _PublisherField extends StatefulWidget {
   final String hint;
   final ValueChanged<String> onSubmit;

@@ -47,7 +47,6 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump(); // Handle metadata loading
 
-    // Check for headers (using translated keys if they aren't translated in tests)
     expect(find.text('FILTERS'), findsOneWidget);
     expect(find.text('SORT_BY'), findsAtLeast(1));
     expect(find.text('GENRES'), findsOneWidget);
@@ -61,7 +60,5 @@ void main() {
     final resetButton = find.text('RESET');
     await tester.tap(resetButton);
     await tester.pump();
-
-    // Verify reset logic (this is more of a unit test but we can check UI updates if any)
   });
 }

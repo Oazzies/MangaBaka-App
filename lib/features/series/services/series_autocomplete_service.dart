@@ -11,34 +11,14 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/services/autocomplete_cache.dart';
 
-/// Search autocomplete for the Browse and Library search fields.
-///
-/// Rate limit context (GET /v1/series/search):
-///   - 30 requests per minute (leaky bucket, per IP)
-///   - Cloudflare caches exact URLs for 2 hours — a CF cache HIT is free
-///
-/// Strategy:
-///   1. [AutocompleteCache] answers exact repeats and prefix-derivable queries
-///      without touching the network, and says when the server has nothing
-///      left to add.
-///   2. Debounce at 220ms — instant to the eye, but one request per word for
-///      a fast typist rather than one per keystroke.
-///   3. Cancel the in-flight request when a newer query arrives, by closing
-///      its dedicated client.
-///   4. On 429, keep the suggestions already on screen instead of blanking
-///      them.
-///
-/// This is the one network path that does **not** go through [ApiClient]'s
-/// throwing contract: results arrive by callback so the field can degrade
-/// silently, and the per-request [http.Client] is the cancellation mechanism.
-/// It still shares [ApiClient.uri] for URL building.
+/// GET /v1/series/search allows 30 req/min per IP (leaky bucket); Cloudflare caches exact URLs for 2h.
+/// Bypasses [ApiClient]'s throwing contract: results come by callback; closing the per-request client cancels.
 class SeriesAutocompleteService {
   static final _logger = LoggingService.logger;
 
   static const int minQueryLength = 2;
   static const int autocompleteLimit = 6;
 
-  /// 220ms: comfortable for fast typists, avoids a request per character.
   static const Duration _debounceDuration = Duration(milliseconds: 220);
 
   static const Duration _timeout = Duration(
@@ -76,12 +56,9 @@ class SeriesAutocompleteService {
 
     final prefixHit = _cache.findPrefixMatch(trimmed);
     if (prefixHit != null) {
-      // Show what the cache knows straight away, then decide whether the
-      // network could still improve on it.
       onResults(prefixHit.results);
       if (!prefixHit.couldHaveMore) {
-        // A request still in flight belongs to an older query; letting it
-        // land would overwrite these results with that query's.
+        // An in-flight request is for an older query and would overwrite these results.
         _cancelActiveRequest();
         _logger.fine(
           'Autocomplete: skipping network (prefix cache covers "$trimmed")',
@@ -123,8 +100,6 @@ class SeriesAutocompleteService {
           )
           .timeout(_timeout);
 
-      // A newer keystroke has already superseded this request; delivering its
-      // results now would overwrite fresher suggestions.
       if (_activeClient != client) return;
 
       _handleResponse(query, response, onResults: onResults, onError: onError);
@@ -143,8 +118,7 @@ class SeriesAutocompleteService {
       if (_activeClient != client) return;
       _logger.warning('Unexpected autocomplete error: $e', e, st);
     } finally {
-      // One client per request: left open, each keeps its socket and TLS
-      // session alive until the idle timeout.
+      // Left open, each per-request client holds its socket and TLS session until the idle timeout.
       client.close();
       if (identical(_activeClient, client)) _activeClient = null;
     }
@@ -176,8 +150,7 @@ class SeriesAutocompleteService {
         AutocompleteSeriesResult.fromJson,
       );
     } catch (e) {
-      // A malformed suggestion payload is not worth an error state in a search
-      // field; drop it and let the next keystroke try again.
+      // A malformed suggestion payload is not worth an error state in a search field.
       _logger.warning('Failed to parse autocomplete response: $e');
       onResults(const []);
       return;

@@ -74,8 +74,7 @@ void main() {
         _entry(id: '3', title: 'My Hero Academia'),
       ];
       final results = service.search('B', entries);
-      // Title-prefix matches tie at score 100, so shorter title wins:
-      // 'Bleach' (6) before 'Berserk' (7); 'My Hero Academia' is excluded (no prefix/contains 'B').
+      // Prefix matches tie at score 100, so the shorter title wins.
       expect(results.map((r) => r.title), ['Bleach', 'Berserk']);
     });
 

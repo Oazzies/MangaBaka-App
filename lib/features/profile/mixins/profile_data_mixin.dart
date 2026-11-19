@@ -36,8 +36,6 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
   int pageChanged = 1;
   int pageAdded = 1;
 
-  /// Fetches the four summary statistics shown on the profile card.
-  /// Runs queries in parallel for performance.
   Future<void> fetchStatistics() async {
     final contentPrefs = SettingsManager().contentPreferences;
     final results = await Future.wait([
@@ -122,10 +120,7 @@ mixin ProfileDataMixin<T extends StatefulWidget> on State<T> {
 
       if (mounted) setState(() => loading = false);
 
-      // The library sync of a big account runs for a while: start it once the
-      // profile is on screen rather than holding sign-in (and every toast and
-      // snackbar behind it) until it finishes. Its progress card and the
-      // library's own banner report how it goes.
+      // A big account's sync runs long; unawaited so sign-in and its toasts are not held up.
       unawaited(
         libraryService.performInitialSyncIfNeeded().catchError((Object e) {
           // Reported through the sync status.

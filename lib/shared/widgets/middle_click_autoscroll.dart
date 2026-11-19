@@ -5,14 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 
-/// Hold the middle mouse button and move the pointer to scroll, as in a
-/// browser: the further from where it was pressed, the faster the scroll, in
-/// the direction of the pointer. Vertical and horizontal scrollables under the
-/// pointer are driven independently, so a horizontal rail inside a vertical
-/// page scrolls both ways. Releasing the button stops it. Desktop only.
-///
-/// The only feedback is the cursor: a four-way scroll cursor where the button
-/// went down, turning to point the way the page is moving.
 class MiddleClickAutoScroll extends StatefulWidget {
   final Widget child;
 
@@ -24,18 +16,12 @@ class MiddleClickAutoScroll extends StatefulWidget {
 
 class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
     with SingleTickerProviderStateMixin {
-  /// Pointer travel, in logical pixels, that is ignored around the anchor.
   static const double _deadZone = 14;
 
-  /// Pixels per second at 100px past the dead zone (growing faster than
-  /// linearly further out).
   static const double _speedAt100 = 650;
 
-  /// How quickly the scroll speed follows the pointer; higher is snappier.
-  /// Smoothing keeps a flick of the mouse from jerking the page.
   static const double _follow = 12;
 
-  /// Created on first use: most sessions never middle-click.
   Ticker? _ticker;
 
   int? _pointer;
@@ -97,7 +83,6 @@ class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
     });
   }
 
-  /// The innermost scrollable that can move on each axis under [event].
   (ScrollPosition?, ScrollPosition?) _scrollablesAt(PointerDownEvent event) {
     final hit = HitTestResult();
     WidgetsBinding.instance.hitTestInView(hit, event.position, event.viewId);
@@ -172,8 +157,6 @@ class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
     if (target != position.pixels) position.jumpTo(target);
   }
 
-  /// The cursor that points the way the page is moving: a four-way scroll
-  /// cursor at rest, an arrow once the pointer has left the dead zone.
   MouseCursor get _cursor {
     final d = _current - _anchor;
     final right = _horizontal != null && d.dx > _deadZone;
@@ -204,8 +187,7 @@ class _MiddleClickAutoScrollState extends State<MiddleClickAutoScroll>
         fit: StackFit.passthrough,
         children: [
           widget.child,
-          // Over everything while active, so the cursor is ours; it lets
-          // pointer events through to whatever is below.
+          // On top so the cursor is ours; pointer events pass through to what's below.
           if (_active)
             Positioned.fill(
               child: MouseRegion(

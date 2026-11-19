@@ -18,17 +18,8 @@ export 'package:mangabaka_app/features/home/models/top_genre_rail.dart';
 
 part 'home_personalization_part.dart';
 
-/// Backs the Home feed's discovery rails.
-///
-/// Every rail here reads from v2 (`discover/*` and `series/search`), which
-/// returns the "lean" series shape: titles as an array, `type`/`year` present,
-/// covers as a sized map. [Series.fromSimilarJson] already normalises that
-/// shape, so the rails reuse the app's normal [Series] model rather than
-/// introducing a parallel one.
-///
-/// **Every method degrades to empty rather than throwing.** Home is a wall of
-/// independent rails; one that cannot load should render as absent while the
-/// others fill in, so a failure here is logged and swallowed by design.
+/// Rails read the lean v2 series shape, which [Series.fromSimilarJson] already normalises.
+/// Every method degrades to empty rather than throwing: one dead rail must not blank Home.
 class HomeService {
   static final _logger = LoggingService.logger;
 
@@ -44,12 +35,7 @@ class HomeService {
   }) : _api = api ?? ApiClient(healthContext: 'home', client: client),
        _titles = titles ?? SeriesTitleEnricher.shared;
 
-  /// Content-rating preferences apply to every discovery rail, so an unwanted
-  /// rating never reaches the Home screen in the first place.
-  ///
-  /// [SettingsManager.contentPreferences] is an allow-list (the ratings the
-  /// user wants to see), which maps onto the API's `content_rating` filter —
-  /// the same mapping `MixController` uses.
+  /// [SettingsManager.contentPreferences] is an allow-list, so it maps onto `content_rating`.
   Map<String, dynamic> _contentParams() {
     final allowed = SettingsManager().contentPreferences
         .where((p) => p.isNotEmpty)
@@ -61,7 +47,6 @@ class HomeService {
   Uri _v2Uri(String path, Map<String, dynamic> params) =>
       ApiClient.uri('$_v2Base$path', {...params, ..._contentParams()});
 
-  /// Series gaining the most library adds recently. Public and CDN-cached.
   Future<List<Series>> fetchRising({int limit = 20, int windowDays = 7}) {
     return _fetchRail(
       _v2Uri('/series/discover/rising', {
@@ -72,10 +57,7 @@ class HomeService {
     );
   }
 
-  /// Highly rated series that comparatively few readers have found.
-  ///
-  /// Sends the deny-list (`not_content_rating`) rather than the allow-list the
-  /// other rails use, which this endpoint accepts.
+  /// This endpoint accepts the deny-list `not_content_rating`, unlike the other rails' allow-list.
   Future<List<Series>> fetchHiddenGems({int limit = 20}) {
     return _fetchRail(
       ApiClient.uri('$_v2Base/series/discover/hidden-gems', {
@@ -86,11 +68,7 @@ class HomeService {
     );
   }
 
-  /// Series gaining popularity the fastest. [windowDays] is 7 or 30; [type] is
-  /// one of manga|manhwa|manhua|novel, or null for every type.
-  ///
-  /// There is no `discover/trending` endpoint — the web surface builds this off
-  /// the `trending_7d` / `trending_30d` search sorts, so the app does the same.
+  /// No `discover/trending` endpoint exists; like the web, this uses the `trending_7d/30d` sorts.
   Future<List<Series>> fetchTrending({
     String? type,
     int windowDays = 7,
@@ -106,8 +84,7 @@ class HomeService {
     );
   }
 
-  /// Series that started publishing within the last year, with at least a
-  /// minimal rating so unrated stubs don't crowd the rail.
+  /// The rating floor keeps unrated stubs from crowding the rail.
   Future<List<Series>> fetchNewReleases({int limit = 20}) {
     final lower = DateTime.now().toUtc().subtract(const Duration(days: 365));
     return _fetchRail(
@@ -121,8 +98,6 @@ class HomeService {
     );
   }
 
-  /// Personalised recommendations. Returns an empty list when logged out or
-  /// when the profile is not warm enough to rank against.
   Future<List<Series>> fetchForYou({int limit = 20}) async {
     final headers = await _authHeaders();
     if (headers == null) return const [];
@@ -170,9 +145,6 @@ class HomeService {
     }
   }
 
-  /// The bearer header for the signed-in user, or null when logged out or the
-  /// token could not be refreshed — in which case the caller shows nothing
-  /// rather than an error, since the rail is only meaningful when signed in.
   Future<Map<String, String>?> _authHeaders() async {
     final auth = getIt<ProfileAuthService>();
     if (!auth.isLoggedIn) return null;
@@ -185,9 +157,6 @@ class HomeService {
     }
   }
 
-  /// Fetches one rail. A dead rail never takes the whole Home screen down
-  /// with it: any failure logs and yields an empty list, which the Home screen
-  /// renders as an absent section.
   Future<List<Series>> _fetchRail(
     Uri uri,
     String label, {
@@ -216,15 +185,10 @@ class HomeService {
       '${date.month.toString().padLeft(2, '0')}-'
       '${date.day.toString().padLeft(2, '0')}';
 
-  /// The user's top genres from their taste profile. Empty when logged out, when
-  /// the profile has nothing yet, or when the (beta) endpoint fails.
-  ///
-  /// Unlike the other endpoints this one answers with `results`, not `data`.
+  /// The (beta) endpoint answers with `results`, not `data`.
   Future<List<TopGenre>> fetchTopGenres({int limit = 3}) =>
       _fetchTopGenres(this, limit);
 
-  /// The best-rated series carrying [tagId] - the content of a "Top in
-  /// {genre}" rail.
   Future<List<Series>> fetchTopInGenre(int tagId, {int limit = 20}) {
     return _fetchRail(
       _v2Uri('/series/search', {
@@ -238,8 +202,6 @@ class HomeService {
     );
   }
 
-  /// "Top in {genre}" rails for the user's top genres, best-fitting first.
-  /// Genres whose rail came back empty are dropped.
   Future<List<TopGenreRail>> fetchTopGenreRails({int genres = 3}) async {
     final top = await fetchTopGenres(limit: genres);
     if (top.isEmpty) return const [];
@@ -252,14 +214,10 @@ class HomeService {
     ];
   }
 
-  /// Cheap probe for whether the taste profile behind "For You" is warm.
-  ///
-  /// Null means "don't show the rail and don't explain why" — logged out, or
-  /// the probe itself failed.
+  /// Null means hide the rail without explanation: logged out, or the probe failed.
   Future<ForYouReadiness?> fetchForYouReadiness() =>
       _fetchForYouReadiness(this);
 
-  /// Fetches upcoming work releases.
   Future<List<SeriesWork>> fetchUpcomingWorks({
     int page = 1,
     int perPage = 25,

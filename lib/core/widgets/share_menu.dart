@@ -7,10 +7,6 @@ import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_dropdown.dart';
 
-/// Asks whether to share [text] or copy it, and does it.
-///
-/// In landscape (with an [anchor], the button's rect in global coordinates)
-/// the choice is a dropdown under the button; otherwise a bottom sheet.
 Future<void> showShareChoice(
   BuildContext context, {
   required String text,

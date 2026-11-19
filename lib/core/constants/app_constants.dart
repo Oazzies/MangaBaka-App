@@ -18,12 +18,9 @@ class AppConstants {
   static const int rateLimitRetryDelaySeconds = 5;
 
   static const int defaultPageLimit = 20;
-  static const int libraryPageLimit = 100; // entries per page (API max)
-  static const int libraryMaxPages = 10000; // API max pages
+  static const int libraryPageLimit = 100; // API max
+  static const int libraryMaxPages = 10000; // API max
   static const double scrollThresholdPx = 100;
-
-  // Colours are not constants: they come from the active theme. Read them
-  // with `context.colors.<token>` (lib/core/theme/theme_context.dart).
 
   static const double horizontalPadding = 16.0;
   static const double verticalPadding = 16.0;
@@ -54,8 +51,7 @@ class AppConstants {
     'offline_access',
   ];
 
-  /// Scopes Stacks needs (added to MangaBaka 2026-10-13). A session from
-  /// before then lacks them until the user signs in again.
+  /// Added to MangaBaka 2026-10-13; older sessions lack them until the user signs in again.
   static const List<String> stackOauthScopes = ['stack.read', 'stack.write'];
 
   /// What a new sign-in asks for.

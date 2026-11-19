@@ -11,9 +11,6 @@ import 'package:mangabaka_app/features/series/models/autocomplete_series_result.
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The seed picker: current seeds, the search field that adds more, and the
-/// two kinds of suggestion below it (typed autocomplete, and the API's own
-/// "you might also seed with…" row once there are two seeds to work from).
 class MixSeedSection extends StatelessWidget {
   final MixController controller;
   final LocalizationService l10n;
@@ -21,8 +18,7 @@ class MixSeedSection extends StatelessWidget {
   final TextEditingController searchController;
   final FocusNode searchFocus;
 
-  /// Typed-autocomplete results and whether the panel is currently open. Owned
-  /// by the screen because they are tied to the field's focus lifecycle.
+  /// Owned by the screen: they follow the field's focus lifecycle.
   final List<AutocompleteSeriesResult> suggestions;
   final bool showSuggestions;
 
@@ -93,8 +89,7 @@ class MixSeedSection extends StatelessWidget {
               showSuggestions: true,
             ),
           ],
-          // The API only has enough signal to suggest further seeds once two
-          // are already chosen.
+          // The API can only suggest further seeds once two are chosen.
           if (controller.seeds.length >= 2) ...[
             const SizedBox(height: 12),
             MixSeedSuggestions(

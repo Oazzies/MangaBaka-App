@@ -13,12 +13,7 @@ import 'support/resize_benchmark.dart';
 import 'support/test_app.dart';
 import 'support/viewports.dart';
 
-/// Measures what a drag-resize costs on each desktop page, frame by frame.
-///
-/// Prints a table rather than asserting on times — wall-clock time in a debug
-/// test build is noisy and far above release — so run it before and after a
-/// change and compare. Set `RESIZE_BENCHMARK_OUT` to also write the table to
-/// a file.
+/// Prints a table instead of asserting: debug-build frame times are too noisy.
 void main() {
   setUpAll(loadAppFonts);
 
@@ -75,8 +70,7 @@ Future<void> _measure(
   String name,
   int destination,
 ) async {
-  // Layout errors are the sweeps' business; here they'd only abort the
-  // measurement.
+  // Layout errors are the sweeps' business; here they'd only abort the measurement.
   final log = IssueLog();
   applyViewport(tester, WindowSizes.drag().first);
   addTearDown(() => resetViewport(tester));

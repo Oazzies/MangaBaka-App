@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// One destination in [MbBottomNav] / [MbNavRail].
 @immutable
 class MbNavDestination {
   final IconData icon;
   final IconData selectedIcon;
 
-  /// Used as the tooltip and the accessibility label; the reference's nav is
-  /// icon-only, so it is never painted.
   final String label;
 
   const MbNavDestination({
@@ -19,8 +16,6 @@ class MbNavDestination {
   });
 }
 
-/// The selected-destination marker: a solid amber disc behind an ink icon.
-/// Shared by the bar and the rail so both read identically.
 class _MbNavItem extends StatelessWidget {
   final MbNavDestination destination;
   final bool selected;
@@ -82,8 +77,6 @@ class _MbNavItem extends StatelessWidget {
   }
 }
 
-/// Icon-only bottom bar with an amber disc on the active destination —
-/// the reference's navigation. Replaces Material's [NavigationBar].
 class MbBottomNav extends StatelessWidget {
   final List<MbNavDestination> destinations;
   final int selectedIndex;
@@ -124,15 +117,12 @@ class MbBottomNav extends StatelessWidget {
   }
 }
 
-/// Vertical counterpart of [MbBottomNav] for the tablet/desktop left and right
-/// rail layouts. Replaces Material's [NavigationRail].
 class MbNavRail extends StatelessWidget {
   final List<MbNavDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final Widget? leading;
 
-  /// Pinned to the bottom of the rail (e.g. the settings button).
   final Widget? trailing;
 
   const MbNavRail({

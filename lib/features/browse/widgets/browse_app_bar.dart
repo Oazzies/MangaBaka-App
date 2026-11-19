@@ -9,8 +9,6 @@ import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
-/// The Browse screen's app bar, in its two states: the title with its actions,
-/// and the search field that replaces them.
 class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isSearching;
   final BrowseController controller;
@@ -21,8 +19,7 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onScanTap;
   final ValueChanged<AutocompleteSeriesResult> onResultSelected;
 
-  /// Caps the search field on a wide window; a full-width field over a centred
-  /// list looks detached from it.
+  /// A full-width field over a centred list looks detached from it.
   static const double _maxSearchWidth = 800;
 
   const BrowseAppBar({
@@ -46,8 +43,7 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildSearching(BuildContext context) {
     return AppBar(
-      // The search bar carries its own back button, which also clears the
-      // query — an implied leading arrow would do neither.
+      // The search bar's own back button also clears the query; an implied one would not.
       automaticallyImplyLeading: false,
       centerTitle: true,
       title: ConstrainedBox(
@@ -58,8 +54,6 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
           initialFilters: controller.currentFilters,
           suggestionsAllowed: controller.currentType == BrowseType.series,
           onScanTap: onScanTap,
-          // The series filters only apply to series: publishers get their own
-          // sort sheet and staff have no filter button at all.
           showFilterButton: controller.currentType != BrowseType.staff,
           onFilterTapOverride: controller.currentType == BrowseType.publishers
               ? () => showPublisherSortSheet(
@@ -100,15 +94,11 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// The "142+ series" line above the results.
 class BrowseResultCount extends StatelessWidget {
   final int total;
 
-  /// True when [total] is a floor rather than a count, rendered as a trailing
-  /// "+".
   final bool isCapped;
 
-  /// The result type's name, translated — "series", "publishers", "staff".
   final String typeLabel;
 
   const BrowseResultCount({

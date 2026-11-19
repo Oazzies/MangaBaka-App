@@ -7,11 +7,7 @@ import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
-/// Opens the publisher page for a publisher known only by name, as in the
-/// library (which stores names, not ids).
-///
-/// Looks the publisher up first; if no exact match comes back, or the lookup
-/// fails, the name's series are browsed instead so the tap still goes somewhere.
+/// For a publisher known only by name: the library stores names, not ids.
 Future<void> openPublisherByName(BuildContext context, String name) async {
   Publisher? match;
   try {

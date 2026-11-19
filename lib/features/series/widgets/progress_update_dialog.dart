@@ -10,9 +10,7 @@ import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/features/series/widgets/progress_overflow_dialog.dart';
 
 class ProgressUpdateDialog extends StatefulWidget {
-  /// Largest value the field accepts. The series' own total is not used as
-  /// the bound: for a series still releasing it lags behind, and a reader
-  /// ahead of the database must still be able to record their progress.
+  /// Not the series total: it lags for a releasing series, and readers ahead of it must still log progress.
   static const int maxProgress = 99999;
 
   final int initialValue;
@@ -62,8 +60,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
     final t = _parsedTotal;
     if (SettingsManager().progressOverflow == ProgressOverflowMode.never &&
         t != null) {
-      // If initialValue already exceeded total before the setting was changed,
-      // don't allow adding more chapters/volumes, while still allowing reduction.
+      // Progress already past the total from before this setting may shrink but not grow.
       return widget.initialValue > t ? widget.initialValue : t;
     }
     return ProgressUpdateDialog.maxProgress;
@@ -179,9 +176,7 @@ class _ProgressUpdateDialogState extends State<ProgressUpdateDialog> {
                   child: TextField(
                     controller: _controller,
                     keyboardType: TextInputType.number,
-                    // keyboardType is only a hint, and none at all on
-                    // desktop: the formatters are what keep the value a
-                    // non-negative integer.
+                    // keyboardType is only a hint (none on desktop); the formatters keep it a non-negative int.
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
                       LengthLimitingTextInputFormatter(

@@ -34,7 +34,6 @@ class ColorPickerSwatch extends StatelessWidget {
   }
 }
 
-/// Drag anywhere to set saturation (x) and value (y) at the current hue.
 class ColorPickerSvSquare extends StatelessWidget {
   final HSVColor hsv;
   final ValueChanged<HSVColor> onChanged;

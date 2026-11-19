@@ -1,12 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// One persisted preference: its key, its default, and how to read and write
-/// it.
-///
-/// [SettingsManager] used to spell all three out per setting — an entry in
-/// `init()`, a six-line setter, and a line in the test reset — three places
-/// that had to agree, and thirty settings' worth of them. Declaring the
-/// setting once lets loading, saving and resetting all be derived.
 abstract class SettingValue<T> {
   final String key;
   final T defaultValue;
@@ -17,8 +10,7 @@ abstract class SettingValue<T> {
 
   T get value => _value;
 
-  /// Assigns [next], returning whether anything actually changed — the caller
-  /// uses that to skip a redundant disk write and notification.
+  /// Returns whether the value changed, so callers can skip a redundant write and notification.
   bool set(T next) {
     if (_value == next) return false;
     _value = next;
@@ -27,13 +19,7 @@ abstract class SettingValue<T> {
 
   void reset() => _value = defaultValue;
 
-  /// Reads the stored value, leaving the current one in place when the key is
-  /// absent or holds something unusable.
-  ///
-  /// Implementations read through `prefs.get` and type-check the result: the
-  /// typed getters (`getInt`, `getBool`, …) throw a TypeError when the key
-  /// holds another type, which during `SettingsManager.init` aborts startup
-  /// before the first frame.
+  /// Read via prefs.get and type-check: typed getters throw on a mismatched type and abort startup.
   void load(SharedPreferences prefs);
 
   Future<void> persist(SharedPreferences prefs);
@@ -53,8 +39,7 @@ class BoolSetting extends SettingValue<bool> {
 }
 
 class IntSetting extends SettingValue<int> {
-  /// Applied on both load and save, so a value from an older build outside the
-  /// current range is corrected rather than carried forward.
+  /// Applied on load too, so an out-of-range value from an older build is corrected.
   final int? min;
   final int? max;
 
@@ -92,18 +77,12 @@ class StringSetting extends SettingValue<String> {
   Future<void> persist(SharedPreferences prefs) => prefs.setString(key, _value);
 }
 
-/// A list of strings, treated as absent when stored empty.
-///
-/// An empty stored list is indistinguishable from "never set" for these
-/// settings, and falling back to the default is the useful reading — an empty
-/// content-rating allow-list would otherwise hide everything.
+/// Empty counts as unset: an empty content-rating allow-list would otherwise hide everything.
 class StringListSetting extends SettingValue<List<String>> {
   StringListSetting(super.key, super.defaultValue);
 
   @override
   bool set(List<String> next) {
-    // Lists compare by identity, so compare contents to avoid a pointless
-    // write when the same values are re-applied.
     if (_value.length == next.length) {
       var same = true;
       for (var i = 0; i < next.length; i++) {
@@ -114,9 +93,7 @@ class StringListSetting extends SettingValue<List<String>> {
       }
       if (same) return false;
     }
-    // A copy: holding the caller's list would let a later mutation of it
-    // change the setting without a notification or a write — and make the
-    // next identical `set` look like "no change".
+    // Copied: a later mutation of the caller's list would change the setting with no write or notify.
     _value = List<String>.of(next);
     return true;
   }
@@ -136,11 +113,7 @@ class StringListSetting extends SettingValue<List<String>> {
   void reset() => _value = List<String>.from(defaultValue);
 }
 
-/// An enum stored by ordinal.
-///
-/// Out-of-range indices are ignored rather than trusted: reordering or
-/// shortening an enum between releases would otherwise throw on startup, or
-/// silently select the wrong member.
+/// Stored by ordinal; an out-of-range index from a shortened enum is ignored rather than thrown on.
 class EnumSetting<T extends Enum> extends SettingValue<T> {
   final List<T> values;
 

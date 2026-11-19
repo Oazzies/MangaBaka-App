@@ -1,14 +1,11 @@
-/// A publisher as embedded in a series: enough to link through to the
-/// publisher page by id and to tell regional editions apart.
 class SeriesPublisher {
   final String id;
   final String name;
   final String? canonicalUrl;
 
-  /// Language of this publisher's edition (`en`, `ko`, ...).
   final String? language;
 
-  /// Role on this series, e.g. `Original` or `English`.
+  /// e.g. `Original` or `English`.
   final String? role;
 
   const SeriesPublisher({
