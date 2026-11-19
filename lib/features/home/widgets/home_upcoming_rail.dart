@@ -86,7 +86,9 @@ class _UpcomingCard extends StatelessWidget {
     // "6 OCT - VOL. 3": the volume rides with the date, not the title.
     final when = [
       if (day != null) DateFormat('d MMM').format(day).toUpperCase(),
-      if (work.sequenceString.isNotEmpty) 'VOL. ${work.sequenceString}',
+      if (work.sequenceString.isNotEmpty)
+        '${LocalizationService().translate('abbr_volume').toUpperCase()} '
+            '${work.sequenceString}',
     ].join(' - ');
 
     return SizedBox(
@@ -117,7 +119,7 @@ class _UpcomingCard extends StatelessWidget {
                 when,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.monoLabel(
+                style: AppTypography.displayLabel(
                   color: context.colors.accent,
                   fontSize: 11,
                 ),

@@ -30,12 +30,16 @@ class HomeRail extends StatelessWidget {
 
   static const int _skeletonCount = 5;
 
+  static const double defaultCoverWidth = 118;
+
+  static double heightFor(double coverWidth) => coverWidth * 1.5 + 42;
+
   const HomeRail({
     super.key,
     required this.title,
     required this.series,
     this.loading = false,
-    this.coverWidth = 118,
+    this.coverWidth = defaultCoverWidth,
     this.onViewAll,
     this.showHeader = true,
     this.heroScopeId,
@@ -45,14 +49,15 @@ class HomeRail extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!loading && series.isEmpty) return const SizedBox.shrink();
 
-    final itemCount = loading ? _skeletonCount : series.length;
+    final skeleton = series.isEmpty;
+    final itemCount = skeleton ? _skeletonCount : series.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showHeader) MbSectionHeader(title: title, onAction: onViewAll),
         SizedBox(
-          height: coverWidth * 1.5 + 42,
+          height: heightFor(coverWidth),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(
@@ -61,9 +66,7 @@ class HomeRail extends StatelessWidget {
             itemCount: itemCount,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (context, i) {
-              if (loading) {
-                return _RailSkeleton(width: coverWidth);
-              }
+              if (skeleton) return _RailSkeleton(width: coverWidth);
               return MbEntrance(
                 index: i,
                 child: _RailCard(

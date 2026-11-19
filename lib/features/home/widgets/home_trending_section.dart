@@ -31,13 +31,15 @@ class HomeTrendingSection extends StatelessWidget {
     this.onViewAll,
   });
 
-  static const List<(String?, String)> _types = [
-    (null, 'any'),
-    ('manga', 'type_manga'),
-    ('manhwa', 'type_manhwa'),
-    ('manhua', 'type_manhua'),
-    ('novel', 'type_novel'),
+  static const List<({String? value, String labelKey})> _types = [
+    (value: null, labelKey: 'any'),
+    (value: 'manga', labelKey: 'type_manga'),
+    (value: 'manhwa', labelKey: 'type_manhwa'),
+    (value: 'manhua', labelKey: 'type_manhua'),
+    (value: 'novel', labelKey: 'type_novel'),
   ];
+
+  static const List<int> _windows = [7, 30];
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +57,11 @@ class HomeTrendingSection extends StatelessWidget {
               horizontal: AppConstants.horizontalPadding,
             ),
             children: [
-              for (final (value, key) in _types) ...[
+              for (final type in _types) ...[
                 _Pill(
-                  label: l10n.translate(key),
-                  selected: selectedType == value,
-                  onTap: () => onTypeChanged(value),
+                  label: l10n.translate(type.labelKey),
+                  selected: selectedType == type.value,
+                  onTap: () => onTypeChanged(type.value),
                 ),
                 const SizedBox(width: 8),
               ],
@@ -69,28 +71,70 @@ class HomeTrendingSection extends StatelessWidget {
                 margin: const EdgeInsets.fromLTRB(2, 8, 10, 8),
                 color: context.colors.border,
               ),
-              _Pill(
-                label: '7d',
-                selected: window == 7,
-                onTap: () => onWindowChanged(7),
-              ),
-              const SizedBox(width: 8),
-              _Pill(
-                label: '30d',
-                selected: window == 30,
-                onTap: () => onWindowChanged(30),
-              ),
+              for (final days in _windows) ...[
+                if (days != _windows.first) const SizedBox(width: 8),
+                _Pill(
+                  label: l10n
+                      .translate('trending_window_days')
+                      .replaceAll('{days}', '$days'),
+                  selected: window == days,
+                  onTap: () => onWindowChanged(days),
+                ),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        HomeRail(
-          title: '',
-          showHeader: false,
-          series: series,
-          loading: loading,
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.horizontalPadding,
+            vertical: 5,
+          ),
+          child: SizedBox(
+            height: 2,
+            child: loading && series.isNotEmpty
+                ? LinearProgressIndicator(
+                    minHeight: 2,
+                    color: context.colors.accent,
+                    backgroundColor: Colors.transparent,
+                  )
+                : null,
+          ),
         ),
+        if (!loading && series.isEmpty)
+          _EmptyRail(message: l10n.translate('no_results'))
+        else
+          HomeRail(
+            title: '',
+            showHeader: false,
+            series: series,
+            loading: loading,
+          ),
       ],
+    );
+  }
+}
+
+class _EmptyRail extends StatelessWidget {
+  final String message;
+
+  const _EmptyRail({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: SizedBox(
+        height: HomeRail.heightFor(HomeRail.defaultCoverWidth),
+        child: Center(
+          child: Text(
+            message,
+            style: AppTypography.sans(
+              color: context.colors.textMuted,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

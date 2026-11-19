@@ -5,7 +5,7 @@ import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series_work.dart';
 
-/// Library marks arrive later ([withLibrary]); a library-only view must wait for [libraryReady].
+/// Library marks arrive later ([withLibrary]); until [libraryReady] they are stale, or empty on first load.
 class UpcomingData {
   final List<SeriesWork> works;
   final Set<String> librarySeriesIds;

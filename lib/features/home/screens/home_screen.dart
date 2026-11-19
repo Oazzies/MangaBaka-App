@@ -15,7 +15,10 @@ import 'package:mangabaka_app/features/home/widgets/home_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_upcoming_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_trending_section.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -44,8 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? _trendingType;
 
-  /// Trending window in days — 7 or 30.
-  int _trendingWindow = 7;
+  int _trendingWindowDays = 7;
 
   bool _loadingRails = true;
   bool _loadingTrending = true;
@@ -87,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
       wantsForYou ? _homeService.fetchForYou() : Future.value(<Series>[]),
       _homeService.fetchTrending(
         type: _trendingType,
-        windowDays: _trendingWindow,
+        windowDays: _trendingWindowDays,
       ),
       _homeService.fetchRising(),
       _homeService.fetchHiddenGems(),
@@ -119,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _loadingTrending = true);
     final list = await _homeService.fetchTrending(
       type: _trendingType,
-      windowDays: _trendingWindow,
+      windowDays: _trendingWindowDays,
     );
     if (!mounted) return;
     setState(() {
@@ -134,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
       AppTransitions.slideRight(
         BrowseResultsScreen(
           sortType: l10n.translate('trending'),
-          sortBy: _trendingWindow == 30 ? 'trending_30d' : 'trending_7d',
+          sortBy: _trendingWindowDays == 30 ? 'trending_30d' : 'trending_7d',
           type: _trendingType,
         ),
       ),
@@ -149,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .translate('top_in_genre')
               .replaceAll('{genre}', genre.name),
           sortBy: 'score_desc',
-          tag: genre.tagId.toString(),
+          tagId: genre.tagId.toString(),
         ),
       ),
     );
@@ -187,15 +189,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     series: _trending,
                     loading: _loadingTrending,
                     selectedType: _trendingType,
-                    window: _trendingWindow,
+                    window: _trendingWindowDays,
                     onTypeChanged: (type) {
                       if (type == _trendingType) return;
                       setState(() => _trendingType = type);
                       _reloadTrending();
                     },
                     onWindowChanged: (days) {
-                      if (days == _trendingWindow) return;
-                      setState(() => _trendingWindow = days);
+                      if (days == _trendingWindowDays) return;
+                      setState(() => _trendingWindowDays = days);
                       _reloadTrending();
                     },
                     onViewAll: _openTrendingAll,
@@ -215,8 +217,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       series: rail.series,
                       onViewAll: () => _openGenreAll(rail.genre),
                     ),
-                  const HomePublishersRail(),
-                  const HomeStacksRail(),
+                  HomePublishersRail(service: getIt<PublisherSearchService>()),
+                  HomeStacksRail(
+                    service: getIt<StackService>(),
+                    status: getIt<StackStatusController>(),
+                  ),
                   HomeRail(
                     title: l10n.translate('rising'),
                     series: _rising,

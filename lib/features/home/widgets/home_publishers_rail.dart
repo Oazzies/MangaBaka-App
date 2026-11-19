@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
@@ -18,13 +17,13 @@ import 'package:mangabaka_app/features/publisher/widgets/publisher_logo.dart';
 
 /// A discovery extra: it disappears on failure or an empty result rather than showing an error.
 class HomePublishersRail extends StatefulWidget {
-  final Future<List<Publisher>> Function()? loader;
+  final PublisherSearchService service;
 
   final double horizontalPadding;
 
   const HomePublishersRail({
     super.key,
-    this.loader,
+    required this.service,
     this.horizontalPadding = AppConstants.horizontalPadding,
   });
 
@@ -45,18 +44,10 @@ class _HomePublishersRailState extends State<HomePublishersRail> {
 
   Future<void> _load() async {
     try {
-      final loader = widget.loader;
-      final List<Publisher> found;
-      if (loader != null) {
-        found = await loader();
-      } else if (getIt.isRegistered<PublisherSearchService>()) {
-        found = await getIt<PublisherSearchService>().searchPublishers(
-          limit: _count,
-          sortBy: PublisherSearchService.sortSeriesCountDesc,
-        );
-      } else {
-        return;
-      }
+      final found = await widget.service.searchPublishers(
+        limit: _count,
+        sortBy: PublisherSearchService.sortSeriesCountDesc,
+      );
       if (mounted) setState(() => _publishers = found);
     } catch (e) {
       LoggingService.logger.warning('Popular publishers rail failed: $e');
@@ -215,7 +206,7 @@ class _DesktopPublisherCard extends StatelessWidget {
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.monoLabel(
+                    style: AppTypography.displayLabel(
                       color: context.colors.textMuted,
                       fontSize: 11,
                     ),

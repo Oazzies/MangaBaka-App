@@ -132,7 +132,8 @@ class _UpcomingWorksScreenState extends State<UpcomingWorksScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    final waitingForLibrary = _onlyLibrary && !_data.libraryReady;
+    final waitingForLibrary =
+        _onlyLibrary && !_data.libraryReady && _data.librarySeriesIds.isEmpty;
     final works = _onlyLibrary
         ? _data.works.where(_data.isInLibrary).toList()
         : _data.works;

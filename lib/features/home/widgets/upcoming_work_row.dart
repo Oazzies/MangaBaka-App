@@ -54,7 +54,7 @@ class UpcomingDayHeader extends StatelessWidget {
                 _relative(d).toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.monoLabel(
+                style: AppTypography.displayLabel(
                   color: context.colors.textMuted,
                   fontSize: 11,
                 ),
@@ -83,9 +83,10 @@ class UpcomingWorkRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LocalizationService();
     final title = work.seriesTitle ?? work.subTitle;
     final volume = work.sequenceString.isNotEmpty
-        ? 'Vol. ${work.sequenceString}'
+        ? '${l10n.translate('abbr_volume')} ${work.sequenceString}'
         : '';
 
     return Padding(
@@ -161,10 +162,8 @@ class UpcomingWorkRow extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            LocalizationService()
-                                .translate('upcoming_in_library')
-                                .toUpperCase(),
-                            style: AppTypography.monoLabel(
+                            l10n.translate('upcoming_in_library').toUpperCase(),
+                            style: AppTypography.displayLabel(
                               color: context.colors.accent,
                               fontSize: 9.5,
                             ),

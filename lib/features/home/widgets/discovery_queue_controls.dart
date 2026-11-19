@@ -3,7 +3,6 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
-import 'package:mangabaka_app/core/widgets/beside_or_below.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_button.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/home/widgets/discovery_add_to_library_button.dart';
@@ -41,21 +40,14 @@ class DiscoveryQueueControlCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final counter = '${currentIndex + 1} / $totalCount';
     return MbCard(
-      label: l10n.translate('discovery_queue'),
-      trailing: _CounterPill(counter),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: progress,
-              color: context.colors.accent,
-              backgroundColor: context.colors.surfaceRaised,
-              minHeight: 3,
-            ),
+          _QueueProgress(
+            currentIndex: currentIndex,
+            totalCount: totalCount,
+            progress: progress,
           ),
           const SizedBox(height: 18),
           DiscoveryAddToLibraryButton(
@@ -120,7 +112,6 @@ class DiscoveryQueueControlBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final horizontal = isDesktop ? DesktopTokens.pagePadding : 12.0;
-    final counter = '${currentIndex + 1} / $totalCount';
     return Padding(
       padding: EdgeInsets.fromLTRB(horizontal, 10, horizontal, 10),
       child: Container(
@@ -142,28 +133,10 @@ class DiscoveryQueueControlBar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BesideOrBelow(
-              minBodyWidth: 140,
-              gap: 10,
-              stackGap: 8,
-              body: Text(
-                l10n.translate('discovery_queue').toUpperCase(),
-                style: AppTypography.display(
-                  color: context.colors.text,
-                  fontSize: 14,
-                ),
-              ),
-              trailing: _CounterPill(counter),
-            ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: progress,
-                color: context.colors.accent,
-                backgroundColor: context.colors.surfaceRaised,
-                minHeight: 3,
-              ),
+            _QueueProgress(
+              currentIndex: currentIndex,
+              totalCount: totalCount,
+              progress: progress,
             ),
             const SizedBox(height: 12),
             DiscoveryAddToLibraryButton(
@@ -202,6 +175,39 @@ class DiscoveryQueueControlBar extends StatelessWidget {
   }
 }
 
+class _QueueProgress extends StatelessWidget {
+  final int currentIndex;
+  final int totalCount;
+  final double progress;
+
+  const _QueueProgress({
+    required this.currentIndex,
+    required this.totalCount,
+    required this.progress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: progress,
+              color: context.colors.accent,
+              backgroundColor: context.colors.surfaceRaised,
+              minHeight: 3,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        _CounterPill('${currentIndex + 1} / $totalCount'),
+      ],
+    );
+  }
+}
+
 class _CounterPill extends StatelessWidget {
   final String counter;
 
@@ -217,7 +223,7 @@ class _CounterPill extends StatelessWidget {
       ),
       child: Text(
         counter,
-        style: AppTypography.monoLabel(
+        style: AppTypography.displayLabel(
           color: context.colors.textMuted,
           fontSize: 12,
         ),
