@@ -84,7 +84,10 @@ Future<int> exportLibraryToShareSheet({
   );
   await file.writeAsString(content);
   await SharePlus.instance.share(
-    ShareParams(files: [XFile(file.path)], subject: 'MangaBaka Library'),
+    ShareParams(
+      files: [XFile(file.path)],
+      subject: LocalizationService().translate('share_subject_library'),
+    ),
   );
   LoggingService.logger.info(
     'Exported ${filteredEntries.length} library entries as $format',

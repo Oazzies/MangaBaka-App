@@ -18,14 +18,14 @@ List<ImportSource> buildImportSources({
   required VoidCallback onOpenFile,
 }) => [
   ImportSource(
-    icon: Icons.cloud_download_outlined,
+    icon: Icons.file_download_rounded,
     logoAsset: 'assets/import/anilist.png',
     labelKey: 'import_anilist',
     hintKey: 'import_anilist_hint',
     onTap: onAniList,
   ),
   ImportSource(
-    icon: Icons.cloud_download_outlined,
+    icon: Icons.file_download_rounded,
     logoAsset: 'assets/import/kitsu.png',
     labelKey: 'import_kitsu',
     hintKey: 'import_kitsu_hint',

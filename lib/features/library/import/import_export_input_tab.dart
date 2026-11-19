@@ -150,7 +150,7 @@ class ImportInputTab extends StatelessWidget {
         Expanded(
           child: Text(
             l10n.translate('import_format').toUpperCase(),
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.textMuted,
               fontSize: 11.5,
             ),
@@ -184,7 +184,7 @@ class ImportInputTab extends StatelessWidget {
         Expanded(
           child: Text(
             l10n.translate('import_add_as').toUpperCase(),
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.textMuted,
               fontSize: 11.5,
             ),

@@ -212,7 +212,7 @@ class ImportRowTile extends StatelessWidget {
                     if (_status.isNotEmpty)
                       Text(
                         _status.toUpperCase(),
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: row.status == ImportRowStatus.inLibrary
                               ? context.colors.accent
                               : context.colors.textMuted,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
@@ -13,13 +12,13 @@ import 'package:mangabaka_app/features/library/import/import_export_tabs.dart';
 import 'package:mangabaka_app/features/library/import/import_parser.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
-import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 
 class ImportExportScaffold extends StatelessWidget {
   final ImportExportTab tab;
   final ValueChanged<ImportExportTab> onTabChanged;
   final BulkImportController controller;
   final LibraryService library;
+  final bool isLoggedIn;
   final TextEditingController textController;
   final List<ImportSource> sources;
   final ImportFormat format;
@@ -44,6 +43,7 @@ class ImportExportScaffold extends StatelessWidget {
     required this.onTabChanged,
     required this.controller,
     required this.library,
+    required this.isLoggedIn,
     required this.textController,
     required this.sources,
     required this.format,
@@ -66,7 +66,6 @@ class ImportExportScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
-    final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
 
     if (DesktopLayout.isActive(context)) {
       return Scaffold(

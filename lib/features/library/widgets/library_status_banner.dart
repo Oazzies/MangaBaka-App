@@ -56,7 +56,7 @@ class LibraryStatusBanner extends StatelessWidget {
             if (onClose != null)
               IconButton(
                 visualDensity: VisualDensity.compact,
-                icon: Icon(Icons.close, color: colors.textMuted, size: 18),
+                icon: Icon(Icons.close_rounded, color: colors.textMuted, size: 18),
                 onPressed: onClose,
               ),
           ],

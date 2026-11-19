@@ -97,7 +97,7 @@ class ImportResultsView extends StatelessWidget {
                       .translate('import_summary')
                       .replaceAll('{selected}', '${c.selectedCount}')
                       .replaceAll('{total}', '${c.rows.length}'),
-                  style: AppTypography.monoLabel(
+                  style: AppTypography.displayLabel(
                     color: context.colors.textMuted,
                     fontSize: 11.5,
                   ),
@@ -186,17 +186,8 @@ class ExportTabView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       children: [
         Text(
-          l10n.translate('export_subtitle'),
-          style: AppTypography.sans(
-            color: context.colors.textMuted,
-            fontSize: 14,
-            height: 1.45,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
           l10n.translate('export_format').toUpperCase(),
-          style: AppTypography.monoLabel(
+          style: AppTypography.displayLabel(
             color: context.colors.textMuted,
             fontSize: 11.5,
           ),
@@ -216,7 +207,7 @@ class ExportTabView extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           l10n.translate('export_scope').toUpperCase(),
-          style: AppTypography.monoLabel(
+          style: AppTypography.displayLabel(
             color: context.colors.textMuted,
             fontSize: 11.5,
           ),
@@ -239,7 +230,7 @@ class ExportTabView extends StatelessWidget {
           l10n
               .translate('export_count')
               .replaceAll('{count}', '${filtered.length}'),
-          style: AppTypography.monoLabel(
+          style: AppTypography.displayLabel(
             color: context.colors.textMuted,
             fontSize: 11.5,
           ),

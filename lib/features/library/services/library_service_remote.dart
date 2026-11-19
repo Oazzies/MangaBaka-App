@@ -69,7 +69,7 @@ Future<LibraryChangesPage> _fetchChangesImpl(
       return _fetchChangesImpl(service, cursor, retryCount: retryCount + 1);
     }
     if (response.statusCode == 400) {
-      return const LibraryChangesPage(invalidCursor: true);
+      return const LibraryChangesPage(rejected: true);
     }
     if (response.statusCode != 200) {
       throw ApiException(
@@ -229,13 +229,13 @@ class LibraryChangesPage {
   final String? cursor;
   final bool more;
 
-  final bool invalidCursor;
+  final bool rejected;
 
   const LibraryChangesPage({
     this.items = const [],
     this.cursor,
     this.more = false,
-    this.invalidCursor = false,
+    this.rejected = false,
   });
 }
 

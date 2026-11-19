@@ -1,5 +1,6 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/features/library/constants/library_screen_constants.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/helpers/library_filter_helper.dart';
@@ -7,6 +8,7 @@ import 'package:mangabaka_app/features/library/widgets/library_grid_list.dart';
 import 'package:mangabaka_app/features/profile/widgets/login/mb_login_prompt.dart';
 import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -25,6 +27,7 @@ class LibraryBody extends StatelessWidget {
   final RefreshCallback onRefresh;
   final VoidCallback onLogin;
   final Function(api.Series) onItemTap;
+  final SeriesListDeps deps;
 
   const LibraryBody({
     super.key,
@@ -37,6 +40,7 @@ class LibraryBody extends StatelessWidget {
     required this.onRefresh,
     required this.onLogin,
     required this.onItemTap,
+    required this.deps,
   });
 
   Widget _buildErrorState(
@@ -57,7 +61,7 @@ class LibraryBody extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '${l10n.translate('failed_to_load')}: $error',
+              ErrorMessages.describe(error, l10n),
               style: AppTypography.sans(color: context.colors.error),
               textAlign: TextAlign.center,
             ),
@@ -153,6 +157,7 @@ class LibraryBody extends StatelessWidget {
               scrollController: scrollControllers[tab.key]!,
               onRefresh: onRefresh,
               onItemTap: onItemTap,
+              deps: deps,
             );
           }).toList(),
         );

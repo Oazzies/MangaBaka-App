@@ -145,7 +145,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         final page = await fetchChanges(cursor);
         if (_isStale(generation)) return;
 
-        if (page.invalidCursor) {
+        if (page.rejected) {
           if (cursor != null && !restarted) {
             logger.warning('Library cursor rejected; scanning from the start.');
             restarted = true;

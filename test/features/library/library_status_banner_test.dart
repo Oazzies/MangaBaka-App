@@ -41,7 +41,7 @@ void main() {
       ),
     ));
 
-    await tester.tap(find.byIcon(Icons.close));
+    await tester.tap(find.byIcon(Icons.close_rounded));
     expect(closed, isTrue);
   });
 }

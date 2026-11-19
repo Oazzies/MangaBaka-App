@@ -7,8 +7,7 @@ import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/widgets/list_style_switch.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
@@ -23,6 +22,7 @@ class LibraryGridList extends StatelessWidget {
   final ScrollController scrollController;
   final RefreshCallback onRefresh;
   final Function(api.Series) onItemTap;
+  final SeriesListDeps deps;
 
   const LibraryGridList({
     super.key,
@@ -31,6 +31,7 @@ class LibraryGridList extends StatelessWidget {
     required this.scrollController,
     required this.onRefresh,
     required this.onItemTap,
+    required this.deps,
   });
 
   @override
@@ -72,19 +73,16 @@ class LibraryGridList extends StatelessWidget {
     );
   }
 
-  Widget _buildEntryItem(
-    LibraryEntry entry,
-    SeriesService seriesService,
-    AppListStyle activeStyle,
-  ) {
+  Widget _buildEntryItem(LibraryEntry entry, AppListStyle activeStyle) {
     return MouseRegion(
-      onEnter: (_) => seriesService.fetchSeries(entry.series.id),
+      onEnter: (_) => deps.prefetch(entry.series.id),
       child: GestureDetector(
         onTap: () => onItemTap(entry.series),
         // heroTagPrefix must match the 'library' prefix the screen opens the detail page with.
         child: EntryListItem(
           key: ValueKey('${activeStyle.name}_${entry.series.id}'),
           series: entry.series,
+          deps: deps,
           isLibrary: true,
           // Spares each row its own database watch, which made scrolling stutter.
           previewEntry: entry,
@@ -100,7 +98,6 @@ class LibraryGridList extends StatelessWidget {
       listenable: SettingsManager(),
       builder: (context, _) {
         final settings = SettingsManager();
-        final seriesService = getIt<SeriesService>();
         final activeStyle = settings.resolvedLibraryListStyle;
         final isGrid = activeStyle.isGrid;
 
@@ -120,7 +117,7 @@ class LibraryGridList extends StatelessWidget {
                 mainAxisSpacing: 10,
                 itemCount: items.length,
                 itemBuilder: (context, index) =>
-                    _buildEntryItem(items[index], seriesService, activeStyle),
+                    _buildEntryItem(items[index], activeStyle),
               );
             }
 
@@ -144,7 +141,7 @@ class LibraryGridList extends StatelessWidget {
                     ),
               itemCount: items.length,
               itemBuilder: (context, index) =>
-                  _buildEntryItem(items[index], seriesService, activeStyle),
+                  _buildEntryItem(items[index], activeStyle),
             );
           }
 
@@ -174,7 +171,7 @@ class LibraryGridList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           itemCount: items.length,
           itemBuilder: (context, index) =>
-              _buildEntryItem(items[index], seriesService, activeStyle),
+              _buildEntryItem(items[index], activeStyle),
         );
 
         if (!DesktopLayout.isActive(context)) return list;

@@ -15,6 +15,7 @@ import 'package:mangabaka_app/features/library/import/import_parser.dart';
 import 'package:mangabaka_app/features/library/import/import_sources.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
 class ImportExportScreen extends StatefulWidget {
@@ -241,6 +242,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       onTabChanged: (t) => setState(() => _tab = t),
       controller: _controller,
       library: _library,
+      isLoggedIn: getIt<ProfileAuthService>().isLoggedIn,
       textController: _text,
       sources: _sources(l10n),
       format: _format,

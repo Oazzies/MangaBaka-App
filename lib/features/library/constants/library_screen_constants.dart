@@ -2,13 +2,13 @@ import 'package:mangabaka_app/core/constants/app_constants.dart';
 
 class LibraryScreenConstants {
   static const List<LibraryTabDefinition> tabs = [
-    LibraryTabDefinition(key: 'reading', label: 'Reading'),
-    LibraryTabDefinition(key: 'paused', label: 'Paused'),
-    LibraryTabDefinition(key: 'completed', label: 'Completed'),
-    LibraryTabDefinition(key: 'plan_to_read', label: 'Plan to Read'),
-    LibraryTabDefinition(key: 'dropped', label: 'Dropped'),
-    LibraryTabDefinition(key: 'rereading', label: 'Rereading'),
-    LibraryTabDefinition(key: 'considering', label: 'Considering'),
+    LibraryTabDefinition(key: 'reading'),
+    LibraryTabDefinition(key: 'paused'),
+    LibraryTabDefinition(key: 'completed'),
+    LibraryTabDefinition(key: 'plan_to_read'),
+    LibraryTabDefinition(key: 'dropped'),
+    LibraryTabDefinition(key: 'rereading'),
+    LibraryTabDefinition(key: 'considering'),
   ];
 
   static Set<String> knownStates = AppConstants.libraryStates;
@@ -16,7 +16,6 @@ class LibraryScreenConstants {
 
 class LibraryTabDefinition {
   final String key;
-  final String label;
 
-  const LibraryTabDefinition({required this.key, required this.label});
+  const LibraryTabDefinition({required this.key});
 }

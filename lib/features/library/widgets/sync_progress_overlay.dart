@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_sync_status.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -11,11 +10,12 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/core/widgets/mb_toast.dart';
 
 class SyncProgressOverlay extends StatelessWidget {
-  const SyncProgressOverlay({super.key});
+  final LibraryService libraryService;
+
+  const SyncProgressOverlay({super.key, required this.libraryService});
 
   @override
   Widget build(BuildContext context) {
-    final libraryService = getIt<LibraryService>();
     final isDesktop = DesktopLayout.isDesktopPlatform;
 
     return ValueListenableBuilder<LibrarySyncStatus>(

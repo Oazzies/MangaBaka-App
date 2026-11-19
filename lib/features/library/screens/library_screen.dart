@@ -23,6 +23,8 @@ import 'package:mangabaka_app/features/library/widgets/library_tab_bar.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 
@@ -44,6 +46,7 @@ class LibraryScreenState extends State<LibraryScreen>
   static const double _maxListWidth = 800;
 
   late final LibraryService _libraryService;
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   late final LibrarySession _session;
   late final LibraryTabCoordinator _tabs;
   late final TabController _tabController;
@@ -221,6 +224,7 @@ class LibraryScreenState extends State<LibraryScreen>
           child: FilterChipsRow(
             filters: _filters,
             onFiltersChanged: updateFilters,
+            metadata: getIt<MetadataService>(),
           ),
         ),
         Expanded(
@@ -234,6 +238,7 @@ class LibraryScreenState extends State<LibraryScreen>
             onRefresh: _session.refresh,
             onLogin: _login,
             onItemTap: _navigateToSeriesDetail,
+            deps: _listDeps,
           ),
         ),
       ],
