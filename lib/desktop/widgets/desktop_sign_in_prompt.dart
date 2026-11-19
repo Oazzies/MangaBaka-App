@@ -5,17 +5,13 @@ import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class DesktopSignInPrompt extends StatelessWidget {
-  final String title;
   final String message;
   final VoidCallback onLogin;
-  final IconData icon;
 
   const DesktopSignInPrompt({
     super.key,
-    required this.title,
     required this.message,
     required this.onLogin,
-    this.icon = Icons.lock_outline_rounded,
   });
 
   @override
@@ -42,15 +38,6 @@ class DesktopSignInPrompt extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(
-                title.toUpperCase(),
-                textAlign: TextAlign.center,
-                style: AppTypography.display(
-                  color: context.colors.text,
-                  fontSize: 22,
-                ),
-              ),
-              const SizedBox(height: 8),
               Text(
                 message,
                 textAlign: TextAlign.center,

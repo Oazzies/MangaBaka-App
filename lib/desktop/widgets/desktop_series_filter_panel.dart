@@ -58,12 +58,8 @@ class DesktopSeriesFilterPanel extends StatelessWidget {
                 Divider(height: 1, color: context.colors.border),
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                    children: [
-                      const _Hint(),
-                      const SizedBox(height: 12),
-                      SeriesFilterSections(controller: controller),
-                    ],
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    children: [SeriesFilterSections(controller: controller)],
                   ),
                 ),
               ],
@@ -117,36 +113,8 @@ class _PanelHeader extends StatelessWidget {
           const SizedBox(width: 8),
           DesktopIconButton(
             icon: Icons.close_rounded,
-            tooltip: l10n.translate('reset'),
+            tooltip: l10n.translate('close'),
             onPressed: controller.close,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Hint extends StatelessWidget {
-  const _Hint();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.mouse_outlined, size: 16, color: context.colors.textMuted),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              LocalizationService().translate('filter_panel_hint'),
-              style: AppTypography.sans(
-                color: context.colors.textMuted,
-                fontSize: 12.5,
-                height: 1.4,
-              ),
-            ),
           ),
         ],
       ),

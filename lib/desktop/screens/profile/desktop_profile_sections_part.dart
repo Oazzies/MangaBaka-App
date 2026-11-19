@@ -19,7 +19,7 @@ extension _DesktopProfileSections on DesktopProfileScreenState {
           onLogout: _logout,
         ),
         const SizedBox(height: 16),
-        const MyStacksEntryCard(),
+        MyStacksEntryCard(service: getIt<StackService>()),
         if (inline) ...[
           const SizedBox(height: DesktopTokens.sectionGap),
           _overview(l10n, twoColumns: true),
@@ -178,7 +178,7 @@ extension _DesktopProfileSections on DesktopProfileScreenState {
                         l10n
                             .translate('library_publishers_series')
                             .replaceAll('{count}', '${p.count}'),
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: context.colors.textMuted,
                           fontSize: 11,
                         ),
@@ -252,6 +252,7 @@ extension _DesktopProfileSections on DesktopProfileScreenState {
       onNearEnd: onNearEnd,
       itemBuilder: (context, i) => DesktopCoverCard(
         series: entries[i].series,
+        prefetch: getIt<SeriesService>().fetchSeries,
         heroTag: 'profile_${title}_$i',
         caption: LocalizationService().translate(entries[i].state),
       ),

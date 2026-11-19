@@ -16,36 +16,19 @@ class _StacksCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(30, 22, 26, 22),
       child: BesideOrBelow(
         minBodyWidth: 180,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: Row(
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.layers_rounded,
-                  size: 22,
-                  color: context.colors.accent,
+            Icon(Icons.layers_rounded, size: 22, color: context.colors.accent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.translate('stacks').toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.display(
+                  color: context.colors.text,
+                  fontSize: 24,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.translate('stacks').toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.display(
-                      color: context.colors.text,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.translate('stacks_tagline'),
-              style: AppTypography.sans(
-                color: context.colors.textMuted,
-                fontSize: 14.5,
               ),
             ),
           ],

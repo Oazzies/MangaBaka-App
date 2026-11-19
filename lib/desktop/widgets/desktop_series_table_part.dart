@@ -19,7 +19,7 @@ abstract final class DesktopSeriesTable {
 
   static const double coverGap = 14;
 
-  static const double actionWidth = 148;
+  static const double quickProgressWidth = 148;
 
   static const double minTitleWidth = 220;
 
@@ -57,7 +57,7 @@ abstract final class DesktopSeriesTable {
         titleLeft(style) -
         sidePadding -
         minTitleWidth -
-        (reserveAction ? actionWidth : 0);
+        (reserveAction ? quickProgressWidth : 0);
     final shown = <DesktopSeriesColumn>[];
     for (final column in wanted) {
       if (room < column.width) break;
@@ -145,7 +145,9 @@ class DesktopSeriesListHeader extends StatelessWidget {
                       child: _label(context, l10n.translate(column.labelKey)),
                     ),
                   if (reserveAction)
-                    const SizedBox(width: DesktopSeriesTable.actionWidth),
+                    const SizedBox(
+                      width: DesktopSeriesTable.quickProgressWidth,
+                    ),
                 ],
               ),
             );
@@ -161,7 +163,7 @@ class DesktopSeriesListHeader extends StatelessWidget {
       text.toUpperCase(),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: AppTypography.monoLabel(
+      style: AppTypography.displayLabel(
         color: context.colors.textMuted,
         fontSize: 11,
       ),

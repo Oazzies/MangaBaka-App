@@ -141,7 +141,7 @@ extension _DesktopExportReview on DesktopImportExportView {
                     l10n
                         .translate('export_count')
                         .replaceAll('{count}', '${filtered.length}'),
-                    style: AppTypography.monoLabel(
+                    style: AppTypography.displayLabel(
                       color: context.colors.textMuted,
                       fontSize: 11.5,
                     ),
@@ -193,7 +193,7 @@ extension _DesktopExportReview on DesktopImportExportView {
         _wideButton(
           context,
           label: l10n.translate('export_action'),
-          icon: Icons.ios_share_rounded,
+          icon: Icons.file_upload_rounded,
           onPressed: filtered.isEmpty || isExporting ? null : onExport,
           trailing: isExporting
               ? MbSpinner(

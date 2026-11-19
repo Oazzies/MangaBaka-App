@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -222,11 +223,12 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LocalizationService();
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _AppWindowButton(
-          tooltip: 'Minimize',
+          tooltip: l10n.translate('window_minimize'),
           buildIcon: (color, _) =>
               Icon(Icons.remove_rounded, size: 18, color: color),
           onPressed: _handleMinimize,
@@ -234,7 +236,9 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
         if (widget.showMaximize) ...[
           const SizedBox(width: 8),
           _AppWindowButton(
-            tooltip: _isExpanded ? 'Restore' : 'Expand',
+            tooltip: l10n.translate(
+              _isExpanded ? 'window_restore' : 'window_expand',
+            ),
             buildIcon: (color, bgColor) => _isExpanded
                 ? FloatingWindowRestoreIcon(
                     color: color,
@@ -248,7 +252,7 @@ class _DesktopWindowButtonsState extends State<DesktopWindowButtons>
         ],
         const SizedBox(width: 8),
         _AppWindowButton(
-          tooltip: 'Close',
+          tooltip: l10n.translate('close'),
           buildIcon: (color, _) =>
               Icon(Icons.close_rounded, size: 18, color: color),
           isClose: true,

@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -14,6 +13,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/utils/series_labels.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
@@ -28,6 +28,7 @@ class DesktopTrendingBoard extends StatelessWidget {
   final ValueChanged<String?> onTypeChanged;
   final ValueChanged<int> onWindowChanged;
   final VoidCallback onViewAll;
+  final MetadataService metadata;
 
   static const int _rankedCount = 8;
 
@@ -53,15 +54,18 @@ class DesktopTrendingBoard extends StatelessWidget {
     required this.onTypeChanged,
     required this.onWindowChanged,
     required this.onViewAll,
+    required this.metadata,
   });
 
-  static const List<(String?, String)> _types = [
-    (null, 'any'),
-    ('manga', 'type_manga'),
-    ('manhwa', 'type_manhwa'),
-    ('manhua', 'type_manhua'),
-    ('novel', 'type_novel'),
+  static const List<({String? value, String labelKey})> _types = [
+    (value: null, labelKey: 'any'),
+    (value: 'manga', labelKey: 'type_manga'),
+    (value: 'manhwa', labelKey: 'type_manhwa'),
+    (value: 'manhua', labelKey: 'type_manhua'),
+    (value: 'novel', labelKey: 'type_novel'),
   ];
+
+  static const List<int> _windows = [7, 30];
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +79,19 @@ class DesktopTrendingBoard extends StatelessWidget {
           derive: (constraints) => constraints.maxWidth < _stackBreakpoint,
           builder: (context, stacked) => _header(context, l10n, stacked),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: SizedBox(
+            height: 2,
+            child: loading && series.isNotEmpty
+                ? LinearProgressIndicator(
+                    minHeight: 2,
+                    color: context.colors.accent,
+                    backgroundColor: Colors.transparent,
+                  )
+                : null,
+          ),
+        ),
         DerivedLayoutBuilder<(bool, int)>(
           derive: (constraints) => (
             constraints.maxWidth < _stackBreakpoint,
@@ -83,10 +100,8 @@ class DesktopTrendingBoard extends StatelessWidget {
           builder: (context, shape) {
             final (stacked, columns) = shape;
 
-            if (loading) {
-              return _BoardSkeleton(stacked: stacked, grow: grow);
-            }
             if (series.isEmpty) {
+              if (loading) return _BoardSkeleton(stacked: stacked, grow: grow);
               return SizedBox(
                 height: _cardHeight * grow,
                 child: DesktopEmptyState(
@@ -101,7 +116,10 @@ class DesktopTrendingBoard extends StatelessWidget {
                 children: [
                   SizedBox(
                     height: _stackedCardHeight * grow,
-                    child: _FeaturedCard(series: series.first),
+                    child: _FeaturedCard(
+                      series: series.first,
+                      metadata: metadata,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   _rankedList(columns: columns),
@@ -113,7 +131,13 @@ class DesktopTrendingBoard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(flex: 5, child: _FeaturedCard(series: series.first)),
+                  Expanded(
+                    flex: 5,
+                    child: _FeaturedCard(
+                      series: series.first,
+                      metadata: metadata,
+                    ),
+                  ),
                   const SizedBox(width: 20),
                   Expanded(flex: 6, child: _rankedGridStretched()),
                 ],
@@ -131,7 +155,16 @@ class DesktopTrendingBoard extends StatelessWidget {
     final windowAndViewAll = [
       DesktopSegmented<int>(
         value: window,
-        segments: const [(7, '7d', null), (30, '30d', null)],
+        segments: [
+          for (final days in _windows)
+            (
+              days,
+              l10n
+                  .translate('trending_window_days')
+                  .replaceAll('{days}', '$days'),
+              null,
+            ),
+        ],
         onChanged: onWindowChanged,
       ),
       DesktopPillButton(
@@ -143,6 +176,7 @@ class DesktopTrendingBoard extends StatelessWidget {
     if (!stacked) {
       return DesktopSectionTitle(
         title: l10n.translate('trending'),
+        padding: EdgeInsets.zero,
         trailing: Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -152,8 +186,8 @@ class DesktopTrendingBoard extends StatelessWidget {
             DesktopSegmented<String?>(
               value: selectedType,
               segments: [
-                for (final (value, key) in _types)
-                  (value, l10n.translate(key), null),
+                for (final type in _types)
+                  (type.value, l10n.translate(type.labelKey), null),
               ],
               onChanged: onTypeChanged,
             ),
@@ -166,45 +200,45 @@ class DesktopTrendingBoard extends StatelessWidget {
     // A Wrap can't shrink one child, and the 5-way type control alone outgrows a narrow section.
     final typeLabel = l10n.translate(
       _types
-          .firstWhere((t) => t.$1 == selectedType, orElse: () => _types.first)
-          .$2,
+          .firstWhere(
+            (t) => t.value == selectedType,
+            orElse: () => _types.first,
+          )
+          .labelKey,
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.translate('trending').toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.display(
-              color: context.colors.text,
-              fontSize: 18,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.translate('trending').toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.display(
+            color: context.colors.text,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          alignment: WrapAlignment.start,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 10,
+          runSpacing: 8,
+          children: [
+            DesktopMenuButton<String?>(
+              valueLabel: typeLabel,
+              items: [
+                for (final type in _types)
+                  (type.value, l10n.translate(type.labelKey)),
+              ],
+              selected: selectedType,
+              onSelected: onTypeChanged,
             ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            alignment: WrapAlignment.start,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 10,
-            runSpacing: 8,
-            children: [
-              DesktopMenuButton<String?>(
-                valueLabel: typeLabel,
-                items: [
-                  for (final (value, key) in _types)
-                    (value, l10n.translate(key)),
-                ],
-                selected: selectedType,
-                onSelected: onTypeChanged,
-              ),
-              ...windowAndViewAll,
-            ],
-          ),
-        ],
-      ),
+            ...windowAndViewAll,
+          ],
+        ),
+      ],
     );
   }
 

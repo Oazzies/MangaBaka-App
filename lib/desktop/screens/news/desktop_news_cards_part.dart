@@ -3,10 +3,12 @@ part of 'desktop_news_screen.dart';
 class _NewsMasonrySliver extends StatelessWidget {
   final List<News> visible;
   final double minColumnWidth;
+  final SeriesPrefetch prefetch;
 
   const _NewsMasonrySliver({
     required this.visible,
     required this.minColumnWidth,
+    required this.prefetch,
   });
 
   @override
@@ -35,6 +37,7 @@ class _NewsMasonrySliver extends StatelessWidget {
                             child: _NewsCard(
                               key: ValueKey('news_${visible[i].id}'),
                               news: visible[i],
+                              prefetch: prefetch,
                             ),
                           ),
                       ],
@@ -61,8 +64,9 @@ String _formatDate(String date) {
 
 class _NewsCard extends StatelessWidget {
   final News news;
+  final SeriesPrefetch prefetch;
 
-  const _NewsCard({super.key, required this.news});
+  const _NewsCard({super.key, required this.news, required this.prefetch});
 
   static const double _coverWidth = 72;
   static const double _coverSpacing = 10;
@@ -105,7 +109,7 @@ class _NewsCard extends StatelessWidget {
                             news.source.toUpperCase(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.monoLabel(
+                            style: AppTypography.displayLabel(
                               color: context.colors.accent,
                               fontSize: 10.5,
                             ),
@@ -167,6 +171,7 @@ class _NewsCard extends StatelessWidget {
                         for (final s in news.series.take(showCount))
                           DesktopCoverCard(
                             series: s,
+                            prefetch: prefetch,
                             width: _coverWidth,
                             showTitle: false,
                             heroTag: 'news_${news.id}',

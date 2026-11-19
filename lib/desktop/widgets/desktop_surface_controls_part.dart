@@ -204,14 +204,14 @@ class DesktopSidePanel extends StatelessWidget {
 class DesktopSettingRow extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final Widget control;
 
   const DesktopSettingRow({
     super.key,
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.control,
   });
 
@@ -233,14 +233,16 @@ class DesktopSettingRow extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: AppTypography.sans(
-              color: context.colors.textMuted,
-              fontSize: 12.5,
+          if (subtitle case final subtitle?) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: AppTypography.sans(
+                color: context.colors.textMuted,
+                fontSize: 12.5,
+              ),
             ),
-          ),
+          ],
         ],
       ),
       trailing: control,

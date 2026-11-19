@@ -54,7 +54,7 @@ extension _DesktopFilterTaxonomy on _DesktopFilterPanelState {
   String _tagLabel(String value) {
     if (widget.tagsByName) return value;
     final id = int.tryParse(value);
-    return id == null ? value : getIt<MetadataService>().getTagName(id);
+    return id == null ? value : widget.metadata.getTagName(id);
   }
 
   Widget _tagSection(LocalizationService l10n) {
@@ -74,50 +74,11 @@ extension _DesktopFilterTaxonomy on _DesktopFilterPanelState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (selected.isNotEmpty) ...[
-          _chipWrap([
-            for (final (value, state) in selected)
-              _chip(
-                label: _tagLabel(value),
-                state: state,
-                onChanged: (s) {
-                  final (inc, exc) = _apply(value, s, _f.tag, _f.tagNot);
-                  _emit(_f.copyWith(tag: inc, tagNot: exc));
-                },
-              ),
-          ]),
-          const SizedBox(height: 10),
-          if (_f.tag.length > 1)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: DesktopSegmented<String>(
-                value: _f.tagMode,
-                segments: [
-                  ('and', l10n.translate('match_all'), null),
-                  ('or', l10n.translate('match_any'), null),
-                ],
-                onChanged: (v) => _emit(_f.copyWith(tagMode: v)),
-              ),
-            ),
-        ],
         _SearchBox(
           controller: _tagSearch,
           hint: l10n.translate('search_tags'),
           onChanged: (v) => _updateState(() => _tagQuery = v),
         ),
-        if (preparedQuery.isEmpty && _tags.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8, left: 4),
-            child: Text(
-              l10n
-                  .translate('tag_search_hint')
-                  .replaceAll('{count}', '${_tags.length}'),
-              style: AppTypography.sans(
-                color: context.colors.textMuted,
-                fontSize: 12,
-              ),
-            ),
-          ),
         if (!preparedQuery.isEmpty) ...[
           const SizedBox(height: 6),
           if (matches.isEmpty)
@@ -140,6 +101,32 @@ extension _DesktopFilterTaxonomy on _DesktopFilterPanelState {
                 final (inc, exc) = _apply(_tagValue(tag), s, _f.tag, _f.tagNot);
                 _emit(_f.copyWith(tag: inc, tagNot: exc));
               },
+            ),
+        ],
+        if (selected.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _chipWrap([
+            for (final (value, state) in selected)
+              _chip(
+                label: _tagLabel(value),
+                state: state,
+                onChanged: (s) {
+                  final (inc, exc) = _apply(value, s, _f.tag, _f.tagNot);
+                  _emit(_f.copyWith(tag: inc, tagNot: exc));
+                },
+              ),
+          ]),
+          if (_f.tag.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: DesktopSegmented<String>(
+                value: _f.tagMode,
+                segments: [
+                  ('and', l10n.translate('match_all'), null),
+                  ('or', l10n.translate('match_any'), null),
+                ],
+                onChanged: (v) => _emit(_f.copyWith(tagMode: v)),
+              ),
             ),
         ],
       ],

@@ -20,7 +20,6 @@ extension _DesktopSettingsGeneralContent on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.language,
             title: l10n.translate('language'),
-            subtitle: l10n.translate('language_subtitle'),
             control: DesktopMenuButton<String>(
               valueLabel: GeneralSettingsDialogs.getLanguageName(
                 l10n.currentLanguage,
@@ -36,7 +35,6 @@ extension _DesktopSettingsGeneralContent on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.start,
             title: l10n.translate('start_page'),
-            subtitle: l10n.translate('start_page_subtitle'),
             control: DesktopMenuButton<AppStartPage>(
               valueLabel: GeneralSettingsDialogs.getAppStartPageName(
                 settings.defaultStartPage,
@@ -54,7 +52,6 @@ extension _DesktopSettingsGeneralContent on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.translate,
             title: l10n.translate('title_language'),
-            subtitle: l10n.translate('title_language_subtitle'),
             control: DesktopMenuButton<TitleLanguage>(
               valueLabel: GeneralSettingsDialogs.getTitleLanguageName(
                 settings.defaultTitleLanguage,
@@ -72,7 +69,6 @@ extension _DesktopSettingsGeneralContent on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.help_outline,
             title: l10n.translate('show_tooltips'),
-            subtitle: l10n.translate('show_tooltips_subtext'),
             control: Switch(
               value: settings.showTooltips,
               onChanged: settings.setShowTooltips,
@@ -135,7 +131,6 @@ extension _DesktopSettingsGeneralContent on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.star_outline,
             title: l10n.translate('rating_step'),
-            subtitle: l10n.translate('rating_step_subtitle'),
             control: DesktopMenuButton<RatingSliderStep>(
               valueLabel: GeneralSettingsDialogs.getRatingSliderStepName(
                 settings.ratingSliderStep,
@@ -154,7 +149,6 @@ extension _DesktopSettingsGeneralContent on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.tab,
             title: l10n.translate('library_default'),
-            subtitle: l10n.translate('library_default_subtitle'),
             control: DesktopMenuButton<String>(
               valueLabel: GeneralSettingsDialogs.getLibraryTabName(
                 settings.addLibraryDefaultTab,

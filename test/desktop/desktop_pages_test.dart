@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/presets/theme_presets.dart';
@@ -94,7 +93,7 @@ void main() {
               width -
               DesktopSeriesTable.titleLeft(style) -
               DesktopSeriesTable.sidePadding -
-              DesktopSeriesTable.actionWidth -
+              DesktopSeriesTable.quickProgressWidth -
               taken;
           expect(
             title,
@@ -193,18 +192,12 @@ void main() {
   });
 
   group('DesktopSidebar', () {
-    setUp(() async {
-      await resetServiceLocator();
-      getIt.registerSingleton<ProfileAuthService>(_FakeAuth());
-    });
-
-    tearDown(resetServiceLocator);
-
     Widget sidebar({required bool collapsed, required VoidCallback onToggle}) {
       return _host(
         Align(
           alignment: Alignment.centerLeft,
           child: DesktopSidebar(
+            auth: _FakeAuth(),
             selectedIndex: 0,
             onSelected: (_) {},
             onSearch: () {},

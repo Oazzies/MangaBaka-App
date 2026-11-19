@@ -45,9 +45,6 @@ class _ProgressTrackingCards extends StatelessWidget {
                           child: DesktopSettingRow(
                             icon: Icons.menu_book_outlined,
                             title: l10n.translate('library_progress_type'),
-                            subtitle: l10n.translate(
-                              'library_progress_type_subtitle',
-                            ),
                             control: DesktopMenuButton<LibraryProgressType>(
                               valueLabel:
                                   GeneralSettingsDialogs.getLibraryProgressTypeName(

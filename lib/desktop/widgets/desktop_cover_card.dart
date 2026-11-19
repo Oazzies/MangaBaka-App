@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -7,7 +6,7 @@ import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_rating_stars.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -29,6 +28,7 @@ class DesktopCoverCard extends StatefulWidget {
   final String? caption;
   final String heroTag;
   final VoidCallback? onTap;
+  final SeriesPrefetch prefetch;
 
   final bool showTitle;
 
@@ -37,6 +37,7 @@ class DesktopCoverCard extends StatefulWidget {
   const DesktopCoverCard({
     super.key,
     required this.series,
+    required this.prefetch,
     this.width,
     this.caption,
     this.heroTag = 'desktop',
@@ -90,7 +91,7 @@ class _DesktopCoverCardState extends State<DesktopCoverCard> {
         cursor: SystemMouseCursors.click,
         onEnter: (_) {
           setState(() => _hovered = true);
-          getIt<SeriesService>().fetchSeries(series.id);
+          widget.prefetch(series.id);
         },
         onExit: (_) => setState(() => _hovered = false),
         child: GestureDetector(

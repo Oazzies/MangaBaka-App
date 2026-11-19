@@ -31,6 +31,9 @@ import 'package:mangabaka_app/features/library/widgets/library_status_banners.da
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -54,6 +57,7 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
   static const String allKey = 'all';
 
   late final LibraryService _libraryService;
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   late final LibrarySession _session;
   final FocusNode _searchFocus = FocusNode();
   final Map<String, ScrollController> _scrollControllers = {};
@@ -178,10 +182,8 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
               DesktopPageHeader(title: l10n.translate('library')),
               Expanded(
                 child: DesktopSignInPrompt(
-                  title: l10n.translate('library'),
                   message: l10n.translate('login_prompt_library'),
                   onLogin: _login,
-                  icon: Icons.bookmark_outline_rounded,
                 ),
               ),
             ],
@@ -200,6 +202,8 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
               child: DesktopFilterPanel(
                 filters: _filters,
                 onChanged: _setFilters,
+                searchService: getIt<SeriesSearchService>(),
+                metadata: getIt<MetadataService>(),
                 tagsByName: true,
                 header: _StatusList(
                   selected: _status,
@@ -274,6 +278,7 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
                 scrollController: _scrollFor(_status),
                 onRefresh: _session.refresh,
                 onItemTap: _openDetail,
+                deps: _listDeps,
               ),
             ),
           ],

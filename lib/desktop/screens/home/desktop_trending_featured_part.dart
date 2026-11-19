@@ -2,8 +2,9 @@ part of 'desktop_trending_board.dart';
 
 class _FeaturedCard extends StatelessWidget {
   final Series series;
+  final MetadataService metadata;
 
-  const _FeaturedCard({required this.series});
+  const _FeaturedCard({required this.series, required this.metadata});
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +14,10 @@ class _FeaturedCard extends StatelessWidget {
     );
     final rating = double.tryParse(series.rating) ?? 0;
     final meta = [
-      if (series.type.isNotEmpty) l10n.translate('type_${series.type}'),
+      if (series.type.isNotEmpty) SeriesLabels.type(series.type),
       if (series.year.isNotEmpty) series.year,
-      if (series.status.isNotEmpty) l10n.translate('status_${series.status}'),
+      if (series.status.isNotEmpty) SeriesLabels.status(series.status),
     ].join('  ·  ');
-    final metadata = getIt<MetadataService>();
 
     return DesktopHoverSurface(
       onTap: () => openSeriesDetail(context, series, heroTag: 'trending_1'),

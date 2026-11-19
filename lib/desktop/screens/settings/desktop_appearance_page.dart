@@ -11,6 +11,7 @@ import 'package:mangabaka_app/features/appearance/widgets/accent_picker.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_gallery.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_live_preview.dart';
 import 'package:mangabaka_app/features/appearance/widgets/theme_mode_selector.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 class DesktopAppearancePage extends StatelessWidget {
   static const double _splitWidth = 900;
@@ -66,9 +67,6 @@ class DesktopAppearancePage extends StatelessWidget {
           child: DesktopSettingRow(
             icon: mode.icon,
             title: l10n.translate('theme_mode'),
-            subtitle: mode == AppThemeMode.system
-                ? l10n.translate('theme_mode_system_hint')
-                : l10n.translate('appearance_subtitle'),
             control: DesktopSegmented<AppThemeMode>(
               segments: [
                 for (final m in AppThemeMode.values) (m, m.label(l10n), m.icon),
@@ -109,14 +107,6 @@ class DesktopAppearancePage extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                l10n.translate('accent_color_subtitle'),
-                style: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 12.5,
-                ),
-              ),
               const SizedBox(height: 16),
               const AccentPicker(swatchSize: 34),
             ],
@@ -137,7 +127,10 @@ class DesktopAppearancePage extends StatelessWidget {
           title: l10n.translate('theme_preview'),
           fontSize: 14,
         ),
-        ThemeLivePreview(palette: context.colors),
+        ThemeLivePreview(
+          palette: context.colors,
+          deps: SeriesListDeps.fromLocator(),
+        ),
       ],
     );
   }

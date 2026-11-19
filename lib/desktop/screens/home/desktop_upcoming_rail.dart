@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
@@ -24,8 +23,15 @@ part 'desktop_upcoming_cards_part.dart';
 class DesktopUpcomingRail extends StatefulWidget {
   /// The docked rail clears the window controls floating over it; the overlay sits below the header.
   final double topPadding;
+  final SeriesService seriesService;
+  final LibraryService library;
 
-  const DesktopUpcomingRail({super.key, this.topPadding = 56});
+  const DesktopUpcomingRail({
+    super.key,
+    required this.seriesService,
+    required this.library,
+    this.topPadding = 56,
+  });
 
   @override
   State<DesktopUpcomingRail> createState() => _DesktopUpcomingRailState();
@@ -74,8 +80,9 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
     };
     var covers = const <String, String>{};
     try {
-      covers = await getIt<LibraryService>().database.libraryEntriesDao
-          .libraryCoversFor(ids);
+      covers = await widget.library.database.libraryEntriesDao.libraryCoversFor(
+        ids,
+      );
     } catch (e, st) {
       // Library marks are decoration; the rail renders without them.
       LoggingService.logger.fine('Upcoming rail library lookup failed', e, st);
@@ -144,6 +151,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
               padding: const EdgeInsets.only(bottom: 8),
               child: _UpcomingWorkCard(
                 work: work,
+                seriesService: widget.seriesService,
                 inLibrary:
                     work.seriesId != null &&
                     _librarySeriesIds.contains(work.seriesId.toString()),
@@ -208,6 +216,8 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
+    final waitingForLibrary =
+        _onlyLibrary && !_libraryResolved && _librarySeriesIds.isEmpty;
     final displayedWorks = _onlyLibrary
         ? _works.where((w) {
             final sid = w.seriesId?.toString();
@@ -244,7 +254,7 @@ class _DesktopUpcomingRailState extends State<DesktopUpcomingRail> {
         ),
         Divider(height: 1, color: context.colors.border),
         Expanded(
-          child: _loading || (_onlyLibrary && !_libraryResolved)
+          child: _loading || waitingForLibrary
               ? const Center(child: MbSpinner())
               : displayedWorks.isEmpty
               ? Center(

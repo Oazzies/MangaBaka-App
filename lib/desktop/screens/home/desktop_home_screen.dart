@@ -11,12 +11,20 @@ import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/home/services/home_service.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/home_stacks_rail.dart';
 import 'package:mangabaka_app/features/home/widgets/home_publishers_rail.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+
+part 'desktop_home_rails_part.dart';
 
 class DesktopHomeScreen extends StatefulWidget {
   static final GlobalKey<DesktopHomeScreenState> stateKey =
@@ -41,7 +49,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
   List<TopGenreRail> _genreRails = const [];
 
   String? _trendingType;
-  int _trendingWindow = 7;
+  int _trendingWindowDays = 7;
 
   bool _loadingRails = true;
   bool _loadingTrending = true;
@@ -84,7 +92,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
 
     final results = await Future.wait([
       wantsForYou ? _home.fetchForYou() : Future.value(<Series>[]),
-      _home.fetchTrending(type: _trendingType, windowDays: _trendingWindow),
+      _home.fetchTrending(type: _trendingType, windowDays: _trendingWindowDays),
       _home.fetchRising(),
       _home.fetchHiddenGems(),
       _home.fetchNewReleases(),
@@ -109,7 +117,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
     setState(() => _loadingTrending = true);
     final list = await _home.fetchTrending(
       type: _trendingType,
-      windowDays: _trendingWindow,
+      windowDays: _trendingWindowDays,
     );
     if (!mounted) return;
     setState(() {
@@ -123,7 +131,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
       AppTransitions.slideRight(
         BrowseResultsScreen(
           sortType: LocalizationService().translate('trending'),
-          sortBy: _trendingWindow == 30 ? 'trending_30d' : 'trending_7d',
+          sortBy: _trendingWindowDays == 30 ? 'trending_30d' : 'trending_7d',
           type: _trendingType,
         ),
       ),
@@ -138,7 +146,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
               .translate('top_in_genre')
               .replaceAll('{genre}', genre.name),
           sortBy: 'score_desc',
-          tag: genre.tagId.toString(),
+          tagId: genre.tagId.toString(),
         ),
       ),
     );
@@ -162,7 +170,6 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
               children: [
                 DesktopPageHeader(
                   title: l10n.translate('home'),
-                  subtitle: l10n.translate('home_subtitle'),
                   // With the rail shown, the window controls float over it, not over this header.
                   reserveWindowControls: !showRail,
                   actions: [
@@ -179,60 +186,64 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                     DesktopIconButton(
                       icon: Icons.refresh_rounded,
                       filled: true,
-                      tooltip: '${l10n.translate('retry')}  (Ctrl+R)',
+                      tooltip: '${l10n.translate('refresh')}  (Ctrl+R)',
                       onPressed: refresh,
                     ),
                   ],
                 ),
                 Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.only(bottom: 48),
-                    children: [
-                      _padded(
-                        DesktopTrendingBoard(
-                          series: _trending,
-                          loading: _loadingTrending,
-                          selectedType: _trendingType,
-                          window: _trendingWindow,
-                          onTypeChanged: (type) {
-                            if (type == _trendingType) return;
-                            setState(() => _trendingType = type);
-                            _reloadTrending();
-                          },
-                          onWindowChanged: (days) {
-                            if (days == _trendingWindow) return;
-                            setState(() => _trendingWindow = days);
-                            _reloadTrending();
-                          },
-                          onViewAll: _openTrendingAll,
+                  child: _withUpcomingOverlay(
+                    ListView(
+                      padding: const EdgeInsets.only(bottom: 48),
+                      children: [
+                        _padded(
+                          DesktopTrendingBoard(
+                            series: _trending,
+                            loading: _loadingTrending,
+                            selectedType: _trendingType,
+                            window: _trendingWindowDays,
+                            onTypeChanged: (type) {
+                              if (type == _trendingType) return;
+                              setState(() => _trendingType = type);
+                              _reloadTrending();
+                            },
+                            onWindowChanged: (days) {
+                              if (days == _trendingWindowDays) return;
+                              setState(() => _trendingWindowDays = days);
+                              _reloadTrending();
+                            },
+                            onViewAll: _openTrendingAll,
+                            metadata: getIt<MetadataService>(),
+                          ),
                         ),
-                      ),
-                      if (_showForYou || _loadingRails)
-                        _rail(
-                          l10n.translate('for_you'),
-                          _forYou,
-                          loading: _loadingRails && _showForYou,
-                        ),
-                      for (final rail in _genreRails)
-                        _rail(
-                          l10n
-                              .translate('top_in_genre')
-                              .replaceAll('{genre}', rail.genre.name),
-                          rail.series,
-                          onViewAll: () => _openGenreAll(rail.genre),
-                        ),
-                      _padded(const HomePublishersRail(horizontalPadding: 0)),
-                      _padded(const HomeStacksRail()),
-                      _rail(l10n.translate('rising'), _rising),
-                      _rail(l10n.translate('hidden_gems'), _hiddenGems),
-                      _rail(l10n.translate('new_releases'), _newReleases),
-                    ],
+                        if (_showForYou || _loadingRails)
+                          _rail(
+                            l10n.translate('for_you'),
+                            _forYou,
+                            loading: _loadingRails && _showForYou,
+                          ),
+                        for (final rail in _genreRails)
+                          _rail(
+                            l10n
+                                .translate('top_in_genre')
+                                .replaceAll('{genre}', rail.genre.name),
+                            rail.series,
+                            onViewAll: () => _openGenreAll(rail.genre),
+                          ),
+                        _padded(_publishersRail()),
+                        _padded(_stacksRail()),
+                        _rail(l10n.translate('rising'), _rising),
+                        _rail(l10n.translate('hidden_gems'), _hiddenGems),
+                        _rail(l10n.translate('new_releases'), _newReleases),
+                      ],
+                    ),
+                    showRail: showRail,
                   ),
                 ),
               ],
             );
 
-            if (!showRail) return _withUpcomingOverlay(feed);
+            if (!showRail) return feed;
 
             return Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -246,7 +257,7 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
                         left: BorderSide(color: context.colors.border),
                       ),
                     ),
-                    child: const DesktopUpcomingRail(),
+                    child: _upcomingRail(),
                   ),
               ],
             );
@@ -255,33 +266,4 @@ class DesktopHomeScreenState extends State<DesktopHomeScreen>
       },
     );
   }
-
-  Widget _withUpcomingOverlay(Widget feed) => DesktopUpcomingOverlay(
-    feed: feed,
-    railWidth: _railWidth,
-    open: _upcomingOpen,
-    built: _upcomingBuilt,
-  );
-
-  Widget _padded(Widget child) => Padding(
-    padding: const EdgeInsets.fromLTRB(
-      DesktopTokens.pagePadding,
-      0,
-      DesktopTokens.pagePadding,
-      DesktopTokens.sectionGap,
-    ),
-    child: child,
-  );
-
-  Widget _rail(
-    String title,
-    List<Series> series, {
-    bool? loading,
-    VoidCallback? onViewAll,
-  }) => DesktopHomeRail(
-    title: title,
-    series: series,
-    loading: loading ?? _loadingRails,
-    onViewAll: onViewAll,
-  );
 }

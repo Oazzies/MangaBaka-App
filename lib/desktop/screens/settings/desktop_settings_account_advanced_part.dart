@@ -10,10 +10,10 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.manage_accounts_outlined,
             title: l10n.translate('account_settings'),
-            subtitle: l10n.translate('account_settings_subtext'),
-            control: DesktopPillButton(
-              label: l10n.translate('account_settings'),
-              icon: Icons.open_in_new,
+            control: DesktopIconButton(
+              icon: Icons.open_in_new_rounded,
+              tooltip: l10n.translate('account_settings'),
+              filled: true,
               onPressed: () => launchUrl(
                 Uri.parse('https://mangabaka.org/my/settings/profile'),
                 mode: LaunchMode.externalApplication,
@@ -24,11 +24,11 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.logout_outlined,
             title: l10n.translate('logout'),
-            subtitle: l10n.translate('logout_subtext'),
-            control: DesktopPillButton(
-              label: l10n.translate('logout'),
+            control: DesktopIconButton(
               icon: Icons.logout_rounded,
-              danger: true,
+              tooltip: l10n.translate('logout'),
+              color: context.colors.error,
+              filled: true,
               onPressed: () async {
                 final confirmed =
                     await LogoutDialog.showLogoutConfirmationDialog(context);
@@ -60,12 +60,12 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
       child: Column(
         children: [
           DesktopSettingRow(
-            icon: Icons.restart_alt,
+            icon: Icons.restart_alt_rounded,
             title: l10n.translate('redo_onboarding'),
-            subtitle: l10n.translate('redo_onboarding_subtitle'),
-            control: DesktopPillButton(
-              label: l10n.translate('redo_onboarding'),
-              icon: Icons.refresh_rounded,
+            control: DesktopIconButton(
+              icon: Icons.restart_alt_rounded,
+              tooltip: l10n.translate('redo_onboarding'),
+              filled: true,
               onPressed: () => Navigator.of(context, rootNavigator: true).push(
                 MaterialPageRoute(
                   builder: (_) => const OnboardingScreen(isRedoing: true),
@@ -77,10 +77,10 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.list_alt,
             title: l10n.translate('logs'),
-            subtitle: l10n.translate('view_logs_subtitle'),
-            control: DesktopPillButton(
-              label: l10n.translate('logs'),
+            control: DesktopIconButton(
               icon: Icons.arrow_forward_rounded,
+              tooltip: l10n.translate('logs'),
+              filled: true,
               onPressed: () => _select(_Category.logs),
             ),
           ),
@@ -89,9 +89,10 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
             icon: Icons.system_update_rounded,
             title: l10n.translate('trigger_update_widget'),
             subtitle: l10n.translate('trigger_update_widget_subtitle'),
-            control: DesktopPillButton(
-              label: l10n.translate('trigger_update_widget'),
-              icon: Icons.system_update_rounded,
+            control: DesktopIconButton(
+              icon: Icons.play_arrow_rounded,
+              tooltip: l10n.translate('trigger_update_widget'),
+              filled: true,
               onPressed: () =>
                   UpdateDialog.show(context, SettingsCategories.debugRelease),
             ),
@@ -100,10 +101,10 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.notifications_active_outlined,
             title: l10n.translate('preview_toasts'),
-            subtitle: l10n.translate('preview_toasts_subtitle'),
-            control: DesktopPillButton(
-              label: l10n.translate('preview_toasts'),
-              icon: Icons.notifications_active_outlined,
+            control: DesktopIconButton(
+              icon: Icons.play_arrow_rounded,
+              tooltip: l10n.translate('preview_toasts'),
+              filled: true,
               onPressed: () => showToastPreviewPicker(context),
             ),
           ),
@@ -111,10 +112,10 @@ extension _DesktopSettingsAccountAdvanced on DesktopSettingsScreenState {
           DesktopSettingRow(
             icon: Icons.web_asset_rounded,
             title: l10n.translate('preview_dialogs'),
-            subtitle: l10n.translate('preview_dialogs_subtitle'),
-            control: DesktopPillButton(
-              label: l10n.translate('preview_dialogs'),
-              icon: Icons.web_asset_rounded,
+            control: DesktopIconButton(
+              icon: Icons.play_arrow_rounded,
+              tooltip: l10n.translate('preview_dialogs'),
+              filled: true,
               onPressed: () => showDialogPreviewPicker(context),
             ),
           ),

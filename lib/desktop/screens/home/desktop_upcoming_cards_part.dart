@@ -4,17 +4,18 @@ class _UpcomingWorkCard extends StatelessWidget {
   final SeriesWork work;
   final bool inLibrary;
   final String? fallbackCoverUrl;
+  final SeriesService seriesService;
 
   const _UpcomingWorkCard({
     required this.work,
     required this.inLibrary,
+    required this.seriesService,
     this.fallbackCoverUrl,
   });
 
   void _openSeries(BuildContext context) async {
     if (work.seriesId == null) return;
     SeriesHoverPreviewController.instance.hide();
-    final seriesService = getIt<SeriesService>();
     try {
       final series = await seriesService.fetchSeries(work.seriesId.toString());
       if (!context.mounted) return;
@@ -42,7 +43,8 @@ class _UpcomingWorkCard extends StatelessWidget {
     final title = work.seriesTitle ?? work.subTitle;
     // The release date is carried by the group header above the card.
     final subtitle = work.sequenceString.isNotEmpty
-        ? 'Vol. ${work.sequenceString}'
+        ? '${LocalizationService().translate('abbr_volume')} '
+              '${work.sequenceString}'
         : '';
 
     final card = DesktopCard(
@@ -60,6 +62,7 @@ class _UpcomingWorkCard extends StatelessWidget {
                 height: 68,
                 child: _UpcomingWorkCover(
                   work: work,
+                  seriesService: seriesService,
                   fallbackCoverUrl: fallbackCoverUrl,
                 ),
               ),
@@ -107,7 +110,7 @@ class _UpcomingWorkCard extends StatelessWidget {
                         LocalizationService()
                             .translate('upcoming_in_library')
                             .toUpperCase(),
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: context.colors.accent,
                           fontSize: 9.5,
                         ),
@@ -163,8 +166,13 @@ class _UpcomingWorkCard extends StatelessWidget {
 class _UpcomingWorkCover extends StatefulWidget {
   final SeriesWork work;
   final String? fallbackCoverUrl;
+  final SeriesService seriesService;
 
-  const _UpcomingWorkCover({required this.work, this.fallbackCoverUrl});
+  const _UpcomingWorkCover({
+    required this.work,
+    required this.seriesService,
+    this.fallbackCoverUrl,
+  });
 
   @override
   State<_UpcomingWorkCover> createState() => _UpcomingWorkCoverState();
@@ -201,7 +209,7 @@ class _UpcomingWorkCoverState extends State<_UpcomingWorkCover> {
     }
     final sid = widget.work.seriesId;
     if (sid != null) {
-      final seriesService = getIt<SeriesService>();
+      final seriesService = widget.seriesService;
       final cached = seriesService.cache[sid.toString()];
       if (cached != null) {
         final cover = cached.coverUrl;

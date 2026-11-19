@@ -7,6 +7,7 @@ class _DesktopBrowseHeader extends StatelessWidget {
   final bool searching;
   final ValueChanged<AutocompleteSeriesResult> onResultSelected;
   final VoidCallback onClearSearch;
+  final SeriesPrefetch prefetch;
 
   const _DesktopBrowseHeader({
     required this.controller,
@@ -15,6 +16,7 @@ class _DesktopBrowseHeader extends StatelessWidget {
     required this.searching,
     required this.onResultSelected,
     required this.onClearSearch,
+    required this.prefetch,
   });
 
   @override
@@ -42,6 +44,7 @@ class _DesktopBrowseHeader extends StatelessWidget {
               suggestionsAllowed: c.currentType == BrowseType.series,
               onResultSelected: onResultSelected,
               onChanged: c.updateSearchQuery,
+              prefetch: prefetch,
               onSubmitted: (_) => c.searchSeries(),
             ),
           );
@@ -126,24 +129,37 @@ class _DesktopBrowseControlsBar extends StatelessWidget {
       ),
       child: Builder(
         builder: (context) {
+          // Filters only apply to series, so the type switch freezes while any are set.
+          final typeLocked = !c.currentFilters.isEmpty;
           final leftControls = Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (c.currentFilters.isEmpty)
-                DesktopSegmented<BrowseType>(
-                  value: c.currentType,
-                  segments: [
-                    (BrowseType.series, l10n.translate('series'), null),
-                    (BrowseType.publishers, l10n.translate('publishers'), null),
-                    (BrowseType.staff, l10n.translate('staff'), null),
-                  ],
-                  onChanged: c.setType,
+              IgnorePointer(
+                ignoring: typeLocked,
+                child: Opacity(
+                  opacity: typeLocked ? 0.45 : 1,
+                  child: DesktopSegmented<BrowseType>(
+                    value: c.currentType,
+                    segments: [
+                      (BrowseType.series, l10n.translate('series'), null),
+                      (
+                        BrowseType.publishers,
+                        l10n.translate('publishers'),
+                        null,
+                      ),
+                      (BrowseType.staff, l10n.translate('staff'), null),
+                    ],
+                    onChanged: c.setType,
+                  ),
                 ),
-              if (searching && c.totalResults > 0) ...[
+              ),
+              if (searching) ...[
                 const SizedBox(width: 16),
                 Text(
-                  '${c.totalResults}${c.isTotalCapped ? '+' : ''} '
-                  '${l10n.translate(c.currentType.name)}',
+                  c.totalResults > 0
+                      ? '${c.totalResults}${c.isTotalCapped ? '+' : ''} '
+                            '${l10n.translate(c.currentType.name)}'
+                      : '',
                   style: AppTypography.sans(
                     color: context.colors.textMuted,
                     fontSize: 13,

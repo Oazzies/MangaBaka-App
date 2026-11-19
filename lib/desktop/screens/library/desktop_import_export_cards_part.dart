@@ -173,7 +173,7 @@ class _ReviewRow extends StatelessWidget {
     ),
     child: Text(
       label.toUpperCase(),
-      style: AppTypography.monoLabel(color: color, fontSize: 10.5),
+      style: AppTypography.displayLabel(color: color, fontSize: 10.5),
     ),
   );
 }

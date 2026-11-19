@@ -163,11 +163,7 @@ class DesktopImportExportView extends StatelessWidget {
                     .translate('import_summary')
                     .replaceAll('{selected}', '${controller.selectedCount}')
                     .replaceAll('{total}', '${controller.rows.length}')
-              : l10n.translate(
-                  tab == ImportExportTab.import
-                      ? 'import_list_subtitle'
-                      : 'export_subtitle',
-                ),
+              : null,
           leading: DesktopIconButton(
             icon: Icons.arrow_back_rounded,
             tooltip: l10n.translate('back'),
@@ -184,12 +180,12 @@ class DesktopImportExportView extends StatelessWidget {
                       (
                         ImportExportTab.import,
                         l10n.translate('import_tab'),
-                        Icons.file_download_outlined,
+                        Icons.file_download_rounded,
                       ),
                       (
                         ImportExportTab.export,
                         l10n.translate('export_tab'),
-                        Icons.file_upload_outlined,
+                        Icons.file_upload_rounded,
                       ),
                     ],
                   ),

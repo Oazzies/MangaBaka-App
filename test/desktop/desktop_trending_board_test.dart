@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -56,6 +57,7 @@ void main() {
                 onTypeChanged: (_) {},
                 onWindowChanged: (_) {},
                 onViewAll: () {},
+                metadata: getIt<MetadataService>(),
               ),
             ),
           ),
@@ -77,6 +79,15 @@ void main() {
 
       testWidgets('loading at width=$width', (tester) async {
         useWideSurface(tester);
+        await tester.pumpWidget(
+          harness(width, loading: true, series: const []),
+        );
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('reloading at width=$width', (tester) async {
+        useWideSurface(tester);
         await tester.pumpWidget(harness(width, loading: true));
         await tester.pump();
         expect(tester.takeException(), isNull);
@@ -89,6 +100,23 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+  });
+
+  testWidgets('a filter reload keeps the results and shows a progress line', (
+    tester,
+  ) async {
+    useWideSurface(tester);
+    await tester.pumpWidget(harness(1200));
+    await tester.pump();
+    final idle = tester.getSize(find.byType(DesktopTrendingBoard));
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+
+    await tester.pumpWidget(harness(1200, loading: true));
+    await tester.pump();
+    expect(find.textContaining('NUMBER 1 THAT'), findsOneWidget);
+    expect(find.textContaining('Number 2 That'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(tester.getSize(find.byType(DesktopTrendingBoard)), idle);
   });
 
   testWidgets('resizing across the stack breakpoint stays overflow-free', (

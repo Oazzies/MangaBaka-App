@@ -51,6 +51,7 @@ void main() {
                               DesktopCoverCard.textAreaHeight(context),
                           itemBuilder: (context, i) => DesktopCoverCard(
                             series: _series(_longTitle),
+                            prefetch: (_) {},
                             caption: 'Reading',
                           ),
                         ),
@@ -96,6 +97,7 @@ void main() {
                             height: budgetedHeight,
                             child: DesktopCoverCard(
                               series: _series(_longTitle),
+                              prefetch: (_) {},
                               width: width,
                               caption: 'Reading',
                             ),

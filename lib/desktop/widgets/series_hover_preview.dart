@@ -1,6 +1,7 @@
 ﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -74,9 +75,13 @@ class SeriesHoverPreviewController {
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return;
 
+    final seriesService = getIt<SeriesService>();
     _entry = OverlayEntry(
-      builder: (ctx) =>
-          _SeriesPreviewOverlay(initialSeries: series, seriesId: seriesId),
+      builder: (ctx) => _SeriesPreviewOverlay(
+        initialSeries: series,
+        seriesId: seriesId,
+        seriesService: seriesService,
+      ),
     );
 
     overlay.insert(_entry!);

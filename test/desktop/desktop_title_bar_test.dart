@@ -50,9 +50,9 @@ void main() {
         ),
       );
 
-      final minFinder = find.bySemanticsLabel('Minimize');
-      final expandFinder = find.bySemanticsLabel('Expand');
-      final closeFinder = find.bySemanticsLabel('Close');
+      final minFinder = find.bySemanticsLabel('window_minimize');
+      final expandFinder = find.bySemanticsLabel('window_expand');
+      final closeFinder = find.bySemanticsLabel('close');
 
       expect(minFinder, findsOneWidget);
       expect(expandFinder, findsOneWidget);
@@ -66,9 +66,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(maximized, isTrue);
 
-      expect(find.byTooltip('Minimize'), findsOneWidget);
-      expect(find.byTooltip('Expand'), findsOneWidget);
-      expect(find.byTooltip('Close'), findsOneWidget);
+      expect(find.byTooltip('window_minimize'), findsOneWidget);
+      expect(find.byTooltip('window_expand'), findsOneWidget);
+      expect(find.byTooltip('close'), findsOneWidget);
 
       await tester.tap(closeFinder);
       await tester.pumpAndSettle();

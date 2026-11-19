@@ -3,10 +3,12 @@ part of 'series_hover_preview.dart';
 class _SeriesPreviewOverlay extends StatefulWidget {
   final Series? initialSeries;
   final String seriesId;
+  final SeriesService seriesService;
 
   const _SeriesPreviewOverlay({
     required this.initialSeries,
     required this.seriesId,
+    required this.seriesService,
   });
 
   @override
@@ -43,7 +45,7 @@ class _SeriesPreviewOverlayState extends State<_SeriesPreviewOverlay>
   }
 
   Future<void> _loadFullSeriesIfNeeded() async {
-    final seriesService = getIt<SeriesService>();
+    final seriesService = widget.seriesService;
     final cached = seriesService.cache[widget.seriesId];
     if (cached != null) {
       if (mounted && (_series == null || _series!.description.isEmpty)) {

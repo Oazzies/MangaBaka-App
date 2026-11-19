@@ -65,7 +65,9 @@ void main() {
 
       await tester.tap(find.text('advanced_settings'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(DesktopPillButton, 'LOGS'));
+      await tester.tap(
+        find.widgetWithIcon(DesktopIconButton, Icons.arrow_forward_rounded),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byTooltip('back'), findsOneWidget);

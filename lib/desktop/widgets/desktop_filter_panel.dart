@@ -3,7 +3,6 @@ import 'package:mangabaka_app/core/utils/content_rating_filter.dart';
 import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
@@ -26,6 +25,8 @@ part 'desktop_filter_inputs_part.dart';
 class DesktopFilterPanel extends StatefulWidget {
   final SearchFilters filters;
   final ValueChanged<SearchFilters> onChanged;
+  final SeriesSearchService searchService;
+  final MetadataService metadata;
 
   /// The library filters locally by tag name; the search API takes ids.
   final bool tagsByName;
@@ -39,6 +40,8 @@ class DesktopFilterPanel extends StatefulWidget {
     super.key,
     required this.filters,
     required this.onChanged,
+    required this.searchService,
+    required this.metadata,
     this.tagsByName = false,
     this.header,
     this.enabled = true,
@@ -81,7 +84,7 @@ class _DesktopFilterPanelState extends State<DesktopFilterPanel> {
   }
 
   Future<void> _loadMetadata() async {
-    final service = getIt<SeriesSearchService>();
+    final service = widget.searchService;
     try {
       final results = await Future.wait([
         service.getGenres(),

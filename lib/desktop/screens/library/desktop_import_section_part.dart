@@ -113,7 +113,7 @@ extension _DesktopImportSection on DesktopImportExportView {
                   const SizedBox(height: 12),
                   Text(
                     summary,
-                    style: AppTypography.monoLabel(
+                    style: AppTypography.displayLabel(
                       color: context.colors.textMuted,
                       fontSize: 11.5,
                     ),
@@ -225,7 +225,7 @@ extension _DesktopImportSection on DesktopImportExportView {
     padding: const EdgeInsets.only(bottom: 8, left: 2),
     child: Text(
       label.toUpperCase(),
-      style: AppTypography.monoLabel(
+      style: AppTypography.displayLabel(
         color: context.colors.textMuted,
         fontSize: 11.5,
       ),

@@ -92,7 +92,7 @@ class _DesktopSeriesRowState extends State<DesktopSeriesRow> {
                     SizedBox(width: column.width, child: _cell(column, l10n)),
                   if (reserveAction)
                     SizedBox(
-                      width: DesktopSeriesTable.actionWidth,
+                      width: DesktopSeriesTable.quickProgressWidth,
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: widget.trailing,

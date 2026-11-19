@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
+import 'package:mangabaka_app/core/exceptions/error_messages.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
@@ -15,6 +16,8 @@ import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/desktop/widgets/series_hover_preview.dart';
 import 'package:mangabaka_app/features/news/models/news.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -49,7 +52,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
   bool _loading = false;
   bool _hasMore = true;
   int _page = 1;
-  String? _error;
+  String? _errorKey;
 
   /// Null shows every source.
   String? _source;
@@ -83,7 +86,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
     if (_loading) return;
     setState(() {
       _loading = true;
-      _error = null;
+      _errorKey = null;
     });
     try {
       final page = initial ? 1 : _page;
@@ -106,7 +109,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = LocalizationService().translate('failed_to_load');
+        _errorKey = ErrorMessages.keyFor(e);
       });
     }
   }
@@ -178,14 +181,13 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
       children: [
         DesktopPageHeader(
           title: l10n.translate('news'),
-          subtitle: l10n.translate('news_subtitle'),
           // With the aside shown, the window controls float over it, not over this header.
           reserveWindowControls: !showAside,
           actions: [
             DesktopIconButton(
               icon: Icons.refresh_rounded,
               filled: true,
-              tooltip: '${l10n.translate('retry')}  (Ctrl+R)',
+              tooltip: '${l10n.translate('refresh')}  (Ctrl+R)',
               onPressed: refresh,
             ),
           ],
@@ -221,8 +223,8 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
                   hasScrollBody: false,
                   child: DesktopEmptyState(
                     icon: Icons.newspaper_rounded,
-                    message: _error ?? l10n.translate('no_results'),
-                    action: _error == null
+                    message: l10n.translate(_errorKey ?? 'no_results'),
+                    action: _errorKey == null
                         ? null
                         : DesktopPillButton(
                             label: l10n.translate('retry'),
@@ -235,6 +237,7 @@ class DesktopNewsScreenState extends State<DesktopNewsScreen>
                 _NewsMasonrySliver(
                   visible: visible,
                   minColumnWidth: _minColumnWidth,
+                  prefetch: getIt<SeriesService>().fetchSeries,
                 ),
               if (_loading)
                 const SliverToBoxAdapter(

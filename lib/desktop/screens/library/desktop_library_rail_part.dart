@@ -182,6 +182,7 @@ class _DesktopLibraryGrid extends StatelessWidget {
   final ScrollController scrollController;
   final Future<void> Function() onRefresh;
   final void Function(api.Series) onItemTap;
+  final SeriesListDeps deps;
 
   const _DesktopLibraryGrid({
     required this.helper,
@@ -189,6 +190,7 @@ class _DesktopLibraryGrid extends StatelessWidget {
     required this.scrollController,
     required this.onRefresh,
     required this.onItemTap,
+    required this.deps,
   });
 
   @override
@@ -218,6 +220,7 @@ class _DesktopLibraryGrid extends StatelessWidget {
         scrollController: scrollController,
         onRefresh: onRefresh,
         onItemTap: onItemTap,
+        deps: deps,
       ),
     );
   }

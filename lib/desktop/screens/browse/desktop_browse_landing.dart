@@ -24,12 +24,12 @@ class DesktopBrowseLanding extends StatelessWidget {
     required this.onDiscoveryQueue,
   });
 
-  static const List<(String, String)> _types = [
-    ('manga', 'type_manga'),
-    ('manhwa', 'type_manhwa'),
-    ('manhua', 'type_manhua'),
-    ('novel', 'novels'),
-    ('oel', 'oel_other'),
+  static const List<({String apiType, String titleKey})> _types = [
+    (apiType: 'manga', titleKey: 'type_manga'),
+    (apiType: 'manhwa', titleKey: 'type_manhwa'),
+    (apiType: 'manhua', titleKey: 'type_manhua'),
+    (apiType: 'novel', titleKey: 'novels'),
+    (apiType: 'oel', titleKey: 'oel_other'),
   ];
 
   @override
@@ -89,23 +89,23 @@ class DesktopBrowseLanding extends StatelessWidget {
           builder: (context, columns) {
             const gap = 16.0;
             final cards = [
-              for (final (type, key) in _types)
+              for (final (:apiType, :titleKey) in _types)
                 _TypeCard(
-                  title: l10n.translate(key),
+                  title: l10n.translate(titleKey),
                   onPopular: () => onNavigate(
                     l10n.translate('most_popular'),
                     'popularity_asc',
-                    type: type,
+                    type: apiType,
                   ),
                   onTopRated: () => onNavigate(
                     l10n.translate('top_rated'),
                     'score_desc',
-                    type: type,
+                    type: apiType,
                   ),
                   onRandom: () => onNavigate(
                     l10n.translate('random'),
                     'random',
-                    type: type,
+                    type: apiType,
                   ),
                 ),
             ];
@@ -140,7 +140,6 @@ class _FeatureCard extends StatelessWidget {
   final VoidCallback onTap;
   final Widget icon;
   final String title;
-  final String subtitle;
   final String buttonLabel;
   final bool isStacked;
 
@@ -148,7 +147,6 @@ class _FeatureCard extends StatelessWidget {
     required this.onTap,
     required this.icon,
     required this.title,
-    required this.subtitle,
     required this.buttonLabel,
     required this.isStacked,
   });
@@ -174,14 +172,6 @@ class _FeatureCard extends StatelessWidget {
       ],
     );
 
-    final subtitleText = Text(
-      subtitle,
-      style: AppTypography.sans(
-        color: context.colors.textMuted,
-        fontSize: 14.5,
-      ),
-    );
-
     final button = DesktopPillButton(
       label: buttonLabel,
       primary: true,
@@ -193,35 +183,13 @@ class _FeatureCard extends StatelessWidget {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              titleRow,
-              const SizedBox(height: 4),
-              subtitleText,
-            ],
-          ),
-          const SizedBox(height: 14),
-          button,
-        ],
+        children: [titleRow, const SizedBox(height: 14), button],
       );
     } else {
       content = Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                titleRow,
-                const SizedBox(height: 4),
-                subtitleText,
-              ],
-            ),
-          ),
+          Expanded(child: titleRow),
           const SizedBox(width: 16),
           button,
         ],
@@ -253,7 +221,6 @@ class _DiscoveryQueueCard extends StatelessWidget {
       isStacked: isStacked,
       icon: Icon(MbIcons.compass, size: 22, color: context.colors.accent),
       title: l10n.translate('discovery_queue'),
-      subtitle: l10n.translate('discovery_queue_subtitle'),
       buttonLabel: l10n.translate('discovery_queue_start'),
     );
   }
@@ -277,7 +244,6 @@ class _MixCard extends StatelessWidget {
         color: context.colors.accent,
       ),
       title: l10n.translate('mix'),
-      subtitle: l10n.translate('mix_subtitle'),
       buttonLabel: l10n.translate('mix_empty_title'),
     );
   }

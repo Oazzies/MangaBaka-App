@@ -10,14 +10,20 @@ import 'package:mangabaka_app/features/profile/widgets/dialogs/general_settings_
 import 'package:mangabaka_app/features/profile/widgets/dialogs/list_style_dialogs.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_customization_scope.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/list_style_live_preview.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_list_customization_widgets_part.dart';
 
 class DesktopListCustomization extends StatefulWidget {
   final LocalizationService l10n;
+  final SeriesListDeps deps;
 
-  const DesktopListCustomization({super.key, required this.l10n});
+  const DesktopListCustomization({
+    super.key,
+    required this.l10n,
+    required this.deps,
+  });
 
   @override
   State<DesktopListCustomization> createState() =>
@@ -129,6 +135,7 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
                       showRemainingProgress: settings.showRemainingProgress,
                       progressType: settings.libraryProgressType,
                       gridColumnCount: scope.gridColumns,
+                      deps: widget.deps,
                     ),
                   ),
                 ),
@@ -243,7 +250,7 @@ class _DesktopListCustomizationState extends State<DesktopListCustomization> {
                   alignment: Alignment.centerLeft,
                   child: DesktopPillButton(
                     label: _l10n.translate('copy_to_other_lists'),
-                    icon: Icons.copy_all_outlined,
+                    icon: Icons.copy_all_rounded,
                     onPressed: () {
                       scope.copyToOtherTabs();
                       AppSnackBar.show(

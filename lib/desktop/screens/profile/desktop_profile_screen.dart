@@ -27,6 +27,8 @@ import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
 import 'package:mangabaka_app/features/profile/services/statistics_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/dialogs/logout_dialog.dart';
 import 'package:mangabaka_app/features/publisher/utils/open_publisher.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
@@ -78,7 +80,7 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
     super.initState();
     _auth = getIt<ProfileAuthService>();
     _library = getIt<LibraryService>();
-    _stats = StatisticsService(getIt<AppDatabase>());
+    _stats = getIt<StatisticsService>();
     _snapshots = getIt<SnapshotService>();
     _auth.addListener(_onAuthChanged);
     _library.syncStatus.addListener(_onSyncChanged);
@@ -222,10 +224,8 @@ class DesktopProfileScreenState extends State<DesktopProfileScreen>
                         ),
                       )
                     : DesktopSignInPrompt(
-                        title: l10n.translate('profile'),
                         message: l10n.translate('login_prompt_profile'),
                         onLogin: login,
-                        icon: Icons.person_outline_rounded,
                       ),
               ),
             ],

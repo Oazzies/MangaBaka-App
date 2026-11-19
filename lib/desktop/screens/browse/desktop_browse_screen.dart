@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/features/publisher/utils/publisher_sort.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
@@ -23,6 +24,9 @@ import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar.dart'
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -44,6 +48,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
   static final _logger = LoggingService.logger;
 
   late final BrowseController _controller;
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   final FocusNode _searchFocus = FocusNode();
 
   /// Seeded by `BrowseNavigation` when a chip elsewhere starts a search.
@@ -134,6 +139,8 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
                 child: DesktopFilterPanel(
                   filters: _controller.currentFilters,
                   onChanged: _controller.updateFilters,
+                  searchService: getIt<SeriesSearchService>(),
+                  metadata: getIt<MetadataService>(),
                 ),
               ),
             Expanded(
@@ -184,6 +191,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
           searching: searching,
           onResultSelected: _onResultSelected,
           onClearSearch: _clearSearch,
+          prefetch: _listDeps.prefetch,
         ),
         _DesktopBrowseControlsBar(
           controller: c,
@@ -212,6 +220,7 @@ class DesktopBrowseScreenState extends State<DesktopBrowseScreen>
               onNavigateToResults: _openResults,
               onNavigateToMix: _openMix,
               onNavigateToDiscoveryQueue: _openDiscoveryQueue,
+              deps: _listDeps,
             ),
           ),
       ],

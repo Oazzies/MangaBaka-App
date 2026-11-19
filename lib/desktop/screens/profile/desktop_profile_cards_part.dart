@@ -104,7 +104,7 @@ class _IdentityCard extends StatelessWidget {
                     ),
                     child: Text(
                       role.toUpperCase(),
-                      style: AppTypography.monoLabel(
+                      style: AppTypography.displayLabel(
                         color: context.colors.textMuted,
                         fontSize: 10.5,
                       ),
@@ -165,7 +165,7 @@ class _OverviewRow extends StatelessWidget {
               label.toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.monoLabel(
+              style: AppTypography.displayLabel(
                 color: context.colors.textMuted,
                 fontSize: 11.5,
               ),
@@ -231,7 +231,7 @@ class _StandoutCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       label.toUpperCase(),
-                      style: AppTypography.monoLabel(
+                      style: AppTypography.displayLabel(
                         color: context.colors.textMuted,
                         fontSize: 11,
                       ),

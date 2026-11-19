@@ -44,13 +44,12 @@ class _RankedRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = LocalizationService();
     final title = series.getDisplayTitle(
       SettingsManager().defaultTitleLanguage,
     );
     final rating = double.tryParse(series.rating) ?? 0;
     final meta = [
-      if (series.type.isNotEmpty) l10n.translate('type_${series.type}'),
+      if (series.type.isNotEmpty) SeriesLabels.type(series.type),
       if (series.year.isNotEmpty) series.year,
     ].join(' · ');
 

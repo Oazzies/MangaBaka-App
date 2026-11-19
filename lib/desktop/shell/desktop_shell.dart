@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/network/backend_health_banner.dart';
+import 'package:mangabaka_app/core/network/backend_health_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
@@ -13,8 +15,10 @@ import 'package:mangabaka_app/desktop/screens/news/desktop_news_screen.dart';
 import 'package:mangabaka_app/desktop/screens/profile/desktop_profile_screen.dart';
 import 'package:mangabaka_app/desktop/screens/settings/desktop_settings_screen.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_sidebar.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/library/widgets/sync_progress_overlay.dart';
 import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
@@ -197,7 +201,9 @@ class DesktopShellState extends State<DesktopShell> {
                         : DesktopTokens.sidebarWidth,
                     child: Column(
                       children: [
-                        const BackendHealthBanner(),
+                        BackendHealthBanner(
+                          health: getIt<BackendHealthService>(),
+                        ),
                         Expanded(child: _content),
                       ],
                     ),
@@ -208,6 +214,7 @@ class DesktopShellState extends State<DesktopShell> {
                     bottom: 0,
                     child: RepaintBoundary(
                       child: DesktopSidebar(
+                        auth: getIt<ProfileAuthService>(),
                         selectedIndex: _index.value,
                         onSelected: select,
                         onSearch: focusSearch,
@@ -247,7 +254,7 @@ class DesktopShellState extends State<DesktopShell> {
             ),
           ],
         ),
-        const SyncProgressOverlay(),
+        SyncProgressOverlay(libraryService: getIt<LibraryService>()),
       ],
     );
   }

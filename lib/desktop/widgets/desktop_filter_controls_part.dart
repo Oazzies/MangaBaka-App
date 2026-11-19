@@ -33,7 +33,7 @@ class _SectionState extends State<_Section> {
                     Expanded(
                       child: Text(
                         widget.title.toUpperCase(),
-                        style: AppTypography.monoLabel(
+                        style: AppTypography.displayLabel(
                           color: context.colors.textMuted,
                           fontSize: 11.5,
                         ),

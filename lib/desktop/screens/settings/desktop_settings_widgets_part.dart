@@ -185,7 +185,10 @@ class _DesktopLogsViewState extends State<_DesktopLogsView> {
       final file = File('${directory.path}/mangabaka_logs.txt');
       await file.writeAsString(_logsText);
       await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], subject: 'MangaBaka Logs'),
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: widget.l10n.translate('logs_share_subject'),
+        ),
       );
     } catch (e, st) {
       LoggingService.logger.warning('Failed to save logs', e, st);

@@ -28,6 +28,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 part 'desktop_settings_nav_part.dart';
 part 'desktop_settings_general_content_part.dart';
@@ -107,7 +108,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
   _Category get _navSelected =>
       _selected == _Category.logs ? _Category.advanced : _selected;
 
-  (IconData, Color, String, String) _describe(_Category c) => switch (c) {
+  (IconData, Color, String, String?) _describe(_Category c) => switch (c) {
     _Category.appearance => (
       Icons.palette_outlined,
       context.colors.accent,
@@ -154,13 +155,13 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
       Icons.translate_rounded,
       context.colors.text,
       'translation_credits',
-      'language_subtitle',
+      null,
     ),
     _Category.logs => (
       Icons.list_alt,
       context.colors.error,
       'logs',
-      'view_logs_subtitle',
+      null,
     ),
   };
 
@@ -218,7 +219,7 @@ class DesktopSettingsScreenState extends State<DesktopSettingsScreen> {
           padding: const EdgeInsets.only(left: 8, bottom: 8),
           child: Text(
             l10n.translate('information').toUpperCase(),
-            style: AppTypography.monoLabel(
+            style: AppTypography.displayLabel(
               color: context.colors.textMuted,
               fontSize: 11.5,
             ),

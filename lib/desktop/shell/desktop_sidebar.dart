@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -20,11 +19,13 @@ class DesktopSidebar extends StatelessWidget {
   final VoidCallback onSearch;
   final bool collapsed;
   final VoidCallback onToggleCollapsed;
+  final ProfileAuthService auth;
 
   static const int settingsIndex = 5;
 
   const DesktopSidebar({
     super.key,
+    required this.auth,
     required this.selectedIndex,
     required this.onSelected,
     required this.onSearch,
@@ -93,6 +94,7 @@ class DesktopSidebar extends StatelessWidget {
                     Divider(height: 1, color: context.colors.border),
                     const SizedBox(height: 10),
                     _AccountChip(
+                      auth: auth,
                       collapsed: collapsed,
                       onTap: () => onSelected(NavTabs.profile),
                     ),

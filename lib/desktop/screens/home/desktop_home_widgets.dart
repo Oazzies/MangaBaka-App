@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/fixed_colors.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
-import 'package:mangabaka_app/desktop/screens/home/desktop_upcoming_rail.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_carousel.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_cover_card.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 class DesktopUpcomingOverlay extends StatelessWidget {
   final Widget feed;
   final double railWidth;
   final bool open;
   final bool built;
+  final Widget rail;
 
   const DesktopUpcomingOverlay({
     super.key,
@@ -19,9 +20,8 @@ class DesktopUpcomingOverlay extends StatelessWidget {
     required this.railWidth,
     required this.open,
     required this.built,
+    required this.rail,
   });
-
-  static const double _overlayTop = 84;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class DesktopUpcomingOverlay extends StatelessWidget {
       children: [
         Positioned.fill(child: feed),
         Positioned(
-          top: _overlayTop,
+          top: 0,
           bottom: 0,
           right: 0,
           width: railWidth,
@@ -52,9 +52,7 @@ class DesktopUpcomingOverlay extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: built
-                    ? const DesktopUpcomingRail(topPadding: 16)
-                    : const SizedBox.shrink(),
+                child: built ? rail : const SizedBox.shrink(),
               ),
             ),
           ),
@@ -69,12 +67,14 @@ class DesktopHomeRail extends StatelessWidget {
   final List<Series> series;
   final bool loading;
   final VoidCallback? onViewAll;
+  final SeriesPrefetch prefetch;
 
   const DesktopHomeRail({
     super.key,
     required this.title,
     required this.series,
     required this.loading,
+    required this.prefetch,
     this.onViewAll,
   });
 
@@ -92,7 +92,7 @@ class DesktopHomeRail extends StatelessWidget {
       ),
       child: DesktopCarousel(
         title: title,
-        loading: loading,
+        loading: loading && series.isEmpty,
         onViewAll: onViewAll,
         itemCount: series.length,
         itemWidth: 156,
@@ -100,6 +100,7 @@ class DesktopHomeRail extends StatelessWidget {
         itemHeight: (width) => width * 1.5 + textArea,
         itemBuilder: (context, i) => DesktopCoverCard(
           series: series[i],
+          prefetch: prefetch,
           heroTag: 'home_${title}_$i',
           showRating: false,
         ),

@@ -1,14 +1,18 @@
 part of 'desktop_sidebar.dart';
 
 class _AccountChip extends StatelessWidget {
+  final ProfileAuthService auth;
   final bool collapsed;
   final VoidCallback onTap;
 
-  const _AccountChip({required this.collapsed, required this.onTap});
+  const _AccountChip({
+    required this.auth,
+    required this.collapsed,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final auth = getIt<ProfileAuthService>();
     return ListenableBuilder(
       listenable: auth,
       builder: (context, _) {

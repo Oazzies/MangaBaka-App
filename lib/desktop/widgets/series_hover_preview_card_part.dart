@@ -22,7 +22,7 @@ class _SeriesPreviewCard extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: AppTypography.monoLabel(
+        style: AppTypography.displayLabel(
           color: color,
           fontSize: 9.5,
           fontWeight: FontWeight.w700,
@@ -50,12 +50,13 @@ class _SeriesPreviewCard extends StatelessWidget {
     final volumes = series.finalVolume;
     final year = series.year;
 
+    final l10n = LocalizationService();
     final subMetaParts = <String>[];
     if (volumes.isNotEmpty && volumes != '0') {
-      subMetaParts.add('Vol. $volumes');
+      subMetaParts.add('${l10n.translate('abbr_volume')} $volumes');
     }
     if (chapters.isNotEmpty && chapters != '0') {
-      subMetaParts.add('Ch. $chapters');
+      subMetaParts.add('${l10n.translate('abbr_chapter')} $chapters');
     }
     if (year.isNotEmpty) {
       subMetaParts.add(year);

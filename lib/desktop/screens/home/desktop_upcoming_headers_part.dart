@@ -49,7 +49,9 @@ class _DateHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
-                  isCollapsed ? Icons.chevron_right : Icons.expand_more,
+                  isCollapsed
+                      ? Icons.chevron_right_rounded
+                      : Icons.expand_more_rounded,
                   size: 20,
                   color: context.colors.textMuted,
                 ),
@@ -73,7 +75,7 @@ class _DateHeader extends StatelessWidget {
                       _relative(d).toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.monoLabel(
+                      style: AppTypography.displayLabel(
                         color: context.colors.textMuted,
                         fontSize: 11.5,
                       ),

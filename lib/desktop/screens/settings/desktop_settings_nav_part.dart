@@ -43,7 +43,7 @@ extension _DesktopSettingsNav on DesktopSettingsScreenState {
                     ),
                   ),
                   Text(
-                    l10n.translate(subtitleKey),
+                    subtitleKey == null ? '' : l10n.translate(subtitleKey),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.sans(
@@ -109,7 +109,7 @@ extension _DesktopSettingsNav on DesktopSettingsScreenState {
   }
 
   Widget _page(_Category category, LocalizationService l10n) {
-    final (_, _, titleKey, subtitleKey) = _describe(category);
+    final (_, _, titleKey, _) = _describe(category);
 
     if (category == _Category.logs) {
       return Padding(
@@ -120,7 +120,6 @@ extension _DesktopSettingsNav on DesktopSettingsScreenState {
             _pageHeader(
               l10n,
               titleKey,
-              subtitleKey,
               leading: DesktopIconButton(
                 icon: Icons.arrow_back_rounded,
                 tooltip: l10n.translate('back'),
@@ -149,7 +148,7 @@ extension _DesktopSettingsNav on DesktopSettingsScreenState {
             alignment: Alignment.topLeft,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
-              child: _pageHeader(l10n, titleKey, subtitleKey),
+              child: _pageHeader(l10n, titleKey),
             ),
           ),
         ),
@@ -171,29 +170,12 @@ extension _DesktopSettingsNav on DesktopSettingsScreenState {
 
   Widget _pageHeader(
     LocalizationService l10n,
-    String titleKey,
-    String subtitleKey, {
+    String titleKey, {
     Widget? leading,
   }) {
-    final text = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.translate(titleKey).toUpperCase(),
-          style: AppTypography.display(
-            color: context.colors.text,
-            fontSize: 26,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l10n.translate(subtitleKey),
-          style: AppTypography.sans(
-            color: context.colors.textMuted,
-            fontSize: 14,
-          ),
-        ),
-      ],
+    final text = Text(
+      l10n.translate(titleKey).toUpperCase(),
+      style: AppTypography.display(color: context.colors.text, fontSize: 26),
     );
 
     if (leading == null) return text;
@@ -210,7 +192,10 @@ extension _DesktopSettingsNav on DesktopSettingsScreenState {
     return switch (category) {
       _Category.appearance => const DesktopAppearancePage(),
       _Category.general => _buildGeneral(l10n),
-      _Category.lists => DesktopListCustomization(l10n: l10n),
+      _Category.lists => DesktopListCustomization(
+        l10n: l10n,
+        deps: SeriesListDeps.fromLocator(),
+      ),
       _Category.content => _buildContent(l10n),
       _Category.importExport => const SizedBox.shrink(),
       _Category.account => _buildAccount(l10n),
