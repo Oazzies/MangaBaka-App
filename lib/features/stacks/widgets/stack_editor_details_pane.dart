@@ -62,8 +62,9 @@ class StackEditorDetailsPane extends StatelessWidget {
           style: AppTypography.sans(color: c.text, fontSize: 14, height: 1.4),
           decoration: _input(
             context,
-            l10n.translate('stacks_description_hint'),
-          ).copyWith(helperText: l10n.translate('stacks_markdown_hint')),
+            '${l10n.translate('stacks_description_hint')}\n'
+            '${l10n.translate('stacks_markdown_hint')}',
+          ).copyWith(hintMaxLines: 4),
         ),
         _label(context, l10n.translate('stacks_field_visibility')),
         Row(
@@ -81,18 +82,9 @@ class StackEditorDetailsPane extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.translate('stacks_visibility_${controller.visibility.name}_hint'),
-          style: AppTypography.sans(
-            color: c.textMuted,
-            fontSize: 12.5,
-            height: 1.35,
-          ),
-        ),
         if (controller.visibility.isListed && publishBlocked)
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 8),
             child: Text(
               l10n
                   .translate('stacks_publish_needs')
@@ -113,22 +105,23 @@ class StackEditorDetailsPane extends StatelessWidget {
             onChanged: controller.setRating,
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          controller.ratingTooLow
-              ? l10n
-                    .translate('stacks_rating_warning')
-                    .replaceAll(
-                      '{rating}',
-                      l10n.translate(controller.suggestedRating),
-                    )
-              : l10n.translate('stacks_rating_hint'),
-          style: AppTypography.sans(
-            color: controller.ratingTooLow ? c.warning : c.textMuted,
-            fontSize: 12.5,
-            height: 1.35,
+        if (controller.ratingTooLow)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              l10n
+                  .translate('stacks_rating_warning')
+                  .replaceAll(
+                    '{rating}',
+                    l10n.translate(controller.suggestedRating),
+                  ),
+              style: AppTypography.sans(
+                color: c.warning,
+                fontSize: 12.5,
+                height: 1.35,
+              ),
+            ),
           ),
-        ),
         const SizedBox(height: 12),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,

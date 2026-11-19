@@ -102,7 +102,7 @@ class _StacksHubScreenState extends State<StacksHubScreen> {
   }
 
   Future<void> _create() async {
-    if (!await ensureStackAccess(context)) return;
+    if (!await ensureStackAccess(context, _auth)) return;
     if (!mounted) return;
     await StackEditorScreen.open(context);
   }
@@ -155,6 +155,7 @@ class _StacksHubScreenState extends State<StacksHubScreen> {
           sliver: SliverToBoxAdapter(
             child: StackAccessPrompt(
               access: _access,
+              auth: _auth,
               signedOutMessage: _l10n.translate('stacks_hub_sign_in_body'),
               onReady: () => setState(_load),
             ),
@@ -223,7 +224,6 @@ class _StacksHubScreenState extends State<StacksHubScreen> {
                     )
                   : null,
               title: _l10n.translate('stacks'),
-              subtitle: _l10n.translate('stacks_tagline'),
               actions: [
                 DesktopPillButton(
                   label: _l10n.translate('stacks_create'),

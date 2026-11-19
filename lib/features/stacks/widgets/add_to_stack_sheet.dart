@@ -7,6 +7,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_draft.dart';
@@ -19,7 +20,7 @@ import 'package:mangabaka_app/features/stacks/widgets/add_to_stack_row.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_auth_gate.dart';
 
 Future<void> showAddToStackSheet(BuildContext context, Series series) async {
-  if (!await ensureStackAccess(context)) return;
+  if (!await ensureStackAccess(context, getIt<ProfileAuthService>())) return;
   if (!context.mounted) return;
   final content = _AddToStack(series: series);
   if (DesktopLayout.isActive(context)) {

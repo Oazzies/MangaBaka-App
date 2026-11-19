@@ -7,6 +7,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_editor_controller.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_editor_details_pane.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_editor_entries_pane.dart';
@@ -194,6 +195,7 @@ class StackEditorSplitLayout extends StatelessWidget {
   final ValueChanged<int> onEditNote;
   final ValueChanged<int> onReplaceMerged;
   final ValueChanged<Series> onToggleSeries;
+  final SeriesSearchService searchService;
 
   const StackEditorSplitLayout({
     super.key,
@@ -206,6 +208,7 @@ class StackEditorSplitLayout extends StatelessWidget {
     required this.onEditNote,
     required this.onReplaceMerged,
     required this.onToggleSeries,
+    required this.searchService,
   });
 
   @override
@@ -252,6 +255,7 @@ class StackEditorSplitLayout extends StatelessWidget {
                   child: DesktopCard(
                     padding: const EdgeInsets.all(14),
                     child: StackSeriesSearch(
+                      searchService: searchService,
                       isAdded: controller.containsSeries,
                       onToggle: onToggleSeries,
                     ),

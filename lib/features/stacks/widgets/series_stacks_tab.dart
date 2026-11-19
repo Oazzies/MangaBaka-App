@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/network/paged_list.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -20,6 +19,8 @@ import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
 class SeriesStacksTab extends StatefulWidget {
   final Series series;
+  final StackService service;
+  final StackStatusController status;
   final double horizontalPadding;
 
   static const int previewCount = 12;
@@ -27,6 +28,8 @@ class SeriesStacksTab extends StatefulWidget {
   const SeriesStacksTab({
     super.key,
     required this.series,
+    required this.service,
+    required this.status,
     this.horizontalPadding = 16,
   });
 
@@ -51,10 +54,10 @@ class _SeriesStacksTabState extends State<SeriesStacksTab> {
   }
 
   void _load() {
-    _stacks = getIt<StackService>()
+    _stacks = widget.service
         .forSeries(widget.series.id, limit: SeriesStacksTab.previewCount)
         .then((page) {
-          getIt<StackStatusController>().request(page.items.map((s) => s.id));
+          widget.status.request(page.items.map((s) => s.id));
           return page;
         });
   }
@@ -66,36 +69,23 @@ class _SeriesStacksTabState extends State<SeriesStacksTab> {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.colors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: widget.horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _l10n.translate('stacks_series_tab_intro'),
-                  style: AppTypography.sans(
-                    color: c.textMuted,
-                    fontSize: 13.5,
-                    height: 1.35,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              MbPrimaryButton(
-                label: _l10n.translate('stacks_add_to_short'),
-                expand: false,
-                icon: Icons.playlist_add_rounded,
-                onPressed: () async {
-                  await showAddToStackSheet(context, widget.series);
-                  if (mounted) setState(_load);
-                },
-              ),
-            ],
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: MbPrimaryButton(
+              label: _l10n.translate('stacks_add_to_short'),
+              expand: false,
+              icon: Icons.playlist_add_rounded,
+              onPressed: () async {
+                await showAddToStackSheet(context, widget.series);
+                if (mounted) setState(_load);
+              },
+            ),
           ),
           const SizedBox(height: 16),
           FutureBuilder<PagedList<StackSummary>>(
@@ -173,7 +163,7 @@ class _SeriesStacksTabState extends State<SeriesStacksTab> {
     padding: const EdgeInsets.symmetric(vertical: 32),
     child: Column(
       children: [
-        Icon(Icons.layers_outlined, size: 40, color: context.colors.textMuted),
+        Icon(Icons.layers_rounded, size: 40, color: context.colors.textMuted),
         const SizedBox(height: 10),
         Text(
           text,

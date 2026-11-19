@@ -133,7 +133,7 @@ class StackEditorEntryRow extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.add_comment_outlined,
+                                Icons.add_comment_rounded,
                                 size: 14,
                                 color: c.accent,
                               ),

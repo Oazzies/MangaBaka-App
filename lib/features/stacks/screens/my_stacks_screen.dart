@@ -8,8 +8,10 @@ import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/screens/stack_editor_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stacks_list_screen.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_auth_gate.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
@@ -60,7 +62,7 @@ class _MyStacksScreenState extends State<MyStacksScreen> {
   });
 
   Future<void> _create() async {
-    if (!await ensureStackAccess(context)) return;
+    if (!await ensureStackAccess(context, _auth)) return;
     if (mounted) await StackEditorScreen.open(context);
   }
 
@@ -79,6 +81,7 @@ class _MyStacksScreenState extends State<MyStacksScreen> {
             padding: const EdgeInsets.all(AppConstants.horizontalPadding),
             child: StackAccessPrompt(
               access: access,
+              auth: _auth,
               onReady: () => setState(() {}),
             ),
           ),
@@ -86,8 +89,9 @@ class _MyStacksScreenState extends State<MyStacksScreen> {
       );
     } else {
       body = StacksPagedView(
-        key: ValueKey(_tab),
         source: _source,
+        service: getIt<StackService>(),
+        status: getIt<StackStatusController>(),
         leading: [
           if (!desktop)
             SliverToBoxAdapter(
@@ -133,7 +137,6 @@ class _MyStacksScreenState extends State<MyStacksScreen> {
                     )
                   : null,
               title: _l10n.translate('stacks_my'),
-              subtitle: _l10n.translate('stacks'),
               actions: [
                 if (access == StackAccess.ready) ...[
                   DesktopSegmented<_MyTab>(

@@ -14,6 +14,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_list_controls.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
@@ -36,6 +37,7 @@ List<Widget> buildStackDetailEntrySlivers(
   required VoidCallback onEdit,
   required VoidCallback onRevealSpoilers,
   required ValueChanged<StackEntrySort> onSortChanged,
+  required SeriesListDeps deps,
   double sidePadding = AppConstants.horizontalPadding,
 }) {
   final pad = EdgeInsets.symmetric(horizontal: sidePadding);
@@ -140,6 +142,7 @@ List<Widget> buildStackDetailEntrySlivers(
                             child: EntryListItem(
                               key: ValueKey('${style.name}_${series.id}'),
                               series: series,
+                              deps: deps,
                               ranking: e.rank,
                               heroTagPrefix: prefix,
                               listStyle: style,
@@ -189,6 +192,7 @@ List<Widget> buildStackDetailEntrySlivers(
                       child: EntryListItem(
                         key: ValueKey('${style.name}_${series.id}'),
                         series: series,
+                        deps: deps,
                         ranking: e.rank,
                         heroTagPrefix: prefix,
                         listStyle: style,

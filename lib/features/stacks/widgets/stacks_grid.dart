@@ -100,7 +100,7 @@ class StacksRail extends StatelessWidget {
   final bool showVisibility;
   final Widget? trailing;
 
-  final double cardWidth;
+  final double phoneCardWidth;
 
   final double gutter;
 
@@ -112,7 +112,7 @@ class StacksRail extends StatelessWidget {
     this.onViewAll,
     this.showVisibility = false,
     this.trailing,
-    this.cardWidth = 168,
+    this.phoneCardWidth = 168,
     this.gutter = AppConstants.horizontalPadding,
   });
 
@@ -147,7 +147,7 @@ class StacksRail extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(gutter, 0, gutter, 12),
         ),
         SizedBox(
-          height: StackCard.heightFor(context, cardWidth),
+          height: StackCard.heightFor(context, phoneCardWidth),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
@@ -155,7 +155,7 @@ class StacksRail extends StatelessWidget {
             itemCount: count,
             separatorBuilder: (_, _) => const SizedBox(width: 14),
             itemBuilder: (context, i) => SizedBox(
-              width: cardWidth,
+              width: phoneCardWidth,
               child: MbEntrance(index: i, child: item(context, i)),
             ),
           ),

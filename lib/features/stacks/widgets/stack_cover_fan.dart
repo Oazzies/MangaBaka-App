@@ -14,10 +14,10 @@ class StackCoverFan extends StatelessWidget {
 
   static const int slots = 4;
 
-  static const double _step = 0.16;
+  static const double _coverShiftFraction = 0.16;
 
   static double heightFor(double width) {
-    final coverWidth = width / (1 + _step * (slots - 1));
+    final coverWidth = width / (1 + _coverShiftFraction * (slots - 1));
     return coverWidth * 1.5;
   }
 
@@ -33,7 +33,7 @@ class StackCoverFan extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final coverWidth = width / (1 + _step * (slots - 1));
+        final coverWidth = width / (1 + _coverShiftFraction * (slots - 1));
         final height = coverWidth * 1.5;
         final decode = WidgetUtils.decodeWidth(context, coverWidth);
         return SizedBox(
@@ -45,7 +45,7 @@ class StackCoverFan extends StatelessWidget {
               // Back to front, so the first cover ends up on top.
               for (var i = slots - 1; i >= 0; i--)
                 Positioned(
-                  left: coverWidth * _step * i,
+                  left: coverWidth * _coverShiftFraction * i,
                   top: 0,
                   child: Transform.scale(
                     scale: 1 - 0.06 * i,
@@ -89,7 +89,7 @@ class _Slot extends StatelessWidget {
     return _body(c, radius, cover);
   }
 
-  Widget _body(dynamic c, double radius, StackCover? cover) {
+  Widget _body(MbPalette c, double radius, StackCover? cover) {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),

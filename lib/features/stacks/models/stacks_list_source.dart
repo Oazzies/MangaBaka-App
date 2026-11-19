@@ -20,7 +20,7 @@ sealed class StacksListSource {
 
   String? subtitle(LocalizationService l10n) => null;
 
-  bool get filterable => false;
+  bool get hasSortAndSpoilerFilters => false;
 
   bool get ownerView => false;
 
@@ -70,7 +70,7 @@ class _ForSeries extends StacksListSource {
   @override
   String? subtitle(LocalizationService l10n) => seriesTitle;
   @override
-  bool get filterable => true;
+  bool get hasSortAndSpoilerFilters => true;
   @override
   Future<PagedList<StackSummary>> load(
     s,

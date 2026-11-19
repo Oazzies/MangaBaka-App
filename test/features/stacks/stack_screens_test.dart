@@ -8,6 +8,8 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
+import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
@@ -25,6 +27,10 @@ import '../../responsive/support/fake_services.dart';
 import '../../responsive/support/fixtures.dart' as rf;
 import 'fake_stack_service.dart';
 import 'stack_fixtures.dart';
+
+class _NoSeriesSearch extends Fake implements SeriesSearchService {}
+
+class _NoSeries extends Fake implements SeriesService {}
 
 void main() {
   late FakeStacksService stacks;
@@ -53,6 +59,8 @@ void main() {
       ..registerSingleton<ProfileAuthService>(auth)
       ..registerSingleton<LibraryService>(FakeLibrary(rf.Fixtures.library(0)))
       ..registerSingleton<StackService>(stacks)
+      ..registerSingleton<SeriesSearchService>(_NoSeriesSearch())
+      ..registerSingleton<SeriesService>(_NoSeries())
       ..registerSingleton<StackStatusController>(
         StackStatusController(service: stacks, auth: auth),
       );

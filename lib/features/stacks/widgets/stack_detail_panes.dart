@@ -4,6 +4,8 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_summary.dart';
@@ -19,6 +21,8 @@ List<Widget> buildStackDetailTopActions(
   required VoidCallback onEdit,
   required VoidCallback onDelete,
   required ValueChanged<StackVisibility> onSetVisibility,
+  required StackStatusController status,
+  required ProfileAuthService auth,
 }) {
   final c = context.colors;
   return [
@@ -64,7 +68,13 @@ List<Widget> buildStackDetailTopActions(
         ],
       ),
     ],
-    ...stackBarActions(context, s, desktop: desktop),
+    ...stackBarActions(
+      context,
+      s,
+      desktop: desktop,
+      status: status,
+      auth: auth,
+    ),
   ];
 }
 
@@ -74,6 +84,8 @@ class StackDetailOnePane extends StatelessWidget {
   final bool isOwner;
   final Future<void> Function() onRefresh;
   final List<Widget> entries;
+  final StackStatusController status;
+  final ProfileAuthService auth;
 
   const StackDetailOnePane({
     super.key,
@@ -82,6 +94,8 @@ class StackDetailOnePane extends StatelessWidget {
     required this.isOwner,
     required this.onRefresh,
     required this.entries,
+    required this.status,
+    required this.auth,
   });
 
   @override
@@ -104,6 +118,8 @@ class StackDetailOnePane extends StatelessWidget {
                 detail: detail,
                 isOwner: isOwner,
                 stacked: true,
+                status: status,
+                auth: auth,
               ),
             ),
           ),
@@ -123,6 +139,8 @@ class StackDetailTwoPane extends StatelessWidget {
   final bool isOwner;
   final Future<void> Function() onRefresh;
   final List<Widget> entries;
+  final StackStatusController status;
+  final ProfileAuthService auth;
 
   const StackDetailTwoPane({
     super.key,
@@ -131,6 +149,8 @@ class StackDetailTwoPane extends StatelessWidget {
     required this.isOwner,
     required this.onRefresh,
     required this.entries,
+    required this.status,
+    required this.auth,
   });
 
   @override
@@ -155,6 +175,8 @@ class StackDetailTwoPane extends StatelessWidget {
                   detail: detail,
                   isOwner: isOwner,
                   stacked: false,
+                  status: status,
+                  auth: auth,
                 ),
               ),
             ),

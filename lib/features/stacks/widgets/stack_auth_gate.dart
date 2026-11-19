@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/exceptions/app_exceptions.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -18,14 +17,15 @@ enum StackAccess {
   needsReconnect,
 }
 
-StackAccess stackAccess([ProfileAuthService? auth]) {
-  final a = auth ?? getIt<ProfileAuthService>();
-  if (!a.isLoggedIn) return StackAccess.signedOut;
-  return a.hasStackScopes ? StackAccess.ready : StackAccess.needsReconnect;
+StackAccess stackAccess(ProfileAuthService auth) {
+  if (!auth.isLoggedIn) return StackAccess.signedOut;
+  return auth.hasStackScopes ? StackAccess.ready : StackAccess.needsReconnect;
 }
 
-Future<bool> signInForStacks(BuildContext context) async {
-  final auth = getIt<ProfileAuthService>();
+Future<bool> signInForStacks(
+  BuildContext context,
+  ProfileAuthService auth,
+) async {
   final l10n = LocalizationService();
   try {
     await auth.login();
@@ -45,8 +45,11 @@ Future<bool> signInForStacks(BuildContext context) async {
   return auth.hasStackScopes;
 }
 
-Future<bool> ensureStackAccess(BuildContext context) async {
-  final access = stackAccess();
+Future<bool> ensureStackAccess(
+  BuildContext context,
+  ProfileAuthService auth,
+) async {
+  final access = stackAccess(auth);
   if (access == StackAccess.ready) return true;
   final l10n = LocalizationService();
   final reconnect = access == StackAccess.needsReconnect;
@@ -88,11 +91,12 @@ Future<bool> ensureStackAccess(BuildContext context) async {
     ),
   );
   if (go != true || !context.mounted) return false;
-  return signInForStacks(context);
+  return signInForStacks(context, auth);
 }
 
 class StackAccessPrompt extends StatelessWidget {
   final StackAccess access;
+  final ProfileAuthService auth;
 
   final VoidCallback? onReady;
 
@@ -101,6 +105,7 @@ class StackAccessPrompt extends StatelessWidget {
   const StackAccessPrompt({
     super.key,
     required this.access,
+    required this.auth,
     this.onReady,
     this.signedOutMessage,
   });
@@ -163,7 +168,7 @@ class StackAccessPrompt extends StatelessWidget {
             ),
             icon: Icons.login_rounded,
             onPressed: () async {
-              if (await signInForStacks(context)) onReady?.call();
+              if (await signInForStacks(context, auth)) onReady?.call();
             },
           ),
         ],

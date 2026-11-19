@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
@@ -12,10 +11,9 @@ import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
 class MyStacksEntryCard extends StatefulWidget {
-  /// Replaces the service lookup, for tests.
-  final Future<List<StackSummary>> Function()? loader;
+  final StackService service;
 
-  const MyStacksEntryCard({super.key, this.loader});
+  const MyStacksEntryCard({super.key, required this.service});
 
   @override
   State<MyStacksEntryCard> createState() => _MyStacksEntryCardState();
@@ -34,15 +32,7 @@ class _MyStacksEntryCardState extends State<MyStacksEntryCard> {
 
   Future<void> _load() async {
     try {
-      final loader = widget.loader;
-      final List<StackSummary> found;
-      if (loader != null) {
-        found = await loader();
-      } else if (getIt.isRegistered<StackService>()) {
-        found = (await getIt<StackService>().mine(limit: _count)).items;
-      } else {
-        return;
-      }
+      final found = (await widget.service.mine(limit: _count)).items;
       if (mounted) setState(() => _stacks = found);
     } catch (e) {
       LoggingService.logger.warning('Profile stacks rail failed: $e');
@@ -82,37 +72,14 @@ class _LinkCard extends StatelessWidget {
         ),
         child: Row(
           children: [
+            Icon(Icons.layers_rounded, size: 18, color: c.textMuted),
+            const SizedBox(width: 8),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.layers_rounded, size: 18, color: c.textMuted),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          l10n.translate('stacks_my').toUpperCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.display(
-                            color: c.text,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.translate('stacks_my_subtitle'),
-                    style: AppTypography.sans(
-                      color: c.textMuted,
-                      fontSize: 13,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
+              child: Text(
+                l10n.translate('stacks_my').toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.display(color: c.text, fontSize: 20),
               ),
             ),
             const SizedBox(width: 12),

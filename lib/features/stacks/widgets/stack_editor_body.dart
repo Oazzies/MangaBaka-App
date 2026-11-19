@@ -5,6 +5,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_editor_controller.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_exceptions.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_editor_layout.dart';
@@ -51,6 +52,7 @@ class StackEditorBody extends StatelessWidget {
   final ValueChanged<int> onEditNote;
   final ValueChanged<int> onReplaceMerged;
   final ValueChanged<Series> onToggleSeries;
+  final SeriesSearchService searchService;
 
   const StackEditorBody({
     super.key,
@@ -64,6 +66,7 @@ class StackEditorBody extends StatelessWidget {
     required this.onEditNote,
     required this.onReplaceMerged,
     required this.onToggleSeries,
+    required this.searchService,
   });
 
   @override
@@ -103,6 +106,7 @@ class StackEditorBody extends StatelessWidget {
           onEditNote: onEditNote,
           onReplaceMerged: onReplaceMerged,
           onToggleSeries: onToggleSeries,
+          searchService: searchService,
         ),
       },
     );

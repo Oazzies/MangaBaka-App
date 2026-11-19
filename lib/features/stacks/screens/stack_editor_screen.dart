@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_editor_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
@@ -15,7 +15,7 @@ import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_editor_body.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_editor_dialogs.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_editor_layout.dart';
-import 'package:mangabaka_app/features/stacks/widgets/stack_editor_note_sheet.dart';
+import 'package:mangabaka_app/features/stacks/widgets/stack_editor_note_form.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stack_series_picker.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
@@ -47,6 +47,7 @@ class _StackEditorScreenState extends State<StackEditorScreen>
   );
   // Not lazy: a wide layout would first build it in dispose(), when vsync can no longer be read.
   late final TabController _tabs;
+  late final SeriesSearchService _search = getIt<SeriesSearchService>();
   final LocalizationService _l10n = LocalizationService();
   bool _showErrors = false;
 
@@ -179,19 +180,13 @@ class _StackEditorScreenState extends State<StackEditorScreen>
 
   void _openPicker() => showStackSeriesPicker(
     context,
+    searchService: _search,
     isAdded: _c.containsSeries,
     onToggle: _toggleSeries,
   );
 
   Future<void> _editNote(int index) async {
-    final entry = _c.entries[index];
-    final result = await showAdaptiveSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      constraints: const BoxConstraints(maxWidth: 560),
-      builder: (context) => StackEditorNoteSheet(entry: entry),
-    );
+    final result = await showStackNoteForm(context, _c.entries[index]);
     if (result != null) _c.setNote(index, result);
   }
 
@@ -225,6 +220,7 @@ class _StackEditorScreenState extends State<StackEditorScreen>
       onEditNote: _editNote,
       onReplaceMerged: _replaceMerged,
       onToggleSeries: _toggleSeries,
+      searchService: _search,
     );
     final saveButton = _c.saving
         ? const Padding(

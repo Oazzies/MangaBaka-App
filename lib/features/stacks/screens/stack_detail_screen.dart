@@ -11,6 +11,7 @@ import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_enums.dart';
@@ -64,6 +65,8 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
 
   late final StackService _service = getIt<StackService>();
   late final ProfileAuthService _auth = getIt<ProfileAuthService>();
+  late final StackStatusController _status = getIt<StackStatusController>();
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   final LocalizationService _l10n = LocalizationService();
 
   late Future<StackDetail> _detail;
@@ -81,7 +84,7 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
   void _load() {
     _detail = _fetch().then((d) {
       if (mounted) setState(() => _loaded = d);
-      getIt<StackStatusController>().refresh([d.id]);
+      _status.refresh([d.id]);
       return d;
     });
   }
@@ -137,7 +140,7 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
   Future<void> _setVisibility(StackVisibility visibility) async {
     try {
       await _service.setVisibility(widget.stackId, visibility);
-      getIt<StackStatusController>().markListsChanged();
+      _status.markListsChanged();
       if (!mounted) return;
       AppSnackBar.show(context, _l10n.translate('stacks_visibility_changed'));
       _refresh();
@@ -153,7 +156,7 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
     if (!ok || !mounted) return;
     try {
       await _service.delete(widget.stackId);
-      getIt<StackStatusController>().markListsChanged();
+      _status.markListsChanged();
       if (!mounted) return;
       AppSnackBar.show(context, _l10n.translate('stacks_deleted'));
       Navigator.of(context).pop(true);
@@ -164,20 +167,19 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
     }
   }
 
-  List<Widget> _topActions(
-    BuildContext context,
-    StackSummary s, {
-    required bool desktop,
-  }) => buildStackDetailTopActions(
-    context,
-    s,
-    isOwner: _isOwner,
-    desktop: desktop,
-    l10n: _l10n,
-    onEdit: _edit,
-    onDelete: _delete,
-    onSetVisibility: _setVisibility,
-  );
+  List<Widget> _topActions(StackSummary s, {required bool desktop}) =>
+      buildStackDetailTopActions(
+        context,
+        s,
+        isOwner: _isOwner,
+        desktop: desktop,
+        l10n: _l10n,
+        onEdit: _edit,
+        onDelete: _delete,
+        onSetVisibility: _setVisibility,
+        status: _status,
+        auth: _auth,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +210,8 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
                       snapshot,
                       sidePadding: pad,
                     ),
+                    status: _status,
+                    auth: _auth,
                   )
                 : StackDetailOnePane(
                     summary: summary,
@@ -215,6 +219,8 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
                     isOwner: _isOwner,
                     onRefresh: _refresh,
                     entries: _entries(context, summary, snapshot),
+                    status: _status,
+                    auth: _auth,
                   );
           },
         );
@@ -232,11 +238,9 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
                 icon: Icons.arrow_back_rounded,
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
-              title: _summary?.title ?? _l10n.translate('stacks'),
-              subtitle: _l10n.translate('stacks'),
+              title: _summary?.title ?? _l10n.translate('stack'),
               actions: [
-                if (_summary != null)
-                  ..._topActions(context, _summary!, desktop: true),
+                if (_summary != null) ..._topActions(_summary!, desktop: true),
                 DesktopIconButton(
                   icon: Icons.open_in_new_rounded,
                   tooltip: _l10n.translate('stacks_open_web'),
@@ -261,7 +265,7 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
         title: _l10n.translate('stack'),
         actions: _summary == null
             ? const []
-            : _topActions(context, _summary!, desktop: false),
+            : _topActions(_summary!, desktop: false),
       ),
       body: body,
     );
@@ -285,6 +289,7 @@ class _StackDetailScreenState extends State<StackDetailScreen> {
     onEdit: _edit,
     onRevealSpoilers: () => setState(() => _spoilersRevealed = true),
     onSortChanged: (s) => setState(() => _sort = s),
+    deps: _listDeps,
     sidePadding: sidePadding,
   );
 }

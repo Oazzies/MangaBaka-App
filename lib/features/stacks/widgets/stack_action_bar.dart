@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -7,6 +6,7 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/widgets/share_menu.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/publisher/utils/format_count.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_status.dart';
@@ -23,16 +23,13 @@ StackStatus _fallbackStatus(StackSummary stack) => StackStatus(
 Future<void> _toggleReaction(
   BuildContext context,
   StackSummary stack,
-  StackReaction reaction,
-) async {
-  if (!await ensureStackAccess(context)) return;
-  final controller = getIt<StackStatusController>();
+  StackReaction reaction, {
+  required StackStatusController status,
+  required ProfileAuthService auth,
+}) async {
+  if (!await ensureStackAccess(context, auth)) return;
   try {
-    await controller.toggle(
-      stack.id,
-      reaction,
-      fallback: _fallbackStatus(stack),
-    );
+    await status.toggle(stack.id, reaction, fallback: _fallbackStatus(stack));
   } catch (e) {
     if (context.mounted) {
       AppSnackBar.show(
@@ -61,56 +58,58 @@ void _shareStack(BuildContext context, StackSummary stack) {
 
 class StackActionBar extends StatelessWidget {
   final StackSummary stack;
-  final bool commentsEnabled;
+  final StackStatusController status;
+  final ProfileAuthService auth;
 
   const StackActionBar({
     super.key,
     required this.stack,
-    this.commentsEnabled = true,
+    required this.status,
+    required this.auth,
   });
+
+  void _toggle(BuildContext context, StackReaction reaction) =>
+      _toggleReaction(context, stack, reaction, status: status, auth: auth);
 
   @override
   Widget build(BuildContext context) {
-    final controller = getIt<StackStatusController>();
-    controller.request([stack.id]);
+    status.request([stack.id]);
     final l10n = LocalizationService();
     return ListenableBuilder(
-      listenable: controller,
+      listenable: status,
       builder: (context, _) {
-        final status = controller.of(stack.id) ?? _fallbackStatus(stack);
-        final busy = controller.isBusy(stack.id);
+        final current = status.of(stack.id) ?? _fallbackStatus(stack);
+        final busy = status.isBusy(stack.id);
         return Wrap(
           spacing: 8,
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             StackActionButton(
-              icon: status.hasVoted
+              icon: current.hasVoted
                   ? Icons.thumb_up_alt_rounded
                   : Icons.thumb_up_alt_outlined,
-              label: formatCount(status.voteCount),
+              label: formatCount(current.voteCount),
               tooltip: l10n.translate(
-                status.hasVoted ? 'stacks_action_unvote' : 'stacks_action_vote',
+                current.hasVoted
+                    ? 'stacks_action_unvote'
+                    : 'stacks_action_vote',
               ),
-              active: status.hasVoted,
-              onTap: busy
-                  ? null
-                  : () => _toggleReaction(context, stack, StackReaction.vote),
+              active: current.hasVoted,
+              onTap: busy ? null : () => _toggle(context, StackReaction.vote),
             ),
             StackActionButton(
-              icon: status.hasFollowed
+              icon: current.hasFollowed
                   ? Icons.notifications_active_rounded
                   : Icons.notifications_none_rounded,
               label: l10n.translate(
-                status.hasFollowed
+                current.hasFollowed
                     ? 'stacks_action_following'
                     : 'stacks_action_follow',
               ),
               tooltip: l10n.translate('stacks_action_follow_hint'),
-              active: status.hasFollowed,
-              onTap: busy
-                  ? null
-                  : () => _toggleReaction(context, stack, StackReaction.follow),
+              active: current.hasFollowed,
+              onTap: busy ? null : () => _toggle(context, StackReaction.follow),
             ),
             // No comments button until the API has a comments endpoint.
           ],
@@ -124,10 +123,11 @@ List<Widget> stackBarActions(
   BuildContext context,
   StackSummary stack, {
   required bool desktop,
+  required StackStatusController status,
+  required ProfileAuthService auth,
 }) {
   final l10n = LocalizationService();
-  final controller = getIt<StackStatusController>();
-  controller.request([stack.id]);
+  status.request([stack.id]);
   final c = context.colors;
 
   Widget button({
@@ -157,25 +157,30 @@ List<Widget> stackBarActions(
 
   return [
     ListenableBuilder(
-      listenable: controller,
+      listenable: status,
       builder: (context, _) {
-        final saved =
-            (controller.of(stack.id) ?? _fallbackStatus(stack)).hasSaved;
+        final saved = (status.of(stack.id) ?? _fallbackStatus(stack)).hasSaved;
         return button(
           icon: saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
           tooltip: l10n.translate(
             saved ? 'stacks_action_saved' : 'stacks_action_save_hint',
           ),
           color: saved ? c.accent : null,
-          onTap: controller.isBusy(stack.id)
+          onTap: status.isBusy(stack.id)
               ? () {}
-              : () => _toggleReaction(context, stack, StackReaction.save),
+              : () => _toggleReaction(
+                  context,
+                  stack,
+                  StackReaction.save,
+                  status: status,
+                  auth: auth,
+                ),
         );
       },
     ),
     Builder(
       builder: (buttonContext) => button(
-        icon: Icons.share_outlined,
+        icon: Icons.share_rounded,
         tooltip: l10n.translate('stacks_action_share'),
         onTap: () => _shareStack(buttonContext, stack),
       ),

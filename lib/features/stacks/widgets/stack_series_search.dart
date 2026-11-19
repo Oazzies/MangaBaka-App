@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -13,12 +12,14 @@ import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 
 class StackSeriesSearch extends StatefulWidget {
+  final SeriesSearchService searchService;
   final bool Function(String seriesId) isAdded;
   final void Function(Series series) onToggle;
   final bool autofocus;
 
   const StackSeriesSearch({
     super.key,
+    required this.searchService,
     required this.isAdded,
     required this.onToggle,
     this.autofocus = false,
@@ -65,7 +66,7 @@ class _StackSeriesSearchState extends State<StackSeriesSearch> {
       _failed = false;
     });
     try {
-      final results = await getIt<SeriesSearchService>().searchSeriesByName(q);
+      final results = await widget.searchService.searchSeriesByName(q);
       if (!mounted || generation != _generation) return;
       setState(() {
         _results = results;

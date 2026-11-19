@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -19,10 +18,14 @@ class StacksPagedView extends StatefulWidget {
   final StacksListSource source;
 
   final List<Widget> leading;
+  final StackService service;
+  final StackStatusController status;
 
   const StacksPagedView({
     super.key,
     required this.source,
+    required this.service,
+    required this.status,
     this.leading = const [],
   });
 
@@ -33,7 +36,6 @@ class StacksPagedView extends StatefulWidget {
 class StacksPagedViewState extends State<StacksPagedView> {
   static const double _loadAhead = 700;
 
-  late final StackService _service = getIt<StackService>();
   final LocalizationService _l10n = LocalizationService();
   final ScrollController _scroll = ScrollController();
 
@@ -41,6 +43,7 @@ class StacksPagedViewState extends State<StacksPagedView> {
   int _page = 0;
   bool _hasNext = true;
   bool _loading = false;
+  bool _replacing = false;
   Object? _error;
   StackSort _sort = StackSort.mostVoted;
   StackSpoilerFilter _spoilers = StackSpoilerFilter.exclude;
@@ -56,9 +59,19 @@ class StacksPagedViewState extends State<StacksPagedView> {
     _loadMore();
   }
 
-  /// Held from initState: the locator may be reset before dispose runs.
-  late final ValueNotifier<int> _revision =
-      getIt<StackStatusController>().listsRevision;
+  /// Held from initState: the controller may be swapped before dispose runs.
+  late final ValueNotifier<int> _revision = widget.status.listsRevision;
+
+  @override
+  void didUpdateWidget(covariant StacksPagedView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.source.personal != widget.source.personal) {
+      widget.source.personal
+          ? _revision.addListener(reload)
+          : _revision.removeListener(reload);
+    }
+    if (oldWidget.source != widget.source) reload();
+  }
 
   @override
   void dispose() {
@@ -71,10 +84,10 @@ class StacksPagedViewState extends State<StacksPagedView> {
     if (!mounted) return;
     setState(() {
       _generation++;
-      _items.clear();
       _page = 0;
       _hasNext = true;
       _loading = false;
+      _replacing = true;
       _error = null;
     });
     _loadMore();
@@ -89,24 +102,28 @@ class StacksPagedViewState extends State<StacksPagedView> {
     });
     try {
       final page = await widget.source.load(
-        _service,
+        widget.service,
         _page + 1,
         sort: _sort,
         spoilers: _spoilers,
       );
       if (!mounted || generation != _generation) return;
-      final seen = _items.map((s) => s.id).toSet();
       setState(() {
+        if (_replacing) _items.clear();
+        _replacing = false;
+        final seen = _items.map((s) => s.id).toSet();
         _page++;
         _items.addAll(page.items.where((s) => seen.add(s.id)));
         _hasNext = page.hasNext;
         _loading = false;
       });
-      getIt<StackStatusController>().request(page.items.map((s) => s.id));
+      widget.status.request(page.items.map((s) => s.id));
       WidgetsBinding.instance.addPostFrameCallback((_) => _maybeLoadMore());
     } catch (e) {
       if (!mounted || generation != _generation) return;
       setState(() {
+        if (_replacing) _items.clear();
+        _replacing = false;
         _loading = false;
         _error = e;
       });
@@ -149,7 +166,7 @@ class StacksPagedViewState extends State<StacksPagedView> {
                 ),
               ),
             ),
-          if (widget.source.filterable)
+          if (widget.source.hasSortAndSpoilerFilters)
             SliverPadding(
               padding: EdgeInsets.fromLTRB(pad, 4, pad, 14),
               sliver: SliverToBoxAdapter(
@@ -171,7 +188,25 @@ class StacksPagedViewState extends State<StacksPagedView> {
               ),
             ),
           SliverPadding(
-            padding: EdgeInsets.fromLTRB(pad, 8, pad, 8),
+            padding: EdgeInsets.symmetric(horizontal: pad),
+            sliver: SliverToBoxAdapter(
+              child: SizedBox(
+                height: 8,
+                child: Center(
+                  child: _replacing
+                      ? LinearProgressIndicator(
+                          minHeight: 2,
+                          color: context.colors.accent,
+                          backgroundColor: Colors.transparent,
+                          borderRadius: BorderRadius.circular(1),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(pad, 0, pad, 8),
             sliver: _content(),
           ),
           SliverToBoxAdapter(child: _footer()),
@@ -189,14 +224,15 @@ class StacksPagedViewState extends State<StacksPagedView> {
   }
 
   Widget _content() {
-    if (_items.isEmpty && !_loading && _error == null) {
+    final firstLoad = _loading && !_replacing && _items.isEmpty;
+    if (_items.isEmpty && !firstLoad && _error == null) {
       return SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 64),
           child: Column(
             children: [
               Icon(
-                Icons.layers_outlined,
+                Icons.layers_rounded,
                 size: 44,
                 color: context.colors.textMuted,
               ),
@@ -216,7 +252,7 @@ class StacksPagedViewState extends State<StacksPagedView> {
     }
     return SliverStackGrid(
       stacks: _items,
-      loading: _loading,
+      loading: firstLoad,
       showVisibility: widget.source.ownerView,
     );
   }
@@ -243,7 +279,7 @@ class StacksPagedViewState extends State<StacksPagedView> {
         ),
       );
     }
-    if (_loading && _items.isNotEmpty) {
+    if (_loading && !_replacing && _items.isNotEmpty) {
       return const Padding(
         padding: EdgeInsets.all(24),
         child: Center(child: MbSpinner()),

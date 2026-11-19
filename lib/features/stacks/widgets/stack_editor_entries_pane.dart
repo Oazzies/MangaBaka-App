@@ -46,13 +46,18 @@ class StackEditorEntriesPane extends StatelessWidget {
             ),
           ),
           if (showAdd)
-            MbPrimaryButton(
-              label: l10n.translate('stacks_add_series'),
-              expand: false,
-              icon: Icons.add_rounded,
-              onPressed: controller.entries.length >= StackLimits.entriesMax
-                  ? null
-                  : onAdd,
+            Flexible(
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: MbPrimaryButton(
+                  label: l10n.translate('stacks_add_series'),
+                  expand: false,
+                  icon: Icons.add_rounded,
+                  onPressed: controller.entries.length >= StackLimits.entriesMax
+                      ? null
+                      : onAdd,
+                ),
+              ),
             ),
         ],
       ),

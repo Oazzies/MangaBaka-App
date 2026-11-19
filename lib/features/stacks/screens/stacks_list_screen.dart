@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_screen_header.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_surfaces.dart';
+import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stacks_list_source.dart';
+import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_paged_view.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
@@ -25,6 +28,11 @@ class StacksListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
     final title = source.title(l10n);
+    final paged = StacksPagedView(
+      source: source,
+      service: getIt<StackService>(),
+      status: getIt<StackStatusController>(),
+    );
     if (DesktopLayout.isActive(context)) {
       return Scaffold(
         backgroundColor: context.colors.background,
@@ -37,9 +45,9 @@ class StacksListScreen extends StatelessWidget {
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
               title: title,
-              subtitle: source.subtitle(l10n) ?? l10n.translate('stacks'),
+              subtitle: source.subtitle(l10n),
             ),
-            Expanded(child: StacksPagedView(source: source)),
+            Expanded(child: paged),
           ],
         ),
       );
@@ -47,7 +55,7 @@ class StacksListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.colors.background,
       appBar: mbScreenAppBar(title: title),
-      body: StacksPagedView(source: source),
+      body: paged,
     );
   }
 }

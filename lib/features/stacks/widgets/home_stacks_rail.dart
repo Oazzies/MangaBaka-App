@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
@@ -9,10 +8,14 @@ import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
 import 'package:mangabaka_app/features/stacks/widgets/stacks_grid.dart';
 
 class HomeStacksRail extends StatefulWidget {
-  /// Replaces the service lookup, for tests.
-  final Future<List<StackSummary>> Function()? loader;
+  final StackService service;
+  final StackStatusController status;
 
-  const HomeStacksRail({super.key, this.loader});
+  const HomeStacksRail({
+    super.key,
+    required this.service,
+    required this.status,
+  });
 
   @override
   State<HomeStacksRail> createState() => _HomeStacksRailState();
@@ -32,27 +35,16 @@ class _HomeStacksRailState extends State<HomeStacksRail> {
 
   Future<void> _load() async {
     try {
-      final loader = widget.loader;
-      List<StackSummary> found;
-      var featured = false;
-      if (loader != null) {
-        found = await loader();
-      } else if (getIt.isRegistered<StackService>()) {
-        final service = getIt<StackService>();
-        found = (await service.browse(featured: true, limit: _count)).items;
-        featured = found.isNotEmpty;
-        if (!featured) found = (await service.browse(limit: _count)).items;
-      } else {
-        return;
-      }
+      final service = widget.service;
+      var found = (await service.browse(featured: true, limit: _count)).items;
+      final featured = found.isNotEmpty;
+      if (!featured) found = (await service.browse(limit: _count)).items;
       if (!mounted) return;
       setState(() {
         _stacks = found;
         _featured = featured;
       });
-      if (getIt.isRegistered<StackStatusController>()) {
-        getIt<StackStatusController>().request(found.map((s) => s.id));
-      }
+      widget.status.request(found.map((s) => s.id));
     } catch (e) {
       LoggingService.logger.warning('Home stacks rail failed: $e');
     }

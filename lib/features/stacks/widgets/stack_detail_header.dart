@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_progress_bar.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/widgets/description_section.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/models/stack_detail.dart';
@@ -22,6 +22,8 @@ class StackDetailHeader extends StatelessWidget {
   final StackDetail? detail;
   final bool isOwner;
   final bool stacked;
+  final StackStatusController status;
+  final ProfileAuthService auth;
 
   const StackDetailHeader({
     super.key,
@@ -29,6 +31,8 @@ class StackDetailHeader extends StatelessWidget {
     required this.detail,
     required this.isOwner,
     required this.stacked,
+    required this.status,
+    required this.auth,
   });
 
   @override
@@ -171,10 +175,7 @@ class StackDetailHeader extends StatelessWidget {
           Wrap(spacing: 6, runSpacing: 6, children: badges),
         ],
         const SizedBox(height: 16),
-        StackActionBar(
-          stack: summary,
-          commentsEnabled: detail?.isCommentsEnabled ?? true,
-        ),
+        StackActionBar(stack: summary, status: status, auth: auth),
         if (draftHint) ...[
           const SizedBox(height: 14),
           StackDetailHint(
@@ -189,6 +190,8 @@ class StackDetailHeader extends StatelessWidget {
           StackLibraryProgress(
             stackId: summary.id,
             total: detail!.liveEntries.length,
+            status: status,
+            auth: auth,
           ),
         ],
         if (description != null) ...[
@@ -212,18 +215,22 @@ class StackDetailHeader extends StatelessWidget {
 class StackLibraryProgress extends StatelessWidget {
   final int stackId;
   final int total;
+  final StackStatusController status;
+  final ProfileAuthService auth;
 
   const StackLibraryProgress({
     super.key,
     required this.stackId,
     required this.total,
+    required this.status,
+    required this.auth,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = LocalizationService();
     final c = context.colors;
-    final access = stackAccess();
+    final access = stackAccess(auth);
     if (access != StackAccess.ready) {
       return Text(
         l10n.translate(
@@ -234,13 +241,12 @@ class StackLibraryProgress extends StatelessWidget {
         style: AppTypography.sans(color: c.textMuted, fontSize: 13),
       );
     }
-    final controller = getIt<StackStatusController>();
     return ListenableBuilder(
-      listenable: controller,
+      listenable: status,
       builder: (context, _) {
-        final status = controller.of(stackId);
-        if (status == null || total == 0) return const SizedBox.shrink();
-        final have = status.libraryCount.clamp(0, total);
+        final current = status.of(stackId);
+        if (current == null || total == 0) return const SizedBox.shrink();
+        final have = current.libraryCount.clamp(0, total);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
