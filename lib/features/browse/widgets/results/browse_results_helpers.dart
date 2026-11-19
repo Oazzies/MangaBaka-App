@@ -48,7 +48,7 @@ class BrowseResultsHelpers {
     required String sortType,
     String? staff,
     String? publisher,
-    String? refineLabel,
+    String? titleRefinement,
   }) {
     if (staff != null) {
       return l10n
@@ -57,7 +57,7 @@ class BrowseResultsHelpers {
     }
     if (publisher != null) {
       final name = l10n.formatPossessive(publisher);
-      final refine = refineLabel;
+      final refine = titleRefinement;
       if (refine != null && refine.isNotEmpty) {
         return l10n
             .translate('publisher_works_of')
@@ -86,7 +86,7 @@ class BrowseResultsAppBar extends StatelessWidget
       elevation: 0,
       centerTitle: true,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: context.colors.text),
+        icon: Icon(Icons.arrow_back_rounded, color: context.colors.text),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(

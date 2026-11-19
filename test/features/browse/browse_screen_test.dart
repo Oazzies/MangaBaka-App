@@ -3,7 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/features/browse/models/browse_type.dart';
+import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_screen.dart';
+import 'package:mangabaka_app/features/browse/widgets/browse_type_tabs.dart';
+import 'package:mangabaka_app/features/browse/widgets/filters/filter_chips_row.dart';
 import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/browse_shortcuts.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -13,6 +17,7 @@ import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/features/publisher/services/publisher_search_service.dart';
 import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
 
 class MockSeriesSearchService extends Fake implements SeriesSearchService {
   @override
@@ -46,6 +51,8 @@ class MockPublisherSearchService extends Fake implements PublisherSearchService 
 
 class MockSeriesService extends Fake implements SeriesService {}
 
+class MockLibraryService extends Fake implements LibraryService {}
+
 
 void main() {
   setUp(() async {
@@ -66,6 +73,7 @@ void main() {
     getIt.registerSingleton<MetadataService>(MockMetadataService());
     getIt.registerSingleton<PublisherSearchService>(MockPublisherSearchService());
     getIt.registerSingleton<SeriesService>(MockSeriesService());
+    getIt.registerSingleton<LibraryService>(MockLibraryService());
   });
 
   Widget createWidgetUnderTest() {
@@ -98,5 +106,25 @@ void main() {
     await tester.pump();
 
     expect(find.text('One Piece'), findsOneWidget);
+  });
+
+  testWidgets('a filter disables the type tabs instead of removing them', (
+    tester,
+  ) async {
+    final key = GlobalKey<BrowseScreenState>();
+    await tester.pumpWidget(MaterialApp(home: BrowseScreen(key: key)));
+
+    key.currentState!.enterSearchMode();
+    key.currentState!.controller.updateFilters(
+      SearchFilters(genre: const ['action']),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(BrowseTypeTabs), findsOneWidget);
+    expect(find.byType(FilterChipsRow), findsOneWidget);
+
+    await tester.tap(find.text('PUBLISHERS'));
+    await tester.pump();
+    expect(key.currentState!.controller.currentType, BrowseType.series);
   });
 }

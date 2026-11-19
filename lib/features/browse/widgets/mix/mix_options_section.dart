@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
@@ -11,17 +10,24 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 class MixOptionsSection extends StatelessWidget {
   final MixController controller;
   final LocalizationService l10n;
+  final ProfileAuthService auth;
 
   const MixOptionsSection({
     super.key,
     required this.controller,
     required this.l10n,
+    required this.auth,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = getIt<ProfileAuthService>().isLoggedIn;
+    return ListenableBuilder(
+      listenable: auth,
+      builder: (context, _) => _build(context, auth.isLoggedIn),
+    );
+  }
 
+  Widget _build(BuildContext context, bool isLoggedIn) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
       child: Container(
@@ -33,8 +39,8 @@ class MixOptionsSection extends StatelessWidget {
           children: [
             MixToggleRow(
               icon: Icons.tune_rounded,
-              title: 'Strict Mode',
-              subtitle: 'Hard-filter tags instead of vector boost',
+              title: l10n.translate('mix_strict_mode'),
+              subtitle: l10n.translate('mix_strict_mode_subtitle'),
               value: controller.strictMode,
               onChanged: controller.setStrictMode,
               isFirst: true,
@@ -43,7 +49,7 @@ class MixOptionsSection extends StatelessWidget {
             MixToggleRow(
               icon: Icons.visibility_off_outlined,
               title: l10n.translate('hide_library'),
-              subtitle: l10n.translate('hide_library_subtext'),
+              subtitle: l10n.translate('mix_hide_library_subtext'),
               value: controller.excludeLibrary,
               onChanged: isLoggedIn ? controller.setExcludeLibrary : null,
               requiresLogin: !isLoggedIn,
@@ -51,8 +57,8 @@ class MixOptionsSection extends StatelessWidget {
             const _OptionDivider(),
             MixToggleRow(
               icon: Icons.merge_type_rounded,
-              title: 'Blend My Taste',
-              subtitle: 'Mix recommendations with your library taste',
+              title: l10n.translate('mix_blend_taste'),
+              subtitle: l10n.translate('mix_blend_taste_subtitle'),
               value: controller.blendUser,
               onChanged: isLoggedIn ? controller.setBlendUser : null,
               requiresLogin: !isLoggedIn,
@@ -128,7 +134,9 @@ class MixToggleRow extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          requiresLogin ? 'Requires login' : subtitle,
+          requiresLogin
+              ? LocalizationService().translate('mix_requires_login')
+              : subtitle,
           style: AppTypography.sans(
             color: context.colors.textMuted.withValues(
               alpha: requiresLogin ? 0.5 : 1.0,

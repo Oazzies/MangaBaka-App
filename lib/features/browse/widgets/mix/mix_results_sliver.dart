@@ -8,6 +8,7 @@ import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
 import 'package:mangabaka_app/features/browse/widgets/mix/mix_state_views.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 
 /// Listens to [SettingsManager] itself so a settings change rebuilds only this sliver.
@@ -15,12 +16,14 @@ class MixResultsSliver extends StatelessWidget {
   final MixController controller;
   final LocalizationService l10n;
   final ValueChanged<Series> onSeriesTap;
+  final SeriesListDeps deps;
 
   const MixResultsSliver({
     super.key,
     required this.controller,
     required this.l10n,
     required this.onSeriesTap,
+    required this.deps,
   });
 
   @override
@@ -28,13 +31,11 @@ class MixResultsSliver extends StatelessWidget {
     if (!controller.hasSeeds) {
       return _fill(MixEmptyState(l10n: l10n));
     }
-    if (controller.isLoading) {
-      return _fill(MixLoadingState(l10n: l10n));
-    }
-    if (controller.error != null) {
-      return _fill(MixErrorState(l10n: l10n, onRetry: controller.refresh));
-    }
     if (controller.results.isEmpty) {
+      if (controller.isLoading) return _fill(MixLoadingState(l10n: l10n));
+      if (controller.error != null) {
+        return _fill(MixErrorState(l10n: l10n, onRetry: controller.refresh));
+      }
       return _fill(MixNoResultsState(l10n: l10n));
     }
 
@@ -55,7 +56,11 @@ class MixResultsSliver extends StatelessWidget {
       return InkWell(
         borderRadius: BorderRadius.circular(AppConstants.cardRadius),
         onTap: () => onSeriesTap(series),
-        child: EntryListItem(key: ValueKey('mix_${series.id}'), series: series),
+        child: EntryListItem(
+          key: ValueKey('mix_${series.id}'),
+          series: series,
+          deps: deps,
+        ),
       );
     }, childCount: controller.results.length);
 

@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
-import 'package:mangabaka_app/features/browse/widgets/filters/filter_chip_badge.dart';
+import 'package:mangabaka_app/features/browse/widgets/filters/active_filter_chips.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
 
 class FilterChipsRow extends StatelessWidget {
+  static const double stripHeight = 40;
+
   final SearchFilters filters;
   final ValueChanged<SearchFilters> onFiltersChanged;
+  final MetadataService metadata;
+  final Widget? leading;
 
+  /// One line of [stripHeight], built even with no chips, so the first filter moves nothing below.
   const FilterChipsRow({
     super.key,
     required this.filters,
     required this.onFiltersChanged,
+    required this.metadata,
+    this.leading,
   });
 
   @override
@@ -23,265 +29,88 @@ class FilterChipsRow extends StatelessWidget {
       listenable: LocalizationService(),
       builder: (context, _) {
         final l10n = LocalizationService();
-        final metadata = getIt<MetadataService>();
-        final chips = <Widget>[];
-
-        if (filters.sortBy != null && filters.sortBy!.isNotEmpty) {
-          final label = filterSortLabel(filters.sortBy!, l10n);
-          chips.add(
-            _buildChip(context, label, () {
-              onFiltersChanged(filters.copyWithSortBy(null));
-            }),
-          );
-        }
-
-        chips.addAll(
-          _buildFilterPairChips(
-            context,
-            include: filters.type,
-            exclude: filters.typeNot,
-            labelFor: (v) => l10n.translate('type_$v'),
-            onRemoveInclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                type: filters.type.where((x) => x != v).toList(),
-              ),
-            ),
-            onRemoveExclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                typeNot: filters.typeNot.where((x) => x != v).toList(),
-              ),
-            ),
-          ),
+        final chips = buildActiveFilterChips(
+          filters: filters,
+          onChanged: onFiltersChanged,
+          l10n: l10n,
+          metadata: metadata,
         );
-
-        chips.addAll(
-          _buildFilterPairChips(
-            context,
-            include: filters.status,
-            exclude: filters.statusNot,
-            labelFor: (v) => l10n.translate('status_$v'),
-            onRemoveInclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                status: filters.status.where((x) => x != v).toList(),
-              ),
-            ),
-            onRemoveExclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                statusNot: filters.statusNot.where((x) => x != v).toList(),
-              ),
-            ),
-          ),
-        );
-
-        chips.addAll(
-          _buildFilterPairChips(
-            context,
-            include: filters.genre,
-            exclude: filters.genreNot,
-            labelFor: metadata.getGenreLabel,
-            onRemoveInclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                genre: filters.genre.where((x) => x != v).toList(),
-              ),
-            ),
-            onRemoveExclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                genreNot: filters.genreNot.where((x) => x != v).toList(),
-              ),
-            ),
-          ),
-        );
-
-        chips.addAll(
-          _buildFilterPairChips(
-            context,
-            include: filters.tag,
-            exclude: filters.tagNot,
-            labelFor: (v) {
-              final id = int.tryParse(v);
-              if (id == null) return v;
-              return metadata.getTagName(id);
-            },
-            onRemoveInclude: (v) => onFiltersChanged(
-              filters.copyWith(tag: filters.tag.where((x) => x != v).toList()),
-            ),
-            onRemoveExclude: (v) => onFiltersChanged(
-              filters.copyWith(
-                tagNot: filters.tagNot.where((x) => x != v).toList(),
-              ),
-            ),
-          ),
-        );
-
-        if (filters.staff.isNotEmpty) {
-          chips.addAll(
-            filters.staff.map(
-              (v) => _buildChip(
-                context,
-                v,
-                () => onFiltersChanged(
-                  filters.copyWith(
-                    staff: filters.staff.where((x) => x != v).toList(),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (filters.publisher.isNotEmpty) {
-          chips.addAll(
-            filters.publisher.map(
-              (v) => _buildChip(
-                context,
-                v,
-                () => onFiltersChanged(
-                  filters.copyWith(
-                    publisher: filters.publisher.where((x) => x != v).toList(),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (filters.ratingLower > 0 || filters.ratingUpper < 100) {
+        if (chips.isNotEmpty) {
           chips.add(
-            _buildChip(
-              context,
-              '${l10n.translate('rating_range')}: ${filters.ratingLower.toInt()}-${filters.ratingUpper.toInt()}',
-              () {
-                onFiltersChanged(
-                  filters.copyWith(ratingLower: 0, ratingUpper: 100),
-                );
-              },
+            _ResetFiltersButton(
+              label: l10n.translate('reset'),
+              onTap: () => onFiltersChanged(SearchFilters()),
             ),
           );
         }
 
-        if (filters.isLicensed != null) {
-          chips.add(
-            _buildChip(
-              context,
-              '${l10n.translate('licensed_status')}: ${filters.isLicensed! ? l10n.translate('yes') : l10n.translate('no')}',
-              () {
-                onFiltersChanged(filters.copyWithIsLicensed(null));
-              },
-            ),
-          );
-        }
-
-        if (filters.hasAnime != null) {
-          chips.add(
-            _buildChip(
-              context,
-              '${l10n.translate('has_anime')}: ${filters.hasAnime! ? l10n.translate('yes') : l10n.translate('no')}',
-              () {
-                onFiltersChanged(filters.copyWithHasAnime(null));
-              },
-            ),
-          );
-        }
-
-        if (filters.publishedYearLower != null ||
-            filters.publishedYearUpper != null) {
-          final yearText =
-              filters.publishedYearLower != null &&
-                  filters.publishedYearUpper != null
-              ? '${filters.publishedYearLower}-${filters.publishedYearUpper}'
-              : (filters.publishedYearLower != null
-                    ? '>= ${filters.publishedYearLower}'
-                    : '<= ${filters.publishedYearUpper}');
-          chips.add(
-            _buildChip(
-              context,
-              '${l10n.translate('publication_year')}: $yearText',
-              () {
-                onFiltersChanged(
-                  filters.copyWithYear(
-                    publishedYearLower: null,
-                    publishedYearUpper: null,
-                  ),
-                );
-              },
-            ),
-          );
-        }
-
-        if (chips.isEmpty) return const SizedBox.shrink();
-
-        return Padding(
-          padding: const EdgeInsets.only(left: 12, right: 12, bottom: 4),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              ...chips,
-              GestureDetector(
-                onTap: () => onFiltersChanged(SearchFilters()),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: context.colors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.refresh_rounded,
-                        size: 16,
-                        color: context.colors.error,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.translate('reset').toUpperCase(),
-                        style: AppTypography.sans(
-                          color: context.colors.error,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+        return _buildStrip(chips);
       },
     );
   }
 
-  List<Widget> _buildFilterPairChips(
-    BuildContext context, {
-    required List<String> include,
-    required List<String> exclude,
-    required String Function(String) labelFor,
-    required void Function(String) onRemoveInclude,
-    required void Function(String) onRemoveExclude,
-  }) => buildFilterPairChips(
-    context,
-    include: include,
-    exclude: exclude,
-    labelFor: labelFor,
-    onRemoveInclude: onRemoveInclude,
-    onRemoveExclude: onRemoveExclude,
-  );
+  Widget _buildStrip(List<Widget> chips) {
+    return SizedBox(
+      height: stripHeight,
+      child: Row(
+        children: [
+          ?leading,
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (var i = 0; i < chips.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 8),
+                    chips[i],
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-  Widget _buildChip(
-    BuildContext context,
-    String label,
-    VoidCallback onDeleted, {
-    bool isNegative = false,
-  }) => FilterChipBadge(
-    label: label,
-    onDeleted: onDeleted,
-    isNegative: isNegative,
-  );
+class _ResetFiltersButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _ResetFiltersButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: context.colors.error.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.restart_alt_rounded,
+              size: 16,
+              color: context.colors.error,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label.toUpperCase(),
+              style: AppTypography.sans(
+                color: context.colors.error,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

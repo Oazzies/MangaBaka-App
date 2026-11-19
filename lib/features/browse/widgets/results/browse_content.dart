@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
+import 'package:mangabaka_app/features/browse/widgets/results/browse_content_frame.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 import 'package:mangabaka_app/core/widgets/dynamic_row_height_grid.dart';
@@ -12,7 +12,7 @@ import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/browse/widgets/results/browse_people_results.dart';
 import 'package:mangabaka_app/features/browse/widgets/shortcuts/browse_shortcuts.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/features/series/widgets/series_list_skeleton.dart';
 
@@ -35,6 +35,7 @@ class BrowseContent extends StatelessWidget {
   onNavigateToResults;
   final VoidCallback onNavigateToMix;
   final VoidCallback onNavigateToDiscoveryQueue;
+  final SeriesListDeps deps;
 
   /// 12 matches the Library when the parent adds no inset; pass 0 when it already does.
   final double horizontalInset;
@@ -52,6 +53,7 @@ class BrowseContent extends StatelessWidget {
     required this.onNavigateToResults,
     required this.onNavigateToMix,
     required this.onNavigateToDiscoveryQueue,
+    required this.deps,
     this.horizontalInset = 12,
   });
 
@@ -86,14 +88,14 @@ class BrowseContent extends StatelessWidget {
   }
 
   Widget _buildSeriesItem(Series series, {required AppListStyle activeStyle}) {
-    final seriesService = getIt<SeriesService>();
     return MouseRegion(
-      onEnter: (_) => seriesService.fetchSeries(series.id),
+      onEnter: (_) => deps.prefetch(series.id),
       child: InkWell(
         onTap: () => onNavigateToDetail(series),
         child: EntryListItem(
           key: ValueKey('${activeStyle.name}_${series.id}'),
           series: series,
+          deps: deps,
           listStyle: activeStyle,
         ),
       ),
@@ -267,23 +269,10 @@ class BrowseContent extends StatelessWidget {
         }
 
         return Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            layoutBuilder: (currentChild, previousChildren) {
-              return Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  ...previousChildren,
-                  if (currentChild != null) currentChild,
-                ],
-              );
-            },
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: content,
+          child: BrowseContentFrame(
+            content: content,
+            showProgress: isLoading && searchResults.isNotEmpty,
+            horizontalInset: horizontalInset,
           ),
         );
       },

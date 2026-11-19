@@ -57,7 +57,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           backgroundColor: FixedColors.imageScrim,
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(l10n.translate('scan_isbn_barcode').toUpperCase()),

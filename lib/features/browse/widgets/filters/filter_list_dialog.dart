@@ -1,6 +1,7 @@
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/utils/search_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/tri_state_chip.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_item.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -14,7 +15,9 @@ class FilterListDialog extends StatefulWidget {
   final List<String> initialIncludes;
   final List<String> initialExcludes;
   final Function(List<String>, List<String>) onApply;
-  final bool showSearch;
+
+  /// Null hides the search field.
+  final String? searchHint;
 
   const FilterListDialog({
     super.key,
@@ -25,7 +28,7 @@ class FilterListDialog extends StatefulWidget {
     required this.initialIncludes,
     required this.initialExcludes,
     required this.onApply,
-    this.showSearch = true,
+    this.searchHint,
   });
 
   @override
@@ -36,6 +39,8 @@ class _FilterListDialogState extends State<FilterListDialog> {
   String _searchQuery = '';
   late List<String> _includes;
   late List<String> _excludes;
+
+  bool get _showSearch => widget.searchHint != null;
 
   @override
   void initState() {
@@ -60,8 +65,7 @@ class _FilterListDialogState extends State<FilterListDialog> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  List<Map<String, dynamic>> _visibleItems() {
     final preparedQuery = SearchUtils.prepare(_searchQuery);
     final filteredItems = widget.items.where((t) {
       final name = t[widget.nameKey]?.toString() ?? '';
@@ -69,83 +73,83 @@ class _FilterListDialogState extends State<FilterListDialog> {
     }).toList();
 
     filteredItems.sort((a, b) {
-      final idA = a[widget.idKey]?.toString() ?? '';
-      final idB = b[widget.idKey]?.toString() ?? '';
-
-      final stateA = _getTriState(idA);
-      final stateB = _getTriState(idB);
-
-      final isSelectedA = stateA != TriState.off;
-      final isSelectedB = stateB != TriState.off;
-
-      if (isSelectedA && !isSelectedB) {
-        return -1;
-      } else if (!isSelectedA && isSelectedB) {
-        return 1;
-      }
-      return 0;
+      final isSelectedA =
+          _getTriState(a[widget.idKey]?.toString() ?? '') != TriState.off;
+      final isSelectedB =
+          _getTriState(b[widget.idKey]?.toString() ?? '') != TriState.off;
+      if (isSelectedA == isSelectedB) return 0;
+      return isSelectedA ? -1 : 1;
     });
+    return filteredItems;
+  }
 
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final double? containerHeight = widget.showSearch
-        ? MediaQuery.of(context).size.height * 0.8
-        : null;
+  @override
+  Widget build(BuildContext context) {
+    final isPage = AdaptiveFormPage.isPage(context);
+    final filteredItems = _visibleItems();
+
+    final list = ListView.separated(
+      shrinkWrap: !_showSearch,
+      physics: _showSearch ? null : const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      itemCount: filteredItems.length,
+      separatorBuilder: (context, index) => _buildDivider(),
+      itemBuilder: (context, index) {
+        final item = filteredItems[index];
+        final id = item[widget.idKey]?.toString() ?? '';
+        final name = item[widget.nameKey]?.toString() ?? '';
+        final state = _getTriState(id);
+
+        return FilterListItem(
+          name: name,
+          state: state,
+          onToggleInclude: () => _updateTriState(
+            id,
+            state == TriState.include ? TriState.off : TriState.include,
+          ),
+          onToggleExclude: () => _updateTriState(
+            id,
+            state == TriState.exclude ? TriState.off : TriState.exclude,
+          ),
+        );
+      },
+    );
+
+    if (isPage) {
+      return Column(
+        children: [
+          if (_showSearch)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+              child: _buildSearchField(),
+            ),
+          Expanded(child: list),
+        ],
+      );
+    }
 
     return Container(
-      height: containerHeight,
+      height: _showSearch ? MediaQuery.sizeOf(context).height * 0.8 : null,
       decoration: BoxDecoration(
         color: context.colors.background,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.only(bottom: bottomPadding),
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       child: Column(
-        mainAxisSize: widget.showSearch ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: _showSearch ? MainAxisSize.max : MainAxisSize.min,
         children: [
           const SizedBox(height: 12),
-          _buildDragHandle(),
+          const AdaptiveSheetHandle(),
           _buildHeader(),
-          Flexible(
-            child: ListView.separated(
-              shrinkWrap: !widget.showSearch,
-              physics: widget.showSearch
-                  ? null
-                  : const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              itemCount: filteredItems.length,
-              separatorBuilder: (context, index) => _buildDivider(),
-              itemBuilder: (context, index) {
-                final item = filteredItems[index];
-                final id = item[widget.idKey]?.toString() ?? '';
-                final name = item[widget.nameKey]?.toString() ?? '';
-                final state = _getTriState(id);
-
-                return FilterListItem(
-                  name: name,
-                  state: state,
-                  onToggleInclude: () => _updateTriState(
-                    id,
-                    state == TriState.include ? TriState.off : TriState.include,
-                  ),
-                  onToggleExclude: () => _updateTriState(
-                    id,
-                    state == TriState.exclude ? TriState.off : TriState.exclude,
-                  ),
-                );
-              },
-            ),
-          ),
+          Flexible(child: list),
         ],
       ),
     );
   }
 
-  Widget _buildDragHandle() {
-    return const AdaptiveSheetHandle();
-  }
-
   Widget _buildHeader() {
     return Padding(
-      padding: widget.showSearch
+      padding: _showSearch
           ? const EdgeInsets.fromLTRB(24, 20, 24, 16)
           : const EdgeInsets.fromLTRB(24, 20, 24, 8),
       child: Column(
@@ -158,45 +162,47 @@ class _FilterListDialogState extends State<FilterListDialog> {
               fontSize: 18,
             ),
           ),
-          if (widget.showSearch) ...[
+          if (_showSearch) ...[
             const SizedBox(height: 16),
-            TextField(
-              style: AppTypography.sans(color: context.colors.text),
-              decoration: InputDecoration(
-                hintText: 'Search ${widget.title.toLowerCase()}...',
-                hintStyle: AppTypography.sans(
-                  color: context.colors.textMuted,
-                  fontSize: 15,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: context.colors.textMuted,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: context.colors.surface,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: context.colors.accent.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-              ),
-              onChanged: (val) => setState(() => _searchQuery = val),
-            ),
+            _buildSearchField(),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide.none,
+    );
+    return TextField(
+      style: AppTypography.sans(color: context.colors.text),
+      decoration: InputDecoration(
+        hintText: widget.searchHint,
+        hintStyle: AppTypography.sans(
+          color: context.colors.textMuted,
+          fontSize: 15,
+        ),
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          color: context.colors.textMuted,
+          size: 20,
+        ),
+        filled: true,
+        fillColor: context.colors.surface,
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        border: border,
+        enabledBorder: border,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: context.colors.accent.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+      ),
+      onChanged: (val) => setState(() => _searchQuery = val),
     );
   }
 

@@ -22,20 +22,36 @@ class MixSeedSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.isSuggestionsLoading) {
-      return _LoadingRow(label: l10n.translate('mix_seed_suggestions'));
+    final suggestions = [
+      for (final s in controller.seedSuggestions)
+        if (!controller.isSeed(s.id)) s,
+    ];
+    if (suggestions.isEmpty) {
+      return controller.isSuggestionsLoading
+          ? _LoadingRow(label: l10n.translate('mix_seed_suggestions'))
+          : const SizedBox.shrink();
     }
-    if (controller.seedSuggestions.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              Icons.auto_awesome_rounded,
-              color: context.colors.accent,
-              size: 16,
+            SizedBox.square(
+              dimension: 16,
+              child: controller.isSuggestionsLoading
+                  ? Center(
+                      child: MbSpinner(
+                        size: 14,
+                        strokeWidth: 2,
+                        color: context.colors.accent,
+                      ),
+                    )
+                  : Icon(
+                      Icons.auto_awesome_rounded,
+                      color: context.colors.accent,
+                      size: 16,
+                    ),
             ),
             const SizedBox(width: 6),
             Text(
@@ -55,9 +71,9 @@ class MixSeedSuggestions extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemCount: controller.seedSuggestions.length,
+            itemCount: suggestions.length,
             itemBuilder: (context, i) {
-              final suggestion = controller.seedSuggestions[i];
+              final suggestion = suggestions[i];
               return _SuggestionCard(
                 suggestion: suggestion,
                 onTap: () => onSeedAdded(suggestion),

@@ -176,7 +176,7 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.arrow_upward), findsNothing);
+    expect(find.byIcon(Icons.arrow_upward_rounded), findsNothing);
 
     final scrollableFinder = find.byType(Scrollable);
     await tester.runAsync(() async {
@@ -186,7 +186,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.arrow_upward), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
     
     await tester.runAsync(() async {
       await tester.tap(find.byType(FloatingActionButton));

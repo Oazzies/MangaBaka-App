@@ -155,6 +155,8 @@ class BrowseController extends ChangeNotifier {
     _logger.info('Switching browse type to: $type');
     _currentType = type;
     if (_hasSearchContext) {
+      // The other tab's results cannot stand in for this tab's while it loads.
+      _results.clear();
       searchSeries();
     } else {
       resetSearchState();
@@ -173,7 +175,7 @@ class BrowseController extends ChangeNotifier {
   void updateFilters(SearchFilters filters) {
     _logger.info('Filters updated: ${filters.toMap()}');
     _currentFilters = filters;
-    // Publishers and Staff tabs are hidden while filters are set, so an active one falls back.
+    // Publishers and Staff tabs are disabled while filters are set, so an active one falls back.
     if (!filters.isEmpty &&
         (_currentType == BrowseType.publishers ||
             _currentType == BrowseType.staff)) {

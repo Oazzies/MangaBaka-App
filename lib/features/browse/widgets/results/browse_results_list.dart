@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/widgets/derived_layout_builder.dart';
 import 'package:mangabaka_app/core/motion/app_motion.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/widgets/entry_list_item.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
@@ -18,6 +19,7 @@ class BrowseResultsList extends StatelessWidget {
   final bool shouldShowRanking;
   final Function(Series) onSeriesTap;
   final String? heroTagPrefix;
+  final SeriesListDeps deps;
 
   const BrowseResultsList({
     required this.results,
@@ -25,6 +27,7 @@ class BrowseResultsList extends StatelessWidget {
     required this.isLoading,
     required this.shouldShowRanking,
     required this.onSeriesTap,
+    required this.deps,
     this.heroTagPrefix,
     super.key,
   });
@@ -76,6 +79,7 @@ class BrowseResultsList extends StatelessWidget {
                                   '${activeStyle.name}_${series.id}',
                                 ),
                                 series: series,
+                                deps: deps,
                                 ranking: index + 1,
                                 heroTagPrefix: heroTagPrefix,
                                 listStyle: activeStyle,
@@ -85,6 +89,7 @@ class BrowseResultsList extends StatelessWidget {
                                   '${activeStyle.name}_${series.id}',
                                 ),
                                 series: series,
+                                deps: deps,
                                 heroTagPrefix: heroTagPrefix,
                                 listStyle: activeStyle,
                               ),
@@ -126,6 +131,7 @@ class BrowseResultsList extends StatelessWidget {
                           ? EntryListItem(
                               key: ValueKey('${activeStyle.name}_${series.id}'),
                               series: series,
+                              deps: deps,
                               ranking: index + 1,
                               heroTagPrefix: heroTagPrefix,
                               listStyle: activeStyle,
@@ -133,6 +139,7 @@ class BrowseResultsList extends StatelessWidget {
                           : EntryListItem(
                               key: ValueKey('${activeStyle.name}_${series.id}'),
                               series: series,
+                              deps: deps,
                               heroTagPrefix: heroTagPrefix,
                               listStyle: activeStyle,
                             ),
@@ -180,6 +187,7 @@ class BrowseResultsList extends StatelessWidget {
                     ? EntryListItem(
                         key: ValueKey('${activeStyle.name}_${series.id}'),
                         series: series,
+                        deps: deps,
                         ranking: index + 1,
                         heroTagPrefix: heroTagPrefix,
                         listStyle: activeStyle,
@@ -187,6 +195,7 @@ class BrowseResultsList extends StatelessWidget {
                     : EntryListItem(
                         key: ValueKey('${activeStyle.name}_${series.id}'),
                         series: series,
+                        deps: deps,
                         heroTagPrefix: heroTagPrefix,
                         listStyle: activeStyle,
                       ),

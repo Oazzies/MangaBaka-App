@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/utils/widget_utils.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/features/browse/controllers/browse_controller.dart';
-import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/browse/screens/mix_screen.dart';
@@ -18,6 +18,8 @@ import 'package:mangabaka_app/features/browse/widgets/results/browse_content.dar
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/metadata_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/shared/widgets/app_shortcuts.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
@@ -36,6 +38,7 @@ class BrowseScreenState extends State<BrowseScreen> {
   static final _logger = LoggingService.logger;
 
   late final BrowseController _controller;
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
 
@@ -192,6 +195,7 @@ class BrowseScreenState extends State<BrowseScreen> {
                 onExitSearch: _exitSearch,
                 onScanTap: handleBarcodeScan,
                 onResultSelected: handleResultSelected,
+                prefetch: _listDeps.prefetch,
               ),
               body: NotificationListener<ScrollMetricsNotification>(
                 // Arriving results or a resize can leave the list too short to ever scroll.
@@ -220,28 +224,28 @@ class BrowseScreenState extends State<BrowseScreen> {
       ),
       child: Column(
         children: [
-          // Filters only apply to series, so the other tabs are hidden while any are set.
-          if (_controller.isSearchMode && _controller.currentFilters.isEmpty)
+          if (_controller.isSearchMode) ...[
             BrowseTypeTabs(
               selectedType: _controller.currentType,
               onTypeChanged: _controller.setType,
+              // Filters only apply to series.
+              enabled: _controller.currentFilters.isEmpty,
             ),
-          if (_controller.currentType == BrowseType.series)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: FilterChipsRow(
-                filters: _controller.currentFilters,
-                onFiltersChanged: _controller.updateFilters,
-              ),
+            FilterChipsRow(
+              filters: _controller.currentFilters,
+              onFiltersChanged: _controller.updateFilters,
+              metadata: getIt<MetadataService>(),
+              leading: _controller.totalResults > 0
+                  ? BrowseResultCount(
+                      total: _controller.totalResults,
+                      isCapped: _controller.isTotalCapped,
+                      typeLabel: LocalizationService().translate(
+                        _controller.currentType.name,
+                      ),
+                    )
+                  : null,
             ),
-          if (_controller.isSearchMode && _controller.totalResults > 0)
-            BrowseResultCount(
-              total: _controller.totalResults,
-              isCapped: _controller.isTotalCapped,
-              typeLabel: LocalizationService().translate(
-                _controller.currentType.name,
-              ),
-            ),
+          ],
           BrowseContent(
             searchResults: _controller.searchResults,
             browseType: _controller.currentType,
@@ -254,6 +258,7 @@ class BrowseScreenState extends State<BrowseScreen> {
             onNavigateToResults: _navigateToBrowseResults,
             onNavigateToMix: _navigateToMix,
             onNavigateToDiscoveryQueue: _navigateToDiscoveryQueue,
+            deps: _listDeps,
             // The body above already insets by 12, as the Library does.
             horizontalInset: 0,
           ),
@@ -269,7 +274,10 @@ class BrowseScreenState extends State<BrowseScreen> {
       child: FloatingActionButton(
         onPressed: _controller.scrollToTop,
         backgroundColor: context.colors.accent,
-        child: Icon(Icons.arrow_upward, color: context.colors.background),
+        child: Icon(
+          Icons.arrow_upward_rounded,
+          color: context.colors.background,
+        ),
       ),
     );
   }

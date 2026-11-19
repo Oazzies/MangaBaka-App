@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/services/series_search_service.dart';
 import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
@@ -28,9 +29,9 @@ class BrowseResultsScreen extends StatefulWidget {
 
   final String? genre;
 
-  final String? refineLabel;
+  final String? titleRefinement;
 
-  final String? tag;
+  final String? tagId;
   final double? randomSeed;
 
   const BrowseResultsScreen({
@@ -41,8 +42,8 @@ class BrowseResultsScreen extends StatefulWidget {
     this.publisher,
     this.publisherId,
     this.genre,
-    this.refineLabel,
-    this.tag,
+    this.titleRefinement,
+    this.tagId,
     this.randomSeed,
     super.key,
   });
@@ -64,6 +65,7 @@ class BrowseResultsScreen extends StatefulWidget {
 class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
   static final _logger = LoggingService.logger;
   late final SeriesSearchService _searchService;
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   late final ScrollController _scrollController;
 
   final List<Series> _results = [];
@@ -200,7 +202,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
       publisherId: widget.publisherId,
       publisher: widget.publisher,
       genre: widget.genre,
-      tag: widget.tag,
+      tag: widget.tagId,
       excludeUserId: excludeUserId,
       randomSeed: _currentRandomSeed,
     );
@@ -243,7 +245,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
               sortType: widget.sortType,
               staff: widget.staff,
               publisher: widget.publisher,
-              refineLabel: widget.refineLabel,
+              titleRefinement: widget.titleRefinement,
             ),
           ),
           body: ListenableBuilder(
@@ -269,6 +271,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
                         onRetry: () => _fetchResults(initial: true),
                         onSeriesTap: _navigateToDetail,
                         heroTagPrefix: widget.heroTagPrefix,
+                        deps: _listDeps,
                       ),
                     ),
                   ),
@@ -282,7 +285,7 @@ class _BrowseResultsScreenState extends State<BrowseResultsScreen> {
                   onPressed: _scrollToTop,
                   backgroundColor: context.colors.accent,
                   child: Icon(
-                    Icons.arrow_upward,
+                    Icons.arrow_upward_rounded,
                     color: context.colors.background,
                   ),
                 )

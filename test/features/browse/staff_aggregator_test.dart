@@ -29,11 +29,11 @@ void main() {
       expect(staff.map((s) => s.name), containsAll(['Kentaro Miura', 'Studio Gaga']));
       expect(
         staff.firstWhere((s) => s.name == 'Kentaro Miura').role,
-        'Author',
+        StaffRole.author,
       );
       expect(
         staff.firstWhere((s) => s.name == 'Studio Gaga').role,
-        'Artist',
+        StaffRole.artist,
       );
     });
 
@@ -46,7 +46,7 @@ void main() {
       );
 
       expect(staff, hasLength(1));
-      expect(staff.single.role, StaffAggregator.bothRoles);
+      expect(staff.single.role, StaffRole.authorAndArtist);
     });
 
     test('folds one person across several series into one entry', () {
@@ -92,10 +92,10 @@ void main() {
   group('StaffAggregator.merge', () {
     test('appends people not seen before', () {
       final existing = <Staff>[
-        Staff(id: 1, name: 'A', role: 'Author', seriesCount: null),
+        Staff(id: 1, name: 'A', role: StaffRole.author, seriesCount: null),
       ];
       StaffAggregator.merge(existing, [
-        Staff(id: 2, name: 'B', role: 'Artist', seriesCount: null),
+        Staff(id: 2, name: 'B', role: StaffRole.artist, seriesCount: null),
       ]);
 
       expect(existing.map((s) => s.name), ['A', 'B']);
@@ -103,25 +103,25 @@ void main() {
 
     test('promotes a role when a later page reveals the other credit', () {
       final existing = <Staff>[
-        Staff(id: 1, name: 'A', role: 'Author', seriesCount: null),
+        Staff(id: 1, name: 'A', role: StaffRole.author, seriesCount: null),
       ];
       StaffAggregator.merge(existing, [
-        Staff(id: 1, name: 'A', role: 'Artist', seriesCount: null),
+        Staff(id: 1, name: 'A', role: StaffRole.artist, seriesCount: null),
       ]);
 
       expect(existing, hasLength(1));
-      expect(existing.single.role, StaffAggregator.bothRoles);
+      expect(existing.single.role, StaffRole.authorAndArtist);
     });
 
     test('leaves a matching role untouched', () {
       final existing = <Staff>[
-        Staff(id: 1, name: 'A', role: 'Author', seriesCount: null),
+        Staff(id: 1, name: 'A', role: StaffRole.author, seriesCount: null),
       ];
       StaffAggregator.merge(existing, [
-        Staff(id: 1, name: 'A', role: 'Author', seriesCount: null),
+        Staff(id: 1, name: 'A', role: StaffRole.author, seriesCount: null),
       ]);
 
-      expect(existing.single.role, 'Author');
+      expect(existing.single.role, StaffRole.author);
     });
   });
 }

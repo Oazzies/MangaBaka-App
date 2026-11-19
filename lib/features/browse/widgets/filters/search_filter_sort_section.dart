@@ -20,30 +20,24 @@ class SearchFilterSortSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SettingsGroup(
       children: [
-        SettingsSectionHeader(title: l10n.translate('sort_by')),
-        SettingsGroup(
-          children: [
-            SettingsItem(
-              icon: Icons.sort_outlined,
-              title: l10n.translate('sort_by'),
-              subtitle: filters.sortBy == null
-                  ? l10n.translate('default')
-                  : sortOptions[filters.sortBy!],
-              isFirst: true,
-              isLast: true,
-              onTap: () => SearchFilterDialogs.showSortSelectionDialog(
-                context: context,
-                l10n: l10n,
-                sortOptions: sortOptions,
-                currentFilters: filters,
-                onSortSelected: (val) =>
-                    onFiltersChanged(filters.copyWith(sortBy: val)),
-              ),
-            ),
-          ],
+        SettingsItem(
+          icon: Icons.sort_rounded,
+          title: l10n.translate('sort_by'),
+          subtitle: filters.sortBy == null
+              ? l10n.translate('default')
+              : sortOptions[filters.sortBy!],
+          isFirst: true,
+          isLast: true,
+          onTap: () => SearchFilterDialogs.showSortSelectionDialog(
+            context: context,
+            l10n: l10n,
+            sortOptions: sortOptions,
+            currentFilters: filters,
+            onSortSelected: (val) =>
+                onFiltersChanged(filters.copyWith(sortBy: val)),
+          ),
         ),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/browse/widgets/results/browse_results_list.dart';
 import 'package:mangabaka_app/features/browse/widgets/results/browse_results_status_widgets.dart';
 
@@ -12,6 +13,7 @@ class BrowseResultsBody extends StatelessWidget {
   final VoidCallback onRetry;
   final Function(Series) onSeriesTap;
   final String? heroTagPrefix;
+  final SeriesListDeps deps;
 
   const BrowseResultsBody({
     required this.error,
@@ -21,6 +23,7 @@ class BrowseResultsBody extends StatelessWidget {
     required this.scrollController,
     required this.onRetry,
     required this.onSeriesTap,
+    required this.deps,
     this.heroTagPrefix,
     super.key,
   });
@@ -58,6 +61,7 @@ class BrowseResultsBody extends StatelessWidget {
               shouldShowRanking: sortBy == 'popularity_asc',
               onSeriesTap: onSeriesTap,
               heroTagPrefix: heroTagPrefix,
+              deps: deps,
             ),
     );
   }

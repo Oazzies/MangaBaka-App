@@ -142,9 +142,9 @@ class BrowseEmptyPrompt extends StatelessWidget {
     }
 
     final icon = switch (browseType) {
-      BrowseType.publishers => Icons.business,
-      BrowseType.staff => Icons.people,
-      _ => Icons.search,
+      BrowseType.publishers => Icons.business_rounded,
+      BrowseType.staff => Icons.people_rounded,
+      _ => Icons.search_rounded,
     };
 
     return Center(
@@ -185,10 +185,14 @@ class BrowseErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, color: context.colors.error, size: 48),
+          Icon(
+            Icons.error_outline_rounded,
+            color: context.colors.error,
+            size: 48,
+          ),
           const SizedBox(height: 16),
           Text(
-            error ?? 'An unexpected error occurred.',
+            error ?? l10n.translate('an_error_occurred'),
             style: AppTypography.sans(color: context.colors.error),
             textAlign: TextAlign.center,
           ),

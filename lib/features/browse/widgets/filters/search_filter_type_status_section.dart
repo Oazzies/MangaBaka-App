@@ -23,39 +23,27 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
     required this.statuses,
   });
 
-  void _showFilterDialog(
+  void _showFilterSheet(
     BuildContext context, {
     required String title,
     required List<Map<String, dynamic>> items,
-    required String idKey,
-    required String nameKey,
     required List<String> includes,
     required List<String> excludes,
     required Function(List<String>, List<String>) onApply,
-    bool showSearch = true,
   }) {
-    showAdaptiveSheet(
+    showAdaptiveSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: context.colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: FilterListDialog(
-            title: title,
-            items: items,
-            idKey: idKey,
-            nameKey: nameKey,
-            initialIncludes: includes,
-            initialExcludes: excludes,
-            onApply: onApply,
-            showSearch: showSearch,
-          ),
-        );
-      },
+      builder: (context) => FilterListDialog(
+        title: title,
+        items: items,
+        idKey: 'value',
+        nameKey: 'label',
+        initialIncludes: includes,
+        initialExcludes: excludes,
+        onApply: onApply,
+      ),
     );
   }
 
@@ -112,7 +100,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                   ? l10n.translate('any')
                   : '${filters.type.length} ${l10n.translate('included')}, ${filters.typeNot.length} ${l10n.translate('excluded')}',
               isFirst: true,
-              onTap: () => _showFilterDialog(
+              onTap: () => _showFilterSheet(
                 context,
                 title: l10n.translate('type'),
                 items: types
@@ -120,13 +108,10 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                       (t) => {'value': t, 'label': l10n.translate('type_$t')},
                     )
                     .toList(),
-                idKey: 'value',
-                nameKey: 'label',
                 includes: filters.type,
                 excludes: filters.typeNot,
                 onApply: (inc, exc) =>
                     onFiltersChanged(filters.copyWith(type: inc, typeNot: exc)),
-                showSearch: false,
               ),
             ),
             const SettingsDivider(),
@@ -136,7 +121,7 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
               subtitle: filters.status.isEmpty && filters.statusNot.isEmpty
                   ? l10n.translate('any')
                   : '${filters.status.length} ${l10n.translate('included')}, ${filters.statusNot.length} ${l10n.translate('excluded')}',
-              onTap: () => _showFilterDialog(
+              onTap: () => _showFilterSheet(
                 context,
                 title: l10n.translate('status'),
                 items: statuses
@@ -144,14 +129,11 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                       (s) => {'value': s, 'label': l10n.translate('status_$s')},
                     )
                     .toList(),
-                idKey: 'value',
-                nameKey: 'label',
                 includes: filters.status,
                 excludes: filters.statusNot,
                 onApply: (inc, exc) => onFiltersChanged(
                   filters.copyWith(status: inc, statusNot: exc),
                 ),
-                showSearch: false,
               ),
             ),
             const SettingsDivider(),
@@ -163,20 +145,17 @@ class SearchFilterTypeStatusSection extends StatelessWidget {
                       filters.contentRatingNot.isEmpty
                   ? l10n.translate('any')
                   : '${filters.contentRating.length} ${l10n.translate('included')}, ${filters.contentRatingNot.length} ${l10n.translate('excluded')}',
-              onTap: () => _showFilterDialog(
+              onTap: () => _showFilterSheet(
                 context,
                 title: l10n.translate('content_rating'),
                 items: ContentRatingFilter.all
                     .map((r) => {'value': r, 'label': l10n.translate(r)})
                     .toList(),
-                idKey: 'value',
-                nameKey: 'label',
                 includes: filters.contentRating,
                 excludes: filters.contentRatingNot,
                 onApply: (inc, exc) => onFiltersChanged(
                   filters.copyWith(contentRating: inc, contentRatingNot: exc),
                 ),
-                showSearch: false,
               ),
             ),
             const SettingsDivider(),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
@@ -12,6 +14,7 @@ import 'package:mangabaka_app/features/browse/widgets/mix/mix_seed_section.dart'
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
 import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 
@@ -27,6 +30,7 @@ class _MixScreenState extends State<MixScreen> {
   static const Duration _suggestionDismissDelay = Duration(milliseconds: 150);
 
   late final MixController _controller;
+  late final SeriesListDeps _listDeps = SeriesListDeps.fromLocator();
   late final SeriesAutocompleteService _autocomplete;
 
   final TextEditingController _searchCtrl = TextEditingController();
@@ -34,6 +38,7 @@ class _MixScreenState extends State<MixScreen> {
 
   List<AutocompleteSeriesResult> _suggestions = const [];
   bool _showSuggestions = false;
+  Timer? _suggestionDismissTimer;
 
   @override
   void initState() {
@@ -47,6 +52,7 @@ class _MixScreenState extends State<MixScreen> {
 
   @override
   void dispose() {
+    _suggestionDismissTimer?.cancel();
     _searchCtrl.removeListener(_onSearchChanged);
     _searchFocus.removeListener(_onFocusChanged);
     _controller.dispose();
@@ -57,8 +63,9 @@ class _MixScreenState extends State<MixScreen> {
   }
 
   void _onFocusChanged() {
+    _suggestionDismissTimer?.cancel();
     if (_searchFocus.hasFocus) return;
-    Future.delayed(_suggestionDismissDelay, () {
+    _suggestionDismissTimer = Timer(_suggestionDismissDelay, () {
       if (!mounted || _searchFocus.hasFocus) return;
       setState(() => _showSuggestions = false);
     });
@@ -115,7 +122,6 @@ class _MixScreenState extends State<MixScreen> {
 
   bool get _showResultsHeader =>
       _controller.hasSeeds &&
-      !_controller.isLoading &&
       _controller.error == null &&
       _controller.results.isNotEmpty;
 
@@ -141,11 +147,11 @@ class _MixScreenState extends State<MixScreen> {
           SliverAppBar(
             backgroundColor: context.colors.background,
             surfaceTintColor: Colors.transparent,
-            leading: _backButton(),
+            leading: _backButton(l10n),
             title: _title(l10n),
             centerTitle: true,
             pinned: true,
-            actions: _actions(),
+            actions: _actions(l10n),
           ),
           SliverToBoxAdapter(child: _seedSection(l10n)),
           SliverToBoxAdapter(child: _optionsSection(l10n)),
@@ -174,10 +180,10 @@ class _MixScreenState extends State<MixScreen> {
         backgroundColor: context.colors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: _backButton(),
+        leading: _backButton(l10n),
         title: _title(l10n),
         centerTitle: true,
-        actions: _actions(),
+        actions: _actions(l10n),
       ),
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,8 +218,9 @@ class _MixScreenState extends State<MixScreen> {
     );
   }
 
-  Widget _backButton() => IconButton(
-    icon: Icon(Icons.arrow_back, color: context.colors.text, size: 22),
+  Widget _backButton(LocalizationService l10n) => IconButton(
+    icon: Icon(Icons.arrow_back_rounded, color: context.colors.text, size: 22),
+    tooltip: l10n.translate('back'),
     onPressed: () => Navigator.pop(context),
   );
 
@@ -226,18 +233,18 @@ class _MixScreenState extends State<MixScreen> {
     ),
   );
 
-  List<Widget> _actions() => [
+  List<Widget> _actions(LocalizationService l10n) => [
     if (_controller.hasSeeds)
       Padding(
         padding: const EdgeInsets.only(right: 8),
         child: IconButton(
           icon: Icon(
-            Icons.refresh_rounded,
+            Icons.clear_all_rounded,
             color: context.colors.textMuted,
             size: 22,
           ),
           onPressed: _controller.clearSeeds,
-          tooltip: 'Clear seeds',
+          tooltip: l10n.translate('mix_clear_seeds'),
         ),
       ),
   ];
@@ -256,8 +263,11 @@ class _MixScreenState extends State<MixScreen> {
     onClearSearch: _clearSearchField,
   );
 
-  Widget _optionsSection(LocalizationService l10n) =>
-      MixOptionsSection(controller: _controller, l10n: l10n);
+  Widget _optionsSection(LocalizationService l10n) => MixOptionsSection(
+    controller: _controller,
+    l10n: l10n,
+    auth: _listDeps.auth,
+  );
 
   Widget _dnaSection(LocalizationService l10n) =>
       MixDnaSection(dna: _controller.dna, l10n: l10n);
@@ -265,11 +275,13 @@ class _MixScreenState extends State<MixScreen> {
   Widget _resultsHeader(LocalizationService l10n) => MixResultsHeader(
     l10n: l10n,
     resultCount: _controller.results.length,
+    loading: _controller.isLoading,
   );
 
   Widget _resultsSliver(LocalizationService l10n) => MixResultsSliver(
     controller: _controller,
     l10n: l10n,
     onSeriesTap: _navigateToDetail,
+    deps: _listDeps,
   );
 }

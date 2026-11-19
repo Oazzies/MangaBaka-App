@@ -5,8 +5,11 @@ import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/features/browse/models/browse_type.dart';
 import 'package:mangabaka_app/features/browse/widgets/results/browse_content.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/publisher/models/publisher.dart';
 import 'package:mangabaka_app/features/publisher/widgets/publisher_list_item.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/features/staff/models/staff.dart';
 import 'package:mangabaka_app/features/staff/widgets/staff_list_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,7 +24,15 @@ Publisher _publisher(int i) => Publisher(
   description: 'A publisher of comics.',
 );
 
-Widget _content(BrowseType type, List<dynamic> results) {
+class _NoAuth extends Fake implements ProfileAuthService {}
+
+class _NoLibrary extends Fake implements LibraryService {}
+
+Widget _content(
+  BrowseType type,
+  List<dynamic> results, {
+  bool isLoading = false,
+}) {
   return MaterialApp(
     home: Scaffold(
       body: Column(
@@ -29,7 +40,7 @@ Widget _content(BrowseType type, List<dynamic> results) {
           BrowseContent(
             searchResults: results,
             browseType: type,
-            isLoading: false,
+            isLoading: isLoading,
             isLoadingMore: false,
             error: null,
             scrollController: ScrollController(),
@@ -38,6 +49,11 @@ Widget _content(BrowseType type, List<dynamic> results) {
             onNavigateToResults: (_, __, {type, staff, publisher}) {},
             onNavigateToMix: () {},
             onNavigateToDiscoveryQueue: () {},
+            deps: SeriesListDeps(
+              auth: _NoAuth(),
+              library: _NoLibrary(),
+              prefetch: (_) {},
+            ),
           ),
         ],
       ),
@@ -81,6 +97,19 @@ void main() {
       expect(find.byIcon(Icons.person), findsNothing);
       final tile = tester.widget<ListTile>(find.byType(ListTile));
       expect(tile.leading, isNull);
+    });
+
+    testWidgets('a role renders through its translation key', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StaffListItem(
+              staff: Staff(id: 1, name: 'A', role: StaffRole.authorAndArtist),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('staff_role_author_artist'), findsOneWidget);
     });
   });
 
@@ -130,6 +159,20 @@ void main() {
 
       expect(find.byType(GridView), findsNothing);
       expect(find.byType(ListView), findsOneWidget);
+    });
+
+    testWidgets('a reload keeps the shown results under a progress line', (
+      tester,
+    ) async {
+      DesktopLayout.debugOverride = false;
+
+      await tester.pumpWidget(
+        _content(BrowseType.publishers, [_publisher(1)], isLoading: true),
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(PublisherListItem), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
     });
   });
 }

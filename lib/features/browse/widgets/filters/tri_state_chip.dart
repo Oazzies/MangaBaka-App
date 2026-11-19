@@ -27,12 +27,12 @@ class TriStateChip extends StatelessWidget {
       case TriState.include:
         backgroundColor = context.colors.accent.withValues(alpha: 0.2);
         textColor = context.colors.accent;
-        icon = Icons.check;
+        icon = Icons.check_rounded;
         break;
       case TriState.exclude:
         backgroundColor = context.colors.error.withValues(alpha: 0.2);
         textColor = context.colors.error;
-        icon = Icons.close;
+        icon = Icons.close_rounded;
         break;
       case TriState.off:
         backgroundColor = context.colors.border.withValues(alpha: 0.25);

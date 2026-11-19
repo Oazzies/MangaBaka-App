@@ -19,7 +19,7 @@ Future<void> _searchSeriesImpl(BrowseController self) async {
   self._isLoading = true;
   self._isLoadingMore = false;
   self._error = null;
-  self._results.clear();
+  self._results.restart();
   self._notify();
 
   await _fetchPageImpl(self);
@@ -78,6 +78,7 @@ Future<void> _fetchPageImpl(
       default:
         self._results.markExhausted();
     }
+    if (!isLoadMore) _jumpToTopImpl(self);
     _finishPageImpl(self);
   } catch (e, st) {
     if (generation != self._requestGeneration) return;
@@ -87,7 +88,12 @@ Future<void> _fetchPageImpl(
       e,
       st,
     );
-    if (isLoadMore) self._results.retreatPage();
+    if (isLoadMore) {
+      self._results.retreatPage();
+    } else {
+      // Results from the previous search would read as answers to this one.
+      self._results.clear();
+    }
     self._isLoading = false;
     self._isLoadingMore = false;
     self._error = ErrorMessages.describe(e);
@@ -101,6 +107,10 @@ bool _isStaleImpl(BrowseController self, int generation, String label) {
     'Discarding stale $label results for superseded search',
   );
   return true;
+}
+
+void _jumpToTopImpl(BrowseController self) {
+  if (self.scrollController.hasClients) self.scrollController.jumpTo(0);
 }
 
 void _finishPageImpl(BrowseController self) {

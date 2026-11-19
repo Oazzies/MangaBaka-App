@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
-import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/features/browse/controllers/mix_controller.dart';
 import 'package:mangabaka_app/features/browse/widgets/mix/mix_section_header.dart';
 import 'package:mangabaka_app/features/browse/widgets/mix/mix_seed_chip.dart';
+import 'package:mangabaka_app/features/browse/widgets/mix/mix_seed_search_field.dart';
 import 'package:mangabaka_app/features/browse/widgets/mix/mix_seed_suggestions.dart';
-import 'package:mangabaka_app/features/browse/widgets/search/search_suggestions_panel.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class MixSeedSection extends StatelessWidget {
   final MixController controller;
@@ -75,20 +72,15 @@ class MixSeedSection extends StatelessWidget {
                 ),
               ),
             ),
-          _SeedSearchField(
+          MixSeedSearchField(
             controller: searchController,
             focusNode: searchFocus,
             hintText: l10n.translate('mix_add_seed'),
+            suggestions: suggestions,
+            showSuggestions: showSuggestions,
+            onSuggestionSelected: onSuggestionSelected,
             onClear: onClearSearch,
           ),
-          if (showSuggestions && suggestions.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            SearchSuggestionsPanel(
-              results: suggestions,
-              onResultTapped: onSuggestionSelected,
-              showSuggestions: true,
-            ),
-          ],
           // The API can only suggest further seeds once two are chosen.
           if (controller.seeds.length >= 2) ...[
             const SizedBox(height: 12),
@@ -99,65 +91,6 @@ class MixSeedSection extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _SeedSearchField extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String hintText;
-  final VoidCallback onClear;
-
-  const _SeedSearchField({
-    required this.controller,
-    required this.focusNode,
-    required this.hintText,
-    required this.onClear,
-  });
-
-  static final _border = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(AppConstants.pillRadius),
-    borderSide: BorderSide.none,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      focusNode: focusNode,
-      style: AppTypography.sans(color: context.colors.text, fontSize: 16),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: AppTypography.sans(
-          color: context.colors.textMuted,
-          fontSize: 16,
-        ),
-        prefixIcon: Icon(Icons.search, color: context.colors.text, size: 22),
-        prefixIconConstraints: const BoxConstraints(
-          minWidth: 48,
-          minHeight: 48,
-        ),
-        suffixIcon: controller.text.isEmpty
-            ? null
-            : IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: context.colors.textMuted,
-                  size: 18,
-                ),
-                onPressed: onClear,
-              ),
-        filled: true,
-        fillColor: context.colors.surfaceRaised,
-        border: _border,
-        enabledBorder: _border,
-        focusedBorder: _border,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 14,
-          horizontal: 20,
-        ),
       ),
     );
   }

@@ -44,7 +44,7 @@ class FilterListItem extends StatelessWidget {
               ),
               _buildActionIcon(
                 context,
-                icon: Icons.check_circle,
+                icon: Icons.check_rounded,
                 isActive: state == TriState.include,
                 activeColor: context.colors.accent,
                 onTap: onToggleInclude,
@@ -52,7 +52,7 @@ class FilterListItem extends StatelessWidget {
               const SizedBox(width: 8),
               _buildActionIcon(
                 context,
-                icon: Icons.cancel,
+                icon: Icons.close_rounded,
                 isActive: state == TriState.exclude,
                 activeColor: context.colors.error,
                 onTap: onToggleExclude,
@@ -75,10 +75,10 @@ class FilterListItem extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isActive
-              ? activeColor.withValues(alpha: 0.1)
+              ? activeColor.withValues(alpha: 0.15)
               : Colors.transparent,
           shape: BoxShape.circle,
         ),
@@ -86,8 +86,8 @@ class FilterListItem extends StatelessWidget {
           icon,
           color: isActive
               ? activeColor
-              : context.colors.border.withValues(alpha: 0.3),
-          size: 26,
+              : context.colors.textMuted.withValues(alpha: 0.5),
+          size: 22,
         ),
       ),
     );

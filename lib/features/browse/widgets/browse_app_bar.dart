@@ -7,6 +7,7 @@ import 'package:mangabaka_app/features/browse/widgets/filters/publisher_sort_she
 import 'package:mangabaka_app/features/browse/widgets/search/mb_search_bar.dart';
 import 'package:mangabaka_app/features/profile/screens/settings_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -18,6 +19,7 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onExitSearch;
   final VoidCallback onScanTap;
   final ValueChanged<AutocompleteSeriesResult> onResultSelected;
+  final SeriesPrefetch prefetch;
 
   /// A full-width field over a centred list looks detached from it.
   static const double _maxSearchWidth = 800;
@@ -31,6 +33,7 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onExitSearch,
     required this.onScanTap,
     required this.onResultSelected,
+    required this.prefetch,
   });
 
   @override
@@ -64,6 +67,7 @@ class BrowseAppBar extends StatelessWidget implements PreferredSizeWidget {
               : null,
           onResultSelected: onResultSelected,
           onChanged: controller.updateSearchQuery,
+          prefetch: prefetch,
           onSubmitted: (_) => controller.searchSeries(),
           onFilterApplied: controller.updateFilters,
           onBackTap: onExitSearch,
@@ -111,7 +115,7 @@ class BrowseResultCount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0, bottom: 4.0),
+      padding: const EdgeInsets.only(left: 4, right: 12),
       child: Row(
         children: [
           Icon(

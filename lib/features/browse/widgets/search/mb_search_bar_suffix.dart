@@ -32,9 +32,9 @@ class MBSearchBarSuffix extends StatelessWidget {
         children: [
           if (controllerText.isNotEmpty) ...[
             WidgetUtils.tooltip(
-              message: LocalizationService().translate('reset'),
+              message: LocalizationService().translate('clear'),
               child: IconButton(
-                icon: Icon(Icons.clear, color: context.colors.text),
+                icon: Icon(Icons.close_rounded, color: context.colors.text),
                 onPressed: onClear,
                 constraints: const BoxConstraints(),
               ),
@@ -45,7 +45,10 @@ class MBSearchBarSuffix extends StatelessWidget {
             WidgetUtils.tooltip(
               message: LocalizationService().translate('scan_isbn_barcode'),
               child: IconButton(
-                icon: Icon(Icons.qr_code_scanner, color: context.colors.text),
+                icon: Icon(
+                  Icons.qr_code_scanner_rounded,
+                  color: context.colors.text,
+                ),
                 onPressed: onScanTap,
                 constraints: const BoxConstraints(),
               ),
@@ -57,7 +60,7 @@ class MBSearchBarSuffix extends StatelessWidget {
               message: LocalizationService().translate('filters'),
               child: IconButton(
                 icon: Icon(
-                  Icons.filter_list,
+                  Icons.filter_list_rounded,
                   color: currentFilters.toMap().isNotEmpty
                       ? context.colors.accent
                       : context.colors.text,

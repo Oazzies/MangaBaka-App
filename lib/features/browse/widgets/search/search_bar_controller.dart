@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.dart';
@@ -51,6 +53,7 @@ class SearchBarController extends ChangeNotifier {
   bool _isSuppressed = false;
   String _suppressedQuery = '';
   bool _disposed = false;
+  Timer? _blurTimer;
 
   List<AutocompleteSeriesResult> get results => _results;
 
@@ -62,6 +65,7 @@ class SearchBarController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _blurTimer?.cancel();
     focusNode.removeListener(_onFocusChange);
     super.dispose();
   }
@@ -222,6 +226,7 @@ class SearchBarController extends ChangeNotifier {
   }
 
   void _onFocusChange() {
+    _blurTimer?.cancel();
     if (focusNode.hasFocus) {
       _isSuppressed = false;
       if (_results.isNotEmpty && suggestionsEnabled()) _showSuggestions = true;
@@ -229,8 +234,8 @@ class SearchBarController extends ChangeNotifier {
       return;
     }
 
-    Future.delayed(blurDismissDelay, () {
-      if (_disposed || focusNode.hasFocus) return;
+    _blurTimer = Timer(blurDismissDelay, () {
+      if (focusNode.hasFocus) return;
       _showSuggestions = false;
       _clearGhost();
       _selectedIndex = -1;

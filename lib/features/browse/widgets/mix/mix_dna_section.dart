@@ -33,7 +33,6 @@ class MixDnaSection extends StatelessWidget {
           MixSectionHeader(
             icon: Icons.biotech_rounded,
             title: l10n.translate('mix_dna'),
-            trailing: l10n.translate('mix_dna_subtitle'),
           ),
           const SizedBox(height: 12),
           Container(

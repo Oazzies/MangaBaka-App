@@ -6,31 +6,29 @@ import 'package:mangabaka_app/features/staff/models/staff.dart';
 class StaffAggregator {
   StaffAggregator._();
 
-  static const String bothRoles = 'Author / Artist';
-
   /// [query] filters by name: a matched series brings in every collaborator on it.
   static List<Staff> fromSeries(List<Series> series, String query) {
     final byName = <String, Staff>{};
     final needle = SearchUtils.prepare(query);
 
-    void upsert(String name, String role) {
+    void upsert(String name, StaffRole role) {
       if (!needle.isEmpty && !needle.matches(name)) return;
       final existing = byName[name];
       byName[name] = Staff(
         // The payload has no staff id, so the name hash keeps identity stable across pages.
         id: existing?.id ?? name.hashCode,
         name: name,
-        role: _mergeRoles(existing?.role, role),
+        role: existing?.role?.mergedWith(role) ?? role,
         seriesCount: null,
       );
     }
 
     for (final entry in series) {
       for (final author in entry.authors) {
-        upsert(author, 'Author');
+        upsert(author, StaffRole.author);
       }
       for (final artist in entry.artists) {
-        upsert(artist, 'Artist');
+        upsert(artist, StaffRole.artist);
       }
     }
 
@@ -50,14 +48,9 @@ class StaffAggregator {
       existing[index] = Staff(
         id: current.id,
         name: current.name,
-        role: bothRoles,
+        role: StaffRole.authorAndArtist,
         seriesCount: null,
       );
     }
-  }
-
-  static String _mergeRoles(String? existing, String incoming) {
-    if (existing == null) return incoming;
-    return existing == incoming ? existing : bothRoles;
   }
 }

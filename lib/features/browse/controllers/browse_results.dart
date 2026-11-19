@@ -26,6 +26,9 @@ class BrowseResults {
   bool _isTotalCapped = false;
   bool get isTotalCapped => _isTotalCapped;
 
+  /// Set by [restart]: the lists still show the previous search until its first page lands.
+  bool _replacePending = false;
+
   List<dynamic> forType(BrowseType type) {
     switch (type) {
       case BrowseType.series:
@@ -39,7 +42,8 @@ class BrowseResults {
     }
   }
 
-  int loadedCount(BrowseType type) => forType(type).length;
+  int loadedCount(BrowseType type) =>
+      _replacePending ? 0 : forType(type).length;
 
   void clear() {
     _series = [];
@@ -48,6 +52,22 @@ class BrowseResults {
     _page = 1;
     _hasMore = true;
     _total = 0;
+    _isTotalCapped = false;
+    _replacePending = false;
+  }
+
+  void restart() {
+    _page = 1;
+    _hasMore = true;
+    _replacePending = true;
+  }
+
+  void _takeReplacement() {
+    if (!_replacePending) return;
+    _replacePending = false;
+    _series = [];
+    _publishers = [];
+    _staff = [];
     _isTotalCapped = false;
   }
 
@@ -58,9 +78,13 @@ class BrowseResults {
     if (_page > 1) _page--;
   }
 
-  void markExhausted() => _hasMore = false;
+  void markExhausted() {
+    _takeReplacement();
+    _hasMore = false;
+  }
 
   void addSeries(BrowsePage<Series> page) {
+    _takeReplacement();
     _series = [..._series, ...page.items];
     _total = page.total;
     _isTotalCapped = page.isTotalCapped;
@@ -68,6 +92,7 @@ class BrowseResults {
   }
 
   void addPublishers(BrowsePage<Publisher> page) {
+    _takeReplacement();
     _publishers = [..._publishers, ...page.items];
     _total = page.total;
     _hasMore = page.hasMore;
@@ -75,6 +100,7 @@ class BrowseResults {
 
   /// Merges by person, not appends: later pages add roles, so the total counts distinct people.
   void addStaff(BrowsePage<Staff> page) {
+    _takeReplacement();
     final updated = List<Staff>.from(_staff);
     StaffAggregator.merge(updated, page.items);
     _staff = updated;

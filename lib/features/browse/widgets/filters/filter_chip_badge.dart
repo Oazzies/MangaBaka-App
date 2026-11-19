@@ -78,8 +78,7 @@ String filterSortLabel(String sortBy, LocalizationService l10n) {
   }
 }
 
-List<Widget> buildFilterPairChips(
-  BuildContext context, {
+List<Widget> buildFilterPairChips({
   required List<String> include,
   required List<String> exclude,
   required String Function(String) labelFor,

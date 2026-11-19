@@ -246,5 +246,42 @@ void main() {
 
       expect(controller.searchResults, isEmpty);
     });
+
+    test('previous results stay until the next search lands', () async {
+      final next = Completer<SeriesSearchResult>();
+      mockSearchService.onSearch = (query) => query == 'first'
+          ? Future.value(
+              SeriesSearchResult(series: [makeSeries('1', 'First')], total: 1),
+            )
+          : next.future;
+
+      controller.updateSearchQuery('first');
+      await controller.searchSeries();
+      controller.updateSearchQuery('second');
+      final search = controller.searchSeries();
+
+      expect(controller.isLoading, isTrue);
+      expect(controller.searchResults.map((s) => s.title), ['First']);
+      expect(controller.totalResults, 1);
+
+      next.complete(
+        SeriesSearchResult(series: [makeSeries('2', 'Second')], total: 1),
+      );
+      await search;
+      expect(controller.searchResults.map((s) => s.title), ['Second']);
+    });
+
+    test('a failed search drops the previous results', () async {
+      mockSearchService.mockResults = [makeSeries('1', 'First')];
+      controller.updateSearchQuery('first');
+      await controller.searchSeries();
+
+      mockSearchService.throwError = true;
+      controller.updateSearchQuery('second');
+      await controller.searchSeries();
+
+      expect(controller.searchResults, isEmpty);
+      expect(controller.error, isNotNull);
+    });
   });
 }

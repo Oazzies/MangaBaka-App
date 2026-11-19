@@ -1,10 +1,9 @@
-import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_form.dart';
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/profile/widgets/settings/settings_components.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/filter_list_dialog.dart';
-import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 class SearchFilterCategoriesSection extends StatelessWidget {
   final SearchFilters filters;
@@ -22,9 +21,10 @@ class SearchFilterCategoriesSection extends StatelessWidget {
     required this.tags,
   });
 
-  void _showFilterDialog(
+  void _showFilterForm(
     BuildContext context, {
     required String title,
+    required String searchHint,
     required List<Map<String, dynamic>> items,
     required String idKey,
     required String nameKey,
@@ -32,27 +32,20 @@ class SearchFilterCategoriesSection extends StatelessWidget {
     required List<String> excludes,
     required Function(List<String>, List<String>) onApply,
   }) {
-    showAdaptiveSheet(
+    showAdaptiveForm<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: context.colors.background,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: FilterListDialog(
-            title: title,
-            items: items,
-            idKey: idKey,
-            nameKey: nameKey,
-            initialIncludes: includes,
-            initialExcludes: excludes,
-            onApply: onApply,
-          ),
-        );
-      },
+      title: title,
+      scrollable: false,
+      builder: (context) => FilterListDialog(
+        title: title,
+        searchHint: searchHint,
+        items: items,
+        idKey: idKey,
+        nameKey: nameKey,
+        initialIncludes: includes,
+        initialExcludes: excludes,
+        onApply: onApply,
+      ),
     );
   }
 
@@ -71,9 +64,10 @@ class SearchFilterCategoriesSection extends StatelessWidget {
                   ? l10n.translate('any')
                   : '${filters.genre.length} ${l10n.translate('included')}, ${filters.genreNot.length} ${l10n.translate('excluded')}',
               isFirst: true,
-              onTap: () => _showFilterDialog(
+              onTap: () => _showFilterForm(
                 context,
                 title: l10n.translate('genres'),
+                searchHint: l10n.translate('search_genres'),
                 items: genres,
                 idKey: 'value',
                 nameKey: 'label',
@@ -92,9 +86,10 @@ class SearchFilterCategoriesSection extends StatelessWidget {
                   ? l10n.translate('any')
                   : '${filters.tag.length} ${l10n.translate('included')}, ${filters.tagNot.length} ${l10n.translate('excluded')}',
               isLast: true,
-              onTap: () => _showFilterDialog(
+              onTap: () => _showFilterForm(
                 context,
                 title: l10n.translate('tags'),
+                searchHint: l10n.translate('search_tags'),
                 items: tags,
                 idKey: 'id',
                 nameKey: 'name',

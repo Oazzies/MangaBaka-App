@@ -9,10 +9,14 @@ class BrowseTypeTabs extends StatelessWidget {
   final BrowseType selectedType;
   final Function(BrowseType) onTypeChanged;
 
+  /// False pins the selection: the other tabs stay visible but take no taps.
+  final bool enabled;
+
   const BrowseTypeTabs({
     super.key,
     required this.selectedType,
     required this.onTypeChanged,
+    this.enabled = true,
   });
 
   static const _tabs = [
@@ -35,7 +39,7 @@ class BrowseTypeTabs extends StatelessWidget {
               _Pill(
                 label: l10n.translate(type.name),
                 selected: selectedType == type,
-                onTap: () => onTypeChanged(type),
+                onTap: enabled ? () => onTypeChanged(type) : null,
               ),
           ],
         ),
@@ -47,7 +51,7 @@ class BrowseTypeTabs extends StatelessWidget {
 class _Pill extends StatelessWidget {
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _Pill({
     required this.label,
@@ -57,6 +61,9 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final idleText = onTap == null
+        ? context.colors.textMuted.withValues(alpha: 0.5)
+        : context.colors.text;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -75,7 +82,7 @@ class _Pill extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             style: AppTypography.display(
               fontSize: 13,
-              color: selected ? context.colors.onAccent : context.colors.text,
+              color: selected ? context.colors.onAccent : idleText,
             ),
             child: Text(label.toUpperCase()),
           ),

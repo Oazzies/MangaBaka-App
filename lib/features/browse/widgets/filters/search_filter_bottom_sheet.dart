@@ -14,19 +14,18 @@ import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_cate
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_type_status_section.dart';
 import 'package:mangabaka_app/features/browse/widgets/filters/search_filter_sort_section.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
+import 'package:mangabaka_app/core/widgets/adaptive_sheet.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_spinner.dart';
 
 class SearchFilterBottomSheet extends StatefulWidget {
   final SearchFilters initialFilters;
   final ValueChanged<SearchFilters> onApply;
-  final bool isDialog;
   final bool showLibrarySorts;
 
   const SearchFilterBottomSheet({
     super.key,
     required this.initialFilters,
     required this.onApply,
-    this.isDialog = false,
     this.showLibrarySorts = false,
   });
 
@@ -84,35 +83,22 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
       builder: (context, _) {
         final l10n = LocalizationService();
         final sortOptions = _getSortOptions(l10n);
+        final isDialog = prefersDialogSheet(context);
 
         return Container(
-          height: widget.isDialog
-              ? null
-              : MediaQuery.of(context).size.height * 0.9,
+          height: isDialog ? null : MediaQuery.sizeOf(context).height * 0.9,
           decoration: BoxDecoration(
-            color: widget.isDialog
+            color: isDialog
                 ? context.colors.surface
                 : context.colors.background,
-            borderRadius: widget.isDialog
+            borderRadius: isDialog
                 ? BorderRadius.circular(24)
                 : const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!widget.isDialog) ...[
-                const SizedBox(height: 12),
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: context.colors.surfaceRaised,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-              ],
+              const AdaptiveSheetHandle(width: 40, topSpacing: 12),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: Row(
@@ -185,7 +171,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                         child: Center(child: MbSpinner()),
                       )
                     : ListView(
-                        shrinkWrap: widget.isDialog,
+                        shrinkWrap: isDialog,
                         padding: EdgeInsets.only(
                           left: AppConstants.horizontalPadding,
                           right: AppConstants.horizontalPadding,

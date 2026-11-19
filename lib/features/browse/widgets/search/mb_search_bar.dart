@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.dart';
 import 'package:mangabaka_app/features/browse/models/search_filters.dart';
@@ -7,12 +6,13 @@ import 'package:mangabaka_app/features/browse/widgets/search/autocomplete_rankin
 import 'package:mangabaka_app/features/browse/widgets/search/search_bar_shell.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/services/series_autocomplete_service.dart';
-import 'package:mangabaka_app/features/series/services/series_service.dart';
+import 'package:mangabaka_app/features/series/services/series_list_deps.dart';
 
 export 'package:mangabaka_app/core/widgets/search/ghost_text_editing_controller.dart';
 
 class MBSearchBar extends StatefulWidget {
   final ValueChanged<String> onChanged;
+  final SeriesPrefetch prefetch;
   final ValueChanged<String>? onSubmitted;
   final SearchFilters? initialFilters;
   final ValueChanged<SearchFilters>? onFilterApplied;
@@ -29,6 +29,7 @@ class MBSearchBar extends StatefulWidget {
   const MBSearchBar({
     super.key,
     required this.onChanged,
+    required this.prefetch,
     this.onSubmitted,
     this.initialFilters,
     this.onFilterApplied,
@@ -89,8 +90,7 @@ class _MBSearchBarState extends State<MBSearchBar> {
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       onResultSelected: widget.onResultSelected,
-      onResultHovered: (result) =>
-          getIt<SeriesService>().fetchSeries(result.id.toString()),
+      onResultHovered: (result) => widget.prefetch(result.id.toString()),
       onBackTap: widget.onBackTap,
       onScanTap: widget.onScanTap,
       initialFilters: widget.initialFilters,
