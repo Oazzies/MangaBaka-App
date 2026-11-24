@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/features/updates/services/update_service.dart';
 import 'package:mangabaka_app/features/updates/models/app_release.dart';
 
@@ -27,6 +29,16 @@ Map<String, dynamic> _releaseJson({
 http.Client _clientWith(int status, Object body) => MockClient((request) async =>
     http.Response(jsonEncode(body), status,
         headers: {'content-type': 'application/json'}));
+
+class _PubspecBundle extends CachingAssetBundle {
+  final String pubspec;
+
+  _PubspecBundle(this.pubspec);
+
+  @override
+  Future<ByteData> load(String key) async =>
+      ByteData.sublistView(utf8.encode(pubspec));
+}
 
 void main() {
   group('UpdateService.fetchLatestRelease', () {
@@ -76,6 +88,8 @@ void main() {
   });
 
   group('UpdateService.checkForUpdate', () {
+    setUp(() => AppConstants.loadAppVersion(_PubspecBundle('version: 1.0.0+1')));
+
     test('returns release when newer than installed', () async {
       final client = _clientWith(200, [_releaseJson(tag: 'v99.0.0')]);
       final svc = UpdateService(client: client);
@@ -86,6 +100,15 @@ void main() {
 
     test('returns null when same as installed', () async {
       final client = _clientWith(200, [_releaseJson(tag: 'v0.1.0')]);
+      final svc = UpdateService(client: client);
+      final result = await svc.checkForUpdate();
+      expect(result, isNull);
+      svc.dispose();
+    });
+
+    test('returns null while the installed version is unknown', () async {
+      await AppConstants.loadAppVersion(_PubspecBundle('name: app'));
+      final client = _clientWith(200, [_releaseJson(tag: 'v99.0.0')]);
       final svc = UpdateService(client: client);
       final result = await svc.checkForUpdate();
       expect(result, isNull);

@@ -142,7 +142,7 @@ jobs:
   publish-android:
     name: Deploy to Google Play
     needs: get-release-info
-    if: ${{ github.event_name == 'release' || github.event.inputs.publish_android == true }}
+    if: ${{ github.event_name == 'release' || inputs.publish_android }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code at Target Tag
@@ -242,7 +242,7 @@ jobs:
   publish-ios:
     name: Deploy to Apple (iOS)
     needs: get-release-info
-    if: ${{ github.event_name == 'release' || github.event.inputs.publish_ios == true }}
+    if: ${{ github.event_name == 'release' || inputs.publish_ios }}
     runs-on: macos-latest
     steps:
       - name: Checkout Code at Target Tag
@@ -300,10 +300,15 @@ jobs:
           p12-password: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
 
       - name: Install iOS Provisioning Profile
-        if: env.SKIP_PUBLISH != 'true' && secrets.IOS_PROVISIONING_PROFILE_BASE64 != ''
+        if: env.SKIP_PUBLISH != 'true'
         env:
           IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
         run: |
+          # The secrets context is not allowed in a step `if:`, so the empty check lives here.
+          if [ -z "$IOS_PROVISIONING_PROFILE_BASE64" ]; then
+            echo "No iOS provisioning profile secret; skipping."
+            exit 0
+          fi
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/appstore.mobileprovision
 
@@ -354,7 +359,7 @@ jobs:
   publish-macos:
     name: Deploy to Mac App Store
     needs: get-release-info
-    if: ${{ github.event_name == 'release' || github.event.inputs.publish_macos == true }}
+    if: ${{ github.event_name == 'release' || inputs.publish_macos }}
     runs-on: macos-latest
     steps:
       - name: Checkout Code at Target Tag
@@ -416,10 +421,14 @@ jobs:
           p12-password: ${{ secrets.MACOS_INSTALLER_CERTIFICATE_PASSWORD }}
 
       - name: Install macOS Provisioning Profile
-        if: env.SKIP_PUBLISH != 'true' && secrets.MACOS_PROVISIONING_PROFILE_BASE64 != ''
+        if: env.SKIP_PUBLISH != 'true'
         env:
           MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
         run: |
+          if [ -z "$MACOS_PROVISIONING_PROFILE_BASE64" ]; then
+            echo "No macOS provisioning profile secret; skipping."
+            exit 0
+          fi
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "$MACOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_appstore.provisionprofile
 
@@ -456,7 +465,7 @@ jobs:
   publish-windows:
     name: Deploy to Microsoft Store
     needs: get-release-info
-    if: ${{ github.event_name == 'release' || github.event.inputs.publish_windows == true }}
+    if: ${{ github.event_name == 'release' || inputs.publish_windows }}
     runs-on: windows-latest
     steps:
       - name: Checkout Code at Target Tag

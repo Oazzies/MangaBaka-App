@@ -71,6 +71,8 @@ class UpdateService {
   }
 
   Future<AppRelease?> checkForUpdate() async {
+    // An unread version would parse as 0.0.0 and make every release look newer.
+    if (AppConstants.appVersion.isEmpty) return null;
     final latest = await fetchLatestRelease();
     if (latest == null) return null;
 

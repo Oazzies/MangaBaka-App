@@ -571,14 +571,14 @@ jobs:
           cp assets/mangabaka512.png "$DEB_DIR"/usr/share/icons/hicolor/512x512/apps/mangabaka.png
 
           cat <<EOF > "$DEB_DIR"/DEBIAN/control
-Package: mangabaka
-Version: ${VERSION_CLEAN}
-Section: utils
-Priority: optional
-Architecture: amd64
-Maintainer: MangaBaka <dev.oazzies.mangabaka>
-Description: MangaBaka - Official MangaBaka desktop app
-EOF
+          Package: mangabaka
+          Version: ${VERSION_CLEAN}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: MangaBaka <dev.oazzies.mangabaka>
+          Description: MangaBaka - Official MangaBaka desktop app
+          EOF
 
           dpkg-deb --build "$DEB_DIR" "build/linux/x64/release/linux-mangabaka-app-v${VERSION_CLEAN}.deb"
 

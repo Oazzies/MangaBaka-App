@@ -11,6 +11,10 @@ import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/utils/link_chip.dart';
 import 'package:mangabaka_app/features/series/widgets/chip.dart';
 
+final Map<String, String> _imageHeaders = {
+  'User-Agent': AppConstants.userAgent,
+};
+
 class WidgetUtils {
   static Widget responsiveConstraint(Widget child, {double maxWidth = 800}) {
     return Align(
@@ -78,7 +82,7 @@ class WidgetUtils {
           )
         : CachedNetworkImage(
             imageUrl: url,
-            httpHeaders: const {'User-Agent': AppConstants.userAgent},
+            httpHeaders: _imageHeaders,
             width: width,
             height: height,
             fit: fit,

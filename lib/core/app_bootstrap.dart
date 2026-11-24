@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:mangabaka_app/core/constants/app_constants.dart';
 import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
@@ -40,6 +41,12 @@ class AppBootstrap {
 
     await LoggingService.setup();
     _installErrorHandlers();
+
+    try {
+      await AppConstants.loadAppVersion();
+    } catch (e, st) {
+      LoggingService.logger.severe('Could not read the app version', e, st);
+    }
 
     // A missing .env must not abort startup; sign-in then reports MISSING_CONFIG.
     try {

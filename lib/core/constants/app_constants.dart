@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppConstants {
   static const String appName = 'MangaBaka';
-  static const String appVersion = '0.4.2';
+
+  /// Read from the bundled pubspec.yaml at startup, so a version bump only touches the pubspec.
+  static String get appVersion => _appVersion;
+  static String _appVersion = '';
+
+  static Future<void> loadAppVersion([AssetBundle? bundle]) async {
+    final pubspec = await (bundle ?? rootBundle).loadString('pubspec.yaml');
+    _appVersion = parsePubspecVersion(pubspec) ?? '';
+  }
+
+  /// The `version:` value without its `+build` number.
+  static String? parsePubspecVersion(String pubspec) => RegExp(
+    r'^version:\s*([^\s+]+)',
+    multiLine: true,
+  ).firstMatch(pubspec)?.group(1);
+
   static const String baseApiUrl = 'https://api.mangabaka.org/v1';
   static const String baseApiUrlV2 = 'https://api.mangabaka.org/v2';
 
@@ -11,7 +27,7 @@ class AppConstants {
   static const String githubReleasesApi =
       'https://api.github.com/repos/$githubOwner/$githubRepo/releases';
   static const String authBaseUrl = 'https://mangabaka.org/auth/oauth2';
-  static const String userAgent =
+  static String get userAgent =>
       '$appName/$appVersion (oazziesmail@gmail.com)';
   static const int networkTimeoutSeconds = 30;
   static const int maxRetries = 3;
