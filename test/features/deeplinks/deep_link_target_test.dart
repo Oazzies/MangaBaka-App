@@ -99,6 +99,7 @@ void main() {
       expect((parse('mangabaka://stacks/35') as StackTarget).id, 35);
       expect(parse('https://mangabaka.org/stacks/oops'), isA<StackHubTarget>());
       expect(parse('https://mangabaka.org/my/stacks'), isA<MyStacksTarget>());
+      expect(parse('https://mangabaka.org/my/lists'), isA<MyListsTarget>());
     });
   });
 

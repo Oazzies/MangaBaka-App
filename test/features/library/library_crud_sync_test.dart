@@ -92,6 +92,7 @@ void main() {
         SharedPreferences.setMockInitialValues({
           AppConstants.libraryCursorKey: 'saved',
           librarySeriesDataKey: librarySeriesDataVersion,
+          libraryFeedDataKey: libraryFeedDataVersion,
         });
         await h.withServer(
           (_) async => feed([], cursor: 'next'),
@@ -155,6 +156,8 @@ void main() {
         await h.seedEntry('42');
         SharedPreferences.setMockInitialValues({
           AppConstants.libraryCursorKey: 'saved',
+          librarySeriesDataKey: librarySeriesDataVersion,
+          libraryFeedDataKey: libraryFeedDataVersion,
         });
         await h.withServer(
           (_) async => feed([
@@ -172,6 +175,8 @@ void main() {
       test('a rejected cursor rescans from the start', () async {
         SharedPreferences.setMockInitialValues({
           AppConstants.libraryCursorKey: 'stale',
+          librarySeriesDataKey: librarySeriesDataVersion,
+          libraryFeedDataKey: libraryFeedDataVersion,
         });
         await h.withServer(
           (r) async => r.url.path.endsWith('/series/batch')

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
+import 'package:mangabaka_app/features/lists/widgets/series_lists_row.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/widgets/mb_card.dart';
 import 'package:mangabaka_app/features/series/widgets/series_my_list_rows.dart';
@@ -17,6 +19,8 @@ class SeriesMyListCard extends StatelessWidget {
   final VoidCallback onUpdateVolume;
   final VoidCallback onUpdateRating;
   final VoidCallback onUpdateNote;
+  final LibraryListsService? listsService;
+  final VoidCallback? onEditLists;
 
   const SeriesMyListCard({
     super.key,
@@ -28,6 +32,8 @@ class SeriesMyListCard extends StatelessWidget {
     required this.onUpdateVolume,
     required this.onUpdateRating,
     required this.onUpdateNote,
+    this.listsService,
+    this.onEditLists,
   });
 
   int? _parseTotal(String raw) {
@@ -96,6 +102,14 @@ class SeriesMyListCard extends StatelessWidget {
             onTap: onUpdateRating,
             statusColor: statusColor,
           ),
+          if (listsService != null && onEditLists != null) ...[
+            const SizedBox(height: 16),
+            SeriesListsRow(
+              service: listsService!,
+              seriesId: series.id,
+              onTap: onEditLists!,
+            ),
+          ],
           const SizedBox(height: 16),
           SeriesNoteRow(
             label: l10n.translate('notes'),

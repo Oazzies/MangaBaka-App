@@ -20,6 +20,7 @@ import 'package:mangabaka_app/features/library/widgets/library_app_bar.dart';
 import 'package:mangabaka_app/features/library/widgets/library_body.dart';
 import 'package:mangabaka_app/features/library/widgets/library_status_banners.dart';
 import 'package:mangabaka_app/features/library/widgets/library_tab_bar.dart';
+import 'package:mangabaka_app/features/lists/screens/library_lists_screen.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -257,6 +258,9 @@ class LibraryScreenState extends State<LibraryScreen>
       onQueryChanged: updateQuery,
       onFiltersChanged: updateFilters,
       onResultSelected: handleResultSelected,
+      onOpenLists: _session.isLoggedIn
+          ? () => LibraryListsScreen.open(context)
+          : null,
       bottom: _buildTabBar(context),
     );
   }

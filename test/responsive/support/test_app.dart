@@ -24,6 +24,7 @@ import 'package:mangabaka_app/features/browse/services/mix_service.dart';
 import 'package:mangabaka_app/features/collections/services/collection_service.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
 import 'package:mangabaka_app/features/news/services/news_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/profile/services/snapshot_service.dart';
@@ -151,7 +152,15 @@ Future<FakeBackend> setUpEnvironment(Environment env) async {
     ..registerLazySingleton<StackStatusController>(
       StackStatusController.new,
       dispose: (c) => c.dispose(),
+    )
+    ..registerLazySingleton<LibraryListsService>(
+      () => LibraryListsService(database: getIt<AppDatabase>()),
     );
+  if (env.populated) {
+    await getIt<AppDatabase>().libraryListsDao.setMemberships(
+      Fixtures.libraryListMembers(library.length),
+    );
+  }
   return backend;
 }
 

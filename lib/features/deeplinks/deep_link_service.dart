@@ -13,12 +13,16 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/logging/logging_service.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
+import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/desktop/screens/library/desktop_library_screen.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/browse/screens/mix_screen.dart';
 import 'package:mangabaka_app/features/browse/utils/browse_navigation.dart';
 import 'package:mangabaka_app/features/deeplinks/deep_link_registrar.dart';
 import 'package:mangabaka_app/features/deeplinks/deep_link_target.dart';
 import 'package:mangabaka_app/features/home/screens/discovery_queue_screen.dart';
+import 'package:mangabaka_app/features/lists/screens/library_lists_screen.dart';
+import 'package:mangabaka_app/features/navigation/models/nav_destinations.dart';
 import 'package:mangabaka_app/features/navigation/screens/main_screen.dart';
 import 'package:mangabaka_app/features/profile/screens/statistics_screen.dart';
 import 'package:mangabaka_app/features/publisher/screens/publisher_detail_screen.dart';
@@ -149,7 +153,22 @@ class DeepLinkService {
         StackDetailScreen.open(context, id: id);
       case MyStacksTarget():
         MyStacksScreen.open(context);
+      case MyListsTarget():
+        _openLists(context);
     }
+  }
+
+  /// On desktop, lists live in the library page; elsewhere they are their own screen.
+  void _openLists(BuildContext context) {
+    if (!DesktopLayout.isActive(context)) {
+      LibraryListsScreen.open(context);
+      return;
+    }
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    MainScreen.setTabIndex(NavTabs.library);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => DesktopLibraryScreen.stateKey.currentState?.openLists(),
+    );
   }
 
   Future<void> _openSeries(String seriesId) async {

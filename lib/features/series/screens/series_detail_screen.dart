@@ -9,6 +9,7 @@ import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart
 import 'package:mangabaka_app/features/browse/utils/browse_navigation.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
 import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
 import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/controllers/series_filter_drawer_controller.dart';
 import 'package:mangabaka_app/features/series/mixins/series_detail_actions_mixin.dart';
@@ -70,6 +71,7 @@ class SeriesDetailScreenState extends State<SeriesDetailScreen>
   bool get isLoggedIn => _auth.isLoggedIn;
   MetadataService get metadata => getIt<MetadataService>();
   StackService get stackService => getIt<StackService>();
+  LibraryListsService get listsService => getIt<LibraryListsService>();
   StackStatusController get stackStatus => getIt<StackStatusController>();
 
   Stream<LibraryEntry?>? _entryStream;

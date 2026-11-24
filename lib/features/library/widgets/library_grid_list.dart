@@ -15,6 +15,7 @@ import 'package:mangabaka_app/desktop/desktop_layout.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_series_row.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 import 'package:mangabaka_app/core/widgets/design/mb_refresh_indicator.dart';
+import 'package:mangabaka_app/features/library/widgets/selectable_entry_frame.dart';
 
 class LibraryGridList extends StatelessWidget {
   final List<LibraryEntry> items;
@@ -24,6 +25,13 @@ class LibraryGridList extends StatelessWidget {
   final Function(api.Series) onItemTap;
   final SeriesListDeps deps;
 
+  /// Series ids drawn as selected; the owner decides what a tap does while selecting.
+  final Set<String> selectedIds;
+  final ValueChanged<api.Series>? onItemLongPress;
+
+  /// Replaces the "no results" placeholder when [items] is empty.
+  final Widget? empty;
+
   const LibraryGridList({
     super.key,
     required this.items,
@@ -32,6 +40,9 @@ class LibraryGridList extends StatelessWidget {
     required this.onRefresh,
     required this.onItemTap,
     required this.deps,
+    this.selectedIds = const {},
+    this.onItemLongPress,
+    this.empty,
   });
 
   @override
@@ -46,7 +57,7 @@ class LibraryGridList extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverFillRemaining(
-                  child: Center(
+                  child: empty ?? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -74,20 +85,30 @@ class LibraryGridList extends StatelessWidget {
   }
 
   Widget _buildEntryItem(LibraryEntry entry, AppListStyle activeStyle) {
+    final longPress = onItemLongPress;
+    final item = EntryListItem(
+      key: ValueKey('${activeStyle.name}_${entry.series.id}'),
+      series: entry.series,
+      deps: deps,
+      isLibrary: true,
+      // Spares each row its own database watch, which made scrolling stutter.
+      previewEntry: entry,
+      heroTagPrefix: 'library',
+      listStyle: activeStyle,
+    );
     return MouseRegion(
       onEnter: (_) => deps.prefetch(entry.series.id),
       child: GestureDetector(
         onTap: () => onItemTap(entry.series),
+        onLongPress: longPress == null ? null : () => longPress(entry.series),
+        onSecondaryTap: longPress == null
+            ? null
+            : () => longPress(entry.series),
         // heroTagPrefix must match the 'library' prefix the screen opens the detail page with.
-        child: EntryListItem(
-          key: ValueKey('${activeStyle.name}_${entry.series.id}'),
-          series: entry.series,
-          deps: deps,
-          isLibrary: true,
-          // Spares each row its own database watch, which made scrolling stutter.
-          previewEntry: entry,
-          heroTagPrefix: 'library',
-          listStyle: activeStyle,
+        child: SelectableEntryFrame(
+          selecting: selectedIds.isNotEmpty,
+          selected: selectedIds.contains(entry.series.id),
+          child: item,
         ),
       ),
     );

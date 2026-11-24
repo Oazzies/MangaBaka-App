@@ -67,6 +67,23 @@ class FakeBackend extends HttpOverrides {
       );
     }
     if (path.contains('/stacks')) return _stacks(uri);
+    if (path.endsWith('/my/library/lists')) {
+      final lists = Fixtures.libraryListsJson();
+      return (
+        200,
+        {
+          'status': 200,
+          'data': lists,
+          'pagination': {
+            'count': lists.length,
+            'page': 1,
+            'limit': 1000,
+            'next': null,
+            'previous': null,
+          },
+        },
+      );
+    }
     final single = RegExp(r'/series/(\d+)$').firstMatch(path);
     if (single != null) {
       final i = int.parse(single.group(1)!) - 1000;

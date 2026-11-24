@@ -18,6 +18,12 @@ const String librarySeriesDataKey =
     '${AppConstants.prefixStorageKey}library_series_data_version';
 const int librarySeriesDataVersion = 2;
 
+/// Bump to make the next sync read the feed from the start once, without refetching series.
+/// 1: lists and entry list ids, which a resumed cursor would never deliver again.
+const String libraryFeedDataKey =
+    '${AppConstants.prefixStorageKey}library_feed_data_version';
+const int libraryFeedDataVersion = 1;
+
 mixin LibrarySyncMixin on LibraryServiceBase {
   bool _hasPerformedInitialSync = false;
   Future<void>? _initialSyncTask;
@@ -130,11 +136,16 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       // Re-fetching old-generation series rows needs a scan from the start of the feed.
       final refreshSeries =
           (prefs.getInt(librarySeriesDataKey) ?? 0) < librarySeriesDataVersion;
-      var cursor = (deep || refreshSeries) ? null : prefs.getString(_cursorKey);
+      final rescanFeed =
+          (prefs.getInt(libraryFeedDataKey) ?? 0) < libraryFeedDataVersion;
+      var cursor = (deep || refreshSeries || rescanFeed)
+          ? null
+          : prefs.getString(_cursorKey);
       var restarted = false;
       var totalFetched = 0;
       // Only a scan from the start can prune; a resumed one has not seen the earlier pages.
       Set<String>? seen = cursor == null ? <String>{} : null;
+      Set<int>? seenLists = cursor == null ? <int>{} : null;
       logger.info(
         'Starting library sync (${cursor == null ? 'full scan' : 'from cursor'})',
       );
@@ -151,6 +162,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
             restarted = true;
             cursor = null;
             seen = <String>{};
+            seenLists = <int>{};
             await prefs.remove(_cursorKey);
             await prefs.setBool(_isIncompleteKey, true);
             continue;
@@ -164,6 +176,7 @@ mixin LibrarySyncMixin on LibraryServiceBase {
         final applied = await _applyChanges(
           page.items,
           seen,
+          seenLists,
           generation,
           refreshSeries: refreshSeries,
         );
@@ -195,6 +208,11 @@ mixin LibrarySyncMixin on LibraryServiceBase {
       if (seen != null && seen.isNotEmpty) {
         await database.libraryEntriesDao.deleteEntriesNotIn(seen.toList());
       }
+      if (seenLists != null) {
+        await database.libraryListsDao.pruneListsNotIn(seenLists);
+        await database.libraryListsDao.pruneMembershipsWithoutEntry();
+        await prefs.setInt(libraryFeedDataKey, libraryFeedDataVersion);
+      }
       await prefs.setBool(_isIncompleteKey, false);
       await prefs.setInt(librarySeriesDataKey, librarySeriesDataVersion);
       await prefs.setString(
@@ -218,11 +236,13 @@ mixin LibrarySyncMixin on LibraryServiceBase {
   Future<int?> _applyChanges(
     List<Map<String, dynamic>> items,
     Set<String>? seen,
+    Set<int>? seenLists,
     int generation, {
     bool refreshSeries = false,
   }) => applyLibraryFeedChanges(
     items: items,
     seen: seen,
+    seenLists: seenLists,
     refreshSeries: refreshSeries,
     database: database,
     logger: logger,

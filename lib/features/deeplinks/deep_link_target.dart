@@ -80,6 +80,8 @@ sealed class DeepLinkTarget {
         return const DiscoverTarget();
       case 'stacks':
         return const MyStacksTarget();
+      case 'lists':
+        return const MyListsTarget();
     }
     return null;
   }
@@ -165,4 +167,8 @@ class StackTarget extends DeepLinkTarget {
 
 class MyStacksTarget extends DeepLinkTarget {
   const MyStacksTarget();
+}
+
+class MyListsTarget extends DeepLinkTarget {
+  const MyListsTarget();
 }

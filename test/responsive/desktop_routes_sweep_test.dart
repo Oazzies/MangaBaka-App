@@ -8,10 +8,16 @@ import 'package:mangabaka_app/features/stacks/screens/stack_detail_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stack_editor_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stacks_hub_screen.dart';
 import 'package:mangabaka_app/features/stacks/screens/stacks_list_screen.dart';
+import 'package:mangabaka_app/core/di/service_locator.dart';
 import 'package:mangabaka_app/desktop/screens/home/desktop_home_screen.dart';
+import 'package:mangabaka_app/desktop/screens/lists/desktop_lists_page.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/features/browse/screens/browse_results_screen.dart';
 import 'package:mangabaka_app/features/library/import/import_export_screen.dart';
+import 'package:mangabaka_app/features/library/services/library_service.dart';
+import 'package:mangabaka_app/features/lists/controllers/library_lists_controller.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
+import 'package:mangabaka_app/features/lists/widgets/library_list_flows.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 
 import 'support/fixtures.dart';
@@ -40,6 +46,7 @@ void main() {
     'my stacks': () => const MyStacksScreen(),
     'stack editor (new)': () => const StackEditorScreen(),
     'stack editor (edit)': () => const StackEditorScreen(stackId: 503),
+    'lists manager': () => const _ListsPageHost(),
   };
 
   for (final env in const [Environment(), Environment(language: 'de')]) {
@@ -86,4 +93,30 @@ void main() {
       }
     });
   }
+}
+
+/// Owns the controller the library page would otherwise hand the lists page.
+class _ListsPageHost extends StatefulWidget {
+  const _ListsPageHost();
+
+  @override
+  State<_ListsPageHost> createState() => _ListsPageHostState();
+}
+
+class _ListsPageHostState extends State<_ListsPageHost> {
+  late final LibraryListsController _lists = LibraryListsController(
+    service: getIt<LibraryListsService>(),
+    library: getIt<LibraryService>(),
+  );
+  late final LibraryListFlows _flows = LibraryListFlows(_lists);
+
+  @override
+  void dispose() {
+    _lists.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      DesktopListsPage(lists: _lists, flows: _flows, onOpenList: (_) {});
 }

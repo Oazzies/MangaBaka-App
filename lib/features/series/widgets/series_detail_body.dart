@@ -3,6 +3,7 @@ import 'package:mangabaka_app/core/localization/localization_service.dart';
 import 'package:mangabaka_app/core/settings/settings_enums.dart';
 import 'package:mangabaka_app/core/settings/settings_manager.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/lists/widgets/series_lists_sheet.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
 import 'package:mangabaka_app/features/series/widgets/complete_progress_dialog.dart';
@@ -193,6 +194,12 @@ class SeriesDetailBody extends StatelessWidget {
         entry == null ? null : state.showUpdateRatingDialog(entry);
     void updateNote() =>
         entry == null ? null : state.showUpdateNoteDialog(entry);
+    void editLists() => showSeriesListsSheet(
+      context,
+      service: state.listsService,
+      library: library,
+      series: series,
+    );
 
     SeriesDetailTabContent tabContent({
       required double hPadding,
@@ -241,6 +248,8 @@ class SeriesDetailBody extends StatelessWidget {
         onUpdateVolume: updateVolume,
         onUpdateRating: updateRating,
         onUpdateNote: updateNote,
+        listsService: state.listsService,
+        onEditLists: editLists,
         rightRail: rightRail,
         buildTabContent:
             (hPadding, {isWide = false, wideRightPaddingOnly = false}) =>
@@ -267,6 +276,8 @@ class SeriesDetailBody extends StatelessWidget {
       onUpdateVolume: updateVolume,
       onUpdateRating: updateRating,
       onUpdateNote: updateNote,
+      listsService: state.listsService,
+      onEditLists: editLists,
       onAuthorTap: onAuthorTap,
       onPublisherTap: onPublisherTap,
       buildTabContent: (hPadding) => tabContent(hPadding: hPadding),

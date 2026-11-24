@@ -27,6 +27,9 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<SearchFilters> onFiltersChanged;
   final ValueChanged<AutocompleteSeriesResult> onResultSelected;
 
+  /// Null while signed out: lists live on the account.
+  final VoidCallback? onOpenLists;
+
   final PreferredSizeWidget bottom;
 
   static const double _maxSearchWidth = 800;
@@ -43,6 +46,7 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onQueryChanged,
     required this.onFiltersChanged,
     required this.onResultSelected,
+    this.onOpenLists,
     required this.bottom,
   });
 
@@ -102,6 +106,15 @@ class LibraryAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(width: 8),
         ],
+        if (onOpenLists != null)
+          WidgetUtils.tooltip(
+            message: l10n.translate('lists'),
+            child: IconButton(
+              key: const ValueKey('library_open_lists'),
+              icon: const Icon(Icons.format_list_bulleted_rounded),
+              onPressed: onOpenLists,
+            ),
+          ),
         WidgetUtils.tooltip(
           message: l10n.translate('import_export_title'),
           child: IconButton(

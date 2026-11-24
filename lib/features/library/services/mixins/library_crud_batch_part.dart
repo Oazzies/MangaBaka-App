@@ -243,6 +243,7 @@ Future<void> _deleteEntryImpl(LibraryCrudMixin self, String seriesId) async {
         'Entry $seriesId deleted from server (or already gone). Updating DB...',
       );
       await self.database.libraryEntriesDao.deleteEntry(seriesId);
+      await self.database.libraryListsDao.removeSeries([seriesId]);
     } else {
       self.logger.severe(
         'Failed to delete entry for $seriesId. Status: ${response.statusCode}',
@@ -270,6 +271,7 @@ Future<void> _clearLibraryImpl(LibraryCrudMixin self) async {
       clearError: true,
     );
     await self.database.libraryEntriesDao.deleteAllEntries();
+    await self.database.libraryListsDao.clearAll();
     self.logger.info('Local library database cleared');
 
     final prefs = await SharedPreferences.getInstance();

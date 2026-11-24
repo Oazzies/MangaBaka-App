@@ -27,6 +27,9 @@ import 'package:mangabaka_app/features/series/models/series_work.dart';
 import 'package:mangabaka_app/features/profile/models/mb_profile.dart';
 import 'package:mangabaka_app/features/stacks/controllers/stack_status_controller.dart';
 import 'package:mangabaka_app/features/stacks/services/stack_service.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
+
+import '../lists/lists_fakes.dart';
 
 class _NoStacks extends Fake implements StackService {}
 
@@ -181,6 +184,7 @@ void main() {
     getIt.registerSingleton<SeriesSearchService>(SeriesSearchService());
     final stacks = _NoStacks();
     getIt.registerSingleton<StackService>(stacks);
+    getIt.registerSingleton<LibraryListsService>(FakeListsService());
     getIt.registerSingleton<StackStatusController>(
       StackStatusController(service: stacks, auth: mockAuthService),
     );

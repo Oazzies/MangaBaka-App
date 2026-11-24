@@ -183,6 +183,11 @@ class _DesktopLibraryGrid extends StatelessWidget {
   final Future<void> Function() onRefresh;
   final void Function(api.Series) onItemTap;
   final SeriesListDeps deps;
+  final Set<String> selectedIds;
+  final ValueChanged<api.Series>? onItemLongPress;
+
+  /// Shown instead of the empty-library state while a list scopes the page.
+  final Widget? emptyScope;
 
   const _DesktopLibraryGrid({
     required this.helper,
@@ -191,6 +196,9 @@ class _DesktopLibraryGrid extends StatelessWidget {
     required this.onRefresh,
     required this.onItemTap,
     required this.deps,
+    this.selectedIds = const {},
+    this.onItemLongPress,
+    this.emptyScope,
   });
 
   @override
@@ -202,6 +210,7 @@ class _DesktopLibraryGrid extends StatelessWidget {
       );
     }
     if (helper!.allEntries.isEmpty) {
+      if (emptyScope != null) return emptyScope!;
       return DesktopEmptyState(
         icon: Icons.library_books_outlined,
         message: l10n.translate('empty_library'),
@@ -221,6 +230,8 @@ class _DesktopLibraryGrid extends StatelessWidget {
         onRefresh: onRefresh,
         onItemTap: onItemTap,
         deps: deps,
+        selectedIds: selectedIds,
+        onItemLongPress: onItemLongPress,
       ),
     );
   }

@@ -23,7 +23,7 @@ void main() {
 
   group('AppDatabase', () {
     test('initializes with correct schema version', () async {
-      expect(db.schemaVersion, 3);
+      expect(db.schemaVersion, 4);
     });
 
     test('can insert and retrieve a series via custom query', () async {
@@ -89,6 +89,8 @@ void main() {
 
       expect(names, contains('series_table'));
       expect(names, contains('library_entries_table'));
+      expect(names, contains('library_lists_table'));
+      expect(names, contains('library_list_entries_table'));
 
       final indexNames = await db
           .customSelect("SELECT name FROM sqlite_master WHERE type='index'")
@@ -135,7 +137,7 @@ void main() {
 
         final upgradeDb = AppDatabase.forTesting(NativeDatabase.opened(rawDb));
 
-        expect(upgradeDb.schemaVersion, 3);
+        expect(upgradeDb.schemaVersion, 4);
 
         final retrievedSeries = await (upgradeDb.select(
           upgradeDb.seriesTable,

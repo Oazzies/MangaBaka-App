@@ -2098,14 +2098,598 @@ class LibraryEntriesTableCompanion
   }
 }
 
+class $LibraryListsTableTable extends LibraryListsTable
+    with TableInfo<$LibraryListsTableTable, LibraryListsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LibraryListsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isPrivateMeta = const VerificationMeta(
+    'isPrivate',
+  );
+  @override
+  late final GeneratedColumn<bool> isPrivate = GeneratedColumn<bool>(
+    'is_private',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_private" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    isPrivate,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'library_lists_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LibraryListsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('is_private')) {
+      context.handle(
+        _isPrivateMeta,
+        isPrivate.isAcceptableOrUnknown(data['is_private']!, _isPrivateMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LibraryListsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LibraryListsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      isPrivate: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_private'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      ),
+    );
+  }
+
+  @override
+  $LibraryListsTableTable createAlias(String alias) {
+    return $LibraryListsTableTable(attachedDatabase, alias);
+  }
+}
+
+class LibraryListsTableData extends DataClass
+    implements Insertable<LibraryListsTableData> {
+  final int id;
+  final String name;
+  final bool isPrivate;
+  final String? createdAt;
+  final String? updatedAt;
+  const LibraryListsTableData({
+    required this.id,
+    required this.name,
+    required this.isPrivate,
+    this.createdAt,
+    this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['is_private'] = Variable<bool>(isPrivate);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<String>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<String>(updatedAt);
+    }
+    return map;
+  }
+
+  LibraryListsTableCompanion toCompanion(bool nullToAbsent) {
+    return LibraryListsTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      isPrivate: Value(isPrivate),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  factory LibraryListsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LibraryListsTableData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      isPrivate: serializer.fromJson<bool>(json['isPrivate']),
+      createdAt: serializer.fromJson<String?>(json['createdAt']),
+      updatedAt: serializer.fromJson<String?>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'isPrivate': serializer.toJson<bool>(isPrivate),
+      'createdAt': serializer.toJson<String?>(createdAt),
+      'updatedAt': serializer.toJson<String?>(updatedAt),
+    };
+  }
+
+  LibraryListsTableData copyWith({
+    int? id,
+    String? name,
+    bool? isPrivate,
+    Value<String?> createdAt = const Value.absent(),
+    Value<String?> updatedAt = const Value.absent(),
+  }) => LibraryListsTableData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    isPrivate: isPrivate ?? this.isPrivate,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+  );
+  LibraryListsTableData copyWithCompanion(LibraryListsTableCompanion data) {
+    return LibraryListsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      isPrivate: data.isPrivate.present ? data.isPrivate.value : this.isPrivate,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryListsTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isPrivate: $isPrivate, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, isPrivate, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LibraryListsTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.isPrivate == this.isPrivate &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class LibraryListsTableCompanion
+    extends UpdateCompanion<LibraryListsTableData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<bool> isPrivate;
+  final Value<String?> createdAt;
+  final Value<String?> updatedAt;
+  const LibraryListsTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.isPrivate = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  LibraryListsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.isPrivate = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<LibraryListsTableData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<bool>? isPrivate,
+    Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (isPrivate != null) 'is_private': isPrivate,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  LibraryListsTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<bool>? isPrivate,
+    Value<String?>? createdAt,
+    Value<String?>? updatedAt,
+  }) {
+    return LibraryListsTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      isPrivate: isPrivate ?? this.isPrivate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (isPrivate.present) {
+      map['is_private'] = Variable<bool>(isPrivate.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryListsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isPrivate: $isPrivate, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LibraryListEntriesTableTable extends LibraryListEntriesTable
+    with TableInfo<$LibraryListEntriesTableTable, LibraryListEntriesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LibraryListEntriesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _listIdMeta = const VerificationMeta('listId');
+  @override
+  late final GeneratedColumn<int> listId = GeneratedColumn<int>(
+    'list_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _seriesIdMeta = const VerificationMeta(
+    'seriesId',
+  );
+  @override
+  late final GeneratedColumn<String> seriesId = GeneratedColumn<String>(
+    'series_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [listId, seriesId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'library_list_entries_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LibraryListEntriesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('list_id')) {
+      context.handle(
+        _listIdMeta,
+        listId.isAcceptableOrUnknown(data['list_id']!, _listIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_listIdMeta);
+    }
+    if (data.containsKey('series_id')) {
+      context.handle(
+        _seriesIdMeta,
+        seriesId.isAcceptableOrUnknown(data['series_id']!, _seriesIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seriesIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {listId, seriesId};
+  @override
+  LibraryListEntriesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LibraryListEntriesTableData(
+      listId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}list_id'],
+      )!,
+      seriesId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}series_id'],
+      )!,
+    );
+  }
+
+  @override
+  $LibraryListEntriesTableTable createAlias(String alias) {
+    return $LibraryListEntriesTableTable(attachedDatabase, alias);
+  }
+}
+
+class LibraryListEntriesTableData extends DataClass
+    implements Insertable<LibraryListEntriesTableData> {
+  final int listId;
+  final String seriesId;
+  const LibraryListEntriesTableData({
+    required this.listId,
+    required this.seriesId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['list_id'] = Variable<int>(listId);
+    map['series_id'] = Variable<String>(seriesId);
+    return map;
+  }
+
+  LibraryListEntriesTableCompanion toCompanion(bool nullToAbsent) {
+    return LibraryListEntriesTableCompanion(
+      listId: Value(listId),
+      seriesId: Value(seriesId),
+    );
+  }
+
+  factory LibraryListEntriesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LibraryListEntriesTableData(
+      listId: serializer.fromJson<int>(json['listId']),
+      seriesId: serializer.fromJson<String>(json['seriesId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'listId': serializer.toJson<int>(listId),
+      'seriesId': serializer.toJson<String>(seriesId),
+    };
+  }
+
+  LibraryListEntriesTableData copyWith({int? listId, String? seriesId}) =>
+      LibraryListEntriesTableData(
+        listId: listId ?? this.listId,
+        seriesId: seriesId ?? this.seriesId,
+      );
+  LibraryListEntriesTableData copyWithCompanion(
+    LibraryListEntriesTableCompanion data,
+  ) {
+    return LibraryListEntriesTableData(
+      listId: data.listId.present ? data.listId.value : this.listId,
+      seriesId: data.seriesId.present ? data.seriesId.value : this.seriesId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryListEntriesTableData(')
+          ..write('listId: $listId, ')
+          ..write('seriesId: $seriesId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(listId, seriesId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LibraryListEntriesTableData &&
+          other.listId == this.listId &&
+          other.seriesId == this.seriesId);
+}
+
+class LibraryListEntriesTableCompanion
+    extends UpdateCompanion<LibraryListEntriesTableData> {
+  final Value<int> listId;
+  final Value<String> seriesId;
+  final Value<int> rowid;
+  const LibraryListEntriesTableCompanion({
+    this.listId = const Value.absent(),
+    this.seriesId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LibraryListEntriesTableCompanion.insert({
+    required int listId,
+    required String seriesId,
+    this.rowid = const Value.absent(),
+  }) : listId = Value(listId),
+       seriesId = Value(seriesId);
+  static Insertable<LibraryListEntriesTableData> custom({
+    Expression<int>? listId,
+    Expression<String>? seriesId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (listId != null) 'list_id': listId,
+      if (seriesId != null) 'series_id': seriesId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LibraryListEntriesTableCompanion copyWith({
+    Value<int>? listId,
+    Value<String>? seriesId,
+    Value<int>? rowid,
+  }) {
+    return LibraryListEntriesTableCompanion(
+      listId: listId ?? this.listId,
+      seriesId: seriesId ?? this.seriesId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (listId.present) {
+      map['list_id'] = Variable<int>(listId.value);
+    }
+    if (seriesId.present) {
+      map['series_id'] = Variable<String>(seriesId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LibraryListEntriesTableCompanion(')
+          ..write('listId: $listId, ')
+          ..write('seriesId: $seriesId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $SeriesTableTable seriesTable = $SeriesTableTable(this);
   late final $LibraryEntriesTableTable libraryEntriesTable =
       $LibraryEntriesTableTable(this);
+  late final $LibraryListsTableTable libraryListsTable =
+      $LibraryListsTableTable(this);
+  late final $LibraryListEntriesTableTable libraryListEntriesTable =
+      $LibraryListEntriesTableTable(this);
   late final SeriesDao seriesDao = SeriesDao(this as AppDatabase);
   late final LibraryEntriesDao libraryEntriesDao = LibraryEntriesDao(
+    this as AppDatabase,
+  );
+  late final LibraryListsDao libraryListsDao = LibraryListsDao(
     this as AppDatabase,
   );
   @override
@@ -2115,6 +2699,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     seriesTable,
     libraryEntriesTable,
+    libraryListsTable,
+    libraryListEntriesTable,
   ];
 }
 
@@ -2196,10 +2782,7 @@ final class $$SeriesTableTableReferences
   _libraryEntriesTableRefsTable(_$AppDatabase db) =>
       MultiTypedResultKey.fromTable(
         db.libraryEntriesTable,
-        aliasName: $_aliasNameGenerator(
-          db.seriesTable.id,
-          db.libraryEntriesTable.seriesId,
-        ),
+        aliasName: 'series_table__id__library_entries_table__series_id',
       );
 
   $$LibraryEntriesTableTableProcessedTableManager get libraryEntriesTableRefs {
@@ -2949,13 +3532,8 @@ final class $$LibraryEntriesTableTableReferences
     super.$_typedResult,
   );
 
-  static $SeriesTableTable _seriesIdTable(_$AppDatabase db) =>
-      db.seriesTable.createAlias(
-        $_aliasNameGenerator(
-          db.libraryEntriesTable.seriesId,
-          db.seriesTable.id,
-        ),
-      );
+  static $SeriesTableTable _seriesIdTable(_$AppDatabase db) => db.seriesTable
+      .createAlias('library_entries_table__series_id__series_table__id');
 
   $$SeriesTableTableProcessedTableManager get seriesId {
     final $_column = $_itemColumn<String>('series_id')!;
@@ -3315,6 +3893,375 @@ typedef $$LibraryEntriesTableTableProcessedTableManager =
       LibraryEntriesTableData,
       PrefetchHooks Function({bool seriesId})
     >;
+typedef $$LibraryListsTableTableCreateCompanionBuilder =
+    LibraryListsTableCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<bool> isPrivate,
+      Value<String?> createdAt,
+      Value<String?> updatedAt,
+    });
+typedef $$LibraryListsTableTableUpdateCompanionBuilder =
+    LibraryListsTableCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<bool> isPrivate,
+      Value<String?> createdAt,
+      Value<String?> updatedAt,
+    });
+
+class $$LibraryListsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LibraryListsTableTable> {
+  $$LibraryListsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPrivate => $composableBuilder(
+    column: $table.isPrivate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LibraryListsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LibraryListsTableTable> {
+  $$LibraryListsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPrivate => $composableBuilder(
+    column: $table.isPrivate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LibraryListsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LibraryListsTableTable> {
+  $$LibraryListsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPrivate =>
+      $composableBuilder(column: $table.isPrivate, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$LibraryListsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LibraryListsTableTable,
+          LibraryListsTableData,
+          $$LibraryListsTableTableFilterComposer,
+          $$LibraryListsTableTableOrderingComposer,
+          $$LibraryListsTableTableAnnotationComposer,
+          $$LibraryListsTableTableCreateCompanionBuilder,
+          $$LibraryListsTableTableUpdateCompanionBuilder,
+          (
+            LibraryListsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $LibraryListsTableTable,
+              LibraryListsTableData
+            >,
+          ),
+          LibraryListsTableData,
+          PrefetchHooks Function()
+        > {
+  $$LibraryListsTableTableTableManager(
+    _$AppDatabase db,
+    $LibraryListsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LibraryListsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LibraryListsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LibraryListsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<bool> isPrivate = const Value.absent(),
+                Value<String?> createdAt = const Value.absent(),
+                Value<String?> updatedAt = const Value.absent(),
+              }) => LibraryListsTableCompanion(
+                id: id,
+                name: name,
+                isPrivate: isPrivate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<bool> isPrivate = const Value.absent(),
+                Value<String?> createdAt = const Value.absent(),
+                Value<String?> updatedAt = const Value.absent(),
+              }) => LibraryListsTableCompanion.insert(
+                id: id,
+                name: name,
+                isPrivate: isPrivate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LibraryListsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LibraryListsTableTable,
+      LibraryListsTableData,
+      $$LibraryListsTableTableFilterComposer,
+      $$LibraryListsTableTableOrderingComposer,
+      $$LibraryListsTableTableAnnotationComposer,
+      $$LibraryListsTableTableCreateCompanionBuilder,
+      $$LibraryListsTableTableUpdateCompanionBuilder,
+      (
+        LibraryListsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $LibraryListsTableTable,
+          LibraryListsTableData
+        >,
+      ),
+      LibraryListsTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$LibraryListEntriesTableTableCreateCompanionBuilder =
+    LibraryListEntriesTableCompanion Function({
+      required int listId,
+      required String seriesId,
+      Value<int> rowid,
+    });
+typedef $$LibraryListEntriesTableTableUpdateCompanionBuilder =
+    LibraryListEntriesTableCompanion Function({
+      Value<int> listId,
+      Value<String> seriesId,
+      Value<int> rowid,
+    });
+
+class $$LibraryListEntriesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $LibraryListEntriesTableTable> {
+  $$LibraryListEntriesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get listId => $composableBuilder(
+    column: $table.listId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seriesId => $composableBuilder(
+    column: $table.seriesId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LibraryListEntriesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $LibraryListEntriesTableTable> {
+  $$LibraryListEntriesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get listId => $composableBuilder(
+    column: $table.listId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seriesId => $composableBuilder(
+    column: $table.seriesId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LibraryListEntriesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LibraryListEntriesTableTable> {
+  $$LibraryListEntriesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get listId =>
+      $composableBuilder(column: $table.listId, builder: (column) => column);
+
+  GeneratedColumn<String> get seriesId =>
+      $composableBuilder(column: $table.seriesId, builder: (column) => column);
+}
+
+class $$LibraryListEntriesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LibraryListEntriesTableTable,
+          LibraryListEntriesTableData,
+          $$LibraryListEntriesTableTableFilterComposer,
+          $$LibraryListEntriesTableTableOrderingComposer,
+          $$LibraryListEntriesTableTableAnnotationComposer,
+          $$LibraryListEntriesTableTableCreateCompanionBuilder,
+          $$LibraryListEntriesTableTableUpdateCompanionBuilder,
+          (
+            LibraryListEntriesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $LibraryListEntriesTableTable,
+              LibraryListEntriesTableData
+            >,
+          ),
+          LibraryListEntriesTableData,
+          PrefetchHooks Function()
+        > {
+  $$LibraryListEntriesTableTableTableManager(
+    _$AppDatabase db,
+    $LibraryListEntriesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LibraryListEntriesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LibraryListEntriesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LibraryListEntriesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> listId = const Value.absent(),
+                Value<String> seriesId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LibraryListEntriesTableCompanion(
+                listId: listId,
+                seriesId: seriesId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int listId,
+                required String seriesId,
+                Value<int> rowid = const Value.absent(),
+              }) => LibraryListEntriesTableCompanion.insert(
+                listId: listId,
+                seriesId: seriesId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LibraryListEntriesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LibraryListEntriesTableTable,
+      LibraryListEntriesTableData,
+      $$LibraryListEntriesTableTableFilterComposer,
+      $$LibraryListEntriesTableTableOrderingComposer,
+      $$LibraryListEntriesTableTableAnnotationComposer,
+      $$LibraryListEntriesTableTableCreateCompanionBuilder,
+      $$LibraryListEntriesTableTableUpdateCompanionBuilder,
+      (
+        LibraryListEntriesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $LibraryListEntriesTableTable,
+          LibraryListEntriesTableData
+        >,
+      ),
+      LibraryListEntriesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3323,6 +4270,13 @@ class $AppDatabaseManager {
       $$SeriesTableTableTableManager(_db, _db.seriesTable);
   $$LibraryEntriesTableTableTableManager get libraryEntriesTable =>
       $$LibraryEntriesTableTableTableManager(_db, _db.libraryEntriesTable);
+  $$LibraryListsTableTableTableManager get libraryListsTable =>
+      $$LibraryListsTableTableTableManager(_db, _db.libraryListsTable);
+  $$LibraryListEntriesTableTableTableManager get libraryListEntriesTable =>
+      $$LibraryListEntriesTableTableTableManager(
+        _db,
+        _db.libraryListEntriesTable,
+      );
 }
 
 mixin _$SeriesDaoMixin on DatabaseAccessor<AppDatabase> {
@@ -3347,6 +4301,39 @@ mixin _$LibraryEntriesDaoMixin on DatabaseAccessor<AppDatabase> {
 class LibraryEntriesDaoManager {
   final _$LibraryEntriesDaoMixin _db;
   LibraryEntriesDaoManager(this._db);
+  $$SeriesTableTableTableManager get seriesTable =>
+      $$SeriesTableTableTableManager(_db.attachedDatabase, _db.seriesTable);
+  $$LibraryEntriesTableTableTableManager get libraryEntriesTable =>
+      $$LibraryEntriesTableTableTableManager(
+        _db.attachedDatabase,
+        _db.libraryEntriesTable,
+      );
+}
+
+mixin _$LibraryListsDaoMixin on DatabaseAccessor<AppDatabase> {
+  $LibraryListsTableTable get libraryListsTable =>
+      attachedDatabase.libraryListsTable;
+  $LibraryListEntriesTableTable get libraryListEntriesTable =>
+      attachedDatabase.libraryListEntriesTable;
+  $SeriesTableTable get seriesTable => attachedDatabase.seriesTable;
+  $LibraryEntriesTableTable get libraryEntriesTable =>
+      attachedDatabase.libraryEntriesTable;
+  LibraryListsDaoManager get managers => LibraryListsDaoManager(this);
+}
+
+class LibraryListsDaoManager {
+  final _$LibraryListsDaoMixin _db;
+  LibraryListsDaoManager(this._db);
+  $$LibraryListsTableTableTableManager get libraryListsTable =>
+      $$LibraryListsTableTableTableManager(
+        _db.attachedDatabase,
+        _db.libraryListsTable,
+      );
+  $$LibraryListEntriesTableTableTableManager get libraryListEntriesTable =>
+      $$LibraryListEntriesTableTableTableManager(
+        _db.attachedDatabase,
+        _db.libraryListEntriesTable,
+      );
   $$SeriesTableTableTableManager get seriesTable =>
       $$SeriesTableTableTableManager(_db.attachedDatabase, _db.seriesTable);
   $$LibraryEntriesTableTableTableManager get libraryEntriesTable =>

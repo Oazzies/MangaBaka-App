@@ -11,6 +11,8 @@ import 'package:mangabaka_app/core/theme/app_typography.dart';
 import 'package:mangabaka_app/core/widgets/app_snack_bar.dart';
 import 'package:mangabaka_app/core/utils/number_utils.dart';
 import 'package:mangabaka_app/desktop/desktop_layout.dart';
+import 'package:mangabaka_app/desktop/screens/library/desktop_library_lists_section.dart';
+import 'package:mangabaka_app/desktop/screens/lists/desktop_lists_page.dart';
 import 'package:mangabaka_app/desktop/shell/desktop_shell.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_filter_panel.dart';
 import 'package:mangabaka_app/desktop/widgets/desktop_list_controls.dart';
@@ -28,6 +30,13 @@ import 'package:mangabaka_app/features/library/services/state_normalizer.dart';
 import 'package:mangabaka_app/features/library/widgets/library_grid_list.dart';
 import 'package:mangabaka_app/features/library/widgets/library_search_bar.dart';
 import 'package:mangabaka_app/features/library/widgets/library_status_banners.dart';
+import 'package:mangabaka_app/features/lists/controllers/library_lists_controller.dart';
+import 'package:mangabaka_app/features/lists/models/library_list.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
+import 'package:mangabaka_app/features/lists/widgets/library_list_flows.dart';
+import 'package:mangabaka_app/features/lists/widgets/list_action_menu.dart';
+import 'package:mangabaka_app/features/lists/widgets/lists_selection_bar.dart';
+import 'package:mangabaka_app/features/profile/services/profile_auth_service.dart';
 import 'package:mangabaka_app/features/series/models/autocomplete_series_result.dart';
 import 'package:mangabaka_app/features/series/models/series.dart' as api;
 import 'package:mangabaka_app/features/series/screens/series_detail_screen.dart';
@@ -39,6 +48,8 @@ import 'package:mangabaka_app/shared/transitions/app_transitions.dart';
 import 'package:mangabaka_app/core/theme/theme_context.dart';
 
 part 'desktop_library_rail_part.dart';
+part 'desktop_library_lists_part.dart';
+part 'desktop_library_main_part.dart';
 
 class DesktopLibraryScreen extends StatefulWidget {
   static final GlobalKey<DesktopLibraryScreenState> stateKey =
@@ -51,6 +62,7 @@ class DesktopLibraryScreen extends StatefulWidget {
 }
 
 class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
+    with _DesktopLibraryListsScope
     implements DesktopRefreshable {
   static final _logger = LoggingService.logger;
 
@@ -70,7 +82,15 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
   void focusSearch() => _searchFocus.requestFocus();
 
   @override
-  Future<void> refresh() => _session.refresh();
+  Future<void> refresh() async {
+    await Future.wait([_session.refresh(), lists.refresh()]);
+  }
+
+  /// For the `/my/lists` deep link.
+  void openLists() => openListsPage();
+
+  @override
+  void didScopeToList() => _status = allKey;
 
   @override
   void initState() {
@@ -78,12 +98,14 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
     _libraryService = getIt<LibraryService>();
     _session = LibrarySession(onEntries: _onEntries);
     _session.addListener(_onSession);
+    initLists();
   }
 
   @override
   void dispose() {
     _session.removeListener(_onSession);
     _session.dispose();
+    disposeLists();
     for (final c in _scrollControllers.values) {
       c.dispose();
     }
@@ -100,6 +122,7 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
 
   void _onEntries(List<LibraryEntry> entries) {
     if (!mounted) return;
+    lists.setEntries(entries);
     setState(() => _entries = entries);
   }
 
@@ -117,6 +140,7 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
   }
 
   void _openDetail(api.Series series) {
+    if (selectedSeries.isNotEmpty) return toggleSeries(series);
     Navigator.of(
       context,
     ).push(AppTransitions.slideUp(SeriesDetailScreen(series: series)));
@@ -129,7 +153,7 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
 
   LibraryFilterHelper _helper(List<LibraryEntry> entries) =>
       LibraryFilterHelper(
-        allEntries: entries,
+        allEntries: scopedEntries(entries),
         query: _query,
         filters: _filters,
         contentPreferences: SettingsManager().contentPreferences,
@@ -205,82 +229,29 @@ class DesktopLibraryScreenState extends State<DesktopLibraryScreen>
                 searchService: getIt<SeriesSearchService>(),
                 metadata: getIt<MetadataService>(),
                 tagsByName: true,
-                header: _StatusList(
-                  selected: _status,
-                  counts: counts,
-                  total: total,
-                  onSelected: (key) => setState(() => _status = key),
+                header: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _StatusList(
+                      selected: _status,
+                      counts: counts,
+                      total: total,
+                      onSelected: (key) => setState(() => _status = key),
+                    ),
+                    const SizedBox(height: 28),
+                    DesktopLibraryListsSection(
+                      lists: lists,
+                      flows: listFlows,
+                      selectedId: listScope,
+                      onSelect: (id) => scopeTo(id == listScope ? null : id),
+                      onCreate: createList,
+                      onManage: openListsPage,
+                    ),
+                  ],
                 ),
               ),
             ),
             Expanded(child: _main(l10n, helper, total)),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _main(
-    LocalizationService l10n,
-    LibraryFilterHelper? helper,
-    int total,
-  ) {
-    final statusLabel = _status == allKey
-        ? l10n.translate('all')
-        : l10n.translate(_status);
-
-    return ValueListenableBuilder<LibrarySyncStatus>(
-      valueListenable: _libraryService.syncStatus,
-      builder: (context, status, _) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DesktopPageHeader(
-              title: l10n.translate('library'),
-              subtitle: helper == null
-                  ? null
-                  : '$statusLabel · ${l10n.translate('series_count').replaceAll('{count}', NumberUtils.formatCount(helper.getByTabOrAll(_status).length))}',
-              actions: [
-                DesktopPillButton(
-                  label: l10n.translate('import_export_title'),
-                  icon: Icons.import_export_rounded,
-                  onPressed: () => ImportExportScreen.open(context),
-                ),
-                DesktopPillButton(
-                  label: l10n.translate(
-                    status.isSyncing ? 'syncing' : 'sync_now',
-                  ),
-                  icon: Icons.sync_rounded,
-                  onPressed: status.isSyncing ? null : _session.refresh,
-                ),
-              ],
-            ),
-            LibraryStatusBanners(
-              status: status,
-              isIncomplete: _session.isIncomplete,
-              onRetrySync: _session.refresh,
-              onDismissError: () => _libraryService.syncStatus.value =
-                  _libraryService.syncStatus.value.copyWith(clearError: true),
-              onImportFullLibrary: _libraryService.importFullLibrary,
-            ),
-            _DesktopLibraryToolbar(
-              searchFocus: _searchFocus,
-              session: _session,
-              filters: _filters,
-              onQueryChanged: _setQuery,
-              onResultSelected: _onResultSelected,
-              onFiltersChanged: _setFilters,
-            ),
-            Expanded(
-              child: _DesktopLibraryGrid(
-                helper: helper,
-                status: _status,
-                scrollController: _scrollFor(_status),
-                onRefresh: _session.refresh,
-                onItemTap: _openDetail,
-                deps: _listDeps,
-              ),
-            ),
           ],
         );
       },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mangabaka_app/features/library/models/library_entry.dart';
+import 'package:mangabaka_app/features/lists/services/library_lists_service.dart';
 import 'package:mangabaka_app/features/series/widgets/series_detail_fab.dart';
 import 'package:mangabaka_app/features/series/models/series.dart';
 import 'package:mangabaka_app/features/series/services/metadata_service.dart';
@@ -32,6 +33,8 @@ class SeriesDetailWideLayout extends StatelessWidget {
   final VoidCallback onUpdateVolume;
   final VoidCallback onUpdateRating;
   final VoidCallback onUpdateNote;
+  final LibraryListsService? listsService;
+  final VoidCallback? onEditLists;
   final Function(String)? onAuthorTap;
   final Function(String)? onPublisherTap;
 
@@ -63,6 +66,8 @@ class SeriesDetailWideLayout extends StatelessWidget {
     required this.onUpdateVolume,
     required this.onUpdateRating,
     required this.onUpdateNote,
+    this.listsService,
+    this.onEditLists,
     this.onAuthorTap,
     this.onPublisherTap,
     this.rightRail,
@@ -114,6 +119,8 @@ class SeriesDetailWideLayout extends StatelessWidget {
                     onUpdateVolume: onUpdateVolume,
                     onUpdateRating: onUpdateRating,
                     onUpdateNote: onUpdateNote,
+                    listsService: listsService,
+                    onEditLists: onEditLists,
                   ),
                   const SizedBox(height: 18),
                 ],

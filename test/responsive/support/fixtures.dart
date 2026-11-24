@@ -248,6 +248,35 @@ abstract final class Fixtures {
     for (var i = 0; i < count; i++) libraryEntry(i),
   ];
 
+  static const _listNames = [
+    'Favourites',
+    'Read on the train, or anywhere else with a long wait and nothing to do',
+    'Comfort reads',
+    'Recommended by friends',
+    'Archive',
+  ];
+
+  static List<Map<String, dynamic>> libraryListsJson() => [
+    for (var i = 0; i < _listNames.length; i++)
+      {
+        'id': 700 + i,
+        'name': _listNames[i],
+        'is_private': i.isOdd,
+        'series_count': 0,
+        'created_at': DateTime(2026, 1 + i, 3).toIso8601String(),
+        'updated_at': null,
+      },
+  ];
+
+  /// Series ids per list id, over the first [count] library fixtures.
+  static Map<String, Set<int>> libraryListMembers(int count) => {
+    for (var i = 0; i < count; i++)
+      '${1000 + i}': {
+        for (var l = 0; l < _listNames.length; l++)
+          if ((i + l) % (l + 2) == 0) 700 + l,
+      },
+  };
+
   static MbProfile profile() => MbProfile.fromJson({
     'id': 'u1',
     'role': 'user',

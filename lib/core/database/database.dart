@@ -12,10 +12,12 @@ import 'package:mangabaka_app/features/series/models/series.dart' as api;
 
 import 'tables/series_table.dart';
 import 'tables/library_entries_table.dart';
+import 'tables/library_lists_table.dart';
 
 part 'database.g.dart';
 part 'daos/series_dao.dart';
 part 'daos/library_entries_dao.dart';
+part 'daos/library_lists_dao.dart';
 
 class LibraryEntryWithSeries {
   final LibraryEntriesTableData libraryEntry;
@@ -25,14 +27,24 @@ class LibraryEntryWithSeries {
 }
 
 @DriftDatabase(
-  tables: [SeriesTable, LibraryEntriesTable],
-  daos: [SeriesDao, LibraryEntriesDao],
+  tables: [
+    SeriesTable,
+    LibraryEntriesTable,
+    LibraryListsTable,
+    LibraryListEntriesTable,
+  ],
+  daos: [SeriesDao, LibraryEntriesDao, LibraryListsDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
+
+  static final Index _listEntriesSeriesIndex = Index(
+    'library_list_entries_series_idx',
+    'CREATE INDEX IF NOT EXISTS library_list_entries_series_idx ON library_list_entries_table (series_id)',
+  );
 
   @override
   MigrationStrategy get migration {
@@ -58,6 +70,7 @@ class AppDatabase extends _$AppDatabase {
             'CREATE INDEX IF NOT EXISTS library_state_idx ON library_entries_table (state)',
           ),
         );
+        await m.createIndex(_listEntriesSeriesIndex);
       },
       onUpgrade: (m, from, to) async {
         // Checks the real schema, not the version, so skip-upgrades (v1 -> v4) and inconsistencies heal.
@@ -76,6 +89,13 @@ class AppDatabase extends _$AppDatabase {
           if (!tableNames.contains('library_entries_table')) {
             await m.createTable(libraryEntriesTable);
           }
+          if (!tableNames.contains('library_lists_table')) {
+            await m.createTable(libraryListsTable);
+          }
+          if (!tableNames.contains('library_list_entries_table')) {
+            await m.createTable(libraryListEntriesTable);
+          }
+          await m.createIndex(_listEntriesSeriesIndex);
 
           await m.createIndex(
             Index(
